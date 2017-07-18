@@ -1,1 +1,1 @@
-# MASSpy
+# masspy
