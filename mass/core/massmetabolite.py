@@ -1,78 +1,80 @@
 # -*- coding: utf-8 -*-
 
-# Import necessary packages
-
-### Compatibility with Python 2.7
+# Compatibility with Python 2.7
 from __future__ import absolute_import
 
-### Other necesary packages
+# Import necesary packages
 import re
+from six import string_types, integer_types
+from warnings import warn
 
-### cobra packages
+# cobra packages
 from cobra.core.species import Species
-
 # Class begins
 
-### Regular expression for element parsing
-element_re = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
-
-### Class definition
-class Metabolite(Species):
-	"""Metabolite is a class for holding information regarding a metabolite
-	in mass.KineticReaction Object
+# Class definition
+class MassMetabolite(Species):
+	"""MassMetabolite is a class for holding information regarding a metabolite
+	in mass.MassReaction Object
 
 	Parameters
 	----------
-	id: string
+	id : string
 		The identifier associated with the metabolite
-	name: string
+	name : string
 		A human readable name
-	formula: string or None
+	formula : string or None
 		Chemical formula associated with the metabolite
-	charge: float or None
+	charge : float or None
 		The charge number associated with the metabolite
-	compartment: string or None
-		The compartment where the metabolite is located"""
+	compartment : string or None
+		The compartment where the metabolite is located
+	"""
 
-	def __init__(self, id=None, name = "", formula= None, charge=None, compartment=None):
-		'''Initialize the Metabolite Object'''
+	def __init__(self, id=None, name = "", formula= None, charge=None,
+		compartment=None):
+		"""Initialize the MassMetabolite Object"""
 		Species.__init__(self, id, name)
-
+		# Chemical formula of the metabolite
 		self._formula = formula
+		# Charge associated with the metabolite
 		self._charge = charge
+		# Compartment in which metabolite is located
 		self._compartment = compartment
+		# Initial condition associated with this metabolite=
 		self._initial_condition = None
-		self._gibbs_formation= None ### Gibbs energy of formation associated with this metabolite
+		# Gibbs energy of formation associated with this metabolite
+		self._gibbs_formation= None
 
-
-
-	### Properties
+	# Properties
 	@property
 	def formula(self):
-		'''Get the metabolite formula'''
+		"""Returns the metabolite formula"""
 		return self._formula
 
 	@property
 	def charge(self):
-		'''Get the metabolite charge'''
+		"""Returns the metabolite charge"""
 		return self._charge
 
 	@property
 	def compartment(self):
-		'''Get the metabolite compartment'''
+		"""Returns the metabolite compartment"""
 		return self._compartment
 
 	@property
 	def elements(self):
-		""" Dictionary of elements as keys and their count in the metabolite
-		as integers. Identical with cobra.core.metabolite"""
+		"""Dictionary of elements as keys and their count in the metabolite as
+		integers. Similar with cobra.core.metabolite
+		"""
+		# Regular expression for element parsing
+		element_re = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
+
 		tmp_formula = self.formula
 		if tmp_formula is None:
 			return {}
-		# necessary for some old pickles which use the deprecated
-		# Formula class
-		tmp_formula = str(self.formula)
-		# commonly occuring characters in incorrectly constructed formulas
+		if not isinstance(tmp_formula, string_types):
+			raise TypeError("Formula must be a string")
 		if "*" in tmp_formula:
 			warn("invalid character '*' found in formula '%s'" % self.formula)
 			tmp_formula = tmp_formula.replace("*", "")
@@ -105,85 +107,139 @@ class Metabolite(Species):
 
 	@property
 	def initial_condition(self):
-		'''Get initial condition of the metabolite
+		"""Returns the initial condition of the metabolite
 
 		Warnings
 		--------
 		In most cases, accessing the initial condition through the massmodel
 		is more accurate than accessing it through the metabolite.
-		'''
+		"""
 		return self._initial_condition
 
 	@initial_condition.setter
 	def initial_condition(self, value):
-		'''Set the initial condition of the metabolite'''
+		"""Set the initial condition of the metabolite.
+
+		Warnings
+		--------
+		Initial concentrations of metabolites cannot be negative.
+		"""
+		if not isinstance(value, integer_types):
+			raise TypeError("Initial condition must be of an integer type")
+		if value < 0.:
+			raise ValueError("Initial condition must be a non-negative number")
 		self._initial_condition = value
 
 	@property
 	def gibbs_formation(self):
+		"""Returns the Gibbs formation energy of the metabolite"""
 		return self._gibbs_formation
 
 	@gibbs_formation.setter
 	def gibbs_formation(self, value):
+		"""Set the Gibbs formation energy of the metabolite"""
 		self._gibbs_formation = value
 
 	@property
 	def formula_weight(self):
-		"""Calculate the formula weight. Identical with cobra.core.metabolite"""
+		"""Calculate the formula weight.
+		Identical with cobra.core.metabolite
+		"""
 		try:
 			return sum([count * elements_and_molecular_weights[element]
 						for element, count in self.elements.items()])
 		except KeyError as e:
 			warn("The element %s does not appear in the peridic table" % e)
 
-
-
-	### Methods
+	# Methods
 	def _set_id_with_model(self, value):
-		'''Set the internal id of the Metabolite object to
-		the associated model. Mirrors the method in cobra.core.metabolite'''
+		"""Set the id of the MassMetabolite object to the associated massmodel.
+		Similar to the method in cobra.core.metabolite.]
+		"""
 		if value in self.massmodel.metabolites:
-			raise ValueError("You stupid")
+			raise ValueError("The massmodel already contains a metabolite with \
+								the id:")
 		self._id = value
 		self.massmodel.metabolites._generate_index()
-
 
 	def remove_from_model(self, destructive=False):
 		"""Removes the metabolite association from self.massmodel
 
-		The change is reverted upon exit when using the model as a context.
+		The change is reverted upon exit when using the massmodel as a context.
 		Mirrors the method in cobra.core.metabolite
 
 		Parameters
 		----------
 		destructive : bool
-			If False then the metabolite is removed from all
-			associated reactions.  If True then all associated
-			reactions are removed from the Model."""
-		return self._model.remove_metabolites(self, destructive)
+			If False then the metabolite is removed from all associated
+			reactions.  If True then all associated reactions are removed from
+			the MassModel.
+		"""
+		return self._massmodel.remove_metabolites(self, destructive)
 
-	### Shorthands
+	# Shorthands
 	@property
 	def ic(self):
-		'''Shorthand getter for initial condition'''
+		"""Shorthand getter for initial condition"""
 		return initial_conditions(self)
 
 	@ic.setter
 	def ic(self, value):
-		'''Shorthand setter for initial condition'''
+		"""Shorthand setter for initial condition"""
 		initial_conidition(self, value)
 
 	@property
 	def gf(self):
-		'''Shorthand getter for Gibb's energy of formation'''
+		"""Shorthand getter for Gibb's energy of formation"""
 		return gibbs_formation(self)
 
 	@gf.setter
 	def gf(self, value):
-		'''Shorthand setter for Gibb's energy of formation'''
+		"""Shorthand setter for Gibb's energy of formation"""
 		gibbs_formation(self, value)
 
-	### Dictionary of elements and their corresponding atomic mass
+	# Compatibility functions
+	def _to_cobra_metabolite(self, cobra_id=None):
+		"""To convert MassMetabolite object into a cobra Metabolite object
+
+		Warnings
+		--------
+		self._constraint_sense & self._bound will initialize to default values.
+		"""
+		try:
+			from cobra.core.metabolite import Metabolite
+		except:
+			raise ImportError("Failed to import the Metabolite Object from \
+				cobra.core.metabolite. Ensure cobra is installed properly")
+
+		if cobra_id ==None:
+			cobra_id = self._id + "_cobra"
+
+		cobra_metab = Metabolite(id=cobra_id, formula=self.formula,
+								name=self.name, charge=self.charge,
+								compartment=self.compartment)
+
+		return cobra_metab
+
+	def _from_cobra_metabolite(self, mass_id=None):
+		"""To convert a cobra Metabolite object into a MassMetabolite object
+
+		Warnings
+		--------
+		self.gibbs_formation, & self.initial_condition will
+			initialize to default values.
+
+		A Metabolite Object from cobra.core.metabolite must be imported into
+			the enviroment in order for this method to work properly.
+		"""
+		if mass_id == None:
+			mass_id = self._id + "_mass"
+
+		mass_metab = MassMetabolite(id=mass_id, formula=self.formula,
+									name=self.name, charge=self.charge,
+									compartment=self.compartment)
+
+	# Dictionary of elements and their corresponding atomic mass
 	elements_and_molecular_weights = {
 		'H':   1.007940,
 		'He':  4.002602,
