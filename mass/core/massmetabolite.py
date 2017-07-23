@@ -180,7 +180,7 @@ class MassMetabolite(Species):
 			reactions.  If True then all associated reactions are removed from
 			the MassModel.
 		"""
-		return self._massmodel.remove_metabolites(self, destructive)
+		return self._model.remove_metabolites(self, destructive)
 
 	# Shorthands
 	@property
@@ -204,12 +204,19 @@ class MassMetabolite(Species):
 		self.gibbs_formation = value
 
 	# Compatibility functions
-	def _to_cobra_metabolite(self, cobra_id=None):
-		"""To convert MassMetabolite object into a cobra Metabolite object
+	def to_cobra_metabolite(self, cobra_id=None):
+		"""To create a cobra Metabolite object from a MassMetabolite Object
+
+		Parameters
+		----------
+		cobra_id : string or None
+			id for the cobra Metabolite object. If no id is specified,
+			one will automatically be generated with the
+			Metabolite object's current ID + _mass at the end
 
 		Warnings
 		--------
-		self._constraint_sense & self._bound will initialize to default values.
+		All other fields will initialize to default values.
 		"""
 		try:
 			from cobra.core.metabolite import Metabolite
@@ -217,32 +224,78 @@ class MassMetabolite(Species):
 			raise ImportError("Failed to import the Metabolite Object from \
 				cobra.core.metabolite. Ensure cobra is installed properly")
 
-		if cobra_id ==None:
-			cobra_id = self._id + "_cobra"
+		if cobra_id == None:
+			cobra_id = self.id + "_cobra"
 
-		cobra_metab = Metabolite(id=cobra_id, formula=self.formula,
-								name=self.name, charge=self.charge,
-								compartment=self.compartment)
+		new_cobra_metab = Metabolite(id=cobra_id, name=self.name,
+								formula=self._formula, charge=self._charge,
+								compartment=self._compartment)
 
-		return cobra_metab
+		return new_cobra_metab
 
-	def _from_cobra_metabolite(self, mass_id=None):
-		"""To convert a cobra Metabolite object into a MassMetabolite object
+	def from_cobra_metabolite(self, CobraMetabolite=None, mass_id=None):
+		"""To create a MassMetabolite object from a cobra Metabolite Object
+
+		Parameters
+		----------
+		CobraMetabolite : Metabolite Object from cobra.core.metabolite
+			The cobra Metabolite Object for creating the MassMetabolite object
+		mass_id : string or None
+			id for the MassMetabolite object. If no id is specified,
+			one will automatically be generated with the
+			MassMetabolite object's current ID + _mass at the end
 
 		Warnings
 		--------
-		self.gibbs_formation, & self.initial_condition will
-			initialize to default values.
+		All other fields will initialize to default values.
 
 		A Metabolite Object from cobra.core.metabolite must be imported into
 			the enviroment in order for this method to work properly.
 		"""
-		if mass_id == None:
-			mass_id = self._id + "_mass"
+		if CobraMetabolite == None:
+			warn("No cobra Metabolite Object was given")
+			return None
 
-		mass_metab = MassMetabolite(id=mass_id, formula=self.formula,
-									name=self.name, charge=self.charge,
-									compartment=self.compartment)
+		if not isinstance(CobraMetabolite, Metabolite):
+			raise TypeError("Metabolite must be a cobra Metabolite Object")
+
+		if mass_id == None:
+			mass_id = CobraMetabolite.id + "_mass"
+
+		new_mass_metab = MassMetabolite(id=mass_id, name=CobraMetabolite.name,
+								formula=CobraMetabolite.formula,
+								charge=CobraMetabolite.charge,
+								compartment=CobraMetabolite.compartment)
+		return new_mass_metab
+
+	# HTML representation
+	def _repr_html_(self):
+		return """
+		<table>
+			<tr>
+				<td><strong>MassMetabolite identifier</strong></td>
+				<td>{id}</td>
+			</tr><tr>
+				<td><strong>Name</strong></td>
+				<td>{name}</td>
+			</tr><tr>
+				<td><strong>Memory address</strong></td>
+				<td>{address}</td>
+			</tr><tr>
+				<td><strong>Formula</strong></td>
+				<td>{formula}</td>
+			</tr><tr>
+				<td><strong>Compartment</strong></td>
+				<td>{compartment}</td>
+			</tr><tr>
+				<td><strong>In {n_reactions} reaction(s)</strong></td>
+				<td>{reactions}</td>
+			</tr>
+		<table>""".format(id=self.id, name=self.name, formula=self._formula,
+							address='0x0%x' % id(self),
+							compartment=self._compartment,
+							n_reactions=len(self.reactions),
+							reactions='. '.join(r.id for r in self.reactions))
 
 	# Dictionary of elements and their corresponding atomic mass
 	elements_and_molecular_weights = {
