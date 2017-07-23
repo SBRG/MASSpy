@@ -12,6 +12,9 @@ from warnings import warn
 from cobra.core.species import Species
 # Class begins
 
+# Regular expression for element parsing
+element_re = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
+
 # Class definition
 class MassMetabolite(Species):
 	"""MassMetabolite is a class for holding information regarding a metabolite
@@ -31,8 +34,8 @@ class MassMetabolite(Species):
 		The compartment where the metabolite is located
 	"""
 
-	def __init__(self, id=None, name = "", formula= None, charge=None,
-		compartment=None):
+	def __init__(self, id=None, name = "", formula=None, charge=None,
+					compartment=None):
 		"""Initialize the MassMetabolite Object"""
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
@@ -64,12 +67,11 @@ class MassMetabolite(Species):
 
 	@property
 	def elements(self):
-		"""Dictionary of elements as keys and their count in the metabolite as
-		integers. Similar with cobra.core.metabolite
-		"""
-		# Regular expression for element parsing
-		element_re = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
+		"""Dictionary of elements as keys and their count in the
+		metabolite as integers.
 
+		Identical to the method in cobra.core.metabolite
+		"""
 		tmp_formula = self.formula
 		if tmp_formula is None:
 			return {}
@@ -111,7 +113,7 @@ class MassMetabolite(Species):
 
 		Warnings
 		--------
-		In most cases, accessing the initial condition through the massmodel
+		In most cases, accessing initial conditions through the massmodel
 		is more accurate than accessing it through the metabolite.
 		"""
 		return self._initial_condition
@@ -143,6 +145,7 @@ class MassMetabolite(Species):
 	@property
 	def formula_weight(self):
 		"""Calculate the formula weight.
+
 		Identical with cobra.core.metabolite
 		"""
 		try:
@@ -154,7 +157,8 @@ class MassMetabolite(Species):
 	# Methods
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassMetabolite object to the associated massmodel.
-		Similar to the method in cobra.core.metabolite.]
+
+		Similar to the method in cobra.core.metabolite.
 		"""
 		if value in self.massmodel.metabolites:
 			raise ValueError("The massmodel already contains a metabolite with \
@@ -166,7 +170,8 @@ class MassMetabolite(Species):
 		"""Removes the metabolite association from self.massmodel
 
 		The change is reverted upon exit when using the massmodel as a context.
-		Mirrors the method in cobra.core.metabolite
+
+		Similar to the method in cobra.core.metabolite
 
 		Parameters
 		----------
@@ -181,22 +186,22 @@ class MassMetabolite(Species):
 	@property
 	def ic(self):
 		"""Shorthand getter for initial condition"""
-		return initial_conditions(self)
+		return self._initial_condition
 
 	@ic.setter
 	def ic(self, value):
 		"""Shorthand setter for initial condition"""
-		initial_conidition(self, value)
+		self.initial_condition = value
 
 	@property
 	def gf(self):
 		"""Shorthand getter for Gibb's energy of formation"""
-		return gibbs_formation(self)
+		return self._gibbs_formation
 
 	@gf.setter
 	def gf(self, value):
 		"""Shorthand setter for Gibb's energy of formation"""
-		gibbs_formation(self, value)
+		self.gibbs_formation = value
 
 	# Compatibility functions
 	def _to_cobra_metabolite(self, cobra_id=None):
