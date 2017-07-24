@@ -6,9 +6,11 @@ from __future__ import absolute_import
 # Import necesary packages
 import re
 from copy import copy, deepcopy
+from functools import partial
 from operator import attrgetter
 from warnings import warn
 from six import iteritems, iterkeys, string_types
+
 
 from sympy import sympify, S, var, Add, Mul, Pow, Integer
 
