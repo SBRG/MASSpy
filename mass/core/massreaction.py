@@ -66,7 +66,7 @@ class MassReaction(Object):
     """
 
     def __init__(self, id=None, name="", subsystem="", reversibility=True):
-        """Initialize the KineticReaction Object"""
+        """Initialize the MassReaction Object"""
         # Check inputs to ensure they are the correct types
         if not isinstance(name, string_types):
             raise TypeError("name must be a string type")
@@ -1052,7 +1052,7 @@ class MassReaction(Object):
         print("FIXME: Implement")
         return
 
-    def generate_custom_rate_law_expr(self, custom_rate_law=None):
+    def generate_custom_rate_law_expr(self, custom_rate_law):
         """Generate the custom rate law expression from the custom rate law
         string
 
