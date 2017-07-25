@@ -66,7 +66,7 @@ class MassReaction(Object):
     """
 
     def __init__(self, id=None, name="", subsystem="", reversibility=True):
-        """Initialize the KineticReaction Object"""
+        """Initialize the MassReaction Object"""
         # Check inputs to ensure they are the correct types
         if not isinstance(name, string_types):
             raise TypeError("name must be a string type")
@@ -79,7 +79,7 @@ class MassReaction(Object):
 
         Object.__init__(self, id, name)
         self._reversibility = reversibility
-        self._subsystem = subsystem
+        self.subsystem = subsystem
         # The forward, reverse, and equilibrium constants as strings
         # for symbolic expressions
         self.sym_kf = ("kf_%s" % id)
@@ -141,11 +141,6 @@ class MassReaction(Object):
             self._reverse_rate_constant = self.sym_kr
         else:
             self._reverse_rate_constant = 0.
-
-    @property
-    def subsystem(self):
-        """Returns the subsystem associated with this reaction"""
-        return self._subsystem
 
     @property
     def forward_rate_constant(self):
@@ -315,15 +310,6 @@ class MassReaction(Object):
         return (len(self.metabolites) ==1 and
             not (self.reactants and self.products))
 
-    @property
-    def transport(self):
-        """Whether or not this reaction is a transport reaction
-        Returns True if the reaction has two different compartments involved.
-
-        .. note:: These are reactions where at least one metabolite
-                    crosses into a different compartment.
-        """
-        return (len(self.compartments) != 1)
     @property
     def genes(self):
         """Returns a frozenset of the genes associated with the reaction"""
@@ -561,10 +547,6 @@ class MassReaction(Object):
         num_values : bool
             If True, the value of the rate constant is used.
             Otherwise use a symbol for the rate constant.
-
-        Warnings
-        --------
-        Using the generate_rate_law method will replace a custom rate law.
         """
         self._forward_rate = self.generate_forward_rate(num_values)
         self._reverse_rate = self.generate_reverse_rate(num_values)
@@ -583,11 +565,6 @@ class MassReaction(Object):
         num_values : bool
             If True, the value of the rate constant is used.
             Otherwise use a symbol for the rate constant.
-
-        Warnings
-        --------
-        Using the generate_rate_law_expr method will replace a
-        custom rate law expression.
         """
         self._forward_rate_expr = self.generate_forward_rate_expr(num_values)
         self._reverse_rate_expr = self.generate_reverse_rate_expr(num_values)
@@ -599,18 +576,19 @@ class MassReaction(Object):
 
         return self._rate_law_expr
 
-    def reset_rate_law(self, num_values=False):
-        """Reset the custom rate law and custom rate law expression
-        to the automatically generated rate law and rate law expression
-
-        Parameters
-        ----------
-        num_values : bool
-            If True, the value of the rate constant is used.
-            Otherwise use a symbol for the rate constant.
-        """
-        self._rate_law = self.generate_rate_law(num_values)
-        self._rate_law_expr = self.generate_rate_law_expr(num_values)
+    # May move elsewhere
+    # def reset_rate_law(self, num_values=False):
+    #     """Reset the custom rate law and custom rate law expression
+    #     to the automatically generated rate law and rate law expression
+    #
+    #     Parameters
+    #     ----------
+    #     num_values : bool
+    #         If True, the value of the rate constant is used.
+    #         Otherwise use a symbol for the rate constant.
+    #     """
+    #     self._rate_law = self.generate_rate_law(num_values)
+    #     self._rate_law_expr = self.generate_rate_law_expr(num_values)
 
     def remove_from_model(self, remove_orphans=False):
         """Removes the reaction from a massmodel.
@@ -1034,43 +1012,6 @@ class MassReaction(Object):
         if self._reversibility == True:
             self.reverse_rate_constant = 0.
 
-    def set_custom_rate_law(self, custom_rate_law):
-        """Use a string to set a custom rate law for the reaction
-
-        Parameters
-        ----------
-        custom_rate_law : string
-            String representation of the custom rate law.
-
-        Warnings
-        --------
-        The custom rate law must be set as a string and will replace any
-            previously generated rate law for this reaction. Using the
-            generate_rate_law method or the reset_rate_law method will
-            replace the custom rate law.
-        """
-        print("FIXME: Implement")
-        return
-
-    def generate_custom_rate_law_expr(self, custom_rate_law=None):
-        """Generate the custom rate law expression from the custom rate law
-        string
-
-        Parameters
-        ----------
-        custom_rate_law : string
-            String representation of the custom rate law.
-
-        Warnings
-        --------
-        The custom rate law must be set as a string and will replace any
-            previously generated rate law for this reaction. Using the
-            generate_rate_law_expr method or the reset_rate_law method will
-            replace the custom rate law expression.
-        """
-        print("FIXME: Implement")
-        return
-
     def _repr_html_(self):
         return """
             <table>
@@ -1101,7 +1042,7 @@ class MassReaction(Object):
                 </tr>
             </table>
         """.format(id=self.id, name=self.name,
-                subsystem=self._subsystem, address='0x0%x' % id(self),
+                subsystem=self.subsystem, address='0x0%x' % id(self),
                 stoich_id=self.build_reaction_string(),
                 stoich_name=self.build_reaction_string(True),
                 gpr=self.gene_reaction_rule,
@@ -1180,7 +1121,7 @@ class MassReaction(Object):
             ub = 1000
 
         cobra_rxn = Reaction(id=cobra_id, name=self.name,
-                            subsystem=self._subsystem, lower_bound=lb,
+                            subsystem=self.subsystem, lower_bound=lb,
                             upper_bound=ub, objective_coefficient=0.)
 
         print("FIXME: Add the current metabolites, model (if any) "
@@ -1215,7 +1156,7 @@ class MassReaction(Object):
             kinetic_reversibility = CobraReaction.reversibility
 
         mass_rxn = MassReaction(id=mass_id, name=self.name,
-                            subsystem=self._subsystem,
+                            subsystem=self.subsystem,
                             reversibility=kinetic_reversibility)
 
         print("FIXME: Add the current metabolites, model (if any) "

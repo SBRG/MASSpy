@@ -34,9 +34,13 @@ class MassMetabolite(Species):
 		The compartment where the metabolite is located
 	"""
 
-	def __init__(self, id=None, name = "", formula=None, charge=None,
+	def __init__(self, id=None, name ="", formula=None, charge=None,
 					compartment=None):
+		# Check inputs to ensure they are the correct types
 		"""Initialize the MassMetabolite Object"""
+		if not isinstance(name, string_types):
+            raise TypeError("name must be a string type")
+
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
 		self._formula = formula
