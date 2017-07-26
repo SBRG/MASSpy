@@ -21,7 +21,7 @@ from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
 # from mass
-from mass.core.massmetabolite import MassMetabolite
+# from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
 ## precompiled regular expressions
@@ -341,41 +341,47 @@ class MassReaction(Object):
         except (SyntaxError, TypeError) as e:
             if "AND" in new_rule or "OR" in new_rule:
                 warn("uppercase AND/OR found in rule '%s' for %s" %
+                        (new_rule, repr(self)))
+                new_rule = uppercase_AND.sub("and", new_rule)
+                new_rule = uppercase_OR.sub("or", new_rule)
+                self.gene_reaction_rule = new_rule
+                return
+            warn("malformed gene_reaction_rule '%s' for %s" %
                     (new_rule, repr(self)))
-                tmp_str = and_or_search.sub('', self._gene_reaction_rule)
-                gene_names = set((gpr_clean.sub(' ', tmp_str).split(' ')))
-            if '' in gene_names:
-                gene_names.remove('')
-            old_genes = self._genes
-            if self._model is None:
-                self._genes = {Gene(i) for i in gene_names}
-            else:
-                massmodel_genes = self._model.genes
-                self._genes = set()
-                for id in gene_names:
-                    if massmodel_genes.has_id(id):
-                        self._genes.add(massmodel_genes.get_by_id(id))
-                    else:
-                        new_gene = Gene(id)
-                        # Must be new_gene._model due to inheritance
-                        # of cobra gene class
-                        new_gene._model = self._model
-                        self._genes.add(new_gene)
-                        massmodel_genes.append(new_gene)
+            tmp_str = and_or_search.sub('', self._gene_reaction_rule)
+            gene_names = set((gpr_clean.sub(' ', tmp_str).split(' ')))
+        if '' in gene_names:
+            gene_names.remove('')
+        old_genes = self._genes
+        if self._model is None:
+            self._genes = {Gene(i) for i in gene_names}
+        else:
+            massmodel_genes = self._model.genes
+            self._genes = set()
+            for id in gene_names:
+                if massmodel_genes.has_id(id):
+                    self._genes.add(massmodel_genes.get_by_id(id))
+                else:
+                    new_gene = Gene(id)
+                    # Must be new_gene._model due to inheritance
+                    # of cobra gene class
+                    new_gene._model = self._model
+                    self._genes.add(new_gene)
+                    massmodel_genes.append(new_gene)
 
-            # Make the genes aware that it is involved in this reaction
-            for g in self._genes:
-                g._reaction.add(self)
+        # Make the genes aware that it is involved in this reaction
+        for g in self._genes:
+            g._reaction.add(self)
 
-            # Make the old genes aware that they are no
-            # longer involved in this reaction
-            for g in old_genes:
-                if g not in self._genes: # if an old gene is not a new gene
-                    try:
-                        g._reaction.remove(self)
-                    except:
-                        warn("Could not remove old gene %s from reaction %s" %
-                            (g.id, self.id))
+        # Make the old genes aware that they are no
+        # longer involved in this reaction
+        for g in old_genes:
+            if g not in self._genes: # if an old gene is not a new gene
+                try:
+                    g._reaction.remove(self)
+                except:
+                    warn("Could not remove old gene %s from reaction %s" %
+                        (g.id, self.id))
 
     @property
     def gene_name_reaction_rule(self):
@@ -1011,6 +1017,8 @@ class MassReaction(Object):
         self.forward_rate_constant = 0.
         if self._reversibility == True:
             self.reverse_rate_constant = 0.
+
+    # HTML representation
     def _repr_html_(self):
         return """
             <table>
@@ -1124,7 +1132,7 @@ class MassReaction(Object):
                             upper_bound=ub, objective_coefficient=0.)
 
         cobra_metab_dict = {metab.to_cobra_metabolite() : coefficient \
-                            for metab, coefficient in self._metabolites}
+                        for metab, coefficient in iteritems(self._metabolites)}
 
         cobra_rxn.add_metabolites(cobra_metab_dict)
         cobra_rxn._genes = self._genes
@@ -1133,7 +1141,7 @@ class MassReaction(Object):
 
         return cobra_rxn
 
-    def from_cobra_reaction(self, CobraReaction=None, mass_id=None,
+    def from_cobra_reaction(CobraReaction=None, mass_id=None,
                             kinetic_reversibility=None):
         """To convert a cobra Reaction object into a MassReaction object
 
@@ -1155,18 +1163,19 @@ class MassReaction(Object):
             raise TypeError("Reaction must be a cobra Reaction Object")
 
         if mass_id == None:
-            mass_id = self._id + "_cobra"
+            mass_id = CobraReaction._id + "_mass"
 
         if kinetic_reversibility == None:
             kinetic_reversibility = CobraReaction.reversibility
 
-        mass_rxn = MassReaction(id=mass_id, name=self.name,
-                            subsystem=self.subsystem,
+        mass_rxn = MassReaction(id=mass_id, name=CobraReaction.name,
+                            subsystem=CobraReaction.subsystem,
                             reversibility=kinetic_reversibility)
 
         mass_metab_dict = {
             MassMetabolite.from_cobra_metabolite(cobra_metab): coefficient
-            for cobra_metab, coefficient in CobraReaction._metabolites}
+            for cobra_metab, coefficient in iteritems(CobraReaction._metabolites)
+            }
 
         mass_rxn.add_metabolites(mass_metab_dict)
         mass_rxn._genes = CobraReaction._genes
