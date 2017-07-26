@@ -50,6 +50,7 @@ Intended Processes for Shorthands:
 
 ### Import necessary packages
 import unittest, doctest, pytest
+### FIXME: replace ipy magic method with proper import from masspy
 %run ./MassMetabolite_Class.ipynb
 
 
@@ -124,8 +125,7 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertIsInstance(c8, Metabolite)
 	
 	def test_IsInstance_from_cobra_metabolite(self):
-		from cobra.core.metabolite import Metabolite
-		cmm = self.from_cobra_metabolite(CobraMetabolite=self.cm, mass_id=self.cm.id)
+		cmm = MassMetabolite.from_cobra_metabolite(CobraMetabolite=self.cm, mass_id=self.cm.id)
 		self.assertIsInstance(cmm, MassMetabolite)
 	
 	
@@ -237,6 +237,91 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertEqual(self.metab3.formula_weight, expected_result)        
 	
 	
+	def test_formulas_cobra(self):
+		from cobra.core.metabolite import Metabolite
+		c1 = self.metab1.to_cobra_metabolite()
+		c2 = self.metab2.to_cobra_metabolite()
+		c3 = self.metab3.to_cobra_metabolite()
+		
+		self.assertEqual(self.metab1.formula, c1.formula)
+		self.assertNotEqual(self.metab2.formula, c1.formula)
+		self.assertNotEqual(self.metab3.formula, c1.formula)
+		
+		self.assertNotEqual(self.metab1.formula, c2.formula)
+		self.assertEqual(self.metab2.formula, c2.formula)
+		self.assertNotEqual(self.metab3.formula, c2.formula)
+		
+		self.assertNotEqual(self.metab1.formula, c3.formula)
+		self.assertNotEqual(self.metab2.formula, c3.formula)
+		self.assertEqual(self.metab3.formula, c3.formula)
+		
+		del c1, c2, c3
+	
+	def test_charge_cobra(self):
+		from cobra.core.metabolite import Metabolite
+		c4 = self.metab4.to_cobra_metabolite()
+		c5 = self.metab5.to_cobra_metabolite()
+		
+		self.assertEqual(self.metab4.charge, c4.charge)
+		self.assertNotEqual(self.metab5.charge, c4.charge)
+		
+		self.assertNotEqual(self.metab4.charge, c5.charge)
+		self.assertEqual(self.metab5.charge, c5.charge)
+		
+		del c4, c5
+	
+	def test_compartment_cobra(self):
+		from cobra.core.metabolite import Metabolite
+		c6 = self.metab6.to_cobra_metabolite()
+		c7 = self.metab7.to_cobra_metabolite()
+		
+		self.assertEqual(self.metab6.compartment, c6.compartment)
+		self.assertNotEqual(self.metab7.compartment, c6.compartment)
+		
+		self.assertNotEqual(self.metab6.compartment, c7.compartment)
+		self.assertEqual(self.metab7.compartment, c7.compartment)
+		
+		del c6, c7
+	
+	def test_elements_cobra(self):
+		from cobra.core.metabolite import Metabolite
+		c1 = self.metab1.to_cobra_metabolite()
+		c2 = self.metab2.to_cobra_metabolite()
+		c3 = self.metab3.to_cobra_metabolite()
+		
+		self.assertEqual(self.metab1.elements, c1.elements)
+		self.assertNotEqual(self.metab2.elements, c1.elements)
+		self.assertNotEqual(self.metab3.elements, c1.elements)
+		
+		self.assertNotEqual(self.metab1.elements, c2.elements)
+		self.assertEqual(self.metab2.elements, c2.elements)
+		self.assertNotEqual(self.metab3.elements, c2.elements)
+		
+		self.assertNotEqual(self.metab1.elements, c3.elements)
+		self.assertNotEqual(self.metab2.elements, c3.elements)
+		self.assertEqual(self.metab3.elements, c3.elements)
+		
+		del c1, c2, c3
+	
+	def test_formula_weight_cobra(self):
+		from cobra.core.metabolite import Metabolite
+		c1 = self.metab1.to_cobra_metabolite()
+		c2 = self.metab2.to_cobra_metabolite()
+		c3 = self.metab3.to_cobra_metabolite()
+		
+		self.assertEqual(self.metab1.formula_weight, c1.formula_weight)
+		self.assertNotEqual(self.metab2.formula_weight, c1.formula_weight)
+		self.assertNotEqual(self.metab3.formula_weight, c1.formula_weight)
+		
+		self.assertNotEqual(self.metab1.formula_weight, c2.formula_weight)
+		self.assertEqual(self.metab2.formula_weight, c2.formula_weight)
+		self.assertNotEqual(self.metab3.formula_weight, c2.formula_weight)
+		
+		self.assertNotEqual(self.metab1.formula_weight, c3.formula_weight)
+		self.assertNotEqual(self.metab2.formula_weight, c3.formula_weight)
+		self.assertEqual(self.metab3.formula_weight, c3.formula_weight)
+	
+	
 	### Test Exceptions and Warnings
 	def test_formula_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
@@ -323,3 +408,5 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		
 		self.assertRaisesRegex(TypeError, "gibbs formation must be a number")
 	
+if __name__ == '__main__':
+	unittest.main(argv=['first-arg-is-ignored'], exit=False)
