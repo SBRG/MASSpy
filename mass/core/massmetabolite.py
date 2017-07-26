@@ -39,7 +39,14 @@ class MassMetabolite(Species):
 		# Check inputs to ensure they are the correct types
 		"""Initialize the MassMetabolite Object"""
 		if not isinstance(name, string_types):
-            raise TypeError("name must be a string type")
+        	raise TypeError("name must be a string type")
+		if not isinstance(formula, string_types) and formula != None:
+        	raise TypeError("formula must be a string type")
+		if not isinstance(charge, integer_types)  \
+			and not isinstance(charge, float) and charge != None:
+        		raise TypeError("charge must be a number")
+		if not isinstance(compartment, string_types) and compartment != None:
+        	raise TypeError("compartment must be a string or none")
 
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
@@ -145,6 +152,10 @@ class MassMetabolite(Species):
 	@gibbs_formation.setter
 	def gibbs_formation(self, value):
 		"""Set the Gibbs formation energy of the metabolite"""
+		if not isinstance(value, integer_types) and \
+			not isinstance(value, float):
+			raise TypeError("Initial condition must be an integer or float")
+
 		self._gibbs_formation = value
 
 	@property
@@ -257,6 +268,13 @@ class MassMetabolite(Species):
 		A Metabolite Object from cobra.core.metabolite must be imported into
 			the enviroment in order for this method to work properly.
 		"""
+
+		try:
+			from cobra.core.metabolite import Metabolite
+		except:
+			raise ImportError("Failed to import the Metabolite Object from \
+				cobra.core.metabolite. Ensure cobra is installed properly")
+
 		if CobraMetabolite == None:
 			warn("No cobra Metabolite Object was given")
 			return None
