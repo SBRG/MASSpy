@@ -320,6 +320,8 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertNotEqual(self.metab1.formula_weight, c3.formula_weight)
 		self.assertNotEqual(self.metab2.formula_weight, c3.formula_weight)
 		self.assertEqual(self.metab3.formula_weight, c3.formula_weight)
+		
+		del c1, c2, c3
 	
 	
 	### Test Exceptions and Warnings
