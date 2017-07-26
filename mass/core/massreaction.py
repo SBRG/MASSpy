@@ -1123,8 +1123,14 @@ class MassReaction(Object):
                             subsystem=self.subsystem, lower_bound=lb,
                             upper_bound=ub, objective_coefficient=0.)
 
-        print("FIXME: Add the current metabolites, model (if any) "
-                "and genes to the new object")
+        cobra_metab_dict = {metab.to_cobra_metabolite() : coefficient \
+                            for metab, coefficient in self._metabolites}
+
+        cobra_rxn.add_metabolites(cobra_metab_dict)
+        cobra_rxn._genes = self._genes
+        cobra_rxn._gene_reaction_rule = self._gene_reaction_rule
+        cobra_rxn._update_awareness()
+
         return cobra_rxn
 
     def from_cobra_reaction(self, CobraReaction=None, mass_id=None,
@@ -1158,8 +1164,15 @@ class MassReaction(Object):
                             subsystem=self.subsystem,
                             reversibility=kinetic_reversibility)
 
-        print("FIXME: Add the current metabolites, model (if any) "
-                "and genes to the new object")
+        mass_metab_dict = {
+            MassMetabolite.from_cobra_metabolite(cobra_metab): coefficient
+            for cobra_metab, coefficient in CobraReaction._metabolites}
+
+        mass_rxn.add_metabolites(mass_metab_dict)
+        mass_rxn._genes = CobraReaction._genes
+        mass_rxn._gene_reaction_rule = CobraReaction._gene_reaction_rule
+        mass_rxn._update_awareness()
+
         return mass_rxn
 
     # Module Dunders
