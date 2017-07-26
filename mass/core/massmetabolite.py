@@ -39,14 +39,14 @@ class MassMetabolite(Species):
 		# Check inputs to ensure they are the correct types
 		"""Initialize the MassMetabolite Object"""
 		if not isinstance(name, string_types):
-        	raise TypeError("name must be a string type")
+			raise TypeError("name must be a string type")
 		if not isinstance(formula, string_types) and formula != None:
-        	raise TypeError("formula must be a string type")
+			raise TypeError("formula must be a string type")
 		if not isinstance(charge, integer_types)  \
 			and not isinstance(charge, float) and charge != None:
-        		raise TypeError("charge must be a number")
+				raise TypeError("charge must be a number")
 		if not isinstance(compartment, string_types) and compartment != None:
-        	raise TypeError("compartment must be a string or none")
+			raise TypeError("compartment must be a string or none")
 
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
@@ -249,7 +249,7 @@ class MassMetabolite(Species):
 
 		return new_cobra_metab
 
-	def from_cobra_metabolite(self, CobraMetabolite=None, mass_id=None):
+	def from_cobra_metabolite(CobraMetabolite=None, mass_id=None):
 		"""To create a MassMetabolite object from a cobra Metabolite Object
 
 		Parameters
