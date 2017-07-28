@@ -148,53 +148,71 @@ class test_MassReaction(unittest.TestCase, MassReaction):
 	
 	### def setUp/tearDown
 	def setUp(self):
-		"""stuff"""
-		self.x=5
+		self.react1 = MassReaction("TestID1")
+		self.react2 = MassReaction("TestID2", reversibility=False)
 	
 	def tearDown(self):
-		"""stuff"""
-		del self.x
+		del self.react1
+		del self.react2
 	
 	### Test IsInstance
+	def test_IsInstance(self):
+		self.assertIsInstance(self.react1, MassReaction)
+		self.assertIsInstance(self.react2, MassReaction)
 	
 	### Test Equal/NotEqual
+	def test_reversibility(self):
+		expected_value = True
+		self.assertEqual(self.react1.reversibility, expected_value)
+		self.assertNotEqual(self.react2.reversibility, expected_value)
 	
 	### Test Exceptions and Warnings
+	
+	### ### Parameter inputs (from __init__)
 	def test_name_not_string_has_typeerror_int(self):
 		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", name=4)
+			del self.react_temp
 	
 	def test_name_not_string_has_typeerror_float(self):
 		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", name=4.5)
+			del self.react_temp
 	
 	def test_name_not_string_has_typeerror_bool(self):
 		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", name=True)
+			del self.react_temp
 	
 	def test_subsystem_not_string_has_typeerror_int(self):
 		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", subsystem=4)
+			del self.react_temp
 	
 	def test_subsystem_not_string_has_typeerror_float(self):
 		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", subsystem=4.5)
+			del self.react_temp
 	
 	def test_subsystem_not_string_has_typeerror_bool(self):
 		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
 			self.react_temp = MassReaction(id="TestID_temp", subsystem=True)
+			del self.react_temp
 	
 	def test_reversibility_not_bool_has_typeerror_int(self):
 		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
 			self.react_temp = MassReaction(id="TestID_temp", reversibility=4)
+			del self.react_temp
 	
 	def test_reversibility_not_bool_has_typeerror_float(self):
 		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
 			self.react_temp = MassReaction(id="TestID_temp", reversibility=4.5)
+			del self.react_temp
 	
 	def test_reversibility_not_bool_has_typeerror_string(self):
 		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
 			self.react_temp = MassReaction(id="TestID_temp", reversibility="True")
+			del self.react_temp
 	
 if __name__ == '__main__':
 	unittest.main(argv=['first-arg-is-ignored'], exit=False)
