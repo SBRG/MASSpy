@@ -149,12 +149,50 @@ class test_MassReaction(unittest.TestCase, MassReaction):
 	### def setUp/tearDown
 	def setUp(self):
 		"""stuff"""
+		self.x=5
 	
 	def tearDown(self):
 		"""stuff"""
+		del self.x
 	
 	### Test IsInstance
 	
 	### Test Equal/NotEqual
 	
 	### Test Exceptions and Warnings
+	def test_name_not_string_has_typeerror_int(self):
+		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", name=4)
+	
+	def test_name_not_string_has_typeerror_float(self):
+		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", name=4.5)
+	
+	def test_name_not_string_has_typeerror_bool(self):
+		with self.assertRaisesRegex(TypeError, "name must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", name=True)
+	
+	def test_subsystem_not_string_has_typeerror_int(self):
+		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", subsystem=4)
+	
+	def test_subsystem_not_string_has_typeerror_float(self):
+		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", subsystem=4.5)
+	
+	def test_subsystem_not_string_has_typeerror_bool(self):
+		with self.assertRaisesRegex(TypeError, "subsystem must be a string type") as t:
+			self.react_temp = MassReaction(id="TestID_temp", subsystem=True)
+	
+	def test_reversibility_not_bool_has_typeerror_int(self):
+		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
+			self.react_temp = MassReaction(id="TestID_temp", reversibility=4)
+	
+	def test_reversibility_not_bool_has_typeerror_float(self):
+		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
+			self.react_temp = MassReaction(id="TestID_temp", reversibility=4.5)
+	
+	def test_reversibility_not_bool_has_typeerror_string(self):
+		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
+			self.react_temp = MassReaction(id="TestID_temp", reversibility="True")
+	
