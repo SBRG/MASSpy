@@ -196,3 +196,5 @@ class test_MassReaction(unittest.TestCase, MassReaction):
 		with self.assertRaisesRegex(TypeError, "reversibility must be a boolean") as t:
 			self.react_temp = MassReaction(id="TestID_temp", reversibility="True")
 	
+if __name__ == '__main__':
+	unittest.main(argv=['first-arg-is-ignored'], exit=False)
