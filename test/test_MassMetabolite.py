@@ -90,6 +90,10 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		
 		del self.metab6
 		del self.metab7
+		
+		del self.metab8
+		
+		del self.cm
 	
 	
 	### Test IsInstance
