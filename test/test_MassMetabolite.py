@@ -61,24 +61,24 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 	def setUp(self):
 		
 		### formula, elements, and formula_weight
-		self.metab1 = MassMetabolite('TestID1', formula='CH4') ## basic metab for testing
-		self.metab2 = MassMetabolite('TestID2', formula='CH3') ## metab w/different formula
-		self.metab3 = MassMetabolite('TestID3', formula='C6H12.5O6') ## metab with decimal formula
+		self.metab1 = MassMetabolite('TestIDm1', formula='CH4') ## basic metab for testing
+		self.metab2 = MassMetabolite('TestIDm2', formula='CH3') ## metab w/different formula
+		self.metab3 = MassMetabolite('TestIDm3', formula='C6H12.5O6') ## metab with decimal formula
 		
 		### charge
-		self.metab4 = MassMetabolite('TestID4', charge= 2) ## basic metab for testing
-		self.metab5 = MassMetabolite('TestID5', charge= -2) ## basic metab w/different charge
+		self.metab4 = MassMetabolite('TestIDm4', charge= 2) ## basic metab for testing
+		self.metab5 = MassMetabolite('TestIDm5', charge= -2) ## basic metab w/different charge
 		
 		### compartment
-		self.metab6 = MassMetabolite('TestID6', compartment="c") ## bastic metab for testing
-		self.metab7 = MassMetabolite('TestID7', compartment="e") ## basic metab with differt compartment
+		self.metab6 = MassMetabolite('TestIDm6', compartment="c") ## bastic metab for testing
+		self.metab7 = MassMetabolite('TestIDm7', compartment="e") ## basic metab with differt compartment
 		
 		### initial_condition & gibbs_formation
-		self.metab8 = MassMetabolite('TestID8')
+		self.metab8 = MassMetabolite('TestIDm8')
 		
 		### cobra Metabolite (for compatibility functions)
 		from cobra.core.metabolite import Metabolite
-		self.cm = Metabolite('TestID_cobra')
+		self.cm = Metabolite('TestIDm_cobra')
 	
 	def tearDown(self):
 		del self.metab1
@@ -331,37 +331,37 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 	### Test Exceptions and Warnings
 	def test_formula_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
-			metab_temp = MassMetabolite('TestID_temp', formula=2)
+			metab_temp = MassMetabolite('TestIDm_temp', formula=2)
 			
 		self.assertRaisesRegex(TypeError, "formula must be a string")
 	
 	def test_formula_not_string_or_none_has_typeerror_bool(self):
 		with self.assertRaises(TypeError) as t:
-			metab_temp = MassMetabolite('TestID_temp', formula=True)
+			metab_temp = MassMetabolite('TestIDm_temp', formula=True)
 			
 		self.assertRaisesRegex(TypeError, "formula must be a string")
 	
 	def test_charge_not_float_or_none_has_typeerror_string(self):
 		with self.assertRaises(TypeError) as t:
-			metab_temp = MassMetabolite('TestID_temp', charge="-2")
+			metab_temp = MassMetabolite('TestIDm_temp', charge="-2")
 		
 		self.assertRaisesRegex(TypeError, "charge must be a float")
 	
 	def test_compartment_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
-			metab_temp = MassMetabolite('TestID_temp', compartment=3)
+			metab_temp = MassMetabolite('TestIDm_temp', compartment=3)
 		
 		self.assertRaisesRegex(TypeError, "compartment must a string")
 	
 	def test_compartment_not_string_or_none_has_typeerror_bool(self):
 		with self.assertRaises(TypeError) as t:
-			metab_temp = MassMetabolite('TestID_temp', compartment=True)
+			metab_temp = MassMetabolite('TestIDm_temp', compartment=True)
 		
 		self.assertRaisesRegex(TypeError, "compartment must a string")
 	
 	def test_elements_asterisk_formula_has_userwarning(self):
 		with self.assertWarns(UserWarning) as w:
-			metab_temp = MassMetabolite('TestID_temp', formula="CoCl2*6H2O")
+			metab_temp = MassMetabolite('TestIDm_temp', formula="CoCl2*6H2O")
 			metab_temp.elements
 		
 		self.assertWarnsRegex(UserWarning, "invalid character '*' found in formula")
@@ -372,7 +372,7 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		May consider returning an error in future"""
 		
 		with self.assertWarns(UserWarning) as w:
-			metab_temp = MassMetabolite('TestID_temp', formula="(CH3)3N+CH2CH2OCOCH3")
+			metab_temp = MassMetabolite('TestIDm_temp', formula="(CH3)3N+CH2CH2OCOCH3")
 			metab_temp.elements
 		
 		self.assertWarnsRegex(UserWarning, "invalid formula (has parenthesis)")
