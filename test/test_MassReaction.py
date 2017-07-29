@@ -166,6 +166,61 @@ class test_MassReaction(unittest.TestCase, MassReaction):
 		self.assertEqual(self.react1.reversibility, expected_value)
 		self.assertNotEqual(self.react2.reversibility, expected_value)
 	
+	def test_forward_rate_constant(self):
+		expected_value = "kf_TestID1"
+		self.assertEqual(self.react1.forward_rate_constant, expected_value)
+		self.assertNotEqual(self.react2.forward_rate_constant, expected_value)
+		
+		expected_value = "kf_TestID2"
+		self.assertNotEqual(self.react1.forward_rate_constant, expected_value)
+		self.assertEqual(self.react2.forward_rate_constant, expected_value)
+	
+	def test_kf(self):
+		expected_value = "kf_TestID1"
+		self.assertEqual(self.react1.kf, expected_value)
+		self.assertNotEqual(self.react2.kf, expected_value)
+		
+		expected_value = "kf_TestID2"
+		self.assertNotEqual(self.react1.kf, expected_value)
+		self.assertEqual(self.react2.kf, expected_value)
+	
+	def test_reverse_rate_constant(self):
+		expected_value = "kr_TestID1"
+		self.assertEqual(self.react1.reverse_rate_constant, expected_value)
+		self.assertNotEqual(self.react2.reverse_rate_constant, expected_value)
+		
+		expected_value = 0
+		self.assertNotEqual(self.react1.reverse_rate_constant, expected_value)
+		self.assertEqual(self.react2.reverse_rate_constant, expected_value)
+	
+	def test_kr(self):
+		expected_value = "kr_TestID1"
+		self.assertEqual(self.react1.kr, expected_value)
+		self.assertNotEqual(self.react2.kr, expected_value)
+		
+		expected_value = 0
+		self.assertNotEqual(self.react1.kr, expected_value)
+		self.assertEqual(self.react2.kr, expected_value)
+	
+	def test_equilibrium_constant(self):
+		expected_value = "Keq_TestID1"
+		self.assertEqual(self.react1.equilibrium_constant, expected_value)
+		self.assertNotEqual(self.react2.equilibrium_constant, expected_value)
+		
+		expected_value = "Keq_TestID2"
+		self.assertNotEqual(self.react1.equilibrium_constant, expected_value)
+		self.assertEqual(self.react2.equilibrium_constant, expected_value)
+	
+	def test_Keq(self):
+		expected_value = "Keq_TestID1"
+		self.assertEqual(self.react1.Keq, expected_value)
+		self.assertNotEqual(self.react2.Keq, expected_value)
+		
+		expected_value = "Keq_TestID2"
+		self.assertNotEqual(self.react1.Keq, expected_value)
+		self.assertEqual(self.react2.Keq, expected_value)
+	
+	
 	### Test Exceptions and Warnings
 	
 	### ### Parameter inputs (from __init__)
