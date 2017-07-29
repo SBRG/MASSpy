@@ -154,8 +154,8 @@ class test_MassReaction(unittest.TestCase, MassReaction):
         self.react2 = MassReaction("TestID2", reversibility=False) ## react with irreversibility
         
         ### compartment and other relevents
-        self.react3 = MassReaction("TestID3", compartment = "c") ## react in compartment "c"
-        self.react4 = MassReaction("TestID4", compartment = "e") ## react w/different compartment
+        self.react3 = MassReaction("TestID3", subsystem = "Techoic Acid Biosynthesis") ## react w/subsystem
+        self.react4 = MassReaction("TestID4", subsystem = "Transport/Exchange") ## react w/different subsystem
         
         ### cobra Reaction (for compatibility functions)
         from cobra.core.reaction import Reaction
