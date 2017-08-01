@@ -624,21 +624,41 @@ class test_MassReaction(unittest.TestCase, MassReaction):
         self.assertEqual(self.react3.boundary, expected_value)
         self.assertEqual(self.react4.boundary, expected_value)
     
-    #def test_genes
     """
+    def test_genes
     def test_gene_reaction_rule
     def test_gene_name_reaction_rule
-    """
-    #def test_remove_from_model
-    #def _set_id_with_model
-    #def test_update_awareness
     
-    """
+    def test_remove_from_model
+    def _set_id_with_model
+    def test_update_awareness
+    def functional
     def test_copy
+    """
     
-    def test_get_coefficients
-    def test_check_mass_balance
-    def test_get_compartments
+    def test_get_coefficient(self):
+        metab6 = MassMetabolite('TestIDm6', compartment="c")
+        metab7 = MassMetabolite('TestIDm7', compartment="e")
+        self.react1.add_metabolites({metab6: -1, metab7: 2})
+        
+        expected_value = -1
+        self.assertEqual(self.react1.get_coefficient(metab6), expected_value)
+        self.assertNotEqual(self.react1.get_coefficient(metab7), expected_value)
+        
+        expected_value = 2
+        self.assertNotEqual(self.react1.get_coefficient(metab6), expected_value)
+        self.assertEqual(self.react1.get_coefficient(metab7), expected_value)
+    
+    def test_get_coefficients(self):
+        metab6 = MassMetabolite('TestIDm6', compartment="c")
+        metab7 = MassMetabolite('TestIDm7', compartment="e")
+        self.react1.add_metabolites({metab6: -1, metab7: 2})
+        
+        expected_value = [-1, 2]
+        self.assertEqual(list(self.react1.get_coefficients([metab6, metab7])), expected_value)
+    
+    """
+    def test_check_mass_balance(self):
     def test_associate_gene
     def test_disassociate_gene
     def knock_out
