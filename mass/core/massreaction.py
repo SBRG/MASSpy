@@ -21,7 +21,7 @@ from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
 # from mass
-# from mass.core.massmetabolite import MassMetabolite
+from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
 ## precompiled regular expressions
@@ -559,7 +559,9 @@ class MassReaction(Object):
         if self._forward_rate == None and self._reverse_rate == None:
             self._rate_law = None
         else:
-            self._rate_law = ("%s - %s" % (self._forward_rate, self._reverse_rate))
+            self._rate_law = ("%s - %s" % (self._forward_rate,
+                                            self._reverse_rate))
+
         return self._rate_law
 
     def generate_rate_law_expr(self, num_values=False):
