@@ -299,11 +299,11 @@ class MassReaction(Object):
         return self._compartments
 
     @property
-    def boundary(self):
+    def exchange(self):
         """Whether or not this reaction is an exchange reaction
         Returns True if the reaction has either no products or reactants
 
-        Identical to the method in cobra.core.reaction
+        Identical to the boundary method in cobra.core.reaction
 
         .. note:: These are reactions with a sink or source
         """
