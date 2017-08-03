@@ -1186,6 +1186,8 @@ class MassReaction(Object):
         mass_rxn.add_metabolites(mass_metab_dict)
         mass_rxn._genes = CobraReaction._genes
         mass_rxn._gene_reaction_rule = CobraReaction._gene_reaction_rule
+        mass_rxn._rate_law = mass_rxn.generate_rate_law()
+        mass_rxn._rate_law_expr = mass_rxn.generate_rate_law_expr()
         mass_rxn._update_awareness()
 
         return mass_rxn
