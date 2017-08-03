@@ -289,7 +289,7 @@ class MassReaction(Object):
 
     @property
     def compartments(self):
-        """Returns a list of compartments that metabolites are in
+        """Returns a set of compartments that metabolites are in
 
         Identical to the method in cobra.core.reaction
         """
@@ -735,15 +735,13 @@ class MassReaction(Object):
                             # do we want to handle creation here?
                             raise e
                 elif isinstance(metabolite, string_types):
-                    # if we want to handle creation, this should be changed
                     raise ValueError("Reaction '%s' does not belong to a "
                                      "massmodel. Either add the reaction to a "
                                      "massmodel or use MassMetabolite objects "
                                      "instead of strings as keys."
                                      % self.id)
                 self._metabolites[metabolite] = coefficient
-                # make the metabolite aware that it is involved in this
-                # reaction
+                # make the metabolite aware it is involved in this reaction
                 metabolite._reaction.add(self)
 
         for metabolite, the_coefficient in list(self._metabolites.items()):
@@ -1155,6 +1153,12 @@ class MassReaction(Object):
         A Reaction Object from cobra.core.reaction must be imported into
             the enviroment in order for this method to work properly.
         """
+        try:
+            from cobra.core.reaction import Reaction
+        except:
+            raise ImportError("Failed to import the Reaction Object from "
+                    "cobra.core.reaction. Ensure cobra is installed properly")
+
         if CobraReaction == None:
             warn("No cobra Reaction Object was given")
             return None

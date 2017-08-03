@@ -10,6 +10,7 @@ from warnings import warn
 
 # cobra packages
 from cobra.core.species import Species
+
 # Class begins
 
 # Regular expression for element parsing
@@ -58,7 +59,9 @@ class MassMetabolite(Species):
 		# Initial condition associated with this metabolite=
 		self._initial_condition = None
 		# Gibbs energy of formation associated with this metabolite
-		self._gibbs_formation= None
+		self._gibbs_formation = None
+		# Ordinary differential equation for the metabolite concentration
+		self._ode = None
 
 	# Properties
 	@property
@@ -169,6 +172,15 @@ class MassMetabolite(Species):
 						for element, count in self.elements.items()])
 		except KeyError as e:
 			warn("The element %s does not appear in the peridic table" % e)
+
+	@property
+	def ode(self):
+		"""Return the ordinary differential equation associated for the
+		concentration of the metabolite
+
+		Will return None if metabolite is not associated with a MassReaction
+		"""
+		return self._ode
 
 	# Methods
 	def _set_id_with_model(self, value):
@@ -311,12 +323,20 @@ class MassMetabolite(Species):
 				<td><strong>Compartment</strong></td>
 				<td>{compartment}</td>
 			</tr><tr>
+				<td><strong>Initial Condition</strong></td>
+				<td>{ic}</td>
+			</tr><tr>
+				<td><strong>Gibbs formation energy</strong></td>
+				<td>{gibbs}</td>
+			</tr><tr>
 				<td><strong>In {n_reactions} reaction(s)</strong></td>
 				<td>{reactions}</td>
 			</tr>
 		<table>""".format(id=self.id, name=self.name, formula=self._formula,
 							address='0x0%x' % id(self),
 							compartment=self._compartment,
+							ic=self._initial_condition,
+							gibbs= self._gibbs_formation
 							n_reactions=len(self.reactions),
 							reactions='. '.join(r.id for r in self.reactions))
 
