@@ -336,7 +336,7 @@ class MassMetabolite(Species):
 							address='0x0%x' % id(self),
 							compartment=self._compartment,
 							ic=self._initial_condition,
-							gibbs= self._gibbs_formation
+							gibbs= self._gibbs_formation,
 							n_reactions=len(self.reactions),
 							reactions='. '.join(r.id for r in self.reactions))
 
