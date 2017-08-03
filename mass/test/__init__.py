@@ -2,5 +2,5 @@
 
 from __future__ import absolute_import
 
-from test.test_massmetabolite import test_MassMetabolite
-from test.test_massreaction import test_MassReaction
+from mass.test.test_massmetabolite import test_MassMetabolite
+from mass.test.test_massreaction import test_MassReaction

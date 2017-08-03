@@ -1,7 +1,7 @@
 """Unit test for MassMetabolite Class
 
-Purpose: 
-	To Test MassMetabolite attributes, properties, and methods 
+Purpose:
+	To Test MassMetabolite attributes, properties, and methods
 	to ensure they work as intended and raise intended
 	exceptions and warnings where appropriate
 
@@ -50,52 +50,52 @@ Intended Processes for Shorthands:
 
 ### Import necessary packages
 import unittest, doctest, pytest
-### FIXME: replace ipy magic method with proper import from masspy
-%run ./MassMetabolite_Class.ipynb
+
+from mass.core.massmetabolite import MassMetabolite
 
 
 ### Testing class begins here
 class test_MassMetabolite(unittest.TestCase, MassMetabolite):
-	
+
 	### setUp/tearDown
 	def setUp(self):
-		
+
 		### formula, elements, and formula_weight
 		self.metab1 = MassMetabolite('TestIDm1', formula='CH4') ## basic metab for testing
 		self.metab2 = MassMetabolite('TestIDm2', formula='CH3') ## metab w/different formula
 		self.metab3 = MassMetabolite('TestIDm3', formula='C6H12.5O6') ## metab with decimal formula
-		
+
 		### charge
 		self.metab4 = MassMetabolite('TestIDm4', charge= 2) ## basic metab for testing
 		self.metab5 = MassMetabolite('TestIDm5', charge= -2) ## basic metab w/different charge
-		
+
 		### compartment
 		self.metab6 = MassMetabolite('TestIDm6', compartment="c") ## bastic metab for testing
 		self.metab7 = MassMetabolite('TestIDm7', compartment="e") ## basic metab with differt compartment
-		
+
 		### initial_condition & gibbs_formation
 		self.metab8 = MassMetabolite('TestIDm8')
-		
+
 		### cobra Metabolite (for compatibility functions)
 		from cobra.core.metabolite import Metabolite
 		self.cm = Metabolite('TestIDm_cobra')
-	
+
 	def tearDown(self):
 		del self.metab1
 		del self.metab2
 		del self.metab3
-		
+
 		del self.metab4
 		del self.metab5
-		
+
 		del self.metab6
 		del self.metab7
-		
+
 		del self.metab8
-		
+
 		del self.cm
-	
-	
+
+
 	### Test IsInstance
 	def test_IsIntance(self):
 		self.assertIsInstance(self.metab1, MassMetabolite)
@@ -106,10 +106,10 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertIsInstance(self.metab6, MassMetabolite)
 		self.assertIsInstance(self.metab7, MassMetabolite)
 		self.assertIsInstance(self.metab8, MassMetabolite)
-	
+
 	def test_IsInstance_to_cobra_metabolite(self):
 		from cobra.core.metabolite import Metabolite
-		
+
 		c1 = self.metab1.to_cobra_metabolite()
 		c2 = self.metab2.to_cobra_metabolite()
 		c3 = self.metab3.to_cobra_metabolite()
@@ -118,7 +118,7 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		c6 = self.metab6.to_cobra_metabolite()
 		c7 = self.metab7.to_cobra_metabolite()
 		c8 = self.metab8.to_cobra_metabolite()
-		
+
 		self.assertIsInstance(c1, Metabolite)
 		self.assertIsInstance(c2, Metabolite)
 		self.assertIsInstance(c3, Metabolite)
@@ -127,292 +127,292 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertIsInstance(c6, Metabolite)
 		self.assertIsInstance(c7, Metabolite)
 		self.assertIsInstance(c8, Metabolite)
-	
+
 	def test_IsInstance_from_cobra_metabolite(self):
 		cmm = MassMetabolite.from_cobra_metabolite(CobraMetabolite=self.cm, mass_id=self.cm.id)
 		self.assertIsInstance(cmm, MassMetabolite)
-	
-	
+
+
 	### Test Equal/NotEqual
 	def test_formulas(self):
-		
+
 		expected_result = 'CH4'
 		self.assertEqual(self.metab1.formula, expected_result)
 		self.assertNotEqual(self.metab2.formula, expected_result)
 		self.assertNotEqual(self.metab3.formula, expected_result)
-		
+
 		expected_result = 'CH3'
 		self.assertNotEqual(self.metab1.formula, expected_result)
 		self.assertEqual(self.metab2.formula, expected_result)
 		self.assertNotEqual(self.metab3.formula, expected_result)
-		
+
 		expected_result = 'C6H12.5O6'
 		self.assertNotEqual(self.metab1.formula, expected_result)
 		self.assertNotEqual(self.metab2.formula, expected_result)
 		self.assertEqual(self.metab3.formula, expected_result)
-	
+
 	def test_charge(self):
-		
+
 		expected_result = 2
 		self.assertEqual(self.metab4.charge, expected_result)
 		self.assertNotEqual(self.metab5.charge, expected_result)
-		
+
 		expected_result = -2
 		self.assertNotEqual(self.metab4.charge, expected_result)
 		self.assertEqual(self.metab5.charge, expected_result)
-	
+
 	def test_compartment(self):
-		
+
 		expected_result = "c"
 		self.assertEqual(self.metab6.compartment, expected_result)
 		self.assertNotEqual(self.metab7.compartment, expected_result)
-		
+
 		expected_result = "e"
 		self.assertNotEqual(self.metab6.compartment, expected_result)
 		self.assertEqual(self.metab7.compartment, expected_result)
-	
+
 	def test_elements(self):
 		expected_result = {'C': 1, 'H': 4}
 		self.assertEqual(self.metab1.elements, expected_result)
 		self.assertNotEqual(self.metab2.elements, expected_result)
 		self.assertNotEqual(self.metab3.elements, expected_result)
-		
+
 		expected_result = {'C': 1, 'H': 3}
 		self.assertNotEqual(self.metab1.elements, expected_result)
 		self.assertEqual(self.metab2.elements, expected_result)
 		self.assertNotEqual(self.metab3.elements, expected_result)
-		
+
 		expected_result = {'C': 6, 'H': 12.5, 'O': 6}
 		self.assertNotEqual(self.metab1.elements, expected_result)
 		self.assertNotEqual(self.metab2.elements, expected_result)
 		self.assertEqual(self.metab3.elements, expected_result)
-	
+
 	def test_initial_condition(self):
 		self.metab8.initial_condition = 5
-		
+
 		expected_result = 5
 		self.assertEqual(self.metab8.initial_condition, expected_result)
-		
+
 		expected_result = 10
 		self.assertNotEqual(self.metab8.initial_condition, expected_result)
-		
+
 	def test_ic(self):
 		self.metab8.ic = 5
-		
+
 		expected_result = 5
 		self.assertEqual(self.metab8.ic, expected_result)
-		
+
 		expected_result = 10
 		self.assertNotEqual(self.metab8.ic, expected_result)
-	
+
 	def test_gibbs_formation(self):
 		self.metab8.gibbs_formation = 100
-		
+
 		expected_result = 100
 		self.assertEqual(self.metab8.gibbs_formation, expected_result)
-		
+
 		expected_result = 1000
 		self.assertNotEqual(self.metab8.gibbs_formation, expected_result)
-	
+
 	def test_gf(self):
 		self.metab8.gf = 100
-		
+
 		expected_result = 100
 		self.assertEqual(self.metab8.gf, expected_result)
-		
+
 		expected_result = 1000
 		self.assertNotEqual(self.metab8.gf, expected_result)
-	
+
 	def test_formula_weight(self):
-		
+
 		expected_result = 16.04246
 		self.assertEqual(self.metab1.formula_weight, expected_result)
 		self.assertNotEqual(self.metab2.formula_weight, expected_result)
 		self.assertNotEqual(self.metab3.formula_weight, expected_result)
-		
+
 		expected_result = 15.03452
 		self.assertNotEqual(self.metab1.formula_weight, expected_result)
 		self.assertEqual(self.metab2.formula_weight, expected_result)
 		self.assertNotEqual(self.metab3.formula_weight, expected_result)
-		
+
 		expected_result = 180.65985
 		self.assertNotEqual(self.metab1.formula_weight, expected_result)
 		self.assertNotEqual(self.metab2.formula_weight, expected_result)
-		self.assertEqual(self.metab3.formula_weight, expected_result)        
-	
-	
+		self.assertEqual(self.metab3.formula_weight, expected_result)
+
+
 	def test_formulas_cobra(self):
 		from cobra.core.metabolite import Metabolite
 		c1 = self.metab1.to_cobra_metabolite()
 		c2 = self.metab2.to_cobra_metabolite()
 		c3 = self.metab3.to_cobra_metabolite()
-		
+
 		self.assertEqual(self.metab1.formula, c1.formula)
 		self.assertNotEqual(self.metab2.formula, c1.formula)
 		self.assertNotEqual(self.metab3.formula, c1.formula)
-		
+
 		self.assertNotEqual(self.metab1.formula, c2.formula)
 		self.assertEqual(self.metab2.formula, c2.formula)
 		self.assertNotEqual(self.metab3.formula, c2.formula)
-		
+
 		self.assertNotEqual(self.metab1.formula, c3.formula)
 		self.assertNotEqual(self.metab2.formula, c3.formula)
 		self.assertEqual(self.metab3.formula, c3.formula)
-		
+
 		del c1, c2, c3
-	
+
 	def test_charge_cobra(self):
 		from cobra.core.metabolite import Metabolite
 		c4 = self.metab4.to_cobra_metabolite()
 		c5 = self.metab5.to_cobra_metabolite()
-		
+
 		self.assertEqual(self.metab4.charge, c4.charge)
 		self.assertNotEqual(self.metab5.charge, c4.charge)
-		
+
 		self.assertNotEqual(self.metab4.charge, c5.charge)
 		self.assertEqual(self.metab5.charge, c5.charge)
-		
+
 		del c4, c5
-	
+
 	def test_compartment_cobra(self):
 		from cobra.core.metabolite import Metabolite
 		c6 = self.metab6.to_cobra_metabolite()
 		c7 = self.metab7.to_cobra_metabolite()
-		
+
 		self.assertEqual(self.metab6.compartment, c6.compartment)
 		self.assertNotEqual(self.metab7.compartment, c6.compartment)
-		
+
 		self.assertNotEqual(self.metab6.compartment, c7.compartment)
 		self.assertEqual(self.metab7.compartment, c7.compartment)
-		
+
 		del c6, c7
-	
+
 	def test_elements_cobra(self):
 		from cobra.core.metabolite import Metabolite
 		c1 = self.metab1.to_cobra_metabolite()
 		c2 = self.metab2.to_cobra_metabolite()
 		c3 = self.metab3.to_cobra_metabolite()
-		
+
 		self.assertEqual(self.metab1.elements, c1.elements)
 		self.assertNotEqual(self.metab2.elements, c1.elements)
 		self.assertNotEqual(self.metab3.elements, c1.elements)
-		
+
 		self.assertNotEqual(self.metab1.elements, c2.elements)
 		self.assertEqual(self.metab2.elements, c2.elements)
 		self.assertNotEqual(self.metab3.elements, c2.elements)
-		
+
 		self.assertNotEqual(self.metab1.elements, c3.elements)
 		self.assertNotEqual(self.metab2.elements, c3.elements)
 		self.assertEqual(self.metab3.elements, c3.elements)
-		
+
 		del c1, c2, c3
-	
+
 	def test_formula_weight_cobra(self):
 		from cobra.core.metabolite import Metabolite
 		c1 = self.metab1.to_cobra_metabolite()
 		c2 = self.metab2.to_cobra_metabolite()
 		c3 = self.metab3.to_cobra_metabolite()
-		
+
 		self.assertEqual(self.metab1.formula_weight, c1.formula_weight)
 		self.assertNotEqual(self.metab2.formula_weight, c1.formula_weight)
 		self.assertNotEqual(self.metab3.formula_weight, c1.formula_weight)
-		
+
 		self.assertNotEqual(self.metab1.formula_weight, c2.formula_weight)
 		self.assertEqual(self.metab2.formula_weight, c2.formula_weight)
 		self.assertNotEqual(self.metab3.formula_weight, c2.formula_weight)
-		
+
 		self.assertNotEqual(self.metab1.formula_weight, c3.formula_weight)
 		self.assertNotEqual(self.metab2.formula_weight, c3.formula_weight)
 		self.assertEqual(self.metab3.formula_weight, c3.formula_weight)
-		
+
 		del c1, c2, c3
-	
-	
+
+
 	### Test Exceptions and Warnings
 	def test_formula_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', formula=2)
-			
+
 		self.assertRaisesRegex(TypeError, "formula must be a string")
-	
+
 	def test_formula_not_string_or_none_has_typeerror_bool(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', formula=True)
-			
+
 		self.assertRaisesRegex(TypeError, "formula must be a string")
-	
+
 	def test_charge_not_float_or_none_has_typeerror_string(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', charge="-2")
-		
+
 		self.assertRaisesRegex(TypeError, "charge must be a float")
-	
+
 	def test_compartment_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', compartment=3)
-		
+
 		self.assertRaisesRegex(TypeError, "compartment must a string")
-	
+
 	def test_compartment_not_string_or_none_has_typeerror_bool(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', compartment=True)
-		
+
 		self.assertRaisesRegex(TypeError, "compartment must a string")
-	
+
 	def test_elements_asterisk_formula_has_userwarning(self):
 		with self.assertWarns(UserWarning) as w:
 			metab_temp = MassMetabolite('TestIDm_temp', formula="CoCl2*6H2O")
 			metab_temp.elements
-		
+
 		self.assertWarnsRegex(UserWarning, "invalid character '*' found in formula")
 		del metab_temp
-	
+
 	def test_elements_parentheses_formula_has_userwarning(self):
-		"""Test is a warning for now. 
+		"""Test is a warning for now.
 		May consider returning an error in future"""
-		
+
 		with self.assertWarns(UserWarning) as w:
 			metab_temp = MassMetabolite('TestIDm_temp', formula="(CH3)3N+CH2CH2OCOCH3")
 			metab_temp.elements
-		
+
 		self.assertWarnsRegex(UserWarning, "invalid formula (has parenthesis)")
 		del metab_temp
-	
+
 	def test_elements_noninteger_formula_has_userwarning(self):
 		with self.assertWarns(UserWarning) as w:
 			self.metab3.elements
-		
+
 		self.assertWarnsRegex(UserWarning, "is not an integer")
-	
+
 	def test_initial_condition_not_float_or_none_has_typeerror_string(self):
 		with self.assertRaises(TypeError) as t:
 			self.metab8.initial_condition = "1.4"
-		
+
 		self.assertRaisesRegex(TypeError, "initial condition must be a number")
-	
+
 	def test_ic_not_float_or_none_has_typeerror_string(self):
 		with self.assertRaises(TypeError) as t:
 			self.metab8.ic = "1.4"
-		
+
 		self.assertRaisesRegex(TypeError, "initial condition must be a number")
-	
+
 	def test_initial_condition_negative_value_has_valueerror(self):
 		with self.assertRaises(ValueError) as v:
 			self.metab1.initial_condition = -1
-			
+
 		self.assertEqual(str(v.exception), "Initial condition must be a non-negative number")
-	
+
 	def test_ic_negative_value_has_valueerror(self):
 		with self.assertRaises(ValueError) as v:
 			self.metab1.ic = -1
-			
+
 		self.assertEqual(str(v.exception), "Initial condition must be a non-negative number")
-	
+
 	def test_gibbs_formation_not_float_or_none_has_typerror_string(self):
 		with self.assertRaises(TypeError) as t:
 			self.metab8.gibbs_formation = "-5.3"
-		
+
 		self.assertRaisesRegex(TypeError, "gibbs formation must be a number")
-	
+
 if __name__ == '__main__':
 	unittest.main(argv=['first-arg-is-ignored'], exit=False)
