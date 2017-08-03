@@ -21,7 +21,7 @@ from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
 # from mass
-# from mass.core.massmetabolite import MassMetabolite
+from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
 ## precompiled regular expressions
