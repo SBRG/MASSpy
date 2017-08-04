@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import re
 from six import string_types, integer_types
 from warnings import warn
-
+from sympy import sympify, S, Add, Mul, simplify
 # cobra packages
 from cobra.core.species import Species
 
@@ -180,19 +180,37 @@ class MassMetabolite(Species):
 
 		Will return None if metabolite is not associated with a MassReaction
 		"""
+		self._ode = self._generate_ode()
 		return self._ode
 
 	# Methods
+	def _generate_ode(self):
+		if len(self._reaction) == 0:
+			return None
+
+		self._ode = S.Zero
+		for rxn in self._reaction:
+			if rxn._model is not None and rxn in rxn._model._custom_rates:
+				print("FIXME: IMPLEMENT CUSTOM RATES")
+			else:
+				if self in rxn.reactants:
+					sign = -1
+				else:
+					sign = 1
+				self._ode = simplify(Add(self._ode,
+									Mul(sign, rxn.rate_law_expr)))
+		return self._ode
+
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassMetabolite object to the associated massmodel.
 
 		Similar to the method in cobra.core.metabolite.
 		"""
-		if value in self.massmodel.metabolites:
-			raise ValueError("The massmodel already contains a metabolite with \
-								the id:")
+		if value in self._model.metabolites:
+			raise ValueError("The massmodel already contains a metabolite"
+							" with the id:", value)
 		self._id = value
-		self.massmodel.metabolites._generate_index()
+		self._model.metabolites._generate_index()
 
 	def remove_from_model(self, destructive=False):
 		"""Removes the metabolite association from self.massmodel
