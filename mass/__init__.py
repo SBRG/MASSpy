@@ -8,4 +8,6 @@ from mass.test import (
 from mass.core import (
     MassMetabolite, MassReaction, MassModel)
 
+from mass import util
+
 __version__ = "0.1.0"
