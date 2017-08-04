@@ -12,7 +12,7 @@ from warnings import warn
 from six import iteritems, iterkeys, string_types
 
 
-from sympy import sympify, S, var, Add, Mul, Pow, Integer
+from sympy import sympify, S, var, Add, Mul, Pow, Integer, simplify
 
 # from cobra
 from cobra.core.object import Object
@@ -579,8 +579,8 @@ class MassReaction(Object):
         if self._forward_rate_expr == None and self._reverse_rate_expr == None:
             self._rate_law_expr = None
         else:
-            self._rate_law_expr = Add(self._forward_rate_expr,
-                                    Mul(Integer(-1), self._reverse_rate_expr))
+            self._rate_law_expr = simplify(Add(self._forward_rate_expr,
+                                    Mul(Integer(-1), self._reverse_rate_expr)))
 
         return self._rate_law_expr
 
