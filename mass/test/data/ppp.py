@@ -330,12 +330,12 @@ EX_G3P_C.add_metabolites({
 })
 
 ### Generate Model object
-ppp = MassModel("PentosePhosphatePathway")
+ppp = MassModel("Pentose_Phosphate_Pathway")
 
 ### Add reactions to model
 ### Note: This will add all associated metabolites as well
 # FIX WHEN SOURCES AND SINKS ADDED
-rxns_list = [G6PDH2r, PGL, GND, RPI, RPE, 
+rxns_list = [G6PDH2r, PGL, GND, RPI, RPE,
              TKT1, TALA, TKT2, GTHOr, GSHR,
             CO2, EX_G6P_C, EX_F6P_C, EX_R5P_C,
             EX_H_C, EX_H2O_C, EX_G3P_C]

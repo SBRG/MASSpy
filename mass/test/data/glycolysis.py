@@ -165,7 +165,7 @@ PFK.add_metabolites({
     h_c: 1
 })
 
-### D-Fructose 1,6-bisphosphate to 
+### D-Fructose 1,6-bisphosphate to
 ### Dihydroxyacetone phosphate + Glyceraldehyde 3-phosphate
 FBA = MassReaction(
     "FBA",
@@ -322,7 +322,7 @@ GLUIN.add_metabolites({
 })
 
 ### (null) <-> amp_c
-### ### Source for AMP 
+### ### Source for AMP
 ### ### Note: BiGG reaction is different
 AMPIN = MassReaction(
     "AMPIN",
@@ -390,11 +390,11 @@ H2O.add_metabolites({
 })
 
 ### Generate Model object
-glycolysis = MassModel("glycolysis")
+glycolysis = MassModel("Glycolysis")
 
 ### Add reactions to model
 ### Note: This will add all associated metabolites as well
-rxns_list = [HEX1, PGI, PFK, FBA, TPI, GAPD, PGK, 
+rxns_list = [HEX1, PGI, PFK, FBA, TPI, GAPD, PGK,
              PGM, ENO, PYK, LDH_L, ADK1, ATPM, NADH,
             GLUIN, AMPIN, AMP, LAC, PYR, H, H2O]
 
