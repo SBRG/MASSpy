@@ -584,20 +584,6 @@ class MassReaction(Object):
 
         return self._rate_law_expr
 
-    # May move elsewhere
-    # def reset_rate_law(self, num_values=False):
-    #     """Reset the custom rate law and custom rate law expression
-    #     to the automatically generated rate law and rate law expression
-    #
-    #     Parameters
-    #     ----------
-    #     num_values : bool
-    #         If True, the value of the rate constant is used.
-    #         Otherwise use a symbol for the rate constant.
-    #     """
-    #     self._rate_law = self.generate_rate_law(num_values)
-    #     self._rate_law_expr = self.generate_rate_law_expr(num_values)
-
     def remove_from_model(self, remove_orphans=False):
         """Removes the reaction from a massmodel.
 
@@ -1209,7 +1195,6 @@ class MassReaction(Object):
         Similar to the method in cobra.core.reaction
         """
         massreaction_deepcopy = deepcopy(super(MassReaction, self), memo)
-        massreaction_deepcopy.reset_rate_law()
         return massreaction_deepcopy
 
     def __setstate__(self, state):
