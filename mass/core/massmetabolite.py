@@ -190,7 +190,7 @@ class MassMetabolite(Species):
 
 		self._ode = S.Zero
 		for rxn in self._reaction:
-			if rxn._model is not None and rxn in rxn._model._custom_rates:
+			if rxn._model is not None and rxn in rxn._model.custom_rates:
 				print("FIXME: IMPLEMENT CUSTOM RATES")
 			else:
 				if self in rxn.reactants:
