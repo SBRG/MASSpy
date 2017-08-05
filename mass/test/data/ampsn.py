@@ -338,13 +338,13 @@ NH3.add_metabolites({
 })
 
 ### Generate Model object
-amps = MassModel("AMPSalvageNetwork")
+amps = MassModel("AMP_Salvage_Network")
 
 ### Add reactions to model
 ### Note: This will add all associated metabolites as well
 # FIX WHEN SOURCES AND SINKS ADDED
-rxns_list = [AK, NTD7, AMPDA, NTD11, ADA, 
-             PUNP5, PPM, ATPM, PRPPSYN, ADPRT, 
+rxns_list = [AK, NTD7, AMPDA, NTD11, ADA,
+             PUNP5, PPM, ATPM, PRPPSYN, ADPRT,
              ADO, ADE, INO, HYP, AMP, H, H2O, PHOS, NH3]
 
 amps.add_reactions(rxns_list)
