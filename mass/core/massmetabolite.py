@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import re
 from six import string_types, integer_types
 from warnings import warn
-
+from sympy import sympify, S, Add, Mul, simplify
 # cobra packages
 from cobra.core.species import Species
 
@@ -180,19 +180,37 @@ class MassMetabolite(Species):
 
 		Will return None if metabolite is not associated with a MassReaction
 		"""
+		self._ode = self._generate_ode()
 		return self._ode
 
 	# Methods
+	def _generate_ode(self):
+		if len(self._reaction) == 0:
+			return None
+
+		self._ode = S.Zero
+		for rxn in self._reaction:
+			if rxn._model is not None and rxn in rxn._model.custom_rates:
+				print("FIXME: IMPLEMENT CUSTOM RATES")
+			else:
+				if self in rxn.reactants:
+					sign = -1
+				else:
+					sign = 1
+				self._ode = simplify(Add(self._ode,
+									Mul(sign, rxn.rate_law_expr)))
+		return self._ode
+
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassMetabolite object to the associated massmodel.
 
 		Similar to the method in cobra.core.metabolite.
 		"""
-		if value in self.massmodel.metabolites:
-			raise ValueError("The massmodel already contains a metabolite with \
-								the id:")
+		if value in self._model.metabolites:
+			raise ValueError("The massmodel already contains a metabolite"
+							" with the id:", value)
 		self._id = value
-		self.massmodel.metabolites._generate_index()
+		self._model.metabolites._generate_index()
 
 	def remove_from_model(self, destructive=False):
 		"""Removes the metabolite association from self.massmodel
@@ -230,78 +248,6 @@ class MassMetabolite(Species):
 	def gf(self, value):
 		"""Shorthand setter for Gibb's energy of formation"""
 		self.gibbs_formation = value
-
-	# Compatibility functions
-	def to_cobra_metabolite(self, cobra_id=None):
-		"""To create a cobra Metabolite object from a MassMetabolite Object
-
-		Parameters
-		----------
-		cobra_id : string or None
-			id for the cobra Metabolite object. If no id is specified,
-			one will automatically be generated with the
-			Metabolite object's current ID + _mass at the end
-
-		Warnings
-		--------
-		All other fields will initialize to default values.
-		"""
-		try:
-			from cobra.core.metabolite import Metabolite
-		except:
-			raise ImportError("Failed to import the Metabolite Object from \
-				cobra.core.metabolite. Ensure cobra is installed properly")
-
-		if cobra_id == None:
-			cobra_id = self.id + "_cobra"
-
-		new_cobra_metab = Metabolite(id=cobra_id, name=self.name,
-								formula=self._formula, charge=self._charge,
-								compartment=self._compartment)
-
-		return new_cobra_metab
-
-	def from_cobra_metabolite(CobraMetabolite=None, mass_id=None):
-		"""To create a MassMetabolite object from a cobra Metabolite Object
-
-		Parameters
-		----------
-		CobraMetabolite : Metabolite Object from cobra.core.metabolite
-			The cobra Metabolite Object for creating the MassMetabolite object
-		mass_id : string or None
-			id for the MassMetabolite object. If no id is specified,
-			one will automatically be generated with the
-			MassMetabolite object's current ID + _mass at the end
-
-		Warnings
-		--------
-		All other fields will initialize to default values.
-
-		A Metabolite Object from cobra.core.metabolite must be imported into
-			the enviroment in order for this method to work properly.
-		"""
-
-		try:
-			from cobra.core.metabolite import Metabolite
-		except:
-			raise ImportError("Failed to import the Metabolite Object from \
-				cobra.core.metabolite. Ensure cobra is installed properly")
-
-		if CobraMetabolite == None:
-			warn("No cobra Metabolite Object was given")
-			return None
-
-		if not isinstance(CobraMetabolite, Metabolite):
-			raise TypeError("Metabolite must be a cobra Metabolite Object")
-
-		if mass_id == None:
-			mass_id = CobraMetabolite.id + "_mass"
-
-		new_mass_metab = MassMetabolite(id=mass_id, name=CobraMetabolite.name,
-								formula=CobraMetabolite.formula,
-								charge=CobraMetabolite.charge,
-								compartment=CobraMetabolite.compartment)
-		return new_mass_metab
 
 	# HTML representation
 	def _repr_html_(self):

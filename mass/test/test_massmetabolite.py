@@ -36,7 +36,8 @@ Intended Process for Methods:
 	from_cobra_metabolite:
 		Function to generate MassMetabolite from cobra Metabolite Object
 		Should take in cobra Metabolite Object, raise TypeError if not
-		Should take in non-None cobra Metabolite Object, raise UserWarning if not
+		Should take in non-None cobra Metabolite Object, raise UserWarning if
+        not
 
 
 Intended Processes for Shorthands:
@@ -48,35 +49,42 @@ Intended Processes for Shorthands:
 		Setter should implement gibb_formation.setter
 """
 
-### Import necessary packages
+# Import necessary packages
 import unittest, doctest, pytest
 
 from mass.core.massmetabolite import MassMetabolite
 
 
-### Testing class begins here
+# Testing class begins here
 class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 
-	### setUp/tearDown
+	# setUp/tearDown
 	def setUp(self):
 
-		### formula, elements, and formula_weight
-		self.metab1 = MassMetabolite('TestIDm1', formula='CH4') ## basic metab for testing
-		self.metab2 = MassMetabolite('TestIDm2', formula='CH3') ## metab w/different formula
-		self.metab3 = MassMetabolite('TestIDm3', formula='C6H12.5O6') ## metab with decimal formula
+		#formula, elements, and formula_weight
+		## basic metab for testing
+		self.metab1 = MassMetabolite('TestIDm1', formula='CH4')
+		## metab w/different formula
+		self.metab2 = MassMetabolite('TestIDm2', formula='CH3')
+		## metab with decimal formula
+		self.metab3 = MassMetabolite('TestIDm3', formula='C6H12.5O6')
 
-		### charge
-		self.metab4 = MassMetabolite('TestIDm4', charge= 2) ## basic metab for testing
-		self.metab5 = MassMetabolite('TestIDm5', charge= -2) ## basic metab w/different charge
+		# charge
+		## basic metab for testing
+		self.metab4 = MassMetabolite('TestIDm4', charge= 2)
+		## basic metab w/different charge
+		self.metab5 = MassMetabolite('TestIDm5', charge= -2)
 
-		### compartment
-		self.metab6 = MassMetabolite('TestIDm6', compartment="c") ## bastic metab for testing
-		self.metab7 = MassMetabolite('TestIDm7', compartment="e") ## basic metab with differt compartment
+		# compartment
+		## basic metab for testing
+		self.metab6 = MassMetabolite('TestIDm6', compartment="c")
+		## basic metab with differt compartment
+		self.metab7 = MassMetabolite('TestIDm7', compartment="e")
 
-		### initial_condition & gibbs_formation
+		# initial_condition & gibbs_formation
 		self.metab8 = MassMetabolite('TestIDm8')
 
-		### cobra Metabolite (for compatibility functions)
+		# cobra Metabolite (for compatibility functions)
 		from cobra.core.metabolite import Metabolite
 		self.cm = Metabolite('TestIDm_cobra')
 
@@ -96,7 +104,7 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		del self.cm
 
 
-	### Test IsInstance
+	# Test IsInstance
 	def test_IsIntance(self):
 		self.assertIsInstance(self.metab1, MassMetabolite)
 		self.assertIsInstance(self.metab2, MassMetabolite)
@@ -129,11 +137,12 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		self.assertIsInstance(c8, Metabolite)
 
 	def test_IsInstance_from_cobra_metabolite(self):
-		cmm = MassMetabolite.from_cobra_metabolite(CobraMetabolite=self.cm, mass_id=self.cm.id)
+		cmm = MassMetabolite.from_cobra_metabolite(CobraMetabolite=self.cm,
+													mass_id=self.cm.id)
 		self.assertIsInstance(cmm, MassMetabolite)
 
 
-	### Test Equal/NotEqual
+	# Test Equal/NotEqual
 	def test_formulas(self):
 
 		expected_result = 'CH4'
@@ -328,7 +337,7 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		del c1, c2, c3
 
 
-	### Test Exceptions and Warnings
+	# Test Exceptions and Warnings
 	def test_formula_not_string_or_none_has_typeerror_int(self):
 		with self.assertRaises(TypeError) as t:
 			metab_temp = MassMetabolite('TestIDm_temp', formula=2)
@@ -364,7 +373,8 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 			metab_temp = MassMetabolite('TestIDm_temp', formula="CoCl2*6H2O")
 			metab_temp.elements
 
-		self.assertWarnsRegex(UserWarning, "invalid character '*' found in formula")
+		self.assertWarnsRegex(UserWarning,
+							"invalid character '*' found in formula")
 		del metab_temp
 
 	def test_elements_parentheses_formula_has_userwarning(self):
@@ -372,7 +382,8 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		May consider returning an error in future"""
 
 		with self.assertWarns(UserWarning) as w:
-			metab_temp = MassMetabolite('TestIDm_temp', formula="(CH3)3N+CH2CH2OCOCH3")
+			metab_temp = MassMetabolite('TestIDm_temp',
+										formula="(CH3)3N+CH2CH2OCOCH3")
 			metab_temp.elements
 
 		self.assertWarnsRegex(UserWarning, "invalid formula (has parenthesis)")
@@ -400,13 +411,15 @@ class test_MassMetabolite(unittest.TestCase, MassMetabolite):
 		with self.assertRaises(ValueError) as v:
 			self.metab1.initial_condition = -1
 
-		self.assertEqual(str(v.exception), "Initial condition must be a non-negative number")
+		self.assertEqual(str(v.exception),
+						"Initial condition must be a non-negative number")
 
 	def test_ic_negative_value_has_valueerror(self):
 		with self.assertRaises(ValueError) as v:
 			self.metab1.ic = -1
 
-		self.assertEqual(str(v.exception), "Initial condition must be a non-negative number")
+		self.assertEqual(str(v.exception),
+						"Initial condition must be a non-negative number")
 
 	def test_gibbs_formation_not_float_or_none_has_typerror_string(self):
 		with self.assertRaises(TypeError) as t:
