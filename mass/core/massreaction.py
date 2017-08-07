@@ -10,13 +10,10 @@ from functools import partial
 from operator import attrgetter
 from warnings import warn
 from six import iteritems, iterkeys, string_types
-
-
 from sympy import sympify, S, var, Add, Mul, Pow, Integer, simplify
 
 # from cobra
 from cobra.core.object import Object
-from cobra.core.metabolite import Metabolite
 from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
@@ -681,19 +678,11 @@ class MassReaction(Object):
 		reversibly : bool
 			Whether to add the change to the context to make the change
 			reversibly or not (primarily intended for internal use).
-
-		Warnings
-		--------
-		To add a cobra Metabolite object to a MassReaction object, the
-			cobra Metabolite must first be converted to a MassMetabolite
-			through the from_cobra method in the mass.core.massmetabolite class
 		"""
 		for metabolite, coefficient in iteritems(metabolites_to_add):
-			if isinstance(metabolite, Metabolite):
-				raise TypeError("Must be a MassMetabolite object and not a "
-							"cobra Metabolite object. Create a MassMetabolite "
-							"by using the from_cobra method on the Metabolite:"
-							" %s" % metabolite.id)
+			if not isinstance(metabolite, NassMetabolite):
+				raise TypeError("%s is not a MassMetabolite object"
+								% metabolite.id)
 
 		old_coefficients = self.metabolites
 		new_metabolites = []
@@ -1076,107 +1065,6 @@ class MassReaction(Object):
 	def S(self):
 		"""Shorthand for the reaction stoichiometry"""
 		return [c for m, c in iteritems(self._metabolites)]
-
-	# Compatibility functions
-	def to_cobra_reaction(self, cobra_id=None,
-							lower_bound=None,
-							upper_bound=None):
-		"""To convert a MassReaction object into a cobra Reaction object
-
-		If the lower and/or upper bounds are not specified,the reversibility
-		will be used to determine the bounds for initializing the reaction.
-
-		For reversible MassReaction objects:
-			lower_bound =-1000 and/or upper_bound=1000
-		For irreversible MassReaction objects:
-			lower_bound =0 and upper_bound=1000
-
-		Warnings
-		--------
-		All other fields in a cobra Reaction will initialize to their defaults
-		"""
-		try:
-			from cobra.core.reaction import Reaction
-		except:
-			raise ImportError("Failed to import the Reaction Object from "
-					"cobra.core.reaction. Ensure cobra is installed properly")
-
-		if cobra_id == None:
-			cobra_id = self._id + "_cobra"
-
-		if lower_bound == None:
-			if self._reversibility == True:
-				lb = -1000
-			else:
-				lb = 0.
-
-		if upper_bound == None:
-			ub = 1000
-
-		cobra_rxn = Reaction(id=cobra_id, name=self.name,
-							subsystem=self.subsystem, lower_bound=lb,
-							upper_bound=ub, objective_coefficient=0.)
-
-		cobra_metab_dict = {metab.to_cobra_metabolite() : coefficient \
-						for metab, coefficient in iteritems(self._metabolites)}
-
-		cobra_rxn.add_metabolites(cobra_metab_dict)
-		cobra_rxn._genes = self._genes
-		cobra_rxn._gene_reaction_rule = self._gene_reaction_rule
-		cobra_rxn._update_awareness()
-
-		return cobra_rxn
-
-	def from_cobra_reaction(CobraReaction=None, mass_id=None,
-							kinetic_reversibility=None):
-		"""To convert a cobra Reaction object into a MassReaction object
-
-		If kinetic_reversibility is not specifiied, will try to infer
-		reversibility from the upper and lower bounds of the cobra object.
-
-		Warnings
-		--------
-		All other fields in a MassReaction will initialize to their defaults
-
-		A Reaction Object from cobra.core.reaction must be imported into
-			the enviroment in order for this method to work properly.
-		"""
-		try:
-			from cobra.core.reaction import Reaction
-		except:
-			raise ImportError("Failed to import the Reaction Object from "
-					"cobra.core.reaction. Ensure cobra is installed properly")
-
-		if CobraReaction == None:
-			warn("No cobra Reaction Object was given")
-			return None
-
-		if not isinstance(CobraReaction, Reaction):
-			raise TypeError("Reaction must be a cobra Reaction Object")
-
-		if mass_id == None:
-			mass_id = CobraReaction._id + "_mass"
-
-		if kinetic_reversibility == None:
-			kinetic_reversibility = CobraReaction.reversibility
-
-		mass_rxn = MassReaction(id=mass_id, name=CobraReaction.name,
-							subsystem=CobraReaction.subsystem,
-							reversibility=kinetic_reversibility)
-
-		mass_metab_dict = {
-			MassMetabolite.from_cobra_metabolite(cobra_metab): coeff
-			for cobra_metab, coeff in iteritems(CobraReaction._metabolites)
-			}
-
-		mass_rxn.add_metabolites(mass_metab_dict)
-		mass_rxn._genes = CobraReaction._genes
-		mass_rxn._gene_reaction_rule = CobraReaction._gene_reaction_rule
-		mass_rxn._rate_law = mass_rxn.generate_rate_law()
-		mass_rxn._rate_law_expr = mass_rxn.generate_rate_law_expr()
-		mass_rxn._update_awareness()
-
-		return mass_rxn
 
 	# Module Dunders
 	# All dunders are similar or identical to cobra.core.reaction dunders
