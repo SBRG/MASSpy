@@ -21,12 +21,16 @@ class MassMetabolite(Species):
 	"""MassMetabolite is a class for holding information regarding a metabolite
 	in mass.MassReaction Object
 
+
 	Parameters
 	----------
 	id : string
 		The identifier associated with the metabolite
 	name : string
 		A human readable name
+
+	Attributes
+	----------
 	formula : string or None
 		Chemical formula associated with the metabolite
 	charge : float or None
@@ -51,11 +55,11 @@ class MassMetabolite(Species):
 
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
-		self._formula = formula
+		self.formula = formula
 		# Charge associated with the metabolite
-		self._charge = charge
+		self.charge = charge
 		# Compartment in which metabolite is located
-		self._compartment = compartment
+		self.compartment = compartment
 		# Initial condition associated with this metabolite=
 		self._initial_condition = None
 		# Gibbs energy of formation associated with this metabolite
@@ -64,21 +68,6 @@ class MassMetabolite(Species):
 		self._ode = None
 
 	# Properties
-	@property
-	def formula(self):
-		"""Returns the metabolite formula"""
-		return self._formula
-
-	@property
-	def charge(self):
-		"""Returns the metabolite charge"""
-		return self._charge
-
-	@property
-	def compartment(self):
-		"""Returns the metabolite compartment"""
-		return self._compartment
-
 	@property
 	def elements(self):
 		"""Dictionary of elements as keys and their count in the
@@ -249,78 +238,6 @@ class MassMetabolite(Species):
 		"""Shorthand setter for Gibb's energy of formation"""
 		self.gibbs_formation = value
 
-	# Compatibility functions
-	def to_cobra_metabolite(self, cobra_id=None):
-		"""To create a cobra Metabolite object from a MassMetabolite Object
-
-		Parameters
-		----------
-		cobra_id : string or None
-			id for the cobra Metabolite object. If no id is specified,
-			one will automatically be generated with the
-			Metabolite object's current ID + _mass at the end
-
-		Warnings
-		--------
-		All other fields will initialize to default values.
-		"""
-		try:
-			from cobra.core.metabolite import Metabolite
-		except:
-			raise ImportError("Failed to import the Metabolite Object from \
-				cobra.core.metabolite. Ensure cobra is installed properly")
-
-		if cobra_id == None:
-			cobra_id = self.id + "_cobra"
-
-		new_cobra_metab = Metabolite(id=cobra_id, name=self.name,
-								formula=self._formula, charge=self._charge,
-								compartment=self._compartment)
-
-		return new_cobra_metab
-
-	def from_cobra_metabolite(CobraMetabolite=None, mass_id=None):
-		"""To create a MassMetabolite object from a cobra Metabolite Object
-
-		Parameters
-		----------
-		CobraMetabolite : Metabolite Object from cobra.core.metabolite
-			The cobra Metabolite Object for creating the MassMetabolite object
-		mass_id : string or None
-			id for the MassMetabolite object. If no id is specified,
-			one will automatically be generated with the
-			MassMetabolite object's current ID + _mass at the end
-
-		Warnings
-		--------
-		All other fields will initialize to default values.
-
-		A Metabolite Object from cobra.core.metabolite must be imported into
-			the enviroment in order for this method to work properly.
-		"""
-
-		try:
-			from cobra.core.metabolite import Metabolite
-		except:
-			raise ImportError("Failed to import the Metabolite Object from \
-				cobra.core.metabolite. Ensure cobra is installed properly")
-
-		if CobraMetabolite == None:
-			warn("No cobra Metabolite Object was given")
-			return None
-
-		if not isinstance(CobraMetabolite, Metabolite):
-			raise TypeError("Metabolite must be a cobra Metabolite Object")
-
-		if mass_id == None:
-			mass_id = CobraMetabolite.id + "_mass"
-
-		new_mass_metab = MassMetabolite(id=mass_id, name=CobraMetabolite.name,
-								formula=CobraMetabolite.formula,
-								charge=CobraMetabolite.charge,
-								compartment=CobraMetabolite.compartment)
-		return new_mass_metab
-
 	# HTML representation
 	def _repr_html_(self):
 		return """
@@ -350,9 +267,9 @@ class MassMetabolite(Species):
 				<td><strong>In {n_reactions} reaction(s)</strong></td>
 				<td>{reactions}</td>
 			</tr>
-		<table>""".format(id=self.id, name=self.name, formula=self._formula,
+		<table>""".format(id=self.id, name=self.name, formula=self.formula,
 							address='0x0%x' % id(self),
-							compartment=self._compartment,
+							compartment=self.compartment,
 							ic=self._initial_condition,
 							gibbs= self._gibbs_formation,
 							n_reactions=len(self.reactions),

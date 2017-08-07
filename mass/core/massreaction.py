@@ -5,18 +5,16 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
+from collections import defaultdict
 from copy import copy, deepcopy
 from functools import partial
 from operator import attrgetter
 from warnings import warn
 from six import iteritems, iterkeys, string_types
-
-
 from sympy import sympify, S, var, Add, Mul, Pow, Integer, simplify
 
 # from cobra
 from cobra.core.object import Object
-from cobra.core.metabolite import Metabolite
 from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
@@ -52,50 +50,47 @@ class MassReaction(Object):
 		A human readable name for the reaction
 	subsystem : string
 		The subsystem where the reaction is meant to occur
-	reversibility : bool
+	reversible : bool
 		The kinetic reversibility of the reaction
 
 	Attributes
 	----------
-	sym_kf : string
-		String representation of the symbol for the forward rate constant.
-	sym_kr : string
-		String representation of the symbol for the reverse rate constant.
-	sym_Keq : string
-		String representation of the symbol for the equilibrium rate constant.
+	ssflux : float or None
+		The steady state flux for the reaction. Can store a steady state flux
+		and be utilized in pseudo rate constnant calculations.
 	"""
 
-	def __init__(self, id=None, name="", subsystem="", reversibility=True):
+	def __init__(self, id=None, name="", subsystem="", reversible=True,
+				ssflux=None):
 		"""Initialize the MassReaction Object"""
 		# Check inputs to ensure they are the correct types
 		if not isinstance(name, string_types):
 			raise TypeError("name must be a string type")
-		elif not isinstance(subsystem, string_types):
+		if not isinstance(subsystem, string_types):
 			raise TypeError("subsystem must be a string type")
-		elif not isinstance(reversibility, bool):
-			raise TypeError("reversibility must be a boolean")
-		else:
-			pass
+		if not isinstance(reversible, bool):
+			raise TypeError("reversible must be a boolean")
 
 		Object.__init__(self, id, name)
-		self._reversibility = reversibility
 		self.subsystem = subsystem
+		self._reversible = reversible
+		self.ssflux = ssflux
 		# The forward, reverse, and equilibrium constants as strings
 		# for symbolic expressions
-		self.sym_kf = ("kf_%s" % id)
-		self.sym_kr = ("kr_%s" % id)
-		self.sym_Keq = ("Keq_%s" % id)
+		self._sym_kf = ("kf_%s" % id)
+		self._sym_kr = ("kr_%s" % id)
+		self._sym_Keq = ("Keq_%s" % id)
 
 		# The forward, reverse, and equilbrium constants for simulation
 		# initialized as strings of their symbolic representations
-		self._forward_rate_constant = self.sym_kf
+		self._forward_rate_constant = self._sym_kf
 		# No reverse rate constant for an irreversible reaction.
 		# Therefore initialized to 0.
-		if self._reversibility == True:
-			self._reverse_rate_constant = self.sym_kr
+		if self._reversible:
+			self._reverse_rate_constant = self._sym_kr
 		else:
 			self._reverse_rate_constant = 0.
-		self._equilibrium_constant = self.sym_Keq
+		self._equilibrium_constant = self._sym_Keq
 
 		# The rate law equation for simulation and the symbolic representation
 		self._rate_law = None
@@ -117,12 +112,12 @@ class MassReaction(Object):
 
 	# Properties
 	@property
-	def reversibility(self):
-		"""Returns the kinetic reversibility of the reaction"""
-		return self._reversibility
+	def reversible(self):
+		"""Returns the kinetic reversible of the reaction"""
+		return self._reversible
 
-	@reversibility.setter
-	def reversibility(self, value):
+	@reversible.setter
+	def reversible(self, value):
 		"""Set the kinetic reversibility of the reaction. Will initialize to
 		default values for the reverse rate constant when the kinetic
 		reversibility is changed to True, and will set the reverse rate
@@ -130,15 +125,15 @@ class MassReaction(Object):
 
 		Parameters
 		----------
-		reversibility : bool
+		reversible : bool
 			True for kinetically reversible reaction, False for irreversible
 		"""
 		if not isinstance(value, bool):
 			raise TypeError("Must be a boolean True or False")
 
-		self._reversibility = value
-		if value == True:
-			self._reverse_rate_constant = self.sym_kr
+		self._reversible = value
+		if value:
+			self._reverse_rate_constant = self._sym_kr
 		else:
 			self._reverse_rate_constant = 0.
 
@@ -154,20 +149,17 @@ class MassReaction(Object):
 
 	@property
 	def reverse_rate_constant(self):
-		"""Returns the reverse rate constant associated with this reaction
-		If the reaction is not reversible, warns the user and return a 0."""
-		if self._reversibility != True:
-			warn("No reverse rate constant for irreversible reactions")
+		"""Returns the reverse rate constant associated with this reaction"""
 		return self._reverse_rate_constant
 
 	@reverse_rate_constant.setter
 	def reverse_rate_constant(self, value):
 		"""Set the reverse rate constant for this reaction.
 		If the reaction is not reversible, warns the user"""
-		if self._reversibility != True:
-			warn("Cannot set reverse rate constant for irreversible reactions")
-		else:
+		if self._reversible:
 			self._reverse_rate_constant = value
+		else:
+			warn("Cannot set reverse rate constant for irreversible reactions")
 
 	@property
 	def equilibrium_constant(self):
@@ -237,14 +229,14 @@ class MassReaction(Object):
 	@property
 	def rate_law(self):
 		"""Returns the rate law as a human readable string"""
-		if self._rate_law == None:
+		if self._rate_law is None:
 			self._rate_law = self.generate_rate_law(num_values=False)
 		return self._rate_law
 
 	@property
 	def rate_law_expr(self):
 		"""Returns the rate law as a sympy expression"""
-		if self._rate_law_expr == None:
+		if self._rate_law_expr is None:
 			self._rate_law_expr = self.generate_rate_law_expr(num_values=False)
 		return self._rate_law_expr
 
@@ -307,7 +299,7 @@ class MassReaction(Object):
 
 		.. note:: These are reactions with a sink or source
 		"""
-		return (len(self.metabolites) ==1 and
+		return (len(self.metabolites) == 1 and
 			not (self.reactants and self.products))
 
 	@property
@@ -432,10 +424,10 @@ class MassReaction(Object):
 								" reactants for this reaction")
 			return None
 
-		if num_values != False:
+		if num_values:
 			self._forward_rate = str(self._forward_rate_constant)
 		else:
-			self._forward_rate = self.sym_kf
+			self._forward_rate = self._sym_kf
 
 		for metab in self.reactants:
 			coeff = self.get_coefficient(metab.id)
@@ -462,10 +454,10 @@ class MassReaction(Object):
 								" reactants for this reaction")
 			return None
 
-		if num_values != False:
+		if num_values:
 			self._forward_rate_expr = sympify(self._forward_rate_constant)
 		else:
-			self._forward_rate_expr = sympify(self.sym_kf)
+			self._forward_rate_expr = sympify(self._sym_kf)
 
 		for metab in self.reactants:
 			coeff = self.get_coefficient(metab.id)
@@ -492,13 +484,13 @@ class MassReaction(Object):
 			warn("Cannot generate a reverse rate when there are no"
 								" products for this reaction")
 			return None
-		if self._reversibility != True:
+		if not self._reversible:
 			return 0.
 
-		if num_values != False:
+		if num_values:
 			self._reverse_rate = str(self._reverse_rate_constant)
 		else:
-			self._reverse_rate = self.sym_kr
+			self._reverse_rate = self._sym_kr
 
 		for metab in self.products:
 			coeff = self.get_coefficient(metab.id)
@@ -525,13 +517,13 @@ class MassReaction(Object):
 			warn("Cannot generate a reverse rate when there are no"
 								" products for this reaction")
 			return None
-		if self._reversibility != True:
+		if self._reversible:
 			return S.Zero
 
-		if num_values != False:
+		if num_values:
 			self._reverse_rate_expr = sympify(self._reverse_rate_constant)
 		else:
-			self._reverse_rate_expr = sympify(self.sym_kr)
+			self._reverse_rate_expr = sympify(self._sym_kr)
 
 		for metab in self.products:
 			coeff = self.get_coefficient(metab.id)
@@ -556,7 +548,7 @@ class MassReaction(Object):
 		"""
 		self._forward_rate = self.generate_forward_rate(num_values)
 		self._reverse_rate = self.generate_reverse_rate(num_values)
-		if self._forward_rate == None and self._reverse_rate == None:
+		if self._forward_rate is None and self._reverse_rate is None:
 			self._rate_law = None
 		else:
 			self._rate_law = ("%s - %s" % (self._forward_rate,
@@ -576,7 +568,7 @@ class MassReaction(Object):
 		"""
 		self._forward_rate_expr = self.generate_forward_rate_expr(num_values)
 		self._reverse_rate_expr = self.generate_reverse_rate_expr(num_values)
-		if self._forward_rate_expr == None and self._reverse_rate_expr == None:
+		if self._forward_rate_expr is None and self._reverse_rate_expr is None:
 			self._rate_law_expr = None
 		else:
 			self._rate_law_expr = simplify(Add(self._forward_rate_expr,
@@ -681,19 +673,11 @@ class MassReaction(Object):
 		reversibly : bool
 			Whether to add the change to the context to make the change
 			reversibly or not (primarily intended for internal use).
-
-		Warnings
-		--------
-		To add a cobra Metabolite object to a MassReaction object, the
-			cobra Metabolite must first be converted to a MassMetabolite
-			through the from_cobra method in the mass.core.massmetabolite class
 		"""
 		for metabolite, coefficient in iteritems(metabolites_to_add):
-			if isinstance(metabolite, Metabolite):
-				raise TypeError("Must be a MassMetabolite object and not a "
-							"cobra Metabolite object. Create a MassMetabolite "
-							"by using the from_cobra method on the Metabolite:"
-							" %s" % metabolite.id)
+			if not isinstance(metabolite, MassMetabolite):
+				raise TypeError("%s is not a MassMetabolite object"
+								% metabolite.id)
 
 		old_coefficients = self.metabolites
 		new_metabolites = []
@@ -834,10 +818,10 @@ class MassReaction(Object):
 			else:
 				reactant_bits.append(format(abs(coefficient)) + metab_name)
 		reaction_string = " + ".join(reactant_bits)
-		if self._reversibility != True:
-			reaction_string += " --> "
-		else:
+		if self._reversible:
 			reaction_string += " <=> "
+		else:
+			reaction_string += " --> "
 		reaction_string += " + ".join(product_bits)
 		return reaction_string
 
@@ -924,7 +908,7 @@ class MassReaction(Object):
 		#Reversible reaction
 		arrow_match = reversible_arrow_finder.search(reaction_string)
 		if arrow_match is not None:
-			self._reversibility = True
+			self._reversible = True
 			# Reactants left of the arrow, products on the right
 			reactant_str = reaction_string[:arrow_match.start()].strip()
 			product_str = reaction_string[arrow_match.end():].strip()
@@ -932,7 +916,7 @@ class MassReaction(Object):
 			# Try forward reaction
 			arrow_match = forward_arrow_finder.search(reaction_string)
 			if arrow_match is not None:
-				self._reversibility = False
+				self._reversible = False
 				# Reactants left of the arrow, products on the right
 				reactant_str = reaction_string[:arrow_match.start()].strip()
 				product_str = reaction_string[arrow_match.end():].strip()
@@ -942,7 +926,7 @@ class MassReaction(Object):
 					raise ValueError("No suitable arrow found in '%s'" %
 										reaction_str)
 				else:
-					self._reversibility = False
+					self._reversible = False
 					# Reactants right of the arrow, products on the left
 					reactant_str = reaction_string[arrow_match.end():].strip()
 					product_str = reaction_string[:arrow_match.start()].strip()
@@ -1001,7 +985,7 @@ class MassReaction(Object):
 
 		Similar to the method in cobra.core.reaction"""
 		self.forward_rate_constant = 0.
-		if self._reversibility == True:
+		if self._reversible:
 			self.reverse_rate_constant = 0.
 
 	# HTML representation
@@ -1015,11 +999,11 @@ class MassReaction(Object):
 					<td><strong>Name</strong></td>
 					<td>{name}</td>
 				</tr><tr>
-					<td><strong>Subsystem</strong></td>
-					<td>{subsystem}</td>
-				</tr><tr>
 					<td><strong>Memory address</strong></td>
 					<td>{address}</td>
+				</tr><tr>
+					<td><strong>Subsystem</strong></td>
+					<td>{subsystem}</td>
 				</tr><tr>
 					<td><strong>Stoichiometry</strong></td>
 					<td>
@@ -1039,7 +1023,7 @@ class MassReaction(Object):
 				stoich_id=self.build_reaction_string(),
 				stoich_name=self.build_reaction_string(True),
 				gpr=self.gene_reaction_rule,
-				reversibility=self._reversibility)
+				reversibility=self._reversible)
 
 	# Shorthands
 	@property
@@ -1076,107 +1060,6 @@ class MassReaction(Object):
 	def S(self):
 		"""Shorthand for the reaction stoichiometry"""
 		return [c for m, c in iteritems(self._metabolites)]
-
-	# Compatibility functions
-	def to_cobra_reaction(self, cobra_id=None,
-							lower_bound=None,
-							upper_bound=None):
-		"""To convert a MassReaction object into a cobra Reaction object
-
-		If the lower and/or upper bounds are not specified,the reversibility
-		will be used to determine the bounds for initializing the reaction.
-
-		For reversible MassReaction objects:
-			lower_bound =-1000 and/or upper_bound=1000
-		For irreversible MassReaction objects:
-			lower_bound =0 and upper_bound=1000
-
-		Warnings
-		--------
-		All other fields in a cobra Reaction will initialize to their defaults
-		"""
-		try:
-			from cobra.core.reaction import Reaction
-		except:
-			raise ImportError("Failed to import the Reaction Object from "
-					"cobra.core.reaction. Ensure cobra is installed properly")
-
-		if cobra_id == None:
-			cobra_id = self._id + "_cobra"
-
-		if lower_bound == None:
-			if self._reversibility == True:
-				lb = -1000
-			else:
-				lb = 0.
-
-		if upper_bound == None:
-			ub = 1000
-
-		cobra_rxn = Reaction(id=cobra_id, name=self.name,
-							subsystem=self.subsystem, lower_bound=lb,
-							upper_bound=ub, objective_coefficient=0.)
-
-		cobra_metab_dict = {metab.to_cobra_metabolite() : coefficient \
-						for metab, coefficient in iteritems(self._metabolites)}
-
-		cobra_rxn.add_metabolites(cobra_metab_dict)
-		cobra_rxn._genes = self._genes
-		cobra_rxn._gene_reaction_rule = self._gene_reaction_rule
-		cobra_rxn._update_awareness()
-
-		return cobra_rxn
-
-	def from_cobra_reaction(CobraReaction=None, mass_id=None,
-							kinetic_reversibility=None):
-		"""To convert a cobra Reaction object into a MassReaction object
-
-		If kinetic_reversibility is not specifiied, will try to infer
-		reversibility from the upper and lower bounds of the cobra object.
-
-		Warnings
-		--------
-		All other fields in a MassReaction will initialize to their defaults
-
-		A Reaction Object from cobra.core.reaction must be imported into
-			the enviroment in order for this method to work properly.
-		"""
-		try:
-			from cobra.core.reaction import Reaction
-		except:
-			raise ImportError("Failed to import the Reaction Object from "
-					"cobra.core.reaction. Ensure cobra is installed properly")
-
-		if CobraReaction == None:
-			warn("No cobra Reaction Object was given")
-			return None
-
-		if not isinstance(CobraReaction, Reaction):
-			raise TypeError("Reaction must be a cobra Reaction Object")
-
-		if mass_id == None:
-			mass_id = CobraReaction._id + "_mass"
-
-		if kinetic_reversibility == None:
-			kinetic_reversibility = CobraReaction.reversibility
-
-		mass_rxn = MassReaction(id=mass_id, name=CobraReaction.name,
-							subsystem=CobraReaction.subsystem,
-							reversibility=kinetic_reversibility)
-
-		mass_metab_dict = {
-			MassMetabolite.from_cobra_metabolite(cobra_metab): coeff
-			for cobra_metab, coeff in iteritems(CobraReaction._metabolites)
-			}
-
-		mass_rxn.add_metabolites(mass_metab_dict)
-		mass_rxn._genes = CobraReaction._genes
-		mass_rxn._gene_reaction_rule = CobraReaction._gene_reaction_rule
-		mass_rxn._rate_law = mass_rxn.generate_rate_law()
-		mass_rxn._rate_law_expr = mass_rxn.generate_rate_law_expr()
-		mass_rxn._update_awareness()
-
-		return mass_rxn
 
 	# Module Dunders
 	# All dunders are similar or identical to cobra.core.reaction dunders
