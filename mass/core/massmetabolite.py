@@ -21,7 +21,6 @@ class MassMetabolite(Species):
 	"""MassMetabolite is a class for holding information regarding a metabolite
 	in mass.MassReaction Object
 
-
 	Parameters
 	----------
 	id : string
@@ -38,7 +37,6 @@ class MassMetabolite(Species):
 	compartment : string or None
 		The compartment where the metabolite is located
 	"""
-
 	def __init__(self, id=None, name ="", formula=None, charge=None,
 					compartment=None):
 		# Check inputs to ensure they are the correct types
@@ -182,12 +180,10 @@ class MassMetabolite(Species):
 			if rxn._model is not None and rxn in rxn._model.custom_rates:
 				print("FIXME: IMPLEMENT CUSTOM RATES")
 			else:
-				if self in rxn.reactants:
-					sign = -1
-				else:
-					sign = 1
-				self._ode = simplify(Add(self._ode,
-									Mul(sign, rxn.rate_law_expr)))
+				for self in rxn.products:
+					self._ode = Add(self._ode, Mul(1, rxn.rate_law_expr))
+				for self in rxn.reactants:
+					self._ode = Add(self._ode, Mul(-1, rxn.rate_law_expr))
 		return self._ode
 
 	def _set_id_with_model(self, value):
