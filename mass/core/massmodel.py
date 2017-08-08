@@ -821,7 +821,8 @@ class MassModel(Object):
 					num_metabolites=len(self.metabolites),
 					num_reactions=len(self.reactions),
 					num_genes=len(self.genes),
-					num_param='FIXME: Get from a parameter summary',
+					num_param=sum([len(rxn.parameters)
+									for rxn in self.reactions]),
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),

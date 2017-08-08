@@ -10,6 +10,7 @@ from copy import copy, deepcopy
 from functools import partial
 from operator import attrgetter
 from warnings import warn
+from math import inf
 from six import iteritems, iterkeys, string_types
 from sympy import sympify, S, var, Add, Mul, Pow, Integer, simplify
 
@@ -59,7 +60,6 @@ class MassReaction(Object):
 		The steady state flux for the reaction. Can store a steady state flux
 		and be utilized in pseudo rate constnant calculations.
 	"""
-
 	def __init__(self, id=None, name="", subsystem="", reversible=True,
 				ssflux=None):
 		"""Initialize the MassReaction Object"""
@@ -82,15 +82,14 @@ class MassReaction(Object):
 		self._sym_Keq = ("Keq_%s" % id)
 
 		# The forward, reverse, and equilbrium constants for simulation
-		# initialized as strings of their symbolic representations
-		self._forward_rate_constant = self._sym_kf
+		self._forward_rate_constant = None
 		# No reverse rate constant for an irreversible reaction.
 		# Therefore initialized to 0.
 		if self._reversible:
-			self._reverse_rate_constant = self._sym_kr
+			self._reverse_rate_constant = None
 		else:
 			self._reverse_rate_constant = 0.
-		self._equilibrium_constant = self._sym_Keq
+		self._equilibrium_constant = None
 
 		# The rate law equation for simulation and the symbolic representation
 		self._rate_law = None
@@ -133,9 +132,11 @@ class MassReaction(Object):
 
 		self._reversible = value
 		if value:
-			self._reverse_rate_constant = self._sym_kr
+			self._reverse_rate_constant = None
+			self._equilibrium_constant = None
 		else:
 			self._reverse_rate_constant = 0.
+			self._equilibrium_constant = inf
 
 	@property
 	def forward_rate_constant(self):
@@ -169,12 +170,27 @@ class MassReaction(Object):
 	@equilibrium_constant.setter
 	def equilibrium_constant(self, value):
 		"""Set the equilibrium constant for this reaction"""
-		self._equilibrium_constant = value
+		if self._reversible:
+			self._equilibrium_constant = value
+		else:
+			warn("Cannot set equilibrium constant for irreversible reactions")
 
 	@property
 	def rate_constants(self):
 		"""Returns a list containing the rate constants."""
 		return [self._forward_rate_constant, self._reverse_rate_constant]
+
+	@property
+	def parameters(self):
+		"""Returns a dictionary of all reaction parameters"""
+		param = {}
+		key_list = [self._sym_kf, self._sym_kr, self._sym_Keq, "ssflux"]
+		attr_list = ["_forward_rate_constant", "_reverse_rate_constant",
+						"_equilibrium_constant", "ssflux"]
+		for i, attr in enumerate(attr_list):
+			if self.__dict__[attr] is not None:
+				param.update({key_list[i] : self.__dict__[attr]})
+		return param
 
 	@property
 	def metabolites(self):
@@ -420,8 +436,6 @@ class MassReaction(Object):
 			Otherwise use a symbol for the rate constant.
 		"""
 		if len(self.reactants) == 0:
-			warn("Cannot generate a forward rate when there are no"
-								" reactants for this reaction")
 			return None
 
 		if num_values:
@@ -450,8 +464,6 @@ class MassReaction(Object):
 			Otherwise use a symbol for the rate constant.
 		"""
 		if len(self.reactants) == 0:
-			warn("Cannot generate a forward rate when there are no"
-								" reactants for this reaction")
 			return None
 
 		if num_values:
@@ -481,8 +493,6 @@ class MassReaction(Object):
 			Otherwise use a symbol for the rate constant.
 		"""
 		if len(self.products) == 0:
-			warn("Cannot generate a reverse rate when there are no"
-								" products for this reaction")
 			return None
 		if not self._reversible:
 			return 0.
@@ -514,8 +524,6 @@ class MassReaction(Object):
 			Otherwise use a symbol for the rate constant.
 		"""
 		if len(self.products) == 0:
-			warn("Cannot generate a reverse rate when there are no"
-								" products for this reaction")
 			return None
 		if self._reversible:
 			return S.Zero
@@ -550,10 +558,11 @@ class MassReaction(Object):
 		self._reverse_rate = self.generate_reverse_rate(num_values)
 		if self._forward_rate is None and self._reverse_rate is None:
 			self._rate_law = None
-		else:
+		elif self._reversible:
 			self._rate_law = ("%s - %s" % (self._forward_rate,
 											self._reverse_rate))
-
+		else:
+			self._rate_law = self._forward_rate
 		return self._rate_law
 
 	def generate_rate_law_expr(self, num_values=False):
@@ -570,9 +579,11 @@ class MassReaction(Object):
 		self._reverse_rate_expr = self.generate_reverse_rate_expr(num_values)
 		if self._forward_rate_expr is None and self._reverse_rate_expr is None:
 			self._rate_law_expr = None
-		else:
+		elif self._reversible:
 			self._rate_law_expr = simplify(Add(self._forward_rate_expr,
 									Mul(Integer(-1), self._reverse_rate_expr)))
+		else:
+			self._rate_law_expr = self._forward_rate_expr
 
 		return self._rate_law_expr
 
