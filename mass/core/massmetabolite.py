@@ -21,12 +21,16 @@ class MassMetabolite(Species):
 	"""MassMetabolite is a class for holding information regarding a metabolite
 	in mass.MassReaction Object
 
+
 	Parameters
 	----------
 	id : string
 		The identifier associated with the metabolite
 	name : string
 		A human readable name
+
+	Attributes
+	----------
 	formula : string or None
 		Chemical formula associated with the metabolite
 	charge : float or None
@@ -51,11 +55,11 @@ class MassMetabolite(Species):
 
 		Species.__init__(self, id, name)
 		# Chemical formula of the metabolite
-		self._formula = formula
+		self.formula = formula
 		# Charge associated with the metabolite
-		self._charge = charge
+		self.charge = charge
 		# Compartment in which metabolite is located
-		self._compartment = compartment
+		self.compartment = compartment
 		# Initial condition associated with this metabolite=
 		self._initial_condition = None
 		# Gibbs energy of formation associated with this metabolite
@@ -64,21 +68,6 @@ class MassMetabolite(Species):
 		self._ode = None
 
 	# Properties
-	@property
-	def formula(self):
-		"""Returns the metabolite formula"""
-		return self._formula
-
-	@property
-	def charge(self):
-		"""Returns the metabolite charge"""
-		return self._charge
-
-	@property
-	def compartment(self):
-		"""Returns the metabolite compartment"""
-		return self._compartment
-
 	@property
 	def elements(self):
 		"""Dictionary of elements as keys and their count in the
@@ -278,9 +267,9 @@ class MassMetabolite(Species):
 				<td><strong>In {n_reactions} reaction(s)</strong></td>
 				<td>{reactions}</td>
 			</tr>
-		<table>""".format(id=self.id, name=self.name, formula=self._formula,
+		<table>""".format(id=self.id, name=self.name, formula=self.formula,
 							address='0x0%x' % id(self),
-							compartment=self._compartment,
+							compartment=self.compartment,
 							ic=self._initial_condition,
 							gibbs= self._gibbs_formation,
 							n_reactions=len(self.reactions),

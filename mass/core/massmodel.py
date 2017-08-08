@@ -21,8 +21,7 @@ from cobra.util.context import HistoryManager, resettable, get_context
 # from mass
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util.array import (create_stoichiometric_matrix, update_S,
-	nullspace, left_nullspace, matrix_rank)
+from mass.util.array import *
 
 # Class begins
 ## Set the logger
@@ -154,7 +153,7 @@ class MassModel(Object):
 	@property
 	def get_irreversible_reactions(self):
 		"""Return a list of all irreversible reactions in the model."""
-		return [rxn for rxn in self.reactions if not rxn.reversibility]
+		return [rxn for rxn in self.reactions if not rxn.reversible]
 
 	# Methods
 	def add_metabolites(self, metabolite_list, add_initial_conditons=False):
@@ -199,7 +198,7 @@ class MassModel(Object):
 		# Add metabolites, and add initial conditions if True
 		self.metabolites += metabolite_list
 		if add_initial_conditons:
-			self.set_initial_conditons(metabolite_list)
+			self.set_initial_conditions(metabolite_list)
 
 		context = get_context(self)
 		if context:
@@ -257,7 +256,7 @@ class MassModel(Object):
 			for metab in metabolite_list:
 				context(partial(setattr, metab, '_model', self))
 
-	def set_initial_conditons(self, metabolite_list):
+	def set_initial_conditions(self, metabolite_list):
 		"""Set the initial conditions for a list of metabolites in the model.
 
 		The metabolite must already exist in the model in order to set its
@@ -350,7 +349,7 @@ class MassModel(Object):
 		# Check whether a metabolite already exists in the massmodel, and
 		# ignore those that do not
 		ic_dict = {metab : ic for metab, ic in iteritems(ic_dict)
-					if metab in self.metabolites}
+					if metab in self.metabolites and ic is not None}
 
 		# Keep track of existing initial conditions for HistoryManager
 		context = get_context(self)
@@ -573,7 +572,7 @@ class MassModel(Object):
 		rxn_name = "{} {}".format(metabolite.name, exchange_type)
 
 		rxn = MassReaction(id=rxn_id, name=rxn_name,
-					subsystem="Transport/Exchange",reversibility=reversible)
+					subsystem="Transport/Exchange",reversible=reversible)
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
 
