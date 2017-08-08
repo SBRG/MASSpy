@@ -50,11 +50,16 @@ class MassReaction(Object):
 		A human readable name for the reaction
 	subsystem : string
 		The subsystem where the reaction is meant to occur
+<<<<<<< HEAD
 	reversible : bool
+=======
+	reversibility : bool
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		The kinetic reversibility of the reaction
 
 	Attributes
 	----------
+<<<<<<< HEAD
 	ssflux : float or None
 		The steady state flux for the reaction. Can store a steady state flux
 		and be utilized in pseudo rate constnant calculations.
@@ -62,10 +67,22 @@ class MassReaction(Object):
 
 	def __init__(self, id=None, name="", subsystem="", reversible=True,
 				ssflux=None):
+=======
+	sym_kf : string
+		String representation of the symbol for the forward rate constant.
+	sym_kr : string
+		String representation of the symbol for the reverse rate constant.
+	sym_Keq : string
+		String representation of the symbol for the equilibrium rate constant.
+	"""
+
+	def __init__(self, id=None, name="", subsystem="", reversibility=True):
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		"""Initialize the MassReaction Object"""
 		# Check inputs to ensure they are the correct types
 		if not isinstance(name, string_types):
 			raise TypeError("name must be a string type")
+<<<<<<< HEAD
 		if not isinstance(subsystem, string_types):
 			raise TypeError("subsystem must be a string type")
 		if not isinstance(reversible, bool):
@@ -91,6 +108,34 @@ class MassReaction(Object):
 		else:
 			self._reverse_rate_constant = 0.
 		self._equilibrium_constant = self._sym_Keq
+=======
+		elif not isinstance(subsystem, string_types):
+			raise TypeError("subsystem must be a string type")
+		elif not isinstance(reversibility, bool):
+			raise TypeError("reversibility must be a boolean")
+		else:
+			pass
+
+		Object.__init__(self, id, name)
+		self._reversibility = reversibility
+		self.subsystem = subsystem
+		# The forward, reverse, and equilibrium constants as strings
+		# for symbolic expressions
+		self.sym_kf = ("kf_%s" % id)
+		self.sym_kr = ("kr_%s" % id)
+		self.sym_Keq = ("Keq_%s" % id)
+
+		# The forward, reverse, and equilbrium constants for simulation
+		# initialized as strings of their symbolic representations
+		self._forward_rate_constant = self.sym_kf
+		# No reverse rate constant for an irreversible reaction.
+		# Therefore initialized to 0.
+		if self._reversibility == True:
+			self._reverse_rate_constant = self.sym_kr
+		else:
+			self._reverse_rate_constant = 0.
+		self._equilibrium_constant = self.sym_Keq
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		# The rate law equation for simulation and the symbolic representation
 		self._rate_law = None
@@ -112,12 +157,21 @@ class MassReaction(Object):
 
 	# Properties
 	@property
+<<<<<<< HEAD
 	def reversible(self):
 		"""Returns the kinetic reversible of the reaction"""
 		return self._reversible
 
 	@reversible.setter
 	def reversible(self, value):
+=======
+	def reversibility(self):
+		"""Returns the kinetic reversibility of the reaction"""
+		return self._reversibility
+
+	@reversibility.setter
+	def reversibility(self, value):
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		"""Set the kinetic reversibility of the reaction. Will initialize to
 		default values for the reverse rate constant when the kinetic
 		reversibility is changed to True, and will set the reverse rate
@@ -125,15 +179,25 @@ class MassReaction(Object):
 
 		Parameters
 		----------
+<<<<<<< HEAD
 		reversible : bool
+=======
+		reversibility : bool
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			True for kinetically reversible reaction, False for irreversible
 		"""
 		if not isinstance(value, bool):
 			raise TypeError("Must be a boolean True or False")
 
+<<<<<<< HEAD
 		self._reversible = value
 		if value:
 			self._reverse_rate_constant = self._sym_kr
+=======
+		self._reversibility = value
+		if value == True:
+			self._reverse_rate_constant = self.sym_kr
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		else:
 			self._reverse_rate_constant = 0.
 
@@ -149,17 +213,31 @@ class MassReaction(Object):
 
 	@property
 	def reverse_rate_constant(self):
+<<<<<<< HEAD
 		"""Returns the reverse rate constant associated with this reaction"""
+=======
+		"""Returns the reverse rate constant associated with this reaction
+		If the reaction is not reversible, warns the user and return a 0."""
+		if self._reversibility != True:
+			warn("No reverse rate constant for irreversible reactions")
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		return self._reverse_rate_constant
 
 	@reverse_rate_constant.setter
 	def reverse_rate_constant(self, value):
 		"""Set the reverse rate constant for this reaction.
 		If the reaction is not reversible, warns the user"""
+<<<<<<< HEAD
 		if self._reversible:
 			self._reverse_rate_constant = value
 		else:
 			warn("Cannot set reverse rate constant for irreversible reactions")
+=======
+		if self._reversibility != True:
+			warn("Cannot set reverse rate constant for irreversible reactions")
+		else:
+			self._reverse_rate_constant = value
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 	@property
 	def equilibrium_constant(self):
@@ -229,14 +307,22 @@ class MassReaction(Object):
 	@property
 	def rate_law(self):
 		"""Returns the rate law as a human readable string"""
+<<<<<<< HEAD
 		if self._rate_law is None:
+=======
+		if self._rate_law == None:
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			self._rate_law = self.generate_rate_law(num_values=False)
 		return self._rate_law
 
 	@property
 	def rate_law_expr(self):
 		"""Returns the rate law as a sympy expression"""
+<<<<<<< HEAD
 		if self._rate_law_expr is None:
+=======
+		if self._rate_law_expr == None:
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			self._rate_law_expr = self.generate_rate_law_expr(num_values=False)
 		return self._rate_law_expr
 
@@ -299,7 +385,11 @@ class MassReaction(Object):
 
 		.. note:: These are reactions with a sink or source
 		"""
+<<<<<<< HEAD
 		return (len(self.metabolites) == 1 and
+=======
+		return (len(self.metabolites) ==1 and
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			not (self.reactants and self.products))
 
 	@property
@@ -424,10 +514,17 @@ class MassReaction(Object):
 								" reactants for this reaction")
 			return None
 
+<<<<<<< HEAD
 		if num_values:
 			self._forward_rate = str(self._forward_rate_constant)
 		else:
 			self._forward_rate = self._sym_kf
+=======
+		if num_values != False:
+			self._forward_rate = str(self._forward_rate_constant)
+		else:
+			self._forward_rate = self.sym_kf
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		for metab in self.reactants:
 			coeff = self.get_coefficient(metab.id)
@@ -454,10 +551,17 @@ class MassReaction(Object):
 								" reactants for this reaction")
 			return None
 
+<<<<<<< HEAD
 		if num_values:
 			self._forward_rate_expr = sympify(self._forward_rate_constant)
 		else:
 			self._forward_rate_expr = sympify(self._sym_kf)
+=======
+		if num_values != False:
+			self._forward_rate_expr = sympify(self._forward_rate_constant)
+		else:
+			self._forward_rate_expr = sympify(self.sym_kf)
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		for metab in self.reactants:
 			coeff = self.get_coefficient(metab.id)
@@ -484,6 +588,7 @@ class MassReaction(Object):
 			warn("Cannot generate a reverse rate when there are no"
 								" products for this reaction")
 			return None
+<<<<<<< HEAD
 		if not self._reversible:
 			return 0.
 
@@ -491,6 +596,15 @@ class MassReaction(Object):
 			self._reverse_rate = str(self._reverse_rate_constant)
 		else:
 			self._reverse_rate = self._sym_kr
+=======
+		if self._reversibility != True:
+			return 0.
+
+		if num_values != False:
+			self._reverse_rate = str(self._reverse_rate_constant)
+		else:
+			self._reverse_rate = self.sym_kr
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		for metab in self.products:
 			coeff = self.get_coefficient(metab.id)
@@ -517,6 +631,7 @@ class MassReaction(Object):
 			warn("Cannot generate a reverse rate when there are no"
 								" products for this reaction")
 			return None
+<<<<<<< HEAD
 		if self._reversible:
 			return S.Zero
 
@@ -524,6 +639,15 @@ class MassReaction(Object):
 			self._reverse_rate_expr = sympify(self._reverse_rate_constant)
 		else:
 			self._reverse_rate_expr = sympify(self._sym_kr)
+=======
+		if self._reversibility != True:
+			return S.Zero
+
+		if num_values != False:
+			self._reverse_rate_expr = sympify(self._reverse_rate_constant)
+		else:
+			self._reverse_rate_expr = sympify(self.sym_kr)
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		for metab in self.products:
 			coeff = self.get_coefficient(metab.id)
@@ -548,7 +672,11 @@ class MassReaction(Object):
 		"""
 		self._forward_rate = self.generate_forward_rate(num_values)
 		self._reverse_rate = self.generate_reverse_rate(num_values)
+<<<<<<< HEAD
 		if self._forward_rate is None and self._reverse_rate is None:
+=======
+		if self._forward_rate == None and self._reverse_rate == None:
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			self._rate_law = None
 		else:
 			self._rate_law = ("%s - %s" % (self._forward_rate,
@@ -568,7 +696,11 @@ class MassReaction(Object):
 		"""
 		self._forward_rate_expr = self.generate_forward_rate_expr(num_values)
 		self._reverse_rate_expr = self.generate_reverse_rate_expr(num_values)
+<<<<<<< HEAD
 		if self._forward_rate_expr is None and self._reverse_rate_expr is None:
+=======
+		if self._forward_rate_expr == None and self._reverse_rate_expr == None:
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			self._rate_law_expr = None
 		else:
 			self._rate_law_expr = simplify(Add(self._forward_rate_expr,
@@ -818,10 +950,17 @@ class MassReaction(Object):
 			else:
 				reactant_bits.append(format(abs(coefficient)) + metab_name)
 		reaction_string = " + ".join(reactant_bits)
+<<<<<<< HEAD
 		if self._reversible:
 			reaction_string += " <=> "
 		else:
 			reaction_string += " --> "
+=======
+		if self._reversibility != True:
+			reaction_string += " --> "
+		else:
+			reaction_string += " <=> "
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		reaction_string += " + ".join(product_bits)
 		return reaction_string
 
@@ -908,7 +1047,11 @@ class MassReaction(Object):
 		#Reversible reaction
 		arrow_match = reversible_arrow_finder.search(reaction_string)
 		if arrow_match is not None:
+<<<<<<< HEAD
 			self._reversible = True
+=======
+			self._reversibility = True
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			# Reactants left of the arrow, products on the right
 			reactant_str = reaction_string[:arrow_match.start()].strip()
 			product_str = reaction_string[arrow_match.end():].strip()
@@ -916,7 +1059,11 @@ class MassReaction(Object):
 			# Try forward reaction
 			arrow_match = forward_arrow_finder.search(reaction_string)
 			if arrow_match is not None:
+<<<<<<< HEAD
 				self._reversible = False
+=======
+				self._reversibility = False
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 				# Reactants left of the arrow, products on the right
 				reactant_str = reaction_string[:arrow_match.start()].strip()
 				product_str = reaction_string[arrow_match.end():].strip()
@@ -926,7 +1073,11 @@ class MassReaction(Object):
 					raise ValueError("No suitable arrow found in '%s'" %
 										reaction_str)
 				else:
+<<<<<<< HEAD
 					self._reversible = False
+=======
+					self._reversibility = False
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 					# Reactants right of the arrow, products on the left
 					reactant_str = reaction_string[arrow_match.end():].strip()
 					product_str = reaction_string[:arrow_match.start()].strip()
@@ -985,7 +1136,11 @@ class MassReaction(Object):
 
 		Similar to the method in cobra.core.reaction"""
 		self.forward_rate_constant = 0.
+<<<<<<< HEAD
 		if self._reversible:
+=======
+		if self._reversibility == True:
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 			self.reverse_rate_constant = 0.
 
 	# HTML representation
@@ -1023,7 +1178,11 @@ class MassReaction(Object):
 				stoich_id=self.build_reaction_string(),
 				stoich_name=self.build_reaction_string(True),
 				gpr=self.gene_reaction_rule,
+<<<<<<< HEAD
 				reversibility=self._reversible)
+=======
+				reversibility=self._reversibility)
+>>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 	# Shorthands
 	@property
