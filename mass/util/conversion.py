@@ -4,172 +4,306 @@
 from __future__ import absolute_import
 
 # Import necesary packages
+from six import iteritems
 
-# from cobra
-from cobra.core.metabolite import Metabolite
-from cobra.core.reaction import Reaction
-
-# from mass
-from mass.core.massmetabolite import MassMetabolite
-from mass.core.massreaction import MassReaction
-
-def to_cobra_metabolite(MassMetab=None, cobra_id=None):
-	"""To create a cobra Metabolite object from a MassMetabolite Object
+def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
+	"""To create a cobra Metabolite from a mass MassMetabolite.
 
 	Parameters
 	----------
+	mass_metabolite : mass.MassMetabolite
+		The MassMetabolite for creating the cobra.Metabolite object
 	cobra_id : string or None
-		id for the cobra Metabolite object. If no id is specified,
+		id for the new cobra Metabolite. If no id is specified,
 		one will automatically be generated with the
-		Metabolite object's current ID + _mass at the end
+		MassMetabolite object's current id + _cobra.
 
 	Warnings
 	--------
+	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	if MassMetab == None:
-		warn("No MassMetabolite Object was given")
+	from cobra.core.metabolite import Metabolite
+	from mass.core.massmetabolite import MassMetabolite
+
+	# Check the input
+	if mass_metabolite is None:
+		warn("No mass MassMetabolite given.")
 		return None
+	if not isinstance(mass_metabolite, MassMetabolite):
+		raise TypeError("Must be a mass MassMetabolite.")
 
-	if not isinstance(MassMetab, Metabolite):
-		raise TypeError("Metabolite must be a  MassMetabolite Object")
+	# Generate a new ID if none is specified
+	if cobra_id is None:
+		cobra_id = mass_metabolite.id + "_cobra"
 
-	if cobra_id == None:
-		cobra_id = MassMetab.id + "_cobra"
+	# Generate the cobra Metabolite
+	cobra_metab = Metabolite(id=cobra_id, name=mass_metabolite.name,
+							formula=mass_metabolite._formula,
+							charge=mass_metabolite._charge,
+							compartment=mass_metabolite._compartment)
+	return cobra_metab
 
-	new_cobra_metab = Metabolite(id=cobra_id, name=MassMetab.name,
-							formula=MassMetab._formula,
-                            charge=MassMetab._charge,
-							compartment=MassMetab._compartment)
-
-	return new_cobra_metab
-
-def from_cobra_metabolite(CobraMetab=None, mass_id=None):
-	"""To create a MassMetabolite object from a cobra Metabolite Object
+def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
+	"""To create a mass MassMetabolite from a cobra Metabolite.
 
 	Parameters
 	----------
-	CobraMetabolite : Metabolite Object from cobra.core.metabolite
-		The cobra Metabolite Object for creating the MassMetabolite object
+	cobra_metabolite : cobra.Metabolite
+		The Metabolite for creating the mass.MassMetabolite object
 	mass_id : string or None
-		id for the MassMetabolite object. If no id is specified,
+		id for the new mass MassMetabolite. If no id is specified,
 		one will automatically be generated with the
-		MassMetabolite object's current ID + _mass at the end
+		Metabolite object's current id + _mass.
 
 	Warnings
 	--------
+	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
+	"""
+	from cobra.core.metabolite import Metabolite
+	from mass.core.massmetabolite import MassMetabolite
 
-	A Metabolite Object from cobra.core.metabolite must be imported into
-		the enviroment in order for this method to work properly.
+	# Check the input
+	if cobra_metabolite is None:
+		warn("No cobra Metabolite given.")
+		return None
+	if not isinstance(cobra_metabolite, Metabolite):
+		raise TypeError("Must be a cobra Metabolite.")
+
+	# Generate a new ID if none is specified
+	if mass_id is None:
+		mass_id = cobra_metabolite.id + "_mass"
+
+	# Generate the mass MassMetabolite
+	mass_metab = MassMetabolite(id=mass_id, name=cobra_metabolite.name,
+								formula=cobra_metabolite.formula,
+								charge=cobra_metabolite.charge,
+								compartment=cobra_metabolite.compartment)
+	return mass_metab
+
+def to_cobra_reaction(mass_reaction=None, cobra_id=None,
+					upper_bound=None, lower_bound=None):
+	"""To create a cobra Reaction from a mass MassReaction.
+
+	If the lower and/or upper bounds are not specified,the reversibility
+	will be used to determine the bounds for initializing the reaction.
+
+	For reversible MassReaction objects:
+		upper_bound=1000, lower_bound=-1000,
+	For irreversible MassReaction objects:
+		lower_bound=0, upper_bound=1000
+
+	Parameters
+	----------
+	mass_reaction : mass.MassReacion
+		The MassReaction for creating the cobra.Reaction object
+	cobra_id : string or None
+		id for the new cobra Reaction. If no id is specified,
+		one will automatically be generated with the
+		MassReaction object's current id + _cobra.
+	lower_bound : float or None
+		The initialized lower bound of the cobra Reaction
+	upper_bound : float or None
+		The initialized upper bound of the cobra Reaction
+
+	Warnings
+	--------
+	All similar fields will initialize to be identical to the input object.
+	All other fields will initialize to default values.
+	"""
+	from cobra.core.reaction import Reaction
+	from mass.core.massreaction import MassReaction
+
+	# Check the input
+	if mass_reaction is None:
+		warn("No MassReaction given")
+		return None
+	if not isinstance(mass_reaction, MassReaction):
+		raise TypeError("Must be a mass MassReaction.")
+
+	# Generate a new ID if none is specified
+	if cobra_id is None:
+		cobra_id = mass_reaction.id + "_cobra"
+
+	# Generate the bounds
+	if upper_bound is None:
+		ub = 1000
+	if lower_bound is None:
+		if mass_reaction._reversibility:
+			lb = -1000
+		else:
+			lb = 0.
+
+	# Generate the cobra Reaction
+	cobra_rxn = Reaction(id=cobra_id, name=mass_reaction.name,
+						subsystem=mass_reaction.subsystem, lower_bound=lb,
+						upper_bound=ub, objective_coefficient=0.)
+
+	# Generate and add cobra Metabolites
+	cobra_metabs = {to_cobra_metabolite(metab) : coefficient
+				for metab, coefficient in iteritems(mass_reaction._metabolites)}
+	cobra_rxn.add_metabolites(cobra_metabs)
+
+	# Generate and add new genes
+	for gene in mass_reaction._genes:
+		cobra_rxn._genes.add(gene.copy())
+	# Add the gene reaction rule
+	cobra_rxn._gene_reaction_rule = mass_reaction._gene_reaction_rule
+
+	# Make new metaboltites and genes aware they are involved in this reaction
+	cobra_rxn._update_awareness()
+	return cobra_rxn
+
+def to_mass_reaction(cobra_reaction=None, mass_id=None,
+					kinetic_reversibility=None):
+	"""To create a MassReaction from a cobra Reaction.
+
+	If kinetic_reversibility is not specifiied, will try to infer
+	reversibility from the upper and lower bounds of the cobra object.
+
+	Reversible if lower_bound < 0 < upper_bound. Otherwise irreversible
+
+	Parameters
+	----------
+	cobra_reaction : cobra.Reaction
+		The cobra Reaction for creating the mass.MassReaction object
+	mass_id : string or None
+		id for the new mass MassReaction. If no id is specified,
+		one will automatically be generated with the
+		Reaction object's current id + _mass.
+	kinetic_reversibility : bool or None
+	 	The reversibility of the mass MassReaction.
+
+	Warnings
+	--------
+	All similar fields will initialize to be identical to the input object.
+	All other fields will initialize to default values.
 	"""
 
-	if CobraMetab == None:
-		warn("No cobra Metabolite Object was given")
+	from cobra.core.reaction import Reaction
+	from mass.core.massreaction import MassReaction
+
+	# Check the input
+	if cobra_reaction is None:
+		warn("No cobra Reaction given.")
 		return None
+	if not isinstance(cobra_reaction, Reaction):
+		raise TypeError("Must be a cobra Reaction.")
 
-	if not isinstance(CobraMetab, Metabolite):
-		raise TypeError("Metabolite must be a cobra Metabolite Object")
+	# Generate a new ID if none is specified
+	if mass_id is None:
+		mass_id = cobra_reaction.id + "_mass"
 
-	if mass_id == None:
-		mass_id = CobraMetab.id + "_mass"
+	# Infer kinetic reversibility from bounds if none is specified
+	if kinetic_reversibility is None:
+		kinetic_reversibility = cobra_reaction.reversibility
 
-	new_mass_metab = MassMetabolite(id=mass_id, name=CobraMetab.name,
-								formula=CobraMetab.formula,
-								charge=CobraMetab.charge,
-								compartment=CobraMetab.compartment)
-	return new_mass_metab
+	# Generate the mass MassReaction
+	mass_rxn = MassReaction(id=mass_id, name=cobra_reaction.name,
+						subsystem=cobra_reaction.subsystem,
+						reversibility=kinetic_reversibility)
 
-def to_cobra_reaction(MassRxn=None, cobra_id=None,
-                        lower_bound=None,
-                        upper_bound=None):
-    """To convert a MassReaction object into a cobra Reaction object
+	# Generate and add mass MassMetsabolites
+	mass_metabs = {to_mass_metabolite(cobra_metab): coeff
+			for cobra_metab, coeff in iteritems(cobra_reaction._metabolites)}
+	mass_rxn.add_metabolites(mass_metabs)
 
-    If the lower and/or upper bounds are not specified,the reversibility
-    will be used to determine the bounds for initializing the reaction.
+	# Generate and add new genes
+	for gene in cobra_reaction._genes:
+		mass_rxn._genes.add(gene.copy())
+	# Add the gene reaction rule
+	mass_rxn._gene_reaction_rule = cobra_reaction._gene_reaction_rule
 
-    For reversible MassReaction objects:
-        lower_bound =-1000 and/or upper_bound=1000
-    For irreversible MassReaction objects:
-        lower_bound =0 and upper_bound=1000
+	# Make new metaboltites and genes aware they are involved in this reaction
+	mass_rxn._update_awareness()
+	return mass_rxn
 
-    Warnings
-    --------
-    All other fields in a cobra Reaction will initialize to their defaults
-    """
-    if MassRxn == None:
-        warn("No MassReaction Object was given")
-        return None
+def to_cobra_model(mass_model=None, cobra_id=None):
+	"""To create a cobra Model from a mass MassModel.
 
-    if not isinstance(MassRxn, MassReaction):
-        raise TypeError("Reaction must be a MassReaction Object")
+	Parameters
+	----------
+	mass_model : mass.MassModel
+		The MassModel for creating the cobra.Model object
+	cobra_id : string or None
+		id for the new cobra Model. If no id is specified,
+		one will automatically be generated with the
+		MassModel object's current id + _cobra.
 
-    if cobra_id == None:
-        cobra_id = MassRxn._id + "_cobra"
+	Warnings
+	--------
+	All similar fields will initialize to be identical to the input object.
+	All other fields will initialize to default values.
+	"""
+	from cobra.core.model import Model
+	from mass.core.massmodel import MassModel
 
-    if lower_bound == None:
-        if MassRxn._reversibility == True:
-            lb = -1000
-        else:
-            lb = 0.
+	# Check the input
+	if mass_model is None:
+		warn("No mass MassModel given.")
+		return None
+	if not isinstance(mass_model, MassModel):
+		raise TypeError("Must be a mass MassModel.")
 
-    if upper_bound == None:
-        ub = 1000
+	# Generate a new ID if none is specified
+	if cobra_id is None:
+		cobra_id = mass_model.id + "_mass"
 
-    cobra_rxn = Reaction(id=cobra_id, name=MassRxn.name,
-                        subsystem=MassRxn.subsystem, lower_bound=lb,
-                        upper_bound=ub, objective_coefficient=0.)
+	# Generate the cobra Model
+	cobra_model = Model(id_or_model=cobra_id, name=mass_model.name)
 
-    cobra_metab_dict = {to_cobra_metabolite(metab) : coefficient
-                    for metab, coefficient in iteritems(MassRxn._metabolites)}
+	# Add reactions and metabolites
+	cobra_rxns = [to_cobra_reaction(rxn) for rxn in mass_model.reactions]
+	cobra_model.add_reactions(cobra_rxns)
+	# Add compartments
+	cobra_model.compartments = mass_model.compartments.copy()
 
-    cobra_rxn.add_metabolites(cobra_metab_dict)
-    cobra_rxn._genes = MassRxn._genes
-    cobra_rxn._gene_reaction_rule = MassRxn._gene_reaction_rule
-    cobra_rxn._update_awareness()
+	cobra_model.repair(rebuild_index=True, rebuild_relationships=True)
 
-    return cobra_rxn
+	return cobra_model
 
-def from_cobra_reaction(CobraRxn=None, mass_id=None,
-                        kinetic_reversibility=None):
-    """To convert a cobra Reaction object into a MassReaction object
+def to_mass_model(cobra_model=None, mass_id=None):
+	"""To create a mass MassModel from a cobra Model.
 
-    If kinetic_reversibility is not specifiied, will try to infer
-    reversibility from the upper and lower bounds of the cobra object.
+	Parameters
+	----------
+	cobra_model : cobra.Model
+		The Model for creating the mass.MassModel object
+	mass_id : string or None
+		id for the new mass MassModel. If no id is specified,
+		one will automatically be generated with the
+		Model object's current id + _mass.
 
-    Warnings
-    --------
-    All other fields in a MassReaction will initialize to their defaults
+	Warnings
+	--------
+	All similar fields will initialize to be identical to the input object.
+	All other fields will initialize to default values.
+	"""
+	from cobra.core.model import Model
+	from mass.core.massmodel import MassModel
 
-    A Reaction Object from cobra.core.reaction must be imported into
-        the enviroment in order for this method to work properly.
-    """
-    if CobraRxn == None:
-        warn("No cobra Reaction Object was given")
-        return None
+	# Check the input
+	if cobra_model is None:
+		warn("No cobra Model given.")
+		return None
+	if not isinstance(cobra_model, Model):
+		raise TypeError("Must be a cobra Model.")
 
-    if not isinstance(CobraRxn, Reaction):
-        raise TypeError("Reaction must be a cobra Reaction Object")
+	# Generate a new ID if none is specified
+	if mass_id is None:
+		mass_id = cobra_model.id + "_mass"
 
-    if mass_id == None:
-        mass_id = CobraRxn._id + "_mass"
+	# Generate the mass MassModel
+	mass_model = MassModel(id_or_massmodel=mass_id, name=cobra_model.name)
 
-    if kinetic_reversibility == None:
-        kinetic_reversibility = CobraRxn.reversibility
+	# Add reactions and metabolites
+	mass_rxns = [to_mass_reaction(rxn) for rxn in cobra_model.reactions]
+	mass_model.add_reactions(mass_rxns)
 
-    mass_rxn = MassReaction(id=mass_id, name=CobraRxn.name,
-                        subsystem=CobraRxn.subsystem,
-                        reversibility=kinetic_reversibility)
+	# Add compartments
+	mass_model.compartments = cobra_model.compartments.copy()
 
-    mass_metab_dict = {from_cobra_metabolite(cobra_metab): coeff
-        for cobra_metab, coeff in iteritems(CobraRxn._metabolites)
-        }
+	mass_model.repair(rebuild_index=True, rebuild_relationships=True)
 
-    mass_rxn.add_metabolites(mass_metab_dict)
-    mass_rxn._genes = CobraRxn._genes
-    mass_rxn._gene_reaction_rule = CobraRxn._gene_reaction_rule
-    mass_rxn._rate_law = mass_rxn.generate_rate_law()
-    mass_rxn._rate_law_expr = mass_rxn.generate_rate_law_expr()
-    mass_rxn._update_awareness()
-
-    return mass_rxn
+	return mass_model
