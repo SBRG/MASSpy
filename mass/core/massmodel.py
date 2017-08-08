@@ -153,11 +153,7 @@ class MassModel(Object):
 	@property
 	def get_irreversible_reactions(self):
 		"""Return a list of all irreversible reactions in the model."""
-<<<<<<< HEAD
 		return [rxn for rxn in self.reactions if not rxn.reversible]
-=======
-		return [rxn for rxn in self.reactions if not rxn.reversibility]
->>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 	# Methods
 	def add_metabolites(self, metabolite_list, add_initial_conditons=False):
@@ -202,11 +198,7 @@ class MassModel(Object):
 		# Add metabolites, and add initial conditions if True
 		self.metabolites += metabolite_list
 		if add_initial_conditons:
-<<<<<<< HEAD
 			self.set_initial_conditions(metabolite_list)
-=======
-			self.set_initial_conditons(metabolite_list)
->>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 
 		context = get_context(self)
 		if context:
@@ -264,11 +256,7 @@ class MassModel(Object):
 			for metab in metabolite_list:
 				context(partial(setattr, metab, '_model', self))
 
-<<<<<<< HEAD
 	def set_initial_conditions(self, metabolite_list):
-=======
-	def set_initial_conditons(self, metabolite_list):
->>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		"""Set the initial conditions for a list of metabolites in the model.
 
 		The metabolite must already exist in the model in order to set its
@@ -584,11 +572,7 @@ class MassModel(Object):
 		rxn_name = "{} {}".format(metabolite.name, exchange_type)
 
 		rxn = MassReaction(id=rxn_id, name=rxn_name,
-<<<<<<< HEAD
 					subsystem="Transport/Exchange",reversible=reversible)
-=======
-					subsystem="Transport/Exchange",reversibility=reversible)
->>>>>>> 0dd510179a2c170b1a5a99ba7b85c4fe71b0e12d
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
 
