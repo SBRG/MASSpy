@@ -7,9 +7,7 @@ from __future__ import absolute_import
 import numpy as np
 import pandas as pd
 from scipy.sparse import dok_matrix, lil_matrix
-
 from six import string_types, iteritems
-
 
 def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 								update_model=True):
@@ -350,7 +348,7 @@ def _convert_S(s_matrix, matrix_type):
 	----------
 	s_matrix : matrix of class "dtype"
 		The S matrix for conversion
-	matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}
+	matrix_type: string {'dense', 'lil' 'dok', 'DataFrame'}
 		The type of matrix to convert to
 
 	Warnings
@@ -379,6 +377,7 @@ def _convert_S(s_matrix, matrix_type):
 
 	s_matrix = matrix_conversion[matrix_type](s_mat=s_matrix)
 	return s_matrix
+
 def _update_model_s(massmodel, s_matrix, matrix_type, dtype):
 	"""For internal use only. Update the model storage of the s matrix,
 	matrix type, and data type

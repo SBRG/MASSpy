@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
+from collections import defaultdict
 from copy import copy, deepcopy
 from functools import partial
 from operator import attrgetter
@@ -680,7 +681,7 @@ class MassReaction(Object):
 			reversibly or not (primarily intended for internal use).
 		"""
 		for metabolite, coefficient in iteritems(metabolites_to_add):
-			if not isinstance(metabolite, NassMetabolite):
+			if not isinstance(metabolite, MassMetabolite):
 				raise TypeError("%s is not a MassMetabolite object"
 								% metabolite.id)
 
@@ -1004,11 +1005,11 @@ class MassReaction(Object):
 					<td><strong>Name</strong></td>
 					<td>{name}</td>
 				</tr><tr>
-					<td><strong>Subsystem</strong></td>
-					<td>{subsystem}</td>
-				</tr><tr>
 					<td><strong>Memory address</strong></td>
 					<td>{address}</td>
+				</tr><tr>
+					<td><strong>Subsystem</strong></td>
+					<td>{subsystem}</td>
 				</tr><tr>
 					<td><strong>Stoichiometry</strong></td>
 					<td>

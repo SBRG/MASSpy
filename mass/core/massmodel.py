@@ -21,8 +21,7 @@ from cobra.util.context import HistoryManager, resettable, get_context
 # from mass
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util.array import (create_stoichiometric_matrix, update_S,
-	nullspace, left_nullspace, matrix_rank)
+from mass.util.array import *
 
 # Class begins
 ## Set the logger
@@ -350,7 +349,7 @@ class MassModel(Object):
 		# Check whether a metabolite already exists in the massmodel, and
 		# ignore those that do not
 		ic_dict = {metab : ic for metab, ic in iteritems(ic_dict)
-					if metab in self.metabolites}
+					if metab in self.metabolites and ic is not None}
 
 		# Keep track of existing initial conditions for HistoryManager
 		context = get_context(self)
