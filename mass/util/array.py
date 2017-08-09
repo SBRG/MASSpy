@@ -10,6 +10,7 @@ from scipy.sparse import dok_matrix, lil_matrix
 from six import string_types, iteritems
 
 # Class begins
+## Public
 def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 								update_model=True):
 	"""Return the stoichiometrix matrix representation for a given massmodel
@@ -111,76 +112,6 @@ def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 		_update_model_s(massmodel, s_matrix, matrix_type, dtype)
 
 	return s_matrix
-
-def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
-			update_model=True):
-	"""For internal use only. Update the S matrix of the model.
-
-	NOTE: reaction_list is assumed to be at the end of self.reactions.
-
-	Warnings
-	--------
-	This method is intended for internal use only. To safely convert a matrix
-	to another type of matrix, use the massmodel.update_S method instead
-
-	Parameters
-	----------
-	model : mass.MassModel
-		The MassModel object to construct the matrix for
-	reaction_list : list of MassReactions or None
-		The list of MassReactions to add to the current stoichiometric matrix.
-		Reactions must already exist in the model in order to update.
-		If None, the entire stoichiometric matrix is reconstructed
-	matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
-		If None, will utilize the matrix type initialized with the original
-		model. Otherwise reconstruct the S matrix with the specified type.
-		Types can include 'dense' for a standard  numpy.array, 'dok' or
-		'lil' to obtain the scipy sparse matrix of the corresponding type, and
-		DataFrame for a pandas 'Dataframe' where species (excluding genes)
-		are row indicies and reactions are column indicices
-	dtype : data-type
-		The desired data-type for the array. If None, defaults to float
-
-	Returns
-	-------
-	matrix of class 'dtype'
-		The stoichiometric matrix for the given MassModel
-	"""
-	# Check matrix type input if it exists to ensure its a valid matrix type
-	if matrix_type is not None:
-		if not isinstance(matrix_type, string_types):
-			raise TypeError("matrix_type must be a string")
-		# Remove case sensitivity
-		matrix_type = matrix_type.lower()
-		if matrix_type not in {'dense', 'dok', 'lil', 'dataframe'}:
-			raise ValueError("matrix_type must be of one of the following"
-							" types: {'dense', 'dok', 'lil', 'dataframe'}")
-	else:
-		matrix_type = massmodel._matrix_type
-
-	# Use the model's stored datatype if the datatype is not specified
-	if dtype is None:
-		dtype = massmodel._dtype
-
-	# Check input of update model
-	if not isinstance(update_model, bool):
-		raise TypeError("update_model must be a bool")
-
-	# If there is no change to the reactions, just reconstruct the model
-	if massmodel._S is None or reaction_list is None:
-		s_matrix = create_stoichiometric_matrix(massmodel,
-						matrix_type=matrix_type,
-						dtype=dtype,
-						update_model=update_model)
-	else:
-		s_matrix = _update_stoichiometry(massmodel, reaction_list,
-										matrix_type=matrix_type)
-
-	if update_model:
-		_update_model_s(massmodel, s_matrix, matrix_type, dtype)
-
-	return s_matrix
-
 
 def nullspace(A, atol=1e-13, rtol=0):
 	"""Compute an approximate basis for the nullspace of A.
@@ -299,9 +230,81 @@ def matrix_rank(A, tol=None):
 
 	return np.linalg.matrix_rank(A, tol)
 
+## Internal
+def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
+			update_model=True):
+	"""For internal use only. Update the S matrix of the model.
+
+	NOTE: reaction_list is assumed to be at the end of self.reactions.
+
+	Warnings
+	--------
+	This method is intended for internal use only. To safely convert a matrix
+	to another type of matrix, use the massmodel.update_S method instead
+
+	Parameters
+	----------
+	model : mass.MassModel
+		The MassModel object to construct the matrix for
+	reaction_list : list of MassReactions or None
+		The list of MassReactions to add to the current stoichiometric matrix.
+		Reactions must already exist in the model in order to update.
+		If None, the entire stoichiometric matrix is reconstructed
+	matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+		If None, will utilize the matrix type initialized with the original
+		model. Otherwise reconstruct the S matrix with the specified type.
+		Types can include 'dense' for a standard  numpy.array, 'dok' or
+		'lil' to obtain the scipy sparse matrix of the corresponding type, and
+		DataFrame for a pandas 'Dataframe' where species (excluding genes)
+		are row indicies and reactions are column indicices
+	dtype : data-type
+		The desired data-type for the array. If None, defaults to float
+
+	Returns
+	-------
+	matrix of class 'dtype'
+		The stoichiometric matrix for the given MassModel
+	"""
+	# Check matrix type input if it exists to ensure its a valid matrix type
+	if matrix_type is not None:
+		if not isinstance(matrix_type, string_types):
+			raise TypeError("matrix_type must be a string")
+		# Remove case sensitivity
+		matrix_type = matrix_type.lower()
+		if matrix_type not in {'dense', 'dok', 'lil', 'dataframe'}:
+			raise ValueError("matrix_type must be of one of the following"
+							" types: {'dense', 'dok', 'lil', 'dataframe'}")
+	else:
+		matrix_type = massmodel._matrix_type
+
+	# Use the model's stored datatype if the datatype is not specified
+	if dtype is None:
+		dtype = massmodel._dtype
+
+	# Check input of update model
+	if not isinstance(update_model, bool):
+		raise TypeError("update_model must be a bool")
+
+	# If there is no change to the reactions, just reconstruct the model
+	if massmodel._S is None or reaction_list is None:
+		s_matrix = create_stoichiometric_matrix(massmodel,
+						matrix_type=matrix_type,
+						dtype=dtype,
+						update_model=update_model)
+	else:
+		s_matrix = _update_stoichiometry(massmodel, reaction_list,
+										matrix_type=matrix_type)
+
+	if update_model:
+		_update_model_s(massmodel, s_matrix, matrix_type, dtype)
+
+	return s_matrix
+
 def _update_stoichiometry(massmodel, reaction_list, matrix_type=None):
 	"""For internal uses only. To update the stoichometric matrix with
-	additional reactions and metabolites.
+	additional reactions and metabolites efficiently by converting to
+	a dok matrix, updating the dok matrix, and converting back to the 
+	desired type
 
 	Parameters
 	----------
