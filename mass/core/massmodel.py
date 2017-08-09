@@ -21,7 +21,8 @@ from cobra.util.context import HistoryManager, resettable, get_context
 # from mass
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util.array import *
+from mass.util.array import (create_stoichiometric_matrix, _update_S,
+	nullspace, left_nullspace, matrix_rank)
 
 # Class begins
 ## Set the logger
@@ -103,9 +104,8 @@ class MassModel(Object):
 	@property
 	def S(self):
 		"""Get the Stoichiometric Matrix of the MassModel"""
-		return update_S(self, reaction_list=None,
-					matrix_type=self._matrix_type, dtype=self._dtype,
-					update_model=False)
+		return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
+							update_model=False)
 
 	@property
 	def rates(self):
@@ -156,6 +156,39 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if not rxn.reversible]
 
 	# Methods
+	def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
+				update_model=True):
+		"""For internal use only. Update the S matrix of the model.
+
+		NOTE: reaction_list is assumed to be at the end of self.reactions.
+
+		Parameters
+		----------
+		model : mass.MassModel
+			The MassModel object to construct the matrix for
+		reaction_list : list of MassReactions or None
+			The list of MassReactions to add to the current stoichiometric matrix.
+			Reactions must already exist in the model in order to update.
+			If None, the entire stoichiometric matrix is reconstructed
+		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+			If None, will utilize the matrix type initialized with the original
+			model. Otherwise reconstruct the S matrix with the specified type.
+			Types can include 'dense' for a standard  numpy.array, 'dok' or
+			'lil' to obtain the scipy sparse matrix of the corresponding type, and
+			DataFrame for a pandas 'Dataframe' where species (excluding genes)
+			are row indicies and reactions are column indicices
+		dtype : data-type
+			The desired data-type for the array. If None, defaults to float
+
+		Returns
+		-------
+		matrix of class 'dtype'
+			The stoichiometric matrix for the given MassModel
+		"""
+		return _update_S(self, reaction_list=reaction_list,
+						matrix_type=matrix_type, dtype=dtype,
+						update_model=update_model)
+
 	def add_metabolites(self, metabolite_list, add_initial_conditons=False):
 		"""Will add a list of metabolites to the MassModel object and add
 		the MassMetabolite initial conditions accordingly.
@@ -453,14 +486,14 @@ class MassModel(Object):
 		# Add reactions to the model
 		self.reactions += reaction_list
 		if update_stoichiometry:
-			update_S(massmodel, reaction_list=reaction_list, update_model=True)
+			self.update_S(reaction_list=reaction_list, update_model=True)
 
 		if context:
 			context(partial(self.reactions.__isub__, reaction_list))
 			for rxn in reaction_list:
 				context(partial(setattr, rxn, '_model', None))
 			if update_stoichiometry:
-				context(partial(update_S, massmodel, None, None, None, True))
+				context(partial(self.update_S, None, None, None, True))
 
 
 	def remove_reactions(self, reaction_list, remove_orphans=False,
@@ -521,14 +554,14 @@ class MassModel(Object):
 		# Remove reactions from the model
 		self.reactions -= reaction_list
 		if update_stoichiometry:
-			update_S(massmodel, reaction_list=None, update_model=True)
+			self.update_S(reaction_list=None, update_model=True)
 
 		if context:
 			context(partial(self.reactions.__iadd__, reaction_list))
 			for rxn in reaction_list:
 				context(partial(setattr, rxn, '_model', self))
 			if update_stoichiometry:
-				context(partial(update_S, massmodel, reaction_list,
+				context(partial(self.update_S, reaction_list,
 							None, None, True))
 
 	def add_exchange(self, metabolite, exchange_type="source",

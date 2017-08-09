@@ -9,6 +9,7 @@ import pandas as pd
 from scipy.sparse import dok_matrix, lil_matrix
 from six import string_types, iteritems
 
+# Class begins
 def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 								update_model=True):
 	"""Return the stoichiometrix matrix representation for a given massmodel
@@ -111,11 +112,16 @@ def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 
 	return s_matrix
 
-def update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
+def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
 			update_model=True):
-	"""Update the S matrix of the model.
+	"""For internal use only. Update the S matrix of the model.
 
-	 NOTE: reaction_list is assumed to be at the end of self.reactions.
+	NOTE: reaction_list is assumed to be at the end of self.reactions.
+
+	Warnings
+	--------
+	This method is intended for internal use only. To safely convert a matrix
+	to another type of matrix, use the massmodel.update_S method instead
 
 	Parameters
 	----------
@@ -309,7 +315,7 @@ def _update_stoichiometry(massmodel, reaction_list, matrix_type=None):
 	Warnings
 	--------
 	This method is intended for internal use only. To safely update a matrix
-	use the update_S method instead
+	use the massmodel.update_S method instead
 	"""
 	# Set defaults
 	shape = (len(massmodel.metabolites), len(massmodel.reactions))
@@ -340,7 +346,6 @@ def _update_stoichiometry(massmodel, reaction_list, matrix_type=None):
 
 	return s_matrix
 
-
 def _convert_S(s_matrix, matrix_type):
 	"""For internal uses only. To convert a matrix to a different type.
 
@@ -354,7 +359,7 @@ def _convert_S(s_matrix, matrix_type):
 	Warnings
 	--------
 	This method is intended for internal use only. To safely convert a matrix
-	to another type of matrix, use the update_S method instead
+	to another type of matrix, use the massmodel.update_S method instead
 	"""
 	def _to_dense(s_mat=s_matrix):
 		if isinstance(s_mat, np.ndarray):
@@ -385,7 +390,7 @@ def _update_model_s(massmodel, s_matrix, matrix_type, dtype):
 	Warnings
 	--------
 	This method is intended for internal use only. To safely convert a matrix
-	to another type of matrix, use the update_S method instead
+	to another type of matrix, use the massmodel.update_S method instead
 	"""
 	massmodel._S = s_matrix
 	massmodel._matrix_type = matrix_type

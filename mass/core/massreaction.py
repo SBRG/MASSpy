@@ -87,9 +87,10 @@ class MassReaction(Object):
 		# Therefore initialized to 0.
 		if self._reversible:
 			self._reverse_rate_constant = None
+			self._equilibrium_constant = None
 		else:
 			self._reverse_rate_constant = 0.
-		self._equilibrium_constant = None
+			self._equilibrium_constant = inf
 
 		# The rate law equation for simulation and the symbolic representation
 		self._rate_law = None
@@ -183,7 +184,7 @@ class MassReaction(Object):
 	@property
 	def parameters(self):
 		"""Returns a dictionary of all reaction parameters"""
-		param = {}
+		param = dict()
 		key_list = [self._sym_kf, self._sym_kr, self._sym_Keq, "ssflux"]
 		attr_list = ["_forward_rate_constant", "_reverse_rate_constant",
 						"_equilibrium_constant", "ssflux"]
