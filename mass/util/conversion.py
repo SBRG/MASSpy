@@ -6,6 +6,7 @@ from __future__ import absolute_import
 # Import necesary packages
 from six import iteritems
 
+# Class begins
 def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	"""To create a cobra Metabolite from a mass MassMetabolite.
 
@@ -17,6 +18,11 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 		id for the new cobra Metabolite. If no id is specified,
 		one will automatically be generated with the
 		MassMetabolite object's current id + _cobra.
+
+	Returns
+	-------
+	cobra.Metabolite
+		The new cobra Metabolite
 
 	Warnings
 	--------
@@ -39,9 +45,9 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 
 	# Generate the cobra Metabolite
 	cobra_metab = Metabolite(id=cobra_id, name=mass_metabolite.name,
-							formula=mass_metabolite._formula,
-							charge=mass_metabolite._charge,
-							compartment=mass_metabolite._compartment)
+							formula=mass_metabolite.formula,
+							charge=mass_metabolite.charge,
+							compartment=mass_metabolite.compartment)
 	return cobra_metab
 
 def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
@@ -55,6 +61,11 @@ def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
 		id for the new mass MassMetabolite. If no id is specified,
 		one will automatically be generated with the
 		Metabolite object's current id + _mass.
+
+	Returns
+	-------
+	mass.MassMetabolite
+		The new mass MassMetsbolite object
 
 	Warnings
 	--------
@@ -86,7 +97,7 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 					upper_bound=None, lower_bound=None):
 	"""To create a cobra Reaction from a mass MassReaction.
 
-	If the lower and/or upper bounds are not specified,the reversibility
+	If the lower and/or upper bounds are not specified, the reversibility
 	will be used to determine the bounds for initializing the reaction.
 
 	For reversible MassReaction objects:
@@ -106,6 +117,11 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 		The initialized lower bound of the cobra Reaction
 	upper_bound : float or None
 		The initialized upper bound of the cobra Reaction
+
+	Returns
+	-------
+	cobra.Reaction
+		The new cobra Reaction object
 
 	Warnings
 	--------
@@ -130,7 +146,7 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 	if upper_bound is None:
 		ub = 1000
 	if lower_bound is None:
-		if mass_reaction._reversibility:
+		if mass_reaction._reversible:
 			lb = -1000
 		else:
 			lb = 0.
@@ -175,6 +191,11 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 	kinetic_reversibility : bool or None
 	 	The reversibility of the mass MassReaction.
 
+	Returns
+	-------
+	mass.MassReaction
+		The new mass MassReaction object
+
 	Warnings
 	--------
 	All similar fields will initialize to be identical to the input object.
@@ -202,7 +223,7 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 	# Generate the mass MassReaction
 	mass_rxn = MassReaction(id=mass_id, name=cobra_reaction.name,
 						subsystem=cobra_reaction.subsystem,
-						reversibility=kinetic_reversibility)
+						reversible=kinetic_reversibility)
 
 	# Generate and add mass MassMetsabolites
 	mass_metabs = {to_mass_metabolite(cobra_metab): coeff
@@ -230,6 +251,11 @@ def to_cobra_model(mass_model=None, cobra_id=None):
 		id for the new cobra Model. If no id is specified,
 		one will automatically be generated with the
 		MassModel object's current id + _cobra.
+
+	Returns
+	-------
+	mass.MassReaction
+		The new cobra Model object
 
 	Warnings
 	--------
@@ -274,6 +300,11 @@ def to_mass_model(cobra_model=None, mass_id=None):
 		id for the new mass MassModel. If no id is specified,
 		one will automatically be generated with the
 		Model object's current id + _mass.
+
+	Returns
+	-------
+	mass.MassModel
+		The new mass MassModel object
 
 	Warnings
 	--------
