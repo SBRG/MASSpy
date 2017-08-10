@@ -19,10 +19,9 @@ from cobra.core.dictlist import DictList
 from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
+from mass.util import array
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util.array import (create_stoichiometric_matrix, _update_S,
-	nullspace, left_nullspace, matrix_rank)
 
 # Class begins
 ## Set the logger
@@ -92,7 +91,7 @@ class MassModel(Object):
 			self._dtype = dtype
 
 			# For storing the stoichiometric matrix.
-			self._S = create_stoichiometric_matrix(self,
+			self._S = array.create_stoichiometric_matrix(self,
                                     matrix_type=self._matrix_type,
                                     dtype=self._dtype,
             						update_model=True)
@@ -185,7 +184,7 @@ class MassModel(Object):
 		matrix of class 'dtype'
 			The stoichiometric matrix for the given MassModel
 		"""
-		return _update_S(self, reaction_list=reaction_list,
+		return array._update_S(self, reaction_list=reaction_list,
 						matrix_type=matrix_type, dtype=dtype,
 						update_model=update_model)
 
@@ -721,7 +720,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		massmodel._S = create_stoichiometric_matrix(massmodel,
+		massmodel._S = array.create_stoichiometric_matrix(massmodel,
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
@@ -859,9 +858,9 @@ class MassModel(Object):
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
-					mat_rank=matrix_rank(self.S),
-					dim_null=nullspace(self.S).shape[1],
-					dim_left_null=left_nullspace(self.S).shape[1],
+					mat_rank=array.matrix_rank(self.S),
+					dim_null=array.nullspace(self.S).shape[1],
+					dim_left_null=array.left_nullspace(self.S).shape[1],
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments))

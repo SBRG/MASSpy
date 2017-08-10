@@ -6,6 +6,16 @@ from __future__ import absolute_import
 # Import necesary packages
 from six import iteritems
 
+# cobra
+from cobra.core.metabolite import Metabolite
+from cobra.core.model import Model
+from cobra.core.reaction import Reaction
+
+# mass
+from mass.core import massmetabolite
+from mass.core import massmodel
+from mass.core import massreaction
+
 # Class begins
 def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	"""To create a cobra Metabolite from a mass MassMetabolite.
@@ -29,14 +39,12 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	from cobra.core.metabolite import Metabolite
-	from mass.core.massmetabolite import MassMetabolite
 
 	# Check the input
 	if mass_metabolite is None:
 		warn("No mass MassMetabolite given.")
 		return None
-	if not isinstance(mass_metabolite, MassMetabolite):
+	if not isinstance(mass_metabolite, massmetabolite.MassMetabolite):
 		raise TypeError("Must be a mass MassMetabolite.")
 
 	# Generate a new ID if none is specified
@@ -72,9 +80,6 @@ def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	from cobra.core.metabolite import Metabolite
-	from mass.core.massmetabolite import MassMetabolite
-
 	# Check the input
 	if cobra_metabolite is None:
 		warn("No cobra Metabolite given.")
@@ -128,14 +133,11 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	from cobra.core.reaction import Reaction
-	from mass.core.massreaction import MassReaction
-
 	# Check the input
 	if mass_reaction is None:
 		warn("No MassReaction given")
 		return None
-	if not isinstance(mass_reaction, MassReaction):
+	if not isinstance(mass_reaction, massreaction.MassReaction):
 		raise TypeError("Must be a mass MassReaction.")
 
 	# Generate a new ID if none is specified
@@ -201,10 +203,6 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-
-	from cobra.core.reaction import Reaction
-	from mass.core.massreaction import MassReaction
-
 	# Check the input
 	if cobra_reaction is None:
 		warn("No cobra Reaction given.")
@@ -262,14 +260,11 @@ def to_cobra_model(mass_model=None, cobra_id=None):
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	from cobra.core.model import Model
-	from mass.core.massmodel import MassModel
-
 	# Check the input
 	if mass_model is None:
 		warn("No mass MassModel given.")
 		return None
-	if not isinstance(mass_model, MassModel):
+	if not isinstance(mass_model, massmodel.MassModel):
 		raise TypeError("Must be a mass MassModel.")
 
 	# Generate a new ID if none is specified
@@ -311,9 +306,6 @@ def to_mass_model(cobra_model=None, mass_id=None):
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-	from cobra.core.model import Model
-	from mass.core.massmodel import MassModel
-
 	# Check the input
 	if cobra_model is None:
 		warn("No cobra Model given.")
