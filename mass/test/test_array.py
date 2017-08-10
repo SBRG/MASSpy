@@ -32,7 +32,27 @@ class test_array(unittest.TestCase, MassModel):
         del self.glycolysis
     
     ### Test IsInstance
-    #def test_IsInstance(self):
+    def test_IsInstance(self):
+        self.assertIsInstance(
+            array.create_stoichiometric_matrix(self.glycolysis),
+            np.ndarray
+        )
+        self.assertIsInstance(
+            array.create_stoichiometric_matrix(self.glycolysis, "dense"),
+            np.ndarray
+        )
+        self.assertIsInstance(
+            array.create_stoichiometric_matrix(self.glycolysis, "dok"), 
+            dok_matrix
+        )
+        self.assertIsInstance(
+            array.create_stoichiometric_matrix(self.glycolysis, "lil"),
+            lil_matrix
+        )
+        self.assertIsInstance(
+            array.create_stoichiometric_matrix(self.glycolysis, "dataframe"),
+            pd.core.frame.DataFrame
+        )
     
     ### Test Equal/NotEqual
     
@@ -91,3 +111,6 @@ class test_array(unittest.TestCase, MassModel):
         with self.assertRaisesRegex(ValueError, "matrix_type must be of one of the following"
                                     " types: {'dense', 'dok', 'lil', 'dataframe'}") as v:
             array._update_S(glycolysis, matrix_type="lil 'sac")
+
+if __name__ == '__main__':
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
