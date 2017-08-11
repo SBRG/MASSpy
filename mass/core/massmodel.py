@@ -70,7 +70,7 @@ class MassModel(Object):
 		numerical consistency in the model. It is highly recommended to stick
 		with the following units:
 
-		{'N': 'Millimoles', 'V': 'Liters', 'T': 'Hours'}
+		{'N': 'Millimoles', 'Vol': 'Liters', 'Time': 'Hours'}
 	"""
 	def __init__(self, id_or_massmodel=None, name=None,
 				matrix_type=None, dtype=None):
@@ -299,7 +299,7 @@ class MassModel(Object):
 			for metab in metabolite_list:
 				context(partial(setattr, metab, '_model', self))
 
-	def set_initial_conditions(self, metabolite_list):
+	def set_initial_conditions(self, metabolite_list=None):
 		"""Set the initial conditions for a list of metabolites in the model.
 
 		The metabolite must already exist in the model in order to set its
@@ -311,13 +311,17 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		metabolite_list : list
-			A list of MassMetabolite objects
+		metabolite_list : list or None
+			A list of MassMetabolite objects. If None, will use all metabolites
+			in the model
 		"""
+		if metabolite_list is None:
+			metabolite_list = self.metabolites
 		# If the metabolite list is not a list
-		if not hasattr(metabolite_list, '__iter__'):
-			metabolite_list = [metabolite_list]
-		metabolite_list = DictList(metabolite_list)
+		elif not hasattr(metabolite_list, '__iter__'):
+			metabolite_list = DictList([metabolite_list])
+		else:
+			metabolite_list = DictList(metabolite_list)
 		if len(metabolite_list) == 0:
 			return None
 
