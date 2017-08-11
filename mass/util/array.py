@@ -9,7 +9,9 @@ import pandas as pd
 from scipy.sparse import dok_matrix, lil_matrix
 from six import string_types, iteritems
 
+# from mass
 from mass.core import massmodel
+
 # Class begins
 ## Public
 def create_stoichiometric_matrix(model, matrix_type=None, dtype=None,

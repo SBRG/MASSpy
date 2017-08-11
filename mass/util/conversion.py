@@ -17,6 +17,7 @@ from mass.core import massmodel
 from mass.core import massreaction
 
 # Class begins
+## Public
 def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	"""To create a cobra Metabolite from a mass MassMetabolite.
 
@@ -39,7 +40,6 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	All similar fields will initialize to be identical to the input object.
 	All other fields will initialize to default values.
 	"""
-
 	# Check the input
 	if mass_metabolite is None:
 		warn("No mass MassMetabolite given.")
@@ -168,7 +168,6 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 		cobra_rxn._genes.add(gene.copy())
 	# Add the gene reaction rule
 	cobra_rxn._gene_reaction_rule = mass_reaction._gene_reaction_rule
-
 	# Make new metaboltites and genes aware they are involved in this reaction
 	cobra_rxn._update_awareness()
 	return cobra_rxn
@@ -233,7 +232,6 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 		mass_rxn._genes.add(gene.copy())
 	# Add the gene reaction rule
 	mass_rxn._gene_reaction_rule = cobra_reaction._gene_reaction_rule
-
 	# Make new metaboltites and genes aware they are involved in this reaction
 	mass_rxn._update_awareness()
 	return mass_rxn
@@ -279,9 +277,8 @@ def to_cobra_model(mass_model=None, cobra_id=None):
 	cobra_model.add_reactions(cobra_rxns)
 	# Add compartments
 	cobra_model.compartments = mass_model.compartments.copy()
-
+	# Repair the new model
 	cobra_model.repair(rebuild_index=True, rebuild_relationships=True)
-
 	return cobra_model
 
 def to_mass_model(cobra_model=None, mass_id=None):
@@ -326,7 +323,6 @@ def to_mass_model(cobra_model=None, mass_id=None):
 
 	# Add compartments
 	mass_model.compartments = cobra_model.compartments.copy()
-
+	# Repair the new model
 	mass_model.repair(rebuild_index=True, rebuild_relationships=True)
-
 	return mass_model

@@ -8,7 +8,7 @@ import logging
 import re
 import sympy as sp
 import pandas as pd
-from six import string_types, iteritems
+from six import string_types, integer_types, iteritems
 from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
@@ -155,6 +155,7 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if not rxn.reversible]
 
 	# Methods
+	## Public
 	def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
 				update_model=True):
 		"""For internal use only. Update the S matrix of the model.
@@ -608,6 +609,138 @@ class MassModel(Object):
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
 
+	def generate_rate_laws(self, reaction_list=None, rate_type=1,
+							sympy_expr=False):
+		"""Get the rate laws for a list of reactions in a MassModel and return
+		them as human readable strings or as sympy expressions for simulations.
+
+		The type determines which rate law format to return.
+		For example: A <=> B
+
+		type=1: kf*(A - B/Keq)
+		type=2: kf*A - kr*B
+		type=3: kr*(Keq*A - B)
+
+		Parameters
+		----------
+		reaction_list = list or None
+			The list of reactions to obtain the rates for. If none specified,
+			will return the rates for all reactions in the MassModel
+		rate_type : int {1, 2, 3}
+			The type of rate law to display. Must be 1, 2, of 3.
+			type 1 will utilize kf and Keq,
+			type 2 will utilize kf and kr,
+			type 3 will utilize kr and Keq.
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of reaction rates where keys are reaction identifiers and
+			values are the strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(rate_type, integer_types) and \
+			not isinstance(rate_type, float):
+			raise TypeError("rate_type must be an int or float")
+		elif not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+		else:
+			rate_type = int(rate_type)
+			if rate_type not in {1, 2, 3}:
+				raise ValueError("rate_type must be 1, 2, or 3")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the rates
+		return {rxn.id : rxn.generate_rate_law(rate_type, sympy_expr)
+				for rxn in reaction_list}
+
+	def get_mass_action_ratios(self, reaction_list=None, sympy_expr=False):
+		"""Get the mass action ratios for a list of reactions in a MassModel
+		and return them as human readable strings or as sympy expressions
+		for simulations
+
+		Parameters
+		----------
+		reaction_list = list of MassReactions or None
+			The list of MassReactions to obtain the disequilibrium ratios for.
+			If None, will return the rates for all reactions in the MassModel
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of disequilibrium ratios where keys are reaction identifiers and
+			values are mass action ratios as strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the mass action ratios
+		return {rxn.id : rxn.get_mass_action_ratio(sympy_expr)
+				for rxn in reaction_list}
+
+	def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=False):
+		"""Get the disequilibrium ratios for a list of reactions in a MassModel
+		and return them as human readable strings or as sympy expressions
+		for simulations
+
+		Parameters
+		----------
+		reaction_list = list of MassReactions or None
+			The list of MassReactions to obtain the disequilibrium ratios for.
+			If None, will return the rates for all reactions in the MassModel
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of disequilibrium ratios where keys are reaction identifiers and
+			values are disequilibrium ratios as strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the disequilibrium ratios
+		return {rxn.id : rxn.get_disequilibrium_ratio(sympy_expr)
+				for rxn in reaction_list}
 
 	def repair(self, rebuild_index=True, rebuild_relationships=True):
 		"""Update all indexes and pointers in a MassModel
@@ -793,7 +926,7 @@ class MassModel(Object):
 
 		return merged_model
 
-	# HTML representation
+	## Internal
 	def _repr_html_(self):
 		return """
 			<table>
@@ -865,6 +998,7 @@ class MassModel(Object):
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments))
 					)
+
 	# Module Dunders
 	def __enter__(self):
 		"""Record all future changes to the MassModel, undoing them when a
