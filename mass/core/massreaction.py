@@ -188,9 +188,12 @@ class MassReaction(Object):
 	def parameters(self):
 		"""Returns a dictionary of all reaction parameters"""
 		param = dict()
-		key_list = [self._sym_kf, self._sym_kr, self._sym_Keq, "ssflux"]
-		attr_list = ["_forward_rate_constant", "_reverse_rate_constant",
-						"_equilibrium_constant", "ssflux"]
+		key_list = [self._sym_kf, self._sym_Keq]
+		attr_list = ["_forward_rate_constant", "_equilibrium_constant"]
+		if self.reversible:
+			key_list.append(self._sym_kr)
+			attr_list.append("_reverse_rate_constant")
+
 		for i, attr in enumerate(attr_list):
 			if self.__dict__[attr] is not None:
 				param.update({key_list[i] : self.__dict__[attr]})
