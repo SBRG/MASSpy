@@ -6,9 +6,9 @@ from __future__ import absolute_import
 # Import necesary packages
 import logging
 import re
-import sympy as sp
 import pandas as pd
-from six import string_types, iteritems
+import numpy as np
+from six import string_types, integer_types, iteritems
 from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
@@ -19,10 +19,9 @@ from cobra.core.dictlist import DictList
 from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
+from mass.util import array
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util.array import (create_stoichiometric_matrix, _update_S,
-	nullspace, left_nullspace, matrix_rank)
 
 # Class begins
 ## Set the logger
@@ -63,6 +62,15 @@ class MassModel(Object):
 		A dictionary to store the compartment shorthands and their full names.
 		Keys are the shorthands and values are the full names.
 		Example: {'c': 'cytosol'}
+	units : dict
+		A dictionary to store the units used in the model for referencing.
+
+		WARNING: Note that the model will not track the units,
+		Therefore all unit conversions must be manually in order to ensure
+		numerical consistency in the model. It is highly recommended to stick
+		with the following units:
+
+		{'N': 'Millimoles', 'V': 'Liters', 'T': 'Hours'}
 	"""
 	def __init__(self, id_or_massmodel=None, name=None,
 				matrix_type=None, dtype=None):
@@ -86,13 +94,14 @@ class MassModel(Object):
 			self.custom_rates= dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
-
+			# A dictionary to store the units utilized in the model.
+			self.units = dict()
 			# Internal storage of S matrix and data types for updating S
 			self._matrix_type = matrix_type
 			self._dtype = dtype
 
 			# For storing the stoichiometric matrix.
-			self._S = create_stoichiometric_matrix(self,
+			self._S = array.create_stoichiometric_matrix(self,
                                     matrix_type=self._matrix_type,
                                     dtype=self._dtype,
             						update_model=True)
@@ -156,6 +165,7 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if not rxn.reversible]
 
 	# Methods
+	## Public
 	def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
 				update_model=True):
 		"""For internal use only. Update the S matrix of the model.
@@ -185,7 +195,7 @@ class MassModel(Object):
 		matrix of class 'dtype'
 			The stoichiometric matrix for the given MassModel
 		"""
-		return _update_S(self, reaction_list=reaction_list,
+		return array._update_S(self, reaction_list=reaction_list,
 						matrix_type=matrix_type, dtype=dtype,
 						update_model=update_model)
 
@@ -609,6 +619,177 @@ class MassModel(Object):
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
 
+	def generate_rate_laws(self, reaction_list=None, rate_type=1,
+							sympy_expr=False):
+		"""Get the rate laws for a list of reactions in a MassModel and return
+		them as human readable strings or as sympy expressions for simulations.
+
+		The type determines which rate law format to return.
+		For example: A <=> B
+
+		type=1: kf*(A - B/Keq)
+		type=2: kf*A - kr*B
+		type=3: kr*(Keq*A - B)
+
+		Parameters
+		----------
+		reaction_list = list or None
+			The list of reactions to obtain the rates for. If none specified,
+			will return the rates for all reactions in the MassModel
+		rate_type : int {1, 2, 3}
+			The type of rate law to display. Must be 1, 2, of 3.
+			type 1 will utilize kf and Keq,
+			type 2 will utilize kf and kr,
+			type 3 will utilize kr and Keq.
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of reaction rates where keys are reaction identifiers and
+			values are the strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(rate_type, integer_types) and \
+			not isinstance(rate_type, float):
+			raise TypeError("rate_type must be an int or float")
+		elif not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+		else:
+			rate_type = int(rate_type)
+			if rate_type not in {1, 2, 3}:
+				raise ValueError("rate_type must be 1, 2, or 3")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the rates
+		return {rxn.id : rxn.generate_rate_law(rate_type, sympy_expr)
+				for rxn in reaction_list}
+
+	def get_mass_action_ratios(self, reaction_list=None, sympy_expr=False):
+		"""Get the mass action ratios for a list of reactions in a MassModel
+		and return them as human readable strings or as sympy expressions
+		for simulations
+
+		Parameters
+		----------
+		reaction_list = list of MassReactions or None
+			The list of MassReactions to obtain the disequilibrium ratios for.
+			If None, will return the rates for all reactions in the MassModel
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of disequilibrium ratios where keys are reaction identifiers and
+			values are mass action ratios as strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the mass action ratios
+		return {rxn.id : rxn.get_mass_action_ratio(sympy_expr)
+				for rxn in reaction_list}
+
+	def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=False):
+		"""Get the disequilibrium ratios for a list of reactions in a MassModel
+		and return them as human readable strings or as sympy expressions
+		for simulations
+
+		Parameters
+		----------
+		reaction_list = list of MassReactions or None
+			The list of MassReactions to obtain the disequilibrium ratios for.
+			If None, will return the rates for all reactions in the MassModel
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		dict of disequilibrium ratios where keys are reaction identifiers and
+			values are disequilibrium ratios as strings or sympy expressions
+		"""
+		# Check inputs
+		if not isinstance(sympy_expr, bool):
+			raise TypeError("sympy_expr must be a bool")
+
+		# Use massmodel reactions if no reaction list is given
+		if reaction_list is None:
+			reaction_list = self.reactions
+		# If the reaction list is not a list
+		elif not hasattr(reaction_list, '__iter__'):
+			reaction_list = DictList([reaction_list])
+		else:
+			reaction_list = DictList(reaction_list)
+
+		if len(reaction_list) == 0:
+			return None
+		# Get the disequilibrium ratios
+		return {rxn.id : rxn.get_disequilibrium_ratio(sympy_expr)
+				for rxn in reaction_list}
+
+	def get_elemental_matrix(self, matrix_type=None, dtype=None):
+		# Set defaults for the elemental matrix
+		if matrix_type is None:
+			matrix_type = 'dataframe'
+		if dtype is None:
+			dtype = np.int64
+
+		# No need to construct a matrix if there are no metabolites
+		if len(self.metabolites) == 0:
+			return None
+
+		CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q' ]
+
+		(matrix_constructor, dtype) = array._setup_matrix_constructor(
+												self, matrix_type, dtype)
+
+		e_matrix = matrix_constructor((len(CHOPNSq),len(self.metabolites)),
+									dtype=dtype)
+		# Get index for elements and metabolites
+		e_ind = CHOPNSq.index
+		m_ind = self.metabolites.index
+
+		# Build the matrix
+		for metab in self.metabolites:
+			for element in CHOPNSq:
+				if element in metab.elements.keys():
+					amount = metab.elements[element]
+				elif element == 'q' and metab.charge is not None:
+					amount = metab.charge
+				else:
+					amount = 0
+				e_matrix[e_ind(element), m_ind(metab)] = amount
+		# Convert matrix to dataframe if matrix type is a dataframe
+		if matrix_type == 'dataframe':
+			metab_ids = [metab.id for metab in self.metabolites]
+			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq, columns=metab_ids)
+
+		return e_matrix
 
 	def repair(self, rebuild_index=True, rebuild_relationships=True):
 		"""Update all indexes and pointers in a MassModel
@@ -721,7 +902,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		massmodel._S = create_stoichiometric_matrix(massmodel,
+		massmodel._S = array.create_stoichiometric_matrix(massmodel,
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
@@ -794,7 +975,7 @@ class MassModel(Object):
 
 		return merged_model
 
-	# HTML representation
+	## Internal
 	def _repr_html_(self):
 		return """
 			<table>
@@ -844,6 +1025,9 @@ class MassModel(Object):
 				</tr><tr>
 					<td><strong>Compartments</strong></td>
 					<td>{compartments}</td>
+				</tr><tr>
+					<td><strong>Units</strong></td>
+					<td>{units}</td>
 				</tr>
 			</table>
 		""".format(name=self.id, address='0x0%x' % id(self),
@@ -859,13 +1043,16 @@ class MassModel(Object):
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
-					mat_rank=matrix_rank(self.S),
-					dim_null=nullspace(self.S).shape[1],
-					dim_left_null=left_nullspace(self.S).shape[1],
+					mat_rank=array.matrix_rank(self.S),
+					dim_null=array.nullspace(self.S).shape[1],
+					dim_left_null=array.left_nullspace(self.S).shape[1],
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
-										k,v in iteritems(self.compartments))
+										k,v in iteritems(self.compartments)),
+					units=", ".join(v if v else k for \
+										k,v in iteritems(self.units))
 					)
+
 	# Module Dunders
 	def __enter__(self):
 		"""Record all future changes to the MassModel, undoing them when a

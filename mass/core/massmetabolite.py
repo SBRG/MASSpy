@@ -12,8 +12,7 @@ from sympy import sympify, S, Add, Mul, simplify
 from cobra.core.species import Species
 
 # Class begins
-
-# Regular expression for element parsing
+## Regular expression for element parsing
 element_re = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
 
 # Class definition
@@ -61,7 +60,7 @@ class MassMetabolite(Species):
 		# Initial condition associated with this metabolite=
 		self._initial_condition = None
 		# Gibbs energy of formation associated with this metabolite
-		self._gibbs_formation = None
+		self._gibbs_formation_energy = None
 		# Ordinary differential equation for the metabolite concentration
 		self._ode = None
 
@@ -135,18 +134,18 @@ class MassMetabolite(Species):
 		self._initial_condition = value
 
 	@property
-	def gibbs_formation(self):
+	def gibbs_formation_energy(self):
 		"""Returns the Gibbs formation energy of the metabolite"""
-		return self._gibbs_formation
+		return self._gibbs_formation_energy
 
-	@gibbs_formation.setter
-	def gibbs_formation(self, value):
+	@gibbs_formation_energy.setter
+	def gibbs_formation_energy(self, value):
 		"""Set the Gibbs formation energy of the metabolite"""
 		if not isinstance(value, integer_types) and \
 			not isinstance(value, float):
-			raise TypeError("Initial condition must be an integer or float")
+			raise TypeError("Must be an integer or float")
 
-		self._gibbs_formation = value
+		self._gibbs_formation_energy = value
 
 	@property
 	def formula_weight(self):
@@ -170,7 +169,46 @@ class MassMetabolite(Species):
 		self._ode = self._generate_ode()
 		return self._ode
 
+	# Shorthands
+	@property
+	def ic(self):
+		"""Shorthand getter for initial condition"""
+		return self._initial_condition
+
+	@ic.setter
+	def ic(self, value):
+		"""Shorthand setter for initial condition"""
+		self.initial_condition = value
+
+	@property
+	def gf(self):
+		"""Shorthand getter for Gibb's energy of formation"""
+		return self._gibbs_formation_energy
+
+	@gf.setter
+	def gf(self, value):
+		"""Shorthand setter for Gibb's energy of formation"""
+		self.gibbs_formation_energy = value
+
 	# Methods
+	## Public
+	def remove_from_model(self, destructive=False):
+		"""Removes the metabolite association from self.massmodel
+
+		The change is reverted upon exit when using the massmodel as a context.
+
+		Similar to the method in cobra.core.metabolite
+
+		Parameters
+		----------
+		destructive : bool
+			If False then the metabolite is removed from all associated
+			reactions.  If True then all associated reactions are removed from
+			the MassModel.
+		"""
+		return self._model.remove_metabolites(self, destructive)
+
+	## Internal
 	def _generate_ode(self):
 		if len(self._reaction) == 0:
 			return None
@@ -197,44 +235,6 @@ class MassMetabolite(Species):
 		self._id = value
 		self._model.metabolites._generate_index()
 
-	def remove_from_model(self, destructive=False):
-		"""Removes the metabolite association from self.massmodel
-
-		The change is reverted upon exit when using the massmodel as a context.
-
-		Similar to the method in cobra.core.metabolite
-
-		Parameters
-		----------
-		destructive : bool
-			If False then the metabolite is removed from all associated
-			reactions.  If True then all associated reactions are removed from
-			the MassModel.
-		"""
-		return self._model.remove_metabolites(self, destructive)
-
-	# Shorthands
-	@property
-	def ic(self):
-		"""Shorthand getter for initial condition"""
-		return self._initial_condition
-
-	@ic.setter
-	def ic(self, value):
-		"""Shorthand setter for initial condition"""
-		self.initial_condition = value
-
-	@property
-	def gf(self):
-		"""Shorthand getter for Gibb's energy of formation"""
-		return self._gibbs_formation
-
-	@gf.setter
-	def gf(self, value):
-		"""Shorthand setter for Gibb's energy of formation"""
-		self.gibbs_formation = value
-
-	# HTML representation
 	def _repr_html_(self):
 		return """
 		<table>
@@ -267,7 +267,7 @@ class MassMetabolite(Species):
 							address='0x0%x' % id(self),
 							compartment=self.compartment,
 							ic=self._initial_condition,
-							gibbs= self._gibbs_formation,
+							gibbs= self._gibbs_formation_energy,
 							n_reactions=len(self.reactions),
 							reactions='. '.join(r.id for r in self.reactions))
 
