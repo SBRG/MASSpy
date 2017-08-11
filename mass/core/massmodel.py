@@ -6,8 +6,8 @@ from __future__ import absolute_import
 # Import necesary packages
 import logging
 import re
-import sympy as sp
 import pandas as pd
+import numpy as np
 from six import string_types, integer_types, iteritems
 from copy import copy, deepcopy
 from functools import partial
@@ -62,6 +62,15 @@ class MassModel(Object):
 		A dictionary to store the compartment shorthands and their full names.
 		Keys are the shorthands and values are the full names.
 		Example: {'c': 'cytosol'}
+	units : dict
+		A dictionary to store the units used in the model for referencing.
+
+		WARNING: Note that the model will not track the units,
+		Therefore all unit conversions must be manually in order to ensure
+		numerical consistency in the model. It is highly recommended to stick
+		with the following units:
+
+		{'N': 'Millimoles', 'V': 'Liters', 'T': 'Hours'}
 	"""
 	def __init__(self, id_or_massmodel=None, name=None,
 				matrix_type=None, dtype=None):
@@ -85,7 +94,8 @@ class MassModel(Object):
 			self.custom_rates= dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
-
+			# A dictionary to store the units utilized in the model.
+			self.units = dict()
 			# Internal storage of S matrix and data types for updating S
 			self._matrix_type = matrix_type
 			self._dtype = dtype
@@ -742,6 +752,45 @@ class MassModel(Object):
 		return {rxn.id : rxn.get_disequilibrium_ratio(sympy_expr)
 				for rxn in reaction_list}
 
+	def get_elemental_matrix(self, matrix_type=None, dtype=None):
+		# Set defaults for the elemental matrix
+		if matrix_type is None:
+			matrix_type = 'dataframe'
+		if dtype is None:
+			dtype = np.int64
+
+		# No need to construct a matrix if there are no metabolites
+		if len(self.metabolites) == 0:
+			return None
+
+		CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q' ]
+
+		(matrix_constructor, dtype) = array._setup_matrix_constructor(
+												self, matrix_type, dtype)
+
+		e_matrix = matrix_constructor((len(CHOPNSq),len(self.metabolites)),
+									dtype=dtype)
+		# Get index for elements and metabolites
+		e_ind = CHOPNSq.index
+		m_ind = self.metabolites.index
+
+		# Build the matrix
+		for metab in self.metabolites:
+			for element in CHOPNSq:
+				if element in metab.elements.keys():
+					amount = metab.elements[element]
+				elif element == 'q' and metab.charge is not None:
+					amount = metab.charge
+				else:
+					amount = 0
+				e_matrix[e_ind(element), m_ind(metab)] = amount
+		# Convert matrix to dataframe if matrix type is a dataframe
+		if matrix_type == 'dataframe':
+			metab_ids = [metab.id for metab in self.metabolites]
+			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq, columns=metab_ids)
+
+		return e_matrix
+
 	def repair(self, rebuild_index=True, rebuild_relationships=True):
 		"""Update all indexes and pointers in a MassModel
 
@@ -976,6 +1025,9 @@ class MassModel(Object):
 				</tr><tr>
 					<td><strong>Compartments</strong></td>
 					<td>{compartments}</td>
+				</tr><tr>
+					<td><strong>Units</strong></td>
+					<td>{units}</td>
 				</tr>
 			</table>
 		""".format(name=self.id, address='0x0%x' % id(self),
@@ -996,7 +1048,9 @@ class MassModel(Object):
 					dim_left_null=array.left_nullspace(self.S).shape[1],
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
-										k,v in iteritems(self.compartments))
+										k,v in iteritems(self.compartments)),
+					units=", ".join(v if v else k for \
+										k,v in iteritems(self.units))
 					)
 
 	# Module Dunders

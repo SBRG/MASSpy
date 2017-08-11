@@ -45,59 +45,24 @@ def create_stoichiometric_matrix(model, matrix_type=None, dtype=None,
 	matrix of class 'dtype'
 		The stoichiometric matrix for the given MassModel
 	"""
-	# Dictionary for constructing the matrix
-	matrix_constructor = {'dense': np.zeros, 'dok': dok_matrix,
-				'lil': lil_matrix, 'dataframe': np.zeros}
-
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a MassModel")
-
 	# Check input of update model
 	if not isinstance(update_model, bool):
 		raise TypeError("update_model must be a bool")
 
-	# Check matrix type input if it exists
-	if matrix_type is not None:
-		if not isinstance(matrix_type, string_types):
-			raise TypeError("matrix_type must be a string")
-		# Remove case sensitivity
-		matrix_type = matrix_type.lower()
-	else:
-		# Use the models stored matrix type if None is specified
-		if model._matrix_type is not None:
-			matrix_type = model._matrix_type
-		# Otherwise use the default type, 'dense'
-		else:
-			matrix_type = 'dense'
-
-	# Check to see if matrix type is one of the defined types
-	if matrix_type not in matrix_constructor:
-		raise ValueError("matrix_type must be a string of one of the following"
-						" types: {'dense', 'dok', 'lil', 'dataframe'}")
-	# Check to see if scipy matricies loaded properly if one is selected
-	elif matrix_constructor[matrix_type] is None:
-		raise ValueError("Sparse matrices require scipy")
 	# Set up for matrix construction if matrix types are correct.
-	else:
-		n_metabolites = len(model.metabolites)
-		n_reactions = len(model.reactions)
+	(matrix_constructor, dtype) = _setup_matrix_constructor(model,
+										matrix_type=matrix_type, dtype=dtype)
+	n_metabolites = len(model.metabolites)
+	n_reactions = len(model.reactions)
 
-	# Set the data-type if it is none
-	if dtype is None:
-		# Use the models stored data type if available
-		if model._dtype is not None:
-			dtype = model._dtype
-		# Otherwise use the default type, np.float64
-		else:
-			dtype = np.float64
 	# No need to construct a matrix if there are no metabolites or species
 	if n_metabolites == 0 or n_reactions == 0:
 		s_matrix = None
 
 	else:
 		# Construct the stoichiometric matrix
-		s_matrix = matrix_constructor[matrix_type](
-								(n_metabolites, n_reactions), dtype=dtype)
+		s_matrix = matrix_constructor((n_metabolites, n_reactions),
+										dtype=dtype)
 		# Get index for metabolites and reactions
 		m_ind = model.metabolites.index
 		r_ind = model.reactions.index
@@ -237,6 +202,68 @@ def matrix_rank(A, tol=None):
 	return np.linalg.matrix_rank(A, tol)
 
 ## Internal
+def _setup_matrix_constructor(model, matrix_type=None, dtype=None):
+	"""Internal use. Check inputs and create a constructor for the specified
+	matrix type.
+
+	Parameters
+	----------
+	model : mass.MassModel
+		The MassModel object to construct the matrix for
+	matrix_type: string {'dense', 'dok', 'lil', 'dataframe'}, or None
+	   Construct the S matrix with the specified matrix type. If None, will
+	   utilize  the matrix type in the massmodel. If massmodel does not have a
+	   specified matrix type, will default to 'dense'
+	   Not case sensitive
+	dtype : data-type
+		Construct the S matrix with the specified data type. If None, will
+		utilize  the data type in the massmodel. If massmodel does not have a
+		specified data type, will default to float64
+	Returns
+	-------
+	matrix of class 'dtype'
+	"""
+	# Dictionary for constructing the matrix
+	matrix_constructor = {'dense': np.zeros, 'dok': dok_matrix,
+				'lil': lil_matrix, 'dataframe': np.zeros}
+
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a MassModel")
+
+	# Check matrix type input if it exists
+	if matrix_type is not None:
+		if not isinstance(matrix_type, string_types):
+			raise TypeError("matrix_type must be a string")
+		# Remove case sensitivity
+		matrix_type = matrix_type.lower()
+	else:
+		# Use the models stored matrix type if None is specified
+		if model._matrix_type is not None:
+			matrix_type = model._matrix_type
+		# Otherwise use the default type, 'dense'
+		else:
+			matrix_type = 'dense'
+
+	# Check to see if matrix type is one of the defined types
+	if matrix_type not in matrix_constructor:
+		raise ValueError("matrix_type must be a string of one of the following"
+						" types: {'dense', 'dok', 'lil', 'dataframe'}")
+	# Check to see if scipy matricies loaded properly if one is selected
+	if matrix_constructor[matrix_type] is None:
+		raise ValueError("Sparse matrices require scipy")
+
+	# Set the data-type if it is none
+	if dtype is None:
+		# Use the models stored data type if available
+		if model._dtype is not None:
+			dtype = model._dtype
+		# Otherwise use the default type, np.float64
+		else:
+			dtype = np.float64
+
+	constructor = matrix_constructor[matrix_type]
+	return (constructor, dtype)
+
 def _update_S(model, reaction_list=None, matrix_type=None, dtype=None,
 			update_model=True):
 	"""For internal use only. Update the S matrix of the model.
