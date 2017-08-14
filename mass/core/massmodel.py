@@ -131,7 +131,7 @@ class MassModel(Object):
 	def rate_expressions(self):
 		"""Get the rate laws for the reactions as sympy expressions in a
 		dictionary where keys are the reaction objects and values are the
-		rate law expressions
+		sympy rate law expressions
 		"""
 		rate_dict =  {rxn: rxn.rate_law_expr for rxn in self.reactions}
 		if self.custom_rates != {}:
@@ -680,7 +680,7 @@ class MassModel(Object):
 		return {rxn.id : rxn.generate_rate_law(rate_type, sympy_expr)
 				for rxn in reaction_list}
 
-	def get_mass_action_ratios(self, reaction_list=None, sympy_expr=False):
+	def get_mass_action_ratios(self, reaction_list=None):
 		"""Get the mass action ratios for a list of reactions in a MassModel
 		and return them as human readable strings or as sympy expressions
 		for simulations
@@ -690,19 +690,12 @@ class MassModel(Object):
 		reaction_list = list of MassReactions or None
 			The list of MassReactions to obtain the disequilibrium ratios for.
 			If None, will return the rates for all reactions in the MassModel
-		sympy_expr : bool
-			If True, will output a sympy expression, otherwise
-			will output a human readable string.
 
 		Returns
 		-------
 		dict of disequilibrium ratios where keys are reaction identifiers and
 			values are mass action ratios as strings or sympy expressions
 		"""
-		# Check inputs
-		if not isinstance(sympy_expr, bool):
-			raise TypeError("sympy_expr must be a bool")
-
 		# Use massmodel reactions if no reaction list is given
 		if reaction_list is None:
 			reaction_list = self.reactions
@@ -715,10 +708,9 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		# Get the mass action ratios
-		return {rxn.id : rxn.get_mass_action_ratio(sympy_expr)
-				for rxn in reaction_list}
+		return {rxn.id : rxn.get_mass_action_ratio for rxn in reaction_list}
 
-	def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=False):
+	def get_disequilibrium_ratios(self, reaction_list=None):
 		"""Get the disequilibrium ratios for a list of reactions in a MassModel
 		and return them as human readable strings or as sympy expressions
 		for simulations
@@ -728,19 +720,11 @@ class MassModel(Object):
 		reaction_list = list of MassReactions or None
 			The list of MassReactions to obtain the disequilibrium ratios for.
 			If None, will return the rates for all reactions in the MassModel
-		sympy_expr : bool
-			If True, will output a sympy expression, otherwise
-			will output a human readable string.
-
 		Returns
 		-------
 		dict of disequilibrium ratios where keys are reaction identifiers and
 			values are disequilibrium ratios as strings or sympy expressions
 		"""
-		# Check inputs
-		if not isinstance(sympy_expr, bool):
-			raise TypeError("sympy_expr must be a bool")
-
 		# Use massmodel reactions if no reaction list is given
 		if reaction_list is None:
 			reaction_list = self.reactions
@@ -753,8 +737,7 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		# Get the disequilibrium ratios
-		return {rxn.id : rxn.get_disequilibrium_ratio(sympy_expr)
-				for rxn in reaction_list}
+		return {rxn.id : rxn.get_disequilibrium_ratio for rxn in reaction_list}
 
 	def get_elemental_matrix(self, matrix_type=None, dtype=None):
 		# Set defaults for the elemental matrix
