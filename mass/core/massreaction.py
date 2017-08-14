@@ -521,17 +521,35 @@ class MassReaction(Object):
 		else:
 			return self._rate_law
 
-	@property
-	def get_mass_action_ratio(self):
-		"""Get the mass action ratio for the reaction as
-		as a sympy expression for simulation."""
-		return self._get_mass_action_ratio_expr()
 
-	@property
-	def get_disequilibrium_ratio(self):
+	def get_mass_action_ratio(self, sympy_expr=False):
+		"""Get the mass action ratio for the reaction as
+		a human readable string or a sympy expression for simulation.
+		"""
+		mass_action_ratio = self._get_mass_action_ratio_expr()
+		if sympy_expr:
+			return mass_action_ratio
+		else:
+			mass_action_ratio = re.sub("[(t)]" ,"", str(mass_action_ratio))
+			r = re.search("[/]", mass_action_ratio)
+			return "(%s)/(%s)" % (mass_action_ratio[:r.start()],
+							mass_action_ratio[r.end():])
+
+
+	def get_disequilibrium_ratio(self, sympy_expr=False):
 		"""Get the disequilibrium ratio for the reaction as
-		as a sympy expression for simulation."""
-		return Mul(self.get_mass_action_ratio, Pow(var(self._sym_Keq), -1))
+		a human readable string or a sympy expression for simulation.
+		"""
+		disequilibrium_ratio = Mul(self._get_mass_action_ratio_expr(),
+								Pow(var(self._sym_Keq), -1))
+		if sympy_expr:
+			return disequilibrium_ratio
+		else:
+			disequilibrium_ratio = re.sub("[(t)]" ,"",
+									str(disequilibrium_ratio))
+			r = re.search("[/]", disequilibrium_ratio)
+			return "(%s)/(%s)" % (disequilibrium_ratio[:r.start()],
+							disequilibrium_ratio[r.end():])
 
 	def remove_from_model(self, remove_orphans=False):
 		"""Removes the reaction from a massmodel.
@@ -951,9 +969,9 @@ class MassReaction(Object):
 			for metab in self.reactants:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "*%s(t)" % metab.id
+					rate_law += "*%s" % metab.id
 				else:
-					rate_law += "*%s(t)**%s" % (metab.id, coeff)
+					rate_law += "*%s**%s" % (metab.id, coeff)
 
 		# Return rate if reaction is irreversible
 		if not self._reversible:
@@ -969,9 +987,9 @@ class MassReaction(Object):
 			for metab in self.products:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "%s(t)*" % metab.id
+					rate_law += "%s*" % metab.id
 				else:
-					rate_law += "%s(t)**%s*" % (metab.id, coeff)
+					rate_law += "%s**%s*" % (metab.id, coeff)
 
 		rate_law = "%s / %s)" % (rate_law.rstrip("*"), self._sym_Keq)
 		return rate_law
@@ -993,9 +1011,9 @@ class MassReaction(Object):
 			for metab in self.reactants:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "*%s(t)" % metab.id
+					rate_law += "*%s" % metab.id
 				else:
-					rate_law += "*%s(t)**%s" % (metab.id, coeff)
+					rate_law += "*%s**%s" % (metab.id, coeff)
 		# Return rate if reaction is irreversible
 		if not self._reversible:
 			return self._sym_kf + rate_law
@@ -1004,15 +1022,15 @@ class MassReaction(Object):
 		rate_law = "%s%s - %s" % (self._sym_kf, rate_law, self._sym_kr)
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s(t)" % self._external_metabolite()
+			rate_law += "*%s" % self._external_metabolite()
 		# For all other reactions
 		else:
 			for metab in self.products:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "*%s(t)" % metab.id
+					rate_law += "*%s" % metab.id
 				else:
-					rate_law += "*%s(t)**%s" % (metab.id, coeff)
+					rate_law += "*%s**%s" % (metab.id, coeff)
 
 		return rate_law
 
@@ -1027,15 +1045,15 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s(t)" % self._external_metabolite()
+			rate_law += "*%s" % self._external_metabolite()
 		# For all other reactions
 		else:
 			for metab in self.reactants:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "*%s(t)" % metab.id
+					rate_law += "*%s" % metab.id
 				else:
-					rate_law += "*%s(t)**%s" % (metab.id, coeff)
+					rate_law += "*%s**%s" % (metab.id, coeff)
 		# Return rate if reaction is irreversible
 		if not self._reversible:
 			return "%s*%s%s" % (self._sym_kr, self._sym_Keq, rate_law)
@@ -1045,15 +1063,15 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "%s(t)*" % self._external_metabolite()
+			rate_law += "%s*" % self._external_metabolite()
 		# For all other reactions
 		else:
 			for metab in self.products:
 				coeff = self.get_coefficient(metab.id)
 				if abs(coeff) == 1:
-					rate_law += "%s(t)*" % metab.id
+					rate_law += "%s*" % metab.id
 				else:
-					rate_law += "%s(t)**%s*" % (metab.id, coeff)
+					rate_law += "%s**%s*" % (metab.id, coeff)
 		rate_law = rate_law.rstrip("*") + ')'
 		return rate_law
 
