@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import numpy as np
 import pandas as pd
 from scipy.sparse import dok_matrix, lil_matrix
+from sympy import Matrix
 from six import string_types, iteritems
 
 # from mass
