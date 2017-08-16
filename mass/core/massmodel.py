@@ -20,6 +20,7 @@ from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
 from mass.util import array
+from mass.util import qcqa
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
 
@@ -57,6 +58,10 @@ class MassModel(Object):
 	custom_rates : dict
 		A dictionary to store custom rates for specific reactions, where
 		keys are reaction objects and values are the custom rate expressions.
+		Custom rates will always have preference over rate laws in reactions.
+	custom_rate_parameters : dict
+		A dictionary to store custom parameters for custom rates,
+		keys are parameters and values are the parameter value.
 		Custom rates will always have preference over rate laws in reactions.
 	fixed_concentrations: dict
 		A dictionary to store fixed concentrations for metabolites, where
@@ -98,6 +103,7 @@ class MassModel(Object):
 			self.initial_conditions = dict()
 			#For storing of custom rate laws and fixed concentrations
 			self.custom_rates= dict()
+			self.custom_rate_parameters = dict()
 			self.fixed_concentrations = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
@@ -106,13 +112,11 @@ class MassModel(Object):
 			# Internal storage of S matrix and data types for updating S
 			self._matrix_type = matrix_type
 			self._dtype = dtype
-
 			# For storing the stoichiometric matrix.
 			self._S = array.create_stoichiometric_matrix(self,
                                     matrix_type=self._matrix_type,
                                     dtype=self._dtype,
             						update_model=True)
-
 			# For storing the HistoryManager contexts
 			self._contexts = []
 
@@ -986,8 +990,7 @@ class MassModel(Object):
 			new_model.reactions.append(new_rxn)
 			# Copy the custom rates
 			if rxn in iterkeys(self.custom_rates):
-				custom_rate_expr = self.custom_rates[rxn]
-				new_model.custom_rates[new_rxn] = custom_rate_expr
+				new_model.custom_rates[new_rxn] = self.custom_rates[rxn]
 			# Update awareness
 			for metab, stoic in iteritems(rxn._metabolites):
 				new_metab = new_model.metabolites.get_by_id(metab.id)
@@ -1073,6 +1076,93 @@ class MassModel(Object):
 
 		return merged_model
 
+	def calc_steady_state_fluxes(self, pathways, flux_dictionary,
+									update_reactions=False):
+		print("FIXME: IMPLEMENT CALC STEADY STATE FLUXES")
+		return
+
+	def calc_PERCS(self, steady_state_concentrations=None,
+					steady_state_fluxes=None, at_equilibrium_default=100000.,
+					update_reactions=False):
+		"""Calculate the pseudo rate constants (rxn.forward_rate_constant)
+		for reactions in the MassModel using steady state concentrations and
+		steady state fluxes.
+
+		Parameters
+		----------
+		steady_state_concentrations : dict or None
+			A dictionary of steady state concentrations where MassMetabolites are
+			keys and the concentrations are the values. If None, will utilize
+			the initial conditions in the MassModel.
+		steady_state_fluxes : dict or None
+			A dictionary of steady state fluxes where MassReactions are the keys
+			and the fluxes are the values. If None, will utilize the
+			steady state reactions stored in each reaction in the model.
+		at_equilibrium_default : float or None
+			The value to set the pseudo order rate constant if the reaction is
+			at equilibrium. If None, will default to 100,000
+		update_parameters : bool
+			Whether to update the forward rate constants in the MassReactions.
+			If True, will update the forward rate constants inside the
+			MassReactions with the calculated pseudo order rate constants
+		"""
+		# Check inputs
+		if steady_state_concentrations is None:
+			steady_state_concentrations = self.initial_conditions
+		if not isinstance(steady_state_concentrations, dict):
+			raise TypeError("Steady state concentrations must be a dictionary"
+					"where keys are MassMetabolites and values are concentrations")
+
+		if steady_state_fluxes is None:
+			steady_state_fluxes = self.steady_state_fluxes
+		if not isinstance(steady_state_fluxes, dict):
+			raise TypeError("Steady state fluxes must be a dictionary where"
+							" keys are MassReactions and values are fluxes")
+
+		if not isinstance(at_equilibrium_default, integer_types) and \
+			not isinstance(at_equilibrium_default, float):
+			raise TypeError("at_equilibrium_default must be an int or float")
+
+		if not isinstance(update_reactions, bool):
+			raise TypeError("update_reactions must be a bool")
+
+		if steady_state_fluxes is None:
+			steady_state_fluxes = self.steady_state_fluxes
+			missing_params = qcqa.get_missing_parameters(self, Keq=True,
+														ssflux=True)
+		else:
+			missing_params = qcqa.get_missing_parameters(self, Keq=True,
+														ssflux=False)
+			for rxn in self.reactions:
+				if rxn not in iterkeys(steady_state_fluxes):
+					if rxn in iterkeys(missing_params):
+						missing_params[rxn] =  [missing_params[rxn], "ssflux"]
+					else:
+						missing_params[rxn] = "ssflux"
+
+		if steady_state_concentrations is None:
+			missing_concs = qcqa.get_missing_initial_conditions(self)
+		else:
+			missing_concs = [m for m in self.metabolites
+							if m not in iterkeys(steady_state_concentrations)]
+
+		if len(missing_params) != 0 or len(missing_concs) != 0:
+			warn("\nCannot calculate PERCs")
+			if len(missing_params) != 0:
+				print("\nMissing Parameters:"
+					"\n=====================")
+				for rxn, parameters in iteritems(missing_params):
+					print("Reaction %s: %s" % (rxn.id, parameters))
+			if len(missing_concs) != 0:
+				print("\nMissing Initial Conditions"
+					"\n============================")
+				for metab in missing_concs:
+					print("Metabolite %s:" % (metab.id))
+			return None
+
+		print("FINISH CALC PERCS")
+		return None
+
 	## Internal
 	def _repr_html_(self):
 		return """
@@ -1142,8 +1232,8 @@ class MassModel(Object):
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
 					mat_rank=array.matrix_rank(self.S),
-					dim_null=array.nullspace(self.S).shape[1],
-					dim_left_null=array.left_nullspace(self.S).shape[1],
+					dim_null=array.nullspace(self.S,'row').shape[0],
+					dim_left_null=array.left_nullspace(self.S, 'row').shape[0],
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),

@@ -8,8 +8,12 @@ import re
 from six import string_types, integer_types
 from warnings import warn
 from sympy import S, Add, Mul
-# cobra packages
+
+# from cobra
 from cobra.core.species import Species
+
+# from mass
+from mass.core import expressions
 
 # Class begins
 ## Regular expression for element parsing
@@ -165,7 +169,7 @@ class MassMetabolite(Species):
 
 		Will return None if metabolite is not associated with a MassReaction
 		"""
-		return self._generate_ode()
+		return expressions.generate_ode(self)
 
 	# Shorthands
 	@property
@@ -207,23 +211,6 @@ class MassMetabolite(Species):
 		return self._model.remove_metabolites(self, destructive)
 
 	## Internal
-	def _generate_ode(self):
-		if len(self._reaction) == 0:
-			return None
-
-		self._ode = S.Zero
-		for rxn in self._reaction:
-			if rxn._model is not None and rxn in rxn._model.custom_rates:
-				print("FIXME: IMPLEMENT CUSTOM RATES")
-				return None
-			else:
-				rate_law_expr = rxn.rate_law_expr
-
-			if self in rxn.reactants:
-				rate_law_expr = Mul(-1, rate_law_expr)
-			self._ode = Add(self._ode, rate_law_expr)
-		return self._ode
-		
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassMetabolite object to the associated massmodel.
 
