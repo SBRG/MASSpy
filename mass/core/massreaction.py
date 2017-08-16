@@ -308,6 +308,20 @@ class MassReaction(Object):
 			not (self.reactants and self.products))
 
 	@property
+	def get_exchange_metabolite(self):
+		"""Get an "external" metabolite for exchanges.	Primarily used for
+		setting fixed concentrations in the MassModel.
+
+		Returns a string representation of the external metabolite, or None if
+		reaction is not an exchange.
+		"""
+		if self.exchange:
+			for metab in self.metabolites:
+				ext_metab = "%s_%s" % (metab.id, "Xt")
+			return ext_metab
+		else:
+			return None
+	@property
 	def genes(self):
 		"""Returns a frozenset of the genes associated with the reaction"""
 		return frozenset(self._genes)
@@ -944,15 +958,6 @@ class MassReaction(Object):
 		self._genes.discard(cobra_gene)
 		cobra_gene._reaction.discard(self)
 
-	def _external_metabolite(self):
-		"""Internal use. Generate an "external" metabolite for exchanges.
-		Returns a string representation of the external metabolite, or None if
-		reaction is not an exchange"""
-		if self.exchange:
-			for metab in self.metabolites:
-				ext_metab = "%s_%s" % (metab.id, "Xt")
-		return ext_metab
-
 	def _generate_rate_type_1(self):
 		"""Internal use. Generates the type 1 rate law for the reaction as
 		a human readable string.
@@ -963,7 +968,7 @@ class MassReaction(Object):
 		rate_law = ""
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
-			rate_law += self._external_metabolite()
+			rate_law += self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.reactants:
@@ -981,7 +986,7 @@ class MassReaction(Object):
 		rate_law = "%s*(%s - " % (self._sym_kf, rate_law.lstrip("*"))
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
-			rate_law += self._external_metabolite()
+			rate_law += self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.products:
@@ -1005,7 +1010,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self._external_metabolite()
+			rate_law += "*%s" % self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.reactants:
@@ -1022,7 +1027,7 @@ class MassReaction(Object):
 		rate_law = "%s%s - %s" % (self._sym_kf, rate_law, self._sym_kr)
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self._external_metabolite()
+			rate_law += "*%s" % self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.products:
@@ -1045,7 +1050,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self._external_metabolite()
+			rate_law += "*%s" % self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.reactants:
@@ -1063,7 +1068,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			rate_law += "%s*" % self._external_metabolite()
+			rate_law += "%s*" % self.get_exchange_metabolite
 		# For all other reactions
 		else:
 			for metab in self.products:
@@ -1086,7 +1091,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_f = Mul(rate_law_f, metab_ode)
 		# For all other reactions
 		else:
@@ -1106,7 +1111,7 @@ class MassReaction(Object):
 		rate_law_r = Pow(var(self._sym_Keq), -1)
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_r = Mul(rate_law_r, metab_ode)
 		# For all other reactions
 		else:
@@ -1133,7 +1138,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_f = Mul(rate_law_f, metab_ode)
 		# For all other reactions
 		else:
@@ -1154,7 +1159,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_r = Mul(rate_law_r, metab_ode)
 		# For all other reactions
 		else:
@@ -1180,7 +1185,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_f = Mul(rate_law_f, metab_ode)
 		# For all other reactions
 		else:
@@ -1201,7 +1206,7 @@ class MassReaction(Object):
 		# For exchange reactions
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			rate_law_r = Mul(rate_law_r, metab_ode)
 		# For all other reactions
 		else:
@@ -1227,7 +1232,7 @@ class MassReaction(Object):
 		reactant_bits = S.One
 		if self.exchange and len(self.reactants) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			reactant_bits = Mul(reactant_bits, metab_ode)
 		# For all other reactions
 		else:
@@ -1243,7 +1248,7 @@ class MassReaction(Object):
 		product_bits = S.One
 		if self.exchange and len(self.products) == 0:
 			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self._external_metabolite())(t)
+			metab_ode = Function(self.get_exchange_metabolite)(t)
 			product_bits = Mul(product_bits, metab_ode)
 		# For all other reactions
 		else:

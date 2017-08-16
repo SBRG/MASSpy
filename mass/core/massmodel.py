@@ -90,8 +90,9 @@ class MassModel(Object):
 			self.genes = DictList()
 			# A dictionary of initial conditions for MassMetabolites
 			self.initial_conditions = dict()
-			#For storing of custom rate laws
+			#For storing of custom rate laws and fixed concentrations
 			self.custom_rates= dict()
+			self._fixed_concentrations = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -151,6 +152,11 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if rxn.exchange]
 
 	@property
+	def get_exchange_metabolites(self):
+		return [rxn.get_exchange_metabolite for rxn in self.reactions
+				if rxn.exchange]
+
+	@property
 	def get_metabolite_compartments(self):
 		"""Return all metabolites' compartments
 
@@ -163,6 +169,17 @@ class MassModel(Object):
 	def get_irreversible_reactions(self):
 		"""Return a list of all irreversible reactions in the model."""
 		return [rxn for rxn in self.reactions if not rxn.reversible]
+
+	@property
+	def fixed_concentrations(self):
+		"""Return all fixed concentrations in the model"""
+		return self._fixed_concentrations
+
+	@property
+	def steady_state_fluxes(self):
+		"""Return all steady state fluxes stored in the model reactions"""
+		return {rxn: rxn.ssflux for rxn in self.reactions}
+
 
 	# Methods
 	## Public
@@ -578,8 +595,9 @@ class MassModel(Object):
 				context(partial(self.update_S, reaction_list,
 							None, None, True))
 
-	def add_exchange(self, metabolite, exchange_type="source",
-					reversible=True, update_stoichiometry=False):
+	def add_exchange(self, metabolite,exchange_type="source",
+						external_concentration=0., reversible=True,
+						update_stoichiometry=False):
 		"""Add an exchange reaction for a given metabolite using the
 		pre-defined exchange types "source" for into the compartment
 		and "sink" for exiting the compartment.
@@ -622,6 +640,8 @@ class MassModel(Object):
 					subsystem="Transport/Exchange",reversible=reversible)
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
+		self.add_fixed_concentrations(fixed_conc_dict={
+			rxn.get_exchange_metabolite : external_concentration})
 
 	def generate_rate_laws(self, reaction_list=None, rate_type=1,
 							sympy_expr=False):
@@ -784,6 +804,85 @@ class MassModel(Object):
 			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq, columns=metab_ids)
 
 		return e_matrix
+
+	def add_fixed_concentrations(self, fixed_conc_dict=None):
+		"""Add fixed concentrations for metabolites, setting their ODEs
+		to a constant value during simulation of the MassModel.
+
+		The metabolites must already exist in the model or be an
+		"external" metabolite for an exchange reaction"
+
+		Parameters
+		----------
+		fixed_conc_dict : dictionary
+			A dictionary of fixed concentrations where
+			metabolites are keys and fixed concentrations are values
+		"""
+		# Check inputs
+		if fixed_conc_dict is None:
+			return None
+		if not isinstance(fixed_conc_dict, dict):
+			raise TypeError("fixed_conc_dict must be a dictionary")
+		for metab, fixed_conc in iteritems(fixed_conc_dict):
+			if metab not in self.get_exchange_metabolites and \
+				metab not in self.metabolites:
+				raise ValueError("Did not find %s in model metabolites"
+								" or exchanges" % metab)
+			if not isinstance(fixed_conc, integer_types) and \
+				not isinstance(fixed_conc, float):
+				raise TypeError("Fixed concentration must be an int or float")
+			if fixed_conc < 0.:
+				raise ValueError("External concentration must be non-negative")
+
+		# Keep track of existing initial conditions for HistoryManager
+		context = get_context(self)
+		if context:
+			existing_ics = {metab : self._fixed_concentrations[metab]
+							for metab in fixed_conc_dict
+							if metab in self._fixed_concentrations}
+
+		self._fixed_concentrations.update(fixed_conc_dict)
+
+		if context:
+			for key in fixed_conc_dict.keys():
+				if key not in existing_ics.keys():
+					context(partial(self._fixed_concentrations.pop, key))
+				context(partial(self._fixed_concentrations.update,
+								existing_ics))
+
+	def remove_fixed_concentrations(self, metabolites=None):
+		"""Remove a fixed concentration for a specific metabolite
+
+		Parameters
+		----------
+		metabolites : list of metabolites identifiers
+			A list containing MassMetabolites or their identifiers. Can also
+			be an "external" metabolite for an exchange reaction
+		"""
+		# Check inputs
+		if metabolites is None:
+			return None
+		if not hasattr(metabolites, '__iter__'):
+			metabolites = [metabolites]
+
+		for metab in metabolites:
+			if metab not in self.get_exchange_metabolites and \
+				metab not in self.metabolites:
+				raise ValueError("Did not find %s in model metabolites"
+								" or exchanges" % metab)
+
+		# Keep track of existing initial conditions for HistoryManager
+		context = get_context(self)
+		if context:
+			existing_ics = {metab : self._fixed_concentrations[metab]
+							for metab in metabolites
+							if metab in self._fixed_concentrations}
+
+		for metab in metabolites:
+			del self._fixed_concentrations[metab]
+
+		if context:
+			context(partial(self._fixed_concentrations.update, existing_ics))
 
 	def repair(self, rebuild_index=True, rebuild_relationships=True):
 		"""Update all indexes and pointers in a MassModel
