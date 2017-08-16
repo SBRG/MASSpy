@@ -8,7 +8,7 @@ import logging
 import re
 import pandas as pd
 import numpy as np
-from six import string_types, integer_types, iteritems
+from six import string_types, integer_types, iteritems, iterkeys
 from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
@@ -58,6 +58,12 @@ class MassModel(Object):
 		A dictionary to store custom rates for specific reactions, where
 		keys are reaction objects and values are the custom rate expressions.
 		Custom rates will always have preference over rate laws in reactions.
+	fixed_concentrations: dict
+		A dictionary to store fixed concentrations for metabolites, where
+		keys are metabolite objects or "external metabolites" of exchange
+		reactions as strings, and values are the fixed concentrations.
+		Fixed concentrations will always have preference over the metabolite
+		ODEs representing concentrations.
 	compartments : dict
 		A dictionary to store the compartment shorthands and their full names.
 		Keys are the shorthands and values are the full names.
@@ -92,7 +98,7 @@ class MassModel(Object):
 			self.initial_conditions = dict()
 			#For storing of custom rate laws and fixed concentrations
 			self.custom_rates= dict()
-			self._fixed_concentrations = dict()
+			self.fixed_concentrations = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -144,7 +150,10 @@ class MassModel(Object):
 		"""Get the ODEs for the metabolites as sympy expressions where
 		keys are the metabolite objects and values are the ODE expressions
 		"""
-		return {metab: metab.ode for metab in self.metabolites}
+		ode_dict = {metab: metab.ode for metab in self.metabolites}
+		if self.fixed_concentrations != {}:
+			ode_dict.update(self.fixed_concentrations)
+		return ode_dict
 
 	@property
 	def exchanges(self):
@@ -171,14 +180,10 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if not rxn.reversible]
 
 	@property
-	def fixed_concentrations(self):
-		"""Return all fixed concentrations in the model"""
-		return self._fixed_concentrations
-
-	@property
 	def steady_state_fluxes(self):
 		"""Return all steady state fluxes stored in the model reactions"""
-		return {rxn: rxn.ssflux for rxn in self.reactions}
+		return {rxn: rxn.ssflux for rxn in self.reactions
+				if rxn.ssflux is not None}
 
 
 	# Methods
@@ -429,8 +434,8 @@ class MassModel(Object):
 				metab._initial_condition = ic_value
 
 		if context:
-			for key in ic_dict.keys():
-				if key not in existing_ics.keys():
+			for key in iterkeys(ic_dict):
+				if key not in iterkeys(existing_ics):
 					context(partial(self.initial_conditions.pop, key))
 				context(partial(self.initial_conditions.update, existing_ics))
 			if update_metabolites:
@@ -479,7 +484,7 @@ class MassModel(Object):
 		for rxn in reaction_list:
 			rxn._model = self
 			# Loop through metabolites in a reaction
-			for metab in list(rxn._metabolites.keys()):
+			for metab in list(iterkeys(rxn._metabolites)):
 				# If metabolite doesn't exist in the model, add it
 				# with its associated initial condition
 				if metab not in self.metabolites:
@@ -791,7 +796,7 @@ class MassModel(Object):
 		# Build the matrix
 		for metab in self.metabolites:
 			for element in CHOPNSq:
-				if element in metab.elements.keys():
+				if element in iterkeys(metab.elements):
 					amount = metab.elements[element]
 				elif element == 'q' and metab.charge is not None:
 					amount = metab.charge
@@ -844,8 +849,8 @@ class MassModel(Object):
 		self._fixed_concentrations.update(fixed_conc_dict)
 
 		if context:
-			for key in fixed_conc_dict.keys():
-				if key not in existing_ics.keys():
+			for key in iterkeys(fixed_conc_dict):
+				if key not in iterkeys(existing_ics):
 					context(partial(self._fixed_concentrations.pop, key))
 				context(partial(self._fixed_concentrations.update,
 								existing_ics))
@@ -954,7 +959,7 @@ class MassModel(Object):
 			new_metab._model = new_model
 			new_model.metabolites.append(new_metab)
 			# Copy the initial condition
-			if metab in self.initial_conditions.keys():
+			if metab in iterkeys(self.initial_conditions) :
 				ic = self.initial_conditions[metab]
 				new_model.initial_conditions[new_metab] = ic
 
@@ -980,7 +985,7 @@ class MassModel(Object):
 			new_rxn._model = new_model
 			new_model.reactions.append(new_rxn)
 			# Copy the custom rates
-			if rxn in self.custom_rates.keys():
+			if rxn in iterkeys(self.custom_rates):
 				custom_rate_expr = self.custom_rates[rxn]
 				new_model.custom_rates[new_rxn] = custom_rate_expr
 			# Update awareness

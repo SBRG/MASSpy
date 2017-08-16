@@ -522,7 +522,7 @@ class MassReaction(Object):
 			2 : [self._generate_rate_type_2, self._generate_rate_expr_type_2],
 			3 : [self._generate_rate_type_3, self._generate_rate_expr_type_3]}
 
-		if rate_type not in rate_constructor.keys():
+		if rate_type not in iterkeys(rate_constructor):
 			raise ValueError("rate_type must be 1, 2, or 3")
 		else:
 			self._rtype = rate_type

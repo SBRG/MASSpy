@@ -190,24 +190,6 @@ class MassMetabolite(Species):
 
 	# Methods
 	## Public
-	def _generate_ode(self):
-		if len(self._reaction) == 0:
-			return None
-
-		self._ode = S.Zero
-		for rxn in self._reaction:
-			if rxn._model is not None and rxn in rxn._model.custom_rates:
-				print("FIXME: IMPLEMENT CUSTOM RATES")
-				return None
-			else:
-				rate_law_expr = rxn.rate_law_expr
-
-			if self in rxn.reactants:
-				rate_law_expr = Mul(-1, rate_law_expr)
-			self._ode = Add(self._ode, rate_law_expr)
-		return self._ode
-
-
 	def remove_from_model(self, destructive=False):
 		"""Removes the metabolite association from self.massmodel
 
@@ -225,6 +207,23 @@ class MassMetabolite(Species):
 		return self._model.remove_metabolites(self, destructive)
 
 	## Internal
+	def _generate_ode(self):
+		if len(self._reaction) == 0:
+			return None
+
+		self._ode = S.Zero
+		for rxn in self._reaction:
+			if rxn._model is not None and rxn in rxn._model.custom_rates:
+				print("FIXME: IMPLEMENT CUSTOM RATES")
+				return None
+			else:
+				rate_law_expr = rxn.rate_law_expr
+
+			if self in rxn.reactants:
+				rate_law_expr = Mul(-1, rate_law_expr)
+			self._ode = Add(self._ode, rate_law_expr)
+		return self._ode
+		
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassMetabolite object to the associated massmodel.
 
