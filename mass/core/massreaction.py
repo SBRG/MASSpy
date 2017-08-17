@@ -12,7 +12,6 @@ from operator import attrgetter
 from warnings import warn
 from math import inf
 from six import iteritems, iterkeys, string_types, integer_types
-from sympy import Function, Symbol, S, Add, Mul, Pow, var
 
 # from cobra
 from cobra.core.object import Object
@@ -20,11 +19,11 @@ from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
 from cobra.util.context import resettable, get_context
 
 # from mass
+from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
-## global symbol for time
-t = Symbol('t')
+
 ## precompiled regular expressions
 ### Matches and/or in a gene reaction rule
 and_or_search = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
@@ -232,18 +231,15 @@ class MassReaction(Object):
 	@property
 	def rate_law(self):
 		"""Returns the rate law as a human readable string"""
-		if self._rate_law is None:
-			self._rate_law = self.generate_rate_law(rate_type=self._rtype,
-													sympy_expr=False)
-		return self._rate_law
+		return expressions.generate_rate_law(self, rate_type=self._rtype,
+									sympy_expr=False, update_reaction=True)
 
 	@property
 	def rate_law_expr(self):
 		"""Returns the rate law as a sympy expression"""
-		if self._rate_law_expr is None:
-			self._rate_law_expr = self.generate_rate_law(rate_type=self._rtype,
-														sympy_expr=True)
-		return self._rate_law_expr
+
+		return expressions.generate_rate_law(self, rate_type=self._rtype,
+									sympy_expr=True,  update_reaction=True)
 
 	@property
 	def model(self):
@@ -478,7 +474,8 @@ class MassReaction(Object):
 
 	# Methods
 	## Public
-	def generate_rate_law(self, rate_type=1, sympy_expr=False):
+	def generate_rate_law(self, rate_type=1, sympy_expr=False,
+						update_reaction=False):
 		"""Generates the rate law for the reaction as a human readable string.
 		or as a sympy expression for simulation.
 
@@ -499,71 +496,48 @@ class MassReaction(Object):
 		sympy_expr : bool
 			If True, will output a sympy expression, otherwise
 			will output a human readable string.
+		update_reaction : bool
+			If True, will update the MassReaction in addition to returning the
+			rate law. Otherwise just return the rate law.
 
 		Returns
 		-------
 		string representation or sympy expression of the rate law
 		"""
-		# Check inputs
-		if not isinstance(rate_type, integer_types) and \
-			not isinstance(rate_type, float):
-			raise TypeError("rate_type must be an int or float")
-		elif not isinstance(sympy_expr, bool):
-			raise TypeError("sympy_expr must be a bool")
-		else:
-			rate_type = int(rate_type)
-
-		if len(self.metabolites) == 0:
-			return None
-
-
-		rate_constructor = {
-			1 : [self._generate_rate_type_1, self._generate_rate_expr_type_1],
-			2 : [self._generate_rate_type_2, self._generate_rate_expr_type_2],
-			3 : [self._generate_rate_type_3, self._generate_rate_expr_type_3]}
-
-		if rate_type not in rate_constructor.keys():
-			raise ValueError("rate_type must be 1, 2, or 3")
-		else:
-			self._rtype = rate_type
-		# Construct the rate law
-		self._rate_law = rate_constructor[rate_type][0]()
-		self._rate_law_expr = rate_constructor[rate_type][1]()
-
-		if sympy_expr:
-			return self._rate_law_expr
-		else:
-			return self._rate_law
-
+		return expressions.generate_rate_law(self, rate_type, sympy_expr,
+										update_reaction)
 
 	def get_mass_action_ratio(self, sympy_expr=False):
 		"""Get the mass action ratio for the reaction as
 		a human readable string or a sympy expression for simulation.
-		"""
-		mass_action_ratio = self._get_mass_action_ratio_expr()
-		if sympy_expr:
-			return mass_action_ratio
-		else:
-			mass_action_ratio = re.sub("[(t)]" ,"", str(mass_action_ratio))
-			r = re.search("[/]", mass_action_ratio)
-			return "(%s)/(%s)" % (mass_action_ratio[:r.start()],
-							mass_action_ratio[r.end():])
 
+		Parameters
+		----------
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		string representation or sympy expression of the mass action ratio
+		"""
+		return expressions.get_mass_action_ratio(self, sympy_expr=sympy_expr)
 
 	def get_disequilibrium_ratio(self, sympy_expr=False):
 		"""Get the disequilibrium ratio for the reaction as
 		a human readable string or a sympy expression for simulation.
+
+		Parameters
+		----------
+		sympy_expr : bool
+			If True, will output a sympy expression, otherwise
+			will output a human readable string.
+
+		Returns
+		-------
+		string representation or sympy expression of the disequilibrium ratio
 		"""
-		disequilibrium_ratio = Mul(self._get_mass_action_ratio_expr(),
-								Pow(var(self._sym_Keq), -1))
-		if sympy_expr:
-			return disequilibrium_ratio
-		else:
-			disequilibrium_ratio = re.sub("[(t)]" ,"",
-									str(disequilibrium_ratio))
-			r = re.search("[/]", disequilibrium_ratio)
-			return "(%s)/(%s)" % (disequilibrium_ratio[:r.start()],
-							disequilibrium_ratio[r.end():])
+		return expressions.get_disequilibrium_ratio(self, sympy_expr=sympy_expr)
 
 	def remove_from_model(self, remove_orphans=False):
 		"""Removes the reaction from a massmodel.
@@ -958,311 +932,6 @@ class MassReaction(Object):
 		self._genes.discard(cobra_gene)
 		cobra_gene._reaction.discard(self)
 
-	def _generate_rate_type_1(self):
-		"""Internal use. Generates the type 1 rate law for the reaction as
-		a human readable string.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law = ""
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			rate_law += self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "*%s" % metab.id
-				else:
-					rate_law += "*%s**%s" % (metab.id, coeff)
-
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return self._sym_kf + rate_law
-
-		# Generate reverse rate
-		rate_law = "%s*(%s - " % (self._sym_kf, rate_law.lstrip("*"))
-		# For exchange reactions
-		if self.exchange and len(self.products) == 0:
-			rate_law += self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.products:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "%s*" % metab.id
-				else:
-					rate_law += "%s**%s*" % (metab.id, coeff)
-
-		rate_law = "%s / %s)" % (rate_law.rstrip("*"), self._sym_Keq)
-		return rate_law
-
-	def _generate_rate_type_2(self):
-		"""Internal use. Generates the type 2 rate law for the reaction as
-		a human readable string.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law = ""
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "*%s" % metab.id
-				else:
-					rate_law += "*%s**%s" % (metab.id, coeff)
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return self._sym_kf + rate_law
-
-		# Generate reverse rate
-		rate_law = "%s%s - %s" % (self._sym_kf, rate_law, self._sym_kr)
-		if self.exchange and len(self.products) == 0:
-			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.products:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "*%s" % metab.id
-				else:
-					rate_law += "*%s**%s" % (metab.id, coeff)
-
-		return rate_law
-
-	def _generate_rate_type_3(self):
-		"""Internal use. Generates the type 3 rate law for the reaction as
-		a human readable string.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law = ""
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			rate_law += "*%s" % self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "*%s" % metab.id
-				else:
-					rate_law += "*%s**%s" % (metab.id, coeff)
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return "%s*%s%s" % (self._sym_kr, self._sym_Keq, rate_law)
-
-		# Generate reverse rate
-		rate_law = '%s*(%s%s - ' % (self._sym_kr, self._sym_Keq, rate_law)
-		# For exchange reactions
-		if self.exchange and len(self.products) == 0:
-			# Generate an "external" metabolite for exchanges
-			rate_law += "%s*" % self.get_exchange_metabolite
-		# For all other reactions
-		else:
-			for metab in self.products:
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law += "%s*" % metab.id
-				else:
-					rate_law += "%s**%s*" % (metab.id, coeff)
-		rate_law = rate_law.rstrip("*") + ')'
-		return rate_law
-
-	def _generate_rate_expr_type_1(self):
-		"""Internal use. Generates the type 1 rate law for the reaction as
-		a sympy expression for simulation.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law_f = S.One
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_f = Mul(rate_law_f, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_f = Mul(rate_law_f, metab_ode)
-				else:
-					rate_law_f = Mul(rate_law_f, Pow(metab_ode, coeff))
-
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return Mul(var(self._sym_kf), rate_law_f)
-
-		# Generate reverse rate
-		rate_law_r = Pow(var(self._sym_Keq), -1)
-		# For exchange reactions
-		if self.exchange and len(self.products) == 0:
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_r = Mul(rate_law_r, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.products:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_r = Mul(rate_law_r, metab_ode)
-				else:
-					rate_law_r = Mul(rate_law_r, Pow(metab_ode, coeff))
-
-		# Combine forward and reverse rates, and return rate law
-		return Mul(var(self._sym_kf), Add(rate_law_f, Mul(-1, rate_law_r)))
-
-
-	def _generate_rate_expr_type_2(self):
-		"""Internal use. Generates the type 2 rate law for the reaction as
-		a sympy expression for simulation.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law_f = var(self._sym_kf)
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_f = Mul(rate_law_f, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_f = Mul(rate_law_f, metab_ode)
-				else:
-					rate_law_f = Mul(rate_law_f, Pow(metab_ode, coeff))
-
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return Mul(var(self._sym_kf), rate_law_f)
-
-		# Generate reverse rate
-		rate_law_r = var(self._sym_kr)
-		# For exchange reactions
-		if self.exchange and len(self.products) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_r = Mul(rate_law_r, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.products:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_r = Mul(rate_law_r, metab_ode)
-				else:
-					rate_law_r = Mul(rate_law_r, Pow(metab_ode, coeff))
-
-		# Combine forward and reverse rates, and return rate law
-		return Add(rate_law_f, Mul(-1, rate_law_r))
-
-	def _generate_rate_expr_type_3(self):
-		"""Internal use. Generates the type 3 rate law for the reaction as
-		a sympy expression for simulation.
-
-		To safely generate a rate law, use massreaction.generate_rate method.
-		"""
-		# Generate forward rate
-		rate_law_f = var(self._sym_Keq)
-		# For exchange reactions
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_f = Mul(rate_law_f, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_f = Mul(rate_law_f, metab_ode)
-				else:
-					rate_law_f = Mul(rate_law_f, Pow(metab_ode, coeff))
-
-		# Return rate if reaction is irreversible
-		if not self._reversible:
-			return Mul(var(self._sym_kr), rate_law_f)
-
-		# Generate reverse rate
-		rate_law_r = S.One
-		# For exchange reactions
-		if self.exchange and len(self.products) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			rate_law_r = Mul(rate_law_r, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.products:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					rate_law_r = Mul(rate_law_r, metab_ode)
-				else:
-					rate_law_r = Mul(rate_law_r, Pow(metab_ode, coeff))
-
-		# Combine forward and reverse rates, and return rate law
-		return Mul(var(self._sym_kr), Add(rate_law_f, Mul(-1, rate_law_r)))
-
-	def _get_mass_action_ratio_expr(self):
-		"""Internal use. Generates the mass action ratio for the reaction as
-		a human readable string.
-
-		To safely generate the mass action ratio, use
-		massreaction.get_mass_action_ratio method.
-		"""
-		# For the reactants
-		reactant_bits = S.One
-		if self.exchange and len(self.reactants) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			reactant_bits = Mul(reactant_bits, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.reactants:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					reactant_bits = Mul(reactant_bits, metab_ode)
-				else:
-					reactant_bits = Mul(reactant_bits, Pow(metab_ode, coeff))
-
-		# For the products
-		product_bits = S.One
-		if self.exchange and len(self.products) == 0:
-			# Generate an "external" metabolite for exchanges
-			metab_ode = Function(self.get_exchange_metabolite)(t)
-			product_bits = Mul(product_bits, metab_ode)
-		# For all other reactions
-		else:
-			for metab in self.products:
-				metab_ode = Function(metab.id)(t)
-				coeff = self.get_coefficient(metab.id)
-				if abs(coeff) == 1:
-					product_bits = Mul(product_bits, metab_ode)
-				else:
-					product_bits = Mul(product_bits, Pow(metab_ode, coeff))
-
-		# Combine to make the mass action ratio
-		return Mul(product_bits, Pow(reactant_bits, -1))
-
 	def _set_id_with_model(self, value):
 		"""Set the id of the MassReaction object to the associated massmodel.
 
@@ -1329,7 +998,6 @@ class MassReaction(Object):
 		Similar to the method in cobra.core.reaction
 		"""
 		massreaction_copy = copy(super(MassReaction, self))
-		massreaction_copy.reset_rate_law()
 		return massreaction_copy
 
 	def __deepcopy__(self, memo):

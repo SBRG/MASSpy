@@ -190,7 +190,7 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 		one will automatically be generated with the
 		Reaction object's current id + _mass.
 	kinetic_reversibility : bool or None
-	 	The reversibility of the mass MassReaction.
+		The reversibility of the mass MassReaction.
 
 	Returns
 	-------
