@@ -351,7 +351,7 @@ EX_glc__D.add_metabolites({
 ### ### Source for AMP 
 ### ### Note: BiGG reaction does not exist
 EX_AMPIN = MassReaction(
-    id="AMPIN",
+    id="EX_AMPIN",
     name="AMP source",
     subsystem="Transport/Exchange",
     reversible=False
@@ -364,7 +364,7 @@ EX_AMPIN.add_metabolites({
 ### ### Sink for AMP
 ### ### Note: BiGG reaction does not exist
 EX_AMPOUT = MassReaction(
-    id="AMP",
+    id="EX_AMPOUT",
     name="AMP sink",
     subsystem="Transport/Exchange",
     reversible=False
