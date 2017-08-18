@@ -397,7 +397,7 @@ EX_pyr.add_metabolites({
 ### H <-> (null)
 ### ### Note: This is a pseudoreaction
 EX_h = MassReaction(
-    id="EX_h_e",
+    id="EX_h",
     name="H+ exchange",
     subsystem="Transport/Exchange"
 )
@@ -409,7 +409,7 @@ EX_h.add_metabolites({
 ### ### Note: BiGG reaction is different
 ### ### Note: This is a pseudoreaction
 EX_h2o = MassReaction(
-    id="EX_h2o_e",
+    id="EX_h2o",
     name="H2O exchange",
     subsystem="Transport/Exchange"
 )
@@ -430,9 +430,6 @@ rxns_list = [HEX1, PGI, PFK, FBA, TPI, GAPD, PGK,
              EX_pyr, EX_h, EX_h2o]
 
 glycolysis.add_reactions(rxns_list)
-
-### View model summary
-glycolysis
 
 ### Populate Model ###
 
@@ -549,7 +546,6 @@ EX_glc__D.forward_rate_constant = 1.12 # Hour^-1
 EX_AMPIN.forward_rate_constant = 0.014 # Hour^-1
 EX_AMPOUT.forward_rate_constant = 0.161424 # Hour^-1
 
-
 EX_lac__L.equilibrium_constant = 1
 EX_lac__L.forward_rate_constant = 5.6 # Hour^-1
 EX_lac__L.reverse_rate_constant = EX_lac__L.kf # Hour^-1
@@ -565,8 +561,6 @@ EX_h.reverse_rate_constant = EX_h.kf # Hour^-1
 EX_h2o.equilibrium_constant = 1
 EX_h2o.forward_rate_constant = 100000 # Hour^-1
 EX_h2o.reverse_rate_constant = EX_h2o.kf # Hour^-1
-
-### Set Steady-State Fluxes
 
 HEX1.ssflux = 1.12 # Millimole * Hour^-1 * Liter^1
 PGI.ssflux = 1.12 # Millimole * Hour^-1 * Liter^1
@@ -596,4 +590,3 @@ EX_pyr.ssflux = 0.224 # Millimole * Hour^-1 * Liter^1
 
 EX_h.ssflux = 2.688 # Millimole * Hour^-1 * Liter^1
 EX_h2o.ssflux = 0 # Millimole * Hour^-1 * Liter^1
-
