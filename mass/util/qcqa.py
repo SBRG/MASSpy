@@ -81,7 +81,7 @@ def qcqa_model(model, missing_params=True, missing_ics=True,
 	return
 
 def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
-							kr=False, ssflux=False):
+							kr=False, ssflux=False, custom_parameters=False):
 	"""Get the parameters that are missing from the reactions that exist
 	in the Massmodel.
 
@@ -150,6 +150,10 @@ def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
 		else:
 			missing_param_dict[rxn] = missing_params
 
+
+	if custom_parameters:
+		print("FIXME: HANDLE CUSTOM PARAMETERS FOR CUSTOM RATES")
+		
 	return missing_param_dict
 
 def get_missing_initial_conditions(model):
