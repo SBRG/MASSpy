@@ -430,8 +430,7 @@ class MassReaction(Object):
 	@gibbs_reaction_energy.setter
 	def gibbs_reaction_energy(self, value):
 		"""Set the Gibbs reaction energy of the reaction"""
-		if not isinstance(value, integer_types) and \
-			not isinstance(value, float):
+		if not isinstance(value, (integer_types, float)):
 			raise TypeError("Must be an integer or float")
 
 		self._gibbs_reaction_energy = value

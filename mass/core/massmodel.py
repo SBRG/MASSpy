@@ -684,8 +684,7 @@ class MassModel(Object):
 			values are the strings or sympy expressions
 		"""
 		# Check inputs
-		if not isinstance(rate_type, integer_types) and \
-			not isinstance(rate_type, float):
+		if not isinstance(rate_type, (integer_types, float)):
 			raise TypeError("rate_type must be an int or float")
 		elif not isinstance(sympy_expr, bool):
 			raise TypeError("sympy_expr must be a bool")
@@ -838,8 +837,7 @@ class MassModel(Object):
 				metab not in self.metabolites:
 				raise ValueError("Did not find %s in model metabolites"
 								" or exchanges" % metab)
-			if not isinstance(fixed_conc, integer_types) and \
-				not isinstance(fixed_conc, float):
+			if not isinstance(fixed_conc, (integer_types, float)):
 				raise TypeError("Fixed concentration must be an int or float")
 			elif fixed_conc < 0.:
 				raise ValueError("External concentration must be non-negative")
@@ -1047,13 +1045,11 @@ class MassModel(Object):
 		# Check inputs to ensure they are correct types
 		if not isinstance(second_model, MassModel):
 			raise TypeError("The second model to merge must be a MassModel")
-		if not isinstance(prefix_existing, string_types) and \
-			prefix_existing is not None:
+		if not isinstance(prefix_existing, (string_types, type(None))):
 			raise TypeError("prefix_existing must be a string or none")
 		if not isinstance(inplace, bool):
 			raise TypeError("inplace must be a bool")
-		if not isinstance(new_model_id, string_types) and \
-			new_model_id is not None:
+		if not isinstance(new_model_id, (string_types, type(None))):
 			raise TypeError("new_model_id must be a string or none")
 
 		if inplace:
@@ -1123,8 +1119,7 @@ class MassModel(Object):
 			raise TypeError("Steady state fluxes must be a dictionary where"
 							" keys are MassReactions and values are fluxes")
 
-		if not isinstance(at_equilibrium_default, integer_types) and \
-			not isinstance(at_equilibrium_default, float):
+		if not isinstance(at_equilibrium_default, (integer_types, float)):
 			raise TypeError("at_equilibrium_default must be an int or float")
 
 		if not isinstance(update_reactions, bool):

@@ -54,8 +54,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 	# Check inputs
 	if not isinstance(reaction, massreaction.MassReaction):
 		raise TypeError("reaction must be a MassReaction")
-	elif not isinstance(rate_type, integer_types) and \
-		not isinstance(rate_type, float):
+	elif not isinstance(rate_type, (integer_types, float)):
 		raise TypeError("rate_type must be an int or float")
 	elif not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
