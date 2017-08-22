@@ -45,12 +45,11 @@ class MassMetabolite(Species):
 		"""Initialize the MassMetabolite Object"""
 		if not isinstance(name, string_types):
 			raise TypeError("name must be a string type")
-		if not isinstance(formula, string_types) and formula != None:
+		if not isinstance(formula, (string_types, type(None))):
 			raise TypeError("formula must be a string type")
-		if not isinstance(charge, integer_types)  \
-			and not isinstance(charge, float) and charge != None:
-				raise TypeError("charge must be a number")
-		if not isinstance(compartment, string_types) and compartment != None:
+		if not isinstance(charge, (integer_types, float,type(None))):
+			raise TypeError("charge must be a number")
+		if not isinstance(compartment, (string_types, type(None))):
 			raise TypeError("compartment must be a string or none")
 
 		Species.__init__(self, id, name)
@@ -129,8 +128,7 @@ class MassMetabolite(Species):
 		--------
 		Initial concentrations of metabolites cannot be negative.
 		"""
-		if not isinstance(value, integer_types) and \
-			not isinstance(value, float):
+		if not isinstance(value, (integer_types, float)):
 			raise TypeError("Initial condition must be an integer or float")
 		if value < 0.:
 			raise ValueError("Initial condition must be a non-negative number")
@@ -144,8 +142,7 @@ class MassMetabolite(Species):
 	@gibbs_formation_energy.setter
 	def gibbs_formation_energy(self, value):
 		"""Set the Gibbs formation energy of the metabolite"""
-		if not isinstance(value, integer_types) and \
-			not isinstance(value, float):
+		if not isinstance(value, (integer_types, float)):
 			raise TypeError("Must be an integer or float")
 
 		self._gibbs_formation_energy = value

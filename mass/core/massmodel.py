@@ -103,7 +103,7 @@ class MassModel(Object):
 			self.initial_conditions = dict()
 			#For storing of custom rate laws and fixed concentrations
 			self.custom_rates= dict()
-			self.custom_rate_parameters = dict()
+			self.custom_parameters = dict()
 			self.fixed_concentrations = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
@@ -144,7 +144,7 @@ class MassModel(Object):
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
 		"""
-		rate_dict =  {rxn: rxn.rate_law_expr for rxn in self.reactions}
+		rate_dict =  {rxn: rxn.rate_law_expression for rxn in self.reactions}
 		if self.custom_rates != {}:
 			rate_dict.update(self.custom_rates)
 		return rate_dict
@@ -154,10 +154,8 @@ class MassModel(Object):
 		"""Get the ODEs for the metabolites as sympy expressions where
 		keys are the metabolite objects and values are the ODE expressions
 		"""
-		ode_dict = {metab: metab.ode for metab in self.metabolites}
-		if self.fixed_concentrations != {}:
-			ode_dict.update(self.fixed_concentrations)
-		return ode_dict
+		return {metab: metab.ode for metab in self.metabolites
+				if metab not in self.fixed_concentrations}
 
 	@property
 	def exchanges(self):
@@ -165,9 +163,12 @@ class MassModel(Object):
 		return [rxn for rxn in self.reactions if rxn.exchange]
 
 	@property
-	def get_exchange_metabolites(self):
-		return [rxn.get_exchange_metabolite for rxn in self.reactions
-				if rxn.exchange]
+	def get_external_metabolites(self):
+		"""Get all 'external' metabolites in the reaction. Primarily used for
+		setting fixed concentrations"""
+		external_set = {rxn.get_external_metabolite for rxn in self.reactions
+				if rxn.exchange}
+		return list(sorted(external_set))
 
 	@property
 	def get_metabolite_compartments(self):
@@ -188,7 +189,6 @@ class MassModel(Object):
 		"""Return all steady state fluxes stored in the model reactions"""
 		return {rxn: rxn.ssflux for rxn in self.reactions
 				if rxn.ssflux is not None}
-
 
 	# Methods
 	## Public
@@ -604,7 +604,7 @@ class MassModel(Object):
 				context(partial(self.update_S, reaction_list,
 							None, None, True))
 
-	def add_exchange(self, metabolite,exchange_type="source",
+	def add_exchange(self, metabolite, exchange_type="source",
 						external_concentration=0., reversible=True,
 						update_stoichiometry=False):
 		"""Add an exchange reaction for a given metabolite using the
@@ -650,10 +650,10 @@ class MassModel(Object):
 		rxn.add_metabolites({metabolite: c})
 		self.add_reactions([rxn], update_stoichiometry)
 		self.add_fixed_concentrations(fixed_conc_dict={
-			rxn.get_exchange_metabolite : external_concentration})
+			rxn.get_external_metabolite : external_concentration})
 
 	def generate_rate_laws(self, reaction_list=None, rate_type=1,
-							sympy_expr=False):
+							sympy_expr=False, update_reactions=False):
 		"""Get the rate laws for a list of reactions in a MassModel and return
 		them as human readable strings or as sympy expressions for simulations.
 
@@ -684,8 +684,7 @@ class MassModel(Object):
 			values are the strings or sympy expressions
 		"""
 		# Check inputs
-		if not isinstance(rate_type, integer_types) and \
-			not isinstance(rate_type, float):
+		if not isinstance(rate_type, (integer_types, float)):
 			raise TypeError("rate_type must be an int or float")
 		elif not isinstance(sympy_expr, bool):
 			raise TypeError("sympy_expr must be a bool")
@@ -706,7 +705,8 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		# Get the rates
-		return {rxn.id : rxn.generate_rate_law(rate_type, sympy_expr)
+		return {rxn :
+		rxn.generate_rate_law(rate_type, sympy_expr, update_reactions)
 				for rxn in reaction_list}
 
 	def get_mass_action_ratios(self, reaction_list=None,sympy_expr=False):
@@ -739,7 +739,7 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		# Get the mass action ratios
-		return {rxn.id : rxn.get_mass_action_ratio(sympy_expr)
+		return {rxn : rxn.get_mass_action_ratio(sympy_expr)
 		 		for rxn in reaction_list}
 
 	def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=False):
@@ -772,7 +772,7 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		# Get the disequilibrium ratios
-		return {rxn.id : rxn.get_disequilibrium_ratio(sympy_expr)
+		return {rxn : rxn.get_disequilibrium_ratio(sympy_expr)
 				for rxn in reaction_list}
 
 	def get_elemental_matrix(self, matrix_type=None, dtype=None):
@@ -833,30 +833,32 @@ class MassModel(Object):
 		if not isinstance(fixed_conc_dict, dict):
 			raise TypeError("fixed_conc_dict must be a dictionary")
 		for metab, fixed_conc in iteritems(fixed_conc_dict):
-			if metab not in self.get_exchange_metabolites and \
+			if metab not in self.get_external_metabolites and \
 				metab not in self.metabolites:
 				raise ValueError("Did not find %s in model metabolites"
 								" or exchanges" % metab)
-			if not isinstance(fixed_conc, integer_types) and \
-				not isinstance(fixed_conc, float):
+			if not isinstance(fixed_conc, (integer_types, float)):
 				raise TypeError("Fixed concentration must be an int or float")
-			if fixed_conc < 0.:
+			elif fixed_conc < 0.:
 				raise ValueError("External concentration must be non-negative")
+			else:
+				fixed_conc = float(fixed_conc)
+
 
 		# Keep track of existing initial conditions for HistoryManager
 		context = get_context(self)
 		if context:
-			existing_ics = {metab : self._fixed_concentrations[metab]
+			existing_ics = {metab : self.fixed_concentrations[metab]
 							for metab in fixed_conc_dict
-							if metab in self._fixed_concentrations}
+							if metab in self.fixed_concentrations}
 
-		self._fixed_concentrations.update(fixed_conc_dict)
+		self.fixed_concentrations.update(fixed_conc_dict)
 
 		if context:
 			for key in iterkeys(fixed_conc_dict):
 				if key not in iterkeys(existing_ics):
-					context(partial(self._fixed_concentrations.pop, key))
-				context(partial(self._fixed_concentrations.update,
+					context(partial(self.fixed_concentrations.pop, key))
+				context(partial(self.fixed_concentrations.update,
 								existing_ics))
 
 	def remove_fixed_concentrations(self, metabolites=None):
@@ -875,7 +877,7 @@ class MassModel(Object):
 			metabolites = [metabolites]
 
 		for metab in metabolites:
-			if metab not in self.get_exchange_metabolites and \
+			if metab not in self.get_external_metabolites and \
 				metab not in self.metabolites:
 				raise ValueError("Did not find %s in model metabolites"
 								" or exchanges" % metab)
@@ -883,15 +885,15 @@ class MassModel(Object):
 		# Keep track of existing initial conditions for HistoryManager
 		context = get_context(self)
 		if context:
-			existing_ics = {metab : self._fixed_concentrations[metab]
+			existing_ics = {metab : self.fixed_concentrations[metab]
 							for metab in metabolites
-							if metab in self._fixed_concentrations}
+							if metab in self.fixed_concentrations}
 
 		for metab in metabolites:
-			del self._fixed_concentrations[metab]
+			del self.fixed_concentrations[metab]
 
 		if context:
-			context(partial(self._fixed_concentrations.update, existing_ics))
+			context(partial(self.fixed_concentrations.update, existing_ics))
 
 	def repair(self, rebuild_index=True, rebuild_relationships=True):
 		"""Update all indexes and pointers in a MassModel
@@ -1043,13 +1045,11 @@ class MassModel(Object):
 		# Check inputs to ensure they are correct types
 		if not isinstance(second_model, MassModel):
 			raise TypeError("The second model to merge must be a MassModel")
-		if not isinstance(prefix_existing, string_types) and \
-			prefix_existing is not None:
+		if not isinstance(prefix_existing, (string_types, type(None))):
 			raise TypeError("prefix_existing must be a string or none")
 		if not isinstance(inplace, bool):
 			raise TypeError("inplace must be a bool")
-		if not isinstance(new_model_id, string_types) and \
-			new_model_id is not None:
+		if not isinstance(new_model_id, (string_types, type(None))):
 			raise TypeError("new_model_id must be a string or none")
 
 		if inplace:
@@ -1119,8 +1119,7 @@ class MassModel(Object):
 			raise TypeError("Steady state fluxes must be a dictionary where"
 							" keys are MassReactions and values are fluxes")
 
-		if not isinstance(at_equilibrium_default, integer_types) and \
-			not isinstance(at_equilibrium_default, float):
+		if not isinstance(at_equilibrium_default, (integer_types, float)):
 			raise TypeError("at_equilibrium_default must be an int or float")
 
 		if not isinstance(update_reactions, bool):
@@ -1227,7 +1226,8 @@ class MassModel(Object):
 					num_reactions=len(self.reactions),
 					num_genes=len(self.genes),
 					num_param=sum([len(rxn.parameters)
-									for rxn in self.reactions]),
+									for rxn in self.reactions] + \
+									[len(self.fixed_concentrations)]),
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
@@ -1255,7 +1255,6 @@ class MassModel(Object):
 			self._contexts = [HistoryManager()]
 
 		return self
-
 
 	def __exit__(self, type, value, traceback):
 		"""Pop the top context manager and trigger the undo functions

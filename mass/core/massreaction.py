@@ -235,7 +235,7 @@ class MassReaction(Object):
 									sympy_expr=False, update_reaction=True)
 
 	@property
-	def rate_law_expr(self):
+	def rate_law_expression(self):
 		"""Returns the rate law as a sympy expression"""
 
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
@@ -304,7 +304,7 @@ class MassReaction(Object):
 			not (self.reactants and self.products))
 
 	@property
-	def get_exchange_metabolite(self):
+	def get_external_metabolite(self):
 		"""Get an "external" metabolite for exchanges.	Primarily used for
 		setting fixed concentrations in the MassModel.
 
@@ -430,8 +430,7 @@ class MassReaction(Object):
 	@gibbs_reaction_energy.setter
 	def gibbs_reaction_energy(self, value):
 		"""Set the Gibbs reaction energy of the reaction"""
-		if not isinstance(value, integer_types) and \
-			not isinstance(value, float):
+		if not isinstance(value, (integer_types, float)):
 			raise TypeError("Must be an integer or float")
 
 		self._gibbs_reaction_energy = value
