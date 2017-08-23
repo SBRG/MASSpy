@@ -312,7 +312,7 @@ def _generate_rate_expr_type_1(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -333,7 +333,7 @@ def _generate_rate_expr_type_1(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -361,7 +361,7 @@ def _generate_rate_expr_type_2(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -383,7 +383,7 @@ def _generate_rate_expr_type_2(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -410,7 +410,7 @@ def _generate_rate_expr_type_3(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -432,7 +432,7 @@ def _generate_rate_expr_type_3(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -460,7 +460,7 @@ def _get_mass_action_ratio_expr(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				reactant_bits = sp.Mul(reactant_bits, metab_ode)
@@ -477,7 +477,7 @@ def _get_mass_action_ratio_expr(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				product_bits = sp.Mul(product_bits, metab_ode)
@@ -486,39 +486,3 @@ def _get_mass_action_ratio_expr(reaction):
 
 	# Combine to make the mass action ratio
 	return sp.Mul(product_bits, sp.Pow(reactant_bits, -1))
-
-def _collect_and_sort_symbols(model):
-	# Initialize sets to store the symbols
-	metab_symbols = set()
-	rate_symbols = set()
-	fixed_conc_symbols = set()
-	custom_symbols = set()
-	symbol_collection = set()
-	# Collect all symbols in the odes expressions into one set
-	for item, expression in iteritems(model.odes):
-		symbols = expression.atoms(sp.Symbol)
-		for sym in symbols:
-			if sym not in symbol_collection:
-				symbol_collection.add(sym)
-	# Sort the symbols into their respective sets
-	for sym in symbol_collection:
-		sym_str = str(sym)
-		# Symbols representing fixed concentrations
-		if sym_str in iterkeys(model.fixed_concentrations):
-			fixed_conc_symbols.add(sym)
-		# Symbols representing rate parameters
-		elif re.search("kf|Keq|kr",sym_str):
-			rate_symbols.add(sym)
-		# Symbols representing custom rate paraemters
-		elif sym_str in iterkeys(model.custom_parameters):
-			custom_symbols.add(sym)
-		# Sort metabolites with fixed concentrations and those that use ODEs
-		else:
-			metab = model.metabolites.get_by_id(sym_str)
-			# Symbols representing fixed metabolite species
-			if metab in iterkeys(model.fixed_concentrations):
-				fixed_conc_symbols.add(sym)
-			else:
-				metab_symbols.add(sym)
-	# Return the list of sorted symbols
-	return [metab_symbols, rate_symbols, fixed_conc_symbols, custom_symbols]
