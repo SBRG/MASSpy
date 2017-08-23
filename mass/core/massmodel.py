@@ -1005,7 +1005,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		massmodel._S = array.create_stoichiometric_matrix(massmodel,
+		new_model._S = array.create_stoichiometric_matrix(self,
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
