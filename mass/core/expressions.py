@@ -486,3 +486,41 @@ def _get_mass_action_ratio_expr(reaction):
 
 	# Combine to make the mass action ratio
 	return sp.Mul(product_bits, sp.Pow(reactant_bits, -1))
+
+def _collect_and_sort_symbols(model):
+	# Initialize sets to store the symbols
+	ode_dict = model.odes
+	rate_dict = model.rate_expressions
+	metab_funcs = set()
+	rate_symbols = set()
+	fixed_symbols = set()
+	custom_symbols = set()
+	# Collect all symbols in the odes expressions into one set
+	for item, expression in iteritems(model.odes):
+		symbols = expression.atoms(sp.Symbol)
+		functions = expression.atoms(sp.Function)
+		for sym in symbols:
+		# Sort the symbols into their respective sets
+			sym_str = str(sym)
+			# Symbols representing fixed concentrations
+			if sym_str in iterkeys(model.fixed_concentrations):
+				fixed_symbols.add(sym)
+			# Symbols representing rate parameters
+			if re.search("kf|Keq|kr",sym_str):
+				rate_symbols.add(sym)
+			# Symbols representing custom rate paraemters
+			if sym_str in iterkeys(model.custom_parameters):
+				custom_symbols.add(sym)
+
+		for func in functions:
+			metab = model.metabolites.get_by_id(str(func)[:-3])
+			if metab in iterkeys(model.fixed_concentrations):
+				metab_sym = sp.Symbol(metab.id, nonnegative=True)
+				ode_dict[item] = expression.subs({func: metab_sym})
+				for rxn, rate in iteritems(model.rate_expressions):
+					rate_dict[rxn] = rate.subs({func: metab_sym})
+				fixed_symbols.add(metab_sym)
+			else:
+				metab_funcs.add(func)
+	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
+	return ode_dict, rate_dict, symbol_list
