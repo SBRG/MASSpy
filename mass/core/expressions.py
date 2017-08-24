@@ -182,13 +182,14 @@ def strip_time(sympy_expr_dict):
 		A dictionary of sympy expressions.
 	"""
 	for item, expression in iteritems(sympy_expr_dict):
+
 		metab_funcs= expression.atoms(sp.Function)
 		metab_syms = list(sp.Symbol(str(m_func)[:-3])
 							for m_func in metab_funcs)
 		metab_func_to_sym = dict((m_func, metab_syms[i])
 								for i, m_func in enumerate(list(metab_funcs)))
 		sympy_expr_dict[item] = expression.subs(metab_func_to_sym)
-		return sympy_expr_dict
+	return sympy_expr_dict
 
 ## Internal
 def _generate_rate_type_1(reaction):
