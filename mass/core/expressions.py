@@ -172,6 +172,24 @@ def generate_ode(metabolite):
 		metabolite._ode = sp.Add(metabolite._ode, rate_law_expr)
 	return metabolite._ode
 
+def strip_time(sympy_expr_dict):
+	"""Strip the time dependency in sympy expresssions. Returns a dictionary
+	with the expressions updated for each entry
+
+	Parameters
+	----------
+	sympy_expr_dict : dict
+		A dictionary of sympy expressions.
+	"""
+	for item, expression in iteritems(sympy_expr_dict):
+		metab_funcs= expression.atoms(sp.Function)
+		metab_syms = list(sp.Symbol(str(m_func)[:-3])
+							for m_func in metab_funcs)
+		metab_func_to_sym = dict((m_func, metab_syms[i])
+								for i, m_func in enumerate(list(metab_funcs)))
+		sympy_expr_dict[item] = expression.subs(metab_func_to_sym)
+		return sympy_expr_dict
+
 ## Internal
 def _generate_rate_type_1(reaction):
 	"""Internal use. Generates the type 1 rate law for the reaction as
@@ -487,10 +505,16 @@ def _get_mass_action_ratio_expr(reaction):
 	# Combine to make the mass action ratio
 	return sp.Mul(product_bits, sp.Pow(reactant_bits, -1))
 
-def _collect_and_sort_symbols(model):
+def _sort_symbols(model, rate_type=None):
+	"""Internal use. Collect and sort the symbols in expressions of a model
+	into different sets, and adjust odes and rates accordingly"""
+	if rate_type is None:
+		rate_type = model._rtype
+
 	# Initialize sets to store the symbols
 	ode_dict = model.odes
-	rate_dict = model.rate_expressions
+	rate_dict = model.generate_rate_laws(rate_type=rate_type,
+								sympy_expr=True, update_reactions=False)
 	metab_funcs = set()
 	rate_symbols = set()
 	fixed_symbols = set()

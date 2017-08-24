@@ -6,7 +6,6 @@ from __future__ import absolute_import
 import re
 import numpy as np
 import sympy as sp
-from sympy.utilities.lambdify import lambdastr
 from six import iteritems, iterkeys, itervalues
 from scipy.integrate import ode
 from mass.core import expressions
@@ -26,7 +25,7 @@ fixed_re = re.compile("fix|fixed|fixed_concentration")
 
 def simulate(model, time_vector, perturbations=None):
 	# Collect sympy symbols and make dictionariess for odes and rates
-	odes, rates, symbols = expressions._collect_and_sort_symbols(model)
+	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
 	if perturbations is not None:
 		odes, rates, symbols, perturbations = _perturb(model, odes, rates,
@@ -238,7 +237,6 @@ def _make_lambda_rates(model, metabolites, rate_dict, values):
 
 	metab_func_to_sym = dict((metab_func, metab_syms[i])
 							for i, metab_func in enumerate(list(metabolites)))
-	rxns = list()
 	for rxn, rate in iteritems(rate_dict):
 		rate = rate.subs(metab_func_to_sym).subs(values)
 		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites))
