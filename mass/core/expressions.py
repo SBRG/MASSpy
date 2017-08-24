@@ -66,6 +66,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 	if len(reaction.metabolites) == 0:
 		return None
 
+	rxn = _ignore_h_and_h2o(reaction)
 	rate_constructor = {
 		1 : [_generate_rate_type_1, _generate_rate_expr_type_1],
 		2 : [_generate_rate_type_2, _generate_rate_expr_type_2],
@@ -75,11 +76,11 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 		raise ValueError("rate_type must be 1, 2, or 3")
 
 	# Construct the rate law
-	rate_law = rate_constructor[rate_type][0](reaction)
-	rate_law_expr = rate_constructor[rate_type][1](reaction)
+	rate_law = rate_constructor[rate_type][0](rxn)
+	rate_law_expr = rate_constructor[rate_type][1](rxn)
 
 	if update_reaction:
-		reaction._rate_law_expr = rate_law_expr
+		reaction._rate_expr = rate_law_expr
 		reaction._rate_law = rate_law
 		reaction._rtype = rate_type
 
@@ -107,18 +108,12 @@ def get_mass_action_ratio(reaction, sympy_expr=False):
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
 
-	ma_r = _get_mass_action_ratio_expr(reaction)
+	rxn = _ignore_h_and_h2o(reaction)
+	ma_r = _get_mass_action_ratio_expr(rxn)
 	if sympy_expr:
 		return ma_r
 	else:
-		ma_r = str(ma_r)
-		for m in iterkeys(reaction.metabolites):
-			m_re = re.compile(m.id)
-			ma_r = m_re.sub(m.id + "(t)", ma_r)
-		r = re.search("[/]", ma_r)
-		return "%s / %s" % (ma_r[:r.start()],
-						ma_r[r.end():])
-
+		return str(ma_r)
 
 def get_disequilibrium_ratio(reaction, sympy_expr=False):
 	"""Generate the disequilibrium ratio for the reaction as
@@ -138,19 +133,15 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 		raise TypeError("reaction must be a MassReaction")
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
+	rxn = _ignore_h_and_h2o(reaction)
 
-	de_r = sp.Mul(_get_mass_action_ratio_expr(reaction),
-							sp.Pow(sp.var(reaction._sym_Keq), -1))
+	de_r = sp.Mul(_get_mass_action_ratio_expr(rxn),
+							sp.Pow(sp.var(rxn._sym_Keq), -1))
 	if sympy_expr:
 		return de_r
 	else:
-		de_r = str(de_r)
-		for m in iterkeys(reaction.metabolites):
-			m_re = re.compile(m.id)
-			de_r = m_re.sub(m.id + "(t)", de_r)
-		r = re.search("[/]", de_r)
-		return "%s / %s" % (de_r[:r.start()],
-						de_r[r.end():])
+		return str(de_r)
+
 
 def generate_ode(metabolite):
 	if not isinstance(metabolite, massmetabolite.MassMetabolite):
@@ -165,7 +156,7 @@ def generate_ode(metabolite):
 			print("FIXME: IMPLEMENT CUSTOM RATES")
 			return None
 		else:
-			rate_law_expr = rxn.rate_law_expression
+			rate_law_expr = rxn.rate_expression
 
 		if metabolite in rxn.reactants:
 			rate_law_expr = sp.Mul(-1, rate_law_expr)
@@ -542,10 +533,23 @@ def _sort_symbols(model, rate_type=None):
 			if metab in iterkeys(model.fixed_concentrations):
 				metab_sym = sp.Symbol(metab.id, nonnegative=True)
 				ode_dict[item] = expression.subs({func: metab_sym})
-				for rxn, rate in iteritems(model.rate_expressions):
-					rate_dict[rxn] = rate.subs({func: metab_sym})
+				for reaction, rate in iteritems(model.rate_expressions):
+					rate_dict[reaction] = rate.subs({func: metab_sym})
 				fixed_symbols.add(metab_sym)
 			else:
 				metab_funcs.add(func)
 	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
 	return ode_dict, rate_dict, symbol_list
+
+def _ignore_h_and_h2o(reaction):
+	"""Internal use. Remove hydrogen and water from reactions to prevent them
+	from inclusion in simulation. Will not effect hydrogen and water exchanges
+	"""
+	reaction = reaction.copy()
+	for metab, coefficient in iteritems(reaction.metabolites):
+		if metab.elements == {'H': 2, 'O': 1} or \
+			metab.elements == {'H': 1}:
+			if not reaction.exchange:
+				reaction.subtract_metabolites({metab:coefficient})
+
+	return reaction

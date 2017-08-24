@@ -23,7 +23,7 @@ kr_re = re.compile("kr|reverse_rate_constant")
 ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed|fixed_concentration")
 
-def simulate(model, time_vector, perturbations=None):
+def simulate(model, time_vector, perturbations=None, solver="vode"):
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
@@ -31,7 +31,7 @@ def simulate(model, time_vector, perturbations=None):
 		odes, rates, symbols, perturbations = _perturb(model, odes, rates,
 													symbols, perturbations)
 	# Get values to substitute into ODEs and the metabolite initial conditions
-	values, initial_conditions = _get_values(model, perturbations, symbols)
+	values, ics = _get_values(model, perturbations, symbols)
 
 	metab_syms = symbols[0]
 	fixed_syms = symbols[2]
@@ -41,7 +41,7 @@ def simulate(model, time_vector, perturbations=None):
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
 
 	# Integrate the odes to obtain the concentration solutions
-	c = _integrate_odes(time_vector, lam_odes, lam_jacb, initial_conditions)
+	c = _integrate_odes(time_vector, lam_odes, lam_jacb, ics, solver)
 
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
@@ -204,7 +204,7 @@ def _make_lambda_odes(model, metabolites, ode_dict, values):
 
 	return [lambda_odes, lambda_jacb]
 
-def _integrate_odes(t_vector, lam_odes, lam_jacb, ics):
+def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver):
 	# Fix types from tuples to lists
 	def f(t, y):
 		res = lam_odes(t, y)
@@ -216,7 +216,7 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics):
 
 	# Set up integrator
 	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
-	integrator.set_integrator("dopri5")
+	integrator.set_integrator(solver, nsteps=int(1000000))
 
 	# Set up solutions array
 	y = np.zeros((len(t_vector), len(ics)))

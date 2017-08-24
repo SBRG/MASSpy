@@ -136,7 +136,9 @@ class MassModel(Object):
 		in a dictionary where keys are the reaction objects and values are the
 		rate laws
 		"""
-		rate_dict =  {rxn: rxn.rate_law for rxn in self.reactions}
+		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
+								sympy_expr=False, update_reaction=True)
+								for rxn in self.reactions}
 		if self.custom_rates != {}:
 			rate_dict.update(self.custom_rates)
 		return rate_dict
@@ -147,7 +149,9 @@ class MassModel(Object):
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
 		"""
-		rate_dict =  {rxn: rxn.rate_law_expression for rxn in self.reactions}
+		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
+								sympy_expr=True, update_reaction=True)
+								for rxn in self.reactions}
 		if self.custom_rates != {}:
 			rate_dict.update(self.custom_rates)
 		return rate_dict
@@ -1094,7 +1098,7 @@ class MassModel(Object):
 
 	def calc_PERCS(self, steady_state_concentrations=None,
 					steady_state_fluxes=None, at_equilibrium_default=100000.,
-					update_reactions=False, include_h_and_h20=False):
+					update_reactions=False):
 		"""Calculate the pseudo rate constants (rxn.forward_rate_constant)
 		for reactions in the MassModel using steady state concentrations and
 		steady state fluxes.
@@ -1199,17 +1203,8 @@ class MassModel(Object):
 				else:
 					metab = self.metabolites.get_by_id(str(sym))
 					values.update({sym : self.initial_conditions[metab]})
-					# Remove hydrogen and water from PERC calculations
-					if not include_h_and_h20:
-						if metab.elements == {'H': 2, 'O': 1} or \
-							metab.elements == {'H': 1}:
-							values[sym] = 1
 
 			flux = steady_state_fluxes[rxn]
-			if not include_h_and_h20:
-				if metab.elements == {'H': 2, 'O': 1} or \
-					metab.elements == {'H': 1}:
-					flux = 0
 
 			# Set equilbrium default if no flux
 			if flux == 0:
