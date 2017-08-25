@@ -6,11 +6,16 @@ from __future__ import absolute_import
 # Import necesary packages
 import numpy as np
 import pandas as pd
+from sympy import Matrix
 from scipy.sparse import dok_matrix, lil_matrix
 from six import string_types, iteritems
 
+# from mass
+from mass.core import massmodel
+
 # Class begins
-def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
+## Public
+def create_stoichiometric_matrix(model, matrix_type=None, dtype=None,
 								update_model=True):
 	"""Return the stoichiometrix matrix representation for a given massmodel
 
@@ -41,13 +46,183 @@ def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 	matrix of class 'dtype'
 		The stoichiometric matrix for the given MassModel
 	"""
+	# Check input of update model
+	if not isinstance(update_model, bool):
+		raise TypeError("update_model must be a bool")
+
+	# Set up for matrix construction if matrix types are correct.
+	(matrix_constructor, dtype) = _setup_matrix_constructor(model,
+										matrix_type=matrix_type, dtype=dtype)
+	n_metabolites = len(model.metabolites)
+	n_reactions = len(model.reactions)
+
+	# No need to construct a matrix if there are no metabolites or species
+	if n_metabolites == 0 or n_reactions == 0:
+		s_matrix = None
+
+	else:
+		# Construct the stoichiometric matrix
+		s_matrix = matrix_constructor((n_metabolites, n_reactions),
+										dtype=dtype)
+		# Get index for metabolites and reactions
+		m_ind = model.metabolites.index
+		r_ind = model.reactions.index
+
+		# Build matrix
+		for rxn in model.reactions:
+			for metab, stoic in iteritems(rxn.metabolites):
+				s_matrix[m_ind(metab), r_ind(rxn)] = stoic
+		# Convert matrix to dataframe if matrix type is a dataframe
+		if matrix_type == 'dataframe':
+			metabolite_ids =[metab.id for metab in model.metabolites]
+			reaction_ids = [rxn.id for rxn in model.reactions]
+			s_matrix = pd.DataFrame(s_matrix, index = metabolite_ids,
+											columns = reaction_ids)
+
+		# Update the model's stored matrix data if True
+	if update_model:
+		_update_model_s(model, s_matrix, matrix_type, dtype)
+
+	return s_matrix
+
+def nullspace(A, orient="col", integers=False):
+	"""Compute an approximate basis for the nullspace of A.
+
+	The sympy.Matrix.nullspace method is utilized to calculate the ns.
+	The algorithm utilizes Gaussian elimination with back substitution
+
+	Parameters
+	----------
+	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas
+		A should be at most 2-D.  A 1-D array with length k will be treated
+		as a 2-D with shape (1, k)
+	orient : 'row' or 'col'
+		Whether to output the nullspace as row vectors or column vectors
+	integers : bool
+		If true, will find the least common denominator in
+		each vector and turn the entries into integers
+
+	Returns
+	-------
+	numpy.ndarray of shape
+		If `A` is an array with shape (m, k), then `ns` will be an array
+		with shape (k, n) for orientation 'col',where n is the estimated
+		dimension of the nullspace of `A`. The columns of ns are a basis for
+		nullspace; each element in numpy.dot(A, ns) will be approximately zero.
+	"""
+	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
+		pass
+	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
+		A = A.toarray()
+	else:
+		raise TypeError("Matrix must be one of the following formats: "
+				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
+
+	if orient not in ("row" "col"):
+		raise TypeError("Orientation must be either 'row' or 'col'")
+
+	A = np.atleast_2d(A)
+	ns = np.array(Matrix(A).nullspace()).astype(np.float64)
+	# Make integers if True
+	if integers:
+		for i in range(ns.shape[0]):
+			# Find abs min value with index
+			ma = np.ma.masked_values(np.absolute(ns[i]), 0.0, copy=False)
+			# Rationalize by dividing by abs min value
+			ns[i] = np.divide(ns[i], ma.min())
+
+	# Set orientation
+	if orient is "col":
+		ns = ns.T
+
+	return ns
+
+def left_nullspace(A, orient="row", integers=False):
+	"""Compute an approximate basis for the left nullspace of A.
+
+	The sympy.Matrix.nullspace method is utilized to calculate the lns
+	The algorithm utilizes Gaussian elimination with back substitution
+
+	Parameters
+	----------
+	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas
+		A should be at most 2-D.  A 1-D array with length k will be treated
+		as a 2-D with shape (1, k)
+	orient : 'row' or 'col'
+		Whether to output the nullspace as row vectors or column vectors
+	integers : bool
+		If true, will find the least common denominator for fractions in
+		each vector and turn the entries into integers
+
+	Returns
+	-------
+	numpy.ndarray of shape
+		If `A` is an array with shape (m, k), then `lns` will be an array
+		with shape (n, k) for orientation "row" where n is the estimated
+		dimension of the left nullspace of `A`.
+		The rows of lns are a basis for the left nullspace; each element
+		in numpy.dot(lns, A) will be approximately zero.
+	"""
+	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
+		pass
+	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
+		A = A.toarray()
+	else:
+		raise TypeError("Matrix must be one of the following formats: "
+				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
+	A = np.atleast_2d(A)
+	lns = nullspace(np.transpose(A), orient, integers)
+	return lns
+
+def matrix_rank(A):
+	"""Get the rank of a matrix.
+
+	Utilizes sympy.Matrix.rank method
+
+	Parameters
+	----------
+	A : numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'
+		A should be at most 2-D.  A 1-D array with length k will be treated
+		as a 2-D with shape (1, k)
+	"""
+	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
+		pass
+	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
+		A = A.toarray()
+	else:
+		raise TypeError("Matrix must be one of the following formats: "
+				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
+
+	return Matrix(A).rank()
+
+## Internal
+def _setup_matrix_constructor(model, matrix_type=None, dtype=None):
+	"""Internal use. Check inputs and create a constructor for the specified
+	matrix type.
+
+	Parameters
+	----------
+	model : mass.MassModel
+		The MassModel object to construct the matrix for
+	matrix_type: string {'dense', 'dok', 'lil', 'dataframe'}, or None
+	   Construct the S matrix with the specified matrix type. If None, will
+	   utilize  the matrix type in the massmodel. If massmodel does not have a
+	   specified matrix type, will default to 'dense'
+	   Not case sensitive
+	dtype : data-type
+		Construct the S matrix with the specified data type. If None, will
+		utilize  the data type in the massmodel. If massmodel does not have a
+		specified data type, will default to float64
+	Returns
+	-------
+	matrix of class 'dtype'
+	"""
 	# Dictionary for constructing the matrix
 	matrix_constructor = {'dense': np.zeros, 'dok': dok_matrix,
 				'lil': lil_matrix, 'dataframe': np.zeros}
 
-	# Check input of update model
-	if not isinstance(update_model, bool):
-		raise TypeError("update_model must be a bool")
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a MassModel")
 
 	# Check matrix type input if it exists
 	if matrix_type is not None:
@@ -57,8 +232,8 @@ def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 		matrix_type = matrix_type.lower()
 	else:
 		# Use the models stored matrix type if None is specified
-		if massmodel._matrix_type is not None:
-			matrix_type = massmodel._matrix_type
+		if model._matrix_type is not None:
+			matrix_type = model._matrix_type
 		# Otherwise use the default type, 'dense'
 		else:
 			matrix_type = 'dense'
@@ -68,51 +243,22 @@ def create_stoichiometric_matrix(massmodel, matrix_type=None, dtype=None,
 		raise ValueError("matrix_type must be a string of one of the following"
 						" types: {'dense', 'dok', 'lil', 'dataframe'}")
 	# Check to see if scipy matricies loaded properly if one is selected
-	elif matrix_constructor[matrix_type] is None:
+	if matrix_constructor[matrix_type] is None:
 		raise ValueError("Sparse matrices require scipy")
-	# Set up for matrix construction if matrix types are correct.
-	else:
-		n_metabolites = len(massmodel.metabolites)
-		n_reactions = len(massmodel.reactions)
 
 	# Set the data-type if it is none
 	if dtype is None:
 		# Use the models stored data type if available
-		if massmodel._dtype is not None:
-			dtype = massmodel._dtype
+		if model._dtype is not None:
+			dtype = model._dtype
 		# Otherwise use the default type, np.float64
 		else:
 			dtype = np.float64
-	# No need to construct a matrix if there are no metabolites or species
-	if n_metabolites == 0 or n_reactions == 0:
-		s_matrix = None
 
-	else:
-		# Construct the stoichiometric matrix
-		s_matrix = matrix_constructor[matrix_type](
-								(n_metabolites, n_reactions), dtype=dtype)
-		# Get index for metabolites and reactions
-		m_ind = massmodel.metabolites.index
-		r_ind = massmodel.reactions.index
+	constructor = matrix_constructor[matrix_type]
+	return (constructor, dtype)
 
-		# Build matrix
-		for rxn in massmodel.reactions:
-			for metab, stoic in iteritems(rxn.metabolites):
-				s_matrix[m_ind(metab), r_ind(rxn)] = stoic
-		# Convert matrix to dataframe if matrix type is a dataframe
-		if matrix_type == 'dataframe':
-			metabolite_ids =[metab.id for metab in massmodel.metabolites]
-			reaction_ids = [rxn.id for rxn in massmodel.reactions]
-			s_matrix = pd.DataFrame(s_matrix, index = metabolite_ids,
-											columns = reaction_ids)
-
-		# Update the model's stored matrix data if True
-	if update_model:
-		_update_model_s(massmodel, s_matrix, matrix_type, dtype)
-
-	return s_matrix
-
-def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
+def _update_S(model, reaction_list=None, matrix_type=None, dtype=None,
 			update_model=True):
 	"""For internal use only. Update the S matrix of the model.
 
@@ -146,6 +292,9 @@ def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
 	matrix of class 'dtype'
 		The stoichiometric matrix for the given MassModel
 	"""
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a MassModel")
+
 	# Check matrix type input if it exists to ensure its a valid matrix type
 	if matrix_type is not None:
 		if not isinstance(matrix_type, string_types):
@@ -156,152 +305,36 @@ def _update_S(massmodel, reaction_list=None, matrix_type=None, dtype=None,
 			raise ValueError("matrix_type must be of one of the following"
 							" types: {'dense', 'dok', 'lil', 'dataframe'}")
 	else:
-		matrix_type = massmodel._matrix_type
+		matrix_type = model._matrix_type
 
 	# Use the model's stored datatype if the datatype is not specified
 	if dtype is None:
-		dtype = massmodel._dtype
+		dtype = model._dtype
 
 	# Check input of update model
 	if not isinstance(update_model, bool):
 		raise TypeError("update_model must be a bool")
 
 	# If there is no change to the reactions, just reconstruct the model
-	if massmodel._S is None or reaction_list is None:
-		s_matrix = create_stoichiometric_matrix(massmodel,
+	if model._S is None or reaction_list is None:
+		s_matrix = create_stoichiometric_matrix(model,
 						matrix_type=matrix_type,
 						dtype=dtype,
 						update_model=update_model)
 	else:
-		s_matrix = _update_stoichiometry(massmodel, reaction_list,
+		s_matrix = _update_stoichiometry(model, reaction_list,
 										matrix_type=matrix_type)
 
 	if update_model:
-		_update_model_s(massmodel, s_matrix, matrix_type, dtype)
+		_update_model_s(model, s_matrix, matrix_type, dtype)
 
 	return s_matrix
 
-
-def nullspace(A, atol=1e-13, rtol=0):
-	"""Compute an approximate basis for the nullspace of A.
-	The algorithm used by this function is based on the singular value
-	decomposition of `A`.
-
-	Parameters
-	----------
-	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas
-		A should be at most 2-D.  A 1-D array with length k will be treated
-		as a 2-D with shape (1, k)
-	atol : float
-		The absolute tolerance for a zero singular value.  Singular values
-		smaller than `atol` are considered to be zero.
-	rtol : float
-		The relative tolerance.  Singular values less than rtol*smax are
-		considered to be zero, where smax is the largest singular value.
-
-	If both `atol` and `rtol` are positive, the combined tolerance is the
-	maximum of the two; that is::
-	tol = max(atol, rtol * smax)
-	Singular values smaller than `tol` are considered to be zero.
-
-	Returns
-	-------
-	numpy.ndarray
-		If `A` is an array with shape (m, k), then `ns` will be an array
-		with shape (k, n), where n is the estimated dimension of the
-		nullspace of `A`.  The columns of `ns` are a basis for the
-		nullspace; each element in numpy.dot(A, ns) will be approximately
-		zero.
-
-	Notes
-	-----
-	Algorithm from the numpy cookbook.
-	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		pass
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
-
-	A = np.atleast_2d(A)
-	u, s, vh = np.linalg.svd(A)
-	tol = max(atol, rtol * s[0])
-	nnz = (s >= tol).sum()
-	ns = vh[nnz:].conj().T
-	return ns
-
-
-def left_nullspace(A, atol=1e-13, rtol=0):
-	"""Compute an approximate basis for the left nullspace of A.
-	The algorithm used by this function is based on the singular value
-	decomposition of `A`.
-
-	Parameters
-	----------
-	A : numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'
-		A should be at most 2-D.  A 1-D array with length k will be treated
-		as a 2-D with shape (1, k)
-	atol : float
-		The absolute tolerance for a zero singular value.  Singular values
-		smaller than `atol` are considered to be zero.
-	rtol : float
-		The relative tolerance.  Singular values less than rtol*smax are
-		considered to be zero, where smax is the largest singular value.
-
-	If both `atol` and `rtol` are positive, the combined tolerance is the
-	maximum of the two; that is::
-	tol = max(atol, rtol * smax)
-	Singular values smaller than `tol` are considered to be zero.
-
-	Returns
-	-------
-	numpy.ndarray
-		If `A` is an array with shape (m, k), then `ns` will be an array
-		with shape (m, n), where n is the estimated dimension of the
-		left nullspace of `A`.  The columns of `lns` are a basis for the
-		left nullspace; each element in numpy.dot(np.transpose(A), lns) will
-		be approximately zero.
-	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		pass
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
-
-	At = np.transpose(A)
-	lns = nullspace(At, atol=atol, rtol=rtol)
-	return lns
-
-def matrix_rank(A, tol=None):
-	"""Get the rank of a matrix.
-
-	Parameters
-	----------
-	A : numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'
-		A should be at most 2-D.  A 1-D array with length k will be treated
-		as a 2-D with shape (1, k)
-	tol : {None, float}, optional
-		The Threshold below which SVD values are considered zero. If tol is
-		None, S is an array with singular values for A, and eps is the epsilon
-		value for datatype of S, tol is set to S.max() * max(A.shape) * eps
-	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		pass
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, dok_matrix, lil_matrix, or pandas 'DataFrame'")
-
-	return np.linalg.matrix_rank(A, tol)
-
-def _update_stoichiometry(massmodel, reaction_list, matrix_type=None):
+def _update_stoichiometry(model, reaction_list, matrix_type=None):
 	"""For internal uses only. To update the stoichometric matrix with
-	additional reactions and metabolites.
+	additional reactions and metabolites efficiently by converting to
+	a dok matrix, updating the dok matrix, and converting back to the
+	desired type
 
 	Parameters
 	----------
@@ -318,29 +351,29 @@ def _update_stoichiometry(massmodel, reaction_list, matrix_type=None):
 	use the massmodel.update_S method instead
 	"""
 	# Set defaults
-	shape = (len(massmodel.metabolites), len(massmodel.reactions))
+	shape = (len(model.metabolites), len(model.reactions))
 	if matrix_type is None:
 		matrix_type = 'dense'
 
 	# Get the S matrix as a dok matrix
-	s_matrix = _convert_S(massmodel._S, 'dok')
+	s_matrix = _convert_S(model._S, 'dok')
 	# Resize the matrix
 	s_matrix.resize(shape)
 
 	# Update the matrix
 	coefficient_dictionary = {}
 	for rxn in reaction_list:
-		rxn_index = massmodel.reactions.index(rxn.id)
+		rxn_index = model.reactions.index(rxn.id)
 		for metab, coeff in rxn._metabolites.items():
-			coefficient_dictionary[(massmodel.metabolites.index(metab.id),
+			coefficient_dictionary[(model.metabolites.index(metab.id),
 									rxn_index)] = coeff
 	s_matrix.update(coefficient_dictionary)
 
 	# Convert the matrix to the desired type
 	s_matrix = _convert_S(s_matrix, matrix_type)
 	if matrix_type == 'dataframe':
-		metabolite_ids =[metab.id for metab in massmodel.metabolites]
-		reaction_ids = [rxn.id for rxn in massmodel.reactions]
+		metabolite_ids =[metab.id for metab in model.metabolites]
+		reaction_ids = [rxn.id for rxn in model.reactions]
 		s_matrix = pd.DataFrame(s_matrix, index = metabolite_ids,
 										columns = reaction_ids)
 
@@ -383,7 +416,7 @@ def _convert_S(s_matrix, matrix_type):
 	s_matrix = matrix_conversion[matrix_type](s_mat=s_matrix)
 	return s_matrix
 
-def _update_model_s(massmodel, s_matrix, matrix_type, dtype):
+def _update_model_s(model, s_matrix, matrix_type, dtype):
 	"""For internal use only. Update the model storage of the s matrix,
 	matrix type, and data type
 
@@ -392,6 +425,6 @@ def _update_model_s(massmodel, s_matrix, matrix_type, dtype):
 	This method is intended for internal use only. To safely convert a matrix
 	to another type of matrix, use the massmodel.update_S method instead
 	"""
-	massmodel._S = s_matrix
-	massmodel._matrix_type = matrix_type
-	massmodel._dtype = dtype
+	model._S = s_matrix
+	model._matrix_type = matrix_type
+	model._dtype = dtype
