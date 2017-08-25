@@ -8,6 +8,7 @@ import logging
 import re
 import pandas as pd
 import numpy as np
+import sympy as sp
 from six import string_types, integer_types, iteritems, iterkeys
 from copy import copy, deepcopy
 from functools import partial
@@ -21,6 +22,7 @@ from cobra.util.context import HistoryManager, resettable, get_context
 # from mass
 from mass.util import array
 from mass.util import qcqa
+from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
 
@@ -102,6 +104,7 @@ class MassModel(Object):
 			# A dictionary of initial conditions for MassMetabolites
 			self.initial_conditions = dict()
 			#For storing of custom rate laws and fixed concentrations
+			self._rtype = 1
 			self.custom_rates= dict()
 			self.custom_parameters = dict()
 			self.fixed_concentrations = dict()
@@ -133,7 +136,9 @@ class MassModel(Object):
 		in a dictionary where keys are the reaction objects and values are the
 		rate laws
 		"""
-		rate_dict =  {rxn: rxn.rate_law for rxn in self.reactions}
+		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
+								sympy_expr=False, update_reaction=True)
+								for rxn in self.reactions}
 		if self.custom_rates != {}:
 			rate_dict.update(self.custom_rates)
 		return rate_dict
@@ -144,7 +149,9 @@ class MassModel(Object):
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
 		"""
-		rate_dict =  {rxn: rxn.rate_law_expression for rxn in self.reactions}
+		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
+								sympy_expr=True, update_reaction=True)
+								for rxn in self.reactions}
 		if self.custom_rates != {}:
 			rate_dict.update(self.custom_rates)
 		return rate_dict
@@ -604,12 +611,13 @@ class MassModel(Object):
 				context(partial(self.update_S, reaction_list,
 							None, None, True))
 
-	def add_exchange(self, metabolite, exchange_type="source",
-						external_concentration=0., reversible=True,
+	def add_exchange(self, metabolite, exchange_type="exchange",
+						external_concentration=0.,
 						update_stoichiometry=False):
 		"""Add an exchange reaction for a given metabolite using the
-		pre-defined exchange types "source" for into the compartment
-		and "sink" for exiting the compartment.
+		pre-defined exchange types "exchange" for reversibly into or exiting
+		the compartment, "source" for irreversibly into the compartment,
+		and "demand" for irreversibly exiting the compartment.
 
 		The change is reverted upon exit when the MassModel as a context.
 
@@ -617,7 +625,7 @@ class MassModel(Object):
 		----------
 		metabolite : MassMetabolite
 			Any given metabolite to create an exchange for.
-		exchange_type : string, {"sink", "source"}
+		exchange_type : string, {"demand", "source", "exchange"}
 			The type of exchange reaction to create are not case sensitive.
 		reversible : bool
 			If True, exchange is reversible. When using a user-defined type,
@@ -627,22 +635,27 @@ class MassModel(Object):
 		if not isinstance(metabolite, MassMetabolite):
 			raise TypeError("metabolite must be a MassMetabolite object")
 
-		type_dict = {"source":1,"sink":-1}
+		type_dict = {"source":["S", 1, False],
+					"demand":["DM", -1, False],
+					"exchange":["EX", -1, True]}
 
 		# Set the type of exchange
 		if not isinstance(exchange_type, string_types):
-			raise TypeError("rxn_type must be a string")
+			raise TypeError("exchange_type must be a string")
 		else:
 			exchange_type = exchange_type.lower()
 
 		if exchange_type in type_dict:
-			rxn_id = "{}_{}".format("EX", metabolite.id)
+			values = type_dict[exchange_type]
+			rxn_id = "{}_{}".format(values[0], metabolite.id)
 			if rxn_id in self.reactions:
 				warn("Reaction %s already exists in model" % rxn_id)
 				return None
-			c = type_dict[exchange_type]
+			c = values[1]
+			reversible = values[2]
 		else:
-			raise TypeError("Exchange type must be either 'source' or 'sink'")
+			raise TypeError("Exchange type must be either "
+							"'exchange''source' or 'sink'")
 		rxn_name = "{} {}".format(metabolite.name, exchange_type)
 
 		rxn = MassReaction(id=rxn_id, name=rxn_name,
@@ -704,9 +717,11 @@ class MassModel(Object):
 
 		if len(reaction_list) == 0:
 			return None
+		if update_reactions:
+			self._rtype = rate_type
 		# Get the rates
 		return {rxn :
-		rxn.generate_rate_law(rate_type, sympy_expr, update_reactions)
+				rxn.generate_rate_law(rate_type, sympy_expr, update_reactions)
 				for rxn in reaction_list}
 
 	def get_mass_action_ratios(self, reaction_list=None,sympy_expr=False):
@@ -1005,7 +1020,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		massmodel._S = array.create_stoichiometric_matrix(massmodel,
+		new_model._S = array.create_stoichiometric_matrix(self,
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
@@ -1144,7 +1159,8 @@ class MassModel(Object):
 		else:
 			missing_concs = [m for m in self.metabolites
 							if m not in iterkeys(steady_state_concentrations)]
-
+		# If parameters or concentrations are missing, print a warning,
+		# inform what values are missing, and return none
 		if len(missing_params) != 0 or len(missing_concs) != 0:
 			warn("\nCannot calculate PERCs")
 			if len(missing_params) != 0:
@@ -1159,8 +1175,50 @@ class MassModel(Object):
 					print("Metabolite %s:" % (metab.id))
 			return None
 
-		print("FINISH CALC PERCS")
-		return None
+		#  Group symbols in rate_laws
+		odes, rates, symbols = expressions._sort_symbols(self, rate_type=1)
+		metabolites = symbols[0]
+		rate_params = symbols[1]
+		fixed_concs = symbols[2]
+		custom_params = symbols[3]
+
+		# Strip the time dependency
+		rates = expressions.strip_time(rates)
+		percs_dict = {}
+		# Get values to subsitute into equation.
+		for rxn, rate in iteritems(rates):
+			values = {}
+			symbols = rate.atoms(sp.Symbol)
+			for sym in symbols:
+				if sym in rate_params:
+
+					if re.search("Keq", str(sym)):
+						values.update({sym : rxn.Keq})
+					else:
+						perc = sym
+				elif sym in custom_params:
+					values.update({sym : self.custom_parameters[str(sym)]})
+				elif sym in fixed_concs:
+					values.update({sym : self.fixed_concentrations[str(sym)]})
+				else:
+					metab = self.metabolites.get_by_id(str(sym))
+					values.update({sym : self.initial_conditions[metab]})
+
+			flux = steady_state_fluxes[rxn]
+
+			# Set equilbrium default if no flux
+			if flux == 0:
+				sol = {at_equilibrium_default}
+			# Otherwise calculate the PERC
+			else:
+				equation = sp.Eq(steady_state_fluxes[rxn], rate.subs(values))
+				sol = set(sp.solveset(equation, perc, domain=sp.S.Reals))
+			percs_dict.update({perc: sol.pop()})
+
+			if update_reactions:
+				rxn.kf = percs_dict[perc]
+
+		return percs_dict
 
 	## Internal
 	def _repr_html_(self):

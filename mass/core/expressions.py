@@ -66,6 +66,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 	if len(reaction.metabolites) == 0:
 		return None
 
+	rxn = _ignore_h_and_h2o(reaction)
 	rate_constructor = {
 		1 : [_generate_rate_type_1, _generate_rate_expr_type_1],
 		2 : [_generate_rate_type_2, _generate_rate_expr_type_2],
@@ -75,11 +76,11 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 		raise ValueError("rate_type must be 1, 2, or 3")
 
 	# Construct the rate law
-	rate_law = rate_constructor[rate_type][0](reaction)
-	rate_law_expr = rate_constructor[rate_type][1](reaction)
+	rate_law = rate_constructor[rate_type][0](rxn)
+	rate_law_expr = rate_constructor[rate_type][1](rxn)
 
 	if update_reaction:
-		reaction._rate_law_expr = rate_law_expr
+		reaction._rate_expr = rate_law_expr
 		reaction._rate_law = rate_law
 		reaction._rtype = rate_type
 
@@ -107,18 +108,12 @@ def get_mass_action_ratio(reaction, sympy_expr=False):
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
 
-	ma_r = _get_mass_action_ratio_expr(reaction)
+	rxn = _ignore_h_and_h2o(reaction)
+	ma_r = _get_mass_action_ratio_expr(rxn)
 	if sympy_expr:
 		return ma_r
 	else:
-		ma_r = str(ma_r)
-		for m in iterkeys(reaction.metabolites):
-			m_re = re.compile(m.id)
-			ma_r = m_re.sub(m.id + "(t)", ma_r)
-		r = re.search("[/]", ma_r)
-		return "%s / %s" % (ma_r[:r.start()],
-						ma_r[r.end():])
-
+		return str(ma_r)
 
 def get_disequilibrium_ratio(reaction, sympy_expr=False):
 	"""Generate the disequilibrium ratio for the reaction as
@@ -138,19 +133,15 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 		raise TypeError("reaction must be a MassReaction")
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
+	rxn = _ignore_h_and_h2o(reaction)
 
-	de_r = sp.Mul(_get_mass_action_ratio_expr(reaction),
-							sp.Pow(sp.var(reaction._sym_Keq), -1))
+	de_r = sp.Mul(_get_mass_action_ratio_expr(rxn),
+							sp.Pow(sp.var(rxn._sym_Keq), -1))
 	if sympy_expr:
 		return de_r
 	else:
-		de_r = str(de_r)
-		for m in iterkeys(reaction.metabolites):
-			m_re = re.compile(m.id)
-			de_r = m_re.sub(m.id + "(t)", de_r)
-		r = re.search("[/]", de_r)
-		return "%s / %s" % (de_r[:r.start()],
-						de_r[r.end():])
+		return str(de_r)
+
 
 def generate_ode(metabolite):
 	if not isinstance(metabolite, massmetabolite.MassMetabolite):
@@ -165,12 +156,31 @@ def generate_ode(metabolite):
 			print("FIXME: IMPLEMENT CUSTOM RATES")
 			return None
 		else:
-			rate_law_expr = rxn.rate_law_expression
+			rate_law_expr = rxn.rate_expression
 
 		if metabolite in rxn.reactants:
 			rate_law_expr = sp.Mul(-1, rate_law_expr)
 		metabolite._ode = sp.Add(metabolite._ode, rate_law_expr)
 	return metabolite._ode
+
+def strip_time(sympy_expr_dict):
+	"""Strip the time dependency in sympy expresssions. Returns a dictionary
+	with the expressions updated for each entry
+
+	Parameters
+	----------
+	sympy_expr_dict : dict
+		A dictionary of sympy expressions.
+	"""
+	for item, expression in iteritems(sympy_expr_dict):
+
+		metab_funcs= expression.atoms(sp.Function)
+		metab_syms = list(sp.Symbol(str(m_func)[:-3])
+							for m_func in metab_funcs)
+		metab_func_to_sym = dict((m_func, metab_syms[i])
+								for i, m_func in enumerate(list(metab_funcs)))
+		sympy_expr_dict[item] = expression.subs(metab_func_to_sym)
+	return sympy_expr_dict
 
 ## Internal
 def _generate_rate_type_1(reaction):
@@ -312,7 +322,7 @@ def _generate_rate_expr_type_1(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -333,7 +343,7 @@ def _generate_rate_expr_type_1(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -361,7 +371,7 @@ def _generate_rate_expr_type_2(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -383,7 +393,7 @@ def _generate_rate_expr_type_2(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -410,7 +420,7 @@ def _generate_rate_expr_type_3(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -432,7 +442,7 @@ def _generate_rate_expr_type_3(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -460,7 +470,7 @@ def _get_mass_action_ratio_expr(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				reactant_bits = sp.Mul(reactant_bits, metab_ode)
@@ -477,7 +487,7 @@ def _get_mass_action_ratio_expr(reaction):
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)
+			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				product_bits = sp.Mul(product_bits, metab_ode)
@@ -487,38 +497,59 @@ def _get_mass_action_ratio_expr(reaction):
 	# Combine to make the mass action ratio
 	return sp.Mul(product_bits, sp.Pow(reactant_bits, -1))
 
-def _collect_and_sort_symbols(model):
+def _sort_symbols(model, rate_type=None):
+	"""Internal use. Collect and sort the symbols in expressions of a model
+	into different sets, and adjust odes and rates accordingly"""
+	if rate_type is None:
+		rate_type = model._rtype
+
 	# Initialize sets to store the symbols
-	metab_symbols = set()
+	ode_dict = model.odes
+	rate_dict = model.generate_rate_laws(rate_type=rate_type,
+								sympy_expr=True, update_reactions=False)
+	metab_funcs = set()
 	rate_symbols = set()
-	fixed_conc_symbols = set()
+	fixed_symbols = set()
 	custom_symbols = set()
-	symbol_collection = set()
 	# Collect all symbols in the odes expressions into one set
 	for item, expression in iteritems(model.odes):
 		symbols = expression.atoms(sp.Symbol)
+		functions = expression.atoms(sp.Function)
 		for sym in symbols:
-			if sym not in symbol_collection:
-				symbol_collection.add(sym)
-	# Sort the symbols into their respective sets
-	for sym in symbol_collection:
-		sym_str = str(sym)
-		# Symbols representing fixed concentrations
-		if sym_str in iterkeys(model.fixed_concentrations):
-			fixed_conc_symbols.add(sym)
-		# Symbols representing rate parameters
-		elif re.search("kf|Keq|kr",sym_str):
-			rate_symbols.add(sym)
-		# Symbols representing custom rate paraemters
-		elif sym_str in iterkeys(model.custom_parameters):
-			custom_symbols.add(sym)
-		# Sort metabolites with fixed concentrations and those that use ODEs
-		else:
-			metab = model.metabolites.get_by_id(sym_str)
-			# Symbols representing fixed metabolite species
+		# Sort the symbols into their respective sets
+			sym_str = str(sym)
+			# Symbols representing fixed concentrations
+			if sym_str in iterkeys(model.fixed_concentrations):
+				fixed_symbols.add(sym)
+			# Symbols representing rate parameters
+			if re.search("kf|Keq|kr",sym_str):
+				rate_symbols.add(sym)
+			# Symbols representing custom rate paraemters
+			if sym_str in iterkeys(model.custom_parameters):
+				custom_symbols.add(sym)
+
+		for func in functions:
+			metab = model.metabolites.get_by_id(str(func)[:-3])
 			if metab in iterkeys(model.fixed_concentrations):
-				fixed_conc_symbols.add(sym)
+				metab_sym = sp.Symbol(metab.id, nonnegative=True)
+				ode_dict[item] = expression.subs({func: metab_sym})
+				for reaction, rate in iteritems(model.rate_expressions):
+					rate_dict[reaction] = rate.subs({func: metab_sym})
+				fixed_symbols.add(metab_sym)
 			else:
-				metab_symbols.add(sym)
-	# Return the list of sorted symbols
-	return [metab_symbols, rate_symbols, fixed_conc_symbols, custom_symbols]
+				metab_funcs.add(func)
+	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
+	return ode_dict, rate_dict, symbol_list
+
+def _ignore_h_and_h2o(reaction):
+	"""Internal use. Remove hydrogen and water from reactions to prevent them
+	from inclusion in simulation. Will not effect hydrogen and water exchanges
+	"""
+	reaction = reaction.copy()
+	for metab, coefficient in iteritems(reaction.metabolites):
+		if metab.elements == {'H': 2, 'O': 1} or \
+			metab.elements == {'H': 1}:
+			if not reaction.exchange:
+				reaction.subtract_metabolites({metab:coefficient})
+
+	return reaction

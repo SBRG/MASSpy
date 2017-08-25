@@ -95,7 +95,7 @@ class MassReaction(Object):
 
 		# The rate law equation for simulation
 		self._rate_law = None
-		self._rate_law_expr = None
+		self._rate_expr = None
 		self._rtype = 1
 
 		# A dictionary of metabolites and their stoichiometric
@@ -235,7 +235,7 @@ class MassReaction(Object):
 									sympy_expr=False, update_reaction=True)
 
 	@property
-	def rate_law_expression(self):
+	def rate_expression(self):
 		"""Returns the rate law as a sympy expression"""
 
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
