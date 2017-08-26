@@ -14,7 +14,7 @@ from mass.util import qcqa
 # Class begins
 ## Global symbol for time
 t = sp.Symbol("t")
-## precompiled re for 'external' metabolites
+## Precompiled re for 'external' metabolites
 ext_metab_re = re.compile("\_Xt")
 # Possible Perturbation Types
 kf_re = re.compile("kf|forward_rate_constant")
@@ -24,6 +24,10 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed|fixed_concentration")
 
 def simulate(model, time_vector, perturbations=None, solver="vode"):
+	can_simulate_check = qcqa.can_simulate(model, show_missing=True)
+	if not can_simulate_check:
+		return [None, None]
+
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
@@ -35,7 +39,6 @@ def simulate(model, time_vector, perturbations=None, solver="vode"):
 
 	metab_syms = symbols[0]
 	fixed_syms = symbols[2]
-
 	# Make lambda functions of the odes and rates
 	[lam_odes, lam_jacb] = _make_lambda_odes(model,metab_syms , odes, values)
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
@@ -79,7 +82,7 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 	for pert, value in iteritems(perturbations):
 		# Handle Custom Rate parameter perturbations
 		if pert in iterkeys(model.custom_parameters):
-			print("FIXME: IMPLEMENT CUSTOM PARAMETER PERTURBATIONS")
+			rate_perturbs.update({pert : value})
 			continue
 		[item_id, to_perturb] = re.split("\.", pert)
 		 # Handle rate and equilibrium constant perturbations
@@ -126,6 +129,7 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 			conc_perturbs.update(
 							{model.metabolites.get_by_id(item_id): value})
 			continue
+
 	symbol_list = [metabolites, rate_params, fixed_concs, custom_params]
 	perturb_list = [conc_perturbs, rate_perturbs]
 	return ode_dict, rate_dict, symbol_list, perturb_list
@@ -172,7 +176,10 @@ def _get_values(model, perturbations, symbol_list):
 
 	# For custom_parameters
 	for c_param in custom_params:
-		print("FIXME: IMPLEMENT CUSTOM PARAMETERS")
+		if str(c_param) in iterkeys(rate_perturbs):
+			values.update({c_param: rate_perturbs[str(c_param)]})
+		else:
+			values.update({c_param: model.custom_parameters[str(c_param)]})
 
 	# Get initial conditions
 	initial_conditions = list()
@@ -182,7 +189,6 @@ def _get_values(model, perturbations, symbol_list):
 			initial_conditions.append(conc_perturbs[metab])
 		else:
 			initial_conditions.append(model.initial_conditions[metab])
-
 	return values, initial_conditions
 
 def _make_lambda_odes(model, metabolites, ode_dict, values):

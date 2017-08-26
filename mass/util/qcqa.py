@@ -4,8 +4,9 @@
 from __future__ import absolute_import
 
 # Import necesary packages
+import re
+import sympy as sp
 from six import iteritems, iterkeys
-
 # from cobra
 from cobra.core.dictlist import DictList
 # from mass
@@ -14,6 +15,8 @@ from mass.core import massmodel
 from mass.core import massreaction
 
 # Class begins
+## Global symbol for time
+t = sp.Symbol("t")
 ## Public
 def qcqa_model(model, missing_params=True, missing_ics=True,
 		simulation=True, superflous=True,
@@ -80,14 +83,14 @@ def qcqa_model(model, missing_params=True, missing_ics=True,
 	print("\nFIXME: IMPLEMENT QCQA")
 	return
 
-def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
+def get_missing_parameters(model, kf=False, Keq=False,
 							kr=False, ssflux=False, custom_parameters=False):
 	"""Get the parameters that are missing from the reactions that exist
 	in the Massmodel.
 
 	Parameters
 	----------
-	model_or_reaction_list : mass.Massmodel or list of mass.MassReactions
+	model : mass.Massmodel
 		The MassModel or list of reactions to inspect.
 	kf : bool
 		If True, check MassReactions for missing forward rate constants.
@@ -109,16 +112,8 @@ def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
 				"_reverse_rate_constant", "ssflux"]
 
 	# Check inputs
-	if isinstance(model_or_reaction_list, massmodel.MassModel):
-		reaction_list = model_or_reaction_list.reactions
-	elif isinstance(model_or_reaction_list, list):
-		for rxn in model_or_reaction_list:
-			if not isinstance(rxn, massreaction.MassModel):
-				raise TypeError("Must be a list of mass.MassReactions")
-		reaction_list = DictList(model_or_reaction_list)
-	else:
-		raise TypeError("model_or_reaction_list must be a mass.MassModel or "
-						"a list of mass.MassReactions")
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
 	for i, param in enumerate(param_checks):
 		if not isinstance(param, bool):
 			raise TypeError("%s must be a bool" % param_keys[i])
@@ -127,7 +122,7 @@ def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
 			param_keys[i] = ("_sym_%s" % param_keys[i])
 
 	missing_param_dict = dict()
-	for rxn in reaction_list:
+	for rxn in model.reactions:
 		missing_params = list()
 		for i, param_check in enumerate(param_checks):
 			# Move on to next parameter if set to False
@@ -143,6 +138,34 @@ def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
 			else:
 				missing_params.append(param_keys[i])
 
+		# If the reaction has custom rates and check is set to True
+		if rxn in iterkeys(model.custom_rates) and custom_parameters:
+			symbols = model.custom_rates[rxn].atoms(sp.Symbol)
+			for sym in symbols:
+				# Ignore time symbol
+				if sym is t:
+					continue
+				# If the symbol is in the custom parameters, check the value
+				elif str(sym) in iterkeys(model.custom_parameters):
+					if model.custom_parameters[str(sym)] is not None:
+						continue
+					else:
+						# Add to missing parameters if value is None
+						missing_params.append(str(sym))
+				elif re.search("kf|Keq|kr", str(sym)) and \
+						re.split("\_", str(sym), maxsplit=1):
+						p_type= re.split("\_", str(sym), maxsplit=1)[0]
+						prop_f = rxn.__class__.__dict__[p_type]
+						if prop_f.fget(rxn) is not None or \
+							str(sym) in missing_params:
+							continue
+						# Add if value is none and not already added
+						else:
+							missing_params.append(str(sym))
+				# Add to missing parameters if not found anywhere
+				else:
+					missing_params.append(str(sym))
+
 		if len(missing_params) == 0:
 			continue
 		elif len(missing_params) == 1:
@@ -150,10 +173,6 @@ def get_missing_parameters(model_or_reaction_list, kf=False, Keq=False,
 		else:
 			missing_param_dict[rxn] = missing_params
 
-
-	if custom_parameters:
-		print("FIXME: HANDLE CUSTOM PARAMETERS FOR CUSTOM RATES")
-		
 	return missing_param_dict
 
 def get_missing_initial_conditions(model):
@@ -190,8 +209,8 @@ def can_simulate(model, show_missing=False):
 	False, and if show_missing is True, will print the why False was returned.
 	"""
 	# Check inputs
-	print("FIXME: IMPLEMENT CAN SIMULATE")
-	return
+	print("FIXME: IMPLEMENT CAN SIMULATE QCQA")
+	return True
 
 def get_superflous_parameters(model):
 	"""Get extra parameters required for massmodel simulation. Superflous

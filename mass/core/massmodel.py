@@ -9,7 +9,7 @@ import re
 import pandas as pd
 import numpy as np
 import sympy as sp
-from six import string_types, integer_types, iteritems, iterkeys
+from six import string_types, integer_types, iteritems, iterkeys, itervalues
 from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
@@ -61,7 +61,7 @@ class MassModel(Object):
 		A dictionary to store custom rates for specific reactions, where
 		keys are reaction objects and values are the custom rate expressions.
 		Custom rates will always have preference over rate laws in reactions.
-	custom_rate_parameters : dict
+	custom_parameters : dict
 		A dictionary to store custom parameters for custom rates,
 		keys are parameters and values are the parameter value.
 		Custom rates will always have preference over rate laws in reactions.
@@ -105,8 +105,8 @@ class MassModel(Object):
 			self.initial_conditions = dict()
 			#For storing of custom rate laws and fixed concentrations
 			self._rtype = 1
-			self.custom_rates= dict()
-			self.custom_parameters = dict()
+			self._custom_rates= dict()
+			self._custom_parameters = dict()
 			self.fixed_concentrations = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
@@ -140,7 +140,8 @@ class MassModel(Object):
 								sympy_expr=False, update_reaction=True)
 								for rxn in self.reactions}
 		if self.custom_rates != {}:
-			rate_dict.update(self.custom_rates)
+			for rxn, custom_expression in iteritems(self.custom_rates):
+				rate_dict.update({rxn : str(custom_expression)})
 		return rate_dict
 
 	@property
@@ -197,6 +198,16 @@ class MassModel(Object):
 		return {rxn: rxn.ssflux for rxn in self.reactions
 				if rxn.ssflux is not None}
 
+	@property
+	def custom_rates(self):
+		"""Get the sympy custom rate expressions in the MassModel"""
+		return self._custom_rates
+
+	@property
+	def custom_parameters(self):
+		"""Get the custom rate parameters in the MassModel"""
+		return self._custom_parameters
+
 	# Methods
 	## Public
 	def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
@@ -236,7 +247,7 @@ class MassModel(Object):
 		"""Will add a list of metabolites to the MassModel object and add
 		the MassMetabolite initial conditions accordingly.
 
-		The change is revereted upon exit when using the MassModel as a context.
+		The change is reverted upon exit when using the MassModel as a context.
 
 		Parameters
 		----------
@@ -547,7 +558,7 @@ class MassModel(Object):
 						update_stoichiometry=False):
 		"""Remove MassReactions from the MassModel
 
-		The change is reverted upon exit when the MassModel as a context.
+		The change is reverted upon exit when using the MassModel as a context.
 
 		Parameters
 		----------
@@ -619,7 +630,7 @@ class MassModel(Object):
 		the compartment, "source" for irreversibly into the compartment,
 		and "demand" for irreversibly exiting the compartment.
 
-		The change is reverted upon exit when the MassModel as a context.
+		The change is reverted upon exit when using the MassModel as a context.
 
 		Parameters
 		----------
@@ -790,7 +801,133 @@ class MassModel(Object):
 		return {rxn : rxn.get_disequilibrium_ratio(sympy_expr)
 				for rxn in reaction_list}
 
+	def add_custom_rate(self, reaction, custom_rate,
+						custom_parameters=None):
+		"""Add a custom rate to the MassModel for a reaction.
+
+		Note: Metabolites must already be in the MassReaction
+
+		The change is reverted upon exit when using the MassModel as a context.
+
+		Parameters
+		----------
+		reaction : mass.MassReaction
+			The MassReaction which the custom rate associated with
+		custom_rate_law :  string
+			The custom rate law as a string. The string representation of the
+			custom rate lawwill be used to create a sympy expression that
+			represents the custom rate law
+		custom_parameters :  dictionary of strings
+			A dictionary of where keys are custom parameters in the custom rate
+			as strings, and values are their numerical value. The string
+			representation of the custom parameters will be used to create the
+			symbols in the sympy expressions of the custom rate law.
+			If None, parameters are assumed to be already in the MassModel,
+			or one of the MassReaction rate or equilibrium constants.
+		"""
+		# Get the custom parameters
+		if custom_parameters is not None:
+			custom_param_list = list(iterkeys(custom_parameters))
+		else:
+			custom_parameters = {}
+			custom_param_list = []
+		# Use existing ones if they are in the rate law
+		existing_customs = self.custom_parameters
+		if len(existing_customs) != 0:
+			for custom_param in iterkeys(existing_customs):
+				if re.search(custom_param, custom_rate) and \
+					custom_param not in custom_param_list:
+					custom_param_list.append(custom_param)
+
+		custom_rate_expression = expressions.create_custom_rate(reaction,
+												custom_rate, custom_param_list)
+
+		self._custom_rates.update({reaction : custom_rate_expression})
+		self._custom_parameters.update(custom_parameters)
+
+		context = get_context(self)
+		if context:
+			context(partial(self._custom_rates.pop, reaction))
+			for key in custom_param_list:
+				if key in iterkeys(self._custom_parameters):
+					context(partial((self._custom_parameters.pop, key)))
+			context(partial(self._custom_parameters.update, existing_customs))
+
+
+	def remove_custom_rate(self, reaction):
+		"""Remove a custom rate to the MassModel for a reaction If no other custom
+		rates rely on those custom parameters, remove those custom parameters from
+		the model as well.
+
+		The change is reverted upon exit when using the MassModel as a context.
+
+		Parameters
+		----------
+		reaction : mass.MassReaction
+			The MassReaction which the custom rate associated with
+		"""
+		# Remove the custom rate law
+		custom_rate_to_remove = self.custom_rates[reaction]
+		del self.custom_rates[reaction]
+
+		# Remove custom parameters if they are not associated with any other
+		# custom rate expression
+		symbols = custom_rate_to_remove.atoms(sp.Symbol)
+		if len(self.custom_rates) != 0:
+			other_syms = set()
+			for custom_rate in itervalues(self.custom_rates):
+				for sym in list(custom_rate.atoms(sp.Symbol)):
+					other_syms.add(sym)
+			for sym in other_syms:
+				if sym in symbols.copy():
+					symbols.remove(sym)
+
+		context = get_context(self)
+		if context:
+			existing = dict((str(sym), self._custom_parameters[str(sym)])
+							for sym in symbols)
+
+		for sym in symbols:
+			del self._custom_parameters[str(sym)]
+
+		if context:
+			context(partial(self._custom_rates.update, {reaction:
+											custom_rate_to_remove}))
+			context(partial(self._custom_parameters.update, existing))
+
+	def reset_custom_rates(self):
+		"""Reset all custom rate laws and parameters in a model.
+
+		Warnings
+		--------
+		Will remove all custom rates and custom rate parameters in the
+		MassModel. To remove a specific rate(s) without affecting the others,
+		use the remove_custom_rate method instead.
+		"""
+		self._custom_rates = {}
+		self._custom_parameters = {}
+		print("Reset all custom rate laws")
+
 	def get_elemental_matrix(self, matrix_type=None, dtype=None):
+		"""Get the elemental matrix of a model
+
+		Parameters
+		----------
+		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+			If None, will utilize the matrix type initialized with the original
+			model. Otherwise reconstruct the S matrix with the specified type.
+			Types can include 'dense' for a standard  numpy.array, 'dok' or
+			'lil' to obtain the scipy sparse matrix of the corresponding type, and
+			DataFrame for a pandas 'Dataframe' where species (excluding genes)
+			are row indicies and reactions are column indicices
+		dtype : data-type
+			The desired data-type for the array. If None, defaults to float
+
+		Returns
+		-------
+		matrix of class 'dtype'
+			The elemental matrix for the given MassModel
+		"""
 		# Set defaults for the elemental matrix
 		if matrix_type is None:
 			matrix_type = 'dataframe'
@@ -1091,11 +1228,6 @@ class MassModel(Object):
 
 		return merged_model
 
-	def calc_steady_state_fluxes(self, pathways, flux_dictionary,
-									update_reactions=False):
-		print("FIXME: IMPLEMENT CALC STEADY STATE FLUXES")
-		return
-
 	def calc_PERCS(self, steady_state_concentrations=None,
 					steady_state_fluxes=None, at_equilibrium_default=100000.,
 					update_reactions=False):
@@ -1143,10 +1275,12 @@ class MassModel(Object):
 		if steady_state_fluxes is None:
 			steady_state_fluxes = self.steady_state_fluxes
 			missing_params = qcqa.get_missing_parameters(self, Keq=True,
-														ssflux=True)
+													ssflux=True,
+													custom_parameters=True)
 		else:
 			missing_params = qcqa.get_missing_parameters(self, Keq=True,
-														ssflux=False)
+													ssflux=False,
+													custom_parameters=True)
 			for rxn in self.reactions:
 				if rxn not in iterkeys(steady_state_fluxes):
 					if rxn in iterkeys(missing_params):

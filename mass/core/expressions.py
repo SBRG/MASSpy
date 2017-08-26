@@ -6,7 +6,7 @@ from __future__ import absolute_import
 # Import necesary packages
 import re
 import sympy as sp
-from six import iterkeys, iteritems, integer_types
+from six import iterkeys, iteritems, integer_types, string_types
 
 # from cobra
 from cobra.core.dictlist import DictList
@@ -142,7 +142,6 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 	else:
 		return str(de_r)
 
-
 def generate_ode(metabolite):
 	if not isinstance(metabolite, massmetabolite.MassMetabolite):
 		raise TypeError("metabolite must be a MassMetabolite")
@@ -153,8 +152,7 @@ def generate_ode(metabolite):
 	metabolite._ode = sp.S.Zero
 	for rxn in metabolite._reaction:
 		if rxn._model is not None and rxn in rxn._model.custom_rates:
-			print("FIXME: IMPLEMENT CUSTOM RATES")
-			return None
+			rate_law_expr = rxn._model.custom_rates[rxn]
 		else:
 			rate_law_expr = rxn.rate_expression
 
@@ -181,6 +179,70 @@ def strip_time(sympy_expr_dict):
 								for i, m_func in enumerate(list(metab_funcs)))
 		sympy_expr_dict[item] = expression.subs(metab_func_to_sym)
 	return sympy_expr_dict
+
+def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
+	"""Create the sympy expression representing a custom rate law.
+
+	Note: Metabolites must already be in the MassReaction
+
+	Parameters
+	----------
+	reaction : mass.MassReaction
+		The MassReaction which the custom rate_law is to be associated with
+	custom_rate_law :  string
+		The custom rate law as a string. The string representation of the
+		custom rate lawwill be used to create a sympy expression that
+		represents the custom rate law
+	custom_parameters :  string, list of strings or None
+		The custom parameters in the custom rate law as strings. The string
+		representation of the custom parameters will be used to create the
+		symbols in the sympy expressions of the custom rate law.
+		If None, parameters are assumed to be one of the MassReaction rate or
+		equilibrium constants
+	"""
+	# Check inputs
+	if not isinstance(reaction, massreaction.MassReaction):
+		raise TypeError("reaction must be a mass.MassReaction")
+	else:
+		if len(reaction._metabolites) == 0:
+			warn ("No metabolites associated with this reaction")
+			return None
+
+	if not isinstance(custom_rate_law, string_types):
+		raise TypeError("custom_rate_law must be a string")
+
+	if custom_parameter_list is not None and len(custom_parameter_list) != 0:
+		if not hasattr(custom_parameter_list, '__iter__'):
+			custom_parameters = list(custom_parameters)
+
+		for custom_param in custom_parameter_list:
+			if not isinstance(custom_param, string_types):
+				raise TypeError("custom parameters must be a string or "
+								"list of strings")
+	else:
+		custom_parameter_list = []
+
+	# Get metabolites as symbols if they are in the custom rate law
+	metab_symbols = dict((metab.id, sp.Function(metab.id, nonnegative=True)(t))
+					for metab in iterkeys(reaction.metabolites)
+					if re.search("[%s]" % metab.id, custom_rate_law))
+
+	# Get rate parameters as symbols if they are in the custom rate law
+	rate_params = dict((reaction.__dict__[p], sp.Symbol(reaction.__dict__[p]))
+					for p in ["_sym_kf", "_sym_Keq", "_sym_kr"]
+					if re.search(str(reaction.__dict__[p]), custom_rate_law))
+
+	# Get custom rate parameters as symbols
+	custom_params = dict((custom, sp.Symbol(custom))
+						for custom in custom_parameter_list)
+
+	# Create custom rate expression
+	symbol_dict = {}
+	for dictionary in [metab_symbols, rate_params, custom_params]:
+		symbol_dict.update(dictionary)
+	custom_rate_expression = sp.sympify(custom_rate_law, locals=symbol_dict)
+
+	return custom_rate_expression
 
 ## Internal
 def _generate_rate_type_1(reaction):
@@ -507,6 +569,9 @@ def _sort_symbols(model, rate_type=None):
 	ode_dict = model.odes
 	rate_dict = model.generate_rate_laws(rate_type=rate_type,
 								sympy_expr=True, update_reactions=False)
+	if len(model.custom_rates) != 0:
+		rate_dict.update(model.custom_rates)
+
 	metab_funcs = set()
 	rate_symbols = set()
 	fixed_symbols = set()
@@ -538,6 +603,7 @@ def _sort_symbols(model, rate_type=None):
 				fixed_symbols.add(metab_sym)
 			else:
 				metab_funcs.add(func)
+
 	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
 	return ode_dict, rate_dict, symbol_list
 
