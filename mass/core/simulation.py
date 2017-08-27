@@ -6,10 +6,13 @@ from __future__ import absolute_import
 import re
 import numpy as np
 import sympy as sp
+from warnings import warn
 from six import iteritems, iterkeys, itervalues
 from scipy.integrate import ode
-from mass.core import expressions
+
+# from mass
 from mass.util import qcqa
+from mass.core import expressions
 
 # Class begins
 ## Global symbol for time
@@ -24,9 +27,24 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed|fixed_concentration")
 
 def simulate(model, time_vector, perturbations=None, solver="vode"):
-	can_simulate_check = qcqa.can_simulate(model, show_missing=True)
-	if not can_simulate_check:
-		return [None, None]
+	sim_check = qcqa.can_simulate(model, model._rtype)
+	if not sim_check[model._rtype]:
+		sim_check = qcqa.can_simulate(model, [1,2,3])
+		possible_rate_types = [rt for rt, check in iteritems(sim_check)
+								if check is True]
+		if len(possible_rate_types) != 0:
+			model._rtype = possible_rate_types[0]
+		else:
+			warn("Unable to simulate")
+			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
+							simulation=True)
+			return [None, None]
+
+	if model._rtype == 3:
+		warn("Using type 3 rate laws can create inaccurate results for "
+			 "irreversible reactions, please generate type 1 or type 2 "
+			"rates if there are kinetically irreversible reactions in the "
+			"model (kr = 0 and Keq = inf, or reversible=False)")
 
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)

@@ -7,6 +7,8 @@ from __future__ import absolute_import
 import re
 import sympy as sp
 from six import iteritems, iterkeys
+from math import inf
+from tabulate import tabulate
 # from cobra
 from cobra.core.dictlist import DictList
 # from mass
@@ -18,10 +20,10 @@ from mass.core import massreaction
 ## Global symbol for time
 t = sp.Symbol("t")
 ## Public
-def qcqa_model(model, missing_params=True, missing_ics=True,
-		simulation=True, superflous=True,
-		unconserved_metabolites=True, param_consistency=True,
-		stoichiometry=True, elemental=True, thermodynamics=True):
+def qcqa_model(model, initial_conditions=False, parameters=False,
+			simulation=False, superflous=False, unconserved_metabolites=False,
+			param_consistency=False, stoichiometry=False, elemental=False,
+			thermodynamics=False):
 	"""Run a series of quality control and assessment tests on a massmodel and
 	return a summary of the test results
 
@@ -29,11 +31,11 @@ def qcqa_model(model, missing_params=True, missing_ics=True,
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	missing_params : bool
+	initial_conditions : bool
+		Check for missing initial_conditions in the model
+	parameters : bool
 		Check for missing parameters in the model and ensure the model
 		parameters are consistent if there are superflous parameters
-	missing_ics : bool
-		Check for missing initial_conditions in the model
 	simulation : bool
 		Check to see if the model can be simulated
 	superflous : bool
@@ -49,24 +51,23 @@ def qcqa_model(model, missing_params=True, missing_ics=True,
 	thermodynamics : bool
 		Check for thermodynamic consistency in the model.
 	"""
-	check_list = [missing_params, missing_ics, simulation, superflous,
-					unconserved_metabolites, param_consistency, stoichiometry,
-					elemental, thermodynamics]
+	check_list = [initial_conditions, parameters, simulation, superflous,
+				unconserved_metabolites, param_consistency, stoichiometry,
+				elemental, thermodynamics]
 
-	name_list = ["missing_parameters", "missing_initial_conditions",
-				"can_simulate","superflous","unconserved_metabolites"
-				"param_consistency", "stoichiometry","elemental",
-				"thermodynamics"]
+	name_list = ["initial_conditions", "parameters", "simulation",
+				"superflous","unconserved_metabolites", "param_consistency",
+				"stoichiometry","elemental", "thermodynamics"]
 
-	function_list =[get_missing_parameters,
-					get_missing_initial_conditions,
-					can_simulate,
-					get_superflous_parameters,
-					get_unconserved_metabolites,
-					parameter_consistency,
-					stoichiometric_consistency,
-					elemental_consistency,
-					thermodynamic_consistency]
+	function_and_args =[[get_missing_initial_conditions, None],
+						[get_missing_parameters, [True]*5],
+						[can_simulate, [[1,2,3]], False],
+						[get_superflous_parameters, None],
+						[get_unconserved_metabolites, None],
+						[parameter_consistency, None],
+						[stoichiometric_consistency, None],
+						[elemental_consistency, None],
+						[thermodynamic_consistency, None]]
 
 	# Check inputs
 	if not isinstance(model, massmodel.MassModel):
@@ -75,13 +76,37 @@ def qcqa_model(model, missing_params=True, missing_ics=True,
 		if not isinstance(check, bool):
 			raise TypeError("%s must be a bool" % name_list[i])
 
+	to_display = []
 	for i, check in enumerate(check_list):
 		if check:
-			check_results = function_list[i](model)
+			function = function_and_args[i][0]
+			args = function_and_args[i][1]
+			if args is not None:
+				to_display.append(function(model, *args))
+			else:
+				to_display.append(function(model))
+		else:
+			to_display.append(None)
 
+	reports = _qcqa_summary(to_display)
+	for report in reports:
+		print("%s\n" % report)
 
-	print("\nFIXME: IMPLEMENT QCQA")
-	return
+def get_missing_initial_conditions(model):
+	"""Get the initial conditions that are missing from the MassModel for the
+	metabolites that exist in the Massmodel.
+
+	Parameters
+	----------
+	model_or_metabolite_list : mass.massmodel
+		The MassModel to inspect
+	"""
+	# Check inputs
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
+
+	return [metab for metab in model.metabolites
+			if metab not in iterkeys(model.initial_conditions)]
 
 def get_missing_parameters(model, kf=False, Keq=False,
 							kr=False, ssflux=False, custom_parameters=False):
@@ -124,20 +149,6 @@ def get_missing_parameters(model, kf=False, Keq=False,
 	missing_param_dict = dict()
 	for rxn in model.reactions:
 		missing_params = list()
-		for i, param_check in enumerate(param_checks):
-			# Move on to next parameter if set to False
-			if not param_check:
-				# Next parameter if set to False
-				continue
-			param = rxn.__dict__[attr_list[i]]
-			param_name = rxn.__dict__[param_keys[i]]
-			if param is not None:
-				continue
-			elif param_keys[i] != "ssflux":
-				missing_params.append(param_name)
-			else:
-				missing_params.append(param_keys[i])
-
 		# If the reaction has custom rates and check is set to True
 		if rxn in iterkeys(model.custom_rates) and custom_parameters:
 			symbols = model.custom_rates[rxn].atoms(sp.Symbol)
@@ -165,52 +176,81 @@ def get_missing_parameters(model, kf=False, Keq=False,
 				# Add to missing parameters if not found anywhere
 				else:
 					missing_params.append(str(sym))
+		# If no custom rate, search for parameters from parameter checks
+		else:
+			for i, param_check in enumerate(param_checks):
+				# Move on to next parameter if set to False
+				if not param_check:
+					# Next parameter if set to False
+					continue
+				param = rxn.__dict__[attr_list[i]]
+				param_name = rxn.__dict__[param_keys[i]]
+				if param is not None:
+					continue
+				elif param_keys[i] != "ssflux":
+					missing_params.append(param_name)
+				else:
+					missing_params.append(param_keys[i])
 
 		if len(missing_params) == 0:
 			continue
-		elif len(missing_params) == 1:
-			missing_param_dict[rxn] = missing_params.pop()
 		else:
 			missing_param_dict[rxn] = missing_params
-
 	return missing_param_dict
 
-def get_missing_initial_conditions(model):
-	"""Get the initial conditions that are missing from the MassModel for the
-	metabolites that exist in the Massmodel.
-
-	Parameters
-	----------
-	model_or_metabolite_list : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
-
-	return [metab for metab in model.metabolites
-			if metab not in iterkeys(model.initial_conditions)]
-
-def can_simulate(model, show_missing=False):
+def can_simulate(model, rate_type=None):
 	"""Check to see if the model has the required initial conditions and
-	parameters in order to be simulated.
+	parameters in order to be simulated with the given rate law type(s)
 
 	Parameters
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	show_missing : bool
-		If True, will printout the missing parameters and conditions required
-		for simulation.
+	rate_type :  1,2,3, list of rate_types, or None
+		What rate type(s) to check for. If None, will use the models
+		current rate type.
 
 	Returns
 	-------
-	True if the model has met conditions for simulation. Otherwise will return
-	False, and if show_missing is True, will print the why False was returned.
+	A dictionary where keys are the rate types and values are bools indicating
+		if the model has met conditions for simulation.
 	"""
 	# Check inputs
-	print("FIXME: IMPLEMENT CAN SIMULATE QCQA")
-	return True
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
+	if rate_type is None:
+		rate_type = [model._rtype]
+	if not isinstance(rate_type, list):
+		rate_type = [rate_type]
+
+	for i, rt in enumerate(rate_type):
+		rt = int(rt)
+		if rt not in {1,2,3}:
+			raise TypeError("Rate type must be integers 1,2, or 3")
+		else:
+			rate_type[i] = rt
+
+	missing_ics = get_missing_initial_conditions(model)
+
+	simulate_checks = {}
+	for rt in rate_type:
+		if rt == 1:
+			missing_params = get_missing_parameters(model, kf=True, Keq=True,
+								kr=False, ssflux=False, custom_parameters=True)
+		elif rt == 2:
+			missing_params = get_missing_parameters(model, kf=True, Keq=False,
+								kr=True, ssflux=False, custom_parameters=True)
+
+		else:
+			missing_params = get_missing_parameters(model, kf=False, Keq=True,
+								kr=True, ssflux=False, custom_parameters=True)
+
+		if len(missing_params) != 0 or len(missing_ics) != 0:
+			simulate_checks.update({rt: False})
+		else:
+			simulate_checks.update({rt: True})
+
+	return simulate_checks
 
 def get_superflous_parameters(model):
 	"""Get extra parameters required for massmodel simulation. Superflous
@@ -292,3 +332,63 @@ def thermodynamic_consistency(model):
 	# Check inputs
 	print("FIXME: IMPLEMENT THERMO CONSISTENTCY")
 	return
+
+## Internal
+def _qcqa_summary(to_display):
+	name_list = ["Missing Initial Conditions", "Missing Parameters",
+				"Can Simulate","Superflous Parameters","Unconserved Metabolites"
+				"Parameter Inconsistencies", "Stoichiometric Inconsistencies",
+				"Elemental Inconsistencies", "Thermodynamic Inconsistencies"]
+
+	headers = []
+	item_list = []
+	for i, display_item in enumerate(to_display):
+		if display_item is not None:
+			headers.append(name_list[i])
+			item_list.append(display_item)
+
+	missing_dict = {}
+	sim_checks = {}
+	consistencies = {}
+	reports = []
+	for i, item in enumerate(item_list):
+		header = headers[i]
+		# Set up printout for missing initial conditions
+		if re.match("Missing Initial Conditions", header):
+			if len(item) != 0:
+				missing_dict[header] = item
+			continue
+		# Set up printout for missing parameters
+		if re.match("Missing Parameters", header):
+			table_list = []
+			for rxn, missing in iteritems(item):
+				missing_params = ": "
+				for param in missing:
+					if re.split("\_", param, maxsplit=1):
+						missing_params += re.split("\_", param)[0] + "; "
+					else:
+						missing_params += "; "
+				missing_params = "%s%s" % (rxn.id, missing_params.rstrip("; "))
+				table_list.append(missing_params)
+
+			if len(table_list) != 0:
+				missing_dict[header] = table_list
+			continue
+
+		if re.match("Can Simulate", header):
+			table_list = []
+			for rate_type, sim_check in iteritems(item):
+				table_list += ["Rate Type %s: %s" % (rate_type, sim_check)]
+			sim_checks[header] = table_list
+			continue
+
+	reports.append("QCQA REPORT\n" + "="*79)
+	if sim_checks != {}:
+		reports.append(tabulate(sim_checks, headers="keys",stralign="center"))
+	if missing_dict != {}:
+		reports.append(tabulate(missing_dict, headers="keys",stralign="left"))
+	if consistencies != {}:
+		reports.append(tabulate(consistencies, headers="keys",stralign="left"))
+
+
+	return reports
