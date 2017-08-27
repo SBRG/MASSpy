@@ -559,19 +559,13 @@ def _get_mass_action_ratio_expr(reaction):
 	# Combine to make the mass action ratio
 	return sp.Mul(product_bits, sp.Pow(reactant_bits, -1))
 
-def _sort_symbols(model, rate_type=None):
+def _sort_symbols(model):
 	"""Internal use. Collect and sort the symbols in expressions of a model
 	into different sets, and adjust odes and rates accordingly"""
-	if rate_type is None:
-		rate_type = model._rtype
-
 	# Initialize sets to store the symbols
+	rate_dict = model.generate_rate_laws(rate_type=model._rtype,
+							sympy_expr=True, update_reactions=True)
 	ode_dict = model.odes
-	rate_dict = model.generate_rate_laws(rate_type=rate_type,
-								sympy_expr=True, update_reactions=False)
-	if len(model.custom_rates) != 0:
-		rate_dict.update(model.custom_rates)
-
 	metab_funcs = set()
 	rate_symbols = set()
 	fixed_symbols = set()

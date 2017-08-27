@@ -731,9 +731,12 @@ class MassModel(Object):
 		if update_reactions:
 			self._rtype = rate_type
 		# Get the rates
-		return {rxn :
+		rates = {rxn :
 				rxn.generate_rate_law(rate_type, sympy_expr, update_reactions)
 				for rxn in reaction_list}
+		if self.custom_rates != {}:
+			rates.update(self.custom_rates)
+		return rates
 
 	def get_mass_action_ratios(self, reaction_list=None,sympy_expr=False):
 		"""Get the mass action ratios for a list of reactions in a MassModel
@@ -1260,9 +1263,7 @@ class MassModel(Object):
 			raise TypeError("Steady state concentrations must be a dictionary"
 					"where keys are MassMetabolites and values are concentrations")
 
-		if steady_state_fluxes is None:
-			steady_state_fluxes = self.steady_state_fluxes
-		if not isinstance(steady_state_fluxes, dict):
+		if not isinstance(steady_state_fluxes, (dict, type(None))):
 			raise TypeError("Steady state fluxes must be a dictionary where"
 							" keys are MassReactions and values are fluxes")
 
@@ -1272,45 +1273,47 @@ class MassModel(Object):
 		if not isinstance(update_reactions, bool):
 			raise TypeError("update_reactions must be a bool")
 
+		# Use model steady state fluxes and check for missing parameters
 		if steady_state_fluxes is None:
 			steady_state_fluxes = self.steady_state_fluxes
 			missing_params = qcqa.get_missing_parameters(self, Keq=True,
-													ssflux=True,
-													custom_parameters=True)
+										ssflux=True, custom_parameters=True)
+		# Use the given steady state fluxes and check for missing parameters
 		else:
 			missing_params = qcqa.get_missing_parameters(self, Keq=True,
-													ssflux=False,
-													custom_parameters=True)
+										ssflux=False, custom_parameters=True)
 			for rxn in self.reactions:
 				if rxn not in iterkeys(steady_state_fluxes):
 					if rxn in iterkeys(missing_params):
-						missing_params[rxn] =  [missing_params[rxn], "ssflux"]
+						missing = missing_params[rxn]
+						missing.append( "ssflux")
+						missing_params[rxn] = missing
 					else:
-						missing_params[rxn] = "ssflux"
+						missing_params[rxn] = ["ssflux"]
 
+		# Use model initial conditions for the steady state concentratiosn
+		# and check for missing initial conditions
 		if steady_state_concentrations is None:
 			missing_concs = qcqa.get_missing_initial_conditions(self)
+		# Use the given steady state concentrations and
+		# check for missing concentrations
 		else:
 			missing_concs = [m for m in self.metabolites
 							if m not in iterkeys(steady_state_concentrations)]
+
 		# If parameters or concentrations are missing, print a warning,
 		# inform what values are missing, and return none
 		if len(missing_params) != 0 or len(missing_concs) != 0:
-			warn("\nCannot calculate PERCs")
-			if len(missing_params) != 0:
-				print("\nMissing Parameters:"
-					"\n=====================")
-				for rxn, parameters in iteritems(missing_params):
-					print("Reaction %s: %s" % (rxn.id, parameters))
-			if len(missing_concs) != 0:
-				print("\nMissing Initial Conditions"
-					"\n============================")
-				for metab in missing_concs:
-					print("Metabolite %s:" % (metab.id))
+			warn("\nCannot calculate PERCs due to missing values")
+			reports = qcqa._qcqa_summary([missing_concs, missing_params])
+			for report in reports:
+				print("%s\n" % report)
 			return None
 
 		#  Group symbols in rate_laws
-		odes, rates, symbols = expressions._sort_symbols(self, rate_type=1)
+		if self._rtype != 1:
+			self._rtype = 1
+		odes, rates, symbols = expressions._sort_symbols(self)
 		metabolites = symbols[0]
 		rate_params = symbols[1]
 		fixed_concs = symbols[2]
