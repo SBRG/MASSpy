@@ -237,6 +237,7 @@ def _setup_matrix_constructor(model, matrix_type=None, dtype=None):
 		# Otherwise use the default type, 'dense'
 		else:
 			matrix_type = 'dense'
+			model._matrix_type = 'dense'
 
 	# Check to see if matrix type is one of the defined types
 	if matrix_type not in matrix_constructor:

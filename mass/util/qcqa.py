@@ -9,8 +9,7 @@ import sympy as sp
 from six import iteritems, iterkeys
 from math import inf
 from tabulate import tabulate
-# from cobra
-from cobra.core.dictlist import DictList
+
 # from mass
 from mass.core import massmetabolite
 from mass.core import massmodel
@@ -51,14 +50,16 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 	thermodynamics : bool
 		Check for thermodynamic consistency in the model.
 	"""
+	# List of bools indicating what QCQA functions to perform
 	check_list = [initial_conditions, parameters, simulation, superflous,
 				unconserved_metabolites, param_consistency, stoichiometry,
 				elemental, thermodynamics]
 
+	# Names of the inputs
 	name_list = ["initial_conditions", "parameters", "simulation",
 				"superflous","unconserved_metabolites", "param_consistency",
 				"stoichiometry","elemental", "thermodynamics"]
-
+	# The functions to perform for each check, and associated arguments if any.
 	function_and_args =[[get_missing_initial_conditions, None],
 						[get_missing_parameters, [True]*5],
 						[can_simulate, [[1,2,3]], False],
@@ -76,8 +77,11 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 		if not isinstance(check, bool):
 			raise TypeError("%s must be a bool" % name_list[i])
 
+	# Create a list of results to display in the QCQA report
 	to_display = []
 	for i, check in enumerate(check_list):
+		# If the check is set to True, perform the function and
+		# pass any existing arguments.
 		if check:
 			function = function_and_args[i][0]
 			args = function_and_args[i][1]
@@ -85,9 +89,10 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 				to_display.append(function(model, *args))
 			else:
 				to_display.append(function(model))
+		# Set result to None if function check is not enabled.
 		else:
 			to_display.append(None)
-
+	# Print report
 	reports = _qcqa_summary(to_display)
 	for report in reports:
 		print("%s\n" % report)
@@ -206,9 +211,9 @@ def can_simulate(model, rate_type=None):
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	rate_type :  1,2,3, list of rate_types, or None
-		What rate type(s) to check for. If None, will use the models
-		current rate type.
+	rate_type :  1,2,3, list of types, or None
+		What rate type(s) to check for the ability to simulate.
+		If None, will use the model's current rate type.
 
 	Returns
 	-------
@@ -230,8 +235,10 @@ def can_simulate(model, rate_type=None):
 		else:
 			rate_type[i] = rt
 
+	# Check for missing initial conditions
 	missing_ics = get_missing_initial_conditions(model)
 
+	# Check for missing parameters
 	simulate_checks = {}
 	for rt in rate_type:
 		if rt == 1:
@@ -245,6 +252,7 @@ def can_simulate(model, rate_type=None):
 			missing_params = get_missing_parameters(model, kf=False, Keq=True,
 								kr=True, ssflux=False, custom_parameters=True)
 
+		# Set check results based on missing initial conditions and parameters
 		if len(missing_params) != 0 or len(missing_ics) != 0:
 			simulate_checks.update({rt: False})
 		else:
@@ -255,7 +263,7 @@ def can_simulate(model, rate_type=None):
 def get_superflous_parameters(model):
 	"""Get extra parameters required for massmodel simulation. Superflous
 	parameters are extra parameters that are not necessarily required for
-	simulating the model. Will
+	simulating the model.
 
 	Primarily a concern when model.kr != (model.Keq / model.kf).
 
@@ -265,8 +273,16 @@ def get_superflous_parameters(model):
 		The MassModel to inspect
 	"""
 	# Check inputs
-	print("FIXME: IMPLEMENT SUPERFLOUS")
-	return
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
+
+	# Get superflous parameters
+	superflous_parameters = {}
+	for rxn in model.reactions:
+		if len(rxn.parameters) == 3:
+			superflous_parameters[rxn] = [rxn._sym_kr]
+
+	return superflous_parameters
 
 def get_unconserved_metabolites(model):
 	"""Get the unconserved metabolites in a massmodel
@@ -291,8 +307,21 @@ def parameter_consistency(model):
 		The MassModel to inspect
 	"""
 	# Check inputs
-	print("FIXME: IMPLEMENT PARAM CONSISTENTCY")
-	return
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
+
+	# Get superflous parameters
+	param_consistency = {}
+	superflous_parameters = get_superflous_parameters(model)
+	for rxn, superflous in iteritems(superflous_parameters):
+		check = (rxn.kr == rxn.kf/rxn.Keq)
+		if check:
+			param_consistency[rxn] = ("%s: kf/Keq == kr" % check)
+		else:
+			param_consistency[rxn] = ("%s: kf/Keq != kr" % check)
+
+
+	return param_consistency
 
 def elemental_consistency(model):
 	"""Performs a consistency check on the reactions in the model to ensure
@@ -335,10 +364,18 @@ def thermodynamic_consistency(model):
 
 ## Internal
 def _qcqa_summary(to_display):
+	"""Internal use. Create reports to print out based on the QCQA results.
+	Returns a list of tabulated reports for printing.
+
+	Parameters
+	----------
+	to_display: list
+		A list of the QCQA results to report
+	"""
 	name_list = ["Missing Initial Conditions", "Missing Parameters",
-				"Can Simulate","Superflous Parameters","Unconserved Metabolites"
-				"Parameter Inconsistencies", "Stoichiometric Inconsistencies",
-				"Elemental Inconsistencies", "Thermodynamic Inconsistencies"]
+			"Can Simulate","Superflous Parameters","Unconserved Metabolites",
+			"Parameter Consistency", "Stoichiometric Consistency",
+			"Elemental Consistency", "Thermodynamic Consistency"]
 
 	headers = []
 	item_list = []
@@ -359,7 +396,8 @@ def _qcqa_summary(to_display):
 				missing_dict[header] = item
 			continue
 		# Set up printout for missing parameters
-		if re.match("Missing Parameters", header):
+		if re.match("Missing Parameters", header) or \
+			re.match("Superflous Parameters", header):
 			table_list = []
 			for rxn, missing in iteritems(item):
 				missing_params = ": "
@@ -380,6 +418,13 @@ def _qcqa_summary(to_display):
 			for rate_type, sim_check in iteritems(item):
 				table_list += ["Rate Type %s: %s" % (rate_type, sim_check)]
 			sim_checks[header] = table_list
+			continue
+
+		if re.match("Parameter Consistency", header):
+			table_list = []
+			for rxn, param_check in iteritems(item):
+				table_list += ["%s: %s" % (rxn.id, param_check)]
+			consistencies[header] = table_list
 			continue
 
 	reports.append("QCQA REPORT\n" + "="*79)
