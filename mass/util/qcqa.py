@@ -20,7 +20,7 @@ from mass.core import massreaction
 t = sp.Symbol("t")
 ## Public
 def qcqa_model(model, initial_conditions=False, parameters=False,
-			simulation=False, superflous=False, unconserved_metabolites=False,
+			simulation=False, superfluous=False, unconserved_metabolites=False,
 			param_consistency=False, stoichiometry=False, elemental=False,
 			thermodynamics=False):
 	"""Run a series of quality control and assessment tests on a massmodel and
@@ -34,11 +34,11 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 		Check for missing initial_conditions in the model
 	parameters : bool
 		Check for missing parameters in the model and ensure the model
-		parameters are consistent if there are superflous parameters
+		parameters are consistent if there are superfluous parameters
 	simulation : bool
 		Check to see if the model can be simulated
-	superflous : bool
-		Check for superflous parameters in the model
+	superfluous : bool
+		Check for superfluous parameters in the model
 	unconserved_metabolites : bool
 		Check for unconserved metabolites in the model
 	param_consistency : bool
@@ -51,19 +51,19 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 		Check for thermodynamic consistency in the model.
 	"""
 	# List of bools indicating what QCQA functions to perform
-	check_list = [initial_conditions, parameters, simulation, superflous,
+	check_list = [initial_conditions, parameters, simulation, superfluous,
 				unconserved_metabolites, param_consistency, stoichiometry,
 				elemental, thermodynamics]
 
 	# Names of the inputs
 	name_list = ["initial_conditions", "parameters", "simulation",
-				"superflous","unconserved_metabolites", "param_consistency",
+				"superfluous","unconserved_metabolites", "param_consistency",
 				"stoichiometry","elemental", "thermodynamics"]
 	# The functions to perform for each check, and associated arguments if any.
 	function_and_args =[[get_missing_initial_conditions, None],
 						[get_missing_parameters, [True]*5],
 						[can_simulate, [[1,2,3]], False],
-						[get_superflous_parameters, None],
+						[get_superfluous_parameters, None],
 						[get_unconserved_metabolites, None],
 						[parameter_consistency, None],
 						[stoichiometric_consistency, None],
@@ -260,8 +260,8 @@ def can_simulate(model, rate_type=None):
 
 	return simulate_checks
 
-def get_superflous_parameters(model):
-	"""Get extra parameters required for massmodel simulation. Superflous
+def get_superfluous_parameters(model):
+	"""Get extra parameters required for massmodel simulation. superfluous
 	parameters are extra parameters that are not necessarily required for
 	simulating the model.
 
@@ -276,13 +276,13 @@ def get_superflous_parameters(model):
 	if not isinstance(model, massmodel.MassModel):
 		raise TypeError("model must be a mass.MassModel")
 
-	# Get superflous parameters
-	superflous_parameters = {}
+	# Get superfluous parameters
+	superfluous_parameters = {}
 	for rxn in model.reactions:
 		if len(rxn.parameters) == 3:
-			superflous_parameters[rxn] = [rxn._sym_kr]
+			superfluous_parameters[rxn] = [rxn._sym_kr]
 
-	return superflous_parameters
+	return superfluous_parameters
 
 def get_unconserved_metabolites(model):
 	"""Get the unconserved metabolites in a massmodel
@@ -298,8 +298,8 @@ def get_unconserved_metabolites(model):
 
 def parameter_consistency(model):
 	"""Performs a consistency check on the rate constants and the equilibrium
-	constant if there are superflous parameters. If there are no missing or
-	superflous parameters, parameters are considered consistent.
+	constant if there are superfluous parameters. If there are no missing or
+	superfluous parameters, parameters are considered consistent.
 
 	Parameters
 	----------
@@ -310,16 +310,15 @@ def parameter_consistency(model):
 	if not isinstance(model, massmodel.MassModel):
 		raise TypeError("model must be a mass.MassModel")
 
-	# Get superflous parameters
+	# Get superfluous parameters
 	param_consistency = {}
-	superflous_parameters = get_superflous_parameters(model)
-	for rxn, superflous in iteritems(superflous_parameters):
+	superfluous_parameters = get_superfluous_parameters(model)
+	for rxn, superfluous in iteritems(superfluous_parameters):
 		check = (rxn.kr == rxn.kf/rxn.Keq)
 		if check:
 			param_consistency[rxn] = ("%s: kf/Keq == kr" % check)
 		else:
 			param_consistency[rxn] = ("%s: kf/Keq != kr" % check)
-
 
 	return param_consistency
 
@@ -335,8 +334,19 @@ def elemental_consistency(model):
 		The MassModel to inspect
 	"""
 	# Check inputs
-	print("FIXME: IMPLEMENT ELEM CONSISTENTCY")
-	return
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a mass.MassModel")
+
+	# Check for elemental consistency
+	elem_consistency = {}
+	for rxn in model.reactions:
+		if not rxn.exchange and rxn.check_mass_balance() != {}:
+			unbalanced = ""
+			for elem, amount in iteritems(rxn.check_mass_balance()):
+				unbalanced += "%s: %.1f;" % (elem, amount)
+			elem_consistency[rxn] = unbalanced.rstrip("; ") + " unbalanced"
+
+	return elem_consistency
 
 def stoichiometric_consistency(model):
 	"""Performs a consistency check on the stoichiometry of the model.
@@ -373,7 +383,7 @@ def _qcqa_summary(to_display):
 		A list of the QCQA results to report
 	"""
 	name_list = ["Missing Initial Conditions", "Missing Parameters",
-			"Can Simulate","Superflous Parameters","Unconserved Metabolites",
+			"Can Simulate","Superfluous Parameters","Unconserved Metabolites",
 			"Parameter Consistency", "Stoichiometric Consistency",
 			"Elemental Consistency", "Thermodynamic Consistency"]
 
@@ -397,7 +407,7 @@ def _qcqa_summary(to_display):
 			continue
 		# Set up printout for missing parameters
 		if re.match("Missing Parameters", header) or \
-			re.match("Superflous Parameters", header):
+			re.match("Superfluous Parameters", header):
 			table_list = []
 			for rxn, missing in iteritems(item):
 				missing_params = ": "
@@ -420,11 +430,13 @@ def _qcqa_summary(to_display):
 			sim_checks[header] = table_list
 			continue
 
-		if re.match("Parameter Consistency", header):
+		if re.match("Parameter Consistency", header) or \
+			re.match("Elemental Consistency", header):
 			table_list = []
-			for rxn, param_check in iteritems(item):
-				table_list += ["%s: %s" % (rxn.id, param_check)]
-			consistencies[header] = table_list
+			if len(item) != 0:
+				for rxn, consistency in iteritems(item):
+					table_list += ["%s: %s" % (rxn.id, consistency)]
+				consistencies[header] = table_list
 			continue
 
 	reports.append("QCQA REPORT\n" + "="*79)
@@ -434,6 +446,5 @@ def _qcqa_summary(to_display):
 		reports.append(tabulate(missing_dict, headers="keys",stralign="left"))
 	if consistencies != {}:
 		reports.append(tabulate(consistencies, headers="keys",stralign="left"))
-
 
 	return reports

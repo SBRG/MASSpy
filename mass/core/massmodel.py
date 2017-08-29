@@ -1345,15 +1345,15 @@ class MassModel(Object):
 
 			# Set equilbrium default if no flux
 			if flux == 0:
-				sol = {at_equilibrium_default}
+				sol = {float(at_equilibrium_default)}
 			# Otherwise calculate the PERC
 			else:
 				equation = sp.Eq(steady_state_fluxes[rxn], rate.subs(values))
 				sol = set(sp.solveset(equation, perc, domain=sp.S.Reals))
-			percs_dict.update({perc: sol.pop()})
+			percs_dict.update({str(perc): float(sol.pop())})
 
 			if update_reactions:
-				rxn.kf = percs_dict[perc]
+				rxn.kf = percs_dict[str(perc)]
 
 		return percs_dict
 
