@@ -14,6 +14,7 @@ except ImportError:
 
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
+from math import inf
 
 from numpy import bool_, float_, float64
 from six import iteritems, string_types
@@ -38,9 +39,10 @@ _REQUIRED_REACTION_ATTRIBUTES = [
     "id", "name", "metabolites", "_reversible", "_forward_rate_constant",
     "_equilibrium_constant", "_genes", "_gene_reaction_rule", "ssflux"]
 _ORDERED_OPTIONAL_REACTION_KEYS = [
-    "subsystem","notes", "annotation"]
+    "subsystem", "_reverse_rate_constant", "notes", "annotation"]
 _OPTIONAL_REACTION_ATTRIBUTES = {
     "subsystem": "",
+    "_reverse_rate_constant": 0,
     "notes": {},
     "annotation": {},
 }
@@ -110,7 +112,7 @@ def _metabolite_to_dict(metabolite):
 
     Parameters
     ----------
-    metabolite : mass.core.MassMetabolite
+    metabolite : mass.MassMetabolite
         The metabolite to reformulate as a dict
 
     Returns
@@ -128,7 +130,7 @@ def _metabolite_to_dict(metabolite):
         new_met[key] = _fix_type(getattr(metabolite, key))
     _update_optional(metabolite, new_met, _OPTIONAL_METABOLITE_ATTRIBUTES,
                      _ORDERED_OPTIONAL_METABOLITE_KEYS)
-    return _inf_to_string(new_met)
+    return new_met
 
 def _metabolite_from_dict(metabolite_dict):
     """Build a metabolite from a dict.
@@ -143,7 +145,7 @@ def _metabolite_from_dict(metabolite_dict):
 
     Returns
     -------
-    mass.core.MassMetabolite
+    mass.MassMetabolite
         The generated metabolite
 
     See Also
@@ -160,7 +162,7 @@ def _reaction_to_dict(reaction):
 
     Parameters
     ----------
-    reaction : mass.core.MassReaction
+    reaction : mass.MassReaction
         The reaction to reformulate as a dict
 
     Returns
@@ -184,7 +186,7 @@ def _reaction_to_dict(reaction):
         mets = OrderedDict()
         for met in sorted(reaction.metabolites, key=attrgetter("id")):
             mets[str(met)] = reaction.metabolites[met]
-        new_reaction["metabolites"] = _inf_to_string(mets)
+        new_reaction["metabolites"] = mets
     _update_optional(reaction, new_reaction, _OPTIONAL_REACTION_ATTRIBUTES,
                      _ORDERED_OPTIONAL_REACTION_KEYS)
     return _inf_to_string(new_reaction)
@@ -202,19 +204,19 @@ def _reaction_from_dict(reaction, model):
         are in turn lists with dictionaries holding all attributes to form the
         corresponding object.
 
-    model : mass.core.MassModel
+    model : mass.MassModel
         The model of the reaction to reformulate as a dict
 
     Returns
     -------
-    mass.core.MassReaction
+    mass.MassReaction
         The generated reaction
 
     See Also
     --------
     mass.io._reaction_to_dict
     """
-    new_reaction = MassReaction()
+    new_reaction = MassReaction(id=reaction["id"], name=reaction["name"])
     for k, v in iteritems(reaction):
         if k == 'metabolites':
             new_reaction.add_metabolites(OrderedDict(
@@ -252,7 +254,7 @@ def _model_to_dict(model):
 
     Parameters
     ----------
-    model : mass.core.MassModel
+    model : mass.MassModel
         The model to reformulate as a dict
 
     Returns
@@ -279,7 +281,7 @@ def _model_to_dict(model):
         (_gene_to_dict(gene) for gene in model.genes), key=itemgetter("id"))
     # Initial conditions added below
     ics = OrderedDict()
-    for met in sorted(temp.metabolites, key=attrgetter("id")):
+    for met in sorted(model.metabolites, key=attrgetter("id")):
         ics[str(met)] = _fix_type(met.ic)
     obj["ics"] = _inf_to_string(ics)
     # Add custom_rates and custom_parameters here (change to optional)
@@ -298,11 +300,12 @@ def _model_from_dict(obj):
         'metabolites', 'notes' and 'reactions'; where 'metabolites', 'genes'
         and 'metabolites' are in turn lists with dictionaries holding all
         attributes to form the corresponding object.
+
     Returns
     -------
-    mass.core.MassModel
+    mass.MassModel
         The generated model
-
+    
     See Also
     --------
     mass.io._model_to_dict
@@ -310,8 +313,8 @@ def _model_from_dict(obj):
     if 'reactions' not in obj:
         raise ValueError('Object has no reactions attribute. Cannot load.')
     model = MassModel()
-    model.add_metabolites(
-        [_metabolite_from_dict(metabolite) for metabolite in obj['metabolites']]
+    model.add_metabolites([
+        _metabolite_from_dict(metabolite) for metabolite in obj['metabolites']]
     )
     model.genes.extend([_gene_from_dict(gene) for gene in obj['genes']])
     model.add_reactions(
@@ -329,6 +332,7 @@ def _model_from_dict(obj):
     return model
 
 # json begins here
+
 def to_json(model, **kwargs):
     """
     Return the model as a JSON document.
@@ -337,7 +341,7 @@ def to_json(model, **kwargs):
 
     Parameters
     ----------
-    model : cobra.core.MassModel
+    model : mass.MassModel
         The mass model to represent.
 
     Returns
@@ -354,6 +358,25 @@ def to_json(model, **kwargs):
     obj[u"version"] = JSON_SPEC
     return json.dumps(obj, allow_nan=False, **kwargs)
 
+def from_json(document):
+    """
+    Load a mass model from a JSON document.
+
+    Parameters
+    ----------
+    document : str
+        The JSON document representation of a mass model.
+
+    Returns
+    -------
+    mass.MassModel
+        The mass model as represented in the JSON document.
+
+    See Also
+    --------
+    load_json_model : Load directly from a file.
+    """
+    return _model_from_dict(json.loads(document))
 
 
 
