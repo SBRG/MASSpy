@@ -279,11 +279,10 @@ def _model_to_dict(model):
         key=itemgetter("id"))
     obj["genes"] = sorted(
         (_gene_to_dict(gene) for gene in model.genes), key=itemgetter("id"))
-    # Initial conditions added below
     ics = OrderedDict()
-    for met in sorted(model.metabolites, key=attrgetter("id")):
-        ics[str(met)] = _fix_type(met.ic)
-    obj["ics"] = _inf_to_string(ics)
+    for met in sorted(model.initial_conditions, key=attrgetter("id")):
+        ics[str(met)] = _fix_type(model.initial_conditions[met])
+    obj["initial_conditions"] = ics
     # Add custom_rates and custom_parameters here (change to optional)
     _update_optional(model, obj, _OPTIONAL_MODEL_ATTRIBUTES,
                      _ORDERED_OPTIONAL_MODEL_KEYS)
@@ -386,7 +385,7 @@ def save_json_model(model, filename, pretty=False, **kwargs):
 
     Parameters
     ----------
-    model : mass.Model
+    model : mass.MassModel
         The mass model to represent.
     filename : str or file-like
         File path or descriptor that the JSON representation should be
@@ -415,6 +414,8 @@ def save_json_model(model, filename, pretty=False, **kwargs):
     dump_opts.update(**kwargs)
 
     if isinstance(filename, string_types):
+        if ".json" not in filename:
+            filename += ".json"
         with open(filename, "w") as file_handle:
             json.dump(obj, file_handle, **dump_opts)
     else:
@@ -432,7 +433,7 @@ def load_json_model(filename):
 
     Returns
     -------
-    mass.Model
+    mass.MassModel
         The cobra model as represented in the JSON document.
 
     See Also
