@@ -56,14 +56,19 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 
 ## Internal Attribute List for MassModels
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "_matrix_type", "_dtype",
-    "compartments", "units", "notes", "annotation"]
+    "name", "_rtype", "_custom_rates", "_custom_parameters", 
+    "fixed_concentrations", "compartments", "units", "_matrix_type", "_dtype", 
+    "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
-    "_matrix_type": "dense",
-    "_dtype": float64,
+    "_rtype": 1,
+    "_custom_rates": {},
+    "_custom_parameters": {},
+    "fixed_concentrations": {},
     "compartments": [],
     "units": {},
+    "_matrix_type": "dense",
+    "_dtype": float64,
     "notes": {},
     "annotation": {}}
 
@@ -419,7 +424,13 @@ def _model_from_dict(obj):
     model.add_reactions(
         [_reaction_from_dict(reaction, model) for reaction in obj['reactions']]
     )
+    # Add update_initial_conditions
+    ics = obj["initial_conditions"]
+    ic_dict = {metab: ics[str(metab)] for metab in model.metabolites}
+    model.update_initial_conditions(ic_dict)
+
     for k, v in iteritems(obj):
-        if k in {'id', 'name', 'notes', 'compartments', 'annotation'}:
+        if k not in {
+        'metabolites', 'reactions', 'genes', 'initial_conditions'}:
             setattr(model, k, v)
     return model
