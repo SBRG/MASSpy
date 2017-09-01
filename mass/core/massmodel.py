@@ -29,6 +29,20 @@ from mass.core.massreaction import MassReaction
 # Class begins
 ## Set the logger
 LOGGER = logging.getLogger(__name__)
+## Precompiled regular expressions for string_to_mass
+### For object IDs
+_rxn_id_finder = re.compile("^(\w+):")
+_met_id_finder = re.compile("^s\[(\S+)[,|\]]")
+### For reaction arrows
+_reversible_arrow = re.compile("<(-+|=+)>")
+_forward_arrow = re.compile("(-+|=+)>")
+_reverse_arrow = re.compile("<(-+|=+)")
+### For metabolite arguments
+_name_arg = re.compile("name=(\w+)")
+_formula_arg = re.compile("formula=(\w+)")
+_charge_arg = re.compile("charge=(\w+)")
+_compartment_finder = re.compile("\](\[[A-Za-z]\])")
+_equals = re.compile("=")
 
 # Class definition
 class MassModel(Object):
@@ -117,9 +131,9 @@ class MassModel(Object):
 			self._dtype = dtype
 			# For storing the stoichiometric matrix.
 			self._S = array.create_stoichiometric_matrix(self,
-                                    matrix_type=self._matrix_type,
-                                    dtype=self._dtype,
-            						update_model=True)
+									matrix_type=self._matrix_type,
+									dtype=self._dtype,
+									update_model=True)
 			# For storing the HistoryManager contexts
 			self._contexts = []
 
@@ -769,7 +783,7 @@ class MassModel(Object):
 			return None
 		# Get the mass action ratios
 		return {rxn : rxn.get_mass_action_ratio(sympy_expr)
-		 		for rxn in reaction_list}
+				for rxn in reaction_list}
 
 	def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=False):
 		"""Get the disequilibrium ratios for a list of reactions in a MassModel
@@ -858,9 +872,9 @@ class MassModel(Object):
 
 
 	def remove_custom_rate(self, reaction):
-		"""Remove a custom rate to the MassModel for a reaction If no other custom
-		rates rely on those custom parameters, remove those custom parameters from
-		the model as well.
+		"""Remove a custom rate to the MassModel for a reaction If no other
+		custom rates rely on those custom parameters, remove those custom
+		parameters from the model as well.
 
 		The change is reverted upon exit when using the MassModel as a context.
 
@@ -920,8 +934,8 @@ class MassModel(Object):
 			If None, will utilize the matrix type initialized with the original
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
-			'lil' to obtain the scipy sparse matrix of the corresponding type, and
-			DataFrame for a pandas 'Dataframe' where species (excluding genes)
+			'lil' to obtain the scipy sparse matrix of the corresponding type,
+			and DataFrame for a pandas 'DataFrame'. Species (excluding genes)
 			are row indicies and reactions are column indicices
 		dtype : data-type
 			The desired data-type for the array. If None, defaults to float
@@ -1174,10 +1188,10 @@ class MassModel(Object):
 		"""Merge two massmodels to create one MassModel object with
 		the reactions and metabolites from both massmodels.
 
-		Initial conditions and custom rate laws will also be added
-		from the second model into the first model. However, initial conditions
-		and custom rate laws are assumed to be the same if they have the same
-		identifier and therefore will not be added.
+		Initial conditions, custom rate laws, and custom rate parameters will
+		also be added from the second model into the first model. However,
+		initial conditions and custom rate laws are assumed to be the same if
+		they have the same identifier and therefore will not be added.
 
 		Parameters
 		----------
@@ -1229,6 +1243,19 @@ class MassModel(Object):
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
 		merged_model.add_reactions(new_reactions, True)
 
+		# Add custom rates and initial conditions
+		new_initial_conditions = second_model.initial_conditions.copy()
+		merged_model.initial_conditions = new_initial_conditions.update(
+											merged_model.initial_conditions)
+
+		new_custom_rates = second_model.custom_rates.copy()
+		merged_model.custom_rates = new_custom_rates.update(
+										merged_model.custom_rates)
+
+		new_custom_parameters = second_model.custom_parameters.copy()
+		merged_model.custom_parameters = new_custom_parameters.update(
+											merged_model.custom_parameters)
+
 		return merged_model
 
 	def calc_PERCS(self, steady_state_concentrations=None,
@@ -1241,13 +1268,13 @@ class MassModel(Object):
 		Parameters
 		----------
 		steady_state_concentrations : dict or None
-			A dictionary of steady state concentrations where MassMetabolites are
-			keys and the concentrations are the values. If None, will utilize
-			the initial conditions in the MassModel.
+			A dictionary of steady state concentrations where MassMetabolites
+			are keys and the concentrations are the values. If None, will
+			utilize the initial conditions in the MassModel.
 		steady_state_fluxes : dict or None
-			A dictionary of steady state fluxes where MassReactions are the keys
-			and the fluxes are the values. If None, will utilize the
-			steady state reactions stored in each reaction in the model.
+			A dictionary of steady state fluxes where MassReactions are keys
+			and fluxes are the values. If None, will utilize the steady state
+			reactions stored in each reaction in the model.
 		at_equilibrium_default : float or None
 			The value to set the pseudo order rate constant if the reaction is
 			at equilibrium. If None, will default to 100,000
@@ -1261,7 +1288,8 @@ class MassModel(Object):
 			steady_state_concentrations = self.initial_conditions
 		if not isinstance(steady_state_concentrations, dict):
 			raise TypeError("Steady state concentrations must be a dictionary"
-					"where keys are MassMetabolites and values are concentrations")
+							"where keys are MassMetabolites and values are "
+							"concentrations")
 
 		if not isinstance(steady_state_fluxes, (dict, type(None))):
 			raise TypeError("Steady state fluxes must be a dictionary where"
@@ -1357,8 +1385,129 @@ class MassModel(Object):
 
 		return percs_dict
 
+	def string_to_mass(self, reaction_strings, term_split="+"):
+		"""Create reactions and metabolite objects from strings.
+
+		To correctly parse a stirng, it must be in the following format:
+			"RID: s[ID, **kwargs] + s[ID, **kwargs] <=>  s[ID, **kwargs]
+
+		where kwargs can be the metabolite attributes 'name', 'formula',
+		'charge'. For example:
+			"v1: s[x1, name=xOne, charge=2] <=> s[x2, formula=X]"
+
+		To add a compartment for a species, add "[c]" where c is a letter
+		representing the compartment for the species. For example:
+			"v1: s[x1][c] <=> s[x2][c]"
+
+		When creating bound enzyme forms, it is recommended to use '&' in the
+		species ID to represent the bound enzyme-metabolite. For example:
+			"E1: s[ENZYME][c] + s[metabolite][c] <=> s[ENZYME&metabolite][c]"
+
+		Note that a reaction ID and a metabolite ID are always required
+		Parameters
+		----------
+		reaction_strings : string or list of strings
+			String or list of strings representing the reaction. Reversibility
+			is inferred from the arrow, and metabolites in the model are used
+			if they exist or created if they do not.
+		term_split : string
+			dividing individual metabolite entries
+		"""
+		if not isinstance(reaction_strings, list):
+			reaction_strings = [reaction_strings]
+
+		for rxn_string in reaction_strings:
+			if not isinstance(rxn_string, string_types):
+				raise TypeError("reaction_strings must be a string or "
+								"list of strings")
+
+		_metab_arguments = [_name_arg, _formula_arg, _charge_arg]
+
+		for rxn_string in reaction_strings:
+			try:
+				res = _rxn_id_finder.search(rxn_string)
+				rxn_id = res.group(1)
+				rxn_string = rxn_string[res.end():]
+			except:
+				ValueError("Could not find an ID for '%s'" % rxn_string)
+			# Determine reversibility
+			if _reversible_arrow.search(rxn_string):
+				arrow_loc = _reversible_arrow.search(rxn_string)
+				reversible = True
+				# Reactants left of the arrow, products on the right
+				reactant_str = rxn_string[:arrow_loc.start()].strip()
+				product_str = rxn_string[arrow_loc.end():].strip()
+			elif _forward_arrow.search(rxn_string):
+				arrow_loc = _forward_arrow.search(reaction_string)
+				reversible = False
+				# Reactants left of the arrow, products on the right
+				reactant_str = rxn_string[:arrow_loc.start()].strip()
+				product_str = rxn_string[arrow_loc.end():].strip()
+			elif _reverse_arrow.search(rxn_string):
+				arrow_loc = _reverse_arrow.search(rxn_string)
+				reversible = False
+				# Reactants right of the arrow, products on the left
+				reactant_str = rxn_string[arrow_loc.end():].strip()
+				product_str = rxn_string[:arrow_loc.start()].strip()
+			else:
+				raise TypeError("Unrecognized arrow for '%s'" % rxn_string)
+			new_reaction = MassReaction(rxn_id, reversible=reversible)
+
+			for substr, factor in ((reactant_str, -1), (product_str, 1)):
+				if len(substr) == 0:
+					continue
+				for term in substr.split(term_split):
+					term = term.strip()
+					if term.lower() == "nothing":
+						continue
+					# Find compartment if it exists
+					if _compartment_finder.search(term):
+						compartment = _compartment_finder.search(term).group(1)
+						compartment = compartment.strip("[|]")
+						term = _compartment_finder.sub("]",term)
+					else:
+						compartment = None
+					# Get the metabolite to make and the cofactor
+					if re.search("\d ", term):
+						num = float(re.search("(\d) ", term).group(1))*factor
+						metab_to_make = term[re.search("(\d) ", term).end():]
+					else:
+						num = factor
+						metab_to_make = term
+
+					# Find the metabolite ID
+					try:
+						met_id = _met_id_finder.search(metab_to_make).group(1)
+					except:
+						raise ValueError("Could not locate metab ID")
+					# Use the metabolite in the model if it exists
+					try:
+						metab = self.metabolites.get_by_id(met_id)
+					# Otherwise create a new metabolite
+					except KeyError:
+						metab = MassMetabolite(met_id)
+
+					# Set attributes for the metabolite
+					for arg in _metab_arguments:
+						if arg.search(metab_to_make):
+							attr = _equals.split(arg.pattern)[0]
+							val = arg.search(metab_to_make).group(1)
+							metab.__dict__[attr] = val
+					new_reaction.add_metabolites({metab:num})
+			self.add_reactions(new_reaction)
+
 	## Internal
 	def _repr_html_(self):
+		try:
+			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
+			rank=array.matrix_rank(self.S)
+			null=array.nullspace(self.S,'row').shape[0]
+			left_null=array.left_nullspace(self.S, 'row').shape[0]
+		except:
+			dim_S = "0x0"
+			rank = 0
+			null = 0
+			left_null = 0
 		return """
 			<table>
 				<tr>
@@ -1413,8 +1562,7 @@ class MassModel(Object):
 				</tr>
 			</table>
 		""".format(name=self.id, address='0x0%x' % id(self),
-					dim_S_matrix="{}x{}".format(self.S.shape[0],
-												self.S.shape[1]),
+					dim_S_matrix=dim_S,
 					S_type="{}, {}".format(self._matrix_type,
 									 self._dtype.__name__),
 					num_metabolites=len(self.metabolites),
@@ -1426,15 +1574,14 @@ class MassModel(Object):
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
-					mat_rank=array.matrix_rank(self.S),
-					dim_null=array.nullspace(self.S,'row').shape[0],
-					dim_left_null=array.left_nullspace(self.S, 'row').shape[0],
+					mat_rank=rank,
+					dim_null=null,
+					dim_left_null=left_null,
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),
 					units=", ".join(v if v else k for \
-										k,v in iteritems(self.units))
-					)
+										k,v in iteritems(self.units)))
 
 	# Module Dunders
 	def __enter__(self):
