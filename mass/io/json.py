@@ -214,6 +214,8 @@ def _inf_to_string(dict_object):
     for key in dict_object:
         if dict_object[key] == inf:
             dict_object[key] = "inf"
+        elif dict_object[key] == -inf:
+            dict_object[key] = "-inf"
     return dict_object
 
 def _metabolite_to_dict(metabolite):
@@ -326,7 +328,8 @@ def _reaction_from_dict(reaction, model):
     --------
     mass.io._reaction_to_dict
     """
-    new_reaction = MassReaction(id=reaction["id"], name=reaction["name"])
+    new_reaction = MassReaction(
+        id=reaction["id"], name=reaction["name"], reversible=_reversible)
     for k, v in iteritems(reaction):
         if k == 'metabolites':
             new_reaction.add_metabolites(OrderedDict(
@@ -334,6 +337,8 @@ def _reaction_from_dict(reaction, model):
                 for met, coeff in iteritems(v)))
         elif v == "inf":
             setattr(new_reaction, k, inf)
+        elif v == "-inf":
+            setattr(new_reaction, k, -inf)
         else:
             setattr(new_reaction, k, v)
     return new_reaction
