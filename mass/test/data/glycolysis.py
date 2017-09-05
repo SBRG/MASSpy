@@ -47,21 +47,21 @@ dhap = MassMetabolite(
     compartment="c"
 )
 _13dpg = MassMetabolite(
-    id="13dpg",
+    id="_13dpg",
     name="3-Phospho-D-glyceroyl phosphate",
     formula="C3H4O10P2",
     charge=-4,
     compartment="c"
 )
 _3pg = MassMetabolite(
-    id="3pg",
+    id="_3pg",
     name="3-Phospho-D-glycerate",
     formula="C3H4O7P",
     charge=-3,
     compartment="c"
 )
 _2pg = MassMetabolite(
-    id="2pg",
+    id="_2pg",
     name="D-Glycerate 2-phosphate",
     formula="C3H4O7P",
     charge=-3,
