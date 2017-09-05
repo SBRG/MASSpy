@@ -5,6 +5,8 @@ from __future__ import absolute_import
 from mass.core import (
     MassMetabolite, MassModel, MassReaction)
 
+from mass import analysis
+from mass import io
 from mass import util
 
 
