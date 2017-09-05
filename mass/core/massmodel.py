@@ -20,8 +20,9 @@ from cobra.core.dictlist import DictList
 from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
-from mass.util import array
+from mass.util import matrix
 from mass.util import qcqa
+from mass.analysis import linear
 from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
@@ -130,7 +131,7 @@ class MassModel(Object):
 			self._matrix_type = matrix_type
 			self._dtype = dtype
 			# For storing the stoichiometric matrix.
-			self._S = array.create_stoichiometric_matrix(self,
+			self._S = matrix.create_stoichiometric_matrix(self,
 									matrix_type=self._matrix_type,
 									dtype=self._dtype,
 									update_model=True)
@@ -253,7 +254,7 @@ class MassModel(Object):
 		matrix of class 'dtype'
 			The stoichiometric matrix for the given MassModel
 		"""
-		return array._update_S(self, reaction_list=reaction_list,
+		return matrix._update_S(self, reaction_list=reaction_list,
 						matrix_type=matrix_type, dtype=dtype,
 						update_model=update_model)
 
@@ -957,7 +958,7 @@ class MassModel(Object):
 
 		CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q' ]
 
-		(matrix_constructor, dtype) = array._setup_matrix_constructor(
+		(matrix_constructor, dtype) = matrix._setup_matrix_constructor(
 												self, matrix_type, dtype)
 
 		e_matrix = matrix_constructor((len(CHOPNSq),len(self.metabolites)),
@@ -1174,7 +1175,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		new_model._S = array.create_stoichiometric_matrix(self,
+		new_model._S = matrix.create_stoichiometric_matrix(self,
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
@@ -1500,9 +1501,9 @@ class MassModel(Object):
 	def _repr_html_(self):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
-			rank=array.matrix_rank(self.S)
-			null=array.nullspace(self.S,'row').shape[0]
-			left_null=array.left_nullspace(self.S, 'row').shape[0]
+			rank=linear.matrix_rank(self.S)
+			null=linear.nullspace(self.S,'row').shape[0]
+			left_null=linear.left_nullspace(self.S, 'row').shape[0]
 		except:
 			dim_S = "0x0"
 			rank = 0
