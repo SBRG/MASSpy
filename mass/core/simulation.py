@@ -184,11 +184,10 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		if len(possible_rate_types) != 0:
 			model._rtype = possible_rate_types[0]
 		else:
-			warn("Unable to simulate")
+			warn("Unable to find steady state due to missing values")
 			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
 			return [None, None]
-
 
 	options = {"simulate": simulate, "find_roots": None}
 	# Perform the simulate strategy
