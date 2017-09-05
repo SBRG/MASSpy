@@ -56,14 +56,19 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 
 ## Internal Attribute List for MassModels
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "_matrix_type", "_dtype",
-    "compartments", "units", "notes", "annotation"]
+    "name", "_rtype", "_custom_rates", "_custom_parameters", 
+    "fixed_concentrations", "compartments", "units", "_matrix_type", "_dtype", 
+    "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
-    "_matrix_type": "dense",
-    "_dtype": float64,
+    "_rtype": 1,
+    "_custom_rates": {},
+    "_custom_parameters": {},
+    "fixed_concentrations": {},
     "compartments": [],
     "units": {},
+    "_matrix_type": "dense",
+    "_dtype": float64,
     "notes": {},
     "annotation": {}}
 
@@ -209,6 +214,8 @@ def _inf_to_string(dict_object):
     for key in dict_object:
         if dict_object[key] == inf:
             dict_object[key] = "inf"
+        elif dict_object[key] == -inf:
+            dict_object[key] = "-inf"
     return dict_object
 
 def _metabolite_to_dict(metabolite):
@@ -321,7 +328,8 @@ def _reaction_from_dict(reaction, model):
     --------
     mass.io._reaction_to_dict
     """
-    new_reaction = MassReaction(id=reaction["id"], name=reaction["name"])
+    new_reaction = MassReaction(
+        id=reaction["id"], name=reaction["name"], reversible=_reversible)
     for k, v in iteritems(reaction):
         if k == 'metabolites':
             new_reaction.add_metabolites(OrderedDict(
@@ -329,6 +337,8 @@ def _reaction_from_dict(reaction, model):
                 for met, coeff in iteritems(v)))
         elif v == "inf":
             setattr(new_reaction, k, inf)
+        elif v == "-inf":
+            setattr(new_reaction, k, -inf)
         else:
             setattr(new_reaction, k, v)
     return new_reaction
@@ -419,7 +429,13 @@ def _model_from_dict(obj):
     model.add_reactions(
         [_reaction_from_dict(reaction, model) for reaction in obj['reactions']]
     )
+    # Add update_initial_conditions
+    ics = obj["initial_conditions"]
+    ic_dict = {metab: ics[str(metab)] for metab in model.metabolites}
+    model.update_initial_conditions(ic_dict)
+
     for k, v in iteritems(obj):
-        if k in {'id', 'name', 'notes', 'compartments', 'annotation'}:
+        if k not in {
+        'metabolites', 'reactions', 'genes', 'initial_conditions'}:
             setattr(model, k, v)
     return model
