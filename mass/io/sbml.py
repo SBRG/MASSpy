@@ -38,7 +38,22 @@ except ImportError:
             parse, Element, SubElement, ElementTree, register_namespace,
             ParseError)
 
-# deal with sbml2 here (currently skipped)
+# deal with sbml2 here
+# use sbml level 2 from sbml.py (which uses libsbml). Eventually, it would
+# be nice to use the libSBML converters directly instead.
+try:
+    import libsbml
+except ImportError:
+    libsbml = None
+else:
+    from cobra.io.sbml import create_cobra_model_from_sbml_file as read_sbml2
+    from cobra.io.sbml import write_cobra_model_to_sbml_file as write_sbml2
+
+try:
+    from sympy import Basic
+except ImportError:
+    class Basic:
+        pass
 
 # deal with namespaces
 namespaces = {"fbc": "http://www.sbml.org/sbml/level3/version1/fbc/version2",
@@ -398,36 +413,28 @@ def model_to_xml(mass_model, units=True):
         SubElement(list_of_units, "unit", kind="second", scale="0",
                    multiplier="3600", exponent="-1")
 
-    # create the element for the flux objective (probably not needed)
-    obj_list_tmp = SubElement(xml_model, ns("fbc:listOfObjectives"))
-    set_attrib(obj_list_tmp, "fbc:activeObjective", "obj")
-    obj_list_tmp = SubElement(obj_list_tmp, ns("fbc:objective"))
-    set_attrib(obj_list_tmp, "fbc:id", "obj")
-    set_attrib(obj_list_tmp, "fbc:type",
-               SHORT_LONG_DIRECTION[mass_model.objective.direction])
-    flux_objectives_list = SubElement(obj_list_tmp,
-                                      ns("fbc:listOfFluxObjectives"))
+    # removed element generation for the flux objective
 
     # change this to be the element for kf, Keq, and kr parameters
     # create the element for the flux bound parameters
-    parameter_list = SubElement(xml_model, "listOfParameters")
-    param_attr = {"constant": "true"}
-    if units:
-        param_attr["units"] = "mmol_per_gDW_per_hr"
-    # the most common bounds are the minimum, maximum, and 0
-    if len(cobra_model.reactions) > 0:
-        min_value = min(mass_model.reactions.list_attr("lower_bound"))
-        max_value = max(mass_model.reactions.list_attr("upper_bound"))
-    else:
-        min_value = -1000
-        max_value = 1000
+    # parameter_list = SubElement(xml_model, "listOfParameters")
+    # param_attr = {"constant": "true"}
+    # if units:
+    #     param_attr["units"] = "mmol_per_gDW_per_hr"
+    # # the most common bounds are the minimum, maximum, and 0
+    # if len(mass_model.reactions) > 0:
+    #     min_value = min(mass_model.reactions.list_attr("lower_bound"))
+    #     max_value = max(mass_model.reactions.list_attr("upper_bound"))
+    # else:
+    #     min_value = -1000
+    #     max_value = 1000
 
-    SubElement(parameter_list, "parameter", value=strnum(min_value),
-               id="cobra_default_lb", sboTerm="SBO:0000626", **param_attr)
-    SubElement(parameter_list, "parameter", value=strnum(max_value),
-               id="cobra_default_ub", sboTerm="SBO:0000626", **param_attr)
-    SubElement(parameter_list, "parameter", value="0",
-               id="cobra_0_bound", sboTerm="SBO:0000626", **param_attr)
+    # SubElement(parameter_list, "parameter", value=strnum(min_value),
+    #            id="cobra_default_lb", sboTerm="SBO:0000626", **param_attr)
+    # SubElement(parameter_list, "parameter", value=strnum(max_value),
+    #            id="cobra_default_ub", sboTerm="SBO:0000626", **param_attr)
+    # SubElement(parameter_list, "parameter", value="0",
+    #            id="cobra_0_bound", sboTerm="SBO:0000626", **param_attr)
 
     def create_bound(reaction, bound_type):
         """returns the str id of the appropriate bound for the reaction
@@ -456,7 +463,7 @@ def model_to_xml(mass_model, units=True):
 
     # add in metabolites
     species_list = SubElement(xml_model, "listOfSpecies")
-    for met in cobra_model.metabolites:
+    for met in mass_model.metabolites:
         species = SubElement(species_list, "species",
                              id="M_" + met.id,
                              # Useless required SBML parameters
@@ -464,15 +471,15 @@ def model_to_xml(mass_model, units=True):
                              boundaryCondition="false",
                              hasOnlySubstanceUnits="false")
         set_attrib(species, "name", met.name)
-        annotate_sbml_from_cobra(species, met)
+        annotate_sbml_from_mass(species, met)
         set_attrib(species, "compartment", met.compartment)
         set_attrib(species, "fbc:charge", met.charge)
         set_attrib(species, "fbc:chemicalFormula", met.formula)
 
     # add in genes
-    if len(cobra_model.genes) > 0:
+    if len(mass_model.genes) > 0:
         genes_list = SubElement(xml_model, GENELIST_TAG)
-        for gene in cobra_model.genes:
+        for gene in mass_model.genes:
             gene_id = gene.id.replace(".", SBML_DOT)
             sbml_gene = SubElement(genes_list, GENE_TAG)
             set_attrib(sbml_gene, "fbc:id", "G_" + gene_id)
@@ -485,29 +492,23 @@ def model_to_xml(mass_model, units=True):
 
     # add in reactions
     reactions_list = SubElement(xml_model, "listOfReactions")
-    for reaction in cobra_model.reactions:
+    for reaction in mass_model.reactions:
         id = "R_" + reaction.id
         sbml_reaction = SubElement(
             reactions_list, "reaction",
             id=id,
             # Useless required SBML parameters
             fast="false",
-            reversible=str(reaction.lower_bound < 0).lower())
+            reversible=str(reaction._reversible))
         set_attrib(sbml_reaction, "name", reaction.name)
-        annotate_sbml_from_cobra(sbml_reaction, reaction)
-        # add in bounds
-        set_attrib(sbml_reaction, "fbc:upperFluxBound",
-                   create_bound(reaction, "upper_bound"))
-        set_attrib(sbml_reaction, "fbc:lowerFluxBound",
-                   create_bound(reaction, "lower_bound"))
+        annotate_sbml_from_mass(sbml_reaction, reaction)
+        # # add in bounds (change this)
+        # set_attrib(sbml_reaction, "fbc:upperFluxBound",
+        #            create_bound(reaction, "upper_bound"))
+        # set_attrib(sbml_reaction, "fbc:lowerFluxBound",
+        #            create_bound(reaction, "lower_bound"))
 
-        # objective coefficient
-        if reaction.objective_coefficient != 0:
-            objective = SubElement(flux_objectives_list,
-                                   ns("fbc:fluxObjective"))
-            set_attrib(objective, "fbc:reaction", id)
-            set_attrib(objective, "fbc:coefficient",
-                       strnum(reaction.objective_coefficient))
+        # objective coefficient removed
 
         # stoichiometry
         reactants = {}
@@ -546,7 +547,56 @@ def model_to_xml(mass_model, units=True):
 
 
 
+def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
+    if not _with_lxml:
+        warn("Install lxml for faster SBML I/O", ImportWarning)
+    if not use_fbc_package:
+        if libsbml is None:
+            raise ImportError("libSBML required to write non-fbc models")
+        # ignore for now (deal with after sbml3 is finished)
+        #write_sbml2(cobra_model, filename, use_fbc_package=False, **kwargs)
+        return
+    # create xml
+    xml = model_to_xml(mass_model, **kwargs)
+    write_args = {"encoding": "UTF-8", "xml_declaration": True}
+    if _with_lxml:
+        write_args["pretty_print"] = True
+        write_args["pretty_print"] = True
+    else:
+        indent_xml(xml)
+    # write xml to file
+    should_close = True
+    if hasattr(filename, "write"):
+        xmlfile = filename
+        should_close = False
+    elif filename.endswith(".gz"):
+        xmlfile = GzipFile(filename, "wb")
+    elif filename.endswith(".bz2"):
+        xmlfile = BZ2File(filename, "wb")
+    else:
+        xmlfile = open(filename, "wb")
+    ElementTree(xml).write(xmlfile, **write_args)
+    if should_close:
+        xmlfile.close()
 
+
+
+# inspired by http://effbot.org/zone/element-lib.htm#prettyprint
+def indent_xml(elem, level=0):
+    """indent xml for pretty printing"""
+    i = "\n" + level * "  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent_xml(elem, level + 1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 
 
