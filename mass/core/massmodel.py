@@ -56,6 +56,16 @@ class MassModel(Object):
 		Either an existing MassModel object in which case a new MassModel
 		object is instantiated with the same properties as the original
 		massmodel, or an identifier to associate with the massmodel as a string
+	matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'} or None
+		If None, will utilize the matrix type initialized with the original
+		model. Otherwise reconstruct the S matrix with the specified type.
+		Types can include 'dense' for a standard  numpy.array, 'dok' or
+		'lil' to obtain the scipy matrix of the corresponding type,
+		DataFrame for a pandas 'Dataframe' where species (excluding genes)
+		are row indicies and reactions are column indicices, and 'symbolic'
+		for a sympy.Matrix.
+	dtype : data-type
+		The desired data-type for the array. If None, defaults to float64
 
 	Attributes
 	----------
@@ -108,6 +118,7 @@ class MassModel(Object):
 			self.__setstate__(id_or_massmodel.__dict__)
 			if not hasattr(self, "name"):
 				self.name = None
+			self.update_S(matrix_type=matrix_type, dtype=dtype)
 		else:
 			Object.__init__(self, id_or_massmodel, name=name)
 			# A DictList of MassReactions
@@ -239,15 +250,16 @@ class MassModel(Object):
 			The list of MassReactions to add to the current stoichiometric matrix.
 			Reactions must already exist in the model in order to update.
 			If None, the entire stoichiometric matrix is reconstructed
-		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+		matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'} or None
 			If None, will utilize the matrix type initialized with the original
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
-			'lil' to obtain the scipy sparse matrix of the corresponding type, and
+			'lil' to obtain the scipy matrix of the corresponding type,
 			DataFrame for a pandas 'Dataframe' where species (excluding genes)
-			are row indicies and reactions are column indicices
+			are row indicies and reactions are column indicices, and 'symbolic'
+			for a sympy.MutableDenseMatrix.
 		dtype : data-type
-			The desired data-type for the array. If None, defaults to float
+			The desired data-type for the array. If None, defaults to float64
 
 		Returns
 		-------
