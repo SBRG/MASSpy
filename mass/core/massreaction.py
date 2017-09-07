@@ -229,7 +229,7 @@ class MassReaction(Object):
 
 
 	@property
-	def rate_law(self):
+	def rate(self):
 		"""Returns the rate law as a human readable string"""
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
 									sympy_expr=False, update_reaction=True)
