@@ -1589,7 +1589,7 @@ class MassModel(Object):
 
 		# No need to construct a matrix if there are no metabolites or species
 		if n_metabolites == 0 or n_reactions == 0:
-			s_matrix = None
+			return None
 
 		else:
 			# Construct the stoichiometric matrix
