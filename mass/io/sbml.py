@@ -13,17 +13,21 @@ from warnings import catch_warnings, simplefilter, warn
 
 from six import iteritems, string_types
 
+from sympy.printing.mathml import mathml
+
 from cobra.core import Gene
 from cobra.core.gene import parse_gpr
 from cobra.manipulation.modify import _renames
 from cobra.manipulation.validate import check_metabolite_compartment_formula
+# For Gene and GPR handling
+from cobra.io.sbml3 import annotate_cobra_from_sbml, annotate_sbml_from_cobra
 
-from mass.core import MassMetabolite, MassReaction, MassModel
+from mass.core import MassMetabolite, MassReaction, MassModel, expressions
 
 try:
     from lxml.etree import (
         parse, Element, SubElement, ElementTree, register_namespace,
-        ParseError, XPath)
+        ParseError, XPath, fromstring)
 
     _with_lxml = True
 except ImportError:
@@ -31,12 +35,12 @@ except ImportError:
     try:
         from xml.etree.cElementTree import (
             parse, Element, SubElement, ElementTree, register_namespace,
-            ParseError)
+            ParseError, fromstring)
     except ImportError:
         XPath = None
         from xml.etree.ElementTree import (
             parse, Element, SubElement, ElementTree, register_namespace,
-            ParseError)
+            ParseError, fromstring)
 
 # deal with sbml2 here
 # use sbml level 2 from sbml.py (which uses libsbml). Eventually, it would
@@ -59,7 +63,8 @@ except ImportError:
 namespaces = {"fbc": "http://www.sbml.org/sbml/level3/version1/fbc/version2",
               "sbml": "http://www.sbml.org/sbml/level3/version1/core",
               "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-              "bqbiol": "http://biomodels.net/biology-qualifiers/"}
+              "bqbiol": "http://biomodels.net/biology-qualifiers/",
+              "mml": "http://www.w3.org/1998/Math/MathML"}
 
 for key in namespaces:
     register_namespace(key, namespaces[key])
@@ -92,6 +97,7 @@ SPECIES_XPATH = ns("sbml:listOfSpecies/sbml:species[@boundaryCondition='%s']")
 OBJECTIVES_XPATH = ns("fbc:objective[@fbc:id='%s']/"
                       "fbc:listOfFluxObjectives/"
                       "fbc:fluxObjective")
+# might not be needed
 LONG_SHORT_DIRECTION = {'maximize': 'max', 'minimize': 'min'}
 SHORT_LONG_DIRECTION = {'min': 'minimize', 'max': 'maximize'}
 
@@ -171,7 +177,7 @@ def clip(string, prefix):
     return string[len(prefix):] if string.startswith(prefix) else string
 
 
-
+# look into this for handling inf and -inf for Keq values
 def strnum(number):
     """Utility function to convert a number to a string"""
     if isinstance(number, (Decimal, Basic, str)):
@@ -199,11 +205,6 @@ def construct_gpr_xml(parent, expression):
         set_attrib(gene_elem, "fbc:geneProduct", "G_" + expression.id)
     else:
         raise Exception("unsupported operation  " + repr(expression))
-
-
-
-# Add annotate_cobra_from_sbml here (for Gene and GPR stuff)
-# Add annotate_sbml_from_cobra here (for Gene and GPR stuff)
 
 
 
@@ -272,8 +273,9 @@ def annotate_sbml_from_mass(sbml_element, mass_element):
 
 def parse_xml_into_model(xml, number=float):
     xml_model = xml.find(ns("sbml:model"))
-    if get_attrib(xml_model, "fbc:strict") != "true":
-        warn('loading SBML model without fbc:strict="true"')
+    # deal with strict fbc model here?
+    if get_attrib(xml_model, "fbc:strict") == "true":
+        warn('loading SBML model with fbc:strict="true"')
 
     model_id = get_attrib(xml_model, "id")
     model = Model(model_id)
@@ -281,7 +283,7 @@ def parse_xml_into_model(xml, number=float):
 
     model.compartments = {c.get("id"): c.get("name") for c in
                           xml_model.findall(COMPARTMENT_XPATH)}
-    # add metabolites (change boundary metabolites maybe)
+    # add metabolites
     for species in xml_model.findall(SPECIES_XPATH % 'false'):
         met = get_attrib(species, "id", require=True)
         met = Metabolite(clip(met, "M_"))
@@ -292,7 +294,7 @@ def parse_xml_into_model(xml, number=float):
         met.formula = get_attrib(species, "fbc:chemicalFormula")
         model.add_metabolites([met])
     # Detect boundary metabolites - In case they have been mistakenly
-    # added. They should not actually appear in a model
+    # added. They should not actually appear in a model (parameters instead)
     boundary_metabolites = {clip(i.get("id"), "M_")
                             for i in xml_model.findall(SPECIES_XPATH % 'true')}
 
@@ -317,7 +319,7 @@ def parse_xml_into_model(xml, number=float):
             return clip(gene_id, "G_")
         else:
             raise Exception("unsupported tag " + sub_xml.tag)
-    # change paramenter stuff below (bounds variable + XPATH stuff for it)
+    # change paramenter stuff below (make sure to include constant="true")
     bounds = {bound.get("id"): get_attrib(bound, "value", type=number)
               for bound in xml_model.iterfind(BOUND_XPATH)}
     # add reactions (might need to be tweaked)
@@ -394,65 +396,26 @@ def model_to_xml(mass_model, units=True):
                   sboTerm="SBO:0000624")
     set_attrib(xml, "fbc:required", "false")
     xml_model = SubElement(xml, "model")
-    set_attrib(xml_model, "fbc:strict", "true")
+    set_attrib(xml_model, "fbc:strict", "false")
     if mass_model.id is not None:
         xml_model.set("id", mass_model.id)
     if mass_model.name is not None:
         xml_model.set("name", mass_model.name)
 
-    # if using units, add in mmol/gdw/hr (might not be needed)
-    if units:
-        unit_def = SubElement(
-            SubElement(xml_model, "listOfUnitDefinitions"),
-            "unitDefinition", id="mmol_per_gDW_per_hr")
-        list_of_units = SubElement(unit_def, "listOfUnits")
-        SubElement(list_of_units, "unit", kind="mole", scale="-3",
-                   multiplier="1", exponent="1")
-        SubElement(list_of_units, "unit", kind="gram", scale="0",
-                   multiplier="1", exponent="-1")
-        SubElement(list_of_units, "unit", kind="second", scale="0",
-                   multiplier="3600", exponent="-1")
+    # if using units, add handling here
+    # refer to cobra for help
 
-    # removed element generation for the flux objective
-
-    # change this to be the element for kf, Keq, and kr parameters
-    # create the element for the flux bound parameters
-    # parameter_list = SubElement(xml_model, "listOfParameters")
-    # param_attr = {"constant": "true"}
-    # if units:
-    #     param_attr["units"] = "mmol_per_gDW_per_hr"
-    # # the most common bounds are the minimum, maximum, and 0
-    # if len(mass_model.reactions) > 0:
-    #     min_value = min(mass_model.reactions.list_attr("lower_bound"))
-    #     max_value = max(mass_model.reactions.list_attr("upper_bound"))
-    # else:
-    #     min_value = -1000
-    #     max_value = 1000
-
-    # SubElement(parameter_list, "parameter", value=strnum(min_value),
-    #            id="cobra_default_lb", sboTerm="SBO:0000626", **param_attr)
-    # SubElement(parameter_list, "parameter", value=strnum(max_value),
-    #            id="cobra_default_ub", sboTerm="SBO:0000626", **param_attr)
-    # SubElement(parameter_list, "parameter", value="0",
-    #            id="cobra_0_bound", sboTerm="SBO:0000626", **param_attr)
-
-    def create_bound(reaction, bound_type):
-        """returns the str id of the appropriate bound for the reaction
-
-        The bound will also be created if necessary"""
-        value = getattr(reaction, bound_type)
-        if value == min_value:
-            return "cobra_default_lb"
-        elif value == 0:
-            return "cobra_0_bound"
-        elif value == max_value:
-            return "cobra_default_ub"
-        else:
-            param_id = "R_" + reaction.id + "_" + bound_type
-            SubElement(parameter_list, "parameter", id=param_id,
-                       value=strnum(value), sboTerm="SBO:0000625",
-                       **param_attr)
-            return param_id
+    # add in parameters (fixed concentration metabolites)
+    parameter_list = SubElement(xml_model, "listOfParameters")
+    param_attr = {"constant": "true", "sboTerm": "SBO:0000285"}
+    for k, v in iteritems(mass_model.fixed_concentrations):
+        param = SubElement(parameter_list, "parameter", 
+                            id="M_" + k.id)
+        set_attrib(param, "name", k.name)
+        annotate_sbml_from_mass(param, k)
+        set_attrib(param, "value", v)
+        set_attrib(param, "constant", "true")
+        set_attrib(param, "sboTerm", "SBO:0000285")
 
     # add in compartments
     compartments_list = SubElement(xml_model, "listOfCompartments")
@@ -492,7 +455,8 @@ def model_to_xml(mass_model, units=True):
 
     # add in reactions
     reactions_list = SubElement(xml_model, "listOfReactions")
-    for reaction in mass_model.reactions:
+    rate_dictionary = expressions.strip_time(mass_model.rate_expressions)
+    for reaction, rate in iteritems(rate_dictionary):
         id = "R_" + reaction.id
         sbml_reaction = SubElement(
             reactions_list, "reaction",
@@ -502,13 +466,26 @@ def model_to_xml(mass_model, units=True):
             reversible=str(reaction._reversible))
         set_attrib(sbml_reaction, "name", reaction.name)
         annotate_sbml_from_mass(sbml_reaction, reaction)
-        # # add in bounds (change this)
-        # set_attrib(sbml_reaction, "fbc:upperFluxBound",
-        #            create_bound(reaction, "upper_bound"))
-        # set_attrib(sbml_reaction, "fbc:lowerFluxBound",
-        #            create_bound(reaction, "lower_bound"))
-
-        # objective coefficient removed
+        sbml_kinetic_law = SubElement(sbml_reaction, "kineticLaw")
+        # add in rate expression
+        math_tag = "<math xmlns:mml='http://www.w3.org/1998/Math/MathML'>"
+        sympy_mathml = mathml(rate)
+        sympy_mathml = math_tag + sympy_mathml + "</math>"
+        sbml_kinetic_law.append(fromstring(sympy_mathml))
+        # add local parameters (kf, Keq, kr)
+        sbml_param_list = SubElement(sbml_reaction, "listofLocalParameters")
+        fwd_rate = "kf_"+reaction.id
+        eq_const = "Keq_"+reaction.id
+        rev_rate = "kr_"+reaction.id
+        sbml_kf = SubElement(
+            sbml_param_list, "parameter", id=fwd_rate, name=fwd_rate)
+        set_attrib(sbml_kf, "value", reaction.kf)
+        sbml_Keq = SubElement(
+            sbml_param_list, "parameter", id=eq_const, name=eq_const)
+        set_attrib(sbml_Keq, "value", reaction.Keq)
+        sbml_kr = SubElement(
+            sbml_param_list, "parameter", id=rev_rate, name=rev_rate)
+        set_attrib(sbml_kr, "value", reaction.kr)
 
         # stoichiometry
         reactants = {}
