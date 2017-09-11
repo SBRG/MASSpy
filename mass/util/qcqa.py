@@ -6,9 +6,9 @@ from __future__ import absolute_import
 # Import necesary packages
 import re
 import sympy as sp
-from six import iteritems, iterkeys
 from math import inf
 from tabulate import tabulate
+from six import iteritems, iterkeys
 
 # from mass
 from mass.core import massmetabolite

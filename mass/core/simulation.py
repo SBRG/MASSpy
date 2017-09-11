@@ -7,9 +7,9 @@ import re
 import numpy as np
 import sympy as sp
 from warnings import warn
-from six import iteritems, iterkeys, itervalues
 from scipy.integrate import ode
 from scipy.optimize import root
+from six import iteritems, iterkeys, itervalues
 
 # from mass
 from mass.util import qcqa

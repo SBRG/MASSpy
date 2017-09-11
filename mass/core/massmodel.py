@@ -4,16 +4,16 @@
 from __future__ import absolute_import
 
 # Import necesary packages
-import logging
 import re
+import logging
 import pandas as pd
 import numpy as np
 import sympy as sp
+from warnings import warn
+from functools import partial
+from copy import copy, deepcopy
 from scipy.sparse import dok_matrix, lil_matrix
 from six import string_types, integer_types, iteritems, iterkeys, itervalues
-from copy import copy, deepcopy
-from functools import partial
-from warnings import warn
 
 # from cobra
 from cobra.core.object import Object
@@ -1245,7 +1245,7 @@ class MassModel(Object):
 		----------
 		second_model : MassModel
 			The other MassModel to add reactions and metabolites from
-		prefix_existing : string_types
+		prefix_existing : string
 			Use the string to prefix the reaction identifier of a reaction
 			in the second_model if that reaction already exists within
 			the first model.
