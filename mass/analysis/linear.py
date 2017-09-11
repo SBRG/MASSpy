@@ -110,7 +110,6 @@ def gradient(model, strip_time=False, sub_parameters=False,
 		for c_param in symbols[3]:
 			values.update({c_param: model.custom_parameters[str(c_param)]})
 
-
 	# Create gradient matrix
 	for rxn, rate in iteritems(rates):
 		for i, metab in enumerate(model.metabolites):
@@ -571,7 +570,7 @@ def svd(A, **kwargs):
 			A = np.array(A).astype(np.float64)
 		except:
 			raise ValueError("Cannot have sympy symbols in the matrix. Try "
-							"susbtituting numerical values in first")	
+							"substituting numerical values in first")
 	else:
 		raise TypeError("Matrix must be one of the following formats: "
 				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
@@ -625,7 +624,7 @@ def eigenvalues(A, left_eigenvec=False, right_eigenvec=False, **kwargs):
 			A = np.array(A).astype(np.float64)
 		except:
 			raise ValueError("Cannot have sympy symbols in the matrix. Try "
-							"susbtituting numerical values in first")
+							"substituting numerical values in first")
 	else:
 		raise TypeError("Matrix must be one of the following formats: "
 				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
