@@ -7,9 +7,9 @@ import re
 import numpy as np
 import sympy as sp
 from warnings import warn
-from six import iteritems, iterkeys, itervalues
 from scipy.integrate import ode
 from scipy.optimize import root
+from six import iteritems, iterkeys, itervalues
 
 # from mass
 from mass.util import qcqa
@@ -184,11 +184,10 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		if len(possible_rate_types) != 0:
 			model._rtype = possible_rate_types[0]
 		else:
-			warn("Unable to simulate")
+			warn("Unable to find steady state due to missing values")
 			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
 			return [None, None]
-
 
 	options = {"simulate": simulate, "find_roots": None}
 	# Perform the simulate strategy

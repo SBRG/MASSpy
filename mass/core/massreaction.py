@@ -5,12 +5,12 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
-from collections import defaultdict
-from copy import copy, deepcopy
-from functools import partial
-from operator import attrgetter
-from warnings import warn
 from math import inf
+from warnings import warn
+from functools import partial
+from copy import copy, deepcopy
+from operator import attrgetter
+from collections import defaultdict
 from six import iteritems, iterkeys, string_types, integer_types
 
 # from cobra
@@ -23,7 +23,6 @@ from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
-
 ## precompiled regular expressions
 ### Matches and/or in a gene reaction rule
 and_or_search = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
@@ -229,7 +228,7 @@ class MassReaction(Object):
 
 
 	@property
-	def rate_law(self):
+	def rate(self):
 		"""Returns the rate law as a human readable string"""
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
 									sympy_expr=False, update_reaction=True)

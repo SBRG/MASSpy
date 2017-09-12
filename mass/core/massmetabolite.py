@@ -5,9 +5,8 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
-from six import string_types, integer_types
 from warnings import warn
-from sympy import S, Add, Mul
+from six import string_types, integer_types
 
 # from cobra
 from cobra.core.species import Species

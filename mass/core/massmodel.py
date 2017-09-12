@@ -4,15 +4,16 @@
 from __future__ import absolute_import
 
 # Import necesary packages
-import logging
 import re
+import logging
 import pandas as pd
 import numpy as np
 import sympy as sp
-from six import string_types, integer_types, iteritems, iterkeys, itervalues
-from copy import copy, deepcopy
-from functools import partial
 from warnings import warn
+from functools import partial
+from copy import copy, deepcopy
+from scipy.sparse import dok_matrix, lil_matrix
+from six import string_types, integer_types, iteritems, iterkeys, itervalues
 
 # from cobra
 from cobra.core.object import Object
@@ -20,7 +21,6 @@ from cobra.core.dictlist import DictList
 from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
-from mass.util import matrix
 from mass.util import qcqa
 from mass.analysis import linear
 from mass.core import expressions
@@ -30,6 +30,8 @@ from mass.core.massreaction import MassReaction
 # Class begins
 ## Set the logger
 LOGGER = logging.getLogger(__name__)
+## Global symbol for time
+t = sp.Symbol("t")
 ## Precompiled regular expressions for string_to_mass
 ### For object IDs
 _rxn_id_finder = re.compile("^(\w+):")
@@ -56,6 +58,16 @@ class MassModel(Object):
 		Either an existing MassModel object in which case a new MassModel
 		object is instantiated with the same properties as the original
 		massmodel, or an identifier to associate with the massmodel as a string
+	matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'} or None
+		If None, will utilize the matrix type initialized with the original
+		model. Otherwise reconstruct the S matrix with the specified type.
+		Types can include 'dense' for a standard  numpy.array, 'dok' or
+		'lil' to obtain the scipy matrix of the corresponding type,
+		DataFrame for a pandas 'Dataframe' where species (excluding genes)
+		are row indicies and reactions are column indicices, and 'symbolic'
+		for a sympy.Matrix.
+	dtype : data-type
+		The desired data-type for the array. If None, defaults to float64
 
 	Attributes
 	----------
@@ -108,6 +120,7 @@ class MassModel(Object):
 			self.__setstate__(id_or_massmodel.__dict__)
 			if not hasattr(self, "name"):
 				self.name = None
+			self.update_S(matrix_type=matrix_type, dtype=dtype)
 		else:
 			Object.__init__(self, id_or_massmodel, name=name)
 			# A DictList of MassReactions
@@ -131,7 +144,7 @@ class MassModel(Object):
 			self._matrix_type = matrix_type
 			self._dtype = dtype
 			# For storing the stoichiometric matrix.
-			self._S = matrix.create_stoichiometric_matrix(self,
+			self._S = self._create_stoichiometric_matrix(
 									matrix_type=self._matrix_type,
 									dtype=self._dtype,
 									update_model=True)
@@ -227,7 +240,7 @@ class MassModel(Object):
 	## Public
 	def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
 				update_model=True):
-		"""For internal use only. Update the S matrix of the model.
+		"""Update the S matrix of the model.
 
 		NOTE: reaction_list is assumed to be at the end of self.reactions.
 
@@ -236,27 +249,58 @@ class MassModel(Object):
 		model : mass.MassModel
 			The MassModel object to construct the matrix for
 		reaction_list : list of MassReactions or None
-			The list of MassReactions to add to the current stoichiometric matrix.
+			List of MassReactions to add to the current stoichiometric matrix.
 			Reactions must already exist in the model in order to update.
 			If None, the entire stoichiometric matrix is reconstructed
-		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+		matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'} or None
 			If None, will utilize the matrix type initialized with the original
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
-			'lil' to obtain the scipy sparse matrix of the corresponding type, and
+			'lil' to obtain the scipy matrix of the corresponding type,
 			DataFrame for a pandas 'Dataframe' where species (excluding genes)
-			are row indicies and reactions are column indicices
+			are row indicies and reactions are column indicices, and 'symbolic'
+			for a sympy.MutableDenseMatrix.
 		dtype : data-type
-			The desired data-type for the array. If None, defaults to float
+			The desired data-type for the array. If None, defaults to float64
 
 		Returns
 		-------
 		matrix of class 'dtype'
 			The stoichiometric matrix for the given MassModel
 		"""
-		return matrix._update_S(self, reaction_list=reaction_list,
-						matrix_type=matrix_type, dtype=dtype,
-						update_model=update_model)
+		# Check matrix type input if it exists to ensure its a valid matrix type
+		if matrix_type is not None:
+			if not isinstance(matrix_type, string_types):
+				raise TypeError("matrix_type must be a string")
+			# Remove case sensitivity
+			matrix_type = matrix_type.lower()
+			if matrix_type not in {'dense', 'dok', 'lil', 'dataframe',
+									'symbolic'}:
+				raise ValueError("matrix_type must be of one of the following"
+						" {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}")
+		else:
+			matrix_type = self._matrix_type
+
+		# Use the model's stored datatype if the datatype is not specified
+		if dtype is None:
+			dtype = self._dtype
+
+		# Check input of update model
+		if not isinstance(update_model, bool):
+			raise TypeError("update_model must be a bool")
+
+		# If there is no change to the reactions, just reconstruct the model
+		if self._S is None or reaction_list is None:
+			s_matrix = self._create_stoichiometric_matrix(matrix_type, dtype,
+														update_model)
+		else:
+			s_matrix = self._update_stoichiometry(reaction_list,
+											matrix_type=matrix_type)
+
+		if update_model:
+			self._update_model_s(s_matrix, matrix_type, dtype)
+
+		return s_matrix
 
 	def add_metabolites(self, metabolite_list, add_initial_conditons=False):
 		"""Will add a list of metabolites to the MassModel object and add
@@ -680,7 +724,7 @@ class MassModel(Object):
 			c = values[1]
 			reversible = values[2]
 		else:
-			raise TypeError("Exchange type must be either "
+			raise ValueError("Exchange type must be either "
 							"'exchange''source' or 'sink'")
 		rxn_name = "{} {}".format(metabolite.name, exchange_type)
 
@@ -936,8 +980,9 @@ class MassModel(Object):
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
 			'lil' to obtain the scipy sparse matrix of the corresponding type,
-			and DataFrame for a pandas 'DataFrame'. Species (excluding genes)
-			are row indicies and reactions are column indicices
+			DataFrame for a pandas 'DataFrame' where species (excluding genes)
+			are row indicies and reactions are column indicices, and 'symbolic'
+			for a sympy.Matrix'.
 		dtype : data-type
 			The desired data-type for the array. If None, defaults to float
 
@@ -958,8 +1003,8 @@ class MassModel(Object):
 
 		CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q' ]
 
-		(matrix_constructor, dtype) = matrix._setup_matrix_constructor(
-												self, matrix_type, dtype)
+		(matrix_constructor, dtype) = self._setup_matrix_constructor(
+												matrix_type, dtype)
 
 		e_matrix = matrix_constructor((len(CHOPNSq),len(self.metabolites)),
 									dtype=dtype)
@@ -981,6 +1026,8 @@ class MassModel(Object):
 		if matrix_type == 'dataframe':
 			metab_ids = [metab.id for metab in self.metabolites]
 			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq, columns=metab_ids)
+		if matrix_type == 'symbolic':
+			e_matrix = sp.Matrix(e_matrix)
 
 		return e_matrix
 
@@ -1175,7 +1222,7 @@ class MassModel(Object):
 
 
 		# Create the new stoichiometric matrix for the model
-		new_model._S = matrix.create_stoichiometric_matrix(self,
+		new_model._S = self._create_stoichiometric_matrix(
 						matrix_type=self._matrix_type,
 						dtype=self._dtype, update_model=True)
 
@@ -1198,7 +1245,7 @@ class MassModel(Object):
 		----------
 		second_model : MassModel
 			The other MassModel to add reactions and metabolites from
-		prefix_existing : string_types
+		prefix_existing : string
 			Use the string to prefix the reaction identifier of a reaction
 			in the second_model if that reaction already exists within
 			the first model.
@@ -1389,7 +1436,7 @@ class MassModel(Object):
 	def string_to_mass(self, reaction_strings, term_split="+"):
 		"""Create reactions and metabolite objects from strings.
 
-		To correctly parse a stirng, it must be in the following format:
+		To correctly parse a string, it must be in the following format:
 			"RID: s[ID, **kwargs] + s[ID, **kwargs] <=>  s[ID, **kwargs]
 
 		where kwargs can be the metabolite attributes 'name', 'formula',
@@ -1405,6 +1452,7 @@ class MassModel(Object):
 			"E1: s[ENZYME][c] + s[metabolite][c] <=> s[ENZYME&metabolite][c]"
 
 		Note that a reaction ID and a metabolite ID are always required
+		
 		Parameters
 		----------
 		reaction_strings : string or list of strings
@@ -1451,7 +1499,7 @@ class MassModel(Object):
 				reactant_str = rxn_string[arrow_loc.end():].strip()
 				product_str = rxn_string[:arrow_loc.start()].strip()
 			else:
-				raise TypeError("Unrecognized arrow for '%s'" % rxn_string)
+				raise ValueError("Unrecognized arrow for '%s'" % rxn_string)
 			new_reaction = MassReaction(rxn_id, reversible=reversible)
 
 			for substr, factor in ((reactant_str, -1), (product_str, 1)):
@@ -1498,12 +1546,255 @@ class MassModel(Object):
 			self.add_reactions(new_reaction)
 
 	## Internal
+	def _create_stoichiometric_matrix(self, matrix_type=None, dtype=None,
+									update_model=True):
+		"""Return the stoichiometrix matrix for a given massmodel
+
+		The rows represent the chemical species and the columns represent the
+		reactions. S[i, j] therefore contain the quantity of species 'i'
+		produce (positive) or consumed (negative) by reaction 'j'.
+
+		Matrix types can include 'dense' for a standard  numpy.array, 'dok' or
+		'lil' to obtain the scipy matrix of the corresponding type, DataFrame
+		for a pandas 'Dataframe' where species (excluding genes) are row
+		indicies and reactions are column indicices, and 'symbolic' for a
+		sympy.Matrix.
+
+		Parameters
+		----------
+		model : mass.MassModel
+			The MassModel object to construct the matrix for
+		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, or None
+		   Construct the S matrix with the specified matrix type. If None, will
+		   utilize the matrix type in the massmodel. If massmodel does not have
+		   a specified matrix type, will default to 'dense'
+		   Not case sensitive
+		dtype : data-type
+			Construct the S matrix with the specified data type. If None, will
+			utilize  the data type in the massmodel. If massmodel does not have
+			a specified data type, will default to float64
+		Returns
+		-------
+		matrix of class 'dtype'
+			The stoichiometric matrix for the given MassModel
+		"""
+		# Check input of update model
+		if not isinstance(update_model, bool):
+			raise TypeError("update_model must be a bool")
+
+		# Set up for matrix construction if matrix types are correct.
+		(matrix_constructor, dtype) = self._setup_matrix_constructor(
+											matrix_type, dtype)
+		n_metabolites = len(self.metabolites)
+		n_reactions = len(self.reactions)
+
+		# No need to construct a matrix if there are no metabolites or species
+		if n_metabolites == 0 or n_reactions == 0:
+			return None
+
+		else:
+			# Construct the stoichiometric matrix
+			s_matrix = matrix_constructor((n_metabolites, n_reactions),
+											dtype=dtype)
+			# Get index for metabolites and reactions
+			m_ind = self.metabolites.index
+			r_ind = self.reactions.index
+
+			# Build matrix
+			for rxn in self.reactions:
+				for metab, stoic in iteritems(rxn.metabolites):
+					s_matrix[m_ind(metab), r_ind(rxn)] = stoic
+
+			# Convert matrix to dataframe if matrix type is a dataframe
+			if matrix_type == 'dataframe':
+				metabolite_ids =[metab.id for metab in self.metabolites]
+				reaction_ids = [rxn.id for rxn in self.reactions]
+				s_matrix = pd.DataFrame(s_matrix, index = metabolite_ids,
+												columns = reaction_ids)
+			if matrix_type == 'symbolic':
+				s_matrix = sp.Matrix(s_matrix)
+
+			# Update the model's stored matrix data if True
+		if update_model:
+			self._update_model_s(s_matrix, matrix_type, dtype)
+
+		return s_matrix
+
+	def _setup_matrix_constructor(self, matrix_type=None, dtype=None):
+		"""Internal use. Check inputs and create a constructor for the
+		specified matrix type.
+
+		Parameters
+		----------
+		model : mass.MassModel
+			The MassModel object to construct the matrix for
+		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, or None
+		   Construct the matrix with the specified matrix type. If None, will
+		   utilize  the matrix type in the massmodel. If massmodel does not
+		   have a specified matrix type, will default to 'dense'
+		   Not case sensitive
+		dtype : data-type
+			Construct the S matrix with the specified data type. If None, will
+			utilize  the data type in the massmodel. If massmodel does not have
+			a specified data type, will default to float64
+		Returns
+		-------
+		matrix of class 'dtype'
+		"""
+		# Dictionary for constructing the matrix
+		matrix_constructor = {'dense': np.zeros, 'dok': dok_matrix,
+								'lil': lil_matrix, 'dataframe': np.zeros,
+								'symbolic': np.zeros}
+
+		# Check matrix type input if it exists
+		if matrix_type is not None:
+			if not isinstance(matrix_type, string_types):
+				raise TypeError("matrix_type must be a string")
+			# Remove case sensitivity
+			matrix_type = matrix_type.lower()
+		else:
+			# Use the models stored matrix type if None is specified
+			if self._matrix_type is not None:
+				matrix_type = self._matrix_type.lower()
+			# Otherwise use the default type, 'dense'
+			else:
+				matrix_type = 'dense'
+				self._matrix_type = 'dense'
+
+		# Check to see if matrix type is one of the defined types
+		if matrix_type not in matrix_constructor:
+			raise ValueError("matrix_type must be a string of one of the "
+							"following types: {'dense', 'dok', 'lil', "
+							"'dataframe', 'symbolic'}")
+
+		# Set the data-type if it is none
+		if dtype is None:
+			# Use the models stored data type if available
+			if self._dtype is not None:
+				dtype = self._dtype
+			# Otherwise use the default type, np.float64
+			else:
+				dtype = np.float64
+				self._dtype = np.float64
+
+		constructor = matrix_constructor[matrix_type]
+		return (constructor, dtype)
+
+	def _update_stoichiometry(self, reaction_list, matrix_type=None):
+		"""For internal uses only. To update the stoichometric matrix with
+		additional reactions and metabolites efficiently by converting to
+		a dok matrix, updating the dok matrix, and converting back to the
+		desired type
+
+		Parameters
+		----------
+		massmodel : mass.MassModel
+			The massmodel to update
+		reaction_list: list of MassReactions
+			The reactions to add to the matrix
+		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}
+			The type of matrix
+
+		Warnings
+		--------
+		This method is intended for internal use only. To safely update a
+		matrix, use the massmodel.update_S method.
+		"""
+		# Set defaults
+		shape = (len(self.metabolites), len(self.reactions))
+		if matrix_type is None:
+			matrix_type = 'dense'
+
+		# Get the S matrix as a dok matrix
+		s_matrix = self._convert_S(self._S, 'dok')
+		# Resize the matrix
+		s_matrix.resize(shape)
+
+		# Update the matrix
+		coefficient_dictionary = {}
+		for rxn in reaction_list:
+			rxn_index = self.reactions.index(rxn.id)
+			for metab, coeff in rxn._metabolites.items():
+				coefficient_dictionary[(self.metabolites.index(metab.id),
+										rxn_index)] = coeff
+		s_matrix.update(coefficient_dictionary)
+
+		# Convert the matrix to the desired type
+		s_matrix = self._convert_S(matrix_type)
+		if matrix_type == 'dataframe':
+			metabolite_ids =[metab.id for metab in self.metabolites]
+			reaction_ids = [rxn.id for rxn in self.reactions]
+			s_matrix = pd.DataFrame(s_matrix, index = metabolite_ids,
+											columns = reaction_ids)
+		if matrix_type == 'symbolic':
+			s_matrix = sp.Matrix(s_matrix)
+
+		return s_matrix
+
+	def _convert_S(self, matrix_type):
+		"""For internal uses only. To convert a matrix to a different type.
+
+		Parameters
+		----------
+		s_matrix : matrix of class "dtype"
+			The S matrix for conversion
+		matrix_type: string {'dense', 'lil', 'dok', 'DataFrame', 'symbolic'}
+			The type of matrix to convert to
+
+		Warnings
+		--------
+		This method is intended for internal use only. To safely convert a
+		matrixto another type of matrix, use the massmodel.update_S method.
+		"""
+		self._S = s_matrix
+		def _to_dense(s_mat=s_matrix):
+			if isinstance(s_mat, np.ndarray):
+				return s_mat
+			elif isinstance(s_mat, pd.DataFrame):
+				return s_mat.as_matrix()
+			elif isinstance(s_mat, sp.Matrix):
+				return np.array(s_mat)
+			else:
+				return s_mat.toarray()
+
+		def _to_lil(s_mat=s_matrix):
+			if isinstance(s_mat, sp.Matrix):
+				s_mat = np.array(s_mat)
+			return lil_matrix(s_mat)
+
+		def _to_dok(s_mat=s_matrix):
+			if isinstance(s_mat, sp.Matrix):
+				s_mat = np.array(s_mat)
+			return dok_matrix(s_mat)
+
+		matrix_conversion = {'dense': _to_dense,
+							'lil' : _to_lil,
+							'dok' : _to_dok,
+							'dataframe' : _to_dense,
+							'symbolic' : to_dense}
+
+		s_matrix = matrix_conversion[matrix_type](s_mat=s_matrix)
+		return s_matrix
+
+	def _update_model_s(self, s_matrix, matrix_type, dtype):
+		"""For internal use only. Update the model storage of the s matrix,
+		matrix type, and data type
+
+		Warnings
+		--------
+		This method is intended for internal use only. To safely convert a
+		matrix to another type of matrix, use the massmodel.update_S method.
+		"""
+		self._S = s_matrix
+		self._matrix_type = matrix_type
+		self._dtype = dtype
+
 	def _repr_html_(self):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
 			rank=linear.matrix_rank(self.S)
-			null=linear.nullspace(self.S,'row').shape[0]
-			left_null=linear.left_nullspace(self.S, 'row').shape[0]
+			null=linear.nullspace(self.S,'row').shape[1]
+			left_null=linear.left_nullspace(self.S, 'row').shape[1]
 		except:
 			dim_S = "0x0"
 			rank = 0
