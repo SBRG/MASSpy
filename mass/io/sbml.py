@@ -285,6 +285,8 @@ def parse_xml_into_model(xml, number=float):
         met.charge = get_attrib(species, "fbc:charge", float)
         met.formula = get_attrib(species, "fbc:chemicalFormula")
         model.add_metabolites([met])
+        model.update_initial_conditions(
+            {met: get_attrib(species, "initialConcentration", float)})
     # Detect boundary metabolites - In case they have been mistakenly
     # added. They should not actually appear in a model (parameters instead)
     boundary_metabolites = {clip(i.get("id"), "M_")
@@ -316,41 +318,49 @@ def parse_xml_into_model(xml, number=float):
               for bound in xml_model.iterfind(BOUND_XPATH)}
     # add reactions
     reactions = []
+    custom_rxn_list = []
+    custom_rate_expr_list = []
     for sbml_reaction in xml_model.iterfind(
             ns("sbml:listOfReactions/sbml:reaction")):
         reaction = get_attrib(sbml_reaction, "id", require=True)
         reaction = MassReaction(clip(reaction, "R_"))
         reaction.name = sbml_reaction.get("name")
         annotate_mass_from_sbml(reaction, sbml_reaction)
-        # add rate constants
+        # add local parameters (rate constants, ssflux, custom paramaters)
         custom_param_dict = {}
+        custom_param_ids = []
+        custom_param_values = []
         for local_parameter in sbml_reaction.findall(
             ns("sbml:listofLocalParameters/sbml:parameter")):
             pid = local_parameter.get("id") + reaction.id
-            if pid == "kf_" + reaction.id:
+            if "ssflux_" in pid:
+                reaction.ssflux = number(local_parameter.get("value"))
+            elif "kf_" in pid:
                 reaction.kf = number(local_parameter.get("value"))
-            elif pid == "Keq_" + reaction.id:
+            elif "Keq_" in pid:
                 if local_parameter.get("value") == "inf":
                     reaction.Keq = inf
                 elif local_parameter.get("value") == "-inf":
                     reaction.Keq = -inf
                 else:
                     reaction.Keq = number(local_parameter.get("value"))
-            elif pid == "kr_" + reaction.id:
+            elif "kr_" in pid:
                 reaction.kr = local_parameter.get("value")
             else:
                 num_val = number(local_parameter.get("value"))
-                custom_param_dict[reaction] = {pid: num_val}
+                custom_param_ids.append(pid)
+                custom_param_values.append(num_val)
+        custom_param_dict[reaction] = dict(zip(custom_param_ids, 
+                                                custom_param_values))
         # add mathml rate law extraction here
+        result_from_mathml = ""
         for local_rate in sbml_reaction.findall(
             ns("sbml:kineticLaw/mml:math")):
             rate_xml_string = tostring(local_rate, encoding="utf-8").decode(
                 "utf-8")
             ast = libsbml.readMathMLFromString(rate_xml_string)
             result_from_mathml = libsbml.formulaToL3String(ast)
-
-        # compare rate laws here
-        # add custom_rates+custom_params to model if needed
+            result_from_mathml = result_from_mathml.replace("^", "**")
 
 
 
@@ -396,18 +406,23 @@ def parse_xml_into_model(xml, number=float):
         gpr = gpr.replace(SBML_DOT, ".")
         reaction.gene_reaction_rule = gpr
 
-        custom_rate_dict = {}
-        test = {}
-        test[reaction] = reaction.rate_expression
-        test2 = expressions.strip_time(test)
-        #print(str(test2[reaction]).replace(" ", ""))
-        #print(result_from_mathml.replace(" ", ""))
-        #print()
-        if result_from_mathml.replace(" ", "") == str(
-            test2[reaction]).replace(" ", ""):
-            continue
-        else:
-            custom_rate_dict[reaction] = result_from_mathml
+        test_dict = dict()
+        test_dict[reaction] = reaction.rate_expression
+        test_dict = expressions.strip_time(test_dict)
+
+        if result_from_mathml.replace(" ", "") != str(
+            test_dict[reaction]).replace(" ", ""):
+            
+            print(str(test_dict[reaction]).replace(" ", ""))
+            print(result_from_mathml.replace(" ", ""))
+            print("reaction:", reaction)
+            print("mathml:", result_from_mathml)
+            print()
+            
+            custom_rxn_list.append(reaction)
+            custom_rate_expr_list.append(result_from_mathml)
+
+    custom_rate_dict = dict(zip(custom_rxn_list, custom_rate_expr_list))
 
 
     try:
@@ -418,12 +433,12 @@ def parse_xml_into_model(xml, number=float):
     for custom_rxn, custom_rate in iteritems(custom_rate_dict):
         model.add_custom_rate(
             custom_rxn, custom_rate, custom_param_dict[custom_rxn])
-    # objective coefficient stuff was removed
+
     return model
 
 
 
-def model_to_xml(mass_model, units=True):
+def model_to_xml(mass_model):
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
     set_attrib(xml, "fbc:required", "false")
@@ -433,9 +448,6 @@ def model_to_xml(mass_model, units=True):
         xml_model.set("id", mass_model.id)
     if mass_model.name is not None:
         xml_model.set("name", mass_model.name)
-
-    # if using units, add handling here
-    # refer to cobra for help
 
     # add in parameters (fixed concentration metabolites)
     parameter_list = SubElement(xml_model, "listOfParameters")
@@ -470,6 +482,8 @@ def model_to_xml(mass_model, units=True):
         set_attrib(species, "compartment", met.compartment)
         set_attrib(species, "fbc:charge", met.charge)
         set_attrib(species, "fbc:chemicalFormula", met.formula)
+        set_attrib(species, "initialConcentration", 
+                    mass_model.initial_conditions[met])
 
     # add in genes
     if len(mass_model.genes) > 0:
@@ -515,16 +529,13 @@ def model_to_xml(mass_model, units=True):
             new_str = new_str.replace(
                 '<?xml version="1.0" encoding="UTF-8"?>\n', "")
             sbml_kinetic_law.append(fromstring(new_str))
-        #math_tag = "<math xmlns:mml='http://www.w3.org/1998/Math/MathML'>"
-        #sympy_mathml = mathml(rate)
-        #sympy_mathml = math_tag + sympy_mathml + "</math>"
-        #sbml_kinetic_law.append(fromstring(sympy_mathml))
         
-        # add local parameters (kf, Keq, kr)
+        # add local parameters (kf, Keq, kr, ssflux)
         sbml_param_list = SubElement(sbml_reaction, "listofLocalParameters")
         fwd_rate = "kf_"+reaction.id
         eq_const = "Keq_"+reaction.id
         rev_rate = "kr_"+reaction.id
+        rxn_ssflux = "ssflux_"+reaction.id
         sbml_kf = SubElement(
             sbml_param_list, "parameter", id=fwd_rate, name=fwd_rate)
         set_attrib(sbml_kf, "value", reaction.kf)
@@ -534,6 +545,15 @@ def model_to_xml(mass_model, units=True):
         sbml_kr = SubElement(
             sbml_param_list, "parameter", id=rev_rate, name=rev_rate)
         set_attrib(sbml_kr, "value", reaction.kr)
+        sbml_ssflux = SubElement(
+            sbml_param_list, "parameter", id=rxn_ssflux, name=rxn_ssflux)
+        set_attrib(sbml_ssflux, "value", reaction.ssflux)
+
+        # add custom parameters
+        for cparam, v in iteritems(mass_model.custom_parameters):
+            sbml_cparam = SubElement(
+                sbml_param_list, "parameter", id=cparam, name=cparam)
+            set_attrib(sbml_cparam, "value", v)
 
         # stoichiometry
         reactants = {}
