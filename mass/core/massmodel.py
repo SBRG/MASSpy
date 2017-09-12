@@ -1436,7 +1436,7 @@ class MassModel(Object):
 	def string_to_mass(self, reaction_strings, term_split="+"):
 		"""Create reactions and metabolite objects from strings.
 
-		To correctly parse a stirng, it must be in the following format:
+		To correctly parse a string, it must be in the following format:
 			"RID: s[ID, **kwargs] + s[ID, **kwargs] <=>  s[ID, **kwargs]
 
 		where kwargs can be the metabolite attributes 'name', 'formula',
@@ -1452,6 +1452,7 @@ class MassModel(Object):
 			"E1: s[ENZYME][c] + s[metabolite][c] <=> s[ENZYME&metabolite][c]"
 
 		Note that a reaction ID and a metabolite ID are always required
+		
 		Parameters
 		----------
 		reaction_strings : string or list of strings
@@ -1674,6 +1675,7 @@ class MassModel(Object):
 			# Otherwise use the default type, np.float64
 			else:
 				dtype = np.float64
+				self._dtype = np.float64
 
 		constructor = matrix_constructor[matrix_type]
 		return (constructor, dtype)
@@ -1791,8 +1793,8 @@ class MassModel(Object):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
 			rank=linear.matrix_rank(self.S)
-			null=linear.nullspace(self.S,'row').shape[0]
-			left_null=linear.left_nullspace(self.S, 'row').shape[0]
+			null=linear.nullspace(self.S,'row').shape[1]
+			left_null=linear.left_nullspace(self.S, 'row').shape[1]
 		except:
 			dim_S = "0x0"
 			rank = 0

@@ -288,7 +288,7 @@ def _generate_rate_type_1(reaction):
 	rate_law = "%s*(%s - " % (reaction._sym_kf, rate_law.lstrip("*"))
 	# For exchange reactions
 	if reaction.exchange and len(reaction.products) == 0:
-		rate_law += "*%s(t)" % reaction.get_external_metabolite
+		rate_law += "%s(t)*" % reaction.get_external_metabolite
 	# For all other reactions
 	else:
 		for metab in reaction.products:
