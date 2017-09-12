@@ -397,8 +397,14 @@ def parse_xml_into_model(xml, number=float):
         reaction.gene_reaction_rule = gpr
 
         custom_rate_dict = {}
-        test = str(reaction.rate_expression).replace(" ", "")
-        if result_from_mathml.replace(" ", "") == test:
+        test = {}
+        test[reaction] = reaction.rate_expression
+        test2 = expressions.strip_time(test)
+        #print(str(test2[reaction]).replace(" ", ""))
+        #print(result_from_mathml.replace(" ", ""))
+        #print()
+        if result_from_mathml.replace(" ", "") == str(
+            test2[reaction]).replace(" ", ""):
             continue
         else:
             custom_rate_dict[reaction] = result_from_mathml
