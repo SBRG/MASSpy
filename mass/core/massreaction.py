@@ -60,13 +60,13 @@ class MassReaction(Object):
 		The steady state flux for the reaction. Can store a steady state flux
 		and be utilized in pseudo rate constnant calculations.
 	"""
-	def __init__(self, id=None, name="", subsystem="", reversible=True,
+	def __init__(self, id=None, name="", subsystem=None, reversible=True,
 				ssflux=None):
 		"""Initialize the MassReaction Object"""
 		# Check inputs to ensure they are the correct types
 		if not isinstance(name, string_types):
 			raise TypeError("name must be a string type")
-		if not isinstance(subsystem, string_types):
+		if not isinstance(subsystem, (string_types, type(None))):
 			raise TypeError("subsystem must be a string type")
 		if not isinstance(reversible, bool):
 			raise TypeError("reversible must be a boolean")
