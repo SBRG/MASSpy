@@ -114,6 +114,17 @@ class MassReaction(Object):
 		# The Gibbs reaction energy assoicated with this reaction
 		self._gibbs_reaction_energy = None
 
+		# For cobra compatibility if desired and escher visualization
+		self.objective_coefficient = 0.
+		self.variable_kind = 'continuous'
+		if self._reversible:
+			self.lower_bound = -1000.
+			self.upper_bound = 1000.
+		else:
+			self.lower_bound = 0.
+			self.upper_bound = 1000.
+
+
 	# Properties
 	@property
 	def reversible(self):

@@ -18,7 +18,7 @@ from mass.core import massreaction
 
 # Class begins
 ## Public
-def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
+def to_cobra_metabolite(mass_metabolite, cobra_id=None):
 	"""To create a cobra Metabolite from a mass MassMetabolite.
 
 	Parameters
@@ -41,9 +41,6 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if mass_metabolite is None:
-		warn("No mass MassMetabolite given.")
-		return None
 	if not isinstance(mass_metabolite, massmetabolite.MassMetabolite):
 		raise TypeError("Must be a mass MassMetabolite.")
 
@@ -56,9 +53,13 @@ def to_cobra_metabolite(mass_metabolite=None, cobra_id=None):
 							formula=mass_metabolite.formula,
 							charge=mass_metabolite.charge,
 							compartment=mass_metabolite.compartment)
+
+	cobra_metab._constraint_sense = mass_metabolite._constraint_sense
+	cobra_metab._bound = mass_metabolite._bound
+
 	return cobra_metab
 
-def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
+def to_mass_metabolite(cobra_metabolite, mass_id=None):
 	"""To create a mass MassMetabolite from a cobra Metabolite.
 
 	Parameters
@@ -81,9 +82,6 @@ def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if cobra_metabolite is None:
-		warn("No cobra Metabolite given.")
-		return None
 	if not isinstance(cobra_metabolite, Metabolite):
 		raise TypeError("Must be a cobra Metabolite.")
 
@@ -92,13 +90,17 @@ def to_mass_metabolite(cobra_metabolite=None, mass_id=None):
 		mass_id = cobra_metabolite.id + "_mass"
 
 	# Generate the mass MassMetabolite
-	mass_metab = MassMetabolite(id=mass_id, name=cobra_metabolite.name,
-								formula=cobra_metabolite.formula,
-								charge=cobra_metabolite.charge,
-								compartment=cobra_metabolite.compartment)
+	mass_metab = massmetabolite.MassMetabolite(id=mass_id,
+				name=cobra_metabolite.name, formula=cobra_metabolite.formula,
+				charge=cobra_metabolite.charge,
+				compartment=cobra_metabolite.compartment)
+
+	mass_metab._constraint_sense = cobra_metabolite._constraint_sense
+	mass_metab._bound = cobra_metabolite._bound
+
 	return mass_metab
 
-def to_cobra_reaction(mass_reaction=None, cobra_id=None,
+def to_cobra_reaction(mass_reaction, cobra_id=None,
 					upper_bound=None, lower_bound=None):
 	"""To create a cobra Reaction from a mass MassReaction.
 
@@ -134,9 +136,6 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if mass_reaction is None:
-		warn("No MassReaction given")
-		return None
 	if not isinstance(mass_reaction, massreaction.MassReaction):
 		raise TypeError("Must be a mass MassReaction.")
 
@@ -146,18 +145,15 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 
 	# Generate the bounds
 	if upper_bound is None:
-		ub = 1000
+		ub = mass_reaction.upper_bound
 	if lower_bound is None:
-		if mass_reaction._reversible:
-			lb = -1000
-		else:
-			lb = 0.
+		lb = mass_reaction.lower_bound
 
 	# Generate the cobra Reaction
 	cobra_rxn = Reaction(id=cobra_id, name=mass_reaction.name,
 						subsystem=mass_reaction.subsystem, lower_bound=lb,
 						upper_bound=ub, objective_coefficient=0.)
-
+	cobra_rxn.variable_kind = mass_reaction.variable_kind
 	# Generate and add cobra Metabolites
 	cobra_metabs = {to_cobra_metabolite(metab) : coefficient
 				for metab, coefficient in iteritems(mass_reaction._metabolites)}
@@ -172,7 +168,7 @@ def to_cobra_reaction(mass_reaction=None, cobra_id=None,
 	cobra_rxn._update_awareness()
 	return cobra_rxn
 
-def to_mass_reaction(cobra_reaction=None, mass_id=None,
+def to_mass_reaction(cobra_reaction, mass_id=None,
 					kinetic_reversibility=None):
 	"""To create a MassReaction from a cobra Reaction.
 
@@ -203,9 +199,6 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if cobra_reaction is None:
-		warn("No cobra Reaction given.")
-		return None
 	if not isinstance(cobra_reaction, Reaction):
 		raise TypeError("Must be a cobra Reaction.")
 
@@ -218,9 +211,14 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 		kinetic_reversibility = cobra_reaction.reversibility
 
 	# Generate the mass MassReaction
-	mass_rxn = MassReaction(id=mass_id, name=cobra_reaction.name,
-						subsystem=cobra_reaction.subsystem,
-						reversible=kinetic_reversibility)
+	mass_rxn = massreaction.MassReaction(id=mass_id, name=cobra_reaction.name,
+										subsystem=cobra_reaction.subsystem,
+										reversible=kinetic_reversibility)
+	# Store old cobra information
+	mass_rxn.variable_kind = cobra_reaction.variable_kind
+	mass_rxn.objective_coefficient = 0.
+	mass_rxn.lower_bound = cobra_reaction.lower_bound
+	mass_rxn.upper_bound = cobra_reaction.upper_bound
 
 	# Generate and add mass MassMetsabolites
 	mass_metabs = {to_mass_metabolite(cobra_metab): coeff
@@ -236,7 +234,7 @@ def to_mass_reaction(cobra_reaction=None, mass_id=None,
 	mass_rxn._update_awareness()
 	return mass_rxn
 
-def to_cobra_model(mass_model=None, cobra_id=None):
+def to_cobra_model(mass_model, cobra_id=None):
 	"""To create a cobra Model from a mass MassModel.
 
 	Parameters
@@ -259,9 +257,6 @@ def to_cobra_model(mass_model=None, cobra_id=None):
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if mass_model is None:
-		warn("No mass MassModel given.")
-		return None
 	if not isinstance(mass_model, massmodel.MassModel):
 		raise TypeError("Must be a mass MassModel.")
 
@@ -281,7 +276,7 @@ def to_cobra_model(mass_model=None, cobra_id=None):
 	cobra_model.repair(rebuild_index=True, rebuild_relationships=True)
 	return cobra_model
 
-def to_mass_model(cobra_model=None, mass_id=None):
+def to_mass_model(cobra_model, mass_id=None):
 	"""To create a mass MassModel from a cobra Model.
 
 	Parameters
@@ -304,9 +299,6 @@ def to_mass_model(cobra_model=None, mass_id=None):
 	All other fields will initialize to default values.
 	"""
 	# Check the input
-	if cobra_model is None:
-		warn("No cobra Model given.")
-		return None
 	if not isinstance(cobra_model, Model):
 		raise TypeError("Must be a cobra Model.")
 
@@ -315,7 +307,8 @@ def to_mass_model(cobra_model=None, mass_id=None):
 		mass_id = cobra_model.id + "_mass"
 
 	# Generate the mass MassModel
-	mass_model = MassModel(id_or_massmodel=mass_id, name=cobra_model.name)
+	mass_model = massmodel.MassModel(id_or_massmodel=mass_id,
+									name=cobra_model.name)
 
 	# Add reactions and metabolites
 	mass_rxns = [to_mass_reaction(rxn) for rxn in cobra_model.reactions]

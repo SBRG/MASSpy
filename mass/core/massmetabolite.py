@@ -65,6 +65,10 @@ class MassMetabolite(Species):
 		# Ordinary differential equation for the metabolite concentration
 		self._ode = None
 
+		# For cobra compatibility if desired and escher visualization
+		self._constraint_sense = 'E'
+		self._bound = 0.
+
 	# Properties
 	@property
 	def elements(self):
