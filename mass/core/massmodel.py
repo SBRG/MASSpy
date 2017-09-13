@@ -1231,7 +1231,7 @@ class MassModel(Object):
 		new_model._contexts = []
 		return new_model
 
-	def merge_models(self, second_model, prefix_existing=None, inplace=False,
+	def merge(self, second_model, prefix_existing=None, inplace=False,
 					new_model_id=None):
 		"""Merge two massmodels to create one MassModel object with
 		the reactions and metabolites from both massmodels.
@@ -1290,19 +1290,22 @@ class MassModel(Object):
 			for rxn in existing_reactions:
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
 		merged_model.add_reactions(new_reactions, True)
-
+		merged_model.repair()
 		# Add custom rates and initial conditions
-		new_initial_conditions = second_model.initial_conditions.copy()
-		merged_model.initial_conditions = new_initial_conditions.update(
-											merged_model.initial_conditions)
+		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
+		for m, ic in iteritems(second_model.initial_conditions):
+			if m.id not in existing_ics:
+				merged_model.update_initial_conditions({m : ic})
 
-		new_custom_rates = second_model.custom_rates.copy()
-		merged_model.custom_rates = new_custom_rates.update(
-										merged_model.custom_rates)
+		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
+		for r, rate in iteritems(second_model._custom_rates):
+			if r.id not in existing_cr:
+				merged_model._custom_rates.update({r : rate})
 
-		new_custom_parameters = second_model.custom_parameters.copy()
-		merged_model.custom_parameters = new_custom_parameters.update(
-											merged_model.custom_parameters)
+		existing_cp = [p for p in iterkeys(merged_model._custom_parameters)]
+		for p, val in iteritems(second_model._custom_parameters):
+			if p not in existing_cp:
+				merged_model._custom_parameters.update({p : val})
 
 		return merged_model
 
@@ -1452,7 +1455,7 @@ class MassModel(Object):
 			"E1: s[ENZYME][c] + s[metabolite][c] <=> s[ENZYME&metabolite][c]"
 
 		Note that a reaction ID and a metabolite ID are always required
-		
+
 		Parameters
 		----------
 		reaction_strings : string or list of strings
@@ -1706,7 +1709,7 @@ class MassModel(Object):
 			matrix_type = 'dense'
 
 		# Get the S matrix as a dok matrix
-		s_matrix = self._convert_S(self._S, 'dok')
+		s_matrix = self._convert_S('dok')
 		# Resize the matrix
 		s_matrix.resize(shape)
 
@@ -1746,7 +1749,7 @@ class MassModel(Object):
 		This method is intended for internal use only. To safely convert a
 		matrixto another type of matrix, use the massmodel.update_S method.
 		"""
-		self._S = s_matrix
+		s_matrix = self._S
 		def _to_dense(s_mat=s_matrix):
 			if isinstance(s_mat, np.ndarray):
 				return s_mat
@@ -1771,7 +1774,7 @@ class MassModel(Object):
 							'lil' : _to_lil,
 							'dok' : _to_dok,
 							'dataframe' : _to_dense,
-							'symbolic' : to_dense}
+							'symbolic' : _to_dense}
 
 		s_matrix = matrix_conversion[matrix_type](s_mat=s_matrix)
 		return s_matrix
