@@ -266,18 +266,24 @@ def annotate_sbml_from_mass(sbml_element, mass_element):
 
 
 def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
+    # add model
     xml_model = xml.find(ns("sbml:model"))
-    if get_attrib(xml_model, "fbc:strict") == "true":
-        warn('loading SBML model with fbc:strict="true"')
+    if get_attrib(xml_model, "fbc:required") == "false":
+        warn('loading SBML model with fbc:required="false"')
 
     model_id = get_attrib(xml_model, "id")
     model = MassModel(model_id)
     model.name = xml_model.get("name")
 
+    # add compartments
     model.compartments = {c.get("id"): c.get("name") for c in
                           xml_model.findall(COMPARTMENT_XPATH)}
-    # add metabolites
-    for species in xml_model.findall(SPECIES_XPATH % 'false'):
+    # Detect fixed concentration metabolites (boundary metabolites)
+    boundary_metabolites = {clip(i.get("id"), "M_")
+                            for i in xml_model.findall(SPECIES_XPATH % 'true')}
+    bound_dict = {}
+    # add metabolites (species)
+    for species in xml_model.findall(ns("sbml:listOfSpecies/sbml:species")):
         met = get_attrib(species, "id", require=True)
         met = MassMetabolite(clip(met, "M_"))
         met.name = species.get("name")
@@ -288,10 +294,12 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
         model.add_metabolites([met])
         model.update_initial_conditions(
             {met: get_attrib(species, "initialConcentration", float)})
-    # Detect boundary metabolites - In case they have been mistakenly
-    # added. They should not actually appear in a model (parameters instead)
-    boundary_metabolites = {clip(i.get("id"), "M_")
-                            for i in xml_model.findall(SPECIES_XPATH % 'true')}
+        if met.id in boundary_metabolites:
+            bound_dict[met] = get_attrib(species, "initialConcentration", 
+                                         float)
+    # add fixed concentration metabolites (boundary metabolites)
+    model.add_fixed_concentrations(bound_dict)
+
 
     # add genes
     for sbml_gene in xml_model.iterfind(GENES_XPATH):
@@ -315,25 +323,9 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
         else:
             raise Exception("unsupported tag " + sub_xml.tag)
     
-    # get parameters (fixed concentration metabolites or custom params)
+    # add reactions
     custom_rate_dict = {}
     custom_param_dict = {}
-    # custom_param_ids_global = []
-    # custom_param_values_global = []
-    # for sbml_param in xml_model.iterfind(
-    #     ns("sbml:listOfParameters/sbml:parameter")):
-    #     pid = sbml_param.get("id")
-    #     if pid.startswith("M_"):
-    #         pass
-    #     else:
-    #         num_val = number(sbml_param.get("value"))
-    #         custom_param_ids_global.append(pid)
-    #         custom_param_values_global.append(num_val)
-    # custom_param_dict[#somereaction] = 
-
-
-
-    # add reactions
     reactions = []
     for sbml_reaction in xml_model.iterfind(
             ns("sbml:listOfReactions/sbml:reaction")):
@@ -346,11 +338,28 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
         reaction = MassReaction(clip(reaction, "R_"), reversible=isReversible)
         reaction.name = sbml_reaction.get("name")
         annotate_mass_from_sbml(reaction, sbml_reaction)
-        # add local parameters (rate constants, ssflux, custom paramaters)
+        reaction.subsystem = get_attrib(sbml_reaction, "compartment")
+
+        # add mathml rate law extraction here
+        result_from_mathml = ""
+        for local_rate in sbml_reaction.findall(
+            ns("sbml:kineticLaw/mml:math")):
+            rate_xml_string = tostring(local_rate, encoding="utf-8").decode(
+                "utf-8")
+            ast = libsbml.readMathMLFromString(rate_xml_string)
+            result_from_mathml = libsbml.formulaToL3String(ast)
+            if result_from_mathml is None:
+                msg = str(reaction.id) + " has imparsible MathML"
+                warn(msg)
+                continue
+            else:
+                result_from_mathml = result_from_mathml.replace("^", "**")
+
+        # add rate constants, ssflux, custom paramaters (local parameters)
         custom_param_ids = []
         custom_param_values = []
-        for local_parameter in sbml_reaction.findall(
-            ns("sbml:listofLocalParameters/sbml:parameter")):
+        for local_parameter in sbml_reaction.findall(ns(
+            "sbml:kineticLaw/sbml:listOfLocalParameters/sbml:localParameter")):
             pid = local_parameter.get("id")
             if pid == "ssflux_"+reaction.id:
                 reaction.ssflux = number(local_parameter.get("value"))
@@ -371,45 +380,26 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
                 custom_param_values.append(num_val)
         custom_param_dict[reaction] = dict(zip(custom_param_ids, 
                                                 custom_param_values))
-        # add mathml rate law extraction here
-        result_from_mathml = ""
-        for local_rate in sbml_reaction.findall(
-            ns("sbml:kineticLaw/mml:math")):
-            rate_xml_string = tostring(local_rate, encoding="utf-8").decode(
-                "utf-8")
-            ast = libsbml.readMathMLFromString(rate_xml_string)
-            result_from_mathml = libsbml.formulaToL3String(ast)
-            if result_from_mathml is None:
-                msg = str(reaction.id) + " has imparsible MathML"
-                warn(msg)
-                continue
-            else:
-                result_from_mathml = result_from_mathml.replace("^", "**")
 
 
 
         reactions.append(reaction)
-
+        # add stoichiometry (reactants, products, modifiers)
         stoichiometry = defaultdict(lambda: 0)
         for species_reference in sbml_reaction.findall(
                 ns("sbml:listOfReactants/sbml:speciesReference")):
             met_name = clip(species_reference.get("species"), "M_")
             stoichiometry[met_name] -= \
-                int(species_reference.get("stoichiometry"))
+                float(species_reference.get("stoichiometry"))
         for species_reference in sbml_reaction.findall(
                 ns("sbml:listOfProducts/sbml:speciesReference")):
             met_name = clip(species_reference.get("species"), "M_")
             stoichiometry[met_name] += \
                 get_attrib(species_reference, "stoichiometry",
-                           type=int, require=True)
+                           type=float, require=True)
         # needs to have keys of metabolite objects, not ids
         object_stoichiometry = {}
         for met_id in stoichiometry:
-            # might need to be changed
-            if met_id in boundary_metabolites:
-                warn("Boundary metabolite '%s' used in reaction '%s'" %
-                     (met_id, reaction.id))
-                continue
             try:
                 metabolite = model.metabolites.get_by_id(met_id)
             except KeyError:
@@ -418,7 +408,7 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
                 continue
             object_stoichiometry[metabolite] = stoichiometry[met_id]
         reaction.add_metabolites(object_stoichiometry)
-        # set gene reaction rule
+        # set gene reaction rule (gene product association)
         gpr_xml = sbml_reaction.find(GPR_TAG)
         if gpr_xml is not None and len(gpr_xml) != 1:
             warn("ignoring invalid geneAssociation for " + repr(reaction))
@@ -457,27 +447,27 @@ def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
 
 
 def model_to_xml(mass_model):
+    # add in model
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
     set_attrib(xml, "fbc:required", "false")
     xml_model = SubElement(xml, "model")
-    set_attrib(xml_model, "fbc:strict", "false")
+    set_attrib(xml_model, "fbc:strict", "true")
     if mass_model.id is not None:
         xml_model.set("id", mass_model.id)
     if mass_model.name is not None:
         xml_model.set("name", mass_model.name)
 
-    # add in parameters (fixed concentration metabolites)
-    parameter_list = SubElement(xml_model, "listOfParameters")
-    param_attr = {"constant": "true", "sboTerm": "SBO:0000285"}
-    for k, v in iteritems(mass_model.fixed_concentrations):
-        param = SubElement(parameter_list, "parameter", 
-                            id="M_" + k.id)
-        set_attrib(param, "name", k.name)
-        annotate_sbml_from_mass(param, k)
-        set_attrib(param, "value", v)
-        set_attrib(param, "constant", "true")
-        set_attrib(param, "sboTerm", "SBO:0000285")
+    # # add in parameters (fixed concentration metabolites)
+    # parameter_list = SubElement(xml_model, "listOfParameters")
+    # param_attr = {"constant": "true", "sboTerm": "SBO:0000285"}
+    # for k, v in iteritems(mass_model.fixed_concentrations):
+    #     param = SubElement(parameter_list, "parameter", id="M_" + k.id)
+    #     set_attrib(param, "name", k.name)
+    #     annotate_sbml_from_mass(param, k)
+    #     set_attrib(param, "value", v)
+    #     set_attrib(param, "constant", "true")
+    #     set_attrib(param, "sboTerm", "SBO:0000285")
 
     # add in compartments
     compartments_list = SubElement(xml_model, "listOfCompartments")
@@ -486,14 +476,12 @@ def model_to_xml(mass_model):
         SubElement(compartments_list, "compartment", id=compartment, name=name,
                    constant="true")
 
-    # add in metabolites
+    # add in species (metabolites)
     species_list = SubElement(xml_model, "listOfSpecies")
     for met in mass_model.metabolites:
-        species = SubElement(species_list, "species",
+        species = SubElement(species_list, "species", 
                              id="M_" + met.id,
-                             # Useless required SBML parameters
-                             constant="false",
-                             boundaryCondition="false",
+                             # Useless required SBML parameter
                              hasOnlySubstanceUnits="false")
         set_attrib(species, "name", met.name)
         annotate_sbml_from_mass(species, met)
@@ -501,7 +489,14 @@ def model_to_xml(mass_model):
         set_attrib(species, "fbc:charge", met.charge)
         set_attrib(species, "fbc:chemicalFormula", met.formula)
         set_attrib(species, "initialConcentration", 
-                    mass_model.initial_conditions[met])
+                   mass_model.initial_conditions[met])
+        # differentiate fixed concentration metabolites
+        if met in mass_model.fixed_concentrations:
+            set_attrib(species, "constant", "true")
+            set_attrib(species, "boundaryCondition", "true")
+        else:
+            set_attrib(species, "constant", "false")
+            set_attrib(species, "boundaryCondition", "false")
 
     # add in genes
     if len(mass_model.genes) > 0:
@@ -522,52 +517,50 @@ def model_to_xml(mass_model):
     rate_dictionary = strip_time(mass_model.rate_expressions)
     for reaction, rate in iteritems(rate_dictionary):
         id = "R_" + reaction.id
-        sbml_reaction = SubElement(
-            reactions_list, "reaction",
-            id=id,
-            # Useless required SBML parameters
-            fast="false",
-            reversible=str(reaction.reversible).lower())
+        sbml_reaction = SubElement(reactions_list, "reaction", 
+                                   id=id, 
+                                   reversible=str(reaction.reversible).lower(),
+                                   # Useless required SBML parameter
+                                   fast="false")
         set_attrib(sbml_reaction, "name", reaction.name)
+        set_attrib(sbml_reaction, "compartment", reaction.subsystem)
         annotate_sbml_from_mass(sbml_reaction, reaction)
+        # add in kinetic law (rate law + associated constants)
         sbml_kinetic_law = SubElement(sbml_reaction, "kineticLaw")
-        # add in rate expression
+        # add in math (rate law in mathml)
         rate_str = str(rate)
         if "**" in rate_str:
             rate_str = rate_str.replace("**", "^")
         new_mathml = libsbml.parseL3Formula(rate_str)
         new_str = libsbml.writeMathMLToString(new_mathml)
         if new_str is None:
-            print("Error: FIXME")
-            print(reaction)
-            print(rate)
-            print("This doesn't work!")
-            raise MassSBMLError("Error: Can't parse rate law expression")
+            msg = "Error: Can't parse rate law expression for "
+            raise MassSBMLError(msg+reaction.name+" with rate law: "+str(rate))
         else:
             new_str = new_str.replace(
                 '<?xml version="1.0" encoding="UTF-8"?>\n', "")
             sbml_kinetic_law.append(fromstring(new_str))
         
-        # add local parameters (kf, Keq, kr, ssflux)
-        sbml_param_list = SubElement(sbml_reaction, "listofLocalParameters")
+        # add in local parameters (kf, Keq, kr, ssflux)
+        sbml_param_list = SubElement(sbml_kinetic_law, "listOfLocalParameters")
         fwd_rate = "kf_"+reaction.id
         eq_const = "Keq_"+reaction.id
         rev_rate = "kr_"+reaction.id
         rxn_ssflux = "ssflux_"+reaction.id
-        sbml_kf = SubElement(
-            sbml_param_list, "parameter", id=fwd_rate, name=fwd_rate)
+        sbml_kf = SubElement(sbml_param_list, "localParameter", 
+                             id=fwd_rate, name=fwd_rate)
+        sbml_Keq = SubElement(sbml_param_list, "localParameter", 
+                              id=eq_const, name=eq_const)
+        sbml_kr = SubElement(sbml_param_list, "localParameter", 
+                             id=rev_rate, name=rev_rate)
+        sbml_ssflux = SubElement(sbml_param_list, "localParameter", 
+                                 id=rxn_ssflux, name=rxn_ssflux)
         set_attrib(sbml_kf, "value", reaction.kf)
-        sbml_Keq = SubElement(
-            sbml_param_list, "parameter", id=eq_const, name=eq_const)
         set_attrib(sbml_Keq, "value", reaction.Keq)
-        sbml_kr = SubElement(
-            sbml_param_list, "parameter", id=rev_rate, name=rev_rate)
         set_attrib(sbml_kr, "value", reaction.kr)
-        sbml_ssflux = SubElement(
-            sbml_param_list, "parameter", id=rxn_ssflux, name=rxn_ssflux)
         set_attrib(sbml_ssflux, "value", reaction.ssflux)
 
-        # add custom parameters
+        # add in local parameters (custom parameters)
         c_param_list = list(mass_model.custom_parameters.keys())
         try:
             c_rate = mass_model.custom_rates[reaction]
@@ -579,11 +572,11 @@ def model_to_xml(mass_model):
                     continue
                 elif str(sym) in c_param_list:
                     v = mass_model.custom_parameters[str(sym)]
-                    sbml_cparam = SubElement(sbml_param_list, "parameter", 
-                                                id=str(sym), name=str(sym))
+                    sbml_cparam = SubElement(sbml_param_list, "localParameter", 
+                                             id=str(sym), name=str(sym))
                     set_attrib(sbml_cparam, "value", v)
 
-        # stoichiometry
+        # add in reactants, products, modifiers (stoichiometry)
         reactants = {}
         products = {}
         for metabolite, stoichiomety in iteritems(reaction._metabolites):
@@ -603,7 +596,7 @@ def model_to_xml(mass_model):
                 SubElement(product_list, "speciesReference", species=met_id,
                            stoichiometry=stoichiomety, constant="true")
 
-        # gene reaction rule
+        # add in gene product association (gene reaction rule)
         gpr = reaction.gene_reaction_rule
         if gpr is not None and len(gpr) > 0:
             gpr = gpr.replace(".", SBML_DOT)
