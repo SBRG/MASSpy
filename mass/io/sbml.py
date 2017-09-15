@@ -265,7 +265,7 @@ def annotate_sbml_from_mass(sbml_element, mass_element):
 
 
 
-def parse_xml_into_model(xml, number=float, importRatesAsCustom=False):
+def parse_xml_into_model(xml, number=float):
     # add model
     xml_model = xml.find(ns("sbml:model"))
     if get_attrib(xml_model, "fbc:required") == "false":
