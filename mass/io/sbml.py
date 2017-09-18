@@ -647,6 +647,12 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
 
 
 
+def read_sbml_model(filename):
+    """parses filename or compressed stream into a MassModel object"""
+    return parse_xml_into_model(parse_stream(filename))
+
+
+
 # inspired by http://effbot.org/zone/element-lib.htm#prettyprint
 def indent_xml(elem, level=0):
     """indent xml for pretty printing"""
