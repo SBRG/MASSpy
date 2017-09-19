@@ -309,7 +309,7 @@ def _reaction_from_dict(reaction, model):
 
     Parameters
     ----------
-    reactions : dict
+    reaction : dict
         A dictionary with elements, 'metabolites', '_reversible',
         '_forward_rate_constant', '_equilibrium_constant', '_genes',
         '_gene_reaction_rule', and 'ssflux'; where 'metabolites' and 'genes'
@@ -328,8 +328,9 @@ def _reaction_from_dict(reaction, model):
     --------
     mass.io._reaction_to_dict
     """
-    new_reaction = MassReaction(
-        id=reaction["id"], name=reaction["name"], reversible=_reversible)
+    new_reaction = MassReaction(id=reaction["id"], 
+                                name=reaction["name"], 
+                                reversible=reaction["_reversible"])
     for k, v in iteritems(reaction):
         if k == 'metabolites':
             new_reaction.add_metabolites(OrderedDict(
