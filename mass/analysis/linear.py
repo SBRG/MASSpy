@@ -19,8 +19,8 @@ from mass.core import massmodel
 # Class begins
 ## Global symbol for time
 t = sp.Symbol("t")
-def gradient(model, strip_time=False, sub_parameters=False,
-				sub_concentrations=False, matrix_type='symbolic'):
+def gradient(model, strip_time=True, sub_parameters=True,
+				sub_concentrations=True, matrix_type='dense'):
 	"""Create the gradient matrix for a given massmodel
 
 	Matrix types can include 'dense' for a standard  numpy.array,
@@ -120,7 +120,7 @@ def gradient(model, strip_time=False, sub_parameters=False,
 		g_matrix = g_matrix.subs(values)
 
 	# Convert to a numpy.array or pandas.DataFrame if specified
-	if matrix_type == 'dense':
+	if matrix_type != 'symbolic':
 		g_matrix = np.array(g_matrix)
 		# Attempt to change the datatype from object to float64 if values
 		# were substituted, otherwise leave as is.
@@ -138,8 +138,8 @@ def gradient(model, strip_time=False, sub_parameters=False,
 
 	return g_matrix
 
-def kappa(model, strip_time=False, sub_parameters=False,
-				sub_concentrations=False, matrix_type='symbolic'):
+def kappa(model, strip_time=True, sub_parameters=True,
+				sub_concentrations=True, matrix_type='dense'):
 	"""Create the kappa matrix for a given massmodel. The kappa matrix is the
 	the diagnolization of the norms for the row vectors in the gradient matrix.
 
@@ -176,7 +176,7 @@ def kappa(model, strip_time=False, sub_parameters=False,
 	kappa = sp.diag(*[g_matrix[r,:].norm()
 					for r in range(g_matrix.rows)]).subs({sp.nan: sp.S.Zero})
 
-	if matrix_type == 'dense':
+	if matrix_type != 'symbolic':
 		kappa = np.array(kappa)
 		# Attempt to change the datatype from object to float64 if values
 		# were substituted, otherwise leave as is.
@@ -192,8 +192,8 @@ def kappa(model, strip_time=False, sub_parameters=False,
 											columns=reaction_ids)
 	return kappa
 
-def gamma(model, strip_time=False, sub_parameters=False,
-				sub_concentrations=False, matrix_type='symbolic'):
+def gamma(model, strip_time=True, sub_parameters=True,
+				sub_concentrations=True, matrix_type='dense'):
 	"""Create the gamma matrix for a given massmodel. The gamma matrix is
 	the 1-norms of the gradient matrix.
 
@@ -231,7 +231,7 @@ def gamma(model, strip_time=False, sub_parameters=False,
 				for r in range(g_matrix.rows)]).subs({sp.nan: sp.S.Zero})
 
 
-	if matrix_type == 'dense':
+	if matrix_type != 'symbolic':
 		gamma = np.array(gamma)
 		# Attempt to change the datatype from object to float64 if values
 		# were substituted, otherwise leave as is.
@@ -249,8 +249,7 @@ def gamma(model, strip_time=False, sub_parameters=False,
 	return gamma
 
 def jacobian(model, jacobian_type="metabolite", strip_time=False,
-			sub_parameters=False, sub_concentrations=False,
-			matrix_type='symbolic'):
+		sub_parameters=True,sub_concentrations=True, matrix_type='dense'):
 	"""Get the jacobian matrix for a given massmodel
 
 	Matrix types can include 'dense' for a standard  numpy.array,
@@ -313,7 +312,7 @@ def jacobian(model, jacobian_type="metabolite", strip_time=False,
 	else:
 		j_matrix = g_matrix * s_matrix
 	# Convert to a numpy.array if specified
-	if matrix_type == 'dense':
+	if matrix_type != 'symbolic':
 		j_matrix = np.array(j_matrix)
 		# Attempt to change the datatype from object to float64 if values
 		# were substituted, otherwise leave as is.
@@ -333,6 +332,8 @@ def jacobian(model, jacobian_type="metabolite", strip_time=False,
 			j_matrix = pd.DataFrame(np.array(j_matrix), index=reaction_ids,
 														columns=reaction_ids)
 	return j_matrix
+
+def
 
 def nullspace(A, integers=False):
 	"""Compute an approximate basis for the nullspace of A.

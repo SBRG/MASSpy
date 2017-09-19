@@ -1796,13 +1796,9 @@ class MassModel(Object):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
 			rank=linear.matrix_rank(self.S)
-			null=linear.nullspace(self.S,'row').shape[1]
-			left_null=linear.left_nullspace(self.S, 'row').shape[1]
 		except:
 			dim_S = "0x0"
 			rank = 0
-			null = 0
-			left_null = 0
 		return """
 			<table>
 				<tr>
@@ -1840,12 +1836,6 @@ class MassModel(Object):
 					<td><strong>Matrix Rank</strong></td>
 					<td>{mat_rank}</td>
 				</tr><tr>
-					<td><strong>Dimension of Null Space</strong></td>
-					<td>{dim_null}</td>
-				</tr><tr>
-					<td><strong>Dimension of Left Null Space</strong></td>
-					<td>{dim_left_null}</td>
-				</tr><tr>
 					<td><strong>Number of Custom Rates</strong></td>
 					<td>{num_custom_rates}</td>
 				</tr><tr>
@@ -1865,13 +1855,12 @@ class MassModel(Object):
 					num_genes=len(self.genes),
 					num_param=sum([len(rxn.parameters)
 									for rxn in self.reactions] + \
-									[len(self.fixed_concentrations)]),
+									[len(self.fixed_concentrations)] + \
+									[len(self.custom_parameters)]),
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
 					mat_rank=rank,
-					dim_null=null,
-					dim_left_null=left_null,
 					num_custom_rates=len(self.custom_rates),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),

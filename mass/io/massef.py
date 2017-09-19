@@ -22,21 +22,18 @@ kf_file_re = re.compile("(\S+)\_kf|(\S+)\_forward_rate_constant")
 Keq_file_re = re.compile("(\S+)\_Keq|(\S+)\_equilibrium_constant")
 kr_file_re = re.compile("(\S+)\_kr|(\S+)\_reverse_rate_constant")
 
-def create_enzyme_model(rxn_file, kf_file=None, Keq_file=None, kr_file=None):
+def create_enzyme_model(model_id, rxn_file, kf_file=None, Keq_file=None, kr_file=None):
     """Create an enzyme model from text files
 
-    The name for the file containing reactions  must be (MODEL_ID)_reactions,
-    where the MODEL_ID has no spaces. Each reaction begins on a newline in the
-    text file, and must be of a format readable by massmodel.string_to_mass.
-    For example:
+    Each reaction begins on a newline in the text file, and must be of a format
+    readable by massmodel.string_to_mass. For example:
 
     Filename: 'MODEL_reactions'
         RID1: s[MET1, **kwargs] + s[MET2, **kwargs] <=>  s[MET3, **kwargs]
         RID2: s[MET3, **kwargs] + s[MET4, **kwargs] <=>  s[MET5, **kwargs]
 
-    To import values for  kf, Keq, and kr values, the filename must be of the
-    format '(MODEL_ID)_(argument), where each RID : value pair begins on a
-    newline in the textfile. For example:
+    To import values for  kf, Keq, and kr values, each RID : value pair begins
+    on a newline in the textfile. For example:
 
     Filename: 'MODEL_Keqs'
         RID1: 1
@@ -48,14 +45,11 @@ def create_enzyme_model(rxn_file, kf_file=None, Keq_file=None, kr_file=None):
         Name of the file containing the reactions. Must adhere to the format of
         mass.massmodel.string_to_mass
     kf_file : string or None
-        Name of the file containing the forward rate constants. Filename must
-        be of format: '(MODEL_ID)_kf' or '(MODEL_ID)_forward_rate_constant'
+        Name of the file containing the forward rate constants.
     Keq_file : string or None
-        Name of the file containing the equilibrium constants. Filename must
-        be of format: '(MODEL_ID)_Keq' or '(MODEL_ID)_equilibrium_constant'
+        Name of the file containing the equilibrium constants.
     kr_file : string or None
-        Name of the file containing the reverse rate constants. Filename must
-        be of format: '(MODEL_ID)_kr' or '(MODEL_ID)_reverse_rate_constant'
+        Name of the file containing the reverse rate constants. =
 
     See Also
 	--------
@@ -63,13 +57,7 @@ def create_enzyme_model(rxn_file, kf_file=None, Keq_file=None, kr_file=None):
         For reactions from strings.
     """
     # Check file input
-    if not rxn_file_re.search(rxn_file):
-        raise ValueError("Could not find the file of reactions.Please ensure"
-                " that the filename is of the format: '(MODEL_ID)_reactions'"
-                " where the MODEL_ID has no spaces.")
-    else:
-        model_id = rxn_file_re.search(rxn_file).group(1)
-        new_model = MassModel(model_id)
+    new_model = MassModel(model_id)
 
     # Get reaction strings
     with io.open(rxn_file, 'r') as file:
@@ -99,22 +87,8 @@ def import_forward_rate_constants(model, kf_file):
     model : mass.MassModel
         The enzyme massmodel.
     kf_file : string or None
-        Name of the file containing the forward rate constants. Filename must
-        be of format: '(MODEL_ID)_kf' or '(MODEL_ID)_forward_rate_constant'
+        Name of the file containing the forward rate constants.
     """
-    # Check input
-    if not kf_file_re.search(kf_file):
-        raise ValueError("Could not find the file of forward rate constants."
-                    "Please ensure that the filename is of the format: "
-                    "'(MODEL_ID)_kf' or '(MODEL_ID)_forward_rate_constants' "
-                    "where the MODEL_ID has no spaces.")
-    if not isinstance(model, MassModel):
-        raise TypeError("model must be a massmodel")
-    else:
-        model_id = kf_file_re.search(kf_file).group(1)
-        if not re.match(model.id, model_id):
-            raise ValueError("Filename model ID does not match given model ID")
-
     with io.open(kf_file, 'r') as file:
         params_and_values = file.readlines()
 
@@ -142,22 +116,8 @@ def import_equilibrium_constants(model, Keq_file):
     model : mass.MassModel
         The enzyme massmodel.
     Keq_file : string or None
-        Name of the file containing the equilibrium constants. Filename must
-        be of format: '(MODEL_ID)_Keq' or '(MODEL_ID)_equilibrium_constant'
+        Name of the file containing the equilibrium constants.
     """
-    if not Keq_file_re.search(Keq_file):
-        raise ValueError("Could not find the file of equilibrium constants."
-                    "Please ensure that the filename is of the format: "
-                    "'(MODEL_ID)_Keq' or '(MODEL_ID)_equilibrium_constants' "
-                    "where the MODEL_ID has no spaces.")
-
-    if not isinstance(model, MassModel):
-        raise TypeError("model must be a massmodel")
-    else:
-        model_id = Keq_file_re.search(Keq_file).group(1)
-        if not re.match(model.id, model_id):
-            raise ValueError("Filename model ID does not match given model ID")
-
     with io.open(Keq_file, 'r') as file:
         params_and_values = file.readlines()
 
@@ -185,21 +145,8 @@ def import_reverse_rate_constants(model, kr_file):
     model : mass.MassModel
         The enzyme massmodel.
     kr_file : string or None
-        Name of the file containing the reverse rate constants. Filename must
-        be of format: '(MODEL_ID)_kr' or '(MODEL_ID)_reverse_rate_constants'
+        Name of the file containing the reverse rate constants.
     """
-    if not kr_file_re.search(kr_file):
-        raise ValueError("Could not find the file of reverse rate constants."
-                    "Please ensure that the filename is of the format: "
-                    "'(MODEL_ID)_kr' or '(MODEL_ID)_reverse_rate_constants' "
-                    "where the MODEL_ID has no spaces.")
-    if not isinstance(model, MassModel):
-        raise TypeError("model must be a massmodel")
-    else:
-        model_id = kr_file_re.search(kr_file).group(1)
-        if not re.match(model.id, model_id):
-            raise ValueError("Filename model ID does not match given model ID")
-
     with io.open(kr_file, 'r') as file:
         params_and_values = file.readlines()
 

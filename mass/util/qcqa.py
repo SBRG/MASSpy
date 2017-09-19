@@ -65,7 +65,7 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 						[can_simulate, [[1,2,3]], False],
 						[get_superfluous_parameters, None],
 						[get_unconserved_metabolites, None],
-						[parameter_consistency, None],
+						[parameter_consistency, [1e-9]],
 						[stoichiometric_consistency, None],
 						[elemental_consistency, None],
 						[thermodynamic_consistency, None]]
@@ -296,7 +296,7 @@ def get_unconserved_metabolites(model):
 	print("FIXME: IMPLEMENT UNCONSERVED METABS")
 	return
 
-def parameter_consistency(model):
+def parameter_consistency(model, tol=1e-9):
 	"""Performs a consistency check on the rate constants and the equilibrium
 	constant if there are superfluous parameters. If there are no missing or
 	superfluous parameters, parameters are considered consistent.
@@ -305,20 +305,21 @@ def parameter_consistency(model):
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
+	tol : float
+		The tolerance for parameter consistency. Parameters are considered
+		consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
 	"""
 	# Check inputs
 	if not isinstance(model, massmodel.MassModel):
 		raise TypeError("model must be a mass.MassModel")
+	if not isinstance(tol, float):
+		raise TypeError("tol must be a float")
 
 	# Get superfluous parameters
 	param_consistency = {}
 	superfluous_parameters = get_superfluous_parameters(model)
 	for rxn, superfluous in iteritems(superfluous_parameters):
-		check = (rxn.kr == rxn.kf/rxn.Keq)
-		if check:
-			param_consistency[rxn] = ("%s: kf/Keq == kr" % check)
-		else:
-			param_consistency[rxn] = ("%s: kf/Keq != kr" % check)
+		param_consistency[rxn] = (abs(rxn.kr - rxn.kf/rxn.Keq) <=tol)
 
 	return param_consistency
 
