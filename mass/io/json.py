@@ -111,7 +111,7 @@ def parse_json_into_model(document):
 
 	See Also
 	--------
-	load_json_model : Load directly from a file.
+	read_json_model : Load directly from a file.
 	"""
 	return _model_from_dict(json.loads(document))
 
@@ -158,7 +158,7 @@ def write_json_model(model, filename, pretty=False, **kwargs):
 	else:
 		json.dump(obj, filename, **dump_opts)
 
-def load_json_model(filename):
+def read_json_model(filename):
 	"""Load a mass model from a file in JSON format.
 
 	Parameters
