@@ -73,8 +73,6 @@ def ns(query):
         query = query.replace(prefix + ":", "{" + uri + "}")
     return query
 
-
-
 # XPATH query wrappers
 fbc_prefix = "{" + namespaces["fbc"] + "}"
 sbml_prefix = "{" + namespaces["sbml"] + "}"
@@ -88,7 +86,6 @@ GPR_TAG = ns("fbc:geneProductAssociation")
 GENELIST_TAG = ns("fbc:listOfGeneProducts")
 GENE_TAG = ns("fbc:geneProduct")
 # XPATHS
-BOUND_XPATH = ns("sbml:listOfParameters/sbml:parameter[@value]")
 COMPARTMENT_XPATH = ns("sbml:listOfCompartments/sbml:compartment")
 GENES_XPATH = GENELIST_TAG + "/" + GENE_TAG
 SPECIES_XPATH = ns("sbml:listOfSpecies/sbml:species[@boundaryCondition='%s']")
@@ -112,37 +109,17 @@ else:
     def extract_rdf_annotation(sbml_element, metaid):
         search_xpath = RDF_ANNOTATION_XPATH % metaid
         for i in sbml_element.iterfind(search_xpath):
-            yield get_attrib(i, "rdf:resource")
+            yield _get_attrib(i, "rdf:resource")
         for i in sbml_element.iterfind(search_xpath.replace(
                 "isEncodedBy", "is")):
-            yield get_attrib(i, "rdf:resource")
+            yield _get_attrib(i, "rdf:resource")
 
 class MassSBMLError(Exception):
     pass
 
 
 
-def get_attrib(tag, attribute, type=lambda x: x, require=False):
-    value = tag.get(ns(attribute))
-    if require and value is None:
-        msg = "required attribute '%s' not found in tag '%s'" % \
-              (attribute, tag.tag)
-        if tag.get("id") is not None:
-            msg += " with id '%s'" % tag.get("id")
-        elif tag.get("name") is not None:
-            msg += " with name '%s'" % tag.get("name")
-        raise MassSBMLError(msg)
-    return type(value) if value is not None else None
-
-
-
-def set_attrib(xml, attribute_name, value):
-    if value is None or value == "":
-        return
-    xml.set(ns(attribute_name), str(value))
-
-
-
+# Public Methods
 def parse_stream(filename):
     """parses filename or compressed stream to xml"""
     try:
@@ -161,117 +138,13 @@ def parse_stream(filename):
 
 
 
-# string utility functions
-def clip(string, prefix):
-    """clips a prefix from the beginning of a string if it exists
-
-    >>> clip("R_pgi", "R_")
-    "pgi"
-
-    """
-    return string[len(prefix):] if string.startswith(prefix) else string
-
-
-def strnum(number):
-    """Utility function to convert a number to a string"""
-    if isinstance(number, (Decimal, Basic, str)):
-        return str(number)
-    s = "%.15g" % number
-    return s.rstrip(".")
-
-
-
-
-def construct_gpr_xml(parent, expression):
-    """create gpr xml under parent node"""
-    if isinstance(expression, BoolOp):
-        op = expression.op
-        if isinstance(op, And):
-            new_parent = SubElement(parent, AND_TAG)
-        elif isinstance(op, Or):
-            new_parent = SubElement(parent, OR_TAG)
-        else:
-            raise Exception("unsupported operation " + op.__class__)
-        for arg in expression.values:
-            construct_gpr_xml(new_parent, arg)
-    elif isinstance(expression, Name):
-        gene_elem = SubElement(parent, GENEREF_TAG)
-        set_attrib(gene_elem, "fbc:geneProduct", "G_" + expression.id)
-    else:
-        raise Exception("unsupported operation  " + repr(expression))
-
-
-
-def annotate_mass_from_sbml(mass_element, sbml_element):
-    sbo_term = sbml_element.get("sboTerm")
-    if sbo_term is not None:
-        mass_element.annotation["SBO"] = sbo_term
-    meta_id = get_attrib(sbml_element, "metaid")
-    if meta_id is None:
-        return
-    annotation = mass_element.annotation
-    for uri in extract_rdf_annotation(sbml_element, metaid="#" + meta_id):
-        if not uri.startswith("http://identifiers.org/"):
-            warn("%s does not start with http://identifiers.org/" % uri)
-            continue
-        try:
-            provider, identifier = uri[23:].split("/", 1)
-        except ValueError:
-            warn("%s does not conform to http://identifiers.org/provider/id"
-                 % uri)
-            continue
-        # handle multiple id's in the same database
-        if provider in annotation:
-            # make into a list if necessary
-            if isinstance(annotation[provider], string_types):
-                annotation[provider] = [annotation[provider]]
-            annotation[provider].append(identifier)
-        else:
-            mass_element.annotation[provider] = identifier
-
-
-
-def annotate_sbml_from_mass(sbml_element, mass_element):
-    if len(mass_element.annotation) == 0:
-        return
-    # get the id so we can set the metaid
-    tag = sbml_element.tag
-    if tag.startswith(sbml_prefix) or tag[0] != "{":
-        prefix = ""
-    elif tag.startswith(fbc_prefix):
-        prefix = fbc_prefix
-    else:
-        raise ValueError("Can not annotate " + repr(sbml_element))
-    id = sbml_element.get(prefix + "id")
-    if len(id) == 0:
-        raise ValueError("%s does not have id set" % repr(sbml_element))
-    set_attrib(sbml_element, "metaid", id)
-    annotation = SubElement(sbml_element, ns("sbml:annotation"))
-    rdf_desc = SubElement(SubElement(annotation, ns("rdf:RDF")),
-                          ns("rdf:Description"))
-    set_attrib(rdf_desc, "rdf:about", "#" + id)
-    bag = SubElement(SubElement(rdf_desc, ns("bqbiol:is")),
-                     ns("rdf:Bag"))
-    for provider, identifiers in sorted(iteritems(mass_element.annotation)):
-        if provider == "SBO":
-            set_attrib(sbml_element, "sboTerm", identifiers)
-            continue
-        if isinstance(identifiers, string_types):
-            identifiers = (identifiers,)
-        for identifier in identifiers:
-            li = SubElement(bag, ns("rdf:li"))
-            set_attrib(li, "rdf:resource", "http://identifiers.org/%s/%s" %
-                       (provider, identifier))
-
-
-
 def parse_xml_into_model(xml, number=float):
     # add model
     xml_model = xml.find(ns("sbml:model"))
-    if get_attrib(xml_model, "fbc:required") == "false":
+    if _get_attrib(xml_model, "fbc:required") == "false":
         warn('loading SBML model with fbc:required="false"')
 
-    model_id = get_attrib(xml_model, "id")
+    model_id = _get_attrib(xml_model, "id")
     model = MassModel(model_id)
     model.name = xml_model.get("name")
 
@@ -279,23 +152,23 @@ def parse_xml_into_model(xml, number=float):
     model.compartments = {c.get("id"): c.get("name") for c in
                           xml_model.findall(COMPARTMENT_XPATH)}
     # Detect fixed concentration metabolites (boundary metabolites)
-    boundary_metabolites = {clip(i.get("id"), "M_")
+    boundary_metabolites = {_clip(i.get("id"), "M_")
                             for i in xml_model.findall(SPECIES_XPATH % 'true')}
     bound_dict = {}
     # add metabolites (species)
     for species in xml_model.findall(ns("sbml:listOfSpecies/sbml:species")):
-        met = get_attrib(species, "id", require=True)
-        met = MassMetabolite(clip(met, "M_"))
+        met = _get_attrib(species, "id", require=True)
+        met = MassMetabolite(_clip(met, "M_"))
         met.name = species.get("name")
-        annotate_mass_from_sbml(met, species)
+        _annotate_mass_from_sbml(met, species)
         met.compartment = species.get("compartment")
-        met.charge = get_attrib(species, "fbc:charge", float)
-        met.formula = get_attrib(species, "fbc:chemicalFormula")
+        met.charge = _get_attrib(species, "fbc:charge", float)
+        met.formula = _get_attrib(species, "fbc:chemicalFormula")
         model.add_metabolites([met])
         model.update_initial_conditions(
-            {met: get_attrib(species, "initialConcentration", float)})
+            {met: _get_attrib(species, "initialConcentration", float)})
         if met.id in boundary_metabolites:
-            bound_dict[met] = get_attrib(species, "initialConcentration", 
+            bound_dict[met] = _get_attrib(species, "initialConcentration", 
                                          float)
     # add fixed concentration metabolites (boundary metabolites)
     model.add_fixed_concentrations(bound_dict)
@@ -303,11 +176,11 @@ def parse_xml_into_model(xml, number=float):
 
     # add genes
     for sbml_gene in xml_model.iterfind(GENES_XPATH):
-        gene_id = get_attrib(sbml_gene, "fbc:id").replace(SBML_DOT, ".")
-        gene = Gene(clip(gene_id, "G_"))
-        gene.name = get_attrib(sbml_gene, "fbc:name")
+        gene_id = _get_attrib(sbml_gene, "fbc:id").replace(SBML_DOT, ".")
+        gene = Gene(_clip(gene_id, "G_"))
+        gene.name = _get_attrib(sbml_gene, "fbc:name")
         if gene.name is None:
-            gene.name = get_attrib(sbml_gene, "fbc:label")
+            gene.name = _get_attrib(sbml_gene, "fbc:label")
         annotate_cobra_from_sbml(gene, sbml_gene)
         model.genes.append(gene)
 
@@ -318,8 +191,8 @@ def parse_xml_into_model(xml, number=float):
         elif sub_xml.tag == AND_TAG:
             return "( " + ' and '.join(process_gpr(i) for i in sub_xml) + " )"
         elif sub_xml.tag == GENEREF_TAG:
-            gene_id = get_attrib(sub_xml, "fbc:geneProduct", require=True)
-            return clip(gene_id, "G_")
+            gene_id = _get_attrib(sub_xml, "fbc:geneProduct", require=True)
+            return _clip(gene_id, "G_")
         else:
             raise Exception("unsupported tag " + sub_xml.tag)
     
@@ -329,16 +202,16 @@ def parse_xml_into_model(xml, number=float):
     reactions = []
     for sbml_reaction in xml_model.iterfind(
             ns("sbml:listOfReactions/sbml:reaction")):
-        reaction = get_attrib(sbml_reaction, "id", require=True)
-        isReversible = get_attrib(sbml_reaction, "reversible")
+        reaction = _get_attrib(sbml_reaction, "id", require=True)
+        isReversible = _get_attrib(sbml_reaction, "reversible")
         if isReversible == "false":
             isReversible = False
         else:
             isReversible = True
-        reaction = MassReaction(clip(reaction, "R_"), reversible=isReversible)
+        reaction = MassReaction(_clip(reaction, "R_"), reversible=isReversible)
         reaction.name = sbml_reaction.get("name")
-        annotate_mass_from_sbml(reaction, sbml_reaction)
-        reaction.subsystem = get_attrib(sbml_reaction, "compartment")
+        _annotate_mass_from_sbml(reaction, sbml_reaction)
+        reaction.subsystem = _get_attrib(sbml_reaction, "compartment")
 
         # add mathml rate law extraction here
         result_from_mathml = ""
@@ -388,14 +261,14 @@ def parse_xml_into_model(xml, number=float):
         stoichiometry = defaultdict(lambda: 0)
         for species_reference in sbml_reaction.findall(
                 ns("sbml:listOfReactants/sbml:speciesReference")):
-            met_name = clip(species_reference.get("species"), "M_")
+            met_name = _clip(species_reference.get("species"), "M_")
             stoichiometry[met_name] -= \
                 float(species_reference.get("stoichiometry"))
         for species_reference in sbml_reaction.findall(
                 ns("sbml:listOfProducts/sbml:speciesReference")):
-            met_name = clip(species_reference.get("species"), "M_")
+            met_name = _clip(species_reference.get("species"), "M_")
             stoichiometry[met_name] += \
-                get_attrib(species_reference, "stoichiometry",
+                _get_attrib(species_reference, "stoichiometry",
                            type=float, require=True)
         # needs to have keys of metabolite objects, not ids
         object_stoichiometry = {}
@@ -450,24 +323,13 @@ def model_to_xml(mass_model):
     # add in model
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
-    set_attrib(xml, "fbc:required", "false")
+    _set_attrib(xml, "fbc:required", "false")
     xml_model = SubElement(xml, "model")
-    set_attrib(xml_model, "fbc:strict", "true")
+    _set_attrib(xml_model, "fbc:strict", "true")
     if mass_model.id is not None:
         xml_model.set("id", mass_model.id)
     if mass_model.name is not None:
         xml_model.set("name", mass_model.name)
-
-    # # add in parameters (fixed concentration metabolites)
-    # parameter_list = SubElement(xml_model, "listOfParameters")
-    # param_attr = {"constant": "true", "sboTerm": "SBO:0000285"}
-    # for k, v in iteritems(mass_model.fixed_concentrations):
-    #     param = SubElement(parameter_list, "parameter", id="M_" + k.id)
-    #     set_attrib(param, "name", k.name)
-    #     annotate_sbml_from_mass(param, k)
-    #     set_attrib(param, "value", v)
-    #     set_attrib(param, "constant", "true")
-    #     set_attrib(param, "sboTerm", "SBO:0000285")
 
     # add in compartments
     compartments_list = SubElement(xml_model, "listOfCompartments")
@@ -483,20 +345,20 @@ def model_to_xml(mass_model):
                              id="M_" + met.id,
                              # Useless required SBML parameter
                              hasOnlySubstanceUnits="false")
-        set_attrib(species, "name", met.name)
-        annotate_sbml_from_mass(species, met)
-        set_attrib(species, "compartment", met.compartment)
-        set_attrib(species, "fbc:charge", met.charge)
-        set_attrib(species, "fbc:chemicalFormula", met.formula)
-        set_attrib(species, "initialConcentration", 
+        _set_attrib(species, "name", met.name)
+        _annotate_sbml_from_mass(species, met)
+        _set_attrib(species, "compartment", met.compartment)
+        _set_attrib(species, "fbc:charge", met.charge)
+        _set_attrib(species, "fbc:chemicalFormula", met.formula)
+        _set_attrib(species, "initialConcentration", 
                    mass_model.initial_conditions[met])
         # differentiate fixed concentration metabolites
         if met in mass_model.fixed_concentrations:
-            set_attrib(species, "constant", "true")
-            set_attrib(species, "boundaryCondition", "true")
+            _set_attrib(species, "constant", "true")
+            _set_attrib(species, "boundaryCondition", "true")
         else:
-            set_attrib(species, "constant", "false")
-            set_attrib(species, "boundaryCondition", "false")
+            _set_attrib(species, "constant", "false")
+            _set_attrib(species, "boundaryCondition", "false")
 
     # add in genes
     if len(mass_model.genes) > 0:
@@ -504,12 +366,12 @@ def model_to_xml(mass_model):
         for gene in mass_model.genes:
             gene_id = gene.id.replace(".", SBML_DOT)
             sbml_gene = SubElement(genes_list, GENE_TAG)
-            set_attrib(sbml_gene, "fbc:id", "G_" + gene_id)
+            _set_attrib(sbml_gene, "fbc:id", "G_" + gene_id)
             name = gene.name
             if name is None or len(name) == 0:
                 name = gene.id
-            set_attrib(sbml_gene, "fbc:label", gene_id)
-            set_attrib(sbml_gene, "fbc:name", name)
+            _set_attrib(sbml_gene, "fbc:label", gene_id)
+            _set_attrib(sbml_gene, "fbc:name", name)
             annotate_sbml_from_cobra(sbml_gene, gene)
 
     # add in reactions
@@ -522,9 +384,9 @@ def model_to_xml(mass_model):
                                    reversible=str(reaction.reversible).lower(),
                                    # Useless required SBML parameter
                                    fast="false")
-        set_attrib(sbml_reaction, "name", reaction.name)
-        set_attrib(sbml_reaction, "compartment", reaction.subsystem)
-        annotate_sbml_from_mass(sbml_reaction, reaction)
+        _set_attrib(sbml_reaction, "name", reaction.name)
+        _set_attrib(sbml_reaction, "compartment", reaction.subsystem)
+        _annotate_sbml_from_mass(sbml_reaction, reaction)
         # add in kinetic law (rate law + associated constants)
         sbml_kinetic_law = SubElement(sbml_reaction, "kineticLaw")
         # add in math (rate law in mathml)
@@ -555,10 +417,10 @@ def model_to_xml(mass_model):
                              id=rev_rate, name=rev_rate)
         sbml_ssflux = SubElement(sbml_param_list, "localParameter", 
                                  id=rxn_ssflux, name=rxn_ssflux)
-        set_attrib(sbml_kf, "value", reaction.kf)
-        set_attrib(sbml_Keq, "value", reaction.Keq)
-        set_attrib(sbml_kr, "value", reaction.kr)
-        set_attrib(sbml_ssflux, "value", reaction.ssflux)
+        _set_attrib(sbml_kf, "value", reaction.kf)
+        _set_attrib(sbml_Keq, "value", reaction.Keq)
+        _set_attrib(sbml_kr, "value", reaction.kr)
+        _set_attrib(sbml_ssflux, "value", reaction.ssflux)
 
         # add in local parameters (custom parameters)
         c_param_list = list(mass_model.custom_parameters.keys())
@@ -574,7 +436,7 @@ def model_to_xml(mass_model):
                     v = mass_model.custom_parameters[str(sym)]
                     sbml_cparam = SubElement(sbml_param_list, "localParameter", 
                                              id=str(sym), name=str(sym))
-                    set_attrib(sbml_cparam, "value", v)
+                    _set_attrib(sbml_cparam, "value", v)
 
         # add in reactants, products, modifiers (stoichiometry)
         reactants = {}
@@ -582,9 +444,9 @@ def model_to_xml(mass_model):
         for metabolite, stoichiomety in iteritems(reaction._metabolites):
             met_id = "M_" + metabolite.id
             if stoichiomety > 0:
-                products[met_id] = strnum(stoichiomety)
+                products[met_id] = _strnum(stoichiomety)
             else:
-                reactants[met_id] = strnum(-stoichiomety)
+                reactants[met_id] = _strnum(-stoichiomety)
         if len(reactants) > 0:
             reactant_list = SubElement(sbml_reaction, "listOfReactants")
             for met_id, stoichiomety in sorted(iteritems(reactants)):
@@ -603,7 +465,7 @@ def model_to_xml(mass_model):
             gpr_xml = SubElement(sbml_reaction, GPR_TAG)
             try:
                 parsed, _ = parse_gpr(gpr)
-                construct_gpr_xml(gpr_xml, parsed.body)
+                _construct_gpr_xml(gpr_xml, parsed.body)
             except Exception as e:
                 print("failed on '%s' in %s" %
                       (reaction.gene_reaction_rule, repr(reaction)))
@@ -629,7 +491,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         write_args["pretty_print"] = True
         write_args["pretty_print"] = True
     else:
-        indent_xml(xml)
+        _indent_xml(xml)
     # write xml to file
     should_close = True
     if hasattr(filename, "write"):
@@ -653,8 +515,113 @@ def read_sbml_model(filename):
 
 
 
+# Internal Methods
+def _get_attrib(tag, attribute, type=lambda x: x, require=False):
+    value = tag.get(ns(attribute))
+    if require and value is None:
+        msg = "required attribute '%s' not found in tag '%s'" % \
+              (attribute, tag.tag)
+        if tag.get("id") is not None:
+            msg += " with id '%s'" % tag.get("id")
+        elif tag.get("name") is not None:
+            msg += " with name '%s'" % tag.get("name")
+        raise MassSBMLError(msg)
+    return type(value) if value is not None else None
+
+
+
+def _set_attrib(xml, attribute_name, value):
+    if value is None or value == "":
+        return
+    xml.set(ns(attribute_name), str(value))
+
+
+
+def _construct_gpr_xml(parent, expression):
+    """create gpr xml under parent node"""
+    if isinstance(expression, BoolOp):
+        op = expression.op
+        if isinstance(op, And):
+            new_parent = SubElement(parent, AND_TAG)
+        elif isinstance(op, Or):
+            new_parent = SubElement(parent, OR_TAG)
+        else:
+            raise Exception("unsupported operation " + op.__class__)
+        for arg in expression.values:
+            _construct_gpr_xml(new_parent, arg)
+    elif isinstance(expression, Name):
+        gene_elem = SubElement(parent, GENEREF_TAG)
+        _set_attrib(gene_elem, "fbc:geneProduct", "G_" + expression.id)
+    else:
+        raise Exception("unsupported operation  " + repr(expression))
+
+
+
+def _annotate_mass_from_sbml(mass_element, sbml_element):
+    sbo_term = sbml_element.get("sboTerm")
+    if sbo_term is not None:
+        mass_element.annotation["SBO"] = sbo_term
+    meta_id = _get_attrib(sbml_element, "metaid")
+    if meta_id is None:
+        return
+    annotation = mass_element.annotation
+    for uri in extract_rdf_annotation(sbml_element, metaid="#" + meta_id):
+        if not uri.startswith("http://identifiers.org/"):
+            warn("%s does not start with http://identifiers.org/" % uri)
+            continue
+        try:
+            provider, identifier = uri[23:].split("/", 1)
+        except ValueError:
+            warn("%s does not conform to http://identifiers.org/provider/id"
+                 % uri)
+            continue
+        # handle multiple id's in the same database
+        if provider in annotation:
+            # make into a list if necessary
+            if isinstance(annotation[provider], string_types):
+                annotation[provider] = [annotation[provider]]
+            annotation[provider].append(identifier)
+        else:
+            mass_element.annotation[provider] = identifier
+
+
+
+def _annotate_sbml_from_mass(sbml_element, mass_element):
+    if len(mass_element.annotation) == 0:
+        return
+    # get the id so we can set the metaid
+    tag = sbml_element.tag
+    if tag.startswith(sbml_prefix) or tag[0] != "{":
+        prefix = ""
+    elif tag.startswith(fbc_prefix):
+        prefix = fbc_prefix
+    else:
+        raise ValueError("Can not annotate " + repr(sbml_element))
+    id = sbml_element.get(prefix + "id")
+    if len(id) == 0:
+        raise ValueError("%s does not have id set" % repr(sbml_element))
+    _set_attrib(sbml_element, "metaid", id)
+    annotation = SubElement(sbml_element, ns("sbml:annotation"))
+    rdf_desc = SubElement(SubElement(annotation, ns("rdf:RDF")),
+                          ns("rdf:Description"))
+    _set_attrib(rdf_desc, "rdf:about", "#" + id)
+    bag = SubElement(SubElement(rdf_desc, ns("bqbiol:is")),
+                     ns("rdf:Bag"))
+    for provider, identifiers in sorted(iteritems(mass_element.annotation)):
+        if provider == "SBO":
+            _set_attrib(sbml_element, "sboTerm", identifiers)
+            continue
+        if isinstance(identifiers, string_types):
+            identifiers = (identifiers,)
+        for identifier in identifiers:
+            li = SubElement(bag, ns("rdf:li"))
+            _set_attrib(li, "rdf:resource", "http://identifiers.org/%s/%s" %
+                       (provider, identifier))
+
+
+
 # inspired by http://effbot.org/zone/element-lib.htm#prettyprint
-def indent_xml(elem, level=0):
+def _indent_xml(elem, level=0):
     """indent xml for pretty printing"""
     i = "\n" + level * "  "
     if len(elem):
@@ -663,7 +630,7 @@ def indent_xml(elem, level=0):
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent_xml(elem, level + 1)
+            _indent_xml(elem, level + 1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
@@ -672,5 +639,21 @@ def indent_xml(elem, level=0):
 
 
 
+# string utility methods
+def _clip(string, prefix):
+    """_clips a prefix from the beginning of a string if it exists
+
+    >>> _clip("R_pgi", "R_")
+    "pgi"
+
+    """
+    return string[len(prefix):] if string.startswith(prefix) else string
 
 
+
+def _strnum(number):
+    """Utility function to convert a number to a string"""
+    if isinstance(number, (Decimal, Basic, str)):
+        return str(number)
+    s = "%.15g" % number
+    return s.rstrip(".")
