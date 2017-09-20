@@ -117,8 +117,6 @@ else:
 class MassSBMLError(Exception):
     pass
 
-
-
 # Public Methods
 def parse_stream(filename):
     """parses filename or compressed stream to xml"""
@@ -135,8 +133,6 @@ def parse_stream(filename):
             return parse(filename)
     except ParseError as e:
         raise MassSBMLError("Malformed XML file: " + str(e))
-
-
 
 def parse_xml_into_model(xml, number=float):
     # add model
@@ -168,11 +164,10 @@ def parse_xml_into_model(xml, number=float):
         model.update_initial_conditions(
             {met: _get_attrib(species, "initialConcentration", float)})
         if met.id in boundary_metabolites:
-            bound_dict[met] = _get_attrib(species, "initialConcentration", 
+            bound_dict[met] = _get_attrib(species, "initialConcentration",
                                          float)
     # add fixed concentration metabolites (boundary metabolites)
     model.add_fixed_concentrations(bound_dict)
-
 
     # add genes
     for sbml_gene in xml_model.iterfind(GENES_XPATH):
@@ -195,7 +190,7 @@ def parse_xml_into_model(xml, number=float):
             return _clip(gene_id, "G_")
         else:
             raise Exception("unsupported tag " + sub_xml.tag)
-    
+
     # add reactions
     custom_rate_dict = {}
     custom_param_dict = {}
@@ -251,10 +246,8 @@ def parse_xml_into_model(xml, number=float):
                 num_val = number(local_parameter.get("value"))
                 custom_param_ids.append(pid)
                 custom_param_values.append(num_val)
-        custom_param_dict[reaction] = dict(zip(custom_param_ids, 
+        custom_param_dict[reaction] = dict(zip(custom_param_ids,
                                                 custom_param_values))
-
-
 
         reactions.append(reaction)
         # add stoichiometry (reactants, products, modifiers)
@@ -303,8 +296,6 @@ def parse_xml_into_model(xml, number=float):
             test_dict[reaction]).replace(" ", ""):
             custom_rate_dict[reaction] = result_from_mathml
 
-
-
     try:
         model.add_reactions(reactions)
     except ValueError as e:
@@ -316,8 +307,6 @@ def parse_xml_into_model(xml, number=float):
             custom_rxn, custom_rate, custom_param_dict[custom_rxn])
 
     return model
-
-
 
 def model_to_xml(mass_model):
     # add in model
@@ -341,7 +330,7 @@ def model_to_xml(mass_model):
     # add in species (metabolites)
     species_list = SubElement(xml_model, "listOfSpecies")
     for met in mass_model.metabolites:
-        species = SubElement(species_list, "species", 
+        species = SubElement(species_list, "species",
                              id="M_" + met.id,
                              # Useless required SBML parameter
                              hasOnlySubstanceUnits="false")
@@ -350,7 +339,7 @@ def model_to_xml(mass_model):
         _set_attrib(species, "compartment", met.compartment)
         _set_attrib(species, "fbc:charge", met.charge)
         _set_attrib(species, "fbc:chemicalFormula", met.formula)
-        _set_attrib(species, "initialConcentration", 
+        _set_attrib(species, "initialConcentration",
                    mass_model.initial_conditions[met])
         # differentiate fixed concentration metabolites
         if met in mass_model.fixed_concentrations:
@@ -379,8 +368,8 @@ def model_to_xml(mass_model):
     rate_dictionary = strip_time(mass_model.rate_expressions)
     for reaction, rate in iteritems(rate_dictionary):
         id = "R_" + reaction.id
-        sbml_reaction = SubElement(reactions_list, "reaction", 
-                                   id=id, 
+        sbml_reaction = SubElement(reactions_list, "reaction",
+                                   id=id,
                                    reversible=str(reaction.reversible).lower(),
                                    # Useless required SBML parameter
                                    fast="false")
@@ -402,20 +391,20 @@ def model_to_xml(mass_model):
             new_str = new_str.replace(
                 '<?xml version="1.0" encoding="UTF-8"?>\n', "")
             sbml_kinetic_law.append(fromstring(new_str))
-        
+
         # add in local parameters (kf, Keq, kr, ssflux)
         sbml_param_list = SubElement(sbml_kinetic_law, "listOfLocalParameters")
         fwd_rate = "kf_"+reaction.id
         eq_const = "Keq_"+reaction.id
         rev_rate = "kr_"+reaction.id
         rxn_ssflux = "ssflux_"+reaction.id
-        sbml_kf = SubElement(sbml_param_list, "localParameter", 
+        sbml_kf = SubElement(sbml_param_list, "localParameter",
                              id=fwd_rate, name=fwd_rate)
-        sbml_Keq = SubElement(sbml_param_list, "localParameter", 
+        sbml_Keq = SubElement(sbml_param_list, "localParameter",
                               id=eq_const, name=eq_const)
-        sbml_kr = SubElement(sbml_param_list, "localParameter", 
+        sbml_kr = SubElement(sbml_param_list, "localParameter",
                              id=rev_rate, name=rev_rate)
-        sbml_ssflux = SubElement(sbml_param_list, "localParameter", 
+        sbml_ssflux = SubElement(sbml_param_list, "localParameter",
                                  id=rxn_ssflux, name=rxn_ssflux)
         _set_attrib(sbml_kf, "value", reaction.kf)
         _set_attrib(sbml_Keq, "value", reaction.Keq)
@@ -434,7 +423,7 @@ def model_to_xml(mass_model):
                     continue
                 elif str(sym) in c_param_list:
                     v = mass_model.custom_parameters[str(sym)]
-                    sbml_cparam = SubElement(sbml_param_list, "localParameter", 
+                    sbml_cparam = SubElement(sbml_param_list, "localParameter",
                                              id=str(sym), name=str(sym))
                     _set_attrib(sbml_cparam, "value", v)
 
@@ -473,8 +462,6 @@ def model_to_xml(mass_model):
 
     return xml
 
-
-
 def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
     if not _with_lxml:
         warn("Install lxml for faster SBML I/O", ImportWarning)
@@ -507,13 +494,9 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
     if should_close:
         xmlfile.close()
 
-
-
 def read_sbml_model(filename):
     """parses filename or compressed stream into a MassModel object"""
     return parse_xml_into_model(parse_stream(filename))
-
-
 
 # Internal Methods
 def _get_attrib(tag, attribute, type=lambda x: x, require=False):
@@ -528,14 +511,10 @@ def _get_attrib(tag, attribute, type=lambda x: x, require=False):
         raise MassSBMLError(msg)
     return type(value) if value is not None else None
 
-
-
 def _set_attrib(xml, attribute_name, value):
     if value is None or value == "":
         return
     xml.set(ns(attribute_name), str(value))
-
-
 
 def _construct_gpr_xml(parent, expression):
     """create gpr xml under parent node"""
@@ -554,8 +533,6 @@ def _construct_gpr_xml(parent, expression):
         _set_attrib(gene_elem, "fbc:geneProduct", "G_" + expression.id)
     else:
         raise Exception("unsupported operation  " + repr(expression))
-
-
 
 def _annotate_mass_from_sbml(mass_element, sbml_element):
     sbo_term = sbml_element.get("sboTerm")
@@ -583,8 +560,6 @@ def _annotate_mass_from_sbml(mass_element, sbml_element):
             annotation[provider].append(identifier)
         else:
             mass_element.annotation[provider] = identifier
-
-
 
 def _annotate_sbml_from_mass(sbml_element, mass_element):
     if len(mass_element.annotation) == 0:
@@ -618,8 +593,6 @@ def _annotate_sbml_from_mass(sbml_element, mass_element):
             _set_attrib(li, "rdf:resource", "http://identifiers.org/%s/%s" %
                        (provider, identifier))
 
-
-
 # inspired by http://effbot.org/zone/element-lib.htm#prettyprint
 def _indent_xml(elem, level=0):
     """indent xml for pretty printing"""
@@ -637,8 +610,6 @@ def _indent_xml(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-
-
 # string utility methods
 def _clip(string, prefix):
     """_clips a prefix from the beginning of a string if it exists
@@ -648,8 +619,6 @@ def _clip(string, prefix):
 
     """
     return string[len(prefix):] if string.startswith(prefix) else string
-
-
 
 def _strnum(number):
     """Utility function to convert a number to a string"""
