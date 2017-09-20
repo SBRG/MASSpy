@@ -51,6 +51,8 @@ def gradient(model, strip_time=True, sub_parameters=True,
 	numpy.array, pandas.DataFrame or sympy.Matrix
 		The gradient matrix for the given MassModel
 	"""
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a MassModel")
 	if not isinstance(matrix_type, string_types):
 		raise TypeError("matrix_type must be a string")
 	matrix_type = matrix_type.lower()
@@ -248,7 +250,7 @@ def gamma(model, strip_time=True, sub_parameters=True,
 											columns=metabolite_ids)
 	return gamma
 
-def jacobian(model, jacobian_type="metabolite", strip_time=False,
+def jacobian(model, jacobian_type="metabolite", strip_time=True,
 		sub_parameters=True,sub_concentrations=True, matrix_type='dense'):
 	"""Get the jacobian matrix for a given massmodel
 
@@ -283,6 +285,8 @@ def jacobian(model, jacobian_type="metabolite", strip_time=False,
 	numpy.array or sympy.Matrix
 		The gradient matrix for the given MassModel
 	"""
+	if not isinstance(model, massmodel.MassModel):
+		raise TypeError("model must be a MassModel")
 	if jacobian_type not in {'metabolite', 'reaction'}:
 		raise ValueError("jacobian_type must be either 'metabolite' "
 							"or 'reaction'}")
@@ -333,108 +337,214 @@ def jacobian(model, jacobian_type="metabolite", strip_time=False,
 														columns=reaction_ids)
 	return j_matrix
 
-def
+def temporal_decomposition(model, jacobian_type='metabolite', tol=1e-10,
+							dynamic_invariants=True):
+	"""Perform a temporal decomposition of the jacobian matrix of a model and
+	return the timescales (ts) and the modal matrix (M), where ts[i] is the
+	time constant for M[i].
 
-def nullspace(A, integers=False):
+	Parameters
+	----------
+	model : mass.MassModel
+		The MassModel object to construct the matrix for
+	jacobian_type : {'metabolite', 'reaction'}
+		Whether to obtain the jacobian with respect to the metabolites (Jx)
+		or to obbtain the jacobian with respect to the reactions (Jv)
+	tol : float
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `tol` are considered to be zero.
+	dynamic_invariants : bool
+		If True, will include the dynamically invariant pools in the returned
+		modal matrix.
+
+	Returns
+	-------
+	ts : numpy.array
+		A numpy array  where ts[i] is time constant for M[i].
+		Time invariants will have a time constant of np.inf
+	M : numpy.array
+		A numpy array representing the modal matrix where M[i] is the row of
+		the matrix that corresponds to the timeconstant ts[i]
+	"""
+	# Get the jacobian matrix
+	J = jacobian(model, jacobian_type, strip_time=True, sub_parameters=True,
+				sub_concentrations=True, matrix_type='dense')
+	# Get the eigenvalues and matrix of eigenrows
+	w, vr = eigenvalues(J, left_eigenvec=False, right_eigenvec=True)
+	vr_inv = sc.linalg.inv(vr)
+	# Get rank of Jacobian
+	n = matrix_rank(J, atol=tol)
+	# Define eigenvalues with real parts below the tolerance to be zero.
+	for i, eig in enumerate(w):
+		# Only check negative eigenvalues since time constants are the negative
+		# recipricols and cannot be negative.
+		if abs(eig.real) <= tol:
+			w[i] = 0
+	# Get indicies of eigenvalues and sort the time scales and corresponding
+	# rows of the modal matrix from fastest to slowest.
+	ts = -1/np.sort(w)[:n]
+	if dynamic_invariants:
+		indices = np.argsort(w)
+		ts = np.concatenate((ts, [np.inf]*(len(w)-n)))
+	else:
+		indices = np.argsort(w)[:n]
+	M = np.array([vr_inv[index] for index in indices])
+
+	for i, r in enumerate(M):
+		for j, val in enumerate(r):
+			if abs(val) <= tol:
+				r[j] = 0.
+		M[i] = r/max(abs(r))
+
+	return ts, M
+
+def nullspace(A, atol=1e-13, rtol=0):
 	"""Compute an approximate basis for the nullspace of A.
 
-	The sympy.Matrix.nullspace method is used to calculate the nullspace.
-	The algorithm uses Gaussian elimination with back substitution.
+	The algorithm used by this function is based on the singular value
+	decomposition of `A`.
 
 	Parameters
 	----------
 	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
 		or sympy.Matrix
-
 		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
 		treated as a 2-D with shape (1, k)
-	integers : bool
-		If true, will find the least common denominator in
-		each vector and turn the entries into integers
-		Will be ignored if method is not 'gaussian'.
+	atol : float
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `atol` are considered to be zero.
+	rtol : float
+		The relative tolerance.  Singular values less than rtol*smax are
+		considered to be zero, where smax is the largest singular value.
+
+	If both `atol` and `rtol` are positive, the combined tolerance is the
+	maximum of the two; that is::
+		tol = max(atol, rtol * smax)
+	Singular values smaller than `tol` are considered to be zero.
 
 	Returns
 	-------
-	numpy.ndarray
+	ns : ndarray
 		If `A` is an array with shape (m, k), then `ns` will be an array
-		with shape (k, n), where n is the estimated	dimension of the nullspace
-		of `A`. The columns of ns are a basis for nullspace; each element
-		in numpy.dot(A, ns) will be approximately zero.
-
-	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, sp.Matrix):
-		pass
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
-				"pandas.DataFrame, or sympy.Matrix.")
-
-	ns = np.array(A.nullspace()).astype(np.float64)
-	# Make integers if True
-	if integers:
-		for i in range(ns.shape[0]):
-			# Find abs min value with index
-			ma = np.ma.masked_values(np.absolute(ns[i]), 0.0, copy=False)
-			# Rationalize by dividing by abs min value
-			ns[i] = np.divide(ns[i], ma.min())
-
-	ns = ns.T
-	return ns
-
-def left_nullspace(A, integers=False):
-	"""Compute an approximate basis for the left nullspace of A.
-
-	The sympy.Matrix.nullspace method is used to calculate the left nullspace.
-	The algorithm uses Gaussian	elimination with back substitution.
-
-	Parameters
-	----------
-	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-		or sympy.Matrix
-
-		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-		treated as a 2-D with shape (1, k)
-	integers : bool
-		If true, will find the least common denominator in
-		each vector and turn the entries into integers
-
-	Returns
-	-------
-	numpy.ndarray
-		If `A` is an array with shape (m, k), then `lns` will be an array
-		with shape (m, n), where n is the estimated dimension of the left
-		nullspace of `A`. The columns of lns are a basis for the left
-		nullspace; each element in numpy.dot(lns.T, A) will be approximately
+		with shape (k, n), where n is the estimated dimension of the
+		nullspace of `A`.  The columns of `ns` are a basis for the
+		nullspace; each element in numpy.dot(A, ns) will be approximately
 		zero.
 	"""
 	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
+		pass
 	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
 		A = A.toarray()
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
 	elif isinstance(A, sp.Matrix):
-		pass
+		try:
+			A = np.array(A).astype(np.float64)
+		except:
+			raise ValueError("Cannot have sympy symbols in the matrix. Try "
+							"substituting numerical values in first")
 	else:
 		raise TypeError("Matrix must be one of the following formats: "
 				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
 				"pandas.DataFrame, or sympy.Matrix.")
-	lns = nullspace(A.transpose(), integers)
+
+	A = np.atleast_2d(A)
+	u, s, vh = svd(A)
+	tol = max(atol, rtol * s[0])
+	nnz = (s >= tol).sum()
+	ns = vh[nnz:].conj().T
+	return ns
+
+def left_nullspace(A, atol=1e-13, rtol=0):
+	"""Compute an approximate basis for the left nullspace of A.
+
+	The algorithm used by this function is based on the singular value
+	decomposition of `A`.
+
+	Parameters
+	----------
+	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
+		or sympy.Matrix
+		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
+		treated as a 2-D with shape (1, k)
+	atol : float
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `atol` are considered to be zero.
+	rtol : float
+		The relative tolerance.  Singular values less than rtol*smax are
+		considered to be zero, where smax is the largest singular value.
+
+	If both `atol` and `rtol` are positive, the combined tolerance is the
+	maximum of the two; that is::
+		tol = max(atol, rtol * smax)
+	Singular values smaller than `tol` are considered to be zero.
+
+	Returns
+	-------
+	lns : ndarray
+		If `A` is an array with shape (m, k), then `lns` will be an array
+		with shape (k, n), where n is the estimated dimension of the
+		left nullspace of `A`.  The columns of `lns` are a basis for the
+		left nullspace; each element in numpy.dot(A.T, lns) will be
+		approximatelyzero.
+	"""
+	lns = nullspace(A.T, atol, rtol)
 	return lns
 
-def rowspace(A):
-	"""Compute an approximate basis for the rowspace of A.
+def columnspace(A, atol=1e-13, rtol=0):
+	"""Compute an approximate basis for the columnspace of A.
 
-	The sympy.Matrix.rowspace method is used to calculate the rowspace.
-	The algorithm uses Gaussian elimination with back substitution.
+	This function utilizes the scipy.linalg.qr method to obtain an orthogonal
+	basis for the columnspace of A.
+
+	Parameters
+	----------
+	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
+		or sympy.Matrix
+		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
+		treated as a 2-D with shape (1, k)
+
+	atol : float
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `atol` are considered to be zero.
+	rtol : float
+		The relative tolerance.  Singular values less than rtol*smax are
+		considered to be zero, where smax is the largest singular value.
+
+	If both `atol` and `rtol` are positive, the combined tolerance is the
+	maximum of the two; that is::
+		tol = max(atol, rtol * smax)
+	Singular values smaller than `tol` are considered to be zero.
+
+	Returns
+	-------
+	numpy.ndarray
+		If `A` is an array with shape (m, k), then `cs` will be an array
+		with shape (m, n), where n is the estimated dimension of the
+		columnspace of `A`. The columns of cs are a basis for the columnspace.
+	"""
+	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
+		pass
+	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
+		A = A.toarray()
+	elif isinstance(A, sp.Matrix):
+		try:
+			A = np.array(A).astype(np.float64)
+		except:
+			raise ValueError("Cannot have sympy symbols in the matrix. Try "
+							"substituting numerical values in first")
+	else:
+		raise TypeError("Matrix must be one of the following formats: "
+				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
+				"pandas.DataFrame, or sympy.Matrix.")
+
+	q,r = np.linalg.qr(A)
+	cs = q[:,:matrix_rank(A, atol, rtol)]
+	return cs
+
+def rowspace(A, atol=1e-13, rtol=0):
+	"""Compute an approximate basis for the columnspace of A.
+
+	This function utilizes the scipy.linalg.qr method to obtain an orthogonal
+	basis for the columnspace of A.
 
 	Parameters
 	----------
@@ -448,95 +558,68 @@ def rowspace(A):
 	-------
 	numpy.ndarray
 		If `A` is an array with shape (m, k), then `rs` will be an array
-		with shape (k, n), where n is the estimated dimension of the left
-		nullspace of `A`. The columns of rs are a basis for the rowspace.
+		with shape (m, n), where n is the estimated dimension of the rowspace
+		of `A`. The columns of rs are a basis for the rowspace.
 	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, sp.Matrix):
-		pass
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
-				"pandas.DataFrame, or sympy.Matrix.")
-
-	rs = np.array(A.rowspace()).astype(np.float64)
-	rs = rs.T
+	rs = columnspace(A.T, atol, rtol)
 	return rs
 
-def columnspace(A):
-	"""Compute an approximate basis for the columnspace of A.
+def matrix_rank(A, atol=1e-13, rtol=0):
+	"""Estimate the rank (i.e. the dimension of the nullspace) of a matrix.
 
-	The sympy.Matrix.columnspace method is used to calculate the columnspace.
-	The algorithm uses Gaussian elimination with back substitution.
+	The algorithm used by this function is based on the singular value
+	decomposition of `A`.
 
 	Parameters
 	----------
-	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-		or sympy.Matrix
+	A : ndarray
+		A should be at most 2-D.  A 1-D array with length n will be treated
+		as a 2-D with shape (1, n)
+	atol : float
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `atol` are considered to be zero.
+	rtol : float
+		The relative tolerance.  Singular values less than rtol*smax are
+		considered to be zero, where smax is the largest singular value.
 
-		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-		treated as a 2-D with shape (1, k)
+	If both `atol` and `rtol` are positive, the combined tolerance is the
+	maximum of the two; that is::
+		tol = max(atol, rtol * smax)
+	Singular values smaller than `tol` are considered to be zero.
 
 	Returns
 	-------
-	numpy.ndarray
-		If `A` is an array with shape (m, k), then `cs` will be an array
-		with shape (m, n), where n is the estimated dimension of the left
-		nullspace of `A`. The columns of cs are a basis for the rowspace.
+	r : int
+		The estimated rank of the matrix.
+
+	See also
+	--------
+	numpy.linalg.matrix_rank
+		matrix_rank is basically the same as this function, but it does not
+		provide the option of the absolute tolerance.
+
+	Note: Taken from the scipy cookbook.
 	"""
 	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
+		pass
 	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
 		A = A.toarray()
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
 	elif isinstance(A, sp.Matrix):
-		pass
+		try:
+			A = np.array(A).astype(np.float64)
+		except:
+			raise ValueError("Cannot have sympy symbols in the matrix. Try "
+							"substituting numerical values in first")
 	else:
 		raise TypeError("Matrix must be one of the following formats: "
 				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
 				"pandas.DataFrame, or sympy.Matrix.")
 
-	cs = np.array(A.columnspace()).astype(np.float64)
-	cs = cs.T
-	return cs
-
-def matrix_rank(A):
-	"""Get the rank of a matrix.
-
-	The sympy.Matrix.rank method is used to calculate the matrix rank.
-	The algorithm uses Gaussian elimination with back substitution.
-
-	Parameters
-	----------
-	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-		or sympy.Matrix
-
-		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-		treated as a 2-D with shape (1, k)
-	"""
-	if isinstance(A, np.ndarray) or isinstance(A, pd.DataFrame):
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, dok_matrix) or isinstance(A, lil_matrix):
-		A = A.toarray()
-		A = np.atleast_2d(A)
-		A = sp.Matrix(A)
-	elif isinstance(A, sp.Matrix):
-		pass
-	else:
-		raise TypeError("Matrix must be one of the following formats: "
-				"numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
-				"pandas.DataFrame, or sympy.Matrix.")
-
-	return A.rank()
+	A = np.atleast_2d(A)
+	s = svd(A, compute_uv=False)
+	tol = max(atol, rtol * s[0])
+	rank = int((s >= tol).sum())
+	return rank
 
 def svd(A, **kwargs):
 	"""Get the singular value decomposition of 'A'
@@ -551,6 +634,7 @@ def svd(A, **kwargs):
 	----------
 	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
 		or sympy.Matrix
+
 	Returns
 	-------
 	matrix of the same type as 'A'
