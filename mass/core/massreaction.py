@@ -5,12 +5,12 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
-from collections import defaultdict
-from copy import copy, deepcopy
-from functools import partial
-from operator import attrgetter
-from warnings import warn
 from math import inf
+from warnings import warn
+from functools import partial
+from copy import copy, deepcopy
+from operator import attrgetter
+from collections import defaultdict
 from six import iteritems, iterkeys, string_types, integer_types
 
 # from cobra
@@ -23,7 +23,6 @@ from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
-
 ## precompiled regular expressions
 ### Matches and/or in a gene reaction rule
 and_or_search = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
@@ -61,13 +60,13 @@ class MassReaction(Object):
 		The steady state flux for the reaction. Can store a steady state flux
 		and be utilized in pseudo rate constnant calculations.
 	"""
-	def __init__(self, id=None, name="", subsystem="", reversible=True,
+	def __init__(self, id=None, name="", subsystem=None, reversible=True,
 				ssflux=None):
 		"""Initialize the MassReaction Object"""
 		# Check inputs to ensure they are the correct types
 		if not isinstance(name, string_types):
 			raise TypeError("name must be a string type")
-		if not isinstance(subsystem, string_types):
+		if not isinstance(subsystem, (string_types, type(None))):
 			raise TypeError("subsystem must be a string type")
 		if not isinstance(reversible, bool):
 			raise TypeError("reversible must be a boolean")
@@ -114,6 +113,17 @@ class MassReaction(Object):
 
 		# The Gibbs reaction energy assoicated with this reaction
 		self._gibbs_reaction_energy = None
+
+		# For cobra compatibility if desired and escher visualization
+		self.objective_coefficient = 0.
+		self.variable_kind = 'continuous'
+		if self._reversible:
+			self.lower_bound = -1000.
+			self.upper_bound = 1000.
+		else:
+			self.lower_bound = 0.
+			self.upper_bound = 1000.
+
 
 	# Properties
 	@property
@@ -229,7 +239,7 @@ class MassReaction(Object):
 
 
 	@property
-	def rate_law(self):
+	def rate(self):
 		"""Returns the rate law as a human readable string"""
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
 									sympy_expr=False, update_reaction=True)

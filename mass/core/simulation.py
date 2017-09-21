@@ -7,9 +7,9 @@ import re
 import numpy as np
 import sympy as sp
 from warnings import warn
-from six import iteritems, iterkeys, itervalues
 from scipy.integrate import ode
 from scipy.optimize import root
+from six import iteritems, iterkeys, itervalues, integer_types
 
 # from mass
 from mass.util import qcqa
@@ -29,7 +29,8 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_vector, perturbations=None, solver="vode"):
+def simulate(model, time_range, numpoints=101, perturbations=None,
+				solver="vode"):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
 	obtain solutions for the metabolite concentrations and reaction fluxes.
@@ -45,10 +46,15 @@ def simulate(model, time_vector, perturbations=None, solver="vode"):
 	----------
 	model : mass.MassModel
 		The MassModel object to simulate:
-	time_vector : list
-		A list of numerical values to treat as the time points for integration
-		of the ODEs. Simulation will run from the first point in the vector
+	time_range : list or tuple
+		Either a list of numerical values to treat as the time points for
+		integration of the ODEs, or a tuple containing the start and end time
+		points for the simulation.
+		Simulation will run from the first point in the vector
 		to the last point in the vector.
+	numpoints :  int
+		The number of points - 1 to plot if the given time_range is a tuple.
+		Default is 100.
 	perturbations : dict or None
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
@@ -68,8 +74,13 @@ def simulate(model, time_vector, perturbations=None, solver="vode"):
 	# Check inputs
 	if not isinstance(model, MassModel):
 		raise TypeError("model must be a MassModel")
-	if not hasattr(time_vector, '__iter__'):
-		raise TypeError("time_vector must be an iterable list of numbers")
+	if isinstance(time_range, tuple):
+		if not isinstance(numpoints, (float, integer_types)):
+			raise TypeError("numpoints must an integer")
+		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+
+	if not hasattr(time_range, '__iter__'):
+		raise TypeError("time_range must a tuple or a list of numbers")
 
 	solver_list = ['vode', 'zvode', 'lsoda', 'dopri5', 'dop853']
 	if solver not in solver_list:
@@ -122,7 +133,7 @@ def simulate(model, time_vector, perturbations=None, solver="vode"):
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
 
 	# Integrate the odes to obtain the concentration solutions
-	c = _integrate_odes(time_vector, lam_odes, lam_jacb, ics, solver)
+	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver)
 
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
@@ -137,13 +148,16 @@ def simulate(model, time_vector, perturbations=None, solver="vode"):
 	# Map reactiom ids to their flux solutions
 	f_profile = dict()
 	for rxn, lambda_func_and_args in iteritems(lam_rates):
-		f = np.zeros(time_vector.shape)
+		f = np.zeros(time_range.shape)
 		lambda_func = lambda_func_and_args[1]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
 							for arg in lambda_func_and_args[0]]).T
 		for i in range(0, len(f)):
 			f[i] = lambda_func(*concs[i,:])
 		f_profile[rxn] = f
+
+	c_profile['t'] = time_range
+	f_profile['t'] = time_range
 
 	return [c_profile, f_profile]
 
@@ -184,11 +198,10 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		if len(possible_rate_types) != 0:
 			model._rtype = possible_rate_types[0]
 		else:
-			warn("Unable to simulate")
+			warn("Unable to find steady state due to missing values")
 			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
 			return [None, None]
-
 
 	options = {"simulate": simulate, "find_roots": None}
 	# Perform the simulate strategy
@@ -198,9 +211,9 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time_vector = np.linspace(0, 10**power,num=10**(power-1),
+			time_range = np.linspace(0, 10**power,num=10**(power-1),
 										endpoint=True)
-			[c_profile, f_profile] = options[strategy](model, time_vector)
+			[c_profile, f_profile] = options[strategy](model, time_range)
 			for metab, conc in iteritems(c_profile):
 				if abs(conc[-1] - conc[-2]) <= 10**9:
 					continue

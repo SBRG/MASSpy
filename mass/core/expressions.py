@@ -161,24 +161,39 @@ def generate_ode(metabolite):
 		metabolite._ode = sp.Add(metabolite._ode, rate_law_expr)
 	return metabolite._ode
 
-def strip_time(sympy_expr_dict):
+def strip_time(sympy_exprs):
 	"""Strip the time dependency in sympy expresssions. Returns a dictionary
 	with the expressions updated for each entry
 
 	Parameters
 	----------
-	sympy_expr_dict : dict
-		A dictionary of sympy expressions.
+	sympy_expr_dict : dict or list
+		A list or a dictionary where values are sympy expressions
 	"""
-	for item, expression in iteritems(sympy_expr_dict):
+	if isinstance(sympy_exprs, dict):
+		for item, expression in iteritems(sympy_exprs):
 
-		metab_funcs= expression.atoms(sp.Function)
-		metab_syms = list(sp.Symbol(str(m_func)[:-3])
-							for m_func in metab_funcs)
-		metab_func_to_sym = dict((m_func, metab_syms[i])
-								for i, m_func in enumerate(list(metab_funcs)))
-		sympy_expr_dict[item] = expression.subs(metab_func_to_sym)
-	return sympy_expr_dict
+			metab_funcs= list(expression.atoms(sp.Function))
+			metab_syms = list(sp.Symbol(str(m_func)[:-3])
+								for m_func in metab_funcs)
+			metab_func_to_sym = dict((m_func, metab_syms[i])
+									for i, m_func in enumerate(list(metab_funcs)))
+			sympy_exprs[item] = expression.subs(metab_func_to_sym)
+
+	elif isinstance(sympy_exprs, list) or isinstance(sympy_exprs, sp.Basic):
+		if isinstance(sympy_exprs, sp.Basic):
+			sympy_exprs = [sympy_exprs]
+		for i, expression in enumerate(sympy_exprs):
+			metab_funcs = list(expression.atoms(sp.Function))
+			metab_syms = list(sp.Symbol(str(m_func)[:-3])
+								for m_func in metab_funcs)
+			metab_func_to_sym = dict((m_func, metab_syms[i])
+									for i, m_func in enumerate(metab_funcs))
+			sympy_exprs[i] = expression.subs(metab_func_to_sym)
+	else:
+		raise TypeError("sympy_exprs must be a dictionary or list of "
+						"sympy expressions")
+	return sympy_exprs
 
 def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 	"""Create the sympy expression representing a custom rate law.
@@ -273,7 +288,7 @@ def _generate_rate_type_1(reaction):
 	rate_law = "%s*(%s - " % (reaction._sym_kf, rate_law.lstrip("*"))
 	# For exchange reactions
 	if reaction.exchange and len(reaction.products) == 0:
-		rate_law += "*%s(t)" % reaction.get_external_metabolite
+		rate_law += "%s(t)*" % reaction.get_external_metabolite
 	# For all other reactions
 	else:
 		for metab in reaction.products:
