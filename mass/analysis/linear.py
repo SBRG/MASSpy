@@ -337,8 +337,8 @@ def jacobian(model, jacobian_type="metabolite", strip_time=True,
 														columns=reaction_ids)
 	return j_matrix
 
-def temporal_decomposition(model, jacobian_type='metabolite', tol=1e-10,
-							dynamic_invariants=True):
+def temporal_decomposition(model, jacobian_type='metabolite', as_percents=True,
+				eigtol=1e-10, zerotol=1e-10, dynamic_invariants=True):
 	"""Perform a temporal decomposition of the jacobian matrix of a model and
 	return the timescales (ts) and the modal matrix (M), where ts[i] is the
 	time constant for M[i].
@@ -350,9 +350,12 @@ def temporal_decomposition(model, jacobian_type='metabolite', tol=1e-10,
 	jacobian_type : {'metabolite', 'reaction'}
 		Whether to obtain the jacobian with respect to the metabolites (Jx)
 		or to obbtain the jacobian with respect to the reactions (Jv)
-	tol : float
-		The absolute tolerance for a zero singular value.  Singular values
-		smaller than `tol` are considered to be zero.
+	eigtol : float
+		The absolute tolerance for a zero singular value of an eigenvalue.
+		Singular values smaller than `eigtol` are considered to be zero.
+	zerotol : float
+		The absolute tolerance for a zero singular value in the modal matrix M.
+		Singular values smaller than `zerotol` are considered to be zero.
 	dynamic_invariants : bool
 		If True, will include the dynamically invariant pools in the returned
 		modal matrix.
@@ -373,12 +376,12 @@ def temporal_decomposition(model, jacobian_type='metabolite', tol=1e-10,
 	w, vr = eigenvalues(J, left_eigenvec=False, right_eigenvec=True)
 	vr_inv = sc.linalg.inv(vr)
 	# Get rank of Jacobian
-	n = matrix_rank(J, atol=tol)
+	n = matrix_rank(J, atol=eigtol)
 	# Define eigenvalues with real parts below the tolerance to be zero.
 	for i, eig in enumerate(w):
 		# Only check negative eigenvalues since time constants are the negative
 		# recipricols and cannot be negative.
-		if abs(eig.real) <= tol:
+		if abs(eig.real) <= eigtol:
 			w[i] = 0
 	# Get indicies of eigenvalues and sort the time scales and corresponding
 	# rows of the modal matrix from fastest to slowest.
@@ -391,10 +394,13 @@ def temporal_decomposition(model, jacobian_type='metabolite', tol=1e-10,
 	M = np.array([vr_inv[index] for index in indices])
 
 	for i, r in enumerate(M):
+		r = r/max(abs(r))
+		if as_percents:
+			r = r/sum(abs(r))
 		for j, val in enumerate(r):
-			if abs(val) <= tol:
+			if abs(val) <= zerotol:
 				r[j] = 0.
-		M[i] = r/max(abs(r))
+		M[i] = r
 
 	return ts, M
 
