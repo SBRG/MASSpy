@@ -277,7 +277,7 @@ def jacobian(model, jacobian_type="metabolite", strip_time=True,
 		represented with the numerical values of the initial conditions
 		substituted for metabolite concentrations. Otherwise output derivatives
 		in as symbolic expressions without substituting numerical values.
-	matrix_type: {'dense', 'symbolic'},
+	matrix_type: {'dense', 'dataframe', 'symbolic'},
 	   Construct the J matrix with the specified matrix type.
 
 	Returns
@@ -337,11 +337,13 @@ def jacobian(model, jacobian_type="metabolite", strip_time=True,
 														columns=reaction_ids)
 	return j_matrix
 
-def temporal_decomposition(model, jacobian_type='metabolite', as_percents=True,
-				eigtol=1e-10, zerotol=1e-10, dynamic_invariants=True):
+def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
+						zerotol=1e-10, as_percents=True, mode_equations=True,
+						dynamic_invariants=True):
 	"""Perform a temporal decomposition of the jacobian matrix of a model and
 	return the timescales (ts) and the modal matrix (M), where ts[i] is the
-	time constant for M[i].
+	time constant for M[i]. Will also return the equations for each mode as a
+	sympy expression where ts[i] is the time constant for m[i] if specified.
 
 	Parameters
 	----------
@@ -349,25 +351,33 @@ def temporal_decomposition(model, jacobian_type='metabolite', as_percents=True,
 		The MassModel object to construct the matrix for
 	jacobian_type : {'metabolite', 'reaction'}
 		Whether to obtain the jacobian with respect to the metabolites (Jx)
-		or to obbtain the jacobian with respect to the reactions (Jv)
+		or to obbtain the jacobian with respect to the reactions (Jv)'=
 	eigtol : float
 		The absolute tolerance for a zero singular value of an eigenvalue.
 		Singular values smaller than `eigtol` are considered to be zero.
 	zerotol : float
 		The absolute tolerance for a zero singular value in the modal matrix M.
 		Singular values smaller than `zerotol` are considered to be zero.
+	as_percents : bool
+		If True, will normalize rows of the modal matrix such that the
+		sum(abs(M[i])) is equal to 1.
+	mode_equations : bool
+		If True, will return the equations for each mode as a sympy expression
 	dynamic_invariants : bool
 		If True, will include the dynamically invariant pools in the returned
-		modal matrix.
+		modal matrix and mode equations .
 
 	Returns
 	-------
 	ts : numpy.array
 		A numpy array  where ts[i] is time constant for M[i].
-		Time invariants will have a time constant of np.inf
+		Time invariants will have a time constant of np.inf.
 	M : numpy.array
 		A numpy array representing the modal matrix where M[i] is the row of
-		the matrix that corresponds to the timeconstant ts[i]
+		the matrix that corresponds to the time constant ts[i].
+	m : numpy.array
+			A numpy array representing the mode equations where m[i] is the
+			equation that corresponds to the time constant ts[i].
 	"""
 	# Get the jacobian matrix
 	J = jacobian(model, jacobian_type, strip_time=True, sub_parameters=True,
@@ -392,18 +402,28 @@ def temporal_decomposition(model, jacobian_type='metabolite', as_percents=True,
 	else:
 		indices = np.argsort(w)[:n]
 	M = np.array([vr_inv[index] for index in indices])
-
+	# Normalize rows by largest weight
 	for i, r in enumerate(M):
 		r = r/max(abs(r))
+		# Convert to percents if specified
 		if as_percents:
 			r = r/sum(abs(r))
 		for j, val in enumerate(r):
 			if abs(val) <= zerotol:
 				r[j] = 0.
 		M[i] = r
-
-	return ts, M
-
+	# Get mode equations if specified
+	if mode_equations:
+		t = sp.Symbol('t')
+		metab_funcs = [sp.Symbol(m.id)(t) for m in model.metabolites]
+		m = [0]*len(ts)
+		e = abs(np.floor(np.log10(np.abs(zerotol))).astype(int))
+		for i, row in enumerate(M):
+			m[i] = sum([round(val,e)*metab_funcs[i]
+						for i, val in enumerate(row)])
+		return ts, M, np.array(m)
+	else:
+		return ts, M
 def nullspace(A, atol=1e-13, rtol=0):
 	"""Compute an approximate basis for the nullspace of A.
 
