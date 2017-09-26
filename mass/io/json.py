@@ -170,7 +170,7 @@ def read_json_model(filename):
 	Returns
 	-------
 	mass.MassModel
-		The cobra model as represented in the JSON document.
+		The mass model as represented in the JSON document.
 
 	See Also
 	--------
