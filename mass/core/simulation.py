@@ -30,7 +30,8 @@ fixed_re = re.compile("fix|fixed")
 
 # Public
 def simulate(model, time_range, numpoints=101, perturbations=None,
-				solver="vode"):
+				solver="vode", nsteps=500, first_step=0., min_step=0..
+				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
 	obtain solutions for the metabolite concentrations and reaction fluxes.
@@ -62,6 +63,16 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 		a change to an initial condition, or fixing a concentration.
 	solver : 'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'
 		The solver for scipy.integrate.ode to utilize for integrating the ODEs.
+	nsteps : int
+		Maximum number of (internally defined) steps allowed during
+		one call to the solver.
+	first_step :  float
+		The value for the first step used by the integrator
+	min_step : float
+		The minimum allowable step size used by the integrator.
+		Does not apply to dopri5 and dop853 solvers
+	max_step : float
+		 Limits for the step sizes used by the integrator.
 
 	Returns
 	-------
@@ -98,6 +109,15 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
 
+	if not isinstance(nsteps, int):
+		raise TypeError("nsteps must be an integer")
+	if not isinstance(first_step, float):
+		raise TypeError("first_step must be an integer")
+	if not isinstance(min_step, float):
+		raise TypeError("min_step must be an integer")
+	if not isinstance(max_step, float):
+		raise TypeError("max_step must be an integer")
+
 	sim_check = qcqa.can_simulate(model, model._rtype)
 	if not sim_check[model._rtype]:
 		sim_check = qcqa.can_simulate(model, [1,2,3])
@@ -133,7 +153,8 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
 
 	# Integrate the odes to obtain the concentration solutions
-	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver)
+	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver,
+								nsteps, firststep, minstep,	maxstep)
 
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
@@ -231,11 +252,15 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 			c_profile[metab] = round(conc[-1], 6)
 			# Update model initial conditions if specified
 			if update_initial_conditions:
+				if metab is 't':
+					continue
 				model.initial_conditions[metab] = round(conc[-1], 6)
 		for reaction, flux in iteritems(f_profile):
 			f_profile[reaction] = round(flux[-1], 6)
 			# Update reaction steady state flux if specified
 			if update_reactions:
+				if reaction is 't':
+					continue
 				reaction.ssflux = round(flux[-1], 6)
 
 		return [c_profile, f_profile]
@@ -444,10 +469,12 @@ def _make_lambda_odes(model, metabolites, ode_dict, values):
 
 	return [lambda_odes, lambda_jacb]
 
-def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver):
+def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver,
+					nsteps, first_step, min_step, max_step):
 	"""Internal use. Integrate the ODEs using lambda functions that represent
 	the system of ODEs and the jacobian"""
 	# Fix types from tuples to lists
+
 	def f(t, y):
 		res = lam_odes(t, y)
 		return list(res)
@@ -458,8 +485,12 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver):
 
 	# Set up integrator
 	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
-	integrator.set_integrator(solver, nsteps=int(1000000))
-
+	if solver is in ['dopri5', 'dop853']:
+		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
+		 							max_step=max_step)
+	else:
+		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
+									min_step=min_step, max_step=max_step)
 	# Set up solutions array
 	y = np.zeros((len(t_vector), len(ics)))
 	dt = t_vector[1] - t_vector[0]
