@@ -46,7 +46,7 @@ def to_cobra_metabolite(mass_metabolite, cobra_id=None):
 
 	# Generate a new ID if none is specified
 	if cobra_id is None:
-		cobra_id = mass_metabolite.id + "_cobra"
+		cobra_id = mass_metabolite.id
 
 	# Generate the cobra Metabolite
 	cobra_metab = Metabolite(id=cobra_id, name=mass_metabolite.name,
@@ -87,7 +87,7 @@ def to_mass_metabolite(cobra_metabolite, mass_id=None):
 
 	# Generate a new ID if none is specified
 	if mass_id is None:
-		mass_id = cobra_metabolite.id + "_mass"
+		mass_id = cobra_metabolite.id
 
 	# Generate the mass MassMetabolite
 	mass_metab = massmetabolite.MassMetabolite(id=mass_id,
@@ -141,7 +141,7 @@ def to_cobra_reaction(mass_reaction, cobra_id=None,
 
 	# Generate a new ID if none is specified
 	if cobra_id is None:
-		cobra_id = mass_reaction.id + "_cobra"
+		cobra_id = mass_reaction.id
 
 	# Generate the bounds
 	if upper_bound is None:
@@ -204,7 +204,7 @@ def to_mass_reaction(cobra_reaction, mass_id=None,
 
 	# Generate a new ID if none is specified
 	if mass_id is None:
-		mass_id = cobra_reaction.id + "_mass"
+		mass_id = cobra_reaction.id
 
 	# Infer kinetic reversibility from bounds if none is specified
 	if kinetic_reversibility is None:
