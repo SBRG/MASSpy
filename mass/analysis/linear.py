@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
+import warnings
 import scipy as sc
 import numpy as np
 import sympy as sp
@@ -338,8 +339,8 @@ def jacobian(model, jacobian_type="metabolite", strip_time=True,
 	return j_matrix
 
 def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
-						zerotol=1e-10, as_percents=True, mode_equations=True,
-						dynamic_invariants=True):
+						zerotol=1e-10, as_percents=True, remove_imag=True,
+						mode_equations=True, dynamic_invariants=True):
 	"""Perform a temporal decomposition of the jacobian matrix of a model and
 	return the timescales (ts) and the modal matrix (M), where ts[i] is the
 	time constant for M[i]. Will also return the equations for each mode as a
@@ -409,9 +410,17 @@ def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
 		if as_percents:
 			r = r/sum(abs(r))
 		for j, val in enumerate(r):
-			if abs(val) <= zerotol:
-				r[j] = 0.
+			val = np.real_if_close(val, tol=1/zerotol)
+			if abs(val.real) <= zerotol:
+				val = 0.
+			r[j] = val
 		M[i] = r
+	if remove_imag:
+		with warnings.catch_warnings():
+			warnings.simplefilter("ignore")
+			M = M.astype(float)
+			ts = ts.astype(float)
+			    
 	# Get mode equations if specified
 	if mode_equations:
 		t = sp.Symbol('t')
@@ -424,6 +433,7 @@ def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
 		return ts, M, np.array(m)
 	else:
 		return ts, M
+
 def nullspace(A, atol=1e-13, rtol=0):
 	"""Compute an approximate basis for the nullspace of A.
 
