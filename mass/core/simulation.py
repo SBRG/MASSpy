@@ -30,7 +30,7 @@ fixed_re = re.compile("fix|fixed")
 
 # Public
 def simulate(model, time_range, numpoints=101, perturbations=None,
-				solver="vode", nsteps=500, first_step=0., min_step=0..
+				solver="vode", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
@@ -485,7 +485,7 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver,
 
 	# Set up integrator
 	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
-	if solver is in ['dopri5', 'dop853']:
+	if solver in ['dopri5', 'dop853']:
 		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
 		 							max_step=max_step)
 	else:
