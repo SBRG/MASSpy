@@ -5,7 +5,16 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import numpy as np
+import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+
+from pandas.compat import range, lrange, zip
+from pandas.io.formats.printing import pprint_thing
+from pandas.plotting._style import _get_standard_colors
+from pandas.plotting._tools import _subplots, _set_ticks_props
+
 from math import inf
 from six import iterkeys, itervalues
 from cycler import cycler
@@ -13,6 +22,7 @@ from cycler import cycler
 # from cobra
 import cobra
 from cobra import DictList
+
 # from mass
 import mass
 from mass import MassMetabolite, MassReaction, MassModel
@@ -330,7 +340,95 @@ def plot_phase_portrait(solution_profile, x, y, **kwargs):
 
 
 
-def plot_tiled_phase_portrait():
+def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None, 
+                              grid=False, marker='.', range_padding=0.05, 
+                              place_tiles="upper", **kwds):
+    """Draw a matrix of scatter plots.
+
+    Parameters
+    ----------
+    frame : DataFrame
+    alpha : float, optional
+        amount of transparency applied
+    figsize : (float,float), optional
+        a tuple (width, height) in inches
+    ax : Matplotlib axis object, optional
+    grid : bool, optional
+        setting this to True will show the grid
+    diagonal : {'hist', 'kde'}
+        pick between 'kde' and 'hist' for
+        either Kernel Density Estimation or Histogram
+        plot in the diagonal
+    marker : str, optional
+        Matplotlib marker type, default '.'
+    range_padding : float, optional
+        relative extension of axis range in x and y
+        with respect to (x_max - x_min) or (y_max - y_min),
+        default 0.05
+    kwds : other plotting keyword arguments
+        To be passed to plot function
+
+    Examples
+    --------
+    >>> df = DataFrame(np.random.randn(1000, 4), columns=['A','B','C','D'])
+    >>> scatter_matrix(df, alpha=0.2)
+    """
+    frame.set_index(keys="t", inplace=True)
+    df = frame._get_numeric_data()
+    n = df.columns.size
+    naxes = n * n
+    fig, axes = _subplots(naxes=naxes, figsize=figsize, ax=ax,
+                          squeeze=False)
+
+    # no gaps between subplots
+    fig.subplots_adjust(wspace=0, hspace=0)
+
+    marker = _get_marker_compat(marker)
+
+    boundaries_list = []
+    for a in df.columns:
+        values = df[a].values
+        rmin_, rmax_ = np.min(values), np.max(values)
+        rdelta_ext = (rmax_ - rmin_) * range_padding / 2.
+        boundaries_list.append((rmin_ - rdelta_ext, rmax_ + rdelta_ext))
+
+    place_tiles_dict = {"lower": float.__gt__, "upper": float.__lt__}
+    for i, a in zip(lrange(n), df.columns):
+        for j, b in zip(lrange(n), df.columns):
+            ax = axes[i, j]
+
+            if i == j:
+                # do nothing along diagonals
+                pass
+
+            elif place_tiles_dict[place_tiles](float(i),float(j)):
+
+                ax.plot(df[b], df[a],
+                           marker=marker, alpha=alpha, **kwds)
+
+                ax.set_xlim(boundaries_list[j])
+                ax.set_ylim(boundaries_list[i])
+
+            ax.set_xlabel(b)
+            ax.set_ylabel(a)
+
+            if j != 0:
+                ax.yaxis.set_visible(False)
+            if i != n - 1:
+                ax.xaxis.set_visible(False)
+
+    _set_ticks_props(axes, xlabelsize=8, xrot=90, ylabelsize=8, yrot=0)
+
+    return axes
+
+
+
+def _get_marker_compat(marker):
+    if mpl.__version__ < '1.1.0' and marker == '.':
+        return 'o'
+    if marker not in mlines.lineMarkers:
+        return 'o'
+    return marker
 
 
 
