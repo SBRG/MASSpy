@@ -154,7 +154,7 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 
 	# Integrate the odes to obtain the concentration solutions
 	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver,
-								nsteps, firststep, minstep,	maxstep)
+								nsteps, first_step, min_step, max_step)
 
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
