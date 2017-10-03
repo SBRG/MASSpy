@@ -126,7 +126,14 @@ def plot_phase_portrait(solution_profile, x, y, **kwargs):
     np_y = _get_conc_flux_vector(sol_profile, y, start, final, **options)
 
     # Step 3: Make plot using options and vectors provided
-    # Step 4: Return plot/show plot figure
+    plt.plot(np_x, np_y)
+    axes = plt.gca()
+    fig = plt.gcf()
+
+    #Step 4: Add remaining plotting options
+
+    # Step 5: Return plot/show plot figure
+    return plt.gcf()
 
 
 
@@ -164,6 +171,7 @@ def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None,
     >>> scatter_matrix(df, alpha=0.2)
     """
 
+# Internal Methods
 def _get_options(**kwargs):
     options = {}
     for key in default_options:
