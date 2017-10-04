@@ -24,30 +24,30 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 			param_consistency=False, stoichiometry=False, elemental=False,
 			thermodynamics=False):
 	"""Run a series of quality control and assessment tests on a massmodel and
-	return a summary of the test results
+	return a summary of the test results. Default value for all is False.
 
 	Parameters
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	initial_conditions : bool
+	initial_conditions : bool, optional
 		Check for missing initial_conditions in the model
-	parameters : bool
+	parameters : bool, optional
 		Check for missing parameters in the model and ensure the model
 		parameters are consistent if there are superfluous parameters
-	simulation : bool
+	simulation : bool, optional
 		Check to see if the model can be simulated
-	superfluous : bool
+	superfluous : bool, optional
 		Check for superfluous parameters in the model
-	unconserved_metabolites : bool
+	unconserved_metabolites : bool, optional
 		Check for unconserved metabolites in the model
-	param_consistency : bool
+	param_consistency : bool, optional
 		Check for parameter consistency in the model
-	stoichiometry : bool
+	stoichiometry : bool, optional
 		Check for stoichiometric consistency in the model
-	elemental : bool
+	elemental : bool, optional
 		Check for elemental consistency in the model. Ignores the exchanges.
-	thermodynamics : bool
+	thermodynamics : bool, optional
 		Check for thermodynamic consistency in the model.
 	"""
 	# List of bools indicating what QCQA functions to perform
@@ -122,14 +122,16 @@ def get_missing_parameters(model, kf=False, Keq=False,
 	----------
 	model : mass.Massmodel
 		The MassModel or list of reactions to inspect.
-	kf : bool
+	kf : bool, optional
 		If True, check MassReactions for missing forward rate constants.
-	Keq : bool
+	Keq : bool, optional
 		If True, check MassReactions for missing equilibrium rate constants.
-	kr : bool
+	kr : bool, optional
 		If True, check MassReactions for missing reverse rate constants.
-	ssflux : bool
+	ssflux : bool, optional
 		If True, check MassReactions for missing steady state fluxes.
+	ssflux : bool, optional
+		If True, check the model for missing custom parameters.
 
 	Returns
 	-------
@@ -211,7 +213,7 @@ def can_simulate(model, rate_type=None):
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	rate_type :  1,2,3, list of types, or None
+	rate_type :  int {1,2,3} or list, optional
 		What rate type(s) to check for the ability to simulate.
 		If None, will use the model's current rate type.
 
@@ -305,7 +307,7 @@ def parameter_consistency(model, tol=1e-9):
 	----------
 	model : mass.massmodel
 		The MassModel to inspect
-	tol : float
+	tol : float, optional
 		The tolerance for parameter consistency. Parameters are considered
 		consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
 	"""

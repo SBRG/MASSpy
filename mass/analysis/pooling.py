@@ -24,13 +24,13 @@ def pairwise_angles(modal_matrix, correlation_cutoff=0.85):
 	modal_matrix :  numpy.array
 		A numpy.array representing the modal matrix rank ordered from
 		fastest mode to slowest mode.
-		correlation_cutoff : float
+	correlation_cutoff : float, optional
 		A value between 0 and 1. that determines the cutoff for correlation.
 		Any cos(angle) < correlation_cutoff will be set at zero.
 
 	Returns
 	-------
-	p_matrices : np.array of length n
+	p_matrices : numpy.array of length n
 		A numpy.array of length n, where the matrix in p_matrices[k]
 		corresponds to the kth mode of the modal matrix (modal_matrix[k])
 		Each matrix entry represents the value given by cos(angle).

@@ -35,15 +35,17 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 
 	Parameters
 	----------
-	rate_type : int {1, 2, 3}
+	reaction : mass.MassReaction
+		The MassReaction object to generate the rate for.
+	rate_type : int {1, 2, 3}, , optional
 		The type of rate law to display. Must be 1, 2, of 3.
 		type 1 will utilize kf and Keq,
 		type 2 will utilize kf and kr,
 		type 3 will utilize kr and Keq.
-	sympy_expr : bool
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
-	update_reaction : bool
+	update_reaction : bool, optional
 		If True, will update the MassReaction in addition to returning the
 		rate law. Otherwise just return the rate law.
 
@@ -95,7 +97,9 @@ def get_mass_action_ratio(reaction, sympy_expr=False):
 
 	Parameters
 	----------
-	sympy_expr : bool
+	reaction : mass.MassReaction
+		The MassReaction object to get the mass action ratio for.
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
 
@@ -121,7 +125,9 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 
 	Parameters
 	----------
-	sympy_expr : bool
+	reaction : mass.MassReaction
+		The MassReaction object to generate the disequilibrium ratio for.
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
 
@@ -143,6 +149,17 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 		return str(de_r)
 
 def generate_ode(metabolite):
+	"""Generate the ODE for a metabolite as a sympy expression for simulation.
+
+	Parameters
+	----------
+	metabolite : mass.MassMetabolite
+		The MassMetabolite object to generate the ODE for.
+
+	Returns
+	-------
+	sympy expression of the ODE for the metabolite
+	"""
 	if not isinstance(metabolite, massmetabolite.MassMetabolite):
 		raise TypeError("metabolite must be a MassMetabolite")
 

@@ -53,25 +53,26 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 		points for the simulation.
 		Simulation will run from the first point in the vector
 		to the last point in the vector.
-	numpoints :  int
+	numpoints :  int, optional
 		The number of points - 1 to plot if the given time_range is a tuple.
 		Default is 100.
-	perturbations : dict or None
+	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
 		condition. Can be changes to the rate and equilibrium constants,
 		a change to an initial condition, or fixing a concentration.
-	solver : 'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'
+	solver : {'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'}, optional
 		The solver for scipy.integrate.ode to utilize for integrating the ODEs.
-	nsteps : int
+		Default is 'vode'
+	nsteps : int, optional
 		Maximum number of (internally defined) steps allowed during
 		one call to the solver.
-	first_step :  float
+	first_step :  float, optional
 		The value for the first step used by the integrator
-	min_step : float
+	min_step : float, optional
 		The minimum allowable step size used by the integrator.
 		Does not apply to dopri5 and dop853 solvers
-	max_step : float
+	max_step : float, optional
 		 Limits for the step sizes used by the integrator.
 
 	Returns
@@ -190,11 +191,11 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 	----------
 	model : mass.MassModel
 		The MassModel object to find a steady state for.
-	strategy : 'simulate' or 'find_roots'
+	strategy : 'simulate' or 'find_roots', optional
 		The strategy to use to solve for the steady state.
-	update_reactions : bool
+	update_reactions : bool, optional
 		If True, update the steady state fluxes (ssflux) in each reaction.
-	update_initial_conditions : bool
+	update_initial_conditions : bool, optional
 		If True, update initial conditions in the model for each metabolite.
 
 	Returns

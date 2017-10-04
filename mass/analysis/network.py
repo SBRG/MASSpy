@@ -17,12 +17,10 @@ from mass.core import massmodel
 ## Hex codes for certain colors and default color schemes
 l_gray = "#D3D3D3"
 
-def visualize_simulation(model, map_name=None, map_json=None,
-					concentration_profile=None, flux_profile=None, **kwargs):
-
-	return
-
 def visualize_current_state(model, map_name=None, map_json=None, **kwargs):
+	"""Display the current concentrations and steady state fluxes of the model
+	onto an Escher map."""
+	
 	# Check inputs
 	if map_name is None and map_json is None:
 		raise ValueError("Either map_name or map_json must be specified")
@@ -44,8 +42,7 @@ def visualize_tsd(model, time_scales,
 				map_name=None, map_json=None,
 				metabolite_data=None, reaction_data=None,
 				highlight_missing=False, **kwargs):
-	"""Docstring
-	"""
+	"""Docstring"""
 	# Check inputs
 	if map_name is None and map_json is None:
 		raise ValueError("Either map_name or map_json must be specified")

@@ -31,21 +31,21 @@ def gradient(model, strip_time=True, sub_parameters=True,
 	----------
 	model : mass.MassModel
 		The MassModel object to construct the matrix for
-	strip_time : bool
+	strip_time : bool, optional
 		If True, turn metabolite functions into symbols by stripping the time
 		dependency.(Metab(t) -> Metab)
-	subs_parameters : bool
+	subs_parameters : bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with numerical values substituted for kinetic parameters.
 		Otherwise output derivatives in as symbolic expressions without
 		substituting numerical values.
-	sub_concentrations :  bool
+	sub_concentrations :  bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with the numerical values of the initial conditions
 		substituted for metabolite concentrations. Otherwise output derivatives
 		in as symbolic expressions without substituting numerical values.
-	matrix_type: {'dense', 'dataframe', 'symbolic'},
-		Matrix return type.
+	matrix_type: {'dense', 'dataframe', 'symbolic'}, optional
+		Matrix return type. Default is dense
 
 	Returns
 	-------
@@ -153,21 +153,21 @@ def kappa(model, strip_time=True, sub_parameters=True,
 	----------
 	model : mass.MassModel
 		The MassModel object to construct the matrix for
-	strip_time : bool
+	strip_time : bool, optional
 		If True, turn metabolite functions into symbols by stripping the time
 		dependency.(Metab(t) -> Metab)
-	subs_parameters : bool
+	subs_parameters : bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with numerical values substituted for kinetic parameters.
 		Otherwise output derivatives in as symbolic expressions without
 		substituting numerical values.
-	sub_concentrations :  bool
+	sub_concentrations :  bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with the numerical values of the initial conditions
 		substituted for metabolite concentrations. Otherwise output derivatives
 		in as symbolic expressions without substituting numerical values.
-	matrix_type: {'dense', 'dataframe', 'symbolic'},
-		Matrix return type.
+	matrix_type: {'dense', 'dataframe', 'symbolic'}, optional
+		Matrix return type. Default is dense
 
 	Returns
 	-------
@@ -207,20 +207,20 @@ def gamma(model, strip_time=True, sub_parameters=True,
 	----------
 	model : mass.MassModel
 		The MassModel object to construct the matrix for
-	strip_time : bool
+	strip_time : bool, optional
 		If True, turn metabolite functions into symbols by stripping the time
 		dependency.(Metab(t) -> Metab)
-	subs_parameters : bool
+	subs_parameters : bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with numerical values substituted for kinetic parameters.
 		Otherwise output derivatives in as symbolic expressions without
 		substituting numerical values.
-	sub_concentrations :  bool
+	sub_concentrations :  bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with the numerical values of the initial conditions
 		substituted for metabolite concentrations. Otherwise output derivatives
 		in as symbolic expressions without substituting numerical values.
-	matrix_type: {'dense', 'dataframe', 'symbolic'},
+	matrix_type: {'dense', 'dataframe', 'symbolic'}, optional
 		Matrix return type.
 
 	Returns
@@ -265,20 +265,20 @@ def jacobian(model, jacobian_type="metabolite", strip_time=True,
 	jacobian_type : {'metabolite', 'reaction'}
 		Whether to obtain the jacobian with respect to the metabolites (Jx)
 		or to obbtain the jacobian with respect to the reactions (Jv)
-	strip_time : bool
+	strip_time : bool, optional
 		If True, turn metabolite functions into symbols by stripping the time
 		dependency.(Metab(t) -> Metab)
-	subs_parameters : bool
+	subs_parameters : bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with numerical values substituted for kinetic parameters.
 		Otherwise output derivatives in as symbolic expressions without
 		substituting numerical values.
-	sub_concentrations :  bool
+	sub_concentrations :  bool, optional
 		If True, will output the gradient matrix with derivatives of the rates
 		represented with the numerical values of the initial conditions
 		substituted for metabolite concentrations. Otherwise output derivatives
 		in as symbolic expressions without substituting numerical values.
-	matrix_type: {'dense', 'dataframe', 'symbolic'},
+	matrix_type: {'dense', 'dataframe', 'symbolic'}, optional
 	   Construct the J matrix with the specified matrix type.
 
 	Returns
@@ -353,18 +353,18 @@ def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
 	jacobian_type : {'metabolite', 'reaction'}
 		Whether to obtain the jacobian with respect to the metabolites (Jx)
 		or to obbtain the jacobian with respect to the reactions (Jv)'=
-	eigtol : float
+	eigtol : float, optional
 		The absolute tolerance for a zero singular value of an eigenvalue.
 		Singular values smaller than `eigtol` are considered to be zero.
-	zerotol : float
+	zerotol : float, optional
 		The absolute tolerance for a zero singular value in the modal matrix M.
 		Singular values smaller than `zerotol` are considered to be zero.
-	as_percents : bool
+	as_percents : bool, optional
 		If True, will normalize rows of the modal matrix such that the
 		sum(abs(M[i])) is equal to 1.
-	mode_equations : bool
+	mode_equations : bool, optional
 		If True, will return the equations for each mode as a sympy expression
-	dynamic_invariants : bool
+	dynamic_invariants : bool, optional
 		If True, will include the dynamically invariant pools in the returned
 		modal matrix and mode equations .
 
@@ -420,7 +420,7 @@ def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
 			warnings.simplefilter("ignore")
 			M = M.astype(float)
 			ts = ts.astype(float)
-			    
+
 	# Get mode equations if specified
 	if mode_equations:
 		t = sp.Symbol('t')
@@ -446,10 +446,10 @@ def nullspace(A, atol=1e-13, rtol=0):
 		or sympy.Matrix
 		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
 		treated as a 2-D with shape (1, k)
-	atol : float
+	atol : float, optional
 		The absolute tolerance for a zero singular value.  Singular values
 		smaller than `atol` are considered to be zero.
-	rtol : float
+	rtol : float, optional
 		The relative tolerance.  Singular values less than rtol*smax are
 		considered to be zero, where smax is the largest singular value.
 
@@ -501,10 +501,10 @@ def left_nullspace(A, atol=1e-13, rtol=0):
 		or sympy.Matrix
 		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
 		treated as a 2-D with shape (1, k)
-	atol : float
+	atol : float, optional
 		The absolute tolerance for a zero singular value.  Singular values
 		smaller than `atol` are considered to be zero.
-	rtol : float
+	rtol : float, optional
 		The relative tolerance.  Singular values less than rtol*smax are
 		considered to be zero, where smax is the largest singular value.
 
@@ -537,11 +537,10 @@ def columnspace(A, atol=1e-13, rtol=0):
 		or sympy.Matrix
 		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
 		treated as a 2-D with shape (1, k)
-
-	atol : float
+	atol : float, optional
 		The absolute tolerance for a zero singular value.  Singular values
 		smaller than `atol` are considered to be zero.
-	rtol : float
+	rtol : float, optional
 		The relative tolerance.  Singular values less than rtol*smax are
 		considered to be zero, where smax is the largest singular value.
 
@@ -586,9 +585,14 @@ def rowspace(A, atol=1e-13, rtol=0):
 	----------
 	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
 		or sympy.Matrix
-
 		Note: 'A' should be at most 2-D.  A 1-D array with length k will be
 		treated as a 2-D with shape (1, k)
+	atol : float, optional
+		The absolute tolerance for a zero singular value.  Singular values
+		smaller than `atol` are considered to be zero.
+	rtol : float, optional
+		The relative tolerance.  Singular values less than rtol*smax are
+		considered to be zero, where smax is the largest singular value.
 
 	Returns
 	-------
@@ -611,10 +615,10 @@ def matrix_rank(A, atol=1e-13, rtol=0):
 	A : ndarray
 		A should be at most 2-D.  A 1-D array with length n will be treated
 		as a 2-D with shape (1, n)
-	atol : float
+	atol : float, optional
 		The absolute tolerance for a zero singular value.  Singular values
 		smaller than `atol` are considered to be zero.
-	rtol : float
+	rtol : float, optional
 		The relative tolerance.  Singular values less than rtol*smax are
 		considered to be zero, where smax is the largest singular value.
 
@@ -712,9 +716,9 @@ def eigenvalues(A, left_eigenvec=False, right_eigenvec=False, **kwargs):
 	----------
 	A : numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
 		or sympy.Matrix
-	left_eigenvec : bool
+	left_eigenvec : bool, optional
 		Whether to calculate and return left eigenvectors. Default is False.
-	right_eigenvec : bool
+	right_eigenvec : bool, optional
 		Whether to calculate and return right eigenvectors. Default is True.
 
 	Returns
