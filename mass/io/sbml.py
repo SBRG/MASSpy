@@ -118,22 +118,6 @@ class MassSBMLError(Exception):
     pass
 
 # Public Methods
-def parse_stream(filename):
-    """parses filename or compressed stream to xml"""
-    try:
-        if hasattr(filename, "read"):
-            return parse(filename)
-        elif filename.endswith(".gz"):
-            with GzipFile(filename) as infile:
-                return parse(infile)
-        elif filename.endswith(".bz2"):
-            with BZ2File(filename) as infile:
-                return parse(infile)
-        else:
-            return parse(filename)
-    except ParseError as e:
-        raise MassSBMLError("Malformed XML file: " + str(e))
-
 def parse_xml_into_model(xml, number=float):
     """Load a mass model from an xml object.
 
@@ -564,9 +548,25 @@ def read_sbml_model(filename):
     --------
     parse_xml_into_model : Load from an xml object.
     """
-    return parse_xml_into_model(parse_stream(filename))
+    return parse_xml_into_model(_parse_stream(filename))
 
 # Internal Methods
+def _parse_stream(filename):
+    """Parses filename or compressed stream to xml"""
+    try:
+        if hasattr(filename, "read"):
+            return parse(filename)
+        elif filename.endswith(".gz"):
+            with GzipFile(filename) as infile:
+                return parse(infile)
+        elif filename.endswith(".bz2"):
+            with BZ2File(filename) as infile:
+                return parse(infile)
+        else:
+            return parse(filename)
+    except ParseError as e:
+        raise MassSBMLError("Malformed XML file: " + str(e))
+
 def _get_attrib(tag, attribute, type=lambda x: x, require=False):
     value = tag.get(ns(attribute))
     if require and value is None:

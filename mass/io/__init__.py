@@ -9,5 +9,5 @@ from mass.io.massef import (
 try:
     from mass.io.sbml import (
         write_sbml_model, read_sbml_model)
-except:
+except ImportError:
     pass
