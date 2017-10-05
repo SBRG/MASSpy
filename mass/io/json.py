@@ -9,6 +9,7 @@ from math import inf
 from collections import OrderedDict
 from six import iteritems, string_types
 from numpy import bool_, float_, float64
+from numpy import int_, int32, int64
 from operator import attrgetter, itemgetter
 
 try:
@@ -73,6 +74,17 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 	"annotation": {}}
 
 ## Public Methods
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer) or isinstance(obj, np.int64):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)
+
 def model_to_json(model, **kwargs):
 	"""Return the model as a JSON document.
 
@@ -94,7 +106,7 @@ def model_to_json(model, **kwargs):
 	"""
 	obj = _model_to_dict(model)
 	obj[u"version"] = JSON_SPEC
-	return json.dumps(obj, allow_nan=False, **kwargs)
+	return json.dumps(obj, allow_nan=False, cls=MyEncoder, **kwargs)
 
 def parse_json_into_model(document):
 	"""Load a mass model from a JSON document.
@@ -154,9 +166,9 @@ def write_json_model(model, filename, pretty=False, **kwargs):
 		if ".json" not in filename:
 			filename += ".json"
 		with open(filename, "w") as file_handle:
-			json.dump(obj, file_handle, **dump_opts)
+			json.dump(obj, file_handle, cls=MyEncoder, **dump_opts)
 	else:
-		json.dump(obj, filename, **dump_opts)
+		json.dump(obj, filename, cls=MyEncoder, **dump_opts)
 
 def read_json_model(filename):
 	"""Load a mass model from a file in JSON format.
@@ -194,6 +206,10 @@ def _fix_type(value):
 		return bool(value)
 	if isinstance(value, set):
 		return list(value)
+	if isinstance(value, int_):
+		return int(value)
+	if isinstance(value, int32) or isinstance(value, int64):
+		return int(value)
 	if value is None:
 		return ""
 	return value
@@ -379,6 +395,7 @@ def _model_to_dict(model):
 	--------
 	mass.io._model_from_dict
 	"""
+	model.update_S(dtype=np.float64)
 	obj = OrderedDict()
 	obj["id"] = model.id
 	obj["metabolites"] = sorted(
