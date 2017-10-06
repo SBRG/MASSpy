@@ -29,7 +29,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=101, perturbations=None,
+def simulate(model, time_range, numpoints=100, perturbations=None,
 				solver="vode", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver

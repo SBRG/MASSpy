@@ -109,9 +109,12 @@ def get_missing_initial_conditions(model):
 	# Check inputs
 	if not isinstance(model, massmodel.MassModel):
 		raise TypeError("model must be a mass.MassModel")
+	missing_ics = [metab for metab in model.metabolites
+					if metab not in iterkeys(model.initial_conditions)]
+	missing_exts = [metab for metab in model.get_external_metabolites
+					if metab not in iterkeys(model.fixed_concentrations)]
 
-	return [metab for metab in model.metabolites
-			if metab not in iterkeys(model.initial_conditions)]
+	return missing_ics + missing_exts
 
 def get_missing_parameters(model, kf=False, Keq=False,
 							kr=False, ssflux=False, custom_parameters=False):

@@ -5,11 +5,10 @@ from __future__ import absolute_import
 
 # Import Necessary Packages
 import io
+import numpy as np
 from math import inf
 from collections import OrderedDict
 from six import iteritems, string_types
-from numpy import bool_, float_, float64
-from numpy import int_, int32, int64
 from operator import attrgetter, itemgetter
 
 try:
@@ -69,14 +68,14 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 	"compartments": [],
 	"units": {},
 	"_matrix_type": "dense",
-	"_dtype": float64,
+	"_dtype": np.float64,
 	"notes": {},
 	"annotation": {}}
 
 ## Public Methods
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, np.integer) or isinstance(obj, np.int64):
+        if isinstance(obj, (np.integer, np.int64)):
             return int(obj)
         elif isinstance(obj, np.floating):
             return float(obj)
@@ -200,15 +199,13 @@ def _fix_type(value):
 	# Because numpy floats can not be pickled to json
 	if isinstance(value, string_types):
 		return str(value)
-	if isinstance(value, float_):
+	if isinstance(value, np.float_):
 		return float(value)
-	if isinstance(value, bool_):
+	if isinstance(value, np.bool_):
 		return bool(value)
 	if isinstance(value, set):
 		return list(value)
-	if isinstance(value, int_):
-		return int(value)
-	if isinstance(value, int32) or isinstance(value, int64):
+	if isinstance(value, (np.int32, np.int_, np.int64)):
 		return int(value)
 	if value is None:
 		return ""
