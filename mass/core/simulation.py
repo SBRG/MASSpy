@@ -137,7 +137,7 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 			 "irreversible reactions, please generate type 1 or type 2 "
 			"rates if there are kinetically irreversible reactions in the "
 			"model (kr = 0 and Keq = inf, or reversible=False)")
-
+	model.repair()
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
