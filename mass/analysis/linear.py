@@ -487,6 +487,12 @@ def nullspace(A, atol=1e-13, rtol=0):
 	tol = max(atol, rtol * s[0])
 	nnz = (s >= tol).sum()
 	ns = vh[nnz:].conj().T
+
+	# Apply zero singular value tolerance
+	for i, row in enumerate(ns):
+		for j, val in enumerate(row):
+			if abs(val) <= tol:
+				ns[i, j] = 0.
 	return ns
 
 def left_nullspace(A, atol=1e-13, rtol=0):
@@ -573,6 +579,15 @@ def columnspace(A, atol=1e-13, rtol=0):
 
 	q,r = np.linalg.qr(A)
 	cs = q[:,:matrix_rank(A, atol, rtol)]
+
+	# Apply zero singular value tolerance
+	s = svd(A, compute_uv=False)
+	tol = max(atol, rtol * s[0])
+	for i, row in enumerate(cs):
+		for j, val in enumerate(row):
+			if abs(val) <= tol:
+				cs[i, j] = 0.
+
 	return cs
 
 def rowspace(A, atol=1e-13, rtol=0):
