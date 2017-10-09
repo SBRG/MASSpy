@@ -171,7 +171,7 @@ def generate_ode(metabolite):
 		if rxn._model is not None and rxn in rxn._model.custom_rates:
 			rate_law_expr = rxn._model.custom_rates[rxn]
 		else:
-			rate_law_expr = rxn.rate_expression
+			rate_law_expr = rxn.rate
 
 		if metabolite in rxn.reactants:
 			rate_law_expr = sp.Mul(-1, rate_law_expr)
@@ -624,7 +624,7 @@ def _sort_symbols(model):
 			if metab in iterkeys(model.fixed_concentrations):
 				metab_sym = sp.Symbol(metab.id, nonnegative=True)
 				ode_dict[item] = expression.subs({func: metab_sym})
-				for reaction, rate in iteritems(model.rate_expressions):
+				for reaction, rate in iteritems(model.rates):
 					rate_dict[reaction] = rate.subs({func: metab_sym})
 				fixed_symbols.add(metab_sym)
 			else:

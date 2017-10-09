@@ -237,15 +237,8 @@ class MassReaction(Object):
 		"""Returns a list containing the stoichiometry of the reaction"""
 		return [c for m, c in iteritems(self._metabolites)]
 
-
 	@property
 	def rate(self):
-		"""Returns the rate law as a human readable string"""
-		return expressions.generate_rate_law(self, rate_type=self._rtype,
-									sympy_expr=False, update_reaction=True)
-
-	@property
-	def rate_expression(self):
 		"""Returns the rate law as a sympy expression"""
 
 		return expressions.generate_rate_law(self, rate_type=self._rtype,

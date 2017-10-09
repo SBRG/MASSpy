@@ -157,23 +157,8 @@ class MassModel(Object):
 		"""Get the Stoichiometric Matrix of the MassModel"""
 		return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
 							update_model=False)
-
 	@property
 	def rates(self):
-		""""Return the rate laws for the reactions as human readable strings
-		in a dictionary where keys are the reaction objects and values are the
-		rate laws
-		"""
-		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
-								sympy_expr=False, update_reaction=True)
-								for rxn in self.reactions}
-		if self.custom_rates != {}:
-			for rxn, custom_expression in iteritems(self.custom_rates):
-				rate_dict.update({rxn : str(custom_expression)})
-		return rate_dict
-
-	@property
-	def rate_expressions(self):
 		"""Get the rate laws for the reactions as sympy expressions in a
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
@@ -201,7 +186,7 @@ class MassModel(Object):
 	@property
 	def get_external_metabolites(self):
 		"""Get all 'external' metabolites in the reaction. Primarily used for
-		setting fixed concentrations"""
+		setting fixed concentrations for null sinks and sources"""
 		external_set = {rxn.get_external_metabolite for rxn in self.reactions
 				if rxn.exchange}
 		return list(sorted(external_set))
