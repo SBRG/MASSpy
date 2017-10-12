@@ -77,11 +77,14 @@ def simulate(model, time_range, numpoints=100, perturbations=None,
 
 	Returns
 	-------
-	list of dictionaries representing the concentration and flux solutions:
-		The first item in the list is a dictionary containing the concentration
-		solutions, where key:value pairs are metabolites: vectors of solutions,
-		and the second item in the list is a dictionary containing the flux
-		solutions, where key:value pairs are reactions: vectors of solutions
+	time_range : list
+		A vector containing the time points for the solution profiles
+	c_profile : dict
+		A dictionary containing the concentration solutions, where key:value
+		pairs are metabolites: vectors of solutions,
+	f_profile : dict
+		A dictionary containing the flux solutions, where key:value
+		pairs are reactions: vectors of solutions
 	"""
 	# Check inputs
 	if not isinstance(model, MassModel):
@@ -178,10 +181,8 @@ def simulate(model, time_range, numpoints=100, perturbations=None,
 			f[i] = lambda_func(*concs[i,:])
 		f_profile[rxn] = f
 
-	c_profile['t'] = time_range
-	f_profile['t'] = time_range
 
-	return [c_profile, f_profile]
+	return [time_range, c_profile, f_profile]
 
 def find_steady_state(model, strategy="simulate", update_reactions=False,
 						update_initial_conditions=False):
