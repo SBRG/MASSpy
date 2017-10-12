@@ -6,9 +6,9 @@ from __future__ import absolute_import
 # Import necesary packages
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
+import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
+import matplotlib.patches as patches
 
 from math import inf
 from six import iterkeys, itervalues
@@ -24,7 +24,7 @@ from mass import MassMetabolite, MassReaction, MassModel
 from mass.core.simulation import *
 
 # Class begins
-def plot_simulation(solution_profile, **kwargs):
+def plot_simulation(solution_profile, default_fontsize=15, **kwargs):
     """Generates a plot of the data in the solution_profile over time.
 
     ``kwargs`` are passed on to various matplotlib methods. 
@@ -44,7 +44,6 @@ def plot_simulation(solution_profile, **kwargs):
     # Generate seperate mutable copy of solution profile
     sol_profile = dict(solution_profile)
     sol_df = pd.DataFrame(solution_profile)
-    default_fontsize = 15
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
@@ -59,6 +58,7 @@ def plot_simulation(solution_profile, **kwargs):
         sol_profile, start, final, **options)
 
     # Step 3: Make plot using options and vectors provided
+    plt.figure()
     plt.plot(np_time_vector, np_sol_profile)
     axes = plt.gca()
     fig = plt.gcf()
@@ -81,7 +81,8 @@ def plot_simulation(solution_profile, **kwargs):
 
 
 
-def plot_phase_portrait(solution_profile, x, y, **kwargs):
+def plot_phase_portrait(solution_profile, x, y, ts=None, 
+                        default_fontsize=15, **kwargs):
     """Generates a phase portrait of x,y in the solution_profile over time.
 
     ``kwargs`` are passed on to various matplotlib methods. 
@@ -110,27 +111,38 @@ def plot_phase_portrait(solution_profile, x, y, **kwargs):
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
-    
-    dict_of_titles = {
-        "title": plt.title, 
-        "xlabel": plt.xlabel, 
-        "ylabel": plt.ylabel
-    }
+    options = _process_title_options(default_fontsize, **options)
 
     # Step 1: Pop time vector from sol_profile
     start, final = _get_time_range(t_sol_profile=sol_profile, **options)
     np_time_vector = np.array(sol_profile.pop("t"))[start:final]
+    sol_df = sol_df.set_index("t")
 
-    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites
+    # Step 2: Get conc/flux vectors for x-axisss and y-axis metabolites
     np_x = _get_conc_flux_vector(sol_profile, x, start, final, **options)
     np_y = _get_conc_flux_vector(sol_profile, y, start, final, **options)
+    sol_df = sol_df.loc[options["tstart"], options["tfinal"]]
 
     # Step 3: Make plot using options and vectors provided
     plt.plot(np_x, np_y)
     axes = plt.gca()
     fig = plt.gcf()
 
-    #Step 4: Add remaining plotting options
+    # Step 4: Add remaining plotting options
+    plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
+    _add_plot_range(axes, **options)
+    _annotate_time_range(
+        axes, np_time_vector, np_x, np_y, default_fontsize)
+    if ts is not None:
+        _annotate_time_scales(axes, list_of_time_scales, np_time_vector, 
+                              sol_df, default_fontsize)
+    _plot_title_options(**options)
+    _plot_figsize(fig, **options)
+    _option_savefig(**options)
+
+    log_xscale, log_yscale = _is_log_scale(default=False, **options)
+    plt.xscale("log") if log_xscale else plt.xscale("linear")
+    plt.yscale("log") if log_yscale else plt.yscale("linear")
 
     # Step 5: Return plot/show plot figure
     return plt.gcf()
@@ -152,10 +164,6 @@ def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None,
     ax : Matplotlib axis object, optional
     grid : bool, optional
         setting this to True will show the grid
-    diagonal : {'hist', 'kde'}
-        pick between 'kde' and 'hist' for
-        either Kernel Density Estimation or Histogram
-        plot in the diagonal
     marker : str, optional
         Matplotlib marker type, default '.'
     range_padding : float, optional
@@ -185,7 +193,7 @@ def _get_time_range(t_sol_profile, **options):
     if options["tstart"] is not None:
         start = np.where(t_sol_profile["t"]==options["tstart"])[0][0]
     if options["tfinal"] is not None:
-        final = np.where(t_sol_profile["t"]==options["tstart"])[0][0] + 1
+        final = np.where(t_sol_profile["t"]==options["tfinal"])[0][0] + 1
 
     return start, final
 
@@ -241,10 +249,13 @@ def _get_conc_flux_vector(sol_profile, metab, start, final, **options):
     np_vector = np.array(sol_profile[metab])[start:final]
     return np_vector
 
-def _is_log_scale(**options):
+def _is_log_scale(default=True, **options):
     plot_function = options["plot_function"].lower()
-    log_xscale = True
-    log_yscale = True
+    log_xscale = default
+    log_yscale = default
+    if "loglog" in plot_function:
+        log_xscale = True
+        log_yscale = True
     if "loglinear" in plot_function:
         log_xscale = True
         log_yscale = False
@@ -321,6 +332,48 @@ def _option_savefig(**options):
     if options["savefig"] != default_options["savefig"]:
         fig.savefig(**options["savefig"])
 
+
+
+def _annotate_time_range(axes, np_time_vector, np_x, np_y, default_fontsize):
+    default_fontsize = default_fontsize - 2
+
+    annotate_start = "t="+str(np_time_vector[0])
+    axes.annotate(annotate_start, xy=(np_x[0], np_y[0]), 
+                  xytext=(np_x[0], np_y[0]), size=default_fontsize)
+    annotate_final = "t="+str(np_time_vector[-1])
+    axes.annotate(annotate_final, xy=(np_x[-1], np_y[-1]), 
+                  xytext=(np_x[-1], np_y[-1]), size=default_fontsize)
+
+def _annotate_time_scales(axes, list_of_time_scales, np_time_vector, 
+                          sol_df, default_fontsize):
+    """Add rectangles for various x,y values corresponding to times where
+    pooling occurs"""
+    i = 0
+    for time_scale in list_of_time_scales:
+        i+=1
+        if time_scale not in np_time_vector:
+            x, y = _interpolate_points()
+        else:
+            pass
+            #x, y = _dont_interpolate_points() #FIXME
+
+        cx, cy = _make_rectangle(axes, x, y, i)
+        axes.annotate(i, (cx, cy), color="w", weight="bold", 
+                      fontsize=6, ha="center", va="center")
+
+def _make_rectangle(axes, x, y, num, width=0.1, height=0.1):
+    rect = patches.Rectangle(xy=(x-0.5*width, y-0.5*height), 
+                             width=width, height=height, 
+                             facecolor="k", label=num)
+    axes.add_patch(rect)
+    rx, ry = rect.get_xy()
+    cx = rx + rect.get_width()/2.0
+    cy = ry + rect.get_height()/2.0
+
+    return cx, cy
+
+def _interpolate_points():
+    return 1,1 #FIXME
 
 
 default_options = {
