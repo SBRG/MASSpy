@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from scipy.interpolate import interp1d
 from math import inf
 from six import iterkeys, itervalues
 from cycler import cycler
@@ -23,75 +24,21 @@ import mass
 from mass import MassMetabolite, MassReaction, MassModel
 from mass.core.simulation import *
 
-# Class begins
-def plot_simulation(solution_profile, default_fontsize=15, **kwargs):
+
+
+def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     """Generates a plot of the data in the solution_profile over time.
 
     ``kwargs`` are passed on to various matplotlib methods. 
-    See default_options for a full list.
+    See get_default_options() for a full description.
 
     Parameters
     ----------
+    time: np.ndarray
+        An array containing the time points over with the system was simulated
     solution_profile : np.ndarray
-        An array containing the time vector and simulated results of solutions.
-
-    Returns
-    -------
-    plt.gcf()
-        A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-    """
-    # Generate seperate mutable copy of solution profile
-    sol_profile = dict(solution_profile)
-    sol_df = pd.DataFrame(solution_profile)
-
-    # Step 0: Get options if provided, else use defaults
-    options = _get_options(**kwargs)
-    options = _process_title_options(default_fontsize, **options)
-
-    # Step 1: Get time vector for x-axis
-    start, final = _get_time_range(t_sol_profile=sol_profile, **options)
-    np_time_vector = np.array(sol_profile.pop("t"))[start:final]
-
-    # Step 2: Get conc/flux array for y-axis
-    np_sol_profile, legend_ids = _get_conc_flux_array(
-        sol_profile, start, final, **options)
-
-    # Step 3: Make plot using options and vectors provided
-    plt.figure()
-    plt.plot(np_time_vector, np_sol_profile)
-    axes = plt.gca()
-    fig = plt.gcf()
-
-    # Step 4: Add remaining plotting options
-    plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
-    _add_custom_linecolors(fig, axes, legend_ids, **options)
-    _add_plot_range(axes, **options)
-    _plot_title_options(**options)
-    _plot_figsize(fig, **options)
-    _plot_legend(legend_ids, default_fontsize, **options)
-    _option_savefig(**options)
-
-    log_xscale, log_yscale = _is_log_scale(**options)
-    plt.xscale("log") if log_xscale else plt.xscale("linear")
-    plt.yscale("log") if log_yscale else plt.yscale("linear")
-
-    # Step 5: Return plot/show plot figure
-    return plt.gcf()
-
-
-
-def plot_phase_portrait(solution_profile, x, y, ts=None, 
-                        default_fontsize=15, **kwargs):
-    """Generates a phase portrait of x,y in the solution_profile over time.
-
-    ``kwargs`` are passed on to various matplotlib methods. 
-    See default_options for a full list.
-
-    Parameters
-    ----------
-    solution_profile : np.ndarray
-        An array containing the time vector and simulated results of solutions.
+        An array containing the simulated results for either concentration
+        or flux
     x: mass.MassMetabolite
         The mass metabolite to plot on the x-axis
     y: mass.MassMetabolite
@@ -102,50 +49,145 @@ def plot_phase_portrait(solution_profile, x, y, ts=None,
     plt.gcf()
         A reference to the current figure instance. Shows plot when returned.
         Can be used to modify plot after initial generation.
+
+    See Also:
+    ---------
+    get_default_options()
     """
 
     # Generate seperate mutable copy of solution profile
-    sol_profile = dict(solution_profile)
-    sol_df = pd.DataFrame(solution_profile)
+    sol_df = pd.DataFrame(solution_profile, index=time)
     default_fontsize = 15
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
     options = _process_title_options(default_fontsize, **options)
 
-    # Step 1: Pop time vector from sol_profile
-    start, final = _get_time_range(t_sol_profile=sol_profile, **options)
-    np_time_vector = np.array(sol_profile.pop("t"))[start:final]
-    sol_df = sol_df.set_index("t")
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(sol_df, **options)
+    sol_df = sol_df.loc[start:final]
 
-    # Step 2: Get conc/flux vectors for x-axisss and y-axis metabolites
-    np_x = _get_conc_flux_vector(sol_profile, x, start, final, **options)
-    np_y = _get_conc_flux_vector(sol_profile, y, start, final, **options)
-    sol_df = sol_df.loc[options["tstart"], options["tfinal"]]
+    # Step 2: Get conc/flux array for y-axis
+    df_conc_flux, legend_ids = _get_conc_flux_array(
+        sol_df, start, final, **options)
+
 
     # Step 3: Make plot using options and vectors provided
-    plt.plot(np_x, np_y)
-    axes = plt.gca()
-    fig = plt.gcf()
+    style, grid = _set_style(**options)
 
-    # Step 4: Add remaining plotting options
-    plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
-    _add_plot_range(axes, **options)
-    _annotate_time_range(
-        axes, np_time_vector, np_x, np_y, default_fontsize)
-    if ts is not None:
-        _annotate_time_scales(axes, list_of_time_scales, np_time_vector, 
-                              sol_df, default_fontsize)
-    _plot_title_options(**options)
-    _plot_figsize(fig, **options)
-    _option_savefig(**options)
+    with matplotlib.style.context(style):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(df_conc_flux.index.tolist(), df_conc_flux)
+        axes = plt.gca()
 
-    log_xscale, log_yscale = _is_log_scale(default=False, **options)
-    plt.xscale("log") if log_xscale else plt.xscale("linear")
-    plt.yscale("log") if log_yscale else plt.yscale("linear")
+        # Step 4: Add remaining plotting options
+        plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
+        _add_custom_linecolors(fig, ax, legend_ids, **options)
+        _add_plot_range(ax, **options)
+        _plot_title_options(**options)
+        _plot_figsize(fig, **options)
+        _plot_legend(legend_ids, default_fontsize, **options)
 
-    # Step 5: Return plot/show plot figure
-    return plt.gcf()
+        log_xscale, log_yscale = _is_log_scale(**options)
+        ax.set_xscale("log") if log_xscale else ax.set_xscale("linear")
+        ax.set_yscale("log") if log_yscale else ax.set_yscale("linear")
+
+        if grid:
+            ax.xaxis.grid(True, linestyle="--")
+            ax.yaxis.grid(True, linestyle="--")
+
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
+
+
+
+def plot_phase_portrait(time, solution_profile, x, y, poi=None, 
+                        ts=None, default_fontsize=15, **kwargs):
+    """Generates a phase portrait of x,y in the solution_profile over time.
+
+    ``kwargs`` are passed on to various matplotlib methods. 
+    See get_default_options() for a full description.
+
+    Parameters
+    ----------
+    time: np.ndarray
+        An array containing the time points over with the system was simulated
+    solution_profile : np.ndarray
+        An array containing the simulated results for either concentration
+        or flux
+    x: mass.MassMetabolite
+        The mass metabolite to plot on the x-axis
+    y: mass.MassMetabolite
+        The mass metabolite to plot on the y-axis
+    poi: list
+        A list of numbers to be annotated on the phase portrait
+    ts: list
+        A list of numbers to be marked to show differing time scales
+    default_fontsize: int
+        The value of the default fontsize for much of the plot text
+
+    Returns
+    -------
+    plt.gcf()
+        A reference to the current figure instance. Shows plot when returned.
+        Can be used to modify plot after initial generation.
+    
+    See Also:
+    ---------
+    get_default_options()
+    """
+
+    # Generate seperate mutable copy of solution profile
+    sol_df = pd.DataFrame(solution_profile, index=time)
+    default_fontsize = 15
+
+    # Step 0: Get options if provided, else use defaults
+    options = _get_options(**kwargs)
+    options = _process_title_options(default_fontsize, **options)
+
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(sol_df, **options)
+    sol_df = sol_df.loc[start:final]
+
+    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites
+    df_x, px = _get_conc_flux_vector(sol_df, x, start, final, **options)
+    df_y, py = _get_conc_flux_vector(sol_df, y, start, final, **options)
+
+    # Step 3: Make plot using options and vectors provided
+    _validate_datapoints(df_x, px, df_y, py)
+    style, grid = _set_style(**options)
+
+    with matplotlib.style.context(style):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(df_x, df_y)
+
+        # Step 4: Add remaining plotting options
+        _add_plot_range(ax, **options)
+
+        _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
+                             default_fontsize, **options)
+        _annotate_time_scales(ax, ts, time, df_x, px, 
+                              df_y, py, start, final)
+        _label_poi(ax, poi, ts, time, df_x, px, df_y, py, 
+                   start, final, default_fontsize)
+        
+        _plot_title_options(**options)
+        _plot_figsize(fig, **options)
+
+        if grid:
+            ax.xaxis.grid(True, linestyle="--")
+            ax.yaxis.grid(True, linestyle="--")
+
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
 
 
 
@@ -179,7 +221,112 @@ def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None,
     >>> scatter_matrix(df, alpha=0.2)
     """
 
-# Internal Methods
+
+
+def get_default_options():
+    """Returns the current default options as a dictionary. These options are
+    used when ``kwargs`` are not provided for plot methods
+    Below is the list of default options for the plotting functions.
+    These options correspond to the ``kwargs``
+
+    ``kwargs``:
+    -----------
+    plot_function: str
+        A string that controls the scaling of the plot.
+        "LogLogPlot" sets the x and y axes to log scale
+        "LogLinearPlot", sets only the x axis to log scale (y axis is linear)
+        "LinearLogPlot", sets only the y axis to log scale (x axis is linear)
+        "LinearPlot", sets the x and y axes to linear scale
+    title: str
+        The title of the plot
+    xlabel: str
+        The title of the x-axis
+    ylabel: str
+        The title of the y-axis
+    plot_legend: bool
+        Whether of not to display the legend
+    observable: list
+        A list containing mass.MassMetabolite or str elements
+        This list is used to filter plot_simulation to only plot specific elements
+    set_xlim: tuple
+        A tuple containing 2 float elements
+        This tuple is used to manually restrict the plotting range for the x-axis
+    set_ylim: tuple
+        A tuple containing 2 float elements
+        This tuple is used to manually restrict the plotting range for the y-axis
+    trange: tuple
+        A tuple containing 2 float elements
+        This tuple is used to restrict the range over which plotlines are drawn
+    truncate: bool
+        Whether or not to truncate floating time point labels on the plot
+    linecolor: dict
+        A dict containing mass.MassMetabolite or mass.MassReaction elements 
+        as the key and matplotlib-compliant str elements as the values.
+        This allows various metabolite/flux plotlines to be colored a specific
+        value.
+
+        See matplotlib's set_color() method for additional details
+    figsize: tuple
+        A tuple containing 2 float elements
+        This tuple is used to manually change the figsize of the plot (in inches)
+    style: str
+        Used to determine the style of the plot. 
+        Accepted str values are: 
+            bmh, classic, dark_background, fivethirtyeight, ggplot, grayscale,
+            seaborn-bright, seaborn-colorblind, seaborn-dark-palette, 
+            seabon-dark, seabon-darkgrid, seabon-deep, seabon-muted, 
+            seabon-notebook, seabon-paper, seabon-pastel, seabon-poster, 
+            seabon-talk, seabon-seabon-ticks, seabon-white, seabon-whitegrid,
+            seabon, _classic-test
+
+        See matplotlib.style.use() for additional details
+    grid: bool
+        Used to turn on/off the gridlines in the plot
+    savefig: dict
+        A dict containing at least "fname" and "dpi" as keys
+        Saves the file at fname with dpi of dpi
+
+        See matplotlib's savefig() method for additional details
+    See Also:
+    ---------
+    set_default_options(**custom)
+    restore_default_options()
+    """
+    return default_options
+
+
+
+def set_default_options(**custom):
+    """Allows user to change the global default options (provided if 
+    ``kawargs`` are not not specified)
+
+    Parameters:
+    -----------
+    **custom: dict
+        A dictionary of ``kwargs`` with options as the keys (str) and the
+        desired option defaults as the values
+
+    See Also:
+    ---------
+    get_default_options()
+    restore_default_options()
+    """
+    default_options.update(custom)
+
+def restore_default_options():
+    """Restores default_options to their original values
+
+    See Also:
+    ---------
+    get_default_options()
+    set_default_options(**custom)
+    restore_default_options()
+    """
+    default_options = _base_default_options
+
+
+
+# Internal Methods - All
 def _get_options(**kwargs):
     options = {}
     for key in default_options:
@@ -187,28 +334,64 @@ def _get_options(**kwargs):
     
     return options
 
-def _get_time_range(t_sol_profile, **options):
-    start = 0
-    final = len(t_sol_profile["t"])
-    if options["tstart"] is not None:
-        start = np.where(t_sol_profile["t"]==options["tstart"])[0][0]
-    if options["tfinal"] is not None:
-        final = np.where(t_sol_profile["t"]==options["tfinal"])[0][0] + 1
+def _process_title_options(default_fontsize, **options):
+    dict_of_titles = {
+        "title": plt.title, 
+        "xlabel": plt.xlabel, 
+        "ylabel": plt.ylabel
+    }
+    for name in dict_of_titles:
+        if isinstance(options[name], str):
+            options.update({name: (options[name], default_fontsize)})
+
+    return options
+
+def _get_time_range(sol_df, **options):
+    start = options["trange"][0] if options["trange"][0] is not None else None
+    final = options["trange"][1] if options["trange"][1] is not None else None
 
     return start, final
 
-def _get_conc_flux_array(sol_profile, start, final, **options):
-    dictlist_metabs = DictList(sol_profile.keys())
+def _add_plot_range(axes, **options):
+    if options["set_xlim"] is not None:
+        axes.set_xlim(options["set_xlim"][0], options["set_xlim"][1])
+        axes.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    if options["set_ylim"] is not None:
+        axes.set_ylim(options["set_ylim"][0], options["set_ylim"][1])
+        axes.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+def _plot_title_options(**options):
+    dict_of_titles = {
+        "title": plt.title, 
+        "xlabel": plt.xlabel, 
+        "ylabel": plt.ylabel
+    }
+    for name in dict_of_titles:
+        if options[name][0] is not None:
+            dict_of_titles[name](**{
+                "s": options[name][0],
+                "fontsize": options[name][1]
+            })
+
+def _plot_figsize(fig, **options):
+    if options["figsize"] != default_options["figsize"]:
+        fig.set_size_inches(options["figsize"][0], options["figsize"][1])
+
+def _option_savefig(**options):
+    if options["savefig"] != default_options["savefig"]:
+        fig.savefig(**options["savefig"])
+
+
+
+# Internal Methods - plot_simulation
+def _get_conc_flux_array(sol_df, start, final, **options):
+    dictlist_metabs = DictList(sol_df.columns.tolist())
     legend_ids = None
 
     if options["observable"] is None or options["observable"] == []:
-        np_sol_profile = np.array(
-            [solution for solution in itervalues(sol_profile)]).T
-        np_sol_profile = np_sol_profile[start:final]
-        if options["plot_legend"]:
-            legend_ids = [x.id for x in iterkeys(sol_profile)]
+        df_conc_flux = sol_df
+        legend_ids = sol_df.columns.tolist()
     else:
-        observable_profile = {}
         if isinstance(options["observable"], MassMetabolite):
             options["observable"] = [options["observable"]]
         elif isinstance(options["observable"], str):
@@ -226,28 +409,34 @@ def _get_conc_flux_array(sol_profile, start, final, **options):
                 raise TypeError("Expected MassMetabolite, string, list of "\
                                 "MassMetabolites, or list of strings")
 
-        for metab in options["observable"]:
-            observable_profile[metab] = sol_profile[metab]
-        np_sol_profile = np.array(
-            [solution for solution in itervalues(observable_profile)]).T
-        np_sol_profile = np_sol_profile[start:final]
-        if options["plot_legend"]:
-            legend_ids = [x.id for x in iterkeys(observable_profile)]
+        df_conc_flux = sol_df[options["observable"]]
+        legend_ids = options["observable"]
 
-    return np_sol_profile, legend_ids
+    return df_conc_flux, legend_ids
 
-def _get_conc_flux_vector(sol_profile, metab, start, final, **options):
-    dictlist_metabs = DictList(sol_profile.keys())
+def _get_colormap():
+    cm = plt.cm.get_cmap("tab20")
+    colors1 = [cm.colors[i] for i in range(len(cm.colors))]
+    cm = plt.cm.get_cmap('tab20b')
+    colors2 = [cm.colors[i] for i in range(len(cm.colors))]
+    cm = plt.cm.get_cmap('tab20c')
+    colors3 = [cm.colors[i] for i in range(len(cm.colors))]
+    colors = colors1 + colors2 + colors3
 
-    if isinstance(metab, MassMetabolite):
-            pass
-    elif isinstance(metab, str):
-            metab = dictlist_metabs.get_by_id(metab)
-    else:
-        raise TypeError("Expected MassMetabolite or string")
+    return colors
 
-    np_vector = np.array(sol_profile[metab])[start:final]
-    return np_vector
+def _add_custom_linecolors(fig, axes, legend_ids, **options):
+    if options["linecolor"] is not None:
+        dict_of_legend_ids = dict(zip(legend_ids, np.arange(len(legend_ids))))
+        for metab in options["linecolor"]:
+            axes.get_lines()[dict_of_legend_ids[metab]].set_color(
+                options["linecolor"][metab])
+
+def _plot_legend(legend_ids, default_fontsize, **options):
+    fontsize = default_fontsize-3
+    if options["plot_legend"]:
+        plt.legend(legend_ids, loc="center left", bbox_to_anchor=(1.1, 0.5), 
+                   prop={"size":fontsize})
 
 def _is_log_scale(default=True, **options):
     plot_function = options["plot_function"].lower()
@@ -268,100 +457,147 @@ def _is_log_scale(default=True, **options):
 
     return log_xscale, log_yscale
 
-def _get_colormap():
-    cm = plt.cm.get_cmap("tab20")
-    colors1 = [cm.colors[i] for i in range(len(cm.colors))]
-    cm = plt.cm.get_cmap('tab20b')
-    colors2 = [cm.colors[i] for i in range(len(cm.colors))]
-    cm = plt.cm.get_cmap('tab20c')
-    colors3 = [cm.colors[i] for i in range(len(cm.colors))]
-    colors = colors1 + colors2 + colors3
-
-    return colors
-
-def _add_custom_linecolors(fig, axes, legend_ids, **options):
-    if options["linecolor"] is not None:
-        dict_of_legend_ids = dict(zip(legend_ids, np.arange(len(legend_ids))))
-        for metab in options["linecolor"]:
-            axes.get_lines()[dict_of_legend_ids[metab]].set_color(
-                options["linecolor"][metab])
-
-def _add_plot_range(axes, **options):
-    if options["set_xlim"] is not None:
-        axes.set_xlim(options["set_xlim"])
-        axes.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-    if options["set_ylim"] is not None:
-        axes.set_ylim(options["set_ylim"])
-        axes.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-
-def _process_title_options(default_fontsize, **options):
-    dict_of_titles = {
-        "title": plt.title, 
-        "xlabel": plt.xlabel, 
-        "ylabel": plt.ylabel
-    }
-    for name in dict_of_titles:
-        if isinstance(options[name], str):
-            options.update({name: (options[name], default_fontsize)})
-
-    return options
-
-def _plot_title_options(**options):
-    dict_of_titles = {
-        "title": plt.title, 
-        "xlabel": plt.xlabel, 
-        "ylabel": plt.ylabel
-    }
-    for name in dict_of_titles:
-        if options[name][0] is not None:
-            dict_of_titles[name](**{
-                "s": options[name][0],
-                "fontsize": options[name][1]
-            })
-
-def _plot_figsize(fig, **options):
-    if options["figsize"] != default_options["figsize"]:
-        fig.set_size_inches(options["figsize"][0], options["figsize"][1])
-
-def _plot_legend(legend_ids, default_fontsize, **options):
-    if options["plot_legend"]:
-        plt.legend(legend_ids, loc="center left", bbox_to_anchor=(1.1, 0.5), 
-                   prop={"size":default_fontsize})
-
-def _option_savefig(**options):
-    if options["savefig"] != default_options["savefig"]:
-        fig.savefig(**options["savefig"])
 
 
+# Internal Methods - plot_phase_portrait
+def _get_conc_flux_vector(sol_df, mass_obj, start, final, **options):
+    dictlist_metabs = DictList(sol_df.columns)
 
-def _annotate_time_range(axes, np_time_vector, np_x, np_y, default_fontsize):
-    default_fontsize = default_fontsize - 2
+    if isinstance(mass_obj, MassMetabolite):
+            pass
+    elif isinstance(mass_obj, str):
+            mass_obj = dictlist_metabs.get_by_id(mass_obj)
+    else:
+        raise TypeError("Expected MassMetabolite or string")
 
-    annotate_start = "t="+str(np_time_vector[0])
-    axes.annotate(annotate_start, xy=(np_x[0], np_y[0]), 
-                  xytext=(np_x[0], np_y[0]), size=default_fontsize)
-    annotate_final = "t="+str(np_time_vector[-1])
-    axes.annotate(annotate_final, xy=(np_x[-1], np_y[-1]), 
-                  xytext=(np_x[-1], np_y[-1]), size=default_fontsize)
+    df_xx = sol_df[[mass_obj]]
+    df_xx = df_xx.loc[start:final]
+
+    return df_xx, mass_obj
+
+def _annotate_time_range(axes, sol_df, df_x, px, df_y, py, 
+                         default_fontsize, **options):
+    fontsize = default_fontsize - 2
+
+    if options["truncate"] is False:
+        t_value_i = sol_df.index.tolist()[0]
+        t_value_f = sol_df.index.tolist()[-1]
+    else:
+        t_value_i = _truncate(sol_df.index.tolist()[0], 2)
+        t_value_f = _truncate(sol_df.index.tolist()[-1], 2)
+
+    annotate_start = "t="+str(t_value_i)
+    annotate_final = "t="+str(t_value_f)
+
+    axes.annotate(annotate_start, 
+                  xy=(df_x.iloc[0][px], df_y.iloc[0][py]), 
+                  xytext=(df_x.iloc[0][px], df_y.iloc[0][py]), 
+                  size=fontsize)
+
+    axes.annotate(annotate_final, 
+                  xy=(df_x.iloc[-1][px], df_y.iloc[-1][py]), 
+                  xytext=(df_x.iloc[-1][px], df_y.iloc[-1][py]), 
+                  size=fontsize)
 
 def _annotate_time_scales(axes, list_of_time_scales, np_time_vector, 
-                          sol_df, default_fontsize):
+                          df_x, px, df_y, py, start, final):
     """Add rectangles for various x,y values corresponding to times where
     pooling occurs"""
-    i = 0
-    for time_scale in list_of_time_scales:
-        i+=1
-        if time_scale not in np_time_vector:
-            x, y = _interpolate_points()
-        else:
-            pass
-            #x, y = _dont_interpolate_points() #FIXME
+    if list_of_time_scales is not None and list_of_time_scales != []:
+        i = 0
+        for time_scale in list_of_time_scales:
+            i+=1
+            if time_scale not in np_time_vector:
+                x_val, y_val = _interpolate_points(df_x, df_y, 
+                                                   time_scale, 
+                                                   np_time_vector, 
+                                                   start, final)
+            else:
+                x_val = df_x.loc[time_scale][px]
+                y_val = df_y.loc[time_scale][py]
 
-        cx, cy = _make_rectangle(axes, x, y, i)
-        axes.annotate(i, (cx, cy), color="w", weight="bold", 
-                      fontsize=6, ha="center", va="center")
+            cx, cy = _make_rectangle(axes, x_val, y_val, i, df_x, px, df_y, py)
+            axes.annotate(i, (cx, cy), color="w", weight="bold", 
+                          fontsize=6, ha="center", va="center")
 
-def _make_rectangle(axes, x, y, num, width=0.1, height=0.1):
+def _label_poi(axes, points, ts, np_time_vector, df_x, px, 
+               df_y, py, start, final, default_fontsize):
+    """Labels points of interest (poi) on the phase portrait"""
+    fontsize = default_fontsize-2
+    width, height = _get_width_height(df_x, px, df_y, py)
+
+    if points is not None and points != []:
+        for point in points:
+            label = "t="+str(point)
+            if point not in np_time_vector:
+                x_val, y_val = _interpolate_points(df_x, df_y, 
+                                                   point, 
+                                                   np_time_vector, 
+                                                   start, final)
+            else:
+                x_val = df_x.loc[point][px]
+                y_val = df_y.loc[point][py]
+
+            if ts is None or ts == []:
+                xytext_val = (x_val, y_val)
+            else:
+                xytext_val = (x_val+width, y_val+height)
+
+            axes.annotate(label, 
+                          xy=(x_val, y_val), 
+                          xytext=xytext_val, 
+                          size=fontsize)
+
+def _validate_datapoints(df_x, px, df_y, py):
+    threshold = 0.4e-6
+
+    x_i, y_i = (df_x.iloc[0][px], df_y.iloc[0][py])
+    x_f, y_f = (df_x.iloc[-1][px], df_y.iloc[-1][py])
+
+    if abs(x_f-x_i) < threshold or abs(y_f-y_i) < threshold:
+        msg =  "datapoints are too close together to make a plot."
+        msg += " Try using points that are less than "+str(threshold)
+        raise ValueError(msg)
+
+def _set_style(**options):
+    
+    style = options["style"] if options["style"] is not None else "default"
+    grid  = options["grid"]
+
+    if (grid is None) and (style is "default"):
+        grid = True
+    elif (grid is None) and (style is not "default"):
+        grid = False
+
+    return style, grid
+
+
+
+# Internal Methods - helper functions
+def _truncate(f, n):
+    """Truncates/pads a float f to n decimal places without rounding"""
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+
+    i, p, d = s.partition('.')
+
+    return '.'.join([i, (d+'0'*n)[:n]])
+
+def _interpolate_points(df_x, df_y, time_scale, np_time_vector, start, final):
+    df_time = pd.DataFrame(np_time_vector, index=np_time_vector)
+    df_time = df_time.loc[start:final]
+    interp_fn_x = interp1d(df_time.squeeze(), df_x.squeeze(), kind="cubic")
+    interp_fn_y = interp1d(df_time.squeeze(), df_y.squeeze(), kind="cubic")
+
+    x_val = interp_fn_x(time_scale)
+    y_val = interp_fn_y(time_scale)
+
+    return x_val, y_val
+
+def _make_rectangle(axes, x, y, num, df_x, px, df_y, py):
+    width, height = _get_width_height(df_x, px, df_y, py)
+
     rect = patches.Rectangle(xy=(x-0.5*width, y-0.5*height), 
                              width=width, height=height, 
                              facecolor="k", label=num)
@@ -372,8 +608,17 @@ def _make_rectangle(axes, x, y, num, width=0.1, height=0.1):
 
     return cx, cy
 
-def _interpolate_points():
-    return 1,1 #FIXME
+def _get_width_height(df_x, px, df_y, py):
+    width  = 0.01*abs(df_x.iloc[0][px] - df_x.iloc[-1][px])
+    height = 0.01*abs(df_y.iloc[0][py] - df_y.iloc[-1][py])
+
+    if width > height:
+        width = height
+    else:
+        height = width
+
+    return width, height
+
 
 
 default_options = {
@@ -385,18 +630,35 @@ default_options = {
     "observable": None,
     "set_xlim": None,
     "set_ylim": None,
-    "tstart": None,
-    "tfinal": None,
+    "trange": (None, None),
+    "truncate": True,
     "linecolor": None,
     "figsize": (None, None),
+    "style": None,
+    "grid": None,
     "savefig": {
         "fname": None,
         "dpi": None
     }
 }
 
-
-
-
-
-
+_base_default_options = {
+    "plot_function": "LogLogPlot",
+    "title": (None, 15),
+    "xlabel": (None, 15),
+    "ylabel": (None, 15),
+    "plot_legend": True,
+    "observable": None,
+    "set_xlim": None,
+    "set_ylim": None,
+    "trange": (None, None),
+    "truncate": True,
+    "linecolor": None,
+    "figsize": (None, None),
+    "style": None,
+    "grid": None,
+    "savefig": {
+        "fname": None,
+        "dpi": None
+    }
+}
