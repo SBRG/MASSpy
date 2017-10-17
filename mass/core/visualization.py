@@ -71,9 +71,8 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     df_conc_flux, legend_ids = _get_conc_flux_array(
         sol_df, start, final, **options)
 
-
     # Step 3: Make plot using options and vectors provided
-    style, grid = _set_style(**options)
+    style, xgrid, ygrid = _set_style(**options)
 
     with matplotlib.style.context(style):
         fig = plt.figure()
@@ -93,8 +92,9 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
         ax.set_xscale("log") if log_xscale else ax.set_xscale("linear")
         ax.set_yscale("log") if log_yscale else ax.set_yscale("linear")
 
-        if grid:
+        if xgrid:
             ax.xaxis.grid(True, linestyle="--")
+        if ygrid:
             ax.yaxis.grid(True, linestyle="--")
 
         _option_savefig(**options)
@@ -135,7 +135,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     plt.gcf()
         A reference to the current figure instance. Shows plot when returned.
         Can be used to modify plot after initial generation.
-    
+
     See Also:
     ---------
     get_default_options()
@@ -277,16 +277,19 @@ def get_default_options():
             seabon-dark, seabon-darkgrid, seabon-deep, seabon-muted, 
             seabon-notebook, seabon-paper, seabon-pastel, seabon-poster, 
             seabon-talk, seabon-seabon-ticks, seabon-white, seabon-whitegrid,
-            seabon, _classic-test
+            seabon, _classic-test, default
 
         See matplotlib.style.use() for additional details
-    grid: bool
-        Used to turn on/off the gridlines in the plot
+    grid: bool or tuple
+        Used to turn on/off the gridlines in the plot.
+        True turns gridlines on, False turns gridlines off
+        A tuple of bools can be used to toggle only x or y axis gridlines
     savefig: dict
         A dict containing at least "fname" and "dpi" as keys
         Saves the file at fname with dpi of dpi
 
         See matplotlib's savefig() method for additional details
+    
     See Also:
     ---------
     set_default_options(**custom)
@@ -376,6 +379,24 @@ def _plot_title_options(**options):
 def _plot_figsize(fig, **options):
     if options["figsize"] != default_options["figsize"]:
         fig.set_size_inches(options["figsize"][0], options["figsize"][1])
+
+def _set_style(**options):    
+    style = options["style"] if options["style"] is not None else "default"
+    grid  = options["grid"]
+
+    if (grid is None) and (style is "default"):
+        grid = True
+    elif (grid is None) and (style is not "default"):
+        grid = False
+
+    if isinstance(grid, tuple):
+        xgrid = grid[0]
+        ygrid = grid[1]
+    else:
+        xgrid = grid
+        ygrid = grid
+
+    return style, xgrid, ygrid
 
 def _option_savefig(**options):
     if options["savefig"] != default_options["savefig"]:
@@ -558,18 +579,6 @@ def _validate_datapoints(df_x, px, df_y, py):
         msg =  "datapoints are too close together to make a plot."
         msg += " Try using points that are less than "+str(threshold)
         raise ValueError(msg)
-
-def _set_style(**options):
-    
-    style = options["style"] if options["style"] is not None else "default"
-    grid  = options["grid"]
-
-    if (grid is None) and (style is "default"):
-        grid = True
-    elif (grid is None) and (style is not "default"):
-        grid = False
-
-    return style, grid
 
 
 
