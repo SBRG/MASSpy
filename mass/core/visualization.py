@@ -10,6 +10,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from pandas.compat import range, lrange, zip
+from pandas.io.formats.printing import pprint_thing
+from pandas.plotting._style import _get_standard_colors
+from pandas.plotting._tools import _subplots, _set_ticks_props
+
 from scipy.interpolate import interp1d
 from math import inf
 from six import iterkeys, itervalues
@@ -84,19 +89,13 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
         plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
         _add_custom_linecolors(fig, ax, legend_ids, **options)
         _add_plot_range(ax, **options)
+
         _plot_title_options(**options)
         _plot_figsize(fig, **options)
         _plot_legend(legend_ids, default_fontsize, **options)
-
-        log_xscale, log_yscale = _is_log_scale(**options)
-        ax.set_xscale("log") if log_xscale else ax.set_xscale("linear")
-        ax.set_yscale("log") if log_yscale else ax.set_yscale("linear")
-
-        if xgrid:
-            ax.xaxis.grid(True, linestyle="--")
-        if ygrid:
-            ax.yaxis.grid(True, linestyle="--")
-
+        
+        _set_log_scale(ax, default=True, **options)
+        _plot_gridlines(ax, xgrid, ygrid)
         _option_savefig(**options)
 
         # Step 5: Return plot/show plot figure
@@ -159,7 +158,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
 
     # Step 3: Make plot using options and vectors provided
     _validate_datapoints(df_x, px, df_y, py)
-    style, grid = _set_style(**options)
+    style, xgrid, ygrid = _set_style(**options)
 
     with matplotlib.style.context(style):
         fig = plt.figure()
@@ -178,11 +177,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
         
         _plot_title_options(**options)
         _plot_figsize(fig, **options)
-
-        if grid:
-            ax.xaxis.grid(True, linestyle="--")
-            ax.yaxis.grid(True, linestyle="--")
-
+        _plot_gridlines(ax, xgrid, ygrid)
         _option_savefig(**options)
 
         # Step 5: Return plot/show plot figure
@@ -191,7 +186,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
 
 
 
-def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None, 
+def plot_tiled_phase_portrait(time, solution_profile, alpha=0.5, figsize=None, ax=None, 
                               grid=False, marker='.', range_padding=0.05, 
                               place_tiles="upper", **kwds):
     """Draw a matrix of scatter plots.
@@ -221,6 +216,27 @@ def plot_tiled_phase_portrait(frame, alpha=0.5, figsize=None, ax=None,
     >>> scatter_matrix(df, alpha=0.2)
     """
 
+    # Generate seperate mutable copy of solution profile
+    sol_df = pd.concat([pd.DataFrame(solution_profile), 
+                        pd.DataFrame(time, columns=["t"])], axis=1)
+
+    sol_df.set_index(keys="t", inplace=True)
+    sol_df = sol_df._get_numeric_data()
+
+    n = sol_df.columns.size
+    naxes = n * n
+    fig, axes = _subplots(naxes=naxes, figsize=figsize, ax=ax, squeeze=False)
+
+    # no gaps between subplots
+    fig.subplots_adjust(wspace=0, hspace=0)
+
+    boundaries_list = []
+    for a in sol_df.columns:
+        values = sol_df[a].values
+        rmin_, rmax_ = np.min(values), np.max(values)
+        rdelta_ext = (rmax_ - rmin_) * range_padding / 2.
+        boundaries_list.append((rmin_ - rdelta_ext, rmax_ + rdelta_ext))
+
 
 
 def get_default_options():
@@ -237,12 +253,12 @@ def get_default_options():
         "LogLinearPlot", sets only the x axis to log scale (y axis is linear)
         "LinearLogPlot", sets only the y axis to log scale (x axis is linear)
         "LinearPlot", sets the x and y axes to linear scale
-    title: str
-        The title of the plot
-    xlabel: str
-        The title of the x-axis
-    ylabel: str
-        The title of the y-axis
+    title: str or tuple
+        The title of the plot. If tuple, the 2nd value determines fontsize
+    xlabel: str or tuple
+        The title of the x-axis. If tuple, the 2nd value determines fontsize
+    ylabel: str or tuple
+        The title of the y-axis. If tuple, the 2nd value determines fontsize
     plot_legend: bool
         Whether of not to display the legend
     observable: list
@@ -280,16 +296,15 @@ def get_default_options():
             seabon, _classic-test, default
 
         See matplotlib.style.use() for additional details
-    grid: bool or tuple
+    grid: bool
         Used to turn on/off the gridlines in the plot.
         True turns gridlines on, False turns gridlines off
-        A tuple of bools can be used to toggle only x or y axis gridlines
     savefig: dict
         A dict containing at least "fname" and "dpi" as keys
         Saves the file at fname with dpi of dpi
 
         See matplotlib's savefig() method for additional details
-    
+
     See Also:
     ---------
     set_default_options(**custom)
@@ -384,19 +399,23 @@ def _set_style(**options):
     style = options["style"] if options["style"] is not None else "default"
     grid  = options["grid"]
 
-    if (grid is None) and (style is "default"):
-        grid = True
-    elif (grid is None) and (style is not "default"):
-        grid = False
-
     if isinstance(grid, tuple):
         xgrid = grid[0]
         ygrid = grid[1]
-    else:
-        xgrid = grid
-        ygrid = grid
+    elif (grid is None) and (style is "default"):
+        xgrid = True
+        ygrid = True
+    elif (grid is None) and (style is not "default"):
+        xgrid = False
+        ygrid = False
 
     return style, xgrid, ygrid
+
+def _plot_gridlines(ax, xgrid, ygrid):
+    if xgrid:
+        ax.xaxis.grid(True, linestyle="--")
+    if ygrid:
+        ax.yaxis.grid(True, linestyle="--")
 
 def _option_savefig(**options):
     if options["savefig"] != default_options["savefig"]:
@@ -459,24 +478,10 @@ def _plot_legend(legend_ids, default_fontsize, **options):
         plt.legend(legend_ids, loc="center left", bbox_to_anchor=(1.1, 0.5), 
                    prop={"size":fontsize})
 
-def _is_log_scale(default=True, **options):
-    plot_function = options["plot_function"].lower()
-    log_xscale = default
-    log_yscale = default
-    if "loglog" in plot_function:
-        log_xscale = True
-        log_yscale = True
-    if "loglinear" in plot_function:
-        log_xscale = True
-        log_yscale = False
-    elif "linearlog" in plot_function:
-        log_xscale = False
-        log_yscale = True
-    elif "linear" in plot_function:
-        log_xscale = False
-        log_yscale = False
-
-    return log_xscale, log_yscale
+def _set_log_scale(ax, default=True, **options):
+    log_xscale, log_yscale = _is_log_scale(default, **options)
+    ax.set_xscale("log") if log_xscale else ax.set_xscale("linear")
+    ax.set_yscale("log") if log_yscale else ax.set_yscale("linear")
 
 
 
@@ -583,6 +588,25 @@ def _validate_datapoints(df_x, px, df_y, py):
 
 
 # Internal Methods - helper functions
+def _is_log_scale(default=True, **options):
+    plot_function = options["plot_function"].lower()
+    log_xscale = default
+    log_yscale = default
+    if "loglog" in plot_function:
+        log_xscale = True
+        log_yscale = True
+    if "loglinear" in plot_function:
+        log_xscale = True
+        log_yscale = False
+    elif "linearlog" in plot_function:
+        log_xscale = False
+        log_yscale = True
+    elif "linear" in plot_function:
+        log_xscale = False
+        log_yscale = False
+
+    return log_xscale, log_yscale
+
 def _truncate(f, n):
     """Truncates/pads a float f to n decimal places without rounding"""
     s = '{}'.format(f)
