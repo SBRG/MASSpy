@@ -30,7 +30,7 @@ fixed_re = re.compile("fix|fixed")
 
 # Public
 def simulate(model, time_range, numpoints=100, perturbations=None,
-				solver="vode", nsteps=500, first_step=0., min_step=0.,
+				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
@@ -184,16 +184,21 @@ def simulate(model, time_range, numpoints=100, perturbations=None,
 
 	return [time_range, c_profile, f_profile]
 
-def find_steady_state(model, strategy="simulate", update_reactions=False,
-						update_initial_conditions=False):
+def find_steady_state(model, strategy="simulate", perturbations=None,
+			update_reactions=False, update_initial_conditions=False):
 	"""Find the steady state solution of a model using a given strategy
 
 	Parameters
 	----------
 	model : mass.MassModel
 		The MassModel object to find a steady state for.
-	strategy : 'simulate' or 'find_roots', optional
+	strategy : 'simulate' or 'find_roots'
 		The strategy to use to solve for the steady state.
+	perturbations : dict, optional
+		A dictionary of events to incorporate into the simulation, where keys
+		are the event to incorporate, and values are new parameter or initial
+		condition. Can be changes to the rate and equilibrium constants,
+		a change to an initial condition, or fixing a concentration.
 	update_reactions : bool, optional
 		If True, update the steady state fluxes (ssflux) in each reaction.
 	update_initial_conditions : bool, optional
@@ -225,6 +230,17 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
 			return [None, None]
+		
+	if perturbations is None:
+		perturbations = {}
+	elif not isinstance(perturbations, dict):
+		raise TypeError("Perturbations must be in a dictionary")
+	else:
+		full_pert_check = re.compile("|".join([pert_type.pattern
+                    for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+		for perturb, value in iteritems(perturbations):
+			if not full_pert_check.search(perturb):
+				raise TypeError("Perturbation not recognized")
 
 	options = {"simulate": simulate, "find_roots": None}
 	# Perform the simulate strategy
@@ -234,9 +250,9 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time_range = np.linspace(0, 10**power,num=10**(power-1),
-										endpoint=True)
-			[c_profile, f_profile] = options[strategy](model, time_range)
+			time_range = (0, 10**power)
+			[t, c_profile, f_profile] = options[strategy](model,
+									time_range, perturbations=perturbations)
 			for metab, conc in iteritems(c_profile):
 				if abs(conc[-1] - conc[-2]) <= 10**9:
 					continue
@@ -271,6 +287,9 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 	elif strategy is "find_roots":
 		# Collect sympy symbols and make dictionariess for odes and rates
 		odes, rates, symbols = expressions._sort_symbols(model)
+		if len(perturbations) != 0:
+			odes, rates, symbols, perturbations = _perturb(model, odes, rates,
+														symbols, perturbations)
 		# Get values to substitute into ODEs and metabolite initial conditions
 		values, ics = _get_values(model, dict(), symbols)
 
