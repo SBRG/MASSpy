@@ -27,7 +27,6 @@ from cobra import DictList
 # from mass
 import mass
 from mass import MassMetabolite, MassReaction, MassModel
-from mass.core.simulation import *
 
 
 
@@ -44,10 +43,8 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     solution_profile : np.ndarray
         An array containing the simulated results for either concentration
         or flux
-    x: mass.MassMetabolite
-        The mass metabolite to plot on the x-axis
-    y: mass.MassMetabolite
-        The mass metabolite to plot on the y-axis
+    default_fontsize: int
+        The value of the default fontsize for much of the plot text
 
     Returns
     -------
@@ -62,7 +59,7 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     # Generate seperate mutable copy of solution profile
     sol_df = pd.DataFrame(solution_profile, index=time)
-    default_fontsize = 15
+    sol_df = _sort_df(sol_df)
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
@@ -93,7 +90,7 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
         _plot_title_options(**options)
         _plot_figsize(fig, **options)
         _plot_legend(legend_ids, default_fontsize, **options)
-        
+
         _set_log_scale(ax, default=True, **options)
         _plot_gridlines(ax, xgrid, ygrid)
         _option_savefig(**options)
@@ -142,7 +139,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
 
     # Generate seperate mutable copy of solution profile
     sol_df = pd.DataFrame(solution_profile, index=time)
-    default_fontsize = 15
+    sol_df = _sort_df(sol_df)
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
@@ -152,7 +149,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     start, final = _get_time_range(sol_df, **options)
     sol_df = sol_df.loc[start:final]
 
-    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites
+    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites/reactions
     df_x, px = _get_conc_flux_vector(sol_df, x, start, final, **options)
     df_y, py = _get_conc_flux_vector(sol_df, y, start, final, **options)
 
@@ -186,29 +183,26 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
 
 
 
-def plot_tiled_phase_portrait(time, solution_profile, alpha=0.5, figsize=None, ax=None, 
-                              grid=False, marker='.', range_padding=0.05, 
-                              place_tiles="upper", **kwds):
-    """Draw a matrix of scatter plots.
+def plot_tiled_phase_portrait(time, solution_profile, figsize=None, 
+                              place_tiles="upper", ax=None, 
+                              range_padding=0.05, ts=None, poi=None, 
+                              default_fontsize=12, **kwds):
+    """FIXME.
+
+    ``kwds`` are passed on to various matplotlib methods. 
+    See below for a full description.
 
     Parameters
     ----------
-    frame : DataFrame
-    alpha : float, optional
-        amount of transparency applied
-    figsize : (float,float), optional
-        a tuple (width, height) in inches
-    ax : Matplotlib axis object, optional
-    grid : bool, optional
-        setting this to True will show the grid
-    marker : str, optional
-        Matplotlib marker type, default '.'
-    range_padding : float, optional
-        relative extension of axis range in x and y
-        with respect to (x_max - x_min) or (y_max - y_min),
-        default 0.05
-    kwds : other plotting keyword arguments
-        To be passed to plot function
+
+    Returns
+    -------
+    plt.gcf()
+        A reference to the current figure instance. Shows plot when returned.
+        Can be used to modify plot after initial generation.
+
+    See Also:
+    ---------
 
     Examples
     --------
@@ -219,23 +213,86 @@ def plot_tiled_phase_portrait(time, solution_profile, alpha=0.5, figsize=None, a
     # Generate seperate mutable copy of solution profile
     sol_df = pd.concat([pd.DataFrame(solution_profile), 
                         pd.DataFrame(time, columns=["t"])], axis=1)
-
     sol_df.set_index(keys="t", inplace=True)
+    sol_df = _sort_df(sol_df)
     sol_df = sol_df._get_numeric_data()
 
+    # Step 0: Get options if provided, else use defaults
+    options = _get_options(tiled=True, **kwds)
+
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(sol_df, **options)
+    sol_df = sol_df.loc[start:final]
+
+    # Setup for subplots
+    style, xgrid, ygrid = _set_style(**options)
     n = sol_df.columns.size
     naxes = n * n
-    fig, axes = _subplots(naxes=naxes, figsize=figsize, ax=ax, squeeze=False)
+    place_tiles_dict = {"upper": int.__lt__, "lower": int.__gt__}
 
-    # no gaps between subplots
-    fig.subplots_adjust(wspace=0, hspace=0)
+    with matplotlib.style.context(style):
+        fig, axes = _subplots(naxes=naxes, figsize=figsize, 
+                              ax=ax, squeeze=False)
 
-    boundaries_list = []
-    for a in sol_df.columns:
-        values = sol_df[a].values
-        rmin_, rmax_ = np.min(values), np.max(values)
-        rdelta_ext = (rmax_ - rmin_) * range_padding / 2.
-        boundaries_list.append((rmin_ - rdelta_ext, rmax_ + rdelta_ext))
+        fig.subplots_adjust(wspace=0.3, hspace=0.3)
+
+        boundaries_list = _get_boundaries(sol_df, range_padding)
+
+        for ycol, i in zip(sol_df.columns, lrange(n)):
+            for xcol, j in zip(sol_df.columns, lrange(n)):
+                ax = axes[i, j]
+
+                # Step 2: Get conc/flux vectors for x-axis and y-axis
+                df_x, px = _get_conc_flux_vector(sol_df, xcol, start, final)
+                df_y, py = _get_conc_flux_vector(sol_df, ycol, start, final)
+
+                if place_tiles_dict[place_tiles](i, j):
+
+                    # Step 3: Make plot using options and vectors provided
+                    ax.plot(sol_df[xcol], sol_df[ycol])
+
+                    # Step 4: Add remaining plotting options
+                    ax.set_xlim(boundaries_list[j])
+                    ax.set_ylim(boundaries_list[i])
+
+                    _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
+                                         default_fontsize, **options)
+
+                    _label_poi_lists(poi, sol_df, xcol, ycol, ax, ts, time, 
+                                     df_x, px, df_y, py, 
+                                     start, final, default_fontsize)
+
+                    # ax1, ax2, tiled_poi = _unpack_poi_tiled(sol_df, poi)
+                    # _label_poi_tiled(sol_df, ax1, ax2, xcol, ycol, 
+                    #                  ax, tiled_poi, ts, time, 
+                    #                  df_x, px, df_y, py, 
+                    #                  start, final, default_fontsize)
+                elif place_tiles_dict[place_tiles](j, i):
+                    #add annotation here
+                    _annotate_tiles(ax, df_x, px, df_y, py, default_fontsize)
+
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+                else:
+                    #no axes elsewhere
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+
+                _axes_visibility(fig, ax, **options)
+
+                if j == 0:
+                    ax.set_ylabel(ycol)
+                if i == n - 1:
+                    ax.set_xlabel(xcol)
+
+                _plot_gridlines(ax, xgrid, ygrid)
+
+        _set_ticks_props(axes, xlabelsize=8, xrot=90, ylabelsize=8, yrot=0)
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
 
 
 
@@ -344,11 +401,27 @@ def restore_default_options():
 
 
 
-# Internal Methods - All
-def _get_options(**kwargs):
+# Internal Methods - Global
+def _sort_df(sol_df):
+    ds = DictList(sol_df.columns)
+    ls = []
+
+    for col in sol_df.columns:
+        ls.append(col.id)
+    ls = sorted(ls)
+
+    ss = DictList()
+    for i in range(len(ls)):
+        ss.append(ds.get_by_id(ls[i]))
+
+    return sol_df.reindex_axis(ss, axis=1)
+
+def _get_options(tiled=False, **kwargs):
     options = {}
-    for key in default_options:
-        options[key] = kwargs[key] if key in kwargs else default_options[key]
+    default = tiled_default_options if tiled else default_options
+
+    for key in default:
+        options[key] = kwargs[key] if key in kwargs else default[key]
     
     return options
 
@@ -398,6 +471,7 @@ def _plot_figsize(fig, **options):
 def _set_style(**options):    
     style = options["style"] if options["style"] is not None else "default"
     grid  = options["grid"]
+    xgrid, ygrid = (None, None)
 
     if isinstance(grid, tuple):
         xgrid = grid[0]
@@ -408,6 +482,9 @@ def _set_style(**options):
     elif (grid is None) and (style is not "default"):
         xgrid = False
         ygrid = False
+    elif isinstance(grid, bool):
+        xgrid = grid
+        ygrid = grid
 
     return style, xgrid, ygrid
 
@@ -503,7 +580,7 @@ def _get_conc_flux_vector(sol_df, mass_obj, start, final, **options):
 
 def _annotate_time_range(axes, sol_df, df_x, px, df_y, py, 
                          default_fontsize, **options):
-    fontsize = default_fontsize - 2
+    fontsize = default_fontsize - 3
 
     if options["truncate"] is False:
         t_value_i = sol_df.index.tolist()[0]
@@ -584,6 +661,107 @@ def _validate_datapoints(df_x, px, df_y, py):
         msg =  "datapoints are too close together to make a plot."
         msg += " Try using points that are less than "+str(threshold)
         raise ValueError(msg)
+
+
+
+# Internal Methods - plot_tiled_phase_portrait
+def _validate_datapoints_tiled(df_x, px, df_y, py):
+    try:
+        _validate_datapoints(df_x, px, df_y, py)
+    except ValueError as v:
+        return False
+    else:
+        return True
+
+def _get_boundaries(df, range_padding):
+    boundaries_list = []
+    for a in df.columns:
+        values = df[a].values
+        rmin_, rmax_ = np.min(values), np.max(values)
+        rdelta_ext = (rmax_ - rmin_) * range_padding / 2.
+        boundaries_list.append((rmin_ - rdelta_ext, rmax_ + rdelta_ext))
+
+    return boundaries_list
+
+def _axes_visibility(fig, ax, **options):
+    if options["display_axes"] is False:
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        fig.subplots_adjust(wspace=0.1, hspace=0.1)
+
+def _label_poi_lists(poi, sol_df, xcol, ycol, ax, ts, time, df_x, px, df_y, py, 
+                     start, final, default_fontsize):
+    if poi is not None:
+        if isinstance(poi, tuple):
+            ax1, ax2, tiled_poi = _unpack_poi_tiled(sol_df, poi)
+            _label_poi_tiled(sol_df, ax1, ax2, xcol, ycol, ax, 
+                             tiled_poi, ts, time, df_x, px, df_y, py, 
+                             start, final, default_fontsize)
+        elif isinstance(poi, list):
+            if isinstance(poi[0], tuple):
+                for item in poi:
+                    ax1, ax2, tiled_poi = _unpack_poi_tiled(sol_df, item)
+                    _label_poi_tiled(sol_df, ax1, ax2, xcol, ycol, ax, 
+                                     tiled_poi, ts, time, df_x, px, df_y, py, 
+                                     start, final, default_fontsize)
+
+def _unpack_poi_tiled(sol_df, poi):
+    if poi is None:
+        return None, None, None
+
+    dictlist_metabs = DictList(sol_df.columns)
+    x, y, list_of_values = poi
+
+    xy = [x, y]
+    for i in range(len(xy)):
+        if isinstance(xy[i], MassMetabolite):
+                pass
+        elif isinstance(xy[i], str):
+                xy[i] = dictlist_metabs.get_by_id(xy[i])
+        else:
+            raise TypeError("Expected MassMetabolite or string")
+
+    x = xy[0]
+    y = xy[1]
+
+    return x, y, list_of_values
+
+def _label_poi_tiled(sol_df, ax1, ax2, xcol, ycol, ax, tiled_poi, ts, time, 
+                     df_x, px, df_y, py, start, final, default_fontsize):
+    if (ax1 is not None) and (ax2 is not None) and (tiled_poi is not None):
+        result = (ax1.id, ax2.id)
+        condition1 = (xcol.id, ycol.id)
+        condition2 = (ycol.id, xcol.id)
+
+        if result == condition1 or result == condition2:
+            _label_poi(ax, tiled_poi, ts, time, 
+                       df_x, px, df_y, py, 
+                       start, final, default_fontsize)
+    # if ax1 is not None and ax2 is not None:
+    #     if ax1.id is xcol.id and ax2.id is ycol.id:
+    #         _label_poi(ax, tiled_poi, ts, time, 
+    #                    df_x, px, df_y, py, start, final, 
+    #                    default_fontsize)
+    #     elif ax1.id is ycol.id and ax2.id is xcol.id:
+    #         _label_poi(ax, tiled_poi, ts, time,
+    #                    df_x, px, df_y, py, start, final,
+    #                    default_fontsize)
+
+def _annotate_tiles(ax, df_x, px, df_y, py, default_fontsize):
+    fontsize = default_fontsize - 2
+
+    startx, starty = (df_x.iloc[0][px], df_y.iloc[0][py])
+    finalx, finaly = (df_x.iloc[-1][px], df_y.iloc[-1][py])
+
+    slope = (finaly - starty) / (finalx - startx)
+
+    str_slope = "slope of "+str(py)+" vs "+str(px)+": "+str(slope)
+
+    ax.annotate(str_slope, 
+                  xy=(0.1, 0.5), 
+                  xytext=(0.1, 0.5), 
+                  size=fontsize)
+
 
 
 
@@ -669,6 +847,20 @@ default_options = {
     "figsize": (None, None),
     "style": None,
     "grid": None,
+    "savefig": {
+        "fname": None,
+        "dpi": None
+    }
+}
+
+tiled_default_options = {
+    "trange": (None, None),
+    "truncate": True,
+    "linecolor": None,
+    "figsize": (None, None),
+    "style": None,
+    "grid": None,
+    "display_axes": True,
     "savefig": {
         "fname": None,
         "dpi": None
