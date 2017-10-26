@@ -190,10 +190,26 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
     """FIXME.
 
     ``kwds`` are passed on to various matplotlib methods. 
-    See below for a full description.
+    See get_tiled_options() for a full description.
 
     Parameters
     ----------
+    time: np.ndarray
+        An array containing the time points over with the system was simulated
+    solution_profile : np.ndarray
+        An array containing the simulated results for either concentration
+        or flux
+    figsize: tuple
+        A tuple containing 2 float elements
+        This tuple is used to manually change the figsize of the plot (in inches)
+    place_tiles: str
+        A str with accepted values "upper" or "lower"
+        "upper" sets the subplots on the upper-right side
+        "lower" sets the subplots on the lower-left  side
+    poi: tuple or list of tuples
+        A list of numbers to be annotated on the phase portrait
+        Specific to each subplot
+
 
     Returns
     -------
@@ -250,6 +266,7 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
 
                     # Step 3: Make plot using options and vectors provided
                     ax.plot(sol_df[xcol], sol_df[ycol])
+                    _plot_gridlines(ax, xgrid, ygrid)
 
                     # Step 4: Add remaining plotting options
                     ax.set_xlim(boundaries_list[j])
@@ -262,11 +279,6 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
                                      df_x, px, df_y, py, 
                                      start, final, default_fontsize)
 
-                    # ax1, ax2, tiled_poi = _unpack_poi_tiled(sol_df, poi)
-                    # _label_poi_tiled(sol_df, ax1, ax2, xcol, ycol, 
-                    #                  ax, tiled_poi, ts, time, 
-                    #                  df_x, px, df_y, py, 
-                    #                  start, final, default_fontsize)
                 elif place_tiles_dict[place_tiles](j, i):
                     #add annotation here
                     _annotate_tiles(ax, df_x, px, df_y, py, default_fontsize)
@@ -285,8 +297,6 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
                 if i == n - 1:
                     ax.set_xlabel(xcol)
 
-                _plot_gridlines(ax, xgrid, ygrid)
-
         _set_ticks_props(axes, xlabelsize=8, xrot=90, ylabelsize=8, yrot=0)
         _option_savefig(**options)
 
@@ -298,7 +308,7 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
 
 def get_default_options():
     """Returns the current default options as a dictionary. These options are
-    used when ``kwargs`` are not provided for plot methods
+    used when ``kwargs`` are not provided for plot methods (and thus optional)
     Below is the list of default options for the plotting functions.
     These options correspond to the ``kwargs``
 
@@ -311,7 +321,7 @@ def get_default_options():
         "LinearLogPlot", sets only the y axis to log scale (x axis is linear)
         "LinearPlot", sets the x and y axes to linear scale
     title: str or tuple
-        The title of the plot. If tuple, the 2nd value determines fontsize
+        The title of the figure. If tuple, the 2nd value determines fontsize
     xlabel: str or tuple
         The title of the x-axis. If tuple, the 2nd value determines fontsize
     ylabel: str or tuple
@@ -373,7 +383,7 @@ def get_default_options():
 
 def set_default_options(**custom):
     """Allows user to change the global default options (provided if 
-    ``kawargs`` are not not specified)
+    ``kwargs`` are not not specified)
 
     Parameters:
     -----------
@@ -398,6 +408,85 @@ def restore_default_options():
     restore_default_options()
     """
     default_options = _base_default_options
+
+def get_tiled_options():
+    """Returns the current default options as a dictionary. These options are
+    used when ``kwds`` are not provided for plot methods (and thus optional)
+    Below is the list of default options for the plotting functions.
+    These options correspond to the ``kwds``
+
+    ``kwds``:
+    -----------
+    trange: tuple
+        A tuple containing 2 float elements
+        This tuple is used to restrict the range over which plotlines are drawn
+    truncate: bool
+        Whether or not to truncate floating time point labels on the plot
+    linecolor: dict
+        A dict containing mass.MassMetabolite or mass.MassReaction elements 
+        as the key and matplotlib-compliant str elements as the values.
+        This allows various metabolite/flux plotlines to be colored a specific
+        value.
+
+        See matplotlib's set_color() method for additional details
+    style: str
+        Used to determine the style of the plot. 
+        Accepted str values are: 
+            bmh, classic, dark_background, fivethirtyeight, ggplot, grayscale,
+            seaborn-bright, seaborn-colorblind, seaborn-dark-palette, 
+            seabon-dark, seabon-darkgrid, seabon-deep, seabon-muted, 
+            seabon-notebook, seabon-paper, seabon-pastel, seabon-poster, 
+            seabon-talk, seabon-seabon-ticks, seabon-white, seabon-whitegrid,
+            seabon, _classic-test, default
+
+        See matplotlib.style.use() for additional details
+    grid: bool
+        Used to turn on/off the gridlines in the plot.
+        True turns gridlines on, False turns gridlines off
+    display_axes: bool
+        Used to turn on/off the axes in the plot.
+        True gives all the subplots their own axes with labels
+        False removes them from the subplots
+    savefig: dict
+        A dict containing at least "fname" and "dpi" as keys
+        Saves the file at fname with dpi of dpi
+
+        See matplotlib's savefig() method for additional details
+
+    See Also:
+    ---------
+    set_tiled_options(**custom)
+    restore_tiled_options()
+    """
+    return tiled_default_options
+
+def set_tiled_options(**custom):
+    """Allows user to change the global default options (provided if 
+    ``kwds`` are not not specified)
+
+    Parameters:
+    -----------
+    **custom: dict
+        A dictionary of ``kwargs`` with options as the keys (str) and the
+        desired option defaults as the values
+
+    See Also:
+    ---------
+    get_tiled_options()
+    restore_tiled_options()
+    """
+    tiled_default_options.update(custom)
+
+def restore_tiled_options():
+    """Restores default_options to their original values
+
+    See Also:
+    ---------
+    get_tiled_options()
+    set_tiled_options(**custom)
+    restore_tiled_options()
+    """
+    tiled_default_options = _base_tiled_default_options
 
 
 
@@ -882,6 +971,20 @@ _base_default_options = {
     "figsize": (None, None),
     "style": None,
     "grid": None,
+    "savefig": {
+        "fname": None,
+        "dpi": None
+    }
+}
+
+_base_tiled_default_options = {
+    "trange": (None, None),
+    "truncate": True,
+    "linecolor": None,
+    "figsize": (None, None),
+    "style": None,
+    "grid": None,
+    "display_axes": True,
     "savefig": {
         "fname": None,
         "dpi": None
