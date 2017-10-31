@@ -38,9 +38,9 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     Parameters
     ----------
-    time: np.ndarray
+    time: np.array
         An array containing the time points over with the system was simulated
-    solution_profile : np.ndarray
+    solution_profile : np.array
         An array containing the simulated results for either concentration
         or flux
     default_fontsize: int
@@ -80,7 +80,6 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot(df_conc_flux.index.tolist(), df_conc_flux)
-        axes = plt.gca()
 
         # Step 4: Add remaining plotting options
         plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
@@ -110,9 +109,9 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
 
     Parameters
     ----------
-    time: np.ndarray
+    time: np.array
         An array containing the time points over with the system was simulated
-    solution_profile : np.ndarray
+    solution_profile : np.array
         An array containing the simulated results for either concentration
         or flux
     x: mass.MassMetabolite
@@ -194,9 +193,9 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
 
     Parameters
     ----------
-    time: np.ndarray
+    time: np.array
         An array containing the time points over with the system was simulated
-    solution_profile : np.ndarray
+    solution_profile : np.array
         An array containing the simulated results for either concentration
         or flux
     figsize: tuple
