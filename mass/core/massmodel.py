@@ -153,27 +153,19 @@ class MassModel(Object):
 
 	# Properties
 	@property
+	def attributes(self):
+		"""Get a list of public model attributes and properties"""
+		return [s for s in iterkeys(self.__dict__) if s[0] is not '_'] + \
+				[p for p in dir(self.__class__)
+				if isinstance(getattr(self.__class__ ,p),property)]
+
+	@property
 	def S(self):
 		"""Get the Stoichiometric Matrix of the MassModel"""
 		return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
 							update_model=False)
-
 	@property
 	def rates(self):
-		""""Return the rate laws for the reactions as human readable strings
-		in a dictionary where keys are the reaction objects and values are the
-		rate laws
-		"""
-		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
-								sympy_expr=False, update_reaction=True)
-								for rxn in self.reactions}
-		if self.custom_rates != {}:
-			for rxn, custom_expression in iteritems(self.custom_rates):
-				rate_dict.update({rxn : str(custom_expression)})
-		return rate_dict
-
-	@property
-	def rate_expressions(self):
 		"""Get the rate laws for the reactions as sympy expressions in a
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
@@ -201,7 +193,7 @@ class MassModel(Object):
 	@property
 	def get_external_metabolites(self):
 		"""Get all 'external' metabolites in the reaction. Primarily used for
-		setting fixed concentrations"""
+		setting fixed concentrations for null sinks and sources"""
 		external_set = {rxn.get_external_metabolite for rxn in self.reactions
 				if rxn.exchange}
 		return list(sorted(external_set))
@@ -235,6 +227,15 @@ class MassModel(Object):
 	def custom_parameters(self):
 		"""Get the custom rate parameters in the MassModel"""
 		return self._custom_parameters
+	@property
+	def parameters(self):
+		"""Get all of the parameters associated with a MassModel"""
+		parameters = {}
+		for rxn in self.reactions:
+			parameters.update(rxn.parameters)
+			parameters.update(self.fixed_concentrations)
+			parameters.update(self.custom_parameters)
+		return parameters
 
 	# Methods
 	## Public
@@ -248,11 +249,11 @@ class MassModel(Object):
 		----------
 		model : mass.MassModel
 			The MassModel object to construct the matrix for
-		reaction_list : list of MassReactions or None
+		reaction_list : list of MassReactions, optional
 			List of MassReactions to add to the current stoichiometric matrix.
 			Reactions must already exist in the model in order to update.
 			If None, the entire stoichiometric matrix is reconstructed
-		matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'} or None
+		matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
 			If None, will utilize the matrix type initialized with the original
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
@@ -260,8 +261,11 @@ class MassModel(Object):
 			DataFrame for a pandas 'Dataframe' where species (excluding genes)
 			are row indicies and reactions are column indicices, and 'symbolic'
 			for a sympy.MutableDenseMatrix.
-		dtype : data-type
+		dtype : data-type, optional
 			The desired data-type for the array. If None, defaults to float64
+		update_model : bool, optional
+			If True, will update the stored S matrix in the model with the new
+			matrix type and dtype.
 
 		Returns
 		-------
@@ -312,7 +316,7 @@ class MassModel(Object):
 		----------
 		metabolite_list : list
 			A list of MassMetabolite objects to add to the MassModel
-		add_initial_conditons : bool
+		add_initial_conditons : bool, optional
 			If True, will also add the initial conditions associated with each
 			metabolite to the model. Otherwise just add metabolites without
 			their intial conditions
@@ -362,7 +366,7 @@ class MassModel(Object):
 		----------
 		metabolite_list : list
 			A list of MassMetabolite objects to remove from the MassModel.
-		destructive : bool
+		destructive : bool, optional
 			If False, then the MassMetabolite and its initial condition are
 			removed from the associated MassReactions. If True, also remove
 			the associated MassReactions and their rate laws from the MassModel
@@ -414,7 +418,7 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		metabolite_list : list or None
+		metabolite_list : list, optional
 			A list of MassMetabolite objects. If None, will use all metabolites
 			in the model
 		"""
@@ -486,7 +490,7 @@ class MassModel(Object):
 		ic_dict : dict
 			A dictionary where MassMetabolites are keys and the
 			initial conditions are the values.
-		update_metabolites : bool
+		update_metabolites : bool, optional
 			If True, will update the initial conditions in the MassMetabolite
 			objects as well. Otherwise, only update the model initial conditons
 		"""
@@ -537,6 +541,8 @@ class MassModel(Object):
 		----------
 		reaction_list : list
 			A list of MassReaction objects to add to the MassModel
+		update_stoichiometry : bool, optional
+			If True, will update the matrix after adding the new reactions.
 		"""
 		# If the reaction list is not a list
 		if not hasattr(reaction_list, '__iter__'):
@@ -623,9 +629,11 @@ class MassModel(Object):
 		----------
 		reaction_list : list
 			A list of MassReaction objects to remove from the MassModel.
-		remove_orphans : bool
+		remove_orphans : bool, optional
 			Remove orphaned genes and MassMetabolites from the
 			MassModel as well.
+		update_stoichiometry : bool, optional
+			If True, will update the matrix after adding the new reactions.
 		"""
 		# If the reaction list is not a list
 		if not hasattr(reaction_list, '__iter__'):
@@ -695,9 +703,11 @@ class MassModel(Object):
 		----------
 		metabolite : MassMetabolite
 			Any given metabolite to create an exchange for.
-		exchange_type : string, {"demand", "source", "exchange"}
+		exchange_type : string, {"demand", "source", "exchange"}, optional
 			The type of exchange reaction to create are not case sensitive.
-		reversible : bool
+		external_concentration : float, optional
+			The concentration to set for the external species.
+		reversible : bool, optional
 			If True, exchange is reversible. When using a user-defined type,
 			must specify the reversiblity
 		"""
@@ -749,15 +759,15 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		reaction_list = list or None
+		reaction_list : list, optional
 			The list of reactions to obtain the rates for. If none specified,
 			will return the rates for all reactions in the MassModel
-		rate_type : int {1, 2, 3}
+		rate_type : int {1, 2, 3}, optional
 			The type of rate law to display. Must be 1, 2, of 3.
 			type 1 will utilize kf and Keq,
 			type 2 will utilize kf and kr,
 			type 3 will utilize kr and Keq.
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output a sympy expression, otherwise
 			will output a human readable string.
 
@@ -804,10 +814,10 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		reaction_list = list of MassReactions or None
+		reaction_list : list of MassReaction, optional
 			The list of MassReactions to obtain the disequilibrium ratios for.
 			If None, will return the rates for all reactions in the MassModel
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output sympy expressions, otherwise
 			will output a human readable strings.
 		Returns
@@ -837,10 +847,10 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		reaction_list = list of MassReactions or None
+		reaction_list : list of MassReactions, optional
 			The list of MassReactions to obtain the disequilibrium ratios for.
 			If None, will return the rates for all reactions in the MassModel
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output sympy expressions, otherwise
 			will output a human readable strings.
 		Returns
@@ -975,7 +985,7 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, or None
+		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, optional
 			If None, will utilize the matrix type initialized with the original
 			model. Otherwise reconstruct the S matrix with the specified type.
 			Types can include 'dense' for a standard  numpy.array, 'dok' or
@@ -983,7 +993,7 @@ class MassModel(Object):
 			DataFrame for a pandas 'DataFrame' where species (excluding genes)
 			are row indicies and reactions are column indicices, and 'symbolic'
 			for a sympy.Matrix'.
-		dtype : data-type
+		dtype : data-type, optional
 			The desired data-type for the array. If None, defaults to float
 
 		Returns
@@ -1119,10 +1129,10 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		rebuild_index : bool
+		rebuild_index : bool, optional
 			If True, rebuild the indecies kept in reactions,
 			metabolites and genes.
-		rebuild_relationships : bool
+		rebuild_relationships : bool, optional
 			If True, reset all associations between the reactions, metabolites,
 			genes, and the MassModel and re-add them
 		"""
@@ -1245,16 +1255,16 @@ class MassModel(Object):
 		----------
 		second_model : MassModel
 			The other MassModel to add reactions and metabolites from
-		prefix_existing : string
+		prefix_existing : string, optional
 			Use the string to prefix the reaction identifier of a reaction
 			in the second_model if that reaction already exists within
 			the first model.
-		inplace : bool
+		inplace : bool, optional
 			If True, add the contents directly into the first model.
 			If False, a new MassModel object is created and the first model is
 			left untouched. When done within the model as context, changes to
 			the models are reverted upon exit.
-		new_id : String or None
+		new_id : String or None, optional
 			Will create a new model ID for the merged model if a string
 			is given. Otherwise will just use the model IDs of the first model
 			if inplace is True or create a combined ID if inplace is false.
@@ -1318,7 +1328,7 @@ class MassModel(Object):
 
 		Parameters
 		----------
-		steady_state_concentrations : dict or None
+		steady_state_concentrations : dict, optional
 			A dictionary of steady state concentrations where MassMetabolites
 			are keys and the concentrations are the values. If None, will
 			utilize the initial conditions in the MassModel.
@@ -1326,10 +1336,10 @@ class MassModel(Object):
 			A dictionary of steady state fluxes where MassReactions are keys
 			and fluxes are the values. If None, will utilize the steady state
 			reactions stored in each reaction in the model.
-		at_equilibrium_default : float or None
+		at_equilibrium_default : float, optional
 			The value to set the pseudo order rate constant if the reaction is
-			at equilibrium. If None, will default to 100,000
-		update_parameters : bool
+			at equilibrium. Will default to 100,000
+		update_parameters : bool, optional
 			Whether to update the forward rate constants in the MassReactions.
 			If True, will update the forward rate constants inside the
 			MassReactions with the calculated pseudo order rate constants
@@ -1462,7 +1472,7 @@ class MassModel(Object):
 			String or list of strings representing the reaction. Reversibility
 			is inferred from the arrow, and metabolites in the model are used
 			if they exist or created if they do not.
-		term_split : string
+		term_split : string, optional
 			dividing individual metabolite entries
 		"""
 		if not isinstance(reaction_strings, list):
@@ -1567,15 +1577,19 @@ class MassModel(Object):
 		----------
 		model : mass.MassModel
 			The MassModel object to construct the matrix for
-		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, or None
+		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, optional
 		   Construct the S matrix with the specified matrix type. If None, will
 		   utilize the matrix type in the massmodel. If massmodel does not have
 		   a specified matrix type, will default to 'dense'
 		   Not case sensitive
-		dtype : data-type
+		dtype : data-type, optional
 			Construct the S matrix with the specified data type. If None, will
 			utilize  the data type in the massmodel. If massmodel does not have
 			a specified data type, will default to float64
+		update_model : bool, optional
+			If True, will update the stored S matrix in the model with the new
+			matrix type and dtype.
+
 		Returns
 		-------
 		matrix of class 'dtype'
@@ -1631,12 +1645,12 @@ class MassModel(Object):
 		----------
 		model : mass.MassModel
 			The MassModel object to construct the matrix for
-		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, or None
+		matrix_type: {'dense', 'dok', 'lil', 'dataframe', 'symbolic'}, optional
 		   Construct the matrix with the specified matrix type. If None, will
 		   utilize  the matrix type in the massmodel. If massmodel does not
 		   have a specified matrix type, will default to 'dense'
 		   Not case sensitive
-		dtype : data-type
+		dtype : data-type, optional
 			Construct the S matrix with the specified data type. If None, will
 			utilize  the data type in the massmodel. If massmodel does not have
 			a specified data type, will default to float64
@@ -1695,7 +1709,7 @@ class MassModel(Object):
 			The massmodel to update
 		reaction_list: list of MassReactions
 			The reactions to add to the matrix
-		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}
+		matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
 			The type of matrix
 
 		Warnings
@@ -1741,7 +1755,7 @@ class MassModel(Object):
 		----------
 		s_matrix : matrix of class "dtype"
 			The S matrix for conversion
-		matrix_type: string {'dense', 'lil', 'dok', 'DataFrame', 'symbolic'}
+		matrix_type: {'dense', 'lil', 'dok', 'DataFrame', 'symbolic'}
 			The type of matrix to convert to
 
 		Warnings
@@ -1853,10 +1867,7 @@ class MassModel(Object):
 					num_metabolites=len(self.metabolites),
 					num_reactions=len(self.reactions),
 					num_genes=len(self.genes),
-					num_param=sum([len(rxn.parameters)
-									for rxn in self.reactions] + \
-									[len(self.fixed_concentrations)] + \
-									[len(self.custom_parameters)]),
+					num_param=len(self.parameters),
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),

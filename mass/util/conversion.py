@@ -25,10 +25,10 @@ def to_cobra_metabolite(mass_metabolite, cobra_id=None):
 	----------
 	mass_metabolite : mass.MassMetabolite
 		The MassMetabolite for creating the cobra.Metabolite object
-	cobra_id : string or None
+	cobra_id : string, optional
 		id for the new cobra Metabolite. If no id is specified,
 		one will automatically be generated with the
-		MassMetabolite object's current id + _cobra.
+		MassMetabolite object's current id.
 
 	Returns
 	-------
@@ -46,7 +46,7 @@ def to_cobra_metabolite(mass_metabolite, cobra_id=None):
 
 	# Generate a new ID if none is specified
 	if cobra_id is None:
-		cobra_id = mass_metabolite.id + "_cobra"
+		cobra_id = mass_metabolite.id
 
 	# Generate the cobra Metabolite
 	cobra_metab = Metabolite(id=cobra_id, name=mass_metabolite.name,
@@ -66,10 +66,10 @@ def to_mass_metabolite(cobra_metabolite, mass_id=None):
 	----------
 	cobra_metabolite : cobra.Metabolite
 		The Metabolite for creating the mass.MassMetabolite object
-	mass_id : string or None
+	mass_id : string, optional
 		id for the new mass MassMetabolite. If no id is specified,
 		one will automatically be generated with the
-		Metabolite object's current id + _mass.
+		Metabolite object's current id.
 
 	Returns
 	-------
@@ -87,7 +87,7 @@ def to_mass_metabolite(cobra_metabolite, mass_id=None):
 
 	# Generate a new ID if none is specified
 	if mass_id is None:
-		mass_id = cobra_metabolite.id + "_mass"
+		mass_id = cobra_metabolite.id
 
 	# Generate the mass MassMetabolite
 	mass_metab = massmetabolite.MassMetabolite(id=mass_id,
@@ -116,13 +116,13 @@ def to_cobra_reaction(mass_reaction, cobra_id=None,
 	----------
 	mass_reaction : mass.MassReacion
 		The MassReaction for creating the cobra.Reaction object
-	cobra_id : string or None
+	cobra_id : string, optional
 		id for the new cobra Reaction. If no id is specified,
 		one will automatically be generated with the
-		MassReaction object's current id + _cobra.
-	lower_bound : float or None
-		The initialized lower bound of the cobra Reaction
-	upper_bound : float or None
+		MassReaction object's current id.
+	lower_bound : float, optional
+		The initialized lower bound of the cobra Reaction.
+	upper_bound : float, optional
 		The initialized upper bound of the cobra Reaction
 
 	Returns
@@ -141,7 +141,7 @@ def to_cobra_reaction(mass_reaction, cobra_id=None,
 
 	# Generate a new ID if none is specified
 	if cobra_id is None:
-		cobra_id = mass_reaction.id + "_cobra"
+		cobra_id = mass_reaction.id
 
 	# Generate the bounds
 	if upper_bound is None:
@@ -181,11 +181,11 @@ def to_mass_reaction(cobra_reaction, mass_id=None,
 	----------
 	cobra_reaction : cobra.Reaction
 		The cobra Reaction for creating the mass.MassReaction object
-	mass_id : string or None
+	mass_id : string, optional
 		id for the new mass MassReaction. If no id is specified,
 		one will automatically be generated with the
-		Reaction object's current id + _mass.
-	kinetic_reversibility : bool or None
+		Reaction object's current id.
+	kinetic_reversibility : bool, optional
 		The reversibility of the mass MassReaction.
 
 	Returns
@@ -204,7 +204,7 @@ def to_mass_reaction(cobra_reaction, mass_id=None,
 
 	# Generate a new ID if none is specified
 	if mass_id is None:
-		mass_id = cobra_reaction.id + "_mass"
+		mass_id = cobra_reaction.id
 
 	# Infer kinetic reversibility from bounds if none is specified
 	if kinetic_reversibility is None:
@@ -241,14 +241,14 @@ def to_cobra_model(mass_model, cobra_id=None):
 	----------
 	mass_model : mass.MassModel
 		The MassModel for creating the cobra.Model object
-	cobra_id : string or None
+	cobra_id : string, optional
 		id for the new cobra Model. If no id is specified,
 		one will automatically be generated with the
 		MassModel object's current id + _cobra.
 
 	Returns
 	-------
-	mass.MassReaction
+	cobra.Model
 		The new cobra Model object
 
 	Warnings
@@ -283,7 +283,7 @@ def to_mass_model(cobra_model, mass_id=None):
 	----------
 	cobra_model : cobra.Model
 		The Model for creating the mass.MassModel object
-	mass_id : string or None
+	mass_id : string, optional
 		id for the new mass MassModel. If no id is specified,
 		one will automatically be generated with the
 		Model object's current id + _mass.

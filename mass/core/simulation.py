@@ -29,8 +29,9 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=101, perturbations=None,
-				solver="vode"):
+def simulate(model, time_range, numpoints=500, perturbations=None,
+				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
+				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
 	obtain solutions for the metabolite concentrations and reaction fluxes.
@@ -52,24 +53,38 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 		points for the simulation.
 		Simulation will run from the first point in the vector
 		to the last point in the vector.
-	numpoints :  int
+	numpoints :  int, optional
 		The number of points - 1 to plot if the given time_range is a tuple.
 		Default is 100.
-	perturbations : dict or None
+	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
 		condition. Can be changes to the rate and equilibrium constants,
 		a change to an initial condition, or fixing a concentration.
-	solver : 'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'
+	solver : {'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'}, optional
 		The solver for scipy.integrate.ode to utilize for integrating the ODEs.
+		Default is 'vode'
+	nsteps : int, optional
+		Maximum number of (internally defined) steps allowed during
+		one call to the solver.
+	first_step :  float, optional
+		The value for the first step used by the integrator
+	min_step : float, optional
+		The minimum allowable step size used by the integrator.
+		Does not apply to dopri5 and dop853 solvers
+	max_step : float, optional
+		 Limits for the step sizes used by the integrator.
 
 	Returns
 	-------
-	list of dictionaries representing the concentration and flux solutions:
-		The first item in the list is a dictionary containing the concentration
-		solutions, where key:value pairs are metabolites: vectors of solutions,
-		and the second item in the list is a dictionary containing the flux
-		solutions, where key:value pairs are reactions: vectors of solutions
+	time_range : list
+		A vector containing the time points for the solution profiles
+	c_profile : dict
+		A dictionary containing the concentration solutions, where key:value
+		pairs are metabolites: vectors of solutions,
+	f_profile : dict
+		A dictionary containing the flux solutions, where key:value
+		pairs are reactions: vectors of solutions
 	"""
 	# Check inputs
 	if not isinstance(model, MassModel):
@@ -98,6 +113,15 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
 
+	if not isinstance(nsteps, int):
+		raise TypeError("nsteps must be an integer")
+	if not isinstance(first_step, float):
+		raise TypeError("first_step must be an integer")
+	if not isinstance(min_step, float):
+		raise TypeError("min_step must be an integer")
+	if not isinstance(max_step, float):
+		raise TypeError("max_step must be an integer")
+
 	sim_check = qcqa.can_simulate(model, model._rtype)
 	if not sim_check[model._rtype]:
 		sim_check = qcqa.can_simulate(model, [1,2,3])
@@ -116,7 +140,7 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 			 "irreversible reactions, please generate type 1 or type 2 "
 			"rates if there are kinetically irreversible reactions in the "
 			"model (kr = 0 and Keq = inf, or reversible=False)")
-
+	model.repair()
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
@@ -131,10 +155,9 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 	# Make lambda functions of the odes and rates
 	[lam_odes, lam_jacb] = _make_lambda_odes(model,metab_syms , odes, values)
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
-
 	# Integrate the odes to obtain the concentration solutions
-	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver)
-
+	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver,
+								nsteps, first_step, min_step, max_step)
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
 	for i, sym in enumerate(metab_syms):
@@ -150,19 +173,21 @@ def simulate(model, time_range, numpoints=101, perturbations=None,
 	for rxn, lambda_func_and_args in iteritems(lam_rates):
 		f = np.zeros(time_range.shape)
 		lambda_func = lambda_func_and_args[1]
+		args = lambda_func_and_args[0]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
-							for arg in lambda_func_and_args[0]]).T
+							for arg in args]).T
+
 		for i in range(0, len(f)):
-			f[i] = lambda_func(*concs[i,:])
+			if len(args) != 0:
+				f[i] = lambda_func(*concs[i,:])
+			else:
+				f[i] = lambda_func()
 		f_profile[rxn] = f
 
-	c_profile['t'] = time_range
-	f_profile['t'] = time_range
+	return [time_range, c_profile, f_profile]
 
-	return [c_profile, f_profile]
-
-def find_steady_state(model, strategy="simulate", update_reactions=False,
-						update_initial_conditions=False):
+def find_steady_state(model, strategy="simulate", perturbations=None,
+			update_reactions=False, update_initial_conditions=False):
 	"""Find the steady state solution of a model using a given strategy
 
 	Parameters
@@ -171,9 +196,14 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		The MassModel object to find a steady state for.
 	strategy : 'simulate' or 'find_roots'
 		The strategy to use to solve for the steady state.
-	update_reactions : bool
+	perturbations : dict, optional
+		A dictionary of events to incorporate into the simulation, where keys
+		are the event to incorporate, and values are new parameter or initial
+		condition. Can be changes to the rate and equilibrium constants,
+		a change to an initial condition, or fixing a concentration.
+	update_reactions : bool, optional
 		If True, update the steady state fluxes (ssflux) in each reaction.
-	update_initial_conditions : bool
+	update_initial_conditions : bool, optional
 		If True, update initial conditions in the model for each metabolite.
 
 	Returns
@@ -203,6 +233,17 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 							simulation=True)
 			return [None, None]
 
+	if perturbations is None:
+		perturbations = {}
+	elif not isinstance(perturbations, dict):
+		raise TypeError("Perturbations must be in a dictionary")
+	else:
+		full_pert_check = re.compile("|".join([pert_type.pattern
+                    for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+		for perturb, value in iteritems(perturbations):
+			if not full_pert_check.search(perturb):
+				raise TypeError("Perturbation not recognized")
+
 	options = {"simulate": simulate, "find_roots": None}
 	# Perform the simulate strategy
 	if strategy is "simulate":
@@ -211,9 +252,9 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time_range = np.linspace(0, 10**power,num=10**(power-1),
-										endpoint=True)
-			[c_profile, f_profile] = options[strategy](model, time_range)
+			time_range = (0, 10**power)
+			[t, c_profile, f_profile] = options[strategy](model,
+									time_range, perturbations=perturbations)
 			for metab, conc in iteritems(c_profile):
 				if abs(conc[-1] - conc[-2]) <= 10**9:
 					continue
@@ -231,11 +272,15 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 			c_profile[metab] = round(conc[-1], 6)
 			# Update model initial conditions if specified
 			if update_initial_conditions:
+				if metab is 't':
+					continue
 				model.initial_conditions[metab] = round(conc[-1], 6)
 		for reaction, flux in iteritems(f_profile):
 			f_profile[reaction] = round(flux[-1], 6)
 			# Update reaction steady state flux if specified
 			if update_reactions:
+				if reaction is 't':
+					continue
 				reaction.ssflux = round(flux[-1], 6)
 
 		return [c_profile, f_profile]
@@ -244,6 +289,9 @@ def find_steady_state(model, strategy="simulate", update_reactions=False,
 	elif strategy is "find_roots":
 		# Collect sympy symbols and make dictionariess for odes and rates
 		odes, rates, symbols = expressions._sort_symbols(model)
+		if len(perturbations) != 0:
+			odes, rates, symbols, perturbations = _perturb(model, odes, rates,
+														symbols, perturbations)
 		# Get values to substitute into ODEs and metabolite initial conditions
 		values, ics = _get_values(model, dict(), symbols)
 
@@ -444,10 +492,12 @@ def _make_lambda_odes(model, metabolites, ode_dict, values):
 
 	return [lambda_odes, lambda_jacb]
 
-def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver):
+def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver,
+					nsteps, first_step, min_step, max_step):
 	"""Internal use. Integrate the ODEs using lambda functions that represent
 	the system of ODEs and the jacobian"""
 	# Fix types from tuples to lists
+
 	def f(t, y):
 		res = lam_odes(t, y)
 		return list(res)
@@ -458,8 +508,12 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver):
 
 	# Set up integrator
 	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
-	integrator.set_integrator(solver, nsteps=int(1000000))
-
+	if solver in ['dopri5', 'dop853']:
+		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
+		 							max_step=max_step)
+	else:
+		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
+									min_step=min_step, max_step=max_step)
 	# Set up solutions array
 	y = np.zeros((len(t_vector), len(ics)))
 	dt = t_vector[1] - t_vector[0]
@@ -483,6 +537,7 @@ def _make_lambda_rates(model, metabolites, rate_dict, values):
 							for i, metab_func in enumerate(list(metabolites)))
 	for rxn, rate in iteritems(rate_dict):
 		rate = rate.subs(metab_func_to_sym).subs(values)
-		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites))
+		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites)
+					if sp.Symbol(m.id) in rate.atoms(sp.Symbol))
 		rate_dict[rxn] = [args, sp.lambdify(args, rate, "numpy")]
 	return rate_dict

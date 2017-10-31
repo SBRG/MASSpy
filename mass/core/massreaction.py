@@ -237,15 +237,8 @@ class MassReaction(Object):
 		"""Returns a list containing the stoichiometry of the reaction"""
 		return [c for m, c in iteritems(self._metabolites)]
 
-
 	@property
 	def rate(self):
-		"""Returns the rate law as a human readable string"""
-		return expressions.generate_rate_law(self, rate_type=self._rtype,
-									sympy_expr=False, update_reaction=True)
-
-	@property
-	def rate_expression(self):
 		"""Returns the rate law as a sympy expression"""
 
 		return expressions.generate_rate_law(self, rate_type=self._rtype,
@@ -497,15 +490,15 @@ class MassReaction(Object):
 
 		Parameters
 		----------
-		rate_type : int {1, 2, 3}
+		rate_type : int {1, 2, 3}, optional
 			The type of rate law to display. Must be 1, 2, of 3.
 			type 1 will utilize kf and Keq,
 			type 2 will utilize kf and kr,
 			type 3 will utilize kr and Keq.
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output a sympy expression, otherwise
 			will output a human readable string.
-		update_reaction : bool
+		update_reaction : bool, optional
 			If True, will update the MassReaction in addition to returning the
 			rate law. Otherwise just return the rate law.
 
@@ -522,7 +515,7 @@ class MassReaction(Object):
 
 		Parameters
 		----------
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output a sympy expression, otherwise
 			will output a human readable string.
 
@@ -538,7 +531,7 @@ class MassReaction(Object):
 
 		Parameters
 		----------
-		sympy_expr : bool
+		sympy_expr : bool, optional
 			If True, will output a sympy expression, otherwise
 			will output a human readable string.
 
@@ -560,7 +553,7 @@ class MassReaction(Object):
 
 		Parameters
 		----------
-		remove_orphans : bool
+		remove_orphans : bool, optional
 			Remove orphaned genes and metabolites from the massmodel as well
 		"""
 		return self._model.remove_reactions([self],remove_orphans)
@@ -569,7 +562,7 @@ class MassReaction(Object):
 		"""Copy a reaction.
 
 		The rate constants, rate laws, referenced metabolites, and genes are
-		also copied
+		also copied.
 		"""
 		# No references to massmodel when copying
 		massmodel = self._model
@@ -592,7 +585,7 @@ class MassReaction(Object):
 
 	def get_coefficient(self, metabolite_id):
 		"""Return the stoichiometric coefficients of a metabolite
-		in the reaction
+		in the reaction.
 
 		Similar to the method in cobra.core.reaction
 
@@ -636,13 +629,11 @@ class MassReaction(Object):
 			keys and coefficients as values. If keys are strings (name of a
 			metabolite) the reaction must already be part of a massmodel and a
 			metabolite with the given name must exist in the massmodel.
-
-		combine : bool
+		combine : bool, optional
 			Describes behavior a metabolite already exists in the reaction.
 			True causes the coefficients to be added.
 			False causes the coefficient to be replaced.
-
-		reversibly : bool
+		reversibly : bool, optional
 			Whether to add the change to the context to make the change
 			reversibly or not (primarily intended for internal use).
 		"""
@@ -726,17 +717,15 @@ class MassReaction(Object):
 			keys and coefficients as values. If keys are strings (name of a
 			metabolite) the reaction must already be part of a massmodel and a
 			metabolite with the given name must exist in the massmodel.
-
-		combine : bool
+		combine : bool, optional
 			Describes behavior a metabolite already exists in the reaction.
 			True causes the coefficients to be added.
 			False causes the coefficient to be replaced.
-
-		reversibly : bool
+		reversibly : bool, optional
 			Whether to add the change to the context to make the change
 			reversibly or not (primarily intended for internal use).
 
-		.. note:: A final coefficient < 0 implies a reactant.
+		Note: A final coefficient < 0 implies a reactant.
 
 		Warnings
 		--------
@@ -750,6 +739,12 @@ class MassReaction(Object):
 
 	def build_reaction_string(self, use_metabolite_names=False):
 		"""Generate a human readable reaction string
+
+		Parameters
+		----------
+		use_metabolite_names : bool, optional
+			If True, use metabolite names instead of identifiers.
+			Default is False.
 
 		Similar to the method in cobra.core.reaction
 		"""
@@ -824,17 +819,17 @@ class MassReaction(Object):
 		Parameters
 		----------
 		reaction_str : string
-			a string containing a reaction formula (equation)
-		verbose: bool
-			setting verbosity of function
-		fwd_arrow : re.compile
-			for forward irreversible reaction arrows
-		rev_arrow : re.compile
-			for backward irreversible reaction arrows
-		reversible_arrow : re.compile
-			for reversible reaction arrows
-		term_split : string
-			dividing individual metabolite entries
+			A string containing a reaction formula (equation)
+		verbose: bool, optional
+			Setting verbosity of function
+		fwd_arrow : re.compile, optional
+			For forward irreversible reaction arrows
+		rev_arrow : re.compile, optional
+			For backward irreversible reaction arrows
+		reversible_arrow : re.compile, optional
+			For reversible reaction arrows
+		term_split : string, optional
+			Dividing individual metabolite entries. Default is '+'
 
 		"""
 		# Set the arrows

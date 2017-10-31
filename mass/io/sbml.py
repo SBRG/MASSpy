@@ -118,23 +118,25 @@ class MassSBMLError(Exception):
     pass
 
 # Public Methods
-def parse_stream(filename):
-    """parses filename or compressed stream to xml"""
-    try:
-        if hasattr(filename, "read"):
-            return parse(filename)
-        elif filename.endswith(".gz"):
-            with GzipFile(filename) as infile:
-                return parse(infile)
-        elif filename.endswith(".bz2"):
-            with BZ2File(filename) as infile:
-                return parse(infile)
-        else:
-            return parse(filename)
-    except ParseError as e:
-        raise MassSBMLError("Malformed XML file: " + str(e))
-
 def parse_xml_into_model(xml, number=float):
+    """Load a mass model from an xml object.
+
+    Parameters
+    ----------
+    xml : xml object
+        The string-like representation of a mass model in xml format.
+    number : float or int
+        The typecasting to use for certain number parsing instances
+
+    Returns
+    -------
+    mass.MassModel
+        The mass model as represented in the SBML/XML document.
+
+    See Also
+    --------
+    read_sbml_model : Load directly from a file.
+    """
     # add model
     xml_model = xml.find(ns("sbml:model"))
     if _get_attrib(xml_model, "fbc:required") == "false":
@@ -309,6 +311,22 @@ def parse_xml_into_model(xml, number=float):
     return model
 
 def model_to_xml(mass_model):
+    """Return the model as an xml object.
+
+    Parameters
+    ----------
+    model : mass.MassModel
+        The mass model to represent.
+
+    Returns
+    -------
+    ElementTree.Element
+        string-like representation of the mass model as an xml object.
+
+    See Also
+    --------
+    write_sbml_model : Write directly to a file.
+    """
     # add in model
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
@@ -463,6 +481,24 @@ def model_to_xml(mass_model):
     return xml
 
 def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
+    """Write the mass model to a file in SBML/XML format.
+
+    ``kwargs`` are passed on to ``ElementTree.write``.
+
+    Parameters
+    ----------
+    mass_model : mass.MassModel
+        The mass model to represent.
+    filename : str or file-like
+        File path or descriptor that the SBML/XML representation should be
+        written to.
+    use_fbc_package: bool
+        Option to use fbc package for generating SBML/XML document
+
+    See Also
+    --------
+    model_to_xml : Return an xml object.
+    """
     if not _with_lxml:
         warn("Install lxml for faster SBML I/O", ImportWarning)
     if not use_fbc_package:
@@ -495,10 +531,42 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         xmlfile.close()
 
 def read_sbml_model(filename):
-    """parses filename or compressed stream into a MassModel object"""
-    return parse_xml_into_model(parse_stream(filename))
+    """Load a mass model from a file in JSON format.
+
+    Parameters
+    ----------
+    filename : str or file-like
+        File path or descriptor that contains the SBML/XML document describing
+        the mass model.
+
+    Returns
+    -------
+    mass.MassModel
+        The mass model as represented in the SBML/XML document.
+
+    See Also
+    --------
+    parse_xml_into_model : Load from an xml object.
+    """
+    return parse_xml_into_model(_parse_stream(filename))
 
 # Internal Methods
+def _parse_stream(filename):
+    """Parses filename or compressed stream to xml"""
+    try:
+        if hasattr(filename, "read"):
+            return parse(filename)
+        elif filename.endswith(".gz"):
+            with GzipFile(filename) as infile:
+                return parse(infile)
+        elif filename.endswith(".bz2"):
+            with BZ2File(filename) as infile:
+                return parse(infile)
+        else:
+            return parse(filename)
+    except ParseError as e:
+        raise MassSBMLError("Malformed XML file: " + str(e))
+
 def _get_attrib(tag, attribute, type=lambda x: x, require=False):
     value = tag.get(ns(attribute))
     if require and value is None:

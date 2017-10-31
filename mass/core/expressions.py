@@ -35,15 +35,17 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 
 	Parameters
 	----------
-	rate_type : int {1, 2, 3}
+	reaction : mass.MassReaction
+		The MassReaction object to generate the rate for.
+	rate_type : int {1, 2, 3}, , optional
 		The type of rate law to display. Must be 1, 2, of 3.
 		type 1 will utilize kf and Keq,
 		type 2 will utilize kf and kr,
 		type 3 will utilize kr and Keq.
-	sympy_expr : bool
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
-	update_reaction : bool
+	update_reaction : bool, optional
 		If True, will update the MassReaction in addition to returning the
 		rate law. Otherwise just return the rate law.
 
@@ -95,7 +97,9 @@ def get_mass_action_ratio(reaction, sympy_expr=False):
 
 	Parameters
 	----------
-	sympy_expr : bool
+	reaction : mass.MassReaction
+		The MassReaction object to get the mass action ratio for.
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
 
@@ -121,7 +125,9 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 
 	Parameters
 	----------
-	sympy_expr : bool
+	reaction : mass.MassReaction
+		The MassReaction object to generate the disequilibrium ratio for.
+	sympy_expr : bool, optional
 		If True, will output a sympy expression, otherwise
 		will output a human readable string.
 
@@ -143,6 +149,17 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 		return str(de_r)
 
 def generate_ode(metabolite):
+	"""Generate the ODE for a metabolite as a sympy expression for simulation.
+
+	Parameters
+	----------
+	metabolite : mass.MassMetabolite
+		The MassMetabolite object to generate the ODE for.
+
+	Returns
+	-------
+	sympy expression of the ODE for the metabolite
+	"""
 	if not isinstance(metabolite, massmetabolite.MassMetabolite):
 		raise TypeError("metabolite must be a MassMetabolite")
 
@@ -154,7 +171,7 @@ def generate_ode(metabolite):
 		if rxn._model is not None and rxn in rxn._model.custom_rates:
 			rate_law_expr = rxn._model.custom_rates[rxn]
 		else:
-			rate_law_expr = rxn.rate_expression
+			rate_law_expr = rxn.rate
 
 		if metabolite in rxn.reactants:
 			rate_law_expr = sp.Mul(-1, rate_law_expr)
@@ -607,12 +624,14 @@ def _sort_symbols(model):
 			if metab in iterkeys(model.fixed_concentrations):
 				metab_sym = sp.Symbol(metab.id, nonnegative=True)
 				ode_dict[item] = expression.subs({func: metab_sym})
-				for reaction, rate in iteritems(model.rate_expressions):
+				for reaction, rate in iteritems(model.rates):
 					rate_dict[reaction] = rate.subs({func: metab_sym})
 				fixed_symbols.add(metab_sym)
 			else:
 				metab_funcs.add(func)
-
+		if sp.Function(item.id)(t) not in metab_funcs and \
+			sp.Symbol(item.id) not in fixed_symbols:
+			metab_funcs.add(sp.Function(item.id)(t))
 	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
 	return ode_dict, rate_dict, symbol_list
 

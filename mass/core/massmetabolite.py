@@ -203,7 +203,7 @@ class MassMetabolite(Species):
 
 		Parameters
 		----------
-		destructive : bool
+		destructive : bool, optional
 			If False then the metabolite is removed from all associated
 			reactions.  If True then all associated reactions are removed from
 			the MassModel.
