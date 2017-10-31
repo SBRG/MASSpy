@@ -25,9 +25,9 @@ import cobra
 from cobra import DictList
 
 # from mass
-import mass
-from mass import MassMetabolite, MassReaction, MassModel
-
+from mass.core.massmetabolite import MassMetabolite
+from mass.core.massreaction import MassReaction
+from mass.core.massmodel import MassModel
 
 
 def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
@@ -596,7 +596,7 @@ def _get_conc_flux_array(sol_df, start, final, **options):
 
     if options["observable"] is None or options["observable"] == []:
         df_conc_flux = sol_df
-        legend_ids = sol_df.columns.tolist()
+        legend_ids = [item.id for item in sol_df.columns.tolist()]
     else:
         if isinstance(options["observable"], MassMetabolite):
             options["observable"] = [options["observable"]]
@@ -616,7 +616,7 @@ def _get_conc_flux_array(sol_df, start, final, **options):
                                 "MassMetabolites, or list of strings")
 
         df_conc_flux = sol_df[options["observable"]]
-        legend_ids = options["observable"]
+        legend_ids = [item.id for item in options["observable"]]
 
     return df_conc_flux, legend_ids
 
