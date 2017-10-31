@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 from mass.core import (
-    MassMetabolite, MassModel, MassReaction)
+    MassMetabolite, MassModel, MassReaction, simulate, find_steady_state,
+    plot_simulation, plot_phase_portrait)
 
 from mass import analysis
 from mass import io
