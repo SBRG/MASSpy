@@ -629,7 +629,9 @@ def _sort_symbols(model):
 				fixed_symbols.add(metab_sym)
 			else:
 				metab_funcs.add(func)
-
+		if sp.Function(item.id)(t) not in metab_funcs and \
+			sp.Symbol(item.id) not in fixed_symbols:
+			metab_funcs.add(sp.Function(item.id)(t))
 	symbol_list = [metab_funcs, rate_symbols, fixed_symbols, custom_symbols]
 	return ode_dict, rate_dict, symbol_list
 

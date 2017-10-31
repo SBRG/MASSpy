@@ -29,7 +29,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=100, perturbations=None,
+def simulate(model, time_range, numpoints=500, perturbations=None,
 				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
@@ -155,11 +155,9 @@ def simulate(model, time_range, numpoints=100, perturbations=None,
 	# Make lambda functions of the odes and rates
 	[lam_odes, lam_jacb] = _make_lambda_odes(model,metab_syms , odes, values)
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
-
 	# Integrate the odes to obtain the concentration solutions
 	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver,
 								nsteps, first_step, min_step, max_step)
-
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
 	for i, sym in enumerate(metab_syms):
@@ -175,12 +173,16 @@ def simulate(model, time_range, numpoints=100, perturbations=None,
 	for rxn, lambda_func_and_args in iteritems(lam_rates):
 		f = np.zeros(time_range.shape)
 		lambda_func = lambda_func_and_args[1]
+		args = lambda_func_and_args[0]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
-							for arg in lambda_func_and_args[0]]).T
-		for i in range(0, len(f)):
-			f[i] = lambda_func(*concs[i,:])
-		f_profile[rxn] = f
+							for arg in args]).T
 
+		for i in range(0, len(f)):
+			if len(args) != 0:
+				f[i] = lambda_func(*concs[i,:])
+			else:
+				f[i] = lambda_func()
+		f_profile[rxn] = f
 
 	return [time_range, c_profile, f_profile]
 
@@ -230,7 +232,7 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
 			return [None, None]
-		
+
 	if perturbations is None:
 		perturbations = {}
 	elif not isinstance(perturbations, dict):
@@ -535,6 +537,7 @@ def _make_lambda_rates(model, metabolites, rate_dict, values):
 							for i, metab_func in enumerate(list(metabolites)))
 	for rxn, rate in iteritems(rate_dict):
 		rate = rate.subs(metab_func_to_sym).subs(values)
-		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites))
+		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites)
+					if sp.Symbol(m.id) in rate.atoms(sp.Symbol))
 		rate_dict[rxn] = [args, sp.lambdify(args, rate, "numpy")]
 	return rate_dict
