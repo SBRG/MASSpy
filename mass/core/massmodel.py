@@ -153,6 +153,13 @@ class MassModel(Object):
 
 	# Properties
 	@property
+	def attributes(self):
+		"""Get a list of public model attributes and properties"""
+		return [s for s in iterkeys(self.__dict__) if s[0] is not '_'] + \
+				[p for p in dir(self.__class__)
+				if isinstance(getattr(self.__class__ ,p),property)]
+
+	@property
 	def S(self):
 		"""Get the Stoichiometric Matrix of the MassModel"""
 		return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
@@ -220,6 +227,15 @@ class MassModel(Object):
 	def custom_parameters(self):
 		"""Get the custom rate parameters in the MassModel"""
 		return self._custom_parameters
+	@property
+	def parameters(self):
+		"""Get all of the parameters associated with a MassModel"""
+		parameters = {}
+		for rxn in self.reactions:
+			parameters.update(rxn.parameters)
+			parameters.update(self.fixed_concentrations)
+			parameters.update(self.custom_parameters)
+		return parameters
 
 	# Methods
 	## Public
@@ -1851,10 +1867,7 @@ class MassModel(Object):
 					num_metabolites=len(self.metabolites),
 					num_reactions=len(self.reactions),
 					num_genes=len(self.genes),
-					num_param=sum([len(rxn.parameters)
-									for rxn in self.reactions] + \
-									[len(self.fixed_concentrations)] + \
-									[len(self.custom_parameters)]),
+					num_param=len(self.parameters),
 					num_ic= len(self.initial_conditions),
 					num_exchanges=len(self.exchanges),
 					num_irreversible=len(self.get_irreversible_reactions),
