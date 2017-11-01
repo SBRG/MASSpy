@@ -9,6 +9,7 @@ import sympy as sp
 from warnings import warn
 from scipy.integrate import ode
 from scipy.optimize import root
+from scipy.interpolate import interp1d
 from six import iteritems, iterkeys, itervalues, integer_types
 
 # from mass
@@ -29,7 +30,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=500, perturbations=None,
+def simulate(model, time_range, numpoints=250, perturbations=None,
 				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
@@ -108,7 +109,7 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 		raise TypeError("Perturbations must be in a dictionary")
 	else:
 		full_pert_check = re.compile("|".join([pert_type.pattern
-                    for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+					for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
 		for perturb, value in iteritems(perturbations):
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
@@ -184,7 +185,16 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 				f[i] = lambda_func()
 		f_profile[rxn] = f
 
-	return [time_range, c_profile, f_profile]
+	# Create interpolating functions for the concentrations and flux profiles
+	for profile in [c_profile, f_profile]:
+		for key, sol in iteritems(profile):
+			if abs(sol[-1]) <= 1e-9:
+				sol = sol[:-1]
+			profile[key] = interp1d(time_range, profile[key], kind='quadratic',
+													fill_value='extrapolate')
+
+
+	return [c_profile, f_profile]
 
 def find_steady_state(model, strategy="simulate", perturbations=None,
 			update_reactions=False, update_initial_conditions=False):
@@ -239,7 +249,7 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 		raise TypeError("Perturbations must be in a dictionary")
 	else:
 		full_pert_check = re.compile("|".join([pert_type.pattern
-                    for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+					for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
 		for perturb, value in iteritems(perturbations):
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
@@ -248,14 +258,16 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 	# Perform the simulate strategy
 	if strategy is "simulate":
 		# Start with final time point at 10^3, quit after trying 10^6
-		power = 3
+		power = 1
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time_range = (0, 10**power)
-			[t, c_profile, f_profile] = options[strategy](model,
+			time_range = np.linspace(0, 10**power, int(10**(power+1)))
+			[c_profile, f_profile] = options[strategy](model,
 									time_range, perturbations=perturbations)
-			for metab, conc in iteritems(c_profile):
+			for metab, profile in iteritems(c_profile):
+				conc = profile(time_range)
+				print(conc)
 				if abs(conc[-1] - conc[-2]) <= 10**9:
 					continue
 				else:
@@ -268,20 +280,22 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 			warn("Unable to find a steady state using strategy %s" % strategy)
 			return [None, None]
 		# Return steady state solutions
-		for metab, conc in iteritems(c_profile):
-			c_profile[metab] = round(conc[-1], 6)
+		for metab, profile in iteritems(c_profile):
+			conc = float(profile(time_range[-1]))
+			c_profile[metab] = round(conc, 6)
 			# Update model initial conditions if specified
 			if update_initial_conditions:
 				if metab is 't':
 					continue
-				model.initial_conditions[metab] = round(conc[-1], 6)
-		for reaction, flux in iteritems(f_profile):
-			f_profile[reaction] = round(flux[-1], 6)
+				model.initial_conditions[metab] = round(conc, 6)
+		for reaction, profile in iteritems(f_profile):
+			flux = float(profile(time_range[-1]))
+			f_profile[reaction] = round(flux, 6)
 			# Update reaction steady state flux if specified
 			if update_reactions:
 				if reaction is 't':
 					continue
-				reaction.ssflux = round(flux[-1], 6)
+				reaction.ssflux = round(flux, 6)
 
 		return [c_profile, f_profile]
 
@@ -510,7 +524,7 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver,
 	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
 	if solver in ['dopri5', 'dop853']:
 		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
-		 							max_step=max_step)
+									max_step=max_step)
 	else:
 		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
 									min_step=min_step, max_step=max_step)
