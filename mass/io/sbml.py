@@ -531,7 +531,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         xmlfile.close()
 
 def read_sbml_model(filename):
-    """Load a mass model from a file in JSON format.
+    """Load a mass model from a file in SBML/XML format.
 
     Parameters
     ----------
