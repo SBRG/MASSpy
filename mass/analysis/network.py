@@ -17,10 +17,10 @@ from mass.core import massmodel
 ## Hex codes for certain colors and default color schemes
 l_gray = "#D3D3D3"
 
+
 def visualize_current_state(model, map_name=None, map_json=None, **kwargs):
 	"""Display the current concentrations and steady state fluxes of the model
 	onto an Escher map."""
-	
 	# Check inputs
 	if map_name is None and map_json is None:
 		raise ValueError("Either map_name or map_json must be specified")
@@ -29,13 +29,24 @@ def visualize_current_state(model, map_name=None, map_json=None, **kwargs):
 
 	concentrations = dict((m.id, ic)
 					   for m, ic in iteritems(model.initial_conditions))
-	fluxes = [dict((r.id, r.ssflux)
-					   for r in model.reactions)]
-	b = escher.Builder(map_name=map_name, map_json=map_json, model=model,
-					metabolite_data=concentrations, reaction_data=fluxes,
-					metabolite_no_data_color=l_gray,
-					reaction_no_data_color=l_gray, **kwargs)
+	fluxes = dict((r.id, r.ssflux)
+					   for r in model.reactions if r.ssflux is not None)
+	if concentrations == {}:
+		concentrations = None
+		ndc = None
+	else:
+		ndc = l_gray
 
+	if fluxes == {}:
+		fluxes = None
+		ndf = None
+	else:
+		ndf = l_gray
+
+	b = escher.Builder(map_name=map_name, map_json=map_json, model=model,
+						metabolite_data=concentrations, reaction_data=fluxes,
+						metabolite_no_data_color=ndc,
+						reaction_no_data_color=ndf, **kwargs)
 	return b.display_in_notebook()
 
 def visualize_tsd(model, time_scales,
