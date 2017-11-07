@@ -21,7 +21,6 @@ from six import iterkeys, itervalues
 from cycler import cycler
 
 # from cobra
-import cobra
 from cobra import DictList
 
 # from mass
@@ -274,8 +273,8 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
                     _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
                                          default_fontsize, **options)
 
-                    _label_poi_lists(poi, sol_df, xcol, ycol, ax, ts, time, 
-                                     df_x, px, df_y, py, 
+                    _label_poi_lists(poi, sol_df, xcol, ycol, ax, 
+                                     ts, time, df_x, px, df_y, py, 
                                      start, final, default_fontsize)
 
                 elif place_tiles_dict[place_tiles](j, i):
