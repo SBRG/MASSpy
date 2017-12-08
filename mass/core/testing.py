@@ -56,8 +56,9 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     get_default_options()
     """
 
-    # Process time vector into numpy array
+    # Process time vector into numpy array, get sorted solution profiel
     time = _gen_np_time_vector(time)
+    ss = _sort_dict(solution_profile)
 
     # Step 0: Get options if provided, else use defaults
     options = _get_options(**kwargs)
@@ -67,8 +68,9 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     start, final = _get_time_range(**options)
     time = pd.DataFrame(time).loc[start:final].values
 
-    # Step 2: Generate conc/flux arrays for plotting
-    plt_args = _gen_plot_args(time, solution_profile)
+    # Step 2: Generate conc/flux array for plotting
+    plt_args, legend_ids = _gen_plot_args(
+        time, ss, solution_profile, **options)
 
     # Step 3: Make plot using options and vectors provided
     style, xgrid, ygrid = _set_style(**options)
@@ -80,14 +82,12 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
         # Step 4: Add remaining plotting options
         plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
-        #FIXME
-        #_add_custom_linecolors(fig, ax, legend_ids, **options)
+        _add_custom_linecolors(fig, ax, legend_ids, **options)
         _add_plot_range(ax, **options)
 
         _plot_title_options(**options)
         _plot_figsize(fig, **options)
-        #FIXME
-        #_plot_legend(legend_ids, default_fontsize, **options)
+        _plot_legend(legend_ids, default_fontsize, **options)
 
         _set_log_scale(ax, default=True, **options)
         _plot_gridlines(ax, xgrid, ygrid)
@@ -299,6 +299,20 @@ def _sort_df(sol_df):
 
     return sol_df.reindex_axis(ss, axis=1)
 
+def _sort_dict(solution_profile):
+    ds = DictList(solution_profile)
+    ls = []
+
+    for key in solution_profile.keys():
+        ls.append(key.id)
+    ls = sorted(ls)
+
+    ss = DictList()
+    for i in range(len(ls)):
+        ss.append(ds.get_by_id(ls[i]))
+
+    return ss
+
 def _gen_np_time_vector(time):
     if isinstance(time, list) or isinstance(time, tuple):
         return np.array(time)
@@ -308,18 +322,40 @@ def _gen_np_time_vector(time):
         msg = "time must be of type list, tuple, or numpy.ndarray"
         raise TypeError(msg)
 
-def _gen_plot_args(time, solution_profile):
-    # Convert list of time points into list of lists of len(solution_profile)
-    t_vec = [time] * len(solution_profile)
+def _gen_plot_args(time, ss, solution_profile, **options):
+    legend_ids = None
+
+    # Convert options["observable"] into list of str if not None or not []
+    if options["observable"] is None or options["observable"] == []:
+        legend_ids = [x.id for x in ss]
+    else:
+        if isinstance(options["observable"], MassMetabolite):
+            options["observable"] = [options["observable"].id]
+        elif isinstance(options["observable"], str):
+            options["observable"] = [options["observable"]]
+        elif isinstance(options["observable"], list):
+            if isinstance(options["observable"][0], MassMetabolite):
+                options["observable"] = [x.id for x in options["observable"]]
+            elif isinstance(options["observable"][0], str):
+                pass
+            else:
+                raise TypeError("Expected MassMetabolite, string, list of "\
+                    "MassMetabolites, or list of strings")
+
+        options["observable"] = sorted(options["observable"])
+        ss = ss.get_by_any(options["observable"])
+        legend_ids = options["observable"]
+
+    # Convert list of time points into list of lists of len(ss)
+    t_vec = [time] * len(ss)
 
     # Convert dict of interpolating functions into list of lists
-    v_list = list(solution_profile.values())
-    v_list = [v_list[i](time) for i in range(len(v_list))]
+    v_list = [solution_profile[ss[i]](time) for i in range(len(ss))]
 
     # Generate list of interleaving lists (for Axes.plot method)
     plt_args = [val for pair in zip(t_vec, v_list) for val in pair]
 
-    return plt_args
+    return plt_args, legend_ids
 
 def _get_options(tiled=False, **kwargs):
     options = {}
