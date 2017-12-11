@@ -43,13 +43,13 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     # Check type of solution_profile, then execute appropriate subroutine
     if isinstance(solution_profile, np.ndarray):
-        plot_simulation_ndarray(
+        _plot_simulation_ndarray(
             time, solution_profile, default_fontsize, **kwargs)
 
     elif isinstance(solution_profile, dict):
         interp_val = list(solution_profile.values())[0]
-        if isinstance(interp_val, scipy.interpolate.interpolate.interp1d):
-            plot_simulation_interp1d(
+        if isinstance(interp_val, interp1d):
+            _plot_simulation_interp1d(
                 time, solution_profile, default_fontsize, **kwargs)
 
     else:
