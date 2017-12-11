@@ -47,7 +47,7 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
             time, solution_profile, default_fontsize, **kwargs)
 
     elif isinstance(solution_profile, dict):
-        list(solution_profile.values())[0] = interp_val
+        interp_val = list(solution_profile.values())[0]
         if isinstance(interp_val, scipy.interpolate.interpolate.interp1d):
             plot_simulation_interp1d(
                 time, solution_profile, default_fontsize, **kwargs)
