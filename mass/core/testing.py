@@ -43,44 +43,99 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     # Check type of solution_profile, then execute appropriate subroutine
     if isinstance(solution_profile, np.ndarray):
-        _plot_simulation_ndarray(
+        plot_simulation_ndarray(
+            time, solution_profile, default_fontsize, **kwargs)
+    elif isinstance(solution_profile, dict):
+        plot_simulation_interp1d(
             time, solution_profile, default_fontsize, **kwargs)
 
-    elif isinstance(solution_profile, dict):
-        interp_val = list(solution_profile.values())[0]
-        if isinstance(interp_val, interp1d):
-            _plot_simulation_interp1d(
-                time, solution_profile, default_fontsize, **kwargs)
-
-    else:
-        msg = "solution_profile must be of type numpy.ndarray "\
-        "or scipy.interpolate.interpolate.interp1d"
-        raise TypeError(msg)
 
 
-
-def plot_phase_portrait(time, solution_profile, x, y, poi=None, 
-                        ts=None, default_fontsize=15, **kwargs):
-    """Generates a phase portrait of x,y in the solution_profile over time.
+def plot_simulation_interp1d(
+    time, solution_profile, default_fontsize=15, **kwargs):
+    """Generates a plot of the data in the solution_profile over time.
 
     ``kwargs`` are passed on to various matplotlib methods. 
     See get_default_options() for a full description.
 
     Parameters
     ----------
-    time: np.array
+    time: list or tuple or numpy.ndarray
         An array containing the time points over with the system was simulated
-    solution_profile : np.array
+    solution_profile : dict of type scipy.interpolate.interpolate.interp1d
+        An dict containing the interpolating functions representing 
+        simulated results for either concentration or flux
+    default_fontsize: int
+        The value of the default fontsize for much of the plot text
+
+    Returns
+    -------
+    plt.gcf()
+        A reference to the current figure instance. Shows plot when returned.
+        Can be used to modify plot after initial generation.
+
+    See Also:
+    ---------
+    get_default_options()
+    """
+
+    # Process time vector into numpy array, get sorted solution profiel
+    time = _gen_np_time_vector(time)
+    ss = _sort_dict(solution_profile)
+
+    # Step 0: Get options if provided, else use defaults
+    options = _get_options(**kwargs)
+    options = _process_title_options(default_fontsize, **options)
+
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(**options)
+    time = pd.DataFrame(time).loc[start:final].values
+
+    # Step 2: Generate conc/flux array for plotting
+    plt_args, legend_ids = _gen_plot_args(
+        time, ss, solution_profile, **options)
+
+    # Step 3: Make plot using options and vectors provided
+    style, xgrid, ygrid = _set_style(**options)
+
+    with matplotlib.style.context(style):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(*plt_args)
+
+        # Step 4: Add remaining plotting options
+        plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
+        _add_custom_linecolors(fig, ax, legend_ids, **options)
+        _add_plot_range(ax, **options)
+
+        _plot_title_options(**options)
+        _plot_figsize(fig, **options)
+        _plot_legend(legend_ids, default_fontsize, **options)
+
+        _set_log_scale(ax, default=True, **options)
+        _plot_gridlines(ax, xgrid, ygrid)
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
+
+
+
+def plot_simulation_ndarray(
+    time, solution_profile, default_fontsize=15, **kwargs):
+    """Generates a plot of the data in the solution_profile over time.
+
+    ``kwargs`` are passed on to various matplotlib methods. 
+    See get_default_options() for a full description.
+
+    Parameters
+    ----------
+    time: numpy.ndarray
+        An array containing the time points over with the system was simulated
+    solution_profile : numpy.ndarray
         An array containing the simulated results for either concentration
         or flux
-    x: mass.MassMetabolite
-        The mass metabolite to plot on the x-axis
-    y: mass.MassMetabolite
-        The mass metabolite to plot on the y-axis
-    poi: list
-        A list of numbers to be annotated on the phase portrait
-    ts: list
-        A list of numbers to be marked to show differing time scales
     default_fontsize: int
         The value of the default fontsize for much of the plot text
 
@@ -107,31 +162,28 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     start, final = _get_time_range(sol_df, **options)
     sol_df = sol_df.loc[start:final]
 
-    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites/reactions
-    df_x, px = _get_conc_flux_vector(sol_df, x, start, final, **options)
-    df_y, py = _get_conc_flux_vector(sol_df, y, start, final, **options)
+    # Step 2: Get conc/flux array for y-axis
+    df_conc_flux, legend_ids = _get_conc_flux_array(
+        sol_df, start, final, **options)
 
     # Step 3: Make plot using options and vectors provided
-    _validate_datapoints(df_x, px, df_y, py)
     style, xgrid, ygrid = _set_style(**options)
 
     with matplotlib.style.context(style):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(df_x, df_y)
+        ax.plot(df_conc_flux.index.tolist(), df_conc_flux)
 
         # Step 4: Add remaining plotting options
+        plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
+        _add_custom_linecolors(fig, ax, legend_ids, **options)
         _add_plot_range(ax, **options)
 
-        _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
-                             default_fontsize, **options)
-        _annotate_time_scales(ax, ts, time, df_x, px, 
-                              df_y, py, start, final)
-        _label_poi(ax, poi, ts, time, df_x, px, df_y, py, 
-                   start, final, default_fontsize)
-        
         _plot_title_options(**options)
         _plot_figsize(fig, **options)
+        _plot_legend(legend_ids, default_fontsize, **options)
+
+        _set_log_scale(ax, default=True, **options)
         _plot_gridlines(ax, xgrid, ygrid)
         _option_savefig(**options)
 
@@ -139,128 +191,6 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
         plt.show()
         return plt.gcf()
 
-
-
-def plot_tiled_phase_portrait(time, solution_profile, figsize=None, 
-                              place_tiles="upper", ax=None, 
-                              range_padding=0.05, ts=None, poi=None, 
-                              default_fontsize=12, **kwds):
-    """FIXME.
-
-    ``kwds`` are passed on to various matplotlib methods. 
-    See get_tiled_options() for a full description.
-
-    Parameters
-    ----------
-    time: np.array
-        An array containing the time points over with the system was simulated
-    solution_profile : np.array
-        An array containing the simulated results for either concentration
-        or flux
-    figsize: tuple
-        A tuple containing 2 float elements
-        This tuple is used to manually change the figsize of the plot (in inches)
-    place_tiles: str
-        A str with accepted values "upper" or "lower"
-        "upper" sets the subplots on the upper-right side
-        "lower" sets the subplots on the lower-left  side
-    poi: tuple or list of tuples
-        A list of numbers to be annotated on the phase portrait
-        Specific to each subplot
-
-
-    Returns
-    -------
-    plt.gcf()
-        A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-    See Also:
-    ---------
-
-    Examples
-    --------
-    >>> df = DataFrame(np.random.randn(1000, 4), columns=['A','B','C','D'])
-    >>> scatter_matrix(df, alpha=0.2)
-    """
-
-    # Generate seperate mutable copy of solution profile
-    sol_df = pd.concat([pd.DataFrame(solution_profile), 
-                        pd.DataFrame(time, columns=["t"])], axis=1)
-    sol_df.set_index(keys="t", inplace=True)
-    sol_df = _sort_df(sol_df)
-    sol_df = sol_df._get_numeric_data()
-
-    # Step 0: Get options if provided, else use defaults
-    options = _get_options(tiled=True, **kwds)
-
-    # Step 1: Index by time and get time range
-    start, final = _get_time_range(sol_df, **options)
-    sol_df = sol_df.loc[start:final]
-
-    # Setup for subplots
-    style, xgrid, ygrid = _set_style(**options)
-    n = sol_df.columns.size
-    naxes = n * n
-    place_tiles_dict = {"upper": int.__lt__, "lower": int.__gt__}
-
-    with matplotlib.style.context(style):
-        fig, axes = _subplots(naxes=naxes, figsize=figsize, 
-                              ax=ax, squeeze=False)
-
-        fig.subplots_adjust(wspace=0.3, hspace=0.3)
-
-        boundaries_list = _get_boundaries(sol_df, range_padding)
-
-        for ycol, i in zip(sol_df.columns, lrange(n)):
-            for xcol, j in zip(sol_df.columns, lrange(n)):
-                ax = axes[i, j]
-
-                # Step 2: Get conc/flux vectors for x-axis and y-axis
-                df_x, px = _get_conc_flux_vector(sol_df, xcol, start, final)
-                df_y, py = _get_conc_flux_vector(sol_df, ycol, start, final)
-
-                if place_tiles_dict[place_tiles](i, j):
-
-                    # Step 3: Make plot using options and vectors provided
-                    ax.plot(sol_df[xcol], sol_df[ycol])
-                    _plot_gridlines(ax, xgrid, ygrid)
-
-                    # Step 4: Add remaining plotting options
-                    ax.set_xlim(boundaries_list[j])
-                    ax.set_ylim(boundaries_list[i])
-
-                    _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
-                                         default_fontsize, **options)
-
-                    _label_poi_lists(poi, sol_df, xcol, ycol, ax, 
-                                     ts, time, df_x, px, df_y, py, 
-                                     start, final, default_fontsize)
-
-                elif place_tiles_dict[place_tiles](j, i):
-                    #add annotation here
-                    _annotate_tiles(ax, df_x, px, df_y, py, default_fontsize)
-
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-                else:
-                    #no axes elsewhere
-                    ax.set_xticklabels([])
-                    ax.set_yticklabels([])
-
-                _axes_visibility(fig, ax, **options)
-
-                if j == 0:
-                    ax.set_ylabel(ycol)
-                if i == n - 1:
-                    ax.set_xlabel(xcol)
-
-        _set_ticks_props(axes, xlabelsize=8, xrot=90, ylabelsize=8, yrot=0)
-        _option_savefig(**options)
-
-        # Step 5: Return plot/show plot figure
-        plt.show()
-        return plt.gcf()
 
 
 
@@ -448,149 +378,6 @@ def restore_tiled_options():
 
 
 
-# Internal Methods - Workhorse subroutines
-def _plot_simulation_interp1d(
-    time, solution_profile, default_fontsize=15, **kwargs):
-    """Generates a plot of the data in the solution_profile over time.
-
-    ``kwargs`` are passed on to various matplotlib methods. 
-    See get_default_options() for a full description.
-
-    Parameters
-    ----------
-    time: list or tuple or numpy.ndarray
-        An array containing the time points over with the system was simulated
-    solution_profile : dict of type scipy.interpolate.interpolate.interp1d
-        A dict containing the interpolating functions representing 
-        simulated results for either concentration or flux
-    default_fontsize: int
-        The value of the default fontsize for much of the plot text
-
-    Returns
-    -------
-    plt.gcf()
-        A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-    See Also:
-    ---------
-    get_default_options()
-    """
-
-    # Process time vector into numpy array, get sorted solution profiel
-    time = _gen_np_time_vector(time)
-    ss = _sort_dict(solution_profile)
-
-    # Step 0: Get options if provided, else use defaults
-    options = _get_options(**kwargs)
-    options = _process_title_options(default_fontsize, **options)
-
-    # Step 1: Index by time and get time range
-    start, final = _get_time_range(**options)
-    time = pd.DataFrame(time).loc[start:final].values
-
-    # Step 2: Generate conc/flux array for plotting
-    plt_args, legend_ids = _gen_plot_args(
-        time, ss, solution_profile, **options)
-
-    # Step 3: Make plot using options and vectors provided
-    style, xgrid, ygrid = _set_style(**options)
-
-    with matplotlib.style.context(style):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot(*plt_args)
-
-        # Step 4: Add remaining plotting options
-        plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
-        _add_custom_linecolors(fig, ax, legend_ids, **options)
-        _add_plot_range(ax, **options)
-
-        _plot_title_options(**options)
-        _plot_figsize(fig, **options)
-        _plot_legend(legend_ids, default_fontsize, **options)
-
-        _set_log_scale(ax, default=True, **options)
-        _plot_gridlines(ax, xgrid, ygrid)
-        _option_savefig(**options)
-
-        # Step 5: Return plot/show plot figure
-        plt.show()
-        return plt.gcf()
-
-
-
-def _plot_simulation_ndarray(
-    time, solution_profile, default_fontsize=15, **kwargs):
-    """Generates a plot of the data in the solution_profile over time.
-
-    ``kwargs`` are passed on to various matplotlib methods. 
-    See get_default_options() for a full description.
-
-    Parameters
-    ----------
-    time: numpy.ndarray
-        An array containing the time points over with the system was simulated
-    solution_profile : numpy.ndarray
-        An array containing the simulated results for either concentration
-        or flux
-    default_fontsize: int
-        The value of the default fontsize for much of the plot text
-
-    Returns
-    -------
-    plt.gcf()
-        A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-    See Also:
-    ---------
-    get_default_options()
-    """
-
-    # Generate seperate mutable copy of solution profile
-    sol_df = pd.DataFrame(solution_profile, index=time)
-    sol_df = _sort_df(sol_df)
-
-    # Step 0: Get options if provided, else use defaults
-    options = _get_options(**kwargs)
-    options = _process_title_options(default_fontsize, **options)
-
-    # Step 1: Index by time and get time range
-    start, final = _get_time_range(sol_df, **options)
-    sol_df = sol_df.loc[start:final]
-
-    # Step 2: Get conc/flux array for y-axis
-    df_conc_flux, legend_ids = _get_conc_flux_array(
-        sol_df, start, final, **options)
-
-    # Step 3: Make plot using options and vectors provided
-    style, xgrid, ygrid = _set_style(**options)
-
-    with matplotlib.style.context(style):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot(df_conc_flux.index.tolist(), df_conc_flux)
-
-        # Step 4: Add remaining plotting options
-        plt.rc("axes", prop_cycle=(cycler("color", _get_colormap())))
-        _add_custom_linecolors(fig, ax, legend_ids, **options)
-        _add_plot_range(ax, **options)
-
-        _plot_title_options(**options)
-        _plot_figsize(fig, **options)
-        _plot_legend(legend_ids, default_fontsize, **options)
-
-        _set_log_scale(ax, default=True, **options)
-        _plot_gridlines(ax, xgrid, ygrid)
-        _option_savefig(**options)
-
-        # Step 5: Return plot/show plot figure
-        plt.show()
-        return plt.gcf()
-
-
-
 # Internal Methods - Global
 def _sort_df(sol_df):
     ds = DictList(sol_df.columns)
@@ -605,6 +392,64 @@ def _sort_df(sol_df):
         ss.append(ds.get_by_id(ls[i]))
 
     return sol_df.reindex_axis(ss, axis=1)
+
+def _sort_dict(solution_profile):
+    ds = DictList(solution_profile)
+    ls = []
+
+    for key in solution_profile.keys():
+        ls.append(key.id)
+    ls = sorted(ls)
+
+    ss = DictList()
+    for i in range(len(ls)):
+        ss.append(ds.get_by_id(ls[i]))
+
+    return ss
+
+def _gen_np_time_vector(time):
+    if isinstance(time, list) or isinstance(time, tuple):
+        return np.array(time)
+    elif isinstance(time, np.ndarray):
+        return time
+    else:
+        msg = "time must be of type list, tuple, or numpy.ndarray"
+        raise TypeError(msg)
+
+def _gen_plot_args(time, ss, solution_profile, **options):
+    legend_ids = None
+
+    # Convert options["observable"] into list of str if not None or not []
+    if options["observable"] is None or options["observable"] == []:
+        legend_ids = [x.id for x in ss]
+    else:
+        if isinstance(options["observable"], MassMetabolite):
+            options["observable"] = [options["observable"].id]
+        elif isinstance(options["observable"], str):
+            options["observable"] = [options["observable"]]
+        elif isinstance(options["observable"], list):
+            if isinstance(options["observable"][0], MassMetabolite):
+                options["observable"] = [x.id for x in options["observable"]]
+            elif isinstance(options["observable"][0], str):
+                pass
+            else:
+                raise TypeError("Expected MassMetabolite, string, list of "\
+                    "MassMetabolites, or list of strings")
+
+        options["observable"] = sorted(options["observable"])
+        ss = ss.get_by_any(options["observable"])
+        legend_ids = options["observable"]
+
+    # Convert list of time points into list of lists of len(ss)
+    t_vec = [time] * len(ss)
+
+    # Convert dict of interpolating functions into list of lists
+    v_list = [solution_profile[ss[i]](time) for i in range(len(ss))]
+
+    # Generate list of interleaving lists (for Axes.plot method)
+    plt_args = [val for pair in zip(t_vec, v_list) for val in pair]
+
+    return plt_args, legend_ids
 
 def _get_options(tiled=False, **kwargs):
     options = {}
@@ -627,7 +472,7 @@ def _process_title_options(default_fontsize, **options):
 
     return options
 
-def _get_time_range(sol_df, **options):
+def _get_time_range(**options):
     start = options["trange"][0] if options["trange"][0] is not None else None
     final = options["trange"][1] if options["trange"][1] is not None else None
 
@@ -1022,6 +867,7 @@ def _get_width_height(df_x, px, df_y, py):
 
 
 
+# Class variables - Public
 default_options = {
     "plot_function": "LogLogPlot",
     "title": (None, 15),
@@ -1057,6 +903,7 @@ tiled_default_options = {
     }
 }
 
+# Class variables - Internal
 _base_default_options = {
     "plot_function": "LogLogPlot",
     "title": (None, 15),
