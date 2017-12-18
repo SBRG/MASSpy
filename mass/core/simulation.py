@@ -30,7 +30,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=250, perturbations=None,
+def simulate(model, time_range, numpoints=500, perturbations=None,
 				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
 				max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
@@ -48,15 +48,14 @@ def simulate(model, time_range, numpoints=250, perturbations=None,
 	----------
 	model : mass.MassModel
 		The MassModel object to simulate:
-	time_range : list or tuple
-		Either a list of numerical values to treat as the time points for
-		integration of the ODEs, or a tuple containing the start and end time
-		points for the simulation.
-		Simulation will run from the first point in the vector
-		to the last point in the vector.
+	time_range : tuple or list
+		Either a tuple containing the start and end time points for the
+		simulation, or a list of numerical values to treat as the time points
+		for integration of the ODEs. Simulation will run from the first point
+		last point.
 	numpoints :  int, optional
-		The number of points - 1 to plot if the given time_range is a tuple.
-		Default is 100.
+		The number of points to plot if the given time_range is a tuple.
+		Default is 500.
 	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
@@ -78,14 +77,12 @@ def simulate(model, time_range, numpoints=250, perturbations=None,
 
 	Returns
 	-------
-	time_range : list
-		A vector containing the time points for the solution profiles
 	c_profile : dict
 		A dictionary containing the concentration solutions, where key:value
-		pairs are metabolites: vectors of solutions,
+		pairs are metabolites: scipy interpolating functions of solutions
 	f_profile : dict
 		A dictionary containing the flux solutions, where key:value
-		pairs are reactions: vectors of solutions
+		pairs are reactions: scipy interpolating functions of solutions
 	"""
 	# Check inputs
 	if not isinstance(model, MassModel):
@@ -190,9 +187,18 @@ def simulate(model, time_range, numpoints=250, perturbations=None,
 		for key, sol in iteritems(profile):
 			if abs(sol[-1]) <= 1e-9:
 				sol = sol[:-1]
-			profile[key] = interp1d(time_range, profile[key], kind='quadratic',
+			profile[key] = interp1d(time_range, profile[key], kind='cubic',
 													fill_value='extrapolate')
 
+	# Reorder dictionary to match model metabolites and reactions.
+	new_profile = {}
+	for metab in model.metabolites:
+		new_profile[metab] = c_profile[metab]
+	c_profile = new_profile
+	new_profile = {}
+	for rxn in model.reactions:
+		new_profile[rxn] = f_profile[rxn]
+	f_profile = new_profile
 
 	return [c_profile, f_profile]
 

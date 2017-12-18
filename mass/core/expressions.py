@@ -225,7 +225,7 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 		The custom rate law as a string. The string representation of the
 		custom rate lawwill be used to create a sympy expression that
 		represents the custom rate law
-	custom_parameters :  string, list of strings or None
+	custom_parameter_list :  string, list of strings or None
 		The custom parameters in the custom rate law as strings. The string
 		representation of the custom parameters will be used to create the
 		symbols in the sympy expressions of the custom rate law.
