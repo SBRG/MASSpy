@@ -9,11 +9,6 @@ import sympy as sp
 from tabulate import tabulate
 from six import iteritems, iterkeys
 
-# from mass
-from mass.core import massmetabolite
-from mass.core import massmodel
-from mass.core import massreaction
-
 # Class begins
 ## Set a float infinity
 inf = float('inf')
@@ -72,8 +67,6 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 						[thermodynamic_consistency, None]]
 
 	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
 	for i, check in enumerate(check_list):
 		if not isinstance(check, bool):
 			raise TypeError("%s must be a bool" % name_list[i])
@@ -108,8 +101,6 @@ def get_missing_initial_conditions(model):
 		The MassModel to inspect
 	"""
 	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
 	missing_ics = [metab for metab in model.metabolites
 					if metab not in iterkeys(model.initial_conditions)]
 	missing_exts = [metab for metab in model.get_external_metabolites
@@ -148,8 +139,6 @@ def get_missing_parameters(model, kf=False, Keq=False,
 				"_reverse_rate_constant", "ssflux"]
 
 	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
 	for i, param in enumerate(param_checks):
 		if not isinstance(param, bool):
 			raise TypeError("%s must be a bool" % param_keys[i])
@@ -227,8 +216,6 @@ def can_simulate(model, rate_type=None):
 		if the model has met conditions for simulation.
 	"""
 	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
 	if rate_type is None:
 		rate_type = [model._rtype]
 	if not isinstance(rate_type, list):
@@ -278,10 +265,6 @@ def get_superfluous_parameters(model):
 	model : mass.massmodel
 		The MassModel to inspect
 	"""
-	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
-
 	# Get superfluous parameters
 	superfluous_parameters = {}
 	for rxn in model.reactions:
@@ -289,18 +272,6 @@ def get_superfluous_parameters(model):
 			superfluous_parameters[rxn] = [rxn._sym_kr]
 
 	return superfluous_parameters
-
-def get_unconserved_metabolites(model):
-	"""Get the unconserved metabolites in a massmodel
-
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check inputs
-	print("FIXME: IMPLEMENT UNCONSERVED METABS")
-	return
 
 def parameter_consistency(model, tol=1e-9):
 	"""Performs a consistency check on the rate constants and the equilibrium
@@ -316,8 +287,6 @@ def parameter_consistency(model, tol=1e-9):
 		consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
 	"""
 	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
 	if not isinstance(tol, float):
 		raise TypeError("tol must be a float")
 
@@ -340,10 +309,6 @@ def elemental_consistency(model):
 	model : mass.massmodel
 		The MassModel to inspect
 	"""
-	# Check inputs
-	if not isinstance(model, massmodel.MassModel):
-		raise TypeError("model must be a mass.MassModel")
-
 	# Check for elemental consistency
 	elem_consistency = {}
 	for rxn in model.reactions:
@@ -354,18 +319,6 @@ def elemental_consistency(model):
 			elem_consistency[rxn] = unbalanced.rstrip("; ") + " unbalanced"
 
 	return elem_consistency
-
-def stoichiometric_consistency(model):
-	"""Performs a consistency check on the stoichiometry of the model.
-
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check inputs
-	print("FIXME: IMPLEMENT S CONSISTENTCY")
-	return
 
 def thermodynamic_consistency(model):
 	"""Performs a consistency check on the thermodynamics of the model.
