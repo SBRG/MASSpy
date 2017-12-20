@@ -6,7 +6,6 @@ from __future__ import absolute_import
 # Import necesary packages
 import re
 import sympy as sp
-from math import inf
 from tabulate import tabulate
 from six import iteritems, iterkeys
 
@@ -16,6 +15,8 @@ from mass.core import massmodel
 from mass.core import massreaction
 
 # Class begins
+## Set a float infinity
+inf = float('inf')
 ## Global symbol for time
 t = sp.Symbol("t")
 ## Public
