@@ -11,11 +11,6 @@ from six import iterkeys, iteritems, integer_types, string_types
 # from cobra
 from cobra.core.dictlist import DictList
 
-# from mass
-from mass.core import massmetabolite
-from mass.core import massreaction
-from mass.core import massmodel
-
 # Class begins
 ## global symbol for time
 t = sp.Symbol('t')
@@ -54,9 +49,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=False,
 	string representation or sympy expression of the rate law
 	"""
 	# Check inputs
-	if not isinstance(reaction, massreaction.MassReaction):
-		raise TypeError("reaction must be a MassReaction")
-	elif not isinstance(rate_type, (integer_types, float)):
+	if not isinstance(rate_type, (integer_types, float)):
 		raise TypeError("rate_type must be an int or float")
 	elif not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
@@ -107,8 +100,6 @@ def get_mass_action_ratio(reaction, sympy_expr=False):
 	-------
 	string representation or sympy expression of the mass action ratio
 	"""
-	if not isinstance(reaction, massreaction.MassReaction):
-		raise TypeError("reaction must be a MassReaction")
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
 
@@ -135,8 +126,6 @@ def get_disequilibrium_ratio(reaction, sympy_expr=False):
 	-------
 	string representation or sympy expression of the disequilibrium ratio
 	"""
-	if not isinstance(reaction, massreaction.MassReaction):
-		raise TypeError("reaction must be a MassReaction")
 	if not isinstance(sympy_expr, bool):
 		raise TypeError("sympy_expr must be a bool")
 	rxn = _ignore_h_and_h2o(reaction)
@@ -160,9 +149,6 @@ def generate_ode(metabolite):
 	-------
 	sympy expression of the ODE for the metabolite
 	"""
-	if not isinstance(metabolite, massmetabolite.MassMetabolite):
-		raise TypeError("metabolite must be a MassMetabolite")
-
 	if len(metabolite._reaction) == 0:
 		return None
 
@@ -233,12 +219,9 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 		equilibrium constants
 	"""
 	# Check inputs
-	if not isinstance(reaction, massreaction.MassReaction):
-		raise TypeError("reaction must be a mass.MassReaction")
-	else:
-		if len(reaction._metabolites) == 0:
-			warn ("No metabolites associated with this reaction")
-			return None
+	if len(reaction._metabolites) == 0:
+		warn ("No metabolites associated with this reaction")
+		return None
 
 	if not isinstance(custom_rate_law, string_types):
 		raise TypeError("custom_rate_law must be a string")
