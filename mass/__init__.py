@@ -6,7 +6,8 @@ from mass.core import (
     MassMetabolite, MassModel, MassReaction, simulate, find_steady_state,
     plot_simulation, plot_phase_portrait)
 
-from mass import analysis
+from mass.analysis import (
+    pools_from_string, net_fluxes_from_strings)
 from mass import io
 from mass import util
 
