@@ -41,6 +41,13 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
     plot_simulation_ndarray(...)
     """
 
+    # Check type of time, and process accordingly
+    if isinstance(time, tuple):
+        if len(time) == 2:
+            time = np.linspace(time[0], time[1], num=100)
+        elif len(time) == 3:
+            time = np.linspace(time[0], time[1], time[2])
+
     # Check type of solution_profile, then execute appropriate subroutine
     if isinstance(solution_profile, np.ndarray):
         _plot_simulation_ndarray(
@@ -52,12 +59,6 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
             _plot_simulation_ndarray(
                 time, solution_profile, default_fontsize, **kwargs)
         elif isinstance(dict_val, interp1d):
-            _plot_simulation_interp1d(
-                time, solution_profile, default_fontsize, **kwargs)
-
-    elif isinstance(solution_profile, dict):
-        interp_val = list(solution_profile.values())[0]
-        if isinstance(interp_val, interp1d):
             _plot_simulation_interp1d(
                 time, solution_profile, default_fontsize, **kwargs)
 
@@ -80,6 +81,13 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     _plot_phase_portrait_interp1d(...)
     _plot_phase_portrait_ndarray(...)
     """
+
+    # Check type of time, and process accordingly
+    if isinstance(time, tuple):
+        if len(time) == 2:
+            time = np.linspace(time[0], time[1], num=100)
+        elif len(time) == 3:
+            time = np.linspace(time[0], time[1], time[2])
 
     # Check type of solution_profile, then execute appropriate subroutine
     if isinstance(solution_profile, np.ndarray):
