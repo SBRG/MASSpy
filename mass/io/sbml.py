@@ -231,23 +231,29 @@ def parse_xml_into_model(xml, number=float):
         for local_parameter in sbml_reaction.findall(ns(
             "sbml:kineticLaw/sbml:listOfLocalParameters/sbml:localParameter")):
             pid = local_parameter.get("id")
-            if pid == "ssflux_"+reaction.id:
+            lpval = local_parameter.get("value")
+            if pid == "ssflux_"+reaction.id and lpval is not None:
                 reaction.ssflux = number(local_parameter.get("value"))
-            elif pid == "kf_"+reaction.id:
+            elif pid == "kf_"+reaction.id and lpval is not None:
                 reaction.kf = number(local_parameter.get("value"))
             elif pid == "Keq_"+reaction.id and reaction.reversible is True:
                 if local_parameter.get("value") == "inf":
                     reaction.Keq = inf
                 elif local_parameter.get("value") == "-inf":
                     reaction.Keq = -inf
+                elif local_parameter.get("value") == None:
+                    pass
                 else:
                     reaction.Keq = number(local_parameter.get("value"))
             elif pid == "kr_"+reaction.id and reaction.reversible is True:
                 reaction.kr = local_parameter.get("value")
             else:
-                num_val = number(local_parameter.get("value"))
-                custom_param_ids.append(pid)
-                custom_param_values.append(num_val)
+                if lpval is None:
+                    pass
+                else:
+                    num_val = number(local_parameter.get("value"))
+                    custom_param_ids.append(pid)
+                    custom_param_values.append(num_val)
         custom_param_dict[reaction] = dict(zip(custom_param_ids,
                                                 custom_param_values))
 
