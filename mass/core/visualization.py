@@ -47,6 +47,12 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
             time, solution_profile, default_fontsize, **kwargs)
 
     elif isinstance(solution_profile, dict):
+        dict_val = list(solution_profile.values())[0]
+        if isinstance(dict_val, np.ndarray):
+            _plot_simulation_ndarray(
+                time, solution_profile, default_fontsize, **kwargs)
+
+    elif isinstance(solution_profile, dict):
         interp_val = list(solution_profile.values())[0]
         if isinstance(interp_val, interp1d):
             _plot_simulation_interp1d(
@@ -54,90 +60,43 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     else:
         msg = "solution_profile must be of type numpy.ndarray "\
-        "or scipy.interpolate.interpolate.interp1d"
+        "or scipy.interp1d"
         raise TypeError(msg)
 
 
 
 def plot_phase_portrait(time, solution_profile, x, y, poi=None, 
                         ts=None, default_fontsize=15, **kwargs):
-    """Generates a phase portrait of x,y in the solution_profile over time.
+    """Generates a phase portrait of x vs y, given data in solution_profile.
 
-    ``kwargs`` are passed on to various matplotlib methods. 
-    See get_default_options() for a full description.
-
-    Parameters
-    ----------
-    time: np.array
-        An array containing the time points over with the system was simulated
-    solution_profile : np.array
-        An array containing the simulated results for either concentration
-        or flux
-    x: mass.MassMetabolite
-        The mass metabolite to plot on the x-axis
-    y: mass.MassMetabolite
-        The mass metabolite to plot on the y-axis
-    poi: list
-        A list of numbers to be annotated on the phase portrait
-    ts: list
-        A list of numbers to be marked to show differing time scales
-    default_fontsize: int
-        The value of the default fontsize for much of the plot text
-
-    Returns
-    -------
-    plt.gcf()
-        A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
+    This method redirects to one of two subroutines, depending on the
+    datatype of solution_profile.
 
     See Also:
     ---------
-    get_default_options()
+    _plot_phase_portrait_interp1d(...)
+    _plot_phase_portrait_ndarray(...)
     """
 
-    # Generate seperate mutable copy of solution profile
-    sol_df = pd.DataFrame(solution_profile, index=time)
-    sol_df = _sort_df(sol_df)
+    # Check type of solution_profile, then execute appropriate subroutine
+    if isinstance(solution_profile, np.ndarray):
+        _plot_phase_portrait_ndarray(
+            time, solution_profile, x, y, poi, ts, default_fontsize, **kwargs)
 
-    # Step 0: Get options if provided, else use defaults
-    options = _get_options(**kwargs)
-    options = _process_title_options(default_fontsize, **options)
+    elif isinstance(solution_profile, dict):
+        dict_val = list(solution_profile.values())[0]
 
-    # Step 1: Index by time and get time range
-    start, final = _get_time_range(sol_df, **options)
-    sol_df = sol_df.loc[start:final]
+        if isinstance(dict_val, np.ndarray):
+            _plot_phase_portrait_ndarray(time, solution_profile, x, y, 
+                                         poi, ts, default_fontsize, **kwargs)
+        elif isinstance(dict_val, interp1d):
+            _plot_phase_portrait_interp1d(time, solution_profile, x, y, 
+                                          poi, ts, default_fontsize, **kwargs)
 
-    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites/reactions
-    df_x, px = _get_conc_flux_vector(sol_df, x, start, final, **options)
-    df_y, py = _get_conc_flux_vector(sol_df, y, start, final, **options)
-
-    # Step 3: Make plot using options and vectors provided
-    _validate_datapoints(df_x, px, df_y, py)
-    style, xgrid, ygrid = _set_style(**options)
-
-    with matplotlib.style.context(style):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot(df_x, df_y)
-
-        # Step 4: Add remaining plotting options
-        _add_plot_range(ax, **options)
-
-        _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
-                             default_fontsize, **options)
-        _annotate_time_scales(ax, ts, time, df_x, px, 
-                              df_y, py, start, final)
-        _label_poi(ax, poi, ts, time, df_x, px, df_y, py, 
-                   start, final, default_fontsize)
-        
-        _plot_title_options(**options)
-        _plot_figsize(fig, **options)
-        _plot_gridlines(ax, xgrid, ygrid)
-        _option_savefig(**options)
-
-        # Step 5: Return plot/show plot figure
-        plt.show()
-        return plt.gcf()
+    else:
+        msg = "solution_profile must be of type numpy.ndarray "\
+        "or scipy.interp1d"
+        raise TypeError(msg)
 
 
 
@@ -183,6 +142,7 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
     >>> df = DataFrame(np.random.randn(1000, 4), columns=['A','B','C','D'])
     >>> scatter_matrix(df, alpha=0.2)
     """
+    return "FIXME" #FIXME
 
     # Generate seperate mutable copy of solution profile
     sol_df = pd.concat([pd.DataFrame(solution_profile), 
@@ -460,7 +420,7 @@ def _plot_simulation_interp1d(
     ----------
     time: list or tuple or numpy.ndarray
         An array containing the time points over with the system was simulated
-    solution_profile : dict of type scipy.interpolate.interpolate.interp1d
+    solution_profile : dict with values of typy scipy.interp1d
         A dict containing the interpolating functions representing 
         simulated results for either concentration or flux
     default_fontsize: int
@@ -477,7 +437,7 @@ def _plot_simulation_interp1d(
     get_default_options()
     """
 
-    # Process time vector into numpy array, get sorted solution profiel
+    # Process time vector into numpy array, get sorted solution profile
     time = _gen_np_time_vector(time)
     ss = _sort_dict(solution_profile)
 
@@ -591,6 +551,170 @@ def _plot_simulation_ndarray(
 
 
 
+def _plot_phase_portrait_interp1d(time, solution_profile, x, y, poi=None, 
+                                  ts=None, default_fontsize=15, **kwargs):
+    """Generates a phase portrait of x,y in the solution_profile over time.
+
+    ``kwargs`` are passed on to various matplotlib methods. 
+    See get_default_options() for a full description.
+
+    Parameters
+    ----------
+    time: numpy.ndarray
+        An array containing the time points over with the system was simulated
+    solution_profile : numpy.ndarray
+        An array containing the simulated results for either concentration
+        or flux
+    x: mass.MassMetabolite
+        The mass metabolite to plot on the x-axis
+    y: mass.MassMetabolite
+        The mass metabolite to plot on the y-axis
+    poi: list
+        A list of numbers to be annotated on the phase portrait
+    ts: list
+        A list of numbers to be marked to show differing time scales
+    default_fontsize: int
+        The value of the default fontsize for much of the plot text
+
+    Returns
+    -------
+    plt.gcf()
+        A reference to the current figure instance. Shows plot when returned.
+        Can be used to modify plot after initial generation.
+
+    See Also:
+    ---------
+    get_default_options()
+    """
+
+    # Process time vector into numpy array, get sorted solution profile
+    time = _gen_np_time_vector(time)
+    ss = _sort_dict(solution_profile)
+
+    # Step 0: Get options if provided, else use defaults
+    options = _get_options(**kwargs)
+    options = _process_title_options(default_fontsize, **options)
+
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(**options)
+    time = pd.DataFrame(time).loc[start:final].values
+
+    # Step 2: Generate conc/flux array for plotting
+    x_arg, y_arg = (solution_profile[x](time), solution_profile[y](time))
+    interp_x, interp_y = (solution_profile[x], solution_profile[y])
+
+    # Step 3: Make plot using options and vectors provided
+    #_validate_datapoints_interp1d(x_arg, y_arg)
+    style, xgrid, ygrid = _set_style(**options)
+
+    with matplotlib.style.context(style):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(x_arg, y_arg)
+
+        # Step 4: Add remaining plotting options
+        _add_plot_range(ax, **options)
+
+        _annotate_time_range_interp1d(ax, time, x_arg, y_arg, 
+                                      default_fontsize, **options)
+        _annotate_time_scales_interp1d(ax, ts, x_arg, y_arg, 
+                                       interp_x, interp_y)
+        _label_poi_interp1d(ax, poi, ts, x_arg, y_arg, 
+                            interp_x, interp_y, default_fontsize)
+        
+        _plot_title_options(**options)
+        _plot_figsize(fig, **options)
+        _plot_gridlines(ax, xgrid, ygrid)
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
+
+
+
+def _plot_phase_portrait_ndarray(time, solution_profile, x, y, poi=None, 
+                                 ts=None, default_fontsize=15, **kwargs):
+    """Generates a phase portrait of x,y in the solution_profile over time.
+
+    ``kwargs`` are passed on to various matplotlib methods. 
+    See get_default_options() for a full description.
+
+    Parameters
+    ----------
+    time: np.array
+        An array containing the time points over with the system was simulated
+    solution_profile : np.array
+        An array containing the simulated results for either concentration
+        or flux
+    x: mass.MassMetabolite
+        The mass metabolite to plot on the x-axis
+    y: mass.MassMetabolite
+        The mass metabolite to plot on the y-axis
+    poi: list
+        A list of numbers to be annotated on the phase portrait
+    ts: list
+        A list of numbers to be marked to show differing time scales
+    default_fontsize: int
+        The value of the default fontsize for much of the plot text
+
+    Returns
+    -------
+    plt.gcf()
+        A reference to the current figure instance. Shows plot when returned.
+        Can be used to modify plot after initial generation.
+
+    See Also:
+    ---------
+    get_default_options()
+    """
+
+    # Generate seperate mutable copy of solution profile
+    sol_df = pd.DataFrame(solution_profile, index=time)
+    sol_df = _sort_df(sol_df)
+
+    # Step 0: Get options if provided, else use defaults
+    options = _get_options(**kwargs)
+    options = _process_title_options(default_fontsize, **options)
+
+    # Step 1: Index by time and get time range
+    start, final = _get_time_range(**options)
+    sol_df = sol_df.loc[start:final]
+
+    # Step 2: Get conc/flux vectors for x-axis and y-axis metabolites/reactions
+    df_x, px = _get_conc_flux_vector(sol_df, x, start, final, **options)
+    df_y, py = _get_conc_flux_vector(sol_df, y, start, final, **options)
+
+    # Step 3: Make plot using options and vectors provided
+    _validate_datapoints(df_x, px, df_y, py)
+    style, xgrid, ygrid = _set_style(**options)
+
+    with matplotlib.style.context(style):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(df_x, df_y)
+
+        # Step 4: Add remaining plotting options
+        _add_plot_range(ax, **options)
+
+        _annotate_time_range(ax, sol_df, df_x, px, df_y, py, 
+                             default_fontsize, **options)
+        _annotate_time_scales(ax, ts, time, df_x, px, 
+                              df_y, py, start, final)
+        _label_poi(ax, poi, ts, time, df_x, px, df_y, py, 
+                   start, final, default_fontsize)
+        
+        _plot_title_options(**options)
+        _plot_figsize(fig, **options)
+        _plot_gridlines(ax, xgrid, ygrid)
+        _option_savefig(**options)
+
+        # Step 5: Return plot/show plot figure
+        plt.show()
+        return plt.gcf()
+
+
+
 # Internal Methods - Global
 def _sort_df(sol_df):
     ds = DictList(sol_df.columns)
@@ -605,6 +729,68 @@ def _sort_df(sol_df):
         ss.append(ds.get_by_id(ls[i]))
 
     return sol_df.reindex_axis(ss, axis=1)
+
+def _sort_dict(solution_profile):
+    ds = DictList(solution_profile)
+    ls = []
+
+    for key in solution_profile.keys():
+        ls.append(key.id)
+    ls = sorted(ls)
+
+    ss = DictList()
+    for i in range(len(ls)):
+        ss.append(ds.get_by_id(ls[i]))
+
+    return ss
+
+def _gen_np_time_vector(time):
+    if isinstance(time, list) or isinstance(time, tuple):
+        return np.array(time)
+    elif isinstance(time, np.ndarray):
+        return time
+    else:
+        msg = "time must be of type list, tuple, or numpy.ndarray"
+        raise TypeError(msg)
+
+def _gen_plot_args(time, ss, solution_profile, **options):
+    legend_ids = None
+
+    # Convert options["observable"] into list of str if not None or not []
+    if options["observable"] is None or options["observable"] == []:
+        legend_ids = [x.id for x in ss]
+    else:
+        msg = "Expected MassMetabolite, string, list of "\
+        "MassMetabolites, or list of strings"
+
+        if isinstance(options["observable"], MassMetabolite):
+            options["observable"] = [options["observable"].id]
+        elif isinstance(options["observable"], str):
+            options["observable"] = [options["observable"]]
+        elif isinstance(options["observable"], list):
+            if isinstance(options["observable"][0], MassMetabolite):
+                options["observable"] = [x.id for x in options["observable"]]
+            elif isinstance(options["observable"][0], str):
+                pass
+            else:
+                raise TypeError(msg)
+        else:
+            raise TypeError(msg)
+
+        options["observable"] = sorted(options["observable"])
+        ss = ss.get_by_any(options["observable"])
+        legend_ids = options["observable"]
+
+    # Convert list of time points into list of lists of len(ss)
+    t_vec = [time] * len(ss)
+
+    # Convert dict of interpolating functions into list of lists
+    v_list = [solution_profile[ss[i]](time) for i in range(len(ss))]
+
+    # Generate list of interleaving lists (for Axes.plot method)
+    plt_args = [val for pair in zip(t_vec, v_list) for val in pair]
+
+    return plt_args, legend_ids
 
 def _get_options(tiled=False, **kwargs):
     options = {}
@@ -627,7 +813,7 @@ def _process_title_options(default_fontsize, **options):
 
     return options
 
-def _get_time_range(sol_df, **options):
+def _get_time_range(**options):
     start = options["trange"][0] if options["trange"][0] is not None else None
     final = options["trange"][1] if options["trange"][1] is not None else None
 
@@ -792,6 +978,32 @@ def _annotate_time_range(axes, sol_df, df_x, px, df_y, py,
                   xytext=(df_x.iloc[-1][px], df_y.iloc[-1][py]), 
                   size=fontsize)
 
+def _annotate_time_range_interp1d(axes, time, x_arg, y_arg, 
+                                  default_fontsize, **options):
+    fontsize = default_fontsize - 3
+    t_value_i = None
+    t_value_f = None
+
+    if options["truncate"] is False:
+        t_value_i = time[0]
+        t_value_f = time[-1]
+    else:
+        t_value_i = _truncate(time[0], 2)
+        t_value_i = _truncate(time[-1], 2)
+
+    annotate_start = "t="+str(t_value_i)
+    annotate_final = "t="+str(t_value_f)
+
+    axes.annotate(annotate_start, 
+                  xy=(x_arg[0], y_arg[0]), 
+                  xytext=(x_arg[0], y_arg[0]), 
+                  size=fontsize)
+
+    axes.annotate(annotate_start, 
+                  xy=(x_arg[-1], y_arg[-1]), 
+                  xytext=(x_arg[-1], y_arg[-1]), 
+                  size=fontsize)
+
 def _annotate_time_scales(axes, list_of_time_scales, np_time_vector, 
                           df_x, px, df_y, py, start, final):
     """Add rectangles for various x,y values corresponding to times where
@@ -810,6 +1022,20 @@ def _annotate_time_scales(axes, list_of_time_scales, np_time_vector,
                 y_val = df_y.loc[time_scale][py]
 
             cx, cy = _make_rectangle(axes, x_val, y_val, i, df_x, px, df_y, py)
+            axes.annotate(i, (cx, cy), color="w", weight="bold", 
+                          fontsize=6, ha="center", va="center")
+
+def _annotate_time_scales_interp1d(axes, list_of_time_scales, x_arg, y_arg, 
+                                   interp_x, interp_y):
+    if list_of_time_scales is not None and list_of_time_scales != []:
+        i = 0
+        for time_scale in list_of_time_scales:
+            i+=1
+            #FIXME
+            x_val, y_val = (interp_x(time_scale), interp_y(time_scale))
+
+            cx, cy = _make_rectangle_interp1d(axes, x_val, y_val, 
+                                              i, x_arg, y_arg)
             axes.annotate(i, (cx, cy), color="w", weight="bold", 
                           fontsize=6, ha="center", va="center")
 
@@ -841,6 +1067,26 @@ def _label_poi(axes, points, ts, np_time_vector, df_x, px,
                           xytext=xytext_val, 
                           size=fontsize)
 
+def _label_poi_interp1d(axes, points, ts, x_arg, y_arg, 
+                        interp_x, interp_y, default_fontsize):
+    fontsize = default_fontsize-2
+    weight, height = _get_width_height_interp1d(x_arg, y_arg)
+
+    if points is not None and points != []:
+        for point in points:
+            label = "t="+str(point)
+            x_val, y_val = (interp_x(point), interp_y(point))
+
+            if ts is None or ts == []:
+                xytext_val = (x_val, y_val)
+            else:
+                xytext_val = (x_val+width, y_val+height)
+
+            axes.annotate(label, 
+                          xy=(x_val, y_val), 
+                          xytext=xytext_val, 
+                          size=fontsize)
+
 def _validate_datapoints(df_x, px, df_y, py):
     threshold = 0.4e-6
 
@@ -850,6 +1096,17 @@ def _validate_datapoints(df_x, px, df_y, py):
     if abs(x_f-x_i) < threshold or abs(y_f-y_i) < threshold:
         msg =  "datapoints are too close together to make a plot."
         msg += " Try using points that are less than "+str(threshold)
+        raise ValueError(msg)
+
+def _validate_datapoints_interp1d(x_arg, y_arg):
+    threshold = 0.4e-6
+
+    x_i, y_i = (x_arg[0], y_arg[0])
+    x_f, y_f = (x_arg[-1], y_arg[-1])
+
+    if abs(x_f-x_i) < threshold or abs(y_f-y_i) < threshold:
+        msg =  "datapoints are too close together to make a plot."
+        msg += " Try using points that are farther apart than "+str(threshold)
         raise ValueError(msg)
 
 
@@ -1009,6 +1266,20 @@ def _make_rectangle(axes, x, y, num, df_x, px, df_y, py):
 
     return cx, cy
 
+def _make_rectangle_interp1d(axes, x, y, num, x_arg, y_arg):
+    weight, height = _get_width_height_interp1d(x_arg, y_arg)
+
+    rect = patches.Rectangle(xy=(x-0.5*width, y-0.5*height), 
+                             width=width, height=height, 
+                             facecolor="k", label=num)
+
+    axes.add_patch(rect)
+    rx, ry = rect.get_xy()
+    cx = rx + rect.get_width()/2.0
+    cy = ry + rect.get_height()/2.0
+
+    return cx, cy
+
 def _get_width_height(df_x, px, df_y, py):
     width  = 0.01*abs(df_x.iloc[0][px] - df_x.iloc[-1][px])
     height = 0.01*abs(df_y.iloc[0][py] - df_y.iloc[-1][py])
@@ -1020,8 +1291,20 @@ def _get_width_height(df_x, px, df_y, py):
 
     return width, height
 
+def _get_width_height_interp1d(x_arg, y_arg):
+    width  = 0.01*abs(x_arg[0] - x_arg[-1])
+    height = 0.01*abs(y_arg[0] - y_arg[-1])
+
+    if width > height:
+        width = height
+    else:
+        height = width
+
+    return width, height
 
 
+
+# Class variables - Public
 default_options = {
     "plot_function": "LogLogPlot",
     "title": (None, 15),
@@ -1057,6 +1340,7 @@ tiled_default_options = {
     }
 }
 
+# Class variables - Internal
 _base_default_options = {
     "plot_function": "LogLogPlot",
     "title": (None, 15),
