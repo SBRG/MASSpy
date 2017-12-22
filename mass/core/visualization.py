@@ -37,8 +37,8 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
 
     See Also:
     ---------
-    plot_simulation_interp1d(...)
-    plot_simulation_ndarray(...)
+    _plot_simulation_interp1d(...)
+    _plot_simulation_ndarray(...)
     """
 
     # Check type of time, and process accordingly
