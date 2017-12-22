@@ -51,6 +51,9 @@ def plot_simulation(time, solution_profile, default_fontsize=15, **kwargs):
         if isinstance(dict_val, np.ndarray):
             _plot_simulation_ndarray(
                 time, solution_profile, default_fontsize, **kwargs)
+        elif isinstance(dict_val, interp1d):
+            _plot_simulation_interp1d(
+                time, solution_profile, default_fontsize, **kwargs)
 
     elif isinstance(solution_profile, dict):
         interp_val = list(solution_profile.values())[0]
