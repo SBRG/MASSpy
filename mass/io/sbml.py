@@ -289,7 +289,7 @@ def parse_xml_into_model(xml, number=float):
         reaction.gene_reaction_rule = gpr
 
         test_dict = dict()
-        test_dict[reaction] = reaction.rate_expression
+        test_dict[reaction] = reaction.rate
         test_dict = strip_time(test_dict)
 
         if result_from_mathml is None:
@@ -327,10 +327,11 @@ def model_to_xml(mass_model):
     --------
     write_sbml_model : Write directly to a file.
     """
+    
     # add in model
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
-    _set_attrib(xml, "fbc:required", "false")
+    _set_attrib(xml, "fbc:required", "true")
     xml_model = SubElement(xml, "model")
     _set_attrib(xml_model, "fbc:strict", "true")
     if mass_model.id is not None:
@@ -383,7 +384,7 @@ def model_to_xml(mass_model):
 
     # add in reactions
     reactions_list = SubElement(xml_model, "listOfReactions")
-    rate_dictionary = strip_time(mass_model.rate_expressions)
+    rate_dictionary = strip_time(mass_model.rates)
     for reaction, rate in iteritems(rate_dictionary):
         id = "R_" + reaction.id
         sbml_reaction = SubElement(reactions_list, "reaction",
@@ -507,6 +508,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         # ignore for now (deal with after sbml3 is finished)
         #write_sbml2(cobra_model, filename, use_fbc_package=False, **kwargs)
         return
+    
     # create xml
     xml = model_to_xml(mass_model, **kwargs)
     write_args = {"encoding": "UTF-8", "xml_declaration": True}
@@ -515,6 +517,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         write_args["pretty_print"] = True
     else:
         _indent_xml(xml)
+    
     # write xml to file
     should_close = True
     if hasattr(filename, "write"):
