@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
-from math import inf
 from warnings import warn
 from functools import partial
 from copy import copy, deepcopy
@@ -23,6 +22,8 @@ from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
+## Set a float infinity
+inf = float('inf')
 ## precompiled regular expressions
 ### Matches and/or in a gene reaction rule
 and_or_search = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)

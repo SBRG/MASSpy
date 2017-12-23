@@ -22,7 +22,6 @@ from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
 from mass.util import qcqa
-from mass.analysis import linear
 from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
@@ -1809,7 +1808,7 @@ class MassModel(Object):
 	def _repr_html_(self):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
-			rank=linear.matrix_rank(self.S)
+			rank=np.linalg.matrix_rank(self.S)
 		except:
 			dim_S = "0x0"
 			rank = 0
