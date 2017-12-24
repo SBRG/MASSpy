@@ -1499,7 +1499,7 @@ class MassModel(Object):
 				reactant_str = rxn_string[:arrow_loc.start()].strip()
 				product_str = rxn_string[arrow_loc.end():].strip()
 			elif _forward_arrow.search(rxn_string):
-				arrow_loc = _forward_arrow.search(reaction_string)
+				arrow_loc = _forward_arrow.search(rxn_string)
 				reversible = False
 				# Reactants left of the arrow, products on the right
 				reactant_str = rxn_string[:arrow_loc.start()].strip()
