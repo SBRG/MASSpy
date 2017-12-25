@@ -7,7 +7,7 @@ import re
 import numpy as np
 import sympy as sp
 from warnings import warn
-from scipy.integrate import ode
+from scipy.integrate import odeint
 from scipy.optimize import root
 from scipy.interpolate import interp1d
 from six import iteritems, iterkeys, itervalues, integer_types
@@ -30,9 +30,8 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, numpoints=500, perturbations=None,
-				solver="lsoda", nsteps=500, first_step=0., min_step=0.,
-				max_step=0.):
+def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
+				first_step=0., min_step=0., max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
 	obtain solutions for the metabolite concentrations and reaction fluxes.
@@ -48,22 +47,18 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 	----------
 	model : mass.MassModel
 		The MassModel object to simulate:
-	time_range : tuple or list
-		Either a tuple containing the start and end time points for the
+	time_range : tuple ot list
+		A tuple containing the start and end time points for the
 		simulation, or a list of numerical values to treat as the time points
-		for integration of the ODEs. Simulation will run from the first point
-		last point.
+		for integration of the ODEs.
 	numpoints :  int, optional
 		The number of points to plot if the given time_range is a tuple.
-		Default is 500.
+		Default is 10000.
 	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
 		condition. Can be changes to the rate and equilibrium constants,
 		a change to an initial condition, or fixing a concentration.
-	solver : {'vode', 'zvode', 'lsoda', 'dopri5', 'dop853'}, optional
-		The solver for scipy.integrate.ode to utilize for integrating the ODEs.
-		Default is 'vode'
 	nsteps : int, optional
 		Maximum number of (internally defined) steps allowed during
 		one call to the solver.
@@ -90,16 +85,13 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
 
 	if not hasattr(time_range, '__iter__'):
 		raise TypeError("time_range must a tuple or a list of numbers")
 
-	solver_list = ['vode', 'zvode', 'lsoda', 'dopri5', 'dop853']
-	if solver not in solver_list:
-		raise TypeError("Solver must be one of the following: %s" %
-					", ".join([solver_str for solver_str in ["'%s'" %
-					solver for solver in solver_list]]))
 	if perturbations is None:
 		perturbations = {}
 	elif not isinstance(perturbations, dict):
@@ -154,8 +146,9 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 	[lam_odes, lam_jacb] = _make_lambda_odes(model,metab_syms , odes, values)
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
 	# Integrate the odes to obtain the concentration solutions
-	c = _integrate_odes(time_range, lam_odes, lam_jacb, ics, solver,
+	time_range, c = _integrate_odes(time_range, lam_odes, lam_jacb, ics,
 								nsteps, first_step, min_step, max_step)
+
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
 	for i, sym in enumerate(metab_syms):
@@ -187,8 +180,12 @@ def simulate(model, time_range, numpoints=500, perturbations=None,
 		for key, sol in iteritems(profile):
 			if abs(sol[-1]) <= 1e-9:
 				sol = sol[:-1]
-			profile[key] = interp1d(time_range, profile[key], kind='cubic',
-													fill_value='extrapolate')
+			if time_range.shape != sol.shape:
+				t = time_range[:-1]
+			else:
+				t = time_range
+			profile[key] = interp1d(t, sol, kind='cubic',
+										fill_value='extrapolate')
 
 	# Reorder dictionary to match model metabolites and reactions.
 	new_profile = {}
@@ -506,43 +503,28 @@ def _make_lambda_odes(model, metabolites, ode_dict, values):
 	odes = metab_matrix.diff(t).subs(eqs)
 	jacb = sp.Matrix([[fj.diff(m) for m in metab_matrix] for fj in odes])
 	# Build lambda functions for odes and Jacobian
-	lambda_odes = sp.lambdify((t, metab_matrix), odes.subs(values), "numpy")
-	lambda_jacb = sp.lambdify((t, metab_matrix), jacb.subs(values), "numpy")
+	lambda_odes = sp.lambdify((metab_matrix, t), odes.subs(values), "numpy")
+	lambda_jacb = sp.lambdify((metab_matrix, t), jacb.subs(values), "numpy")
 
 	return [lambda_odes, lambda_jacb]
 
-def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, solver,
-					nsteps, first_step, min_step, max_step):
+def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, nsteps, first_step,
+					min_step, max_step):
 	"""Internal use. Integrate the ODEs using lambda functions that represent
 	the system of ODEs and the jacobian"""
 	# Fix types from tuples to lists
 
-	def f(t, y):
-		res = lam_odes(t, y)
+	def f(y, t):
+		res = np.array(lam_odes(y, t)).T[0]
 		return list(res)
 
-	def j(t, y):
-		res = lam_jacb(t, y)
+	def j(y, t):
+		res = lam_jacb(y, t)
 		return list(res)
 
-	# Set up integrator
-	integrator = ode(f, j).set_initial_value(ics, t_vector[0])
-	if solver in ['dopri5', 'dop853']:
-		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
-									max_step=max_step)
-	else:
-		integrator.set_integrator(solver, nsteps=nsteps, first_step=first_step,
-									min_step=min_step, max_step=max_step)
-	# Set up solutions array
-	y = np.zeros((len(t_vector), len(ics)))
-	dt = t_vector[1] - t_vector[0]
-	idx = 0
-	while integrator.successful() and integrator.t < t_vector[-1]:
-		y[idx,:] = integrator.y
-		integrator.integrate(integrator.t + dt)
-		idx += 1
-
-	return y
+	y = odeint(f, ics, t_vector, Dfun=j, h0=first_step, mxstep=nsteps,
+											hmax=max_step, hmin=min_step)
+	return t_vector, y
 
 def _make_lambda_rates(model, metabolites, rate_dict, values):
 	"""Make a lambda function that uses the concentration solutions to
