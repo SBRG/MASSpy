@@ -10,7 +10,7 @@ from six import string_types, integer_types, iterkeys, iteritems
 from cobra import DictList
 
 def pools_from_string(concentration_profile, time_range, pools,
-						parameters=None, pool_ids=None, numpoints=500):
+						parameters=None, pool_ids=None, numpoints=5000):
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
 
@@ -65,9 +65,13 @@ def pools_from_string(concentration_profile, time_range, pools,
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+
 	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must a tuple or a list of numbers")
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
 
 	if isinstance(pools, string_types):
 		pools = [pools]
@@ -188,9 +192,13 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+
 	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must a tuple or a list of numbers")
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
 
 	if isinstance(net_fluxes, string_types):
 		net_fluxes = [net_fluxes]
