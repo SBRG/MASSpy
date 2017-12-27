@@ -132,7 +132,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     """
 
     # Process time vector into numpy array, get sorted solution profile
-    time = _gen_np_time_vector(time)
+    time = _gen_np_time_vector(time, **options)
     ss = _sort_dict(solution_profile)
 
     # Step 0: Get options if provided, else use defaults
