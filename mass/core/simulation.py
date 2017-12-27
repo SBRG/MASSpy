@@ -82,6 +82,7 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 	# Check inputs
 	if not isinstance(model, MassModel):
 		raise TypeError("model must be a MassModel")
+
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
@@ -90,7 +91,8 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
 
 	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must a tuple or a list of numbers")
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
 
 	if perturbations is None:
 		perturbations = {}
