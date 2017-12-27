@@ -131,7 +131,7 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     get_default_options()
     """
 
-    # Process time vector into numpy array, get sorted solution profile
+    # Process time and solution profile
     time = _gen_np_time_vector(time, **options)
     ss = _sort_dict(solution_profile)
 
@@ -148,7 +148,6 @@ def plot_phase_portrait(time, solution_profile, x, y, poi=None,
     interp_x, interp_y = (solution_profile[x], solution_profile[y])
 
     # Step 3: Make plot using options and vectors provided
-    #_validate_datapoints_interp1d(x_arg, y_arg)
     style, xgrid, ygrid = _set_style(**options)
 
     with matplotlib.style.context(style):
@@ -219,6 +218,10 @@ def plot_tiled_phase_portrait(time, solution_profile, figsize=None,
     >>> scatter_matrix(df, alpha=0.2)
     """
     return "FIXME" #FIXME
+
+    # Process time and solution profile
+    time = _gen_np_time_vector(time, **options)
+    ss = _sort_dict(solution_profile)
 
     # Generate seperate mutable copy of solution profile
     sol_df = pd.concat([pd.DataFrame(solution_profile), 
