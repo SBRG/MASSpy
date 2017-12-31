@@ -25,6 +25,114 @@ def get_plot_defaults():
 	"""Return a copy of the default options for plot_simulation and
 	plot_phase_portrait
 
+	The following are possible ``kwarg`` arguments that can be provided to
+	plot_simulation and plot_phase_portrait methods.
+
+	plot_function : {"plot", "semilogx", "semilogy", "loglog"}
+		A string representing which matplotlib.pyplot plotting function to use.
+		Accepted values are {"plot", "semilogx", "semilogy", "loglog"}.
+			"plot" uses an linear x-axis and a linear y-axis
+			"semilogx" uses an logarithmic x-axis and a linear y-axis
+			"semilogy" uses an linear x-axis and a logarithmic y-axis
+			"loglog" uses an logarithmic x-axis and a logarithmic y-axis
+		Default value is "plot"
+	numpoints : int or float
+		An integer defining the amount of time points to generate between the
+		start time and end time points should the time input be a tuple.
+		Time points are generated using numpy.geomspace(start, end, numpoints).
+		If a float is provided, it will be converted to an integer.
+	figsize : tuple
+	 	A tuple of two ints or floats specifying the size (in inches) of the
+		generated figure if no axes object is provided. The values specify the
+		width (x) and length (y) of the figure, and are passed to the
+		figure.set_size_inches method. The default figure size is (6.0, 4.0)
+		for plot_simulation and (5.0, 5.0) for plot_phase_portrait if "figsize"
+		is not in ``kwargs``.
+	tick_labels : bool
+		If True, will display the tick labels for the x-axis and y-axis.
+		Otherwise, the labels are removed.
+	x_major_ticks : int or float
+		Set the major tick locator for the x-axis to multiples of the given
+		value. The given value is passed to a matplotlib.ticker.MultipleLocator
+		instance and is set by the axes.xaxis.set_major_locator method.
+	x_minor_ticks : int or float
+		Set the minor tick locator for the x-axis to multiples of the given
+		value. The given value is passed to a matplotlib.ticker.MultipleLocator
+		instance andis set by the axes.xaxis.set_minor_locator method.
+	y_major_ticks : int or float
+		Set the major tick locator for the y-axis to multiples of the given
+		value. The given value is passed to a matplotlib.ticker.MultipleLocator
+		instance and is set by the axes.yaxis.set_major_locator method.
+	y_minor_ticks : int or float
+		Set the minor tick locator for the y-axis to multiples of the given
+		value. The given value is passed to a matplotlib.ticker.MultipleLocator
+		instance andis set by the axes.yaxis.set_minor_locator method.
+	linecolor : iterable of strings, optional
+		An iterable of strings representing colors from matplotlib.colors to
+		use for the solution color when plotting. If an iterable containing
+		color specification strings is provided, the length of the iterable
+		must be equal to the number of items to be plotted.
+		If None provided, will use default colormaps.
+	linestyle : iterable of strings, optional
+		An iterable of strings representing linestyles to use for the solution
+		line when plotting. If an iterable containing style specification
+		strings is provided, the length of the iterable must be equal to the
+		number of items to be plotted. If None provided, will use the default
+		styling of solid lines.
+	grid : tuple
+		A tuple containing two bools specifying whether to add gridlines on the
+		x-axis or y-axis respecitvely. If True, dashed gridlines will be added
+		using the axes.xaxis.grid and axes.yaxis.grid method. Otherwise,
+		no gridlines are plotted.
+	dpi : float
+		A float value specifying how many dots per inch (dpi) to use in a
+		generated figure. Passes argument to the figure.set_dpi method.
+	title : string, tuple
+		Either a string to use as a title, or a tuple where the first value is
+		the string to use as a title, and the second value is a dictionary
+		of font options to pass to the axes.set_title method. Dictionary keys
+		must be one of the six matplotlib.font_manager font properties.
+		See matplotlib.fontmanager documentation for more details.
+		When setting new defaults, the new value must be the tuple.
+	xlabel : string, tuple
+		Either a string to use as a x-axis label, or a tuple where the first
+		value is the string to use as a x-axis label, and the second value is
+		a dictionary of font options to pass to the axes.set_xlabel method.
+		Dictionary keys must be one of the six matplotlib.font_manager
+		font properties. See matplotlib.fontmanager documentation for more
+		details. When setting new defaults, the new value must be the tuple.
+	ylabel : string, tuple
+		Either a string to use as a y-axis label, or a tuple where the first
+		value is the string to use as a y-axis label, and the second value is
+		a dictionary of font options to pass to the axes.set_ylabel method.
+		Dictionary keys must be one of the six matplotlib.font_manager
+		font properties. See matplotlib.fontmanager documentation for more
+		details. When setting new defaults, the new value must be the tuple.
+	xlim : tuple
+		A tuple of integers or floats of form (xmin, xmax) specifying the
+		limits of the x-axis. Arguments are passed to the axes.set_xlim method.
+	ylim : tuple
+		A tuple of integers or floats of form (ymin, ymax) specifying the
+		limits of the y-axis. Arguments are passed to the axes.set_ylim method.
+	legend : tuple or list iterable
+		If provided, strings to use as legend entries. The size of the legend
+		text can optionally defined by a numerical value at the end of the
+		iterable, and the legend location is optionally defined by a string in
+		the second to last entry of the iterable (if legend size is defined),
+		or last entry of the iterable (if no legend size defined). The number
+		of defined legend entries must equal the number of plotted solutions.
+
+		For plot_simulation, the default legend are the solution profile keys,
+		and for plot_phase_portrait, the default legend is None. Default legend
+		location is 'best', and default legend size is 10.
+
+		Accepted location values are the following: {"best", "upper right",
+			"upper left", "lower left". "lower right", "right", "center"
+			"left", "center right". "lower center" "upper center", and "center"
+			for inside the plot, and "outside" for outside of the plot.
+		Examples: legend=['a', 'b', 'center', 15],
+				  legend=['outside', 20]
+
 	See Also:
 	---------
 	set_plot_defaults(**custom)
@@ -34,6 +142,72 @@ def get_plot_defaults():
 
 def get_tiled_defaults():
 	"""Return a copy of the default options for plot_tiled_phase_portrait
+
+	The following are possible ``kwarg`` arguments that can be provided to
+	the plot_tiled_phase_portrait method.
+
+	plot_function : {"plot", "semilogx", "semilogy", "loglog"}
+		A string representing which matplotlib.pyplot plotting function to use
+		for each phase portrait on the tiled phase portrait.
+		Accepted values are {"plot", "semilogx", "semilogy", "loglog"}.
+			"plot" uses an linear x-axis and a linear y-axis
+			"semilogx" uses an logarithmic x-axis and a linear y-axis
+			"semilogy" uses an linear x-axis and a logarithmic y-axis
+			"loglog" uses an logarithmic x-axis and a logarithmic y-axis
+		Default value is "plot"
+	numpoints : int or float
+		An integer defining the amount of time points to generate between the
+		start time and end time points should the time input be a tuple.
+		Time points are generated using numpy.geomspace(start, end, numpoints).
+		If a float is provided, it will be converted to an integer.
+	figsize : tuple
+	 	A tuple of two ints or floats specifying the size (in inches) of the
+		generated figure if no axes object is provided. The values specify the
+		width (x) and length (y) of the main figure, and are passed to the
+		figure.set_size_inches method. The default figure size is (5.0, 5.0)
+		for plot_tiled_phase_portrait if "figsize" is not in ``kwargs``.
+	tick_labels : bool
+		If True, will display the tick labels for the x-axis and y-axis.
+		Otherwise, the labels are removed.
+	x_major_ticks : int or float
+		Set the major tick locator for the x-axis on each phase portrait to
+		multiples of the given value. The given value is passed to a
+		matplotlib.ticker.MultipleLocator instance and is set by the
+		axes.xaxis.set_major_locator method for each phase portrait tile.
+	x_minor_ticks : int or float
+		Set the minor tick locator for the x-axis on each phase portrait to
+		multiples of the given value. The given value is passed to a
+		matplotlib.ticker.MultipleLocator instance and is set by the
+		axes.xaxis.set_minor_locator method for each phase portrait tile.
+	y_major_ticks : int or float
+		Set the major tick locator for the y-axis on each phase portrait to
+		multiples of the given value. The given value is passed to a
+		matplotlib.ticker.MultipleLocator instance and is set by the
+		axes.yaxis.set_major_locator method for each phase portrait tile.
+	y_minor_ticks : int or float
+		Set the minor tick locator for the y-axis on each phase portrait to
+		multiples of the given value. The given value is passed to a
+		matplotlib.ticker.MultipleLocator instance and is set by the
+		axes.yaxis.set_minor_locator method for each phase portrait tile.
+	linecolor : string
+		A string representing a color from matplotlib.colors to use for the
+		solution line when plotting all phase portraits of the tiled phase
+		portrait. If None provided, will use a color from the default colormaps.
+	linestyle : string
+		A string representing linestyle to use for the solution line when
+		plotting all phase portraits of the tiled phase portrait. If None
+		provided, will use the defaultstyling of solid lines.
+	grid : tuple
+		A tuple containing two bools specifying whether to add gridlines on the
+		x-axis or y-axis of each phase portrait respecitvely. If True, dashed
+		gridlines will be added using the axes.xaxis.grid and
+		axes.yaxis.grid method. Otherwise, no gridlines are plotted.
+	dpi : float
+		A float value specifying how many dots per inch (dpi) to use in a
+		generated figure. Passes argument to the figure.set_dpi method.
+	title : string
+		A string to use as a title for the tiled phase portrait. The title is
+		set using the figure.suptitle method
 
 	See Also:
 	---------
@@ -667,8 +841,7 @@ def _check_main_inputs(solution_profile, time, options_dict):
 		if abs(time[0]) < 1e-9:
 			time = (1e-9, time[1])
 		# Generate numbers spaced evenly on a log scale
-		time = np.geomspace(time[0], time[1],
-										options_dict["numpoints"])
+		time = np.geomspace(time[0], time[1], options_dict["numpoints"])
 	if not isinstance(time, (np.ndarray, list)):
 		raise TypeError("time must be a list or numpy.ndarray of time "
 						"points, or a tuple of form (start_point, end_point).")
@@ -865,39 +1038,39 @@ def _get_base_colormap():
 ## Internal variables
 _base_plot_defaults = {
 	"plot_function" : "plot",
-	"numpoints" : 1e5,
-	"figsize" : (5.0, 5.0),
-	"legend" : (None, "best", 10),
-	"xlabel" : (None, {"size": 10}),
-	"ylabel" : (None, {"size": 10}),
-	"title"  : (None, {"size": 10}),
-	"xlim"   : (None, None),
-	"ylim"   : (None, None),
-	"grid" 	 : (False, False),
-	"dpi"    : None,
-	"tick_labels" : True,
+	"numpoints"     : 1e5,
+	"figsize"       : (5.0, 5.0),
+	"tick_labels"   : True,
 	"x_major_ticks" : None,
 	"x_minor_ticks" : None,
 	"y_major_ticks" : None,
 	"y_minor_ticks" : None,
-	"linecolor" : None,
-	"linestyle" : None
+	"linecolor"     : None,
+	"linestyle"     : None,
+	"grid" 	 : (False, False),
+	"dpi"    : None,
+	"title"  : (None, {"size": 10}),
+	"xlabel" : (None, {"size": 10}),
+	"ylabel" : (None, {"size": 10}),
+	"xlim"   : (None, None),
+	"ylim"   : (None, None),
+	"legend" : (None, "best", 10),
 }
 
 _base_tiled_defaults = {
 	"plot_function" : "plot",
+	"numpoints"     : 1e5,
+	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : False,
 	"x_major_ticks" : None,
 	"x_minor_ticks" : None,
 	"y_major_ticks" : None,
 	"y_minor_ticks" : None,
 	"linecolor"     : None,
-    "linestyle"     : None,
-	"numpoints" : 1e5,
-	"figsize" : (5.0, 5.0),
+	"linestyle"     : None,
 	"grid" 	 : (False, False),
-	"title"  : None,
 	"dpi"    : None,
+	"title"  : None
 }
 
 _plot_defaults = _base_plot_defaults
