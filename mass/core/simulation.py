@@ -30,7 +30,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
+def simulate(model, time, perturbations=None, numpoints=10000, nsteps=500,
 				first_step=0., min_step=0., max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
@@ -47,12 +47,12 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 	----------
 	model : mass.MassModel
 		The MassModel object to simulate:
-	time_range : tuple ot list
+	time : tuple, list, or numpy.ndarray
 		A tuple containing the start and end time points for the
 		simulation, or a list of numerical values to treat as the time points
 		for integration of the ODEs.
 	numpoints :  int, optional
-		The number of points to plot if the given time_range is a tuple.
+		The number of points to plot if the given time is a tuple.
 		Default is 10000.
 	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
@@ -83,17 +83,16 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 	if not isinstance(model, MassModel):
 		raise TypeError("model must be a MassModel")
 
-	if isinstance(time_range, tuple):
+	if isinstance(time, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		if abs(time_range[0]) < 1e-9:
-			time_range = (1e-6, time_range[1])
-		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time[0]) < 1e-9:
+			time = (1e-6, time[1])
+		time = np.geomspace(time[0], time[1], int(numpoints))
 
-	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must an iterable list of time points or "
-						" a tuple of containing start and end points")
-
+	if not isinstance(time, (np.ndarray, list)):
+		raise TypeError("time must be a list or numpy.ndarray of time "
+						"points, or a tuple of form (start_point, end_point).")
 	if perturbations is None:
 		perturbations = {}
 	elif not isinstance(perturbations, dict):
@@ -148,7 +147,7 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 	[lam_odes, lam_jacb] = _make_lambda_odes(model,metab_syms , odes, values)
 	lam_rates = _make_lambda_rates(model, metab_syms, rates, values)
 	# Integrate the odes to obtain the concentration solutions
-	time_range, c = _integrate_odes(time_range, lam_odes, lam_jacb, ics,
+	time, c = _integrate_odes(time, lam_odes, lam_jacb, ics,
 								nsteps, first_step, min_step, max_step)
 
 	# Map metbaolite ids to their concentration solutions
@@ -164,7 +163,7 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 	# Map reactiom ids to their flux solutions
 	f_profile = dict()
 	for rxn, lambda_func_and_args in iteritems(lam_rates):
-		f = np.zeros(time_range.shape)
+		f = np.zeros(time.shape)
 		lambda_func = lambda_func_and_args[1]
 		args = lambda_func_and_args[0]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
@@ -182,10 +181,10 @@ def simulate(model, time_range, perturbations=None, numpoints=10000, nsteps=500,
 		for key, sol in iteritems(profile):
 			if abs(sol[-1]) <= 1e-9:
 				sol = sol[:-1]
-			if time_range.shape != sol.shape:
-				t = time_range[:-1]
+			if time.shape != sol.shape:
+				t = time[:-1]
 			else:
-				t = time_range
+				t = time
 			profile[key] = interp1d(t, sol, kind='cubic',
 										fill_value='extrapolate')
 
@@ -267,11 +266,11 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time_range = np.linspace(0, 10**power, int(10**(power+1)))
+			time = np.linspace(0, 10**power, int(10**(power+1)))
 			[c_profile, f_profile] = options[strategy](model,
-									time_range, perturbations=perturbations)
+									time, perturbations=perturbations)
 			for metab, profile in iteritems(c_profile):
-				conc = profile(time_range)
+				conc = profile(time)
 				if abs(conc[-1] - conc[-2]) <= 10**9:
 					continue
 				else:
@@ -285,20 +284,16 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 			return [None, None]
 		# Return steady state solutions
 		for metab, profile in iteritems(c_profile):
-			conc = float(profile(time_range[-1]))
+			conc = float(profile(time[-1]))
 			c_profile[metab] = round(conc, 6)
 			# Update model initial conditions if specified
 			if update_initial_conditions:
-				if metab is 't':
-					continue
 				model.initial_conditions[metab] = round(conc, 6)
 		for reaction, profile in iteritems(f_profile):
-			flux = float(profile(time_range[-1]))
+			flux = float(profile(time[-1]))
 			f_profile[reaction] = round(flux, 6)
 			# Update reaction steady state flux if specified
 			if update_reactions:
-				if reaction is 't':
-					continue
 				reaction.ssflux = round(flux, 6)
 
 		return [c_profile, f_profile]
