@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.axes._axes as _axes
 from matplotlib.ticker import MultipleLocator
 from cycler import cycler
 from warnings import warn
@@ -20,6 +21,8 @@ legend_loc = re.compile("best|upper right|upper left|lower left|lower right|"
 ptpp_options = re.compile("both|upper|lower")
 plot_re = re.compile("plot")
 tiled_re = re.compile("tiled")
+## Default axes shape:
+rect = [0.1, 0.1, 0.8, 0.8]
 ## Public Methods
 def get_plot_defaults():
 	"""Return a copy of the default options for plot_simulation and
@@ -280,7 +283,7 @@ def restore_tiled_defaults():
 	_tiled_defaults = _base_tiled_defaults
 	print("Original tiled defaults restored")
 
-def plot_simulation(solution_profile, time, ax=None, observable=None,
+def plot_simulation(solution_profile, time, axes=None, observable=None,
 					**kwargs):
 	"""Generates a plot of the data in the solution_profile over time.
 
@@ -300,7 +303,7 @@ def plot_simulation(solution_profile, time, ax=None, observable=None,
 		of form (start point, end_point) is provided, a time vector is
 		internally generated with optional kwarg "numpoints" specifying how
 		many points are in the generated vector.
-	ax : matplotlib.pyplot.axes, optional
+	axes : matplotlib.pyplot.axes, optional
 		A matplotlib.pyplot.axes instance to plot the data on. If None,
 		a figure and an axes will be generated for plotting instead.
 	observable : iterable of key(s) of the solution profile, optional
@@ -327,30 +330,27 @@ def plot_simulation(solution_profile, time, ax=None, observable=None,
 	# Obtain list if solutions to be observed
 	observable = _set_plot_observables(solution_profile, observable)
 	# Generate a new figure if no axes provided
-	if ax is None:
-		fig = plt.figure()
+	if axes is None:
+		fig, axes = plt.subplots(1, 1)
 		if "figsize" not in kwargs and options_dict["figsize"] == (5.0, 5.0):
 			fig.set_size_inches((6.0, 4.0))
 		else:
 			fig.set_size_inches(options_dict["figsize"])
-		fig.clf()
 		if options_dict["dpi"] is not None:
 			fig.set_dpi(options_dict["dpi"])
-		ax = fig.add_subplot(111)
-		ax.cla()
 	# Otherwise ensure provided axes is a matplotlib.pyplot.axes instance.
-	elif not isinstance(ax, type(plt.axes())):
-		raise TypeError("ax must be an instance of a "
-						"matplotlib.axes._subplots.AxesSubplot object")
-
+	elif not isinstance(axes, _axes.Axes):
+		raise TypeError("axes must be an instance of a "
+						"matplotlib.axes.axes.Axes object")
+	else:
+		fig = axes.get_figure()
 	# Set plot function
-	plot_function = {"loglog" : ax.loglog,
-					"semilogx" : ax.semilogx,
-					"semilogy" : ax.semilogy,
-					"plot" : ax.plot}[options_dict["plot_function"]]
+	plot_function = {"loglog" : axes.loglog,
+					"semilogx" : axes.semilogx,
+					"semilogy" : axes.semilogy,
+					"plot" : axes.plot}[options_dict["plot_function"]]
 	# Get solutions
-	sols = np.array([profile(time)
-					for profile in itervalues(observable)]).T
+	sols = np.array([prof(time) for prof in itervalues(observable)]).T
 	# Create Plot
 	plot_function(time, sols)
 	# Set legend
@@ -366,14 +366,15 @@ def plot_simulation(solution_profile, time, ax=None, observable=None,
 		lgnd = [x if isinstance(x, string_types) else x.id
 					for x in list(iterkeys(observable))]
 	# Set linecolors and linestyles, ensure legend is update accordingly
-	ax = _set_colors_and_styles(ax, lgnd, options_dict)
-	ax.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font, bbox_to_anchor=anchor)
+	axes = _set_colors_and_styles(axes, lgnd, options_dict)
+	axes.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font, bbox_to_anchor=anchor)
 	# Add all other features to the plot
-	ax = _add_plot_options_to_plot(ax, options_dict, "plot")
+	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
-	return ax.get_figure()
+	fig.tight_layout()
+	return fig
 
-def plot_phase_portrait(solution_profile, time, x, y, ax=None,
+def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 						poi="endpoints", poi_color="red", poi_labels=True,
 						**kwargs):
 	"""Generates a phase portrait of x,y in the solution_profile over time.
@@ -400,8 +401,8 @@ def plot_phase_portrait(solution_profile, time, x, y, ax=None,
 	y : mass.MassMetabolite, mass.MassReaction, or string
 		A key of the corresponding to the solution to plot on the y-axis of the
 		phase portrait. Must exist in the given solution_profile dictionary.
-	ax : matplotlib.pyplot.axes, optional
-		A matplotlib.pyplot.axes instance to plot the data on. If None,
+	axes : matplotlib.axes, optional
+		A matplotlib.axes._axes.Axes instance to plot the data on. If None,
 		a figure and an axes will be generated for plotting instead.
 	poi : tuple, list, or numpy.ndarray, or the string "endpoints", optional
 		An iterable of time "points of interest" to be annotated on each
@@ -437,26 +438,25 @@ def plot_phase_portrait(solution_profile, time, x, y, ax=None,
 	x_observable = _set_plot_observables(solution_profile, x)
 	y_observable = _set_plot_observables(solution_profile, y)
 	# Generate figure if no axes passed
-	if ax is None:
-		fig = plt.figure()
-		fig.clf()
+	if axes is None:
+		fig, axes = plt.subplots(nrows=1, ncols=1)
 		fig.set_size_inches(options_dict["figsize"])
-		ax = fig.add_subplot(111)
-		ax.cla()
+		if options_dict["dpi"] is not None:
+			fig.set_dpi(options_dict["dpi"])
 	# Otherwise ensure provided axes is a matplotlib.pyplot.axes instance.
-	elif not isinstance(ax, type(plt.axes())):
-		raise TypeError("ax must be an instance of a "
-						"matplotlib.axes._subplots.AxesSubplot object")
+	elif not isinstance(axes, _axes.Axes):
+		raise TypeError("axes must be an instance of a "
+						"matplotlib.axes.axes.Axes object")
+	else:
+		fig = axes.get_figure()
 	# Set plot function
-	plot_function = {"loglog" : ax.loglog,
-					"semilogx" : ax.semilogx,
-					"semilogy" : ax.semilogy,
-					"plot" : ax.plot}[options_dict["plot_function"]]
+	plot_function = {"loglog" : axes.loglog,
+					"semilogx" : axes.semilogx,
+					"semilogy" : axes.semilogy,
+					"plot" : axes.plot}[options_dict["plot_function"]]
 	# Obtain solutions
-	x_sols = np.array([profile(time)
-					for profile in itervalues(x_observable)])
-	y_sols = np.array([profile(time)
-					for profile in itervalues(y_observable)])
+	x_sols = np.array([prof(time) for prof in itervalues(x_observable)])
+	y_sols = np.array([prof(time) for prof in itervalues(y_observable)])
 	# Plot solutions
 	for i in range(0, len(x_sols)):
 		for j in range(0, len(y_sols)):
@@ -473,17 +473,18 @@ def plot_phase_portrait(solution_profile, time, x, y, ax=None,
 			lgnd_loc = "center left"
 			anchor = (1, 0.5)
 		# Set linecolors and linestyles, ensure legend is update accordingly
-		ax = _set_colors_and_styles(ax, lgnd, options_dict)
-		ax.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font,
+		axes = _set_colors_and_styles(axes, lgnd, options_dict)
+		axes.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font,
 					bbox_to_anchor=anchor)
 	# Label time points of interest
 	if poi is not None:
-		ax = _label_poi(ax, time, poi, poi_color, poi_labels,
+		axes = _label_poi(axes, time, poi, poi_color, poi_labels,
 						plot_function, x_observable, y_observable)
 	# Add all other features to the plot
-	ax = _add_plot_options_to_plot(ax, options_dict, "plot")
+	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
-	return ax.get_figure()
+	fig.tight_layout()
+	return fig
 
 def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 						data=None, poi=None, poi_color=None, poi_labels=False,
@@ -587,25 +588,24 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 	fig.set_size_inches(options_dict["figsize"])
 
 	# Obtain sols
-	sols = np.array([profile(time)
-					for profile in itervalues(solution_profile)])
+	sols = np.array([prof(time) for prof in itervalues(solution_profile)])
 	# A function that uses the tiled options to generate each individual tile
-	def _add_plot_tile(ax, i, j, x, y):
-		plot_function = {"loglog" : ax.loglog,
-						"semilogx" : ax.semilogx,
-						"semilogy" : ax.semilogy,
-						"plot" : ax.plot}[options_dict["plot_function"]]
+	def _add_plot_tile(axes, i, j, x, y):
+		plot_function = {"loglog" : axes.loglog,
+						"semilogx" : axes.semilogx,
+						"semilogy" : axes.semilogy,
+						"plot" : axes.plot}[options_dict["plot_function"]]
 		plot_function(sols[j], sols[i], c=options_dict["linecolor"],
 										ls=options_dict["linestyle"])
 		# Label points of interest if provided
 		if poi is not None:
-			ax = _label_poi(ax, time, poi, poi_color,
+			axes = _label_poi(axes, time, poi, poi_color,
 						poi_labels, plot_function,
 						_set_plot_observables(solution_profile, x),
 						_set_plot_observables(solution_profile, y))
 
-		ax = _add_plot_options_to_plot(ax, options_dict, "tiled")
-		return ax
+		axes = _add_plot_options_to_plot(axes, options_dict, "tiled")
+		return axes
 
 	# Adjust the font size scalar
 	if fontsize is None:
@@ -616,29 +616,29 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 						fontsize=fontsize)
 	for i, y in enumerate(iterkeys(solution_profile)):
 		for j, x in enumerate(iterkeys(solution_profile)):
-			ax = ax_main[i][j]
+			axes = ax_main[i][j]
 			# Set common axis labels
 			if i == n_keys-1:
 				label = x
 				if not isinstance(label, string_types):
 					label = label.id
-				ax.set_xlabel(label, fontdict={"size":fontsize})
+				axes.set_xlabel(label, fontdict={"size":fontsize})
 			if j == 0:
 				label = y
 				if not isinstance(label, string_types):
 					label = label.id
-				ax.set_ylabel(label, fontdict={"size":fontsize})
+				axes.set_ylabel(label, fontdict={"size":fontsize})
 			# Don't create phase portraits of items vs. themselves.
 			if i == j:
-				ax.annotate("X", xy=(0.5, 0.5), xycoords="axes fraction",
+				axes.annotate("X", xy=(0.5, 0.5), xycoords="axes fraction",
 						va="center", ha="center", fontsize=fontsize)
-				ax.set_xticklabels([])
-				ax.set_yticklabels([])
+				axes.set_xticklabels([])
+				axes.set_yticklabels([])
 			# Create phase portraits for upper tiles only
 			elif re.match("upper", place_tiles):
 				# Create upper tile phase portraits
 				if i < j:
-					ax = _add_plot_tile(ax, i, j, x, y)
+					axes = _add_plot_tile(axes, i, j, x, y)
 				# Add additional data to lower tiles if provided
 				if i > j and data is not None:
 					ax.annotate(str(data[i][j]), xy=(0.5, 0.5),
@@ -648,67 +648,67 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 			elif re.match("lower", place_tiles):
 				# Create lower tile phase portraits
 				if i > j:
-					ax = _add_plot_tile(ax, i, j, x, y)
+					axes = _add_plot_tile(axes, i, j, x, y)
 				# Add additional data to upper tiles if provided
 				if i < j and data is not None:
-					ax.annotate(str(data[i][j]), xy=(0.5, 0.5),
+					axes.annotate(str(data[i][j]), xy=(0.5, 0.5),
 							xycoords="axes fraction", va="center", ha="center",
 							fontsize=fontsize)
 			# Create phase portraits for both upper and lower tiles
 			else:
-				ax = _add_plot_tile(ax, i, j, x, y)
+				axes = _add_plot_tile(axes, i, j, x, y)
 	# Return figure instance
 	return fig
 
 ## Internal Methods
-def _add_plot_options_to_plot(ax, options_dict, plot_type):
+def _add_plot_options_to_plot(axes, options_dict, plot_type):
 	"""Internal Method. Add plot features to the axes"""
 	# For plot_simulation and plot_phase_portrait specifically
 	if plot_re.match(plot_type):
 		# Set xlim
 		if options_dict["xlim"] != (None, None):
-			ax.set_xlim(options_dict["xlim"])
+			axes.set_xlim(options_dict["xlim"])
 		# Set ylim
 		if options_dict["ylim"] != (None, None):
-			ax.set_ylim(options_dict["ylim"])
+			axes.set_ylim(options_dict["ylim"])
 		# Set title if desired
 		if options_dict["title"][0] is not None:
-			ax.set_title(options_dict["title"][0],
+			axes.set_title(options_dict["title"][0],
 						fontdict=options_dict["title"][1])
 		# Set xlabel if desired
 		if options_dict["xlabel"][0] is not None:
-			ax.set_xlabel(options_dict["xlabel"][0],
+			axes.set_xlabel(options_dict["xlabel"][0],
 						fontdict=options_dict["xlabel"][1])
 		# Set ylabel if desired
 		if options_dict["ylabel"][0] is not None:
-			ax.set_ylabel(options_dict["ylabel"][0],
+			axes.set_ylabel(options_dict["ylabel"][0],
 						fontdict=options_dict["ylabel"][1])
 
 	# Set xgrid and y grid if deisred
 	if options_dict["grid"][0]:
-		ax.xaxis.grid(True, linestyle="--")
+		axes.xaxis.grid(True, linestyle="--")
 	if options_dict["grid"][1]:
-		ax.yaxis.grid(True, linestyle="--")
+		axes.yaxis.grid(True, linestyle="--")
 	# Set options for ticks and ticklabels
 	if not options_dict["tick_labels"]:
-		ax.set_xticklabels([])
-		ax.set_yticklabels([])
+		axes.set_xticklabels([])
+		axes.set_yticklabels([])
 	for tick_type in ["x_major_ticks", "x_minor_ticks",
 						"y_major_ticks", "y_minor_ticks"]:
 		if options_dict[tick_type] is not None:
 			# x-axis ticks
 			if re.match("x", tick_type[0]):
-				axis = ax.xaxis
+				axis = axes.xaxis
 			# y-axis ticks
 			else:
-				axis = ax.yaxis
+				axis = axes.yaxis
 			# Major ticks
 			if re.search("major", tick_type):
 				axis.set_major_locator(options_dict[tick_type])
 			# Minor ticks
 			else:
 				axis.set_minor_locator(options_dict[tick_type])
-	return ax
+	return axes
 
 def _set_plot_observables(solution_profile, observable):
 	"""Internal method. Check and return a list of solution profiles to be
@@ -729,7 +729,7 @@ def _set_plot_observables(solution_profile, observable):
 
 	return observable
 
-def _set_colors_and_styles(ax, lgnd, options_dict):
+def _set_colors_and_styles(axes, lgnd, options_dict):
 	"""Internal method. Set linecolors and styles for a plot"""
 	# Use a larger colormap if more than 20 items are to be plotted and no
 	# colors were specified by the user.
@@ -739,16 +739,16 @@ def _set_colors_and_styles(ax, lgnd, options_dict):
 	if options_dict["linecolor"] is not None:
 		lgnd_id_dict = dict(zip(lgnd, np.arange(len(lgnd))))
 		for entry, i in iteritems(lgnd_id_dict):
-			ax.get_lines()[lgnd_id_dict[entry]].set_color(
+			axes.get_lines()[lgnd_id_dict[entry]].set_color(
 				options_dict["linecolor"][i])
 	# Set linestyles and adjust legend entries
 	if options_dict["linestyle"] is not None:
 		lgnd_id_dict = dict(zip(lgnd, np.arange(len(lgnd))))
 		for entry, i in iteritems(lgnd_id_dict):
-			ax.get_lines()[lgnd_id_dict[entry]].set_linestyle(
+			axes.get_lines()[lgnd_id_dict[entry]].set_linestyle(
 				options_dict["linestyle"][i])
 
-	return ax
+	return axes
 
 def _handle_plot_options(kwargs, plot_type):
 	"""Internal method. Using the default options as the base, creates the
@@ -847,7 +847,7 @@ def _check_main_inputs(solution_profile, time, options_dict):
 						"points, or a tuple of form (start_point, end_point).")
 	return time
 
-def _label_poi(ax, time, poi, poi_color, poi_labels, plot_function,
+def _label_poi(axes, time, poi, poi_color, poi_labels, plot_function,
 				x_observable, y_observable):
 	"""Internal method. Annotate the points of interest for phase portraits"""
 	# Annotate time points of interest
@@ -898,12 +898,12 @@ def _label_poi(ax, time, poi, poi_color, poi_labels, plot_function,
 								color=poi_color[k])
 				# Label points with time value if desired.
 				if poi_labels:
-					ax.annotate("   t=%s" % poi[k],
+					axes.annotate("   t=%s" % poi[k],
 								xy=(x_poi_coords[k], y_poi_coords[k]),
 								xycoords='data',
 								xytext=(x_poi_coords[k], y_poi_coords[k]),
 								textcoords='offset points')
-	return ax
+	return axes
 
 def _update_plot_function(options_dict, value):
 	"""Internal method. Update "plot_function" to user-defined number"""
