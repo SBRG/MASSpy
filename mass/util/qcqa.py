@@ -60,9 +60,7 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 						[get_missing_parameters, [True]*5],
 						[can_simulate, [[1,2,3]], False],
 						[get_superfluous_parameters, None],
-						[get_unconserved_metabolites, None],
 						[parameter_consistency, [1e-9]],
-						[stoichiometric_consistency, None],
 						[elemental_consistency, None],
 						[thermodynamic_consistency, None]]
 
