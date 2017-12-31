@@ -21,8 +21,6 @@ legend_loc = re.compile("best|upper right|upper left|lower left|lower right|"
 ptpp_options = re.compile("both|upper|lower")
 plot_re = re.compile("plot")
 tiled_re = re.compile("tiled")
-## Default axes shape:
-rect = [0.1, 0.1, 0.8, 0.8]
 ## Public Methods
 def get_plot_defaults():
 	"""Return a copy of the default options for plot_simulation and
@@ -363,8 +361,12 @@ def plot_simulation(solution_profile, time, axes=None, observable=None,
 		anchor = (1, 0.5)
 	# Create a legend if none provided.
 	if lgnd is None or len(lgnd) == 0:
+		# Obtain strings for legends
 		lgnd = [x if isinstance(x, string_types) else x.id
 					for x in list(iterkeys(observable))]
+		# Filter out leading underscores
+		lgnd = [s if not re.search('^[^A-Za-z0-9]*', s)
+				else re.sub('^[^A-Za-z0-9]*', '', s) for s in lgnd]
 	# Set linecolors and linestyles, ensure legend is update accordingly
 	axes = _set_colors_and_styles(axes, lgnd, options_dict)
 	axes.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font, bbox_to_anchor=anchor)
@@ -733,7 +735,7 @@ def _set_colors_and_styles(axes, lgnd, options_dict):
 	"""Internal method. Set linecolors and styles for a plot"""
 	# Use a larger colormap if more than 20 items are to be plotted and no
 	# colors were specified by the user.
-	if options_dict["linecolor"] is None and len(lgnd) > 20:
+	if options_dict["linecolor"] is None and len(lgnd) > 10:
 		options_dict["linecolor"] = _get_base_colormap()
 	# Set colors and adjust legend entries
 	if options_dict["linecolor"] is not None:
