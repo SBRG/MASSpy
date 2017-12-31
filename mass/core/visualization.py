@@ -692,7 +692,7 @@ def _label_poi(ax, time, poi, poi_color, poi_labels, plot_function,
 	elif not hasattr(poi, '__iter__'):
 		poi = [poi]
 	# Default to red if None provided
-	if poi_color = None:
+	if poi_color is None:
 		poi_color = "red"
 	# Turn poi_color into an iterable if only a single color provided.
 	if isinstance(poi_color , string_types):
