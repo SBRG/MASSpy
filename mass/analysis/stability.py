@@ -12,7 +12,7 @@ import seaborn as sns
 
 from sympy.core import Symbol
 from scipy.interpolate import interp1d
-from math import inf, log10
+from math import log10
 from six import iterkeys, itervalues
 
 # from cobra
@@ -27,7 +27,8 @@ from mass.core.simulation import *
 from mass.analysis.linear import *
 
 
-
+## Set a float infinity (Compatibility with Python 2.7)
+inf = float('inf')
 # Methods to generate perturbed eigenvalues
 def get_Jx_sym(massmodel, jacobian_type="metabolite"):
     """Get symbolic Jacobian
@@ -45,7 +46,7 @@ def get_Jx_sym(massmodel, jacobian_type="metabolite"):
     sympy.MutableDenseMatrix
         A sympy matrix representation of the Jacobian (in symbolic form)
     """
-    return jacobian(massmodel, jacobian_type=jacobian_type, 
+    return jacobian(massmodel, jacobian_type=jacobian_type,
                     sub_parameters=False, sub_concentrations=False,
                     matrix_type="symbolic")
 
@@ -161,7 +162,7 @@ def gen_eigvalues(
         keyword arguments for changing default range of linspace/logspace
         methods. These arguments are passed in as parameters into these methods
         directly. See documentation on np.linspace and/or np.logspace for
-        details. 
+        details.
         Examples:
             linspace: **{"start": 10, "stop": 100, "num": 100}
                 Range is np.linspace(start=10, stop=100, num=100)
@@ -195,7 +196,7 @@ def gen_eigvalues(
 
 # Methods to process generated eigenvalues
 def normalize_eigenvalues(Jx, param, react_dict, eigs_df):
-    """Divide each column of eigs_df by each eigenvalue's original 
+    """Divide each column of eigs_df by each eigenvalue's original
        steady-state value
 
     Parameters
@@ -238,13 +239,13 @@ def applymap_log_wsp(eigs_df):
     ----------
     norm_eigs_df: pd.DataFrame
         A pandas dataframe, indexed by the values of a pertubed parameter and
-        containing the log_wsp of the normalized eigenvalues for each value 
+        containing the log_wsp of the normalized eigenvalues for each value
         of that perturbed parameter
     Returns
     -------
     pd.DataFrame
         A pandas dataframe, indexed by the values of a pertubed parameter and
-        containing the log_wsp of the normalized eigenvalues for each value 
+        containing the log_wsp of the normalized eigenvalues for each value
         of that perturbed parameter
     """
     return eigs_df.applymap(lambda x: _log_wsp(x))
@@ -267,13 +268,13 @@ def plot_eigvalues(eigs_df, size=(15,15), linewidth=None, fname=None):
     if fname is not None:
         fig.savefig(fname, format="png")
 
-def gen_perturbed_parameter_eigenvalue_plots(massmodel, 
-                                             jacobian_type="metabolite", 
-                                             strategy="simulate", 
-                                             scale="logspace", 
-                                             size=(15,15), 
+def gen_perturbed_parameter_eigenvalue_plots(massmodel,
+                                             jacobian_type="metabolite",
+                                             strategy="simulate",
+                                             scale="logspace",
+                                             size=(15,15),
                                              linewidth=0.1,
-                                             dname=None, 
+                                             dname=None,
                                              custom_values=None, **values):
     """FIXME"""
     #generate symbolic Jacobian
@@ -341,7 +342,7 @@ def _set_scale(scale, *custom_values, **values):
         keyword arguments for changing default range of linspace/logspace
         methods. These arguments are passed in as parameters into these methods
         directly. See documentation on np.linspace and/or np.logspace for
-        details. 
+        details.
         Examples:
             linspace: **{"start": 10, "stop": 100, "num": 100}
                 Range is np.linspace(start=10, stop=100, num=100)
@@ -388,20 +389,3 @@ def _log_wsp(x):
     else:
         result = log10(x) if x > 0 else -1*log10(-x)
         return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

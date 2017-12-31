@@ -6,7 +6,6 @@ from __future__ import absolute_import
 # Import Necessary Packages
 import io
 import numpy as np
-from math import inf
 from collections import OrderedDict
 from six import iteritems, string_types
 from operator import attrgetter, itemgetter
@@ -22,6 +21,8 @@ from cobra.core import Gene
 from mass.core import MassMetabolite, MassReaction, MassModel
 
 # Class begins
+## Set a float infinity (Compatibility with Python 2.7)
+inf = float('inf')
 ## JSON_SPEC
 JSON_SPEC = "1"
 ## Internal Attribute List for MassMetabolites

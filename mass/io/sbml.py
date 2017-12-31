@@ -10,7 +10,6 @@ from decimal import Decimal
 from gzip import GzipFile
 from tempfile import NamedTemporaryFile
 from warnings import catch_warnings, simplefilter, warn
-from math import inf
 
 from six import iteritems, string_types
 
@@ -56,7 +55,9 @@ except ImportError:
 else:
     from cobra.io.sbml import create_cobra_model_from_sbml_file as read_sbml2
     from cobra.io.sbml import write_cobra_model_to_sbml_file as write_sbml2
-
+    
+## Set a float infinity (Compatibility with Python 2.7)
+inf = float('inf')
 # deal with namespaces
 namespaces = {"fbc": "http://www.sbml.org/sbml/level3/version1/fbc/version2",
               "sbml": "http://www.sbml.org/sbml/level3/version1/core",
@@ -333,7 +334,7 @@ def model_to_xml(mass_model):
     --------
     write_sbml_model : Write directly to a file.
     """
-    
+
     # add in model
     xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
                   sboTerm="SBO:0000624")
@@ -514,7 +515,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         # ignore for now (deal with after sbml3 is finished)
         #write_sbml2(cobra_model, filename, use_fbc_package=False, **kwargs)
         return
-    
+
     # create xml
     xml = model_to_xml(mass_model, **kwargs)
     write_args = {"encoding": "UTF-8", "xml_declaration": True}
@@ -523,7 +524,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         write_args["pretty_print"] = True
     else:
         _indent_xml(xml)
-    
+
     # write xml to file
     should_close = True
     if hasattr(filename, "write"):

@@ -22,7 +22,7 @@ from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
 # Class begins
-## Set a float infinity
+## Set a float infinity (Compatibility with Python 2.7)
 inf = float('inf')
 ## precompiled regular expressions
 ### Matches and/or in a gene reaction rule
