@@ -241,8 +241,10 @@ class MassReaction(Object):
 	@property
 	def rate(self):
 		"""Returns the rate law as a sympy expression"""
-
-		return expressions.generate_rate_law(self, rate_type=self._rtype,
+		if self._model is not None and self in self._model.custom_rates:
+			return self._model.custom_rates[self]
+		else:
+			return expressions.generate_rate_law(self, rate_type=self._rtype,
 									sympy_expr=True,  update_reaction=True)
 
 	@property
