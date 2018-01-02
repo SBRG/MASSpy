@@ -132,7 +132,7 @@ def get_plot_defaults():
 			"upper left", "lower left". "lower right", "right", "center"
 			"left", "center right". "lower center" "upper center", and "center"
 			for locations inside the plot, and "left outside", "right outside",
-			"lower outside", and "upper outside" for locations outside the plot.
+			"lower outside", and "upper outside" for outside the plot.
 		Examples: legend=['a', 'b', 'center', 15],
 				  legend=['right outside', 20]
 
@@ -195,7 +195,7 @@ def get_tiled_defaults():
 	linecolor : string
 		A string representing a color from matplotlib.colors to use for the
 		solution line when plotting all phase portraits of the tiled phase
-		portrait. If None provided, will use a color from the default colormaps.
+		portrait. If None provided, will the default colormaps.
 	linestyle : string
 		A string representing linestyle to use for the solution line when
 		plotting all phase portraits of the tiled phase portrait. If None
@@ -482,8 +482,8 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 		for j in range(0, len(y_sols)):
 			if lgnd is None or len(lgnd) < len(x_sols)*len(y_sols):
 				if lgnd is not None and len(lgnd) != 0:
-					warn("Not enough legend entries provided, using the default "
-						"line labels instead")
+					warn("Not enough legend entries provided, using the "
+						"default line labels instead")
 				label = "%s vs. %s" % (list(iterkeys(x_observable))[i],
 									list(iterkeys(y_observable))[j])
 			else:
@@ -521,7 +521,8 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 						data=None, poi=None, poi_color=None, poi_labels=False,
 						fontsize=None, **kwargs):
-	"""Generates a tiled phase portrait for all items in a given solution_profile
+	"""Generates a tiled phase portrait for all items in a given
+	solution_profile
 
 	``kwargs`` are passed on to various matplotlib methods.
 	See get_tiled_defaults() for a full description.
