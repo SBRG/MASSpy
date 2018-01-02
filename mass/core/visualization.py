@@ -15,9 +15,10 @@ from six import iteritems, iterkeys, itervalues, integer_types, string_types
 # Class begins
 ## Precompiled regular expression for legend location and
 ## plot_tiled_phase_portrait options
-legend_loc = re.compile("best|upper right|upper left|lower left|lower right|"
-						"right|center left|center right|lower center|"
-						"upper center|center|outside")
+legend_loc_re = re.compile("best|upper right|upper left|lower left|lower right"
+							"|right|center left|center right|lower center|"
+							"upper center|center|left outside|right outside|"
+							"lower outside|upper outside")
 ptpp_options = re.compile("both|upper|lower")
 plot_re = re.compile("plot")
 tiled_re = re.compile("tiled")
@@ -130,9 +131,10 @@ def get_plot_defaults():
 		Accepted location values are the following: {"best", "upper right",
 			"upper left", "lower left". "lower right", "right", "center"
 			"left", "center right". "lower center" "upper center", and "center"
-			for inside the plot, and "outside" for outside of the plot.
+			for locations inside the plot, and "left outside", "right outside",
+			"lower outside", and "upper outside" for locations outside the plot.
 		Examples: legend=['a', 'b', 'center', 15],
-				  legend=['outside', 20]
+				  legend=['right outside', 20]
 
 	See Also:
 	---------
@@ -348,28 +350,42 @@ def plot_simulation(solution_profile, time, axes=None, observable=None,
 					"semilogy" : axes.semilogy,
 					"plot" : axes.plot}[options_dict["plot_function"]]
 	# Get solutions
-	sols = np.array([prof(time) for prof in itervalues(observable)]).T
-	# Create Plot
-	plot_function(time, sols)
-	# Set legend
+	sols = np.array([prof(time) for prof in itervalues(observable)])
 	lgnd = options_dict["legend"][0]
-	lgnd_loc = options_dict["legend"][1]
-	lgnd_font = options_dict["legend"][2]
-	anchor = None
-	if re.match("outside", lgnd_loc):
-		lgnd_loc = "center left"
-		anchor = (1, 0.5)
-	# Create a legend if none provided.
-	if lgnd is None or len(lgnd) == 0:
+	# Create line labels
+	if lgnd is not None and len(lgnd) >= len(sols):
+		labels=lgnd
+	else:
+		if lgnd is not None and len(lgnd) != 0:
+			warn("Not enough legend entries provided, using the default "
+				"line labels instead")
 		# Obtain strings for legends
-		lgnd = [x if isinstance(x, string_types) else x.id
+		labels = [x if isinstance(x, string_types) else x.id
 					for x in list(iterkeys(observable))]
 		# Filter out leading underscores
-		lgnd = [s if not re.search('^[^A-Za-z0-9]*', s)
-				else re.sub('^[^A-Za-z0-9]*', '', s) for s in lgnd]
-	# Set linecolors and linestyles, ensure legend is update accordingly
-	axes = _set_colors_and_styles(axes, lgnd, options_dict)
-	axes.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font, bbox_to_anchor=anchor)
+		labels = [s if not re.search('^[^A-Za-z0-9]*', s)
+				else re.sub('^[^A-Za-z0-9]*', '', s) for s in labels]
+	# Create Plot
+	for sol, label in zip(sols, labels):
+		plot_function(time, sol, label=label)
+	# Set legend if provided
+	if lgnd is not None:
+		lgnd_loc = options_dict["legend"][1]
+		lgnd_font = options_dict["legend"][2]
+		if re.search("(\S+) outside", lgnd_loc):
+			lgnd_loc = re.search("(\S+) outside", lgnd_loc).group(1)
+			lgnd_loc, anchor, col = _place_legend_outside(lgnd_loc)
+		else:
+			anchor = None
+			col=1
+		# Set linecolors and linestyles, ensure legend is update accordingly
+		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
+						bbox_to_anchor=anchor,
+						ncol=col)
+	# Set linecolors and linestyles if no legend
+	else:
+		axes, labels = _set_colors_and_styles(axes, options_dict)
 	# Add all other features to the plot
 	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
@@ -459,25 +475,39 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 	# Obtain solutions
 	x_sols = np.array([prof(time) for prof in itervalues(x_observable)])
 	y_sols = np.array([prof(time) for prof in itervalues(y_observable)])
-	# Plot solutions
+	lgnd = options_dict["legend"][0]
+	# # Create line labels and plot solutions
+	item_count = 0
 	for i in range(0, len(x_sols)):
 		for j in range(0, len(y_sols)):
-			plot_function(x_sols[i], y_sols[j])
-	# Set legend
-	lgnd = options_dict["legend"][0]
-	if lgnd is None or len(lgnd) == 0:
-		pass
-	else:
+			if lgnd is None or len(lgnd) < len(x_sols)*len(y_sols):
+				if lgnd is not None and len(lgnd) != 0:
+					warn("Not enough legend entries provided, using the default "
+						"line labels instead")
+				label = "%s vs. %s" % (list(iterkeys(x_observable))[i],
+									list(iterkeys(y_observable))[j])
+			else:
+				label = lgnd[item_count]
+				item_count += 1
+			plot_function(x_sols[i], y_sols[j], label=label)
+
+	# Set legend if provided
+	if lgnd is not None:
 		lgnd_loc = options_dict["legend"][1]
 		lgnd_font = options_dict["legend"][2]
-		anchor = None
-		if re.match("outside", lgnd_loc):
-			lgnd_loc = "center left"
-			anchor = (1, 0.5)
+		if re.search("(\S+) outside", lgnd_loc):
+			lgnd_loc = re.search("(\S+) outside", lgnd_loc).group(1)
+			lgnd_loc, anchor, col = _place_legend_outside(lgnd_loc)
+		else:
+			anchor = None
+			col=1
 		# Set linecolors and linestyles, ensure legend is update accordingly
-		axes = _set_colors_and_styles(axes, lgnd, options_dict)
-		axes.legend(lgnd, loc=lgnd_loc, fontsize=lgnd_font,
-					bbox_to_anchor=anchor)
+		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
+					bbox_to_anchor=anchor, ncol=col)
+	# Set linecolors and linestyles if no legend
+	else:
+		axes, labels = _set_colors_and_styles(axes, options_dict)
 	# Label time points of interest
 	if poi is not None:
 		axes = _label_poi(axes, time, poi, poi_color, poi_labels,
@@ -731,26 +761,30 @@ def _set_plot_observables(solution_profile, observable):
 
 	return observable
 
-def _set_colors_and_styles(axes, lgnd, options_dict):
+def _set_colors_and_styles(axes, options_dict):
 	"""Internal method. Set linecolors and styles for a plot"""
 	# Use a larger colormap if more than 20 items are to be plotted and no
 	# colors were specified by the user.
-	if options_dict["linecolor"] is None and len(lgnd) > 10:
-		options_dict["linecolor"] = _get_base_colormap()
-	# Set colors and adjust legend entries
-	if options_dict["linecolor"] is not None:
-		lgnd_id_dict = dict(zip(lgnd, np.arange(len(lgnd))))
-		for entry, i in iteritems(lgnd_id_dict):
-			axes.get_lines()[lgnd_id_dict[entry]].set_color(
-				options_dict["linecolor"][i])
-	# Set linestyles and adjust legend entries
-	if options_dict["linestyle"] is not None:
-		lgnd_id_dict = dict(zip(lgnd, np.arange(len(lgnd))))
-		for entry, i in iteritems(lgnd_id_dict):
-			axes.get_lines()[lgnd_id_dict[entry]].set_linestyle(
-				options_dict["linestyle"][i])
+	labels = [l.get_label() for l in  axes.get_lines()
+							if not re.search("_line+|poi+", l.get_label())]
+	lines = [axes.get_lines()[i] for i, l in enumerate(axes.get_lines())
+								if not re.search("_line+|poi+", l.get_label())]
 
-	return axes
+	# Set linecolors and adjust legend entries from last to first one
+	# to preserve previous linecolors on the axes
+	if options_dict["linecolor"] is not None:
+		colors = options_dict["linecolor"].copy()
+		colors.reverse()
+		for i, lc in enumerate(colors):
+			lines[len(lines)-1-i].set_color(lc)
+	# Set linestyles and adjust legend entries from last to first one
+	# to preserve previous linecolors on the axes
+	if options_dict["linestyle"] is not None:
+		styles = options_dict["linestyle"].copy()
+		styles.reverse()
+		for i, ls in enumerate(styles):
+			lines[len(lines)-1-i].set_linestyle(ls)
+	return axes, (lines, labels)
 
 def _handle_plot_options(kwargs, plot_type):
 	"""Internal method. Using the default options as the base, creates the
@@ -897,7 +931,7 @@ def _label_poi(axes, time, poi, poi_color, poi_labels, plot_function,
 			# Plot the points
 			for k in range(0, len(poi)):
 				plot_function(x_poi_coords[k], y_poi_coords[k], 'o',
-								color=poi_color[k])
+								color=poi_color[k], label=("poi_%s" % poi[k]))
 				# Label points with time value if desired.
 				if poi_labels:
 					axes.annotate("   t=%s" % poi[k],
@@ -906,6 +940,37 @@ def _label_poi(axes, time, poi, poi_color, poi_labels, plot_function,
 								xytext=(x_poi_coords[k], y_poi_coords[k]),
 								textcoords='offset points')
 	return axes
+
+def _place_legend_outside(lgnd_loc):
+	"""Internal method. Determine where the legend needs to be anchored
+	outside of the plot and return location and anchor coordinates."""
+	# Place legend outside the plot on the left
+	if re.match(lgnd_loc, "left"):
+		lgnd_loc = "center right"
+		anchor = (-0.15, 0.5)
+		col = 1
+	# Place legend outside the plot on the right
+	elif re.match(lgnd_loc, "right"):
+		lgnd_loc = "center left"
+		anchor = (1.05, 0.5)
+		col = 1
+	# Place legend outside the plot on the top
+	elif re.match(lgnd_loc, "upper"):
+		lgnd_loc = "lower center"
+		anchor = (0.5, 1.15)
+		col = 5
+	# Place legend outside the plot on the bottom
+	elif re.match(lgnd_loc, "lower"):
+		lgnd_loc = "upper center"
+		anchor = (0.5, -0.2)
+		col = 5
+	# Place legend in best location if unknown option used.
+	else:
+		warn("Unrecognized legend entry, will use 'best' instead")
+		lgnd_loc = "best"
+		anchor = None
+		col = 1
+	return lgnd_loc, anchor, col
 
 def _update_plot_function(options_dict, value):
 	"""Internal method. Update "plot_function" to user-defined number"""
@@ -937,25 +1002,24 @@ def _update_figsize(options_dict, value):
 def _update_legend(options_dict, value):
 	"""Internal method. Update "legend" to user-defined number"""
 	# Check input type for option
-	if not hasattr(value, '__iter__'):
-		raise TypeError("legend must be an iterable")
-	if isinstance(value, string_types):
-		value = [value]
-	# Check if fontsize for the legend was specified
-	if isinstance(value[-1], (integer_types, float)):
-		fontsize = value.pop(-1)
-	# Otherwise use default
-	else:
-		fontsize = options_dict["legend"][2]
-	# Check if legend location was specified, otherwise use default
 	loc = options_dict["legend"][1]
-	if len(value) != 0:
-		if legend_loc.match(value[-1]):
-			loc = value.pop(-1)
+	fontsize = options_dict["legend"][2]
+	if value is not None:
+		if not hasattr(value, '__iter__'):
+			raise TypeError("legend must be an iterable")
+		if isinstance(value, string_types):
+			value = [value]
+		# Check if fontsize for the legend was specified
+		if isinstance(value[-1], (integer_types, float)):
+			fontsize = value.pop(-1)
+		# Check if legend location was specified, otherwise use default
+		if len(value) != 0:
+			if legend_loc_re.match(value[-1]):
+				loc = value.pop(-1)
 
-		for entry in value:
-			if not isinstance(entry, string_types):
-				raise TypeError("legend entries must be strings")
+			for entry in value:
+				if not isinstance(entry, string_types):
+					raise TypeError("legend entries must be strings")
 
 	# Update options
 	options_dict.update({"legend": (value, loc, fontsize)})
@@ -1010,6 +1074,7 @@ def _update_dpi(options_dict, value):
 	options_dict.update({"dpi": value})
 
 def _update_ticks(options_dict, tick_type, value):
+	# Check input type for option
 	if re.match("tick_labels", tick_type):
 		if not isinstance(value, bool):
 			raise TypeError("%s must be a bool" % tick_type)
@@ -1021,6 +1086,12 @@ def _update_ticks(options_dict, tick_type, value):
 	options_dict.update({tick_type: value})
 
 def _update_lines(options_dict, line_option, value):
+	# Check input type for option
+	if isinstance(value, string_types):
+		value = [value]
+	if not hasattr(value, "__iter__"):
+		raise TypeError("%s must be a string or an iterable of strings"
+						% line_option)
 	# Update options
 	options_dict.update({line_option: value})
 
@@ -1040,7 +1111,7 @@ def _get_base_colormap():
 ## Internal variables
 _base_plot_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e5,
+	"numpoints"     : 1e4,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : True,
 	"x_major_ticks" : None,
@@ -1061,7 +1132,7 @@ _base_plot_defaults = {
 
 _base_tiled_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e5,
+	"numpoints"     : 1e4,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : False,
 	"x_major_ticks" : None,
