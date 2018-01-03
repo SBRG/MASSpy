@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import re
 import sympy as sp
 from tabulate import tabulate
-from six import iteritems, iterkeys
+from six import iteritems, iterkeys, itervalues
 
 # Class begins
 ## Set a float infinity
@@ -101,10 +101,21 @@ def get_missing_initial_conditions(model):
 	# Check inputs
 	missing_ics = [metab for metab in model.metabolites
 					if metab not in iterkeys(model.initial_conditions)]
-	missing_exts = [metab for metab in model.get_external_metabolites
+	missing_ics += [metab for metab in model.get_external_metabolites
 					if metab not in iterkeys(model.fixed_concentrations)]
+	# Determine which initial conditions are not necessary and remove them.
+	if len(missing_ics) != 0:
+		rate_symbol_sets = [r.atoms(sp.Function, sp.Symbol)
+							for r in itervalues(model.rates)]
+		rate_syms = set()
+		for symbol_sets in rate_symbol_sets:
+			rate_syms = rate_syms.union(symbol_sets)
+		rate_syms = [str(sym)[:-3] if re.search("\(t\)", str(sym))
+									else str(sym)
+									for sym in list(rate_syms)]
+		missing_ics = [metab for metab in missing_ics if metab in rate_syms]
 
-	return missing_ics + missing_exts
+	return missing_ics
 
 def get_missing_parameters(model, kf=False, Keq=False,
 							kr=False, ssflux=False, custom_parameters=False):
@@ -397,7 +408,7 @@ def _qcqa_summary(to_display):
 				consistencies[header] = table_list
 			continue
 
-	reports.append("QCQA REPORT\n" + "="*79)
+	reports.append("QCQA REPORT\n" + "="*11)
 	if sim_checks != {}:
 		reports.append(tabulate(sim_checks, headers="keys",stralign="center"))
 	if missing_dict != {}:
