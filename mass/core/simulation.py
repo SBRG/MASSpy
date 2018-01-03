@@ -271,7 +271,7 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 									time, perturbations=perturbations)
 			for metab, profile in iteritems(c_profile):
 				conc = profile(time)
-				if abs(conc[-1] - conc[-2]) <= 10**9:
+				if abs(conc[-1] - conc[-2]) <= 10**-9:
 					continue
 				else:
 					retry = True
