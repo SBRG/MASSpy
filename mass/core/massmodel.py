@@ -22,7 +22,6 @@ from cobra.util.context import HistoryManager, resettable, get_context
 
 # from mass
 from mass.util import qcqa
-from mass.analysis import linear
 from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
@@ -92,12 +91,15 @@ class MassModel(Object):
 		A dictionary to store custom parameters for custom rates,
 		keys are parameters and values are the parameter value.
 		Custom rates will always have preference over rate laws in reactions.
-	fixed_concentrations: dict
+	fixed_concentrations : dict
 		A dictionary to store fixed concentrations for metabolites, where
 		keys are metabolite objects or "external metabolites" of exchange
 		reactions as strings, and values are the fixed concentrations.
 		Fixed concentrations will always have preference over the metabolite
 		ODEs representing concentrations.
+	modules : dict
+		A dictionary to store the models/modules associated with this model.
+		Keys are model idenfifiers (model.id) and values are MassModel objects.
 	compartments : dict
 		A dictionary to store the compartment shorthands and their full names.
 		Keys are the shorthands and values are the full names.
@@ -105,7 +107,7 @@ class MassModel(Object):
 	units : dict
 		A dictionary to store the units used in the model for referencing.
 
-		WARNING: Note that the model will not track the units,
+		WARNING: Note that the MassModel will not track the units,
 		Therefore all unit conversions must be manually in order to ensure
 		numerical consistency in the model. It is highly recommended to stick
 		with the following units:
@@ -131,11 +133,13 @@ class MassModel(Object):
 			self.genes = DictList()
 			# A dictionary of initial conditions for MassMetabolites
 			self.initial_conditions = dict()
-			#For storing of custom rate laws and fixed concentrations
+			# For storing of custom rate laws and fixed concentrations
 			self._rtype = 1
 			self._custom_rates= dict()
 			self._custom_parameters = dict()
 			self.fixed_concentrations = dict()
+			# For storing added models and modules
+			self.modules = dict()
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -1264,7 +1268,7 @@ class MassModel(Object):
 			If False, a new MassModel object is created and the first model is
 			left untouched. When done within the model as context, changes to
 			the models are reverted upon exit.
-		new_id : String or None, optional
+		new_model_id : String or None, optional
 			Will create a new model ID for the merged model if a string
 			is given. Otherwise will just use the model IDs of the first model
 			if inplace is True or create a combined ID if inplace is false.
@@ -1301,7 +1305,7 @@ class MassModel(Object):
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
 		merged_model.add_reactions(new_reactions, True)
 		merged_model.repair()
-		# Add custom rates and initial conditions
+		# Add custom rates, custom parameters, and initial conditions
 		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
 		for m, ic in iteritems(second_model.initial_conditions):
 			if m.id not in existing_ics:
@@ -1316,7 +1320,11 @@ class MassModel(Object):
 		for p, val in iteritems(second_model._custom_parameters):
 			if p not in existing_cp:
 				merged_model._custom_parameters.update({p : val})
-
+		# Add old models to the module set
+		if second_model.id not in merged_model.modules:
+			merged_model.modules.update({second_model.id: second_model})
+		if not inplace:
+			merged_model.modules.update({self.id: self})
 		return merged_model
 
 	def calc_PERCS(self, steady_state_concentrations=None,
@@ -1500,7 +1508,7 @@ class MassModel(Object):
 				reactant_str = rxn_string[:arrow_loc.start()].strip()
 				product_str = rxn_string[arrow_loc.end():].strip()
 			elif _forward_arrow.search(rxn_string):
-				arrow_loc = _forward_arrow.search(reaction_string)
+				arrow_loc = _forward_arrow.search(rxn_string)
 				reversible = False
 				# Reactants left of the arrow, products on the right
 				reactant_str = rxn_string[:arrow_loc.start()].strip()
@@ -1809,7 +1817,7 @@ class MassModel(Object):
 	def _repr_html_(self):
 		try:
 			dim_S="{}x{}".format(self.S.shape[0],self.S.shape[1])
-			rank=linear.matrix_rank(self.S)
+			rank=np.linalg.matrix_rank(self.S)
 		except:
 			dim_S = "0x0"
 			rank = 0
@@ -1853,6 +1861,9 @@ class MassModel(Object):
 					<td><strong>Number of Custom Rates</strong></td>
 					<td>{num_custom_rates}</td>
 				</tr><tr>
+					<td><strong>Modules</strong></td>
+					<td>{modules}</td>
+				</tr><tr>
 					<td><strong>Compartments</strong></td>
 					<td>{compartments}</td>
 				</tr><tr>
@@ -1873,6 +1884,8 @@ class MassModel(Object):
 					num_irreversible=len(self.get_irreversible_reactions),
 					mat_rank=rank,
 					num_custom_rates=len(self.custom_rates),
+					modules=", ".join(v.id if v else k for \
+										k,v in iteritems(self.modules)),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),
 					units=", ".join(v if v else k for \

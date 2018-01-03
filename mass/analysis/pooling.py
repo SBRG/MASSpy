@@ -5,12 +5,16 @@ from __future__ import absolute_import
 
 import numpy as np
 import sympy as sp
-import scipy as sc
+from scipy import interpolate
 from six import string_types, integer_types, iterkeys, iteritems
+
+# from cobra
 from cobra import DictList
 
+# Class begins
+## Public
 def pools_from_string(concentration_profile, time_range, pools,
-						parameters=None, pool_ids=None, numpoints=500):
+						parameters=None, pool_ids=None, numpoints=5000):
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
 
@@ -65,9 +69,13 @@ def pools_from_string(concentration_profile, time_range, pools,
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+
 	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must a tuple or a list of numbers")
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
 
 	if isinstance(pools, string_types):
 		pools = [pools]
@@ -131,7 +139,7 @@ def pools_from_string(concentration_profile, time_range, pools,
 		else:
 			time_vec = time_range
 		# Add the new pool interpolating funtion into pool_dict
-		pool_dict.update({pool_ids[i]: sc.interpolate.interp1d(time_vec,
+		pool_dict.update({pool_ids[i]: interpolate.interp1d(time_vec,
 							pool_sol, kind='cubic', fill_value='extrapolate')})
 	return pool_dict
 
@@ -188,9 +196,13 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 	if isinstance(time_range, tuple):
 		if not isinstance(numpoints, (float, integer_types)):
 			raise TypeError("numpoints must an integer")
-		time_range = np.linspace(time_range[0], time_range[1], int(numpoints))
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+
 	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must a tuple or a list of numbers")
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
 
 	if isinstance(net_fluxes, string_types):
 		net_fluxes = [net_fluxes]
@@ -254,12 +266,11 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 		else:
 			time_vec = time_range
 		# Add the new net_flux interpolating funtion into net_flux_dict
-		net_flux_dict.update({net_flux_ids[i]: sc.interpolate.interp1d(
+		net_flux_dict.update({net_flux_ids[i]: interpolate.interp1d(
 								time_vec, net_flux_sol,
 								kind='cubic', fill_value='extrapolate')})
 	return net_flux_dict
 
-# Class begins
 def pairwise_angles(modal_matrix, correlation_cutoff=0.85):
 	"""Obtain pooling matrices for each mode by calculating the angle
 	between columns for each column of the modal matrix. The algorithm
