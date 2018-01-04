@@ -16,11 +16,6 @@ if version_info[:2] == (3, 4):
 setup_kwargs = dict()
 setup_requirements = []
 
-extras = {
-    'sbml': ["python-libsbml", "lxml"]
-}
-extras["all"] = sorted(list(extras))
-
 try:
     with open('README.rst') as handle:
         readme = handle.read()
@@ -32,7 +27,7 @@ except IOError:
 
 setup(
     name="masspy",
-    version="0.1.0a1",
+    version="0.1.0a2",
     description="MASSpy is a package for kinetic modeling and simulation of "
                 "biological networks",
     license="LGPL/GPL v2+",
@@ -66,10 +61,11 @@ setup(
         "scipy>=0.19.1",
         "sympy>=1.0",
         "matplotlib>=2.1.1",
-        "tabulate"
+        "tabulate",
+        "python-libsbml", # Move to extras eventually
+        "lxml"            # Move to extras eventually
     ],
     tests_require=[],
-    extras_require=extras,
     **setup_kwargs
 )
 
@@ -78,3 +74,4 @@ setup(
 # author
 # author_email
 # platforms=""
+# extras_require
