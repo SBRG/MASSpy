@@ -15,6 +15,10 @@ if version_info[:2] == (3, 4):
 
 setup_kwargs = dict()
 setup_requirements = []
+extras = {
+    'sbml': ["python-libsbml", "lxml"]
+}
+extras["all"] = sorted(list(extras))
 
 try:
     with open('README.rst') as handle:
@@ -61,11 +65,10 @@ setup(
         "scipy>=0.19.1",
         "sympy>=1.0",
         "matplotlib>=2.1.1",
-        "tabulate",
-        "python-libsbml", # Move to extras eventually
-        "lxml"            # Move to extras eventually
+        "tabulate"
     ],
     tests_require=[],
+    extras_require=extras,
     **setup_kwargs
 )
 
@@ -74,4 +77,3 @@ setup(
 # author
 # author_email
 # platforms=""
-# extras_require
