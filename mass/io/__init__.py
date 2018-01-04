@@ -6,8 +6,3 @@ from mass.io.json import (
     write_json_model, read_json_model)
 from mass.io.enzymes import (
     create_enzyme_model)
-try:
-    from mass.io.sbml import (
-        write_sbml_model, read_sbml_model)
-except ImportError:
-    pass
