@@ -62,7 +62,7 @@ setup(
         "sympy>=1.0",
         "matplotlib>=2.1.1",
         "tabulate",
-        "libsbml",        # Move to extras eventually
+        "python-libsbml", # Move to extras eventually
         "lxml"            # Move to extras eventually
     ],
     tests_require=[],
