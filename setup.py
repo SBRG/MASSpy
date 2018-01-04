@@ -34,10 +34,11 @@ setup(
     name="masspy",
     version="0.1.0a1",
     description="MASSpy is a package for kinetic modeling and simulation of "
-                "biological networks",=
+                "biological networks",
     license="LGPL/GPL v2+",
+    url="https://github.com/SBRG/MASSpy",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha,
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
@@ -54,7 +55,7 @@ setup(
     ],
     keywords=("metabolism biology kinetic modeling simulation programming"),
     packages=find_packages(),
-    python_requires='>=3.6'
+    python_requires='>=3.6',
     setup_requires=setup_requirements,
     install_requires=[
         "six",
@@ -66,14 +67,13 @@ setup(
         "sympy>=1.0",
         "matplotlib>=2.1.1",
         "tabulate"
-    ]
+    ],
     tests_require=[],
     extras_require=extras,
     **setup_kwargs
 )
 
 # To add at a later date:
-# url
 # download_url
 # author
 # author_email
