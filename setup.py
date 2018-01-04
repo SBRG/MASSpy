@@ -29,4 +29,52 @@ try:
     setup_kwargs["long_description"] = readme + "\n\n" + install
 except IOError:
     setup_kwargs["long_description"] = ''
-    
+
+setup(
+    name="masspy",
+    version="0.1.0a1",
+    description="MASSpy is a package for kinetic modeling and simulation of "
+                "biological networks",=
+    license="LGPL/GPL v2+",
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha,
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Build Tools',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU Lesser General Public License v2'
+            ' or later (LGPLv2+)',
+        'License :: OSI Approved :: GNU General Public License v2'
+            ' or later (GPLv2+)',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Bio-Informatics'
+    ],
+    keywords=("metabolism biology kinetic modeling simulation programming"),
+    packages=find_packages(),
+    python_requires='>=3.6'
+    setup_requires=setup_requirements,
+    install_requires=[
+        "six",
+        "future",
+        "cobra>=0.8.2",
+        "pandas>=0.21.0",
+        "numpy>=1.13.1",
+        "scipy>=0.19.1",
+        "sympy>=1.0",
+        "matplotlib>=2.1.1",
+        "tabulate"
+    ]
+    tests_require=[],
+    extras_require=extras,
+    **setup_kwargs
+)
+
+# To add at a later date:
+# url
+# download_url
+# author
+# author_email
+# platforms=""
