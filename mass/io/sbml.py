@@ -27,6 +27,9 @@ from cobra.io.sbml3 import annotate_cobra_from_sbml, annotate_sbml_from_cobra
 from mass.core import MassMetabolite, MassReaction, MassModel
 from mass.core.expressions import strip_time
 
+class MassSBMLError(Exception):
+    pass
+    
 try:
     from lxml.etree import (
         parse, Element, SubElement, ElementTree, register_namespace,
@@ -55,7 +58,7 @@ except ImportError:
 else:
     from cobra.io.sbml import create_cobra_model_from_sbml_file as read_sbml2
     from cobra.io.sbml import write_cobra_model_to_sbml_file as write_sbml2
-    
+
 ## Set a float infinity (Compatibility with Python 2.7)
 inf = float('inf')
 # deal with namespaces
@@ -115,8 +118,6 @@ else:
                 "isEncodedBy", "is")):
             yield _get_attrib(i, "rdf:resource")
 
-class MassSBMLError(Exception):
-    pass
 
 # Public Methods
 def parse_xml_into_model(xml, number=float):
