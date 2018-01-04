@@ -1,0 +1,2 @@
+include README.rst INSTALL.rst LICENSE
+include mass
