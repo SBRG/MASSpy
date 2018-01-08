@@ -3,7 +3,7 @@ masspy - Mass Action Stoichiometric Simulation in Python
 
 What is masspy?
 ~~~~~~~~~~~~~~~
-The **M** ass **A** ction **S** toichiometric **S** imulation for **Py** thon
+The **M**\ass **A**\ction **S**\toichiometric **S**\imulation for **Py**\thon
 (masspy) is a modeling software package for the construction and
 analysis of kinetic models of biochemical reaction systems.
 
