@@ -327,6 +327,23 @@ def parse_xml_into_model(xml, number=float):
     # add fixed concentration metabolites (external metabolites)
     model.add_fixed_concentrations(ext_dict)
 
+    # check to ensure custom rates are not same as standard rates (hotfix)
+    for rxn in model.reactions:
+        try:
+            custom = model.custom_rates[rxn]
+        except KeyError:
+            pass
+        else:
+            custom = str(custom).replace(" ", "")
+            std = str(rxn.rate).replace(" ", "")
+
+            if std == custom:
+                try:
+                    model.remove_custom_rate(rxn)
+                except KeyError:
+                    pass
+
+
     return model
 
 def model_to_xml(model):
