@@ -173,17 +173,6 @@ def parse_xml_into_model(xml, number=float):
     # add fixed concentration metabolites (boundary metabolites)
     model.add_fixed_concentrations(bound_dict)
 
-    # add external metabolites (parameters)
-    ext_dict = {}
-    for param in xml_model.findall(ns("sbml:listOfParameters/sbml:parameter")):
-        ext = _get_attrib(param, "id", require=True)
-        val = _get_attrib(param, "value", float)
-        ext_dict[ext] = val
-        model.add_fixed_concentrations({ext: val})
-
-    # add fixed concentration metabolites (external metabolites)
-    model.add_fixed_concentrations(ext_dict)
-
     # add genes
     for sbml_gene in xml_model.iterfind(GENES_XPATH):
         gene_id = _get_attrib(sbml_gene, "fbc:id").replace(SBML_DOT, ".")
@@ -326,6 +315,17 @@ def parse_xml_into_model(xml, number=float):
     for custom_rxn, custom_rate in iteritems(custom_rate_dict):
         model.add_custom_rate(
             custom_rxn, custom_rate, custom_param_dict[custom_rxn])
+
+    # add external metabolites (parameters)
+    ext_dict = {}
+    for param in xml_model.findall(ns("sbml:listOfParameters/sbml:parameter")):
+        ext = _get_attrib(param, "id", require=True)
+        val = _get_attrib(param, "value", float)
+        ext_dict[ext] = val
+        model.add_fixed_concentrations({ext: val})
+
+    # add fixed concentration metabolites (external metabolites)
+    model.add_fixed_concentrations(ext_dict)
 
     return model
 
