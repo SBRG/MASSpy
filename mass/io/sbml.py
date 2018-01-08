@@ -545,8 +545,8 @@ def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
         _indent_xml(xml)
 
     # write xml to file
+    xmlfile = filename
     should_close = True
-    xmlfile = None
     if hasattr(filename, "write"):
         xmlfile = filename
         should_close = False
