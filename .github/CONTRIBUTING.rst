@@ -5,7 +5,7 @@ Contributing
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
-However, masspy is still currently under development and testing. We apologize
+Currently masspy is still under development and testing. We apologize
 for the inconvenience and provide further details on this page in a
 future update.
 
