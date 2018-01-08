@@ -173,6 +173,17 @@ def parse_xml_into_model(xml, number=float):
     # add fixed concentration metabolites (boundary metabolites)
     model.add_fixed_concentrations(bound_dict)
 
+    # add external metabolites (parameters)
+    ext_dict = {}
+    for param in xml_model.findall(ns("sbml:listOfParameters/sbml:parameter")):
+        ext = _get_attrib(param, "id", require=True)
+        val = _get_attrib(param, "value", float)
+        ext_dict[ext] = val
+        model.add_fixed_concentrations({ext: val})
+
+    # add fixed concentration metabolites (external metabolites)
+    model.add_fixed_concentrations(ext_dict)
+
     # add genes
     for sbml_gene in xml_model.iterfind(GENES_XPATH):
         gene_id = _get_attrib(sbml_gene, "fbc:id").replace(SBML_DOT, ".")
@@ -375,6 +386,13 @@ def model_to_xml(mass_model):
         else:
             _set_attrib(species, "constant", "false")
             _set_attrib(species, "boundaryCondition", "false")
+
+    # add in parameters (external metabolites)
+    parameter_list = SubElement(xml_model, "listOfParameters")
+    for ext in mass_model.get_external_metabolites:
+        param = SubElement(parameter_list, "parameter", id=ext)
+        _set_attrib(param, "value", mass_model.fixed_concentrations[ext])
+        _set_attrib(param, "constant", "true")
 
     # add in genes
     if len(mass_model.genes) > 0:
