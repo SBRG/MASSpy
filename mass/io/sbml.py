@@ -332,7 +332,7 @@ def parse_xml_into_model(xml, number=float):
         try:
             custom = model.custom_rates[rxn]
         except KeyError:
-            pass
+            pass #maybe change to continue
         else:
             custom = str(custom).replace(" ", "")
             std = str(rxn.rate).replace(" ", "")
