@@ -554,13 +554,10 @@ def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
         xmlfile = GzipFile(filename, "wb")
     elif filename.endswith(".bz2"):
         xmlfile = BZ2File(filename, "wb")
-    elif filename.endswith("sbml"):
-        warn("xml file has improper file extenstion")
-    elif filename.endswith("xml"):
-        pass
     else:
         if isinstance(filename, str):
             filename = filename + ".xml"
+            xmlfile = filename
         xmlfile = open(filename, "wb")
 
     ElementTree(xml).write(xmlfile, **write_args)
