@@ -556,8 +556,11 @@ def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
         xmlfile = BZ2File(filename, "wb")
     else:
         if isinstance(filename, str):
-            filename = filename + ".xml"
-            xmlfile = filename
+            a = filename.endswith(".xml")
+            b = filename.endswith(".sbml")
+            if (not a) and (not b):
+                filename = filename + ".xml"
+                xmlfile = filename
         xmlfile = open(filename, "wb")
 
     ElementTree(xml).write(xmlfile, **write_args)
