@@ -11,7 +11,7 @@ One of the main goals of masspy is to integrate seamlessly with  **cobrapy**,
 a widely used constraint-based reconstruction and analysis python package in
 order to provide a wide range of modeling techniques that can be utilized
 seperately or together. For further information about cobrapy, please visit
-<https://github.com/opencobra/cobrapy>`_.
+their github page at https://github.com/opencobra/cobrapy.
 
 Cite
 ----
