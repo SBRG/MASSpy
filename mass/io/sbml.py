@@ -329,7 +329,7 @@ def parse_xml_into_model(xml, number=float):
 
     return model
 
-def model_to_xml(mass_model):
+def model_to_xml(model):
     """Return the model as an xml object.
 
     Parameters
@@ -353,21 +353,21 @@ def model_to_xml(mass_model):
     _set_attrib(xml, "fbc:required", "true")
     xml_model = SubElement(xml, "model")
     _set_attrib(xml_model, "fbc:strict", "true")
-    if mass_model.id is not None:
-        xml_model.set("id", mass_model.id)
-    if mass_model.name is not None:
-        xml_model.set("name", mass_model.name)
+    if model.id is not None:
+        xml_model.set("id", model.id)
+    if model.name is not None:
+        xml_model.set("name", model.name)
 
     # add in compartments
     compartments_list = SubElement(xml_model, "listOfCompartments")
-    compartments = mass_model.compartments
+    compartments = model.compartments
     for compartment, name in iteritems(compartments):
         SubElement(compartments_list, "compartment", id=compartment, name=name,
                    constant="true")
 
     # add in species (metabolites)
     species_list = SubElement(xml_model, "listOfSpecies")
-    for met in mass_model.metabolites:
+    for met in model.metabolites:
         species = SubElement(species_list, "species",
                              id="M_" + met.id,
                              # Useless required SBML parameter
@@ -378,9 +378,9 @@ def model_to_xml(mass_model):
         _set_attrib(species, "fbc:charge", met.charge)
         _set_attrib(species, "fbc:chemicalFormula", met.formula)
         _set_attrib(species, "initialConcentration",
-                   mass_model.initial_conditions[met])
+                   model.initial_conditions[met])
         # differentiate fixed concentration metabolites
-        if met in mass_model.fixed_concentrations:
+        if met in model.fixed_concentrations:
             _set_attrib(species, "constant", "true")
             _set_attrib(species, "boundaryCondition", "true")
         else:
@@ -389,15 +389,15 @@ def model_to_xml(mass_model):
 
     # add in parameters (external metabolites)
     parameter_list = SubElement(xml_model, "listOfParameters")
-    for ext in mass_model.get_external_metabolites:
+    for ext in model.get_external_metabolites:
         param = SubElement(parameter_list, "parameter", id=ext)
-        _set_attrib(param, "value", mass_model.fixed_concentrations[ext])
+        _set_attrib(param, "value", model.fixed_concentrations[ext])
         _set_attrib(param, "constant", "true")
 
     # add in genes
-    if len(mass_model.genes) > 0:
+    if len(model.genes) > 0:
         genes_list = SubElement(xml_model, GENELIST_TAG)
-        for gene in mass_model.genes:
+        for gene in model.genes:
             gene_id = gene.id.replace(".", SBML_DOT)
             sbml_gene = SubElement(genes_list, GENE_TAG)
             _set_attrib(sbml_gene, "fbc:id", "G_" + gene_id)
@@ -410,7 +410,7 @@ def model_to_xml(mass_model):
 
     # add in reactions
     reactions_list = SubElement(xml_model, "listOfReactions")
-    rate_dictionary = strip_time(mass_model.rates)
+    rate_dictionary = strip_time(model.rates)
     for reaction, rate in iteritems(rate_dictionary):
         id = "R_" + reaction.id
         sbml_reaction = SubElement(reactions_list, "reaction",
@@ -457,9 +457,9 @@ def model_to_xml(mass_model):
         _set_attrib(sbml_ssflux, "value", reaction.ssflux)
 
         # add in local parameters (custom parameters)
-        c_param_list = list(mass_model.custom_parameters.keys())
+        c_param_list = list(model.custom_parameters.keys())
         try:
-            c_rate = mass_model.custom_rates[reaction]
+            c_rate = model.custom_rates[reaction]
         except KeyError:
             pass
         else:
@@ -467,7 +467,7 @@ def model_to_xml(mass_model):
                 if sym is Symbol("t"):
                     continue
                 elif str(sym) in c_param_list:
-                    v = mass_model.custom_parameters[str(sym)]
+                    v = model.custom_parameters[str(sym)]
                     sbml_cparam = SubElement(sbml_param_list, "localParameter",
                                              id=str(sym), name=str(sym))
                     _set_attrib(sbml_cparam, "value", v)
@@ -507,14 +507,14 @@ def model_to_xml(mass_model):
 
     return xml
 
-def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
+def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
     """Write the mass model to a file in SBML/XML format.
 
     ``kwargs`` are passed on to ``ElementTree.write``.
 
     Parameters
     ----------
-    mass_model : mass.MassModel
+    model : mass.MassModel
         The mass model to represent.
     filename : str or file-like
         File path or descriptor that the SBML/XML representation should be
@@ -536,7 +536,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
         return
 
     # create xml
-    xml = model_to_xml(mass_model, **kwargs)
+    xml = model_to_xml(model, **kwargs)
     write_args = {"encoding": "UTF-8", "xml_declaration": True}
     if _with_lxml:
         write_args["pretty_print"] = True
@@ -546,6 +546,7 @@ def write_sbml_model(mass_model, filename, use_fbc_package=True, **kwargs):
 
     # write xml to file
     should_close = True
+    xmlfile = None
     if hasattr(filename, "write"):
         xmlfile = filename
         should_close = False
