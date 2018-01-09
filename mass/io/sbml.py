@@ -148,6 +148,19 @@ def parse_xml_into_model(xml, number=float):
     model = MassModel(model_id)
     model.name = xml_model.get("name")
 
+    # add in units
+    unit_dict = {}
+    for unit_def in xml_model.findall(ns("sbml:listOfUnitDefinitions")):
+        unit = _get_attrib(unit_def, "id")
+        if "mole" in unit.lower():
+            unit_dict["N"] = "Milimoles"
+        if ("liter" in unit.lower()) or ("litre" in unit.lower()):
+            unit_dict["Vol"] = "Liters"
+        if "hour" in unit.lower():
+            unit_dict["Time"] = "Hours"
+
+    model.units = unit_dict
+
     # add compartments
     model.compartments = {c.get("id"): c.get("name") for c in
                           xml_model.findall(COMPARTMENT_XPATH)}
@@ -381,6 +394,18 @@ def model_to_xml(model):
         xml_model.set("id", model.id)
     if model.name is not None:
         xml_model.set("name", model.name)
+
+    # add in units
+    units_list = SubElement(xml_model, "listOfUnitDefinitions")
+    units = model.units
+    for key, unit in iteritems(units):
+        unit_def = SubElement(units_list, "unitDefinition" id=unit)
+        if "mole" in unit.lower():
+            SubElement(unit_def, "listOfUnits", kind="mole")
+        if ("liter" in unit.lower()) or ("litre" in unit.lower()):
+            SubElement(unit_def, "listOfUnits", kind="litre")
+        if "hour" in unit.lower():
+            SubElement(unit_def, "listOfUnits", kind="hour")
 
     # add in compartments
     compartments_list = SubElement(xml_model, "listOfCompartments")
