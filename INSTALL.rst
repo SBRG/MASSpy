@@ -31,7 +31,7 @@ latest Windows installers for Python 2.7 and 3.4 include pip, so if you
 use those you will already have pip.
 
 1. In a terminal, run ``C:\Python36\Scripts\pip.exe install masspy``
-	(you may need to adjust the path accordingly).
+(you may need to adjust the path accordingly).
 
 To install without pip, you will need to download and use the
 appropriate installer for your version of python from the `python
@@ -60,7 +60,7 @@ installed using pip, or from the OS package manager (e.g brew, apt, yum).
    -  Use ``sudo pip install python-libsbml`` on Mac/Linux
 
 2. `lxml <http://lxml.de/>`_ to speed up read/write of SBML level 3 files.
-You can install all packages directly by .. code:: shell
+You can install all packages directly by:
 
 	pip install "masspy[all]"
 
