@@ -11,7 +11,7 @@ from gzip import GzipFile
 from tempfile import NamedTemporaryFile
 from warnings import catch_warnings, simplefilter, warn
 
-from six import iteritems, string_types
+from six import iterkeys, iteritems, string_types
 
 import sympy
 from sympy import Basic, Symbol
@@ -367,56 +367,42 @@ def model_to_xml(model):
         units_list = SubElement(xml_model, "listOfUnitDefinitions")
         for key, unit in iteritems(model.units):
             unit_def = SubElement(units_list, "unitDefinition", id=unit)
-
-            scale = None
-            if "milli" in unit.lower():
-                scale = -3
-            elif "micro" in unit.lower():
-                scale = -6
+            scale = _get_scale(unit.lower())
 
             if "mole" in unit.lower():                
                 list_units = SubElement(unit_def, "listOfUnits")
                 unit_elem = SubElement(list_units, "unit", kind="mole")
                 _set_attrib(unit_elem, "multiplier", 1)
                 _set_attrib(unit_elem, "exponent", 1)
-                if scale is not None:
-                    _set_attrib(unit_elem, "scale", scale)
-                else:
-                    _set_attrib(unit_elem, "scale", 0)
+                _set_attrib(unit_elem, "scale", scale)
 
             elif ("liter" in unit.lower()) or ("litre" in unit.lower()):
                 list_units = SubElement(unit_def, "listOfUnits")
                 unit_elem = SubElement(list_units, "unit", kind="litre")
                 _set_attrib(unit_elem, "multiplier", 1)
                 _set_attrib(unit_elem, "exponent", 1)
-                if scale is not None:
-                    _set_attrib(unit_elem, "scale", scale)
-                else:
-                    _set_attrib(unit_elem, "scale", 0)
+                _set_attrib(unit_elem, "scale", scale)
 
             elif "hour" in unit.lower():
                 list_units = SubElement(unit_def, "listOfUnits")
                 unit_elem = SubElement(list_units, "unit", kind="second")
                 _set_attrib(unit_elem, "multiplier", 3600)
                 _set_attrib(unit_elem, "exponent", 1)
-                _set_attrib(unit_elem, "scale", 0)
+                _set_attrib(unit_elem, "scale", scale)
 
             elif "minute" in unit.lower():
                 list_units = SubElement(unit_def, "listOfUnits")
                 unit_elem = SubElement(list_units, "unit", kind="second")
                 _set_attrib(unit_elem, "multiplier", 60)
                 _set_attrib(unit_elem, "exponent", 1)
-                _set_attrib(unit_elem, "scale", 0)
+                _set_attrib(unit_elem, "scale", scale)
 
             elif "second" in unit.lower():
                 list_units = SubElement(unit_def, "listOfUnits")
                 unit_elem = SubElement(list_units, "unit", kind="second")
                 _set_attrib(unit_elem, "multiplier", 1)
                 _set_attrib(unit_elem, "exponent", 0)
-                if scale is not None:
-                    _set_attrib(unit_elem, "scale", scale)
-                else:
-                    _set_attrib(unit_elem, "scale", 0)
+                _set_attrib(unit_elem, "scale", scale)
 
 
     # add in compartments
@@ -763,6 +749,19 @@ def _indent_xml(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
+def _get_scale(string):
+    
+    scale = None
+    
+    for key in iterkeys(_SI_prefix_dict):
+        if key in string:
+            scale = _SI_prefix_dict[key]
+
+    if scale is None:
+        scale = 0
+
+    return scale
+
 # string utility methods
 def _clip(string, prefix):
     """_clips a prefix from the beginning of a string if it exists
@@ -807,3 +806,23 @@ def _remove_trailing_zeroes(string):
     #remove any whitespace
     result = result.replace(" ", "")
     return result
+
+# Internal Variables
+_SI_prefix_dict = {
+    "atto": -18,
+    "femto": -15,
+    "pico": -12,
+    "nano": -9,
+    "micro": -6,
+    "milli": -3,
+    "centi": -2,
+    "deci": -1,
+    "deca": 1,
+    "hecto": 2,
+    "kilo": 3,
+    "mega": 6,
+    "giga": 9,
+    "tera": 12,
+    "peta": 15,
+    "exa": 18
+}
