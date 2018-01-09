@@ -48,16 +48,10 @@ except ImportError:
             parse, Element, SubElement, ElementTree, register_namespace,
             ParseError, fromstring, tostring)
 
-# deal with sbml2 here
-# use sbml level 2 from sbml.py (which uses libsbml). Eventually, it would
-# be nice to use the libSBML converters directly instead.
 try:
     import libsbml
 except ImportError:
     raise MassSBMLError("Need to install libsbml to proceed")
-else:
-    from cobra.io.sbml import create_cobra_model_from_sbml_file as read_sbml2
-    from cobra.io.sbml import write_cobra_model_to_sbml_file as write_sbml2
 
 ## Set a float infinity (Compatibility with Python 2.7)
 inf = float('inf')
@@ -150,8 +144,9 @@ def parse_xml_into_model(xml, number=float):
 
     # add in units
     unit_dict = {}
-    for unit_def in xml_model.findall(ns("sbml:listOfUnitDefinitions")):
-        unit = _get_attr(unit_def, "id")
+    for unit_def in xml_model.findall(ns(
+        "sbml:listOfUnitDefinitions/sbml:unitDefinition")):
+        unit = _get_attr(unit_def, "id", require=True)
         if unit is None:
             continue
         if "mole" in unit.lower():
@@ -372,12 +367,57 @@ def model_to_xml(model):
         units_list = SubElement(xml_model, "listOfUnitDefinitions")
         for key, unit in iteritems(model.units):
             unit_def = SubElement(units_list, "unitDefinition", id=unit)
-            if "mole" in unit.lower():
-                SubElement(unit_def, "listOfUnits", kind=unit)
-            if ("liter" in unit.lower()) or ("litre" in unit.lower()):
-                SubElement(unit_def, "listOfUnits", kind=unit)
-            if ("hour" in unit.lower()) or ("sec" in unit.lower()):
-                SubElement(unit_def, "listOfUnits", kind=unit)
+
+            scale = None
+            if "milli" in unit.lower():
+                scale = -3
+            elif "micro" in unit.lower():
+                scale = -6
+
+            if "mole" in unit.lower():                
+                list_units = SubElement(unit_def, "listOfUnits")
+                unit_elem = SubElement(list_units, "unit", kind="mole")
+                _set_attrib(unit_elem, "multiplier", 1)
+                _set_attrib(unit_elem, "exponent", 1)
+                if scale is not None:
+                    _set_attrib(unit_elem, "scale", scale)
+                else:
+                    _set_attrib(unit_elem, "scale", 0)
+
+            elif ("liter" in unit.lower()) or ("litre" in unit.lower()):
+                list_units = SubElement(unit_def, "listOfUnits")
+                unit_elem = SubElement(list_units, "unit", kind="litre")
+                _set_attrib(unit_elem, "multiplier", 1)
+                _set_attrib(unit_elem, "exponent", 1)
+                if scale is not None:
+                    _set_attrib(unit_elem, "scale", scale)
+                else:
+                    _set_attrib(unit_elem, "scale", 0)
+
+            elif "hour" in unit.lower():
+                list_units = SubElement(unit_def, "listOfUnits")
+                unit_elem = SubElement(list_units, "unit", kind="second")
+                _set_attrib(unit_elem, "multiplier", 3600)
+                _set_attrib(unit_elem, "exponent", 1)
+                _set_attrib(unit_elem, "scale", 0)
+
+            elif "minute" in unit.lower():
+                list_units = SubElement(unit_def, "listOfUnits")
+                unit_elem = SubElement(list_units, "unit", kind="second")
+                _set_attrib(unit_elem, "multiplier", 60)
+                _set_attrib(unit_elem, "exponent", 1)
+                _set_attrib(unit_elem, "scale", 0)
+
+            elif "second" in unit.lower():
+                list_units = SubElement(unit_def, "listOfUnits")
+                unit_elem = SubElement(list_units, "unit", kind="second")
+                _set_attrib(unit_elem, "multiplier", 1)
+                _set_attrib(unit_elem, "exponent", 0)
+                if scale is not None:
+                    _set_attrib(unit_elem, "scale", scale)
+                else:
+                    _set_attrib(unit_elem, "scale", 0)
+
 
     # add in compartments
     if len(model.compartments) != 0:
