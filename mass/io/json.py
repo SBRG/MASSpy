@@ -89,6 +89,7 @@ def model_to_json(model, **kwargs):
 	"""Return the model as a JSON document.
 
 	``kwargs`` are passed on to ``json.dumps``.
+	See documentation for json.dumps for more detail.
 
 	Parameters
 	----------
@@ -131,6 +132,7 @@ def write_json_model(model, filename, pretty=False, **kwargs):
 	"""Write the mass model to a file in JSON format.
 
 	``kwargs`` are passed on to ``json.dump``.
+	See documentation for json.dump for more detail.
 
 	Parameters
 	----------
