@@ -60,9 +60,9 @@ installed using pip, or from the OS package manager (e.g brew, apt, yum).
    -  Use ``sudo pip install python-libsbml`` on Mac/Linux
 
 2. `lxml <http://lxml.de/>`_ to speed up read/write of SBML level 3 files.
-You can install all packages directly by:
+You can install all packages directly by::
 
-	pip install "masspy[all]"
+    pip install "masspy[all]"
 
 Testing your installation
 =========================
