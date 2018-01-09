@@ -300,10 +300,17 @@ def parse_xml_into_model(xml, number=float):
         test_dict[reaction] = reaction.rate
         test_dict = strip_time(test_dict)
 
+        # Test to see mathml rate matches standard massreaction rate
+        # if no match, add mathml rate as custom rate law for reaction
+        curr_string = str(test_dict[reaction])
+        curr_string = _remove_trailing_zeroes(curr_string)
+        curr_mathml = _remove_trailing_zeroes(result_from_mathml)
+
+
+
         if result_from_mathml is None:
             pass
-        elif result_from_mathml.replace(" ", "") != str(
-            test_dict[reaction]).replace(" ", ""):
+        elif curr_string != curr_mathml:
             custom_rate_dict[reaction] = result_from_mathml
 
     try:
@@ -328,20 +335,20 @@ def parse_xml_into_model(xml, number=float):
     model.add_fixed_concentrations(ext_dict)
 
     # check to ensure custom rates are not same as standard rates (hotfix)
-    for rxn in model.reactions:
-        try:
-            custom = model.custom_rates[rxn]
-        except KeyError:
-            pass #maybe change to continue
-        else:
-            custom = str(custom).replace(" ", "")
-            std = str(rxn.rate).replace(" ", "")
+    # for rxn in model.reactions:
+    #     try:
+    #         custom = model.custom_rates[rxn]
+    #     except KeyError:
+    #         pass #maybe change to continue
+    #     else:
+    #         custom = str(custom).replace(" ", "")
+    #         std = str(rxn.rate).replace(" ", "")
 
-            if std == custom:
-                try:
-                    model.remove_custom_rate(rxn)
-                except KeyError:
-                    pass
+    #         if std == custom:
+    #             try:
+    #                 model.remove_custom_rate(rxn)
+    #             except KeyError:
+    #                 pass
 
 
     return model
@@ -748,3 +755,31 @@ def _strnum(number):
         return str(number)
     s = "%.15g" % number
     return s.rstrip(".")
+
+def _remove_trailing_zeroes(string):
+    # Remove whitespace
+    string = string.replace(" ", "")
+    original = string
+    
+    # Split by decimal
+    str_list = string.split(".")
+    
+    #if len of 1, return original
+    if len(str_list) == 1:
+        return original
+    
+    # Remove leading zeroes
+    str_list = [s.lstrip("0") for s in str_list]
+    
+    # If any string starts with a number, return original
+    for s in str_list:
+        if s[0].isdigit():
+            return original
+    
+    # Else, join strings and return them
+    result = ""
+    for s in str_list:
+        result += s
+    #remove any whitespace
+    result = result.replace(" ", "")
+    return result
