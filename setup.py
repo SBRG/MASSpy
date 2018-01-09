@@ -72,7 +72,7 @@ setup(
 	],
 	tests_require=[],
 	extras_require=extras,
-	platforms="GNU/Linux, Mac OS X >= 10.7, Microsoft Windows >= 7,
+	platforms="GNU/Linux, Mac OS X >= 10.7, Microsoft Windows >= 7",
 	**setup_kwargs
 )
 
