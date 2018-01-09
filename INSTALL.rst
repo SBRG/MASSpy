@@ -30,8 +30,8 @@ The preferred installation method on Windows is also to use pip. The
 latest Windows installers for Python 2.7 and 3.4 include pip, so if you
 use those you will already have pip.
 
-1. In a terminal, run ``C:\Python36\Scripts\pip.exe install masspy`` (you
-    may need to adjust the path accordingly).
+1. In a terminal, run ``C:\Python36\Scripts\pip.exe install masspy``
+(you may need to adjust the path accordingly).
 
 To install without pip, you will need to download and use the
 appropriate installer for your version of python from the `python
@@ -49,23 +49,18 @@ Installation of optional dependencies
 Optional dependencies
 ~~~~~~~~~~~~~~~~~~~~~
 
-On windows, these can downloaded from [this site]
-(http://www.lfd.uci.edu/~gohlke/pythonlibs/). On Mac/Linux, they can be
-installed using pip, or from the OS package manager (e.g brew, apt,
-yum).
+On windows, these can downloaded from `this site
+<http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_. On Mac/Linux, they can be
+installed using pip, or from the OS package manager (e.g brew, apt, yum).
 
 1. `libsbml <http://sbml.org>`_ >= 5.10 to read/write SBML level 2
    files
 
-   -  `Windows libsbml installer
-   <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libsbml>`_
+   -  `Windows libsbml installer <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libsbml>`_
    -  Use ``sudo pip install python-libsbml`` on Mac/Linux
 
 2. `lxml <http://lxml.de/>`_ to speed up read/write of SBML level 3 files.
-
-You can install all packages directly by
-
-.. code:: shell
+You can install all packages directly by::
 
     pip install "masspy[all]"
 

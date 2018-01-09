@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import
 
 from warnings import warn
@@ -31,12 +30,14 @@ except IOError:
 
 setup(
 	name="masspy",
-	version="0.1.0a2",
+	version="0.1.0a6",
 	description="MASSpy is a package for kinetic modeling and simulation of "
 				"biological networks",
 	license="LGPL/GPL v2+",
 	url="https://github.com/SBRG/MASSpy",
 	download_url="https://pypi.python.org/pypi/masspy",
+	author="Zhaiman and the masspy development team at SBRG",
+	author_email="zhaiman@eng.ucsd.edu",
 	classifiers=[
 		'Development Status :: 3 - Alpha',
 		'Environment :: Console',
@@ -72,10 +73,6 @@ setup(
 	],
 	tests_require=[],
 	extras_require=extras,
-	platforms="GNU/Linux, Mac OS X >= 10.7, Microsoft Windows >= 7,
+	platforms="GNU/Linux, Mac OS X >= 10.7, Microsoft Windows >= 7",
 	**setup_kwargs
 )
-
-# To add at a later date:
-# author
-# author_email
