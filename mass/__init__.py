@@ -19,7 +19,7 @@ from mass import io
 from mass import util
 from mass.util.version_info import show_versions
 
-__version__ = "0.1.0a5"
+__version__ = "0.1.0a6"
 
 # set the warning format to be prettier and fit on one line
 _mass_path = _dirname(_abspath(__file__))

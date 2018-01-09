@@ -3,7 +3,7 @@ masspy - Mass Action Stoichiometric Simulation in Python
 
 What is masspy?
 ~~~~~~~~~~~~~~~
-The Mass Action Stoichiometric Simulation for Python
+The **M**\ass **A**\ction **S**\toichiometric **S**\imulation for Python
 (masspy) is a modeling software package for the construction and
 analysis of kinetic models of biochemical reaction systems.
 
@@ -23,13 +23,14 @@ Installation
 
 The recommended method to install masspy is to use pip to `install masspy from
 PyPI <https://pypi.python.org/pypi/masspy>`_ (we recommend doing this
-inside a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
+inside a `virtual environment
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
-		pip install masspy
+	pip install masspy
 
 If you downloaded the source code, run::
 
-		pip install -e .
+	pip install -e .
 
 in the ``masspy`` directory. For additional information, please refer to the
 the `detailed installation instructions <INSTALL.rst>`_.
@@ -38,8 +39,8 @@ Contributing
 ~~~~~~~~~~~~
 
 Contributions are always welcome! Please read the `contributions
-guideline <.github/CONTRIBUTING.rst>`_ to get started.
-
+guideline <.github/CONTRIBUTING.rst>`_
+to get started.
 
 License
 -------
