@@ -18,9 +18,9 @@ def pools_from_string(concentration_profile, time_range, pools,
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
 
-	Example: For the reaction v1: x1 <=> x2 with Keq = 2,  a conservation pool and a
-	disequilibrium pool can be defined by providing the following input for
-	pools and parameters:
+	Example: For the reaction v1: x1 <=> x2 with Keq = 2,  a conservation pool
+	and a disequilibrium pool can be defined by providing the following input
+	for pools and parameters:
 
 	pools = ['x1 + x2', 'x1 - x2/Keq_v1']
 	parameters = {'Keq_v1' : 2}
@@ -217,12 +217,13 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 	if isinstance(net_flux_ids, string_types):
 		net_flux_ids = [net_flux_ids]
 	if not isinstance(net_flux_ids, (list, type(None))):
-		raise TypeError("net_flux_ids must be a string or a list of strings with "
-						"the same length as net_fluxes")
+		raise TypeError("net_flux_ids must be a string or a list of strings "
+						"with the same length as net_fluxes")
 	else:
 		# Generate net flux IDs if not provided
 		if net_flux_ids is None:
-			net_flux_ids = ['v_net%s' % str(i+1) for i in range(0, len(net_fluxes))]
+			net_flux_ids = ['v_net%s' % str(i+1)
+							for i in range(0, len(net_fluxes))]
 		# Otherwise check length of net_flux IDs if provided
 		elif len(net_flux_ids) == len(net_fluxes):
 			pass

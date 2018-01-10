@@ -542,7 +542,7 @@ class MassReaction(Object):
 		-------
 		string representation or sympy expression of the disequilibrium ratio
 		"""
-		return expressions.get_disequilibrium_ratio(self, sympy_expr=sympy_expr)
+		return expressions.get_disequilibrium_ratio(self,sympy_expr=sympy_expr)
 
 	def remove_from_model(self, remove_orphans=False):
 		"""Removes the reaction from a massmodel.

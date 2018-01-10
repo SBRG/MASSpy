@@ -156,7 +156,8 @@ def to_cobra_reaction(mass_reaction, cobra_id=None,
 	cobra_rxn.variable_kind = mass_reaction.variable_kind
 	# Generate and add cobra Metabolites
 	cobra_metabs = {to_cobra_metabolite(metab) : coefficient
-				for metab, coefficient in iteritems(mass_reaction._metabolites)}
+					for metab, coefficient in \
+					iteritems(mass_reaction._metabolites)}
 	cobra_rxn.add_metabolites(cobra_metabs)
 
 	# Generate and add new genes
