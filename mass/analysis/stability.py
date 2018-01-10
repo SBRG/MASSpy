@@ -254,21 +254,6 @@ def applymap_log_wsp(eigs_df):
 
 
 # Methods to plot dataframes of eigenvalues
-# def plot_eigvalues(eigs_df, size=(15,15), linewidth=None, fname=None):
-#     """Generate heatmap of eigs_df"""
-#     fig, ax = plt.subplots()
-#     fig.set_size_inches(size[0],size[1])
-
-#     if linewidth is not None:
-#         sns.heatmap(eigs_df, ax=ax, linewidth=linewidth)
-#         plt.show()
-#     else:
-#         sns.heatmap(eigs_df, ax=ax)
-#         plt.show()
-
-#     if fname is not None:
-#         fig.savefig(fname, format="png")
-
 def plot_heatmap(data_arr, default_fontsize=15, **kwargs):
     """Generates a heatmap of the data provided.
 
