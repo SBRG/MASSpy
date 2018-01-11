@@ -364,43 +364,43 @@ def model_to_xml(model):
 		xml_model.set("name", model.name)
 
 	 # add in units
-    if len(model.units) != 0:
-        units_list = SubElement(xml_model, "listOfUnitDefinitions")
-        for key, unit in iteritems(model.units):
-            unit_def = SubElement(units_list, "unitDefinition", id=unit)
-            scale = _get_scale(unit.lower())
+	if len(model.units) != 0:
+		units_list = SubElement(xml_model, "listOfUnitDefinitions")
+		for key, unit in iteritems(model.units):
+			unit_def = SubElement(units_list, "unitDefinition", id=unit)
+			scale = _get_scale(unit.lower())
 
-            unit_str = ""
-            special = ""
-            for i in range(len(_SBML_base_units)):
-                if _SBML_base_units[i] in unit.lower():
-                    unit_str = _SBML_base_units[i]
-                elif "liter" in unit.lower():
-                    unit_str = "litre"
-                elif "meter" in unit.lower():
-                    unit_str = "metre"
-                elif "hour" in unit.lower():
-                    unit_str = "second"
-                    special = "hour"
-                elif "minute" in unit.lower():
-                    unit_str = "minute"
-                    special = "minute"
-            
-            if (unit_str == "") or (unit_str is None):
-                warn("Units are not SBML-compliant")
-                unit_str = unit
+			unit_str = ""
+			special = ""
+			for i in range(len(_SBML_base_units)):
+				if _SBML_base_units[i] in unit.lower():
+					unit_str = _SBML_base_units[i]
+				elif "liter" in unit.lower():
+					unit_str = "litre"
+				elif "meter" in unit.lower():
+					unit_str = "metre"
+				elif "hour" in unit.lower():
+					unit_str = "second"
+					special = "hour"
+				elif "minute" in unit.lower():
+					unit_str = "minute"
+					special = "minute"
 
-            list_units = SubElement(unit_def, "listOfUnits")
-            unit_elem = SubElement(list_units, "unit", kind=unit_str)
-            if "minute" in special:
-                _set_attrib(unit_elem, "multiplier", 60)
-            elif "hour" in special:
-                _set_attrib(unit_elem, "multiplier", 3600)
-            else:
-                _set_attrib(unit_elem, "multiplier", 1)
+			if (unit_str == "") or (unit_str is None):
+				warn("Units are not SBML-compliant")
+				unit_str = unit
 
-            _set_attrib(unit_elem, "exponent", 1)
-            _set_attrib(unit_elem, "scale", scale)
+			list_units = SubElement(unit_def, "listOfUnits")
+			unit_elem = SubElement(list_units, "unit", kind=unit_str)
+			if "minute" in special:
+				_set_attrib(unit_elem, "multiplier", 60)
+			elif "hour" in special:
+				_set_attrib(unit_elem, "multiplier", 3600)
+			else:
+				_set_attrib(unit_elem, "multiplier", 1)
+
+			_set_attrib(unit_elem, "exponent", 1)
+			_set_attrib(unit_elem, "scale", scale)
 
 
 	# add in compartments
@@ -827,38 +827,38 @@ _SI_prefix_dict = {
 
 # litre <-> liter, metre <-> meter
 _SBML_base_units = [
-    "ampere",
-    "avogadro",
-    "becquerel",
-    "candela",
-    "coulomb",
-    "dimensionless",
-    "farad",
-    "gram",
-    "gray",
-    "henry",
-    "hertz",
-    "item",
-    "joule",
-    "katal",
-    "kelvin",
-    "kilogram",
-    "litre",
-    "lumen",
-    "lux",
-    "metre",
-    "mole",
-    "newton",
-    "ohm",
-    "pascal",
-    "radian",
-    "second",
-    "siemens",
-    "sievert",
-    "steradian",
-    "tesla",
-    "volt",
-    "watt",
-    "weber"
+	"ampere",
+	"avogadro",
+	"becquerel",
+	"candela",
+	"coulomb",
+	"dimensionless",
+	"farad",
+	"gram",
+	"gray",
+	"henry",
+	"hertz",
+	"item",
+	"joule",
+	"katal",
+	"kelvin",
+	"kilogram",
+	"litre",
+	"lumen",
+	"lux",
+	"metre",
+	"mole",
+	"newton",
+	"ohm",
+	"pascal",
+	"radian",
+	"second",
+	"siemens",
+	"sievert",
+	"steradian",
+	"tesla",
+	"volt",
+	"watt",
+	"weber"
 
 ]
