@@ -59,7 +59,7 @@ def to_cobra_metabolite(mass_metabolite, cobra_id=None):
 
 	return cobra_metab
 
-def to_mass_metabolite(cobra_metabolite, mass_id=None):
+def to_massmetabolite(cobra_metabolite, mass_id=None):
 	"""To create a mass MassMetabolite from a cobra Metabolite.
 
 	Parameters
@@ -169,7 +169,7 @@ def to_cobra_reaction(mass_reaction, cobra_id=None,
 	cobra_rxn._update_awareness()
 	return cobra_rxn
 
-def to_mass_reaction(cobra_reaction, mass_id=None,
+def to_massreaction(cobra_reaction, mass_id=None,
 					kinetic_reversibility=None):
 	"""To create a MassReaction from a cobra Reaction.
 
@@ -222,7 +222,7 @@ def to_mass_reaction(cobra_reaction, mass_id=None,
 	mass_rxn.upper_bound = cobra_reaction.upper_bound
 
 	# Generate and add mass MassMetsabolites
-	mass_metabs = {to_mass_metabolite(cobra_metab): coeff
+	mass_metabs = {to_massmetabolite(cobra_metab): coeff
 			for cobra_metab, coeff in iteritems(cobra_reaction._metabolites)}
 	mass_rxn.add_metabolites(mass_metabs)
 
@@ -277,7 +277,7 @@ def to_cobra_model(mass_model, cobra_id=None):
 	cobra_model.repair(rebuild_index=True, rebuild_relationships=True)
 	return cobra_model
 
-def to_mass_model(cobra_model, mass_id=None):
+def to_massmodel(cobra_model, mass_id=None):
 	"""To create a mass MassModel from a cobra Model.
 
 	Parameters
@@ -312,7 +312,7 @@ def to_mass_model(cobra_model, mass_id=None):
 									name=cobra_model.name)
 
 	# Add reactions and metabolites
-	mass_rxns = [to_mass_reaction(rxn) for rxn in cobra_model.reactions]
+	mass_rxns = [to_massreaction(rxn) for rxn in cobra_model.reactions]
 	mass_model.add_reactions(mass_rxns)
 
 	# Add compartments

@@ -16,9 +16,8 @@ inf = float('inf')
 t = sp.Symbol("t")
 ## Public
 def qcqa_model(model, initial_conditions=False, parameters=False,
-			simulation=False, superfluous=False, unconserved_metabolites=False,
-			param_consistency=False, stoichiometry=False, elemental=False,
-			thermodynamics=False):
+			simulation=False, superfluous=False, param_consistency=False,
+			elemental=False, thermodynamics=False):
 	"""Run a series of quality control and assessment tests on a massmodel and
 	return a summary of the test results. Default value for all is False.
 
@@ -35,12 +34,8 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 		Check to see if the model can be simulated
 	superfluous : bool, optional
 		Check for superfluous parameters in the model
-	unconserved_metabolites : bool, optional
-		Check for unconserved metabolites in the model
 	param_consistency : bool, optional
 		Check for parameter consistency in the model
-	stoichiometry : bool, optional
-		Check for stoichiometric consistency in the model
 	elemental : bool, optional
 		Check for elemental consistency in the model. Ignores the exchanges.
 	thermodynamics : bool, optional
@@ -48,13 +43,12 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 	"""
 	# List of bools indicating what QCQA functions to perform
 	check_list = [initial_conditions, parameters, simulation, superfluous,
-				unconserved_metabolites, param_consistency, stoichiometry,
-				elemental, thermodynamics]
+				param_consistency, elemental, thermodynamics]
 
 	# Names of the inputs
 	name_list = ["initial_conditions", "parameters", "simulation",
-				"superfluous","unconserved_metabolites", "param_consistency",
-				"stoichiometry","elemental", "thermodynamics"]
+				"superfluous", "param_consistency","elemental",
+				"thermodynamics"]
 	# The functions to perform for each check, and associated arguments if any.
 	function_and_args =[[get_missing_initial_conditions, None],
 						[get_missing_parameters, [True]*5],
@@ -352,9 +346,9 @@ def _qcqa_summary(to_display):
 		A list of the QCQA results to report
 	"""
 	name_list = ["Missing Initial Conditions", "Missing Parameters",
-			"Can Simulate","Superfluous Parameters","Unconserved Metabolites",
-			"Parameter Consistency", "Stoichiometric Consistency",
-			"Elemental Consistency", "Thermodynamic Consistency"]
+				"Can Simulate","Superfluous Parameters",
+				"Parameter Consistency", "Elemental Consistency",
+				"Thermodynamic Consistency"]
 
 	headers = []
 	item_list = []
