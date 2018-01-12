@@ -97,7 +97,7 @@ class MassModel(Object):
 		reactions as strings, and values are the fixed concentrations.
 		Fixed concentrations will always have preference over the metabolite
 		ODEs representing concentrations.
-	modules : dict
+	modules : set
 		A dictionary to store the models/modules associated with this model.
 		Keys are model idenfifiers (model.id) and values are MassModel objects.
 	compartments : dict
@@ -139,7 +139,8 @@ class MassModel(Object):
 			self._custom_parameters = dict()
 			self.fixed_concentrations = dict()
 			# For storing added models and modules
-			self.modules = dict()
+			self.modules = set()
+			self.modules.add(self.id)
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -1337,9 +1338,9 @@ class MassModel(Object):
 				merged_model._custom_parameters.update({p : val})
 		# Add old models to the module set
 		if second_model.id not in merged_model.modules:
-			merged_model.modules.update({second_model.id: second_model})
+			merged_model.modules.add(second_model.id)
 		if not inplace:
-			merged_model.modules.update({self.id: self})
+			merged_model.modules.add(self.id)
 		return merged_model
 
 	def calc_PERCS(self, steady_state_concentrations=None,
@@ -1903,8 +1904,8 @@ class MassModel(Object):
 					num_irreversible=len(self.get_irreversible_reactions),
 					mat_rank=rank,
 					num_custom_rates=len(self.custom_rates),
-					modules=", ".join(v.id if v else k for \
-										k,v in iteritems(self.modules)),
+					modules=", ".join([str(m) for m in self.modules
+										if m is not None]),
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),
 					units=", ".join(v if v else k for \
