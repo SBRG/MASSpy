@@ -21,7 +21,7 @@ from mass.core.massmodel import MassModel
 ## Global symbol for time
 t = sp.Symbol("t")
 ## Precompiled re for 'external' metabolites
-ext_metab_re = re.compile("\_Xt")
+ext_metab_re = re.compile("\_e")
 # Possible Perturbation Types
 kf_re = re.compile("kf|forward_rate_constant")
 Keq_re = re.compile("Keq|equilibrium_constant")
@@ -389,10 +389,7 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 		# Handle fixed concentration perturbations
 		if fixed_re.match(to_perturb):
 			# 'External' metabolites
-			if ext_metab_re.search(item_id):
-				conc_perturbs.update({item_id: value})
-				continue
-			else:
+			if not ext_metab_re.search(item_id):
 				# Other metabolites
 				metab = model.metabolites.get_by_id(item_id)
 				# Use a copy to enable removal of metabolite function
@@ -414,7 +411,13 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 								rate_dict[rxn] = rate.subs({metab_func:
 															metab_sym})
 				conc_perturbs.update({metab: value})
-				continue
+			else:
+				try:
+					metab = model.metabolites.get_by_id(item_id)
+				except KeyError:
+					metab = item_id
+				finally:
+					conc_perturbs.update({metab: value})
 		# Handle initial condition perturbations
 		if ic_re.match(to_perturb):
 			conc_perturbs.update(

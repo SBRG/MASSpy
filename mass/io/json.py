@@ -75,15 +75,15 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 
 ## Public Methods
 class MyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (np.integer, np.int64)):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        else:
-            return super(MyEncoder, self).default(obj)
+	def default(self, obj):
+		if isinstance(obj, (np.integer, np.int64)):
+			return int(obj)
+		elif isinstance(obj, np.floating):
+			return float(obj)
+		elif isinstance(obj, np.ndarray):
+			return obj.tolist()
+		else:
+			return super(MyEncoder, self).default(obj)
 
 def model_to_json(model, **kwargs):
 	"""Return the model as a JSON document.

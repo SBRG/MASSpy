@@ -319,7 +319,11 @@ class MassReaction(Object):
 		"""
 		if self.exchange:
 			for metab in self.metabolites:
-				ext_metab = "%s_%s" % (metab.id, "Xt")
+				_c = re.search("^\w*\S(?!<\_)(\_\S+)$", metab.id)
+				if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
+					ext_metab = re.sub(_c.group(1), "_e", metab.id)
+				else:
+					ext_metab = "{}{}".format(metab.id, "_e")
 			return ext_metab
 		else:
 			return None
@@ -542,7 +546,7 @@ class MassReaction(Object):
 		-------
 		string representation or sympy expression of the disequilibrium ratio
 		"""
-		return expressions.get_disequilibrium_ratio(self, sympy_expr=sympy_expr)
+		return expressions.get_disequilibrium_ratio(self,sympy_expr=sympy_expr)
 
 	def remove_from_model(self, remove_orphans=False):
 		"""Removes the reaction from a massmodel.

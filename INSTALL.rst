@@ -27,7 +27,7 @@ Microsoft Windows
 -----------------
 
 The preferred installation method on Windows is also to use pip. The
-latest Windows installers for Python 2.7 and 3.4 include pip, so if you
+latest Windows installers for Python 3.4 and up include pip, so if you
 use those you will already have pip.
 
 1. In a terminal, run ``C:\Python36\Scripts\pip.exe install masspy``
