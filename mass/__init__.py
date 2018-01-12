@@ -17,6 +17,7 @@ from mass.analysis import (
 	pools_from_string, net_fluxes_from_strings)
 from mass import io
 from mass import util
+from mass.util.qcqa import qcqa_model
 from mass.util.version_info import show_versions
 
 __version__ = "0.1.0a6"
