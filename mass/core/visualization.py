@@ -959,12 +959,12 @@ def _place_legend_outside(lgnd_loc):
 	elif re.match(lgnd_loc, "upper"):
 		lgnd_loc = "lower center"
 		anchor = (0.5, 1.15)
-		col = 5
+		col = 4
 	# Place legend outside the plot on the bottom
 	elif re.match(lgnd_loc, "lower"):
 		lgnd_loc = "upper center"
 		anchor = (0.5, -0.2)
-		col = 5
+		col = 4
 	# Place legend in best location if unknown option used.
 	else:
 		warn("Unrecognized legend entry, will use 'best' instead")
