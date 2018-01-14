@@ -58,8 +58,8 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 ## Internal Attribute List for MassModels
 _ORDERED_OPTIONAL_MODEL_KEYS = [
 	"name", "_rtype", "_custom_rates", "_custom_parameters",
-	"fixed_concentrations", "compartments", "units", "_matrix_type", "_dtype",
-	"notes", "annotation"]
+	"fixed_concentrations", "compartments", "modules", "units", "_matrix_type",
+	"_dtype", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
 	"name": None,
 	"_rtype": 1,
@@ -67,6 +67,7 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 	"_custom_parameters": {},
 	"fixed_concentrations": {},
 	"compartments": [],
+	"modules" : set(),
 	"units": {},
 	"_matrix_type": "dense",
 	"_dtype": np.float64,
