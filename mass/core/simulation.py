@@ -30,7 +30,7 @@ ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
 
 # Public
-def simulate(model, time, perturbations=None, numpoints=10000, nsteps=500,
+def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 				first_step=0., min_step=0., max_step=0.):
 	"""Simulate a MassModel by integrating the ODEs  using the specified solver
 	at the given time points and for given perturbation(s) to the model to
@@ -53,7 +53,7 @@ def simulate(model, time, perturbations=None, numpoints=10000, nsteps=500,
 		for integration of the ODEs.
 	numpoints :  int, optional
 		The number of points to plot if the given time is a tuple.
-		Default is 10000.
+		Default is 1000.
 	perturbations : dict, optional
 		A dictionary of events to incorporate into the simulation, where keys
 		are the event to incorporate, and values are new parameter or initial
@@ -266,9 +266,10 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time = np.linspace(0, 10**power, int(10**(power+1)))
-			[c_profile, f_profile] = options[strategy](model,
-									time, perturbations=perturbations)
+			time = np.geomspace(1e-6, 10**power, int(10**power))
+			[c_profile, f_profile] = options[strategy](
+									model, time,
+									perturbations=perturbations)
 			for metab, profile in iteritems(c_profile):
 				conc = profile(time)
 				if abs(conc[-1] - conc[-2]) <= 10**-9:

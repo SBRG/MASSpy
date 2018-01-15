@@ -14,7 +14,7 @@ from cobra import DictList
 # Class begins
 ## Public
 def pools_from_string(concentration_profile, time_range, pools,
-						parameters=None, pool_ids=None, numpoints=5000):
+						parameters=None, pool_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
 
@@ -50,7 +50,7 @@ def pools_from_string(concentration_profile, time_range, pools,
 	numpoints :  int, optional
 		The number of time points to use to create the interpolating function
 		for the pools.
-		Default is 500.
+		Default is 1000.
 
 	Returns
 	-------
@@ -64,7 +64,7 @@ def pools_from_string(concentration_profile, time_range, pools,
 	return pool_dict
 
 def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
-				parameters=None, net_flux_ids=None, numpoints=5000):
+				parameters=None, net_flux_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of net_fluxes
 	defined by string input.
 
@@ -97,7 +97,7 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 	numpoints :  int, optional
 		The number of time points to use to create the interpolating function
 		for the net_fluxes.
-		Default is 500.
+		Default is 1000.
 
 	Returns
 	-------

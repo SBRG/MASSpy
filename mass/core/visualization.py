@@ -1112,7 +1112,7 @@ def _get_base_colormap():
 ## Internal variables
 _base_plot_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e4,
+	"numpoints"     : 1e3,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : True,
 	"x_major_ticks" : None,
@@ -1133,7 +1133,7 @@ _base_plot_defaults = {
 
 _base_tiled_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e4,
+	"numpoints"     : 1e3,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : False,
 	"x_major_ticks" : None,
