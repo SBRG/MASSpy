@@ -11,7 +11,7 @@ from os.path import dirname as _dirname
 from mass.core import (
 	MassMetabolite, MassModel, MassReaction, simulate, find_steady_state,
 	plot_simulation, plot_phase_portrait, plot_tiled_phase_portrait,
-	get_plot_defaults, get_tiled_defaults)
+	get_plot_defaults, get_tiled_defaults, strip_time)
 
 from mass.analysis import (
 	pools_from_string, net_fluxes_from_strings)
