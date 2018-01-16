@@ -484,8 +484,17 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 				if lgnd is not None and len(lgnd) != 0:
 					warn("Not enough legend entries provided, using the "
 						"default line labels instead")
-				label = "%s vs. %s" % (list(iterkeys(x_observable))[i],
-									list(iterkeys(y_observable))[j])
+				labels = list()
+				# Ensure labels are strings
+				for label in [list(iterkeys(x_observable))[i],
+								list(iterkeys(y_observable))[j]]:
+					if not isinstance(label, string_types):
+						label = label.id
+						# Filter out leading underscores
+						if re.search('^[^A-Za-z0-9]*', label):
+							label = re.sub('^[^A-Za-z0-9]*', '', label)
+					labels += [label]
+				label = "%s vs. %s" % (labels[0], labels[1])
 			else:
 				label = lgnd[item_count]
 				item_count += 1
