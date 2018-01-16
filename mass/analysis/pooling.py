@@ -13,7 +13,7 @@ from cobra import DictList
 
 # Class begins
 ## Public
-def pools_from_string(concentration_profile, time_range, pools,
+def pools_from_string(concentration_profile, time, pools,
 						parameters=None, pool_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
@@ -59,11 +59,11 @@ def pools_from_string(concentration_profile, time_range, pools,
 		key:value pairs are pool identiiers: scipy interpolating functions
 		of the pools
 	"""
-	pool_dict = _setup_interpol_func(concentration_profile, time_range, pools,
+	pool_dict = _setup_interpol_func(concentration_profile, time, pools,
 								parameters, pool_ids, numpoints, "pool")
 	return pool_dict
 
-def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
+def net_fluxes_from_strings(flux_profile, time, net_fluxes,
 				parameters=None, net_flux_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of net_fluxes
 	defined by string input.
@@ -106,7 +106,7 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 		key:value pairs are net flux identiiers: scipy interpolating functions
 		of the net fluxes
 	"""
-	net_flux_dict = _setup_interpol_func(flux_profile, time_range, net_fluxes,
+	net_flux_dict = _setup_interpol_func(flux_profile, time, net_fluxes,
 							parameters, net_flux_ids, numpoints, "net_flux")
 	return net_flux_dict
 
