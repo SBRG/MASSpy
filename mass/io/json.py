@@ -28,14 +28,6 @@ inf = float('inf')
 JSON_SPEC = "1"
 ## Internal Attribute List for MassMetabolites
 _REQUIRED_METABOLITE_ATTRIBUTES = ["id", "name", "initial_condition"]
-# _ORDERED_OPTIONAL_METABOLITE_KEYS = [
-#     "charge", "compartment", "formula", "notes", "annotation"]
-# _OPTIONAL_METABOLITE_ATTRIBUTES = {
-#     "charge": None,
-#     "compartment": None,
-#     "formula": None,
-#     "notes": {},
-#     "annotation": {}}
 _UNNECESSARY_METABOLITE_KEYS = [
     '_id',
     '_model',
@@ -50,13 +42,6 @@ _UNNECESSARY_METABOLITE_KEYS = [
 _REQUIRED_REACTION_ATTRIBUTES = [
     "id", "name", "metabolites", "_reversible", "_forward_rate_constant",
     "_equilibrium_constant", "_genes", "_gene_reaction_rule", "ssflux"]
-# _ORDERED_OPTIONAL_REACTION_KEYS = [
-#     "subsystem", "_reverse_rate_constant", "notes", "annotation"]
-# _OPTIONAL_REACTION_ATTRIBUTES = {
-#     "subsystem": "",
-#     "_reverse_rate_constant": 0,
-#     "notes": {},
-#     "annotation": {}}
 _UNNECESSARY_REACTION_KEYS = [
     '_id',
     '_sym_kf',
@@ -82,23 +67,6 @@ _OPTIONAL_GENE_ATTRIBUTES = {
     "annotation": {}}
 
 ## Internal Attribute List for MassModels
-# _ORDERED_OPTIONAL_MODEL_KEYS = [
-#     "name", "_rtype", "_custom_rates", "_custom_parameters",
-#     "fixed_concentrations", "compartments", "modules", "units", "_matrix_type",
-#     "_dtype", "notes", "annotation"]
-# _OPTIONAL_MODEL_ATTRIBUTES = {
-#     "name": None,
-#     "_rtype": 1,
-#     "_custom_rates": {},
-#     "_custom_parameters": {},
-#     "fixed_concentrations": {},
-#     "compartments": [],
-#     "modules" : set(),
-#     "units": {},
-#     "_matrix_type": "dense",
-#     "_dtype": np.float64,
-#     "notes": {},
-#     "annotation": {}}
 _UNNECESSARY_MODEL_KEYS = [
     '_id',
     'reactions',
