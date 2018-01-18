@@ -484,8 +484,17 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 				if lgnd is not None and len(lgnd) != 0:
 					warn("Not enough legend entries provided, using the "
 						"default line labels instead")
-				label = "%s vs. %s" % (list(iterkeys(x_observable))[i],
-									list(iterkeys(y_observable))[j])
+				labels = list()
+				# Ensure labels are strings
+				for label in [list(iterkeys(x_observable))[i],
+								list(iterkeys(y_observable))[j]]:
+					if not isinstance(label, string_types):
+						label = label.id
+						# Filter out leading underscores
+						if re.search('^[^A-Za-z0-9]*', label):
+							label = re.sub('^[^A-Za-z0-9]*', '', label)
+					labels += [label]
+				label = "%s vs. %s" % (labels[0], labels[1])
 			else:
 				label = lgnd[item_count]
 				item_count += 1
@@ -959,12 +968,12 @@ def _place_legend_outside(lgnd_loc):
 	elif re.match(lgnd_loc, "upper"):
 		lgnd_loc = "lower center"
 		anchor = (0.5, 1.15)
-		col = 5
+		col = 4
 	# Place legend outside the plot on the bottom
 	elif re.match(lgnd_loc, "lower"):
 		lgnd_loc = "upper center"
 		anchor = (0.5, -0.2)
-		col = 5
+		col = 4
 	# Place legend in best location if unknown option used.
 	else:
 		warn("Unrecognized legend entry, will use 'best' instead")
@@ -1112,7 +1121,7 @@ def _get_base_colormap():
 ## Internal variables
 _base_plot_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e4,
+	"numpoints"     : 1e3,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : True,
 	"x_major_ticks" : None,
@@ -1133,7 +1142,7 @@ _base_plot_defaults = {
 
 _base_tiled_defaults = {
 	"plot_function" : "plot",
-	"numpoints"     : 1e4,
+	"numpoints"     : 1e3,
 	"figsize"       : (5.0, 5.0),
 	"tick_labels"   : False,
 	"x_major_ticks" : None,

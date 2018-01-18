@@ -454,8 +454,8 @@ def model_to_xml(model):
 	# add in reactions
 	rxns_list = SubElement(xml_model, "listOfReactions")
 	for rxn, rate in iteritems(strip_time(model.rates)):
-		id = "R_%s" % rxn.id
-		sbml_rxn = SubElement(rxns_list, "reaction", id=id,
+		rxn_id = "R_%s" % rxn.id
+		sbml_rxn = SubElement(rxns_list, "reaction", id=rxn_id,
 								   reversible=str(rxn.reversible).lower(),
 								   # Required SBML parameter
 								   fast="false")
@@ -567,8 +567,6 @@ def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
 	if not use_fbc_package:
 		if libsbml is None:
 			raise ImportError("libSBML required to write non-fbc models")
-		# ignore for now (deal with after sbml3 is finished)
-		#write_sbml2(cobra_model, filename, use_fbc_package=False, **kwargs)
 		return
 
 	# create xml

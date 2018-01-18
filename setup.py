@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
@@ -34,7 +35,7 @@ setup(
 	description="MASSpy is a package for kinetic modeling and simulation of "
 				"biological networks",
 	license="LGPL/GPL v2+",
-	url="https://github.com/SBRG/MASSpy",
+	url="https://github.com/SBRG/masspy",
 	download_url="https://pypi.python.org/pypi/masspy",
 	author="Zhaiman and the masspy development team at SBRG",
 	author_email="zhaiman@eng.ucsd.edu",

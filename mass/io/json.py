@@ -58,8 +58,8 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 ## Internal Attribute List for MassModels
 _ORDERED_OPTIONAL_MODEL_KEYS = [
 	"name", "_rtype", "_custom_rates", "_custom_parameters",
-	"fixed_concentrations", "compartments", "units", "_matrix_type", "_dtype",
-	"notes", "annotation"]
+	"fixed_concentrations", "compartments", "modules", "units", "_matrix_type",
+	"_dtype", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
 	"name": None,
 	"_rtype": 1,
@@ -67,6 +67,7 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 	"_custom_parameters": {},
 	"fixed_concentrations": {},
 	"compartments": [],
+	"modules" : set(),
 	"units": {},
 	"_matrix_type": "dense",
 	"_dtype": np.float64,
@@ -153,6 +154,15 @@ def write_json_model(model, filename, pretty=False, **kwargs):
 	"""
 	obj = _model_to_dict(model)
 	obj[u"version"] = JSON_SPEC
+	try:
+		if len(obj[u"_custom_rates"]) != 0:
+			custom_rate_dict = dict()
+			custom_rate_dict.update(dict((rxn_obj.id, str(custom_rate))
+							for rxn_obj, custom_rate in \
+							iteritems(obj[u"_custom_rates"])))
+			obj[u"_custom_rates"] = custom_rate_dict
+	except KeyError:
+		pass
 
 	if pretty:
 		dump_opts = {
@@ -439,20 +449,32 @@ def _model_from_dict(obj):
 	if 'reactions' not in obj:
 		raise ValueError('Object has no reactions attribute. Cannot load.')
 	model = MassModel()
-	model.add_metabolites([
-		_metabolite_from_dict(metabolite) for metabolite in obj['metabolites']]
-	)
+	# Add metabolites
+	model.add_metabolites([_metabolite_from_dict(metabolite)
+							for metabolite in obj['metabolites']])
+	# Add genes
 	model.genes.extend([_gene_from_dict(gene) for gene in obj['genes']])
-	model.add_reactions(
-		[_reaction_from_dict(reaction, model) for reaction in obj['reactions']]
-	)
-	# Add update_initial_conditions
+	# Add reactions
+	model.add_reactions([_reaction_from_dict(reaction, model)
+						for reaction in obj['reactions']])
+	# Add initial conditions
 	ics = obj["initial_conditions"]
 	ic_dict = {metab: ics[str(metab)] for metab in model.metabolites}
 	model.update_initial_conditions(ic_dict)
 
+	# Add custom rate laws
+	try:
+		if len(obj[u"_custom_rates"]) != 0:
+			model._custom_parameters.update(obj[u"_custom_parameters"])
+			for rxn, custom_rate in iteritems(obj[u"_custom_rates"]):
+
+				model.add_custom_rate(model.reactions.get_by_id(rxn),
+										custom_rate=custom_rate)
+	except KeyError:
+		pass
+
 	for k, v in iteritems(obj):
-		if k not in {
-		'metabolites', 'reactions', 'genes', 'initial_conditions'}:
+		if k not in {'metabolites', 'reactions', 'genes',
+			'initial_conditions', '_custom_rates', "_custom_parameters"}:
 			setattr(model, k, v)
 	return model

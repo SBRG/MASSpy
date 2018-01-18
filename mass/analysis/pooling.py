@@ -13,8 +13,8 @@ from cobra import DictList
 
 # Class begins
 ## Public
-def pools_from_string(concentration_profile, time_range, pools,
-						parameters=None, pool_ids=None, numpoints=5000):
+def pools_from_string(concentration_profile, time, pools,
+						parameters=None, pool_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of pools
 	defined by string input.
 
@@ -50,101 +50,21 @@ def pools_from_string(concentration_profile, time_range, pools,
 	numpoints :  int, optional
 		The number of time points to use to create the interpolating function
 		for the pools.
-		Default is 500.
+		Default is 1000.
 
 	Returns
 	-------
-	pooling_dictionary : dict
+	pool_dict : dict
 		A dictionary containing the pooling interpolating functions, where
 		key:value pairs are pool identiiers: scipy interpolating functions
 		of the pools
 	"""
-	# Check inputs
-	if not isinstance(concentration_profile, dict):
-		raise TypeError("concentration_profile must be a dictionary")
-	elif len(concentration_profile) == 0:
-		warn ("No concentration solutions associated with this profile")
-		return None
-
-	if isinstance(time_range, tuple):
-		if not isinstance(numpoints, (float, integer_types)):
-			raise TypeError("numpoints must an integer")
-		if abs(time_range[0]) < 1e-9:
-			time_range = (1e-6, time_range[1])
-		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
-
-	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must an iterable list of time points or "
-						" a tuple of containing start and end points")
-
-	if isinstance(pools, string_types):
-		pools = [pools]
-	if not isinstance(pools, list):
-		raise TypeError("pools must be a string or list of strings")
-
-	if parameters is None:
-		parameters = {}
-	if not isinstance(parameters, dict):
-		raise TypeError("parameters must be a dictionary")
-
-	if isinstance(pool_ids, string_types):
-		pool_ids = [pool_ids]
-	if not isinstance(pool_ids, (list, type(None))):
-		raise TypeError("pool_ids must be a string or a list of strings with "
-						"the same length as pools")
-	else:
-		# Generate pool IDs if not provided
-		if pool_ids is None:
-			pool_ids = ['p%s' % str(i+1) for i in range(0, len(pools))]
-		# Otherwise check length of pool IDs if provided
-		elif len(pool_ids) == len(pools):
-			pass
-		else:
-			raise ValueError("Number of pool IDs does not match the number of "
-							"defined pools")
-	# Create pools expressions using Sympy
-	pool_dict = dict()
-	symbol_dict = dict()
-	metab_lookup = DictList()
-	# Get metabolite objects in a DictList and local symbols in a dictionary
-	for key in iterkeys(concentration_profile):
-		metab_lookup.append(key)
-		symbol_dict.update({key.id: sp.Symbol(key.id)})
-	# Add parameters into local symbol dictionary, if any
-	for key in iterkeys(parameters):
-		symbol_dict.update({key: sp.Symbol(key)})
-	for i, p_str in enumerate(pools):
-		# Use sympy.sympify to create pool expression
-		try:
-			pool_expr = sp.sympify(p_str, locals=symbol_dict)
-			pool_expr = pool_expr.subs(dict((sp.Symbol(k), v)
-											for k, v in iteritems(parameters)))
-		except:
-			raise ValueError("Could not convert (%s) into a pool." % p_str)
-		# Set up substitution for concentration values
-		sub_dict = dict((sym, concentration_profile[
-						metab_lookup.get_by_id(str(sym))])
-						for sym in pool_expr.atoms(sp.Symbol))
-		# Obtain pooling solution by substituting concentration values for each
-		# time point
-		pool_sol = list()
-		for t in time_range:
-			val_at_t = dict((sym, sub_dict[sym](t))
-							for sym, func in iteritems(sub_dict))
-			pool_sol.extend([pool_expr.subs(val_at_t)])
-		# Remove the last point if needed
-		if pool_sol[-1] == 0:
-			pool_sol = pool_sol[:-1]
-			time_vec = time_range[:-1]
-		else:
-			time_vec = time_range
-		# Add the new pool interpolating funtion into pool_dict
-		pool_dict.update({pool_ids[i]: interpolate.interp1d(time_vec,
-							pool_sol, kind='cubic', fill_value='extrapolate')})
+	pool_dict = _setup_interpol_func(concentration_profile, time, pools,
+								parameters, pool_ids, numpoints, "pool")
 	return pool_dict
 
-def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
-				parameters=None, net_flux_ids=None, numpoints=500):
+def net_fluxes_from_strings(flux_profile, time, net_fluxes,
+				parameters=None, net_flux_ids=None, numpoints=1000):
 	"""Create a dictionary of interpolating functions for a list of net_fluxes
 	defined by string input.
 
@@ -177,7 +97,7 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 	numpoints :  int, optional
 		The number of time points to use to create the interpolating function
 		for the net_fluxes.
-		Default is 500.
+		Default is 1000.
 
 	Returns
 	-------
@@ -186,90 +106,8 @@ def net_fluxes_from_strings(flux_profile, time_range, net_fluxes,
 		key:value pairs are net flux identiiers: scipy interpolating functions
 		of the net fluxes
 	"""
-	# Check inputs
-	if not isinstance(flux_profile, dict):
-		raise TypeError("flux_profile must be a dictionary")
-	elif len(flux_profile) == 0:
-		warn ("No flux solutions associated with this profile")
-		return None
-
-	if isinstance(time_range, tuple):
-		if not isinstance(numpoints, (float, integer_types)):
-			raise TypeError("numpoints must an integer")
-		if abs(time_range[0]) < 1e-9:
-			time_range = (1e-6, time_range[1])
-		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
-
-	if not hasattr(time_range, '__iter__'):
-		raise TypeError("time_range must an iterable list of time points or "
-						" a tuple of containing start and end points")
-
-	if isinstance(net_fluxes, string_types):
-		net_fluxes = [net_fluxes]
-	if not isinstance(net_fluxes, list):
-		raise TypeError("net_fluxes must be a string or list of strings")
-
-	if parameters is None:
-		parameters = {}
-	if not isinstance(parameters, dict):
-		raise TypeError("parameters must be a dictionary")
-
-	if isinstance(net_flux_ids, string_types):
-		net_flux_ids = [net_flux_ids]
-	if not isinstance(net_flux_ids, (list, type(None))):
-		raise TypeError("net_flux_ids must be a string or a list of strings "
-						"with the same length as net_fluxes")
-	else:
-		# Generate net flux IDs if not provided
-		if net_flux_ids is None:
-			net_flux_ids = ['v_net%s' % str(i+1)
-							for i in range(0, len(net_fluxes))]
-		# Otherwise check length of net_flux IDs if provided
-		elif len(net_flux_ids) == len(net_fluxes):
-			pass
-		else:
-			raise ValueError("Number of net_flux IDs does not match the number"
-							" of defined net_fluxes")
-	# Create net flux expressions using Sympy
-	net_flux_dict = dict()
-	symbol_dict = dict()
-	reaction_lookup = DictList()
-	# Get metabolite objects in a DictList and local symbols in a dictionary
-	for key in iterkeys(flux_profile):
-		reaction_lookup.append(key)
-		symbol_dict.update({key.id: sp.Symbol(key.id)})
-	# Add parameters into local symbol dictionary, if any
-	for key in iterkeys(parameters):
-		symbol_dict.update({key: sp.Symbol(key)})
-	for i, f_str in enumerate(net_fluxes):
-		# Use sympy.sympify to create net_flux expression
-		try:
-			net_flux_expr = sp.sympify(f_str, locals=symbol_dict)
-			net_flux_expr = net_flux_expr.subs(dict((sp.Symbol(k), v)
-											for k, v in iteritems(parameters)))
-		except:
-			raise ValueError("Could not convert (%s) into a net_flux." % f_str)
-		# Set up substitution for flux values
-		sub_dict = dict((sym, flux_profile[
-						reaction_lookup.get_by_id(str(sym))])
-						for sym in net_flux_expr.atoms(sp.Symbol))
-		# Obtain net flux solution by substituting flux values for each
-		# time point
-		net_flux_sol = list()
-		for t in time_range:
-			val_at_t = dict((sym, sub_dict[sym](t))
-							for sym, func in iteritems(sub_dict))
-			net_flux_sol.extend([net_flux_expr.subs(val_at_t)])
-		# Remove the last point if needed
-		if net_flux_sol[-1] == 0:
-			net_flux_sol = net_flux_sol[:-1]
-			time_vec = time_range[:-1]
-		else:
-			time_vec = time_range
-		# Add the new net_flux interpolating funtion into net_flux_dict
-		net_flux_dict.update({net_flux_ids[i]: interpolate.interp1d(
-								time_vec, net_flux_sol,
-								kind='cubic', fill_value='extrapolate')})
+	net_flux_dict = _setup_interpol_func(flux_profile, time, net_fluxes,
+							parameters, net_flux_ids, numpoints, "net_flux")
 	return net_flux_dict
 
 def pairwise_angles(modal_matrix, correlation_cutoff=0.85):
@@ -331,3 +169,95 @@ def pairwise_angles(modal_matrix, correlation_cutoff=0.85):
 					F2[i, j] = 0
 		p_matrices.append(np.dot(F1, angle_mat, F2))
 	return p_matrices
+
+# Internal
+def _setup_interpol_func(solution_profile, time_range, to_create,
+						parameters, new_ids, numpoints, func_type):
+	# Check inputs
+	if not isinstance(solution_profile, dict):
+		raise TypeError("concentration_profile must be a dictionary")
+	elif len(solution_profile) == 0:
+		warn ("No solutions associated with this profile")
+		return None
+
+	if isinstance(time_range, tuple):
+		if not isinstance(numpoints, (float, integer_types)):
+			raise TypeError("numpoints must an integer")
+		if abs(time_range[0]) < 1e-9:
+			time_range = (1e-6, time_range[1])
+		time_range = np.geomspace(time_range[0], time_range[1], int(numpoints))
+
+	if not hasattr(time_range, '__iter__'):
+		raise TypeError("time_range must an iterable list of time points or "
+						" a tuple of containing start and end points")
+
+	if isinstance(to_create, string_types):
+		to_create = [to_create]
+	if not isinstance(to_create, list):
+		raise TypeError("%s must be a string or list of strings" % func_type)
+
+	if parameters is None:
+		parameters = {}
+	if not isinstance(parameters, dict):
+		raise TypeError("parameters must be a dictionary")
+
+	if isinstance(new_ids, string_types):
+		new_ids = [new_ids]
+	if not isinstance(new_ids, (list, type(None))):
+		raise TypeError("%s_ids must be a string or a list of strings with "
+					"the same length as %ss" % (func_type, func_type + "e"))
+
+
+	else:
+		# Generate pool IDs if not provided
+		if new_ids is None and func_type is "pool":
+			new_ids = ['p%s' % str(i+1) for i in range(0, len(to_create))]
+		elif new_ids is None and func_type is "net_flux":
+			new_ids = ['v_net%s' % str(i+1) for i in range(0, len(to_create))]
+		# Otherwise check length of IDs if provided
+		elif len(new_ids) == len(to_create):
+			pass
+		else:
+			raise ValueError("Number of %s IDs does not match the number of "
+							"defined %ss" % (func_type, func_type + "e"))
+
+	# Create pools expressions using Sympy
+	to_create_dict = dict()
+	symbol_dict = dict()
+	lookup = DictList()
+	# Get metabolite objects in a DictList and local symbols in a dictionary
+	for key in iterkeys(solution_profile):
+		lookup.append(key)
+		symbol_dict.update({key.id: sp.Symbol(key.id)})
+	# Add parameters into local symbol dictionary, if any
+	for key in iterkeys(parameters):
+		symbol_dict.update({key: sp.Symbol(key)})
+	for i, id_str in enumerate(to_create):
+		# Use sympy.sympify to create expression
+		try:
+			expr = sp.sympify(id_str, locals=symbol_dict)
+			expr = expr.subs(dict((sp.Symbol(k), v)
+							for k, v in iteritems(parameters)))
+		except:
+			raise ValueError("Could not convert (%s) into a %s."
+							% (id_str, func_type))
+		# Set up substitution for concentration values
+		sub_dict = dict((sym, solution_profile[
+						lookup.get_by_id(str(sym))])
+						for sym in expr.atoms(sp.Symbol))
+		# Obtain solutions by substituting values for each time point
+		sol = list()
+		for t in time_range:
+			val_at_t = dict((sym, sub_dict[sym](t))
+							for sym, func in iteritems(sub_dict))
+			sol.extend([expr.subs(val_at_t)])
+		# Remove the last point if needed
+		if sol[-1] == 0:
+			sol = sol[:-1]
+			time_vec = time_range[:-1]
+		else:
+			time_vec = time_range
+		# Add the new pool interpolating funtion into pool_dict
+		to_create_dict.update({new_ids[i]: interpolate.interp1d(time_vec,
+							sol, kind='cubic', fill_value='extrapolate')})
+	return to_create_dict
