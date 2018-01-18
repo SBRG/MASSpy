@@ -293,7 +293,7 @@ def plot_simulation(solution_profile, time, axes=None, observable=None,
 	Parameters
 	----------
 	solution_profile : dict
-        An dict of interpolating functions containing the solution profiles to
+        A dict of interpolating functions containing the solution profiles to
 		be plotted. The keys are strings, mass.MassMetabolite objects, or
 		mass.MassReaction objects, and the values are interpolating functions
 		of the corresponding solution.
@@ -379,13 +379,13 @@ def plot_simulation(solution_profile, time, axes=None, observable=None,
 			anchor = None
 			col=1
 		# Set linecolors and linestyles, ensure legend is update accordingly
-		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes, labels = _set_colors_and_styles(axes, options_dict, len(sols))
 		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
 						bbox_to_anchor=anchor,
 						ncol=col)
 	# Set linecolors and linestyles if no legend
 	else:
-		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes, labels = _set_colors_and_styles(axes, options_dict, len(sols))
 	# Add all other features to the plot
 	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
@@ -403,7 +403,7 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 	Parameters
 	----------
 	solution_profile : dict
-        An dict of interpolating functions containing the solution profiles to
+        A dict of interpolating functions containing the solution profiles to
 		be plotted. The keys are strings, mass.MassMetabolite objects, or
 		mass.MassReaction objects, and the values are interpolating functions
 		of the corresponding solution.
@@ -495,11 +495,11 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 							label = re.sub('^[^A-Za-z0-9]*', '', label)
 					labels += [label]
 				label = "%s vs. %s" % (labels[0], labels[1])
+				item_count += 1
 			else:
 				label = lgnd[item_count]
 				item_count += 1
 			plot_function(x_sols[i], y_sols[j], label=label)
-
 	# Set legend if provided
 	if lgnd is not None:
 		lgnd_loc = options_dict["legend"][1]
@@ -511,12 +511,12 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 			anchor = None
 			col=1
 		# Set linecolors and linestyles, ensure legend is update accordingly
-		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes, labels = _set_colors_and_styles(axes, options_dict, item_count)
 		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
 					bbox_to_anchor=anchor, ncol=col)
 	# Set linecolors and linestyles if no legend
 	else:
-		axes, labels = _set_colors_and_styles(axes, options_dict)
+		axes, labels = _set_colors_and_styles(axes, options_dict, item_count)
 	# Label time points of interest
 	if poi is not None:
 		axes = _label_poi(axes, time, poi, poi_color, poi_labels,
@@ -710,13 +710,28 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 def _add_plot_options_to_plot(axes, options_dict, plot_type):
 	"""Internal Method. Add plot features to the axes"""
 	# For plot_simulation and plot_phase_portrait specifically
+
 	if plot_re.match(plot_type):
 		# Set xlim
 		if options_dict["xlim"] != (None, None):
-			axes.set_xlim(options_dict["xlim"])
+			xmin, xmax = options_dict["xlim"]
+			# Account for 0 value on logarithmic scaling
+			if re.match("semilogx|loglog", options_dict["plot_function"]):
+				if xmin == 0:
+					xmin = 1e-6
+				if xmax == 0:
+					xmax = 1e-6
+			axes.set_xlim((xmin, xmax))
 		# Set ylim
 		if options_dict["ylim"] != (None, None):
-			axes.set_ylim(options_dict["ylim"])
+			ymin, ymax = options_dict["ylim"]
+			# Account for 0 value on logarithmic scaling
+			if re.match("semilogy|loglog", options_dict["plot_function"]):
+				if ymin == 0:
+					ymin = 1e-6
+				if ymax == 0:
+					ymax = 1e-6
+			axes.set_ylim((ymin, ymax))
 		# Set title if desired
 		if options_dict["title"][0] is not None:
 			axes.set_title(options_dict["title"][0],
@@ -775,7 +790,7 @@ def _set_plot_observables(solution_profile, observable):
 
 	return observable
 
-def _set_colors_and_styles(axes, options_dict):
+def _set_colors_and_styles(axes, options_dict, num_new_items):
 	"""Internal method. Set linecolors and styles for a plot"""
 	# Use a larger colormap if more than 20 items are to be plotted and no
 	# colors were specified by the user.
@@ -789,6 +804,8 @@ def _set_colors_and_styles(axes, options_dict):
 	if options_dict["linecolor"] is not None:
 		colors = options_dict["linecolor"].copy()
 		colors.reverse()
+		if len(colors) == 1 and num_new_items != 1:
+			colors = colors*num_new_items
 		for i, lc in enumerate(colors):
 			lines[len(lines)-1-i].set_color(lc)
 	# Set linestyles and adjust legend entries from last to first one
@@ -796,6 +813,8 @@ def _set_colors_and_styles(axes, options_dict):
 	if options_dict["linestyle"] is not None:
 		styles = options_dict["linestyle"].copy()
 		styles.reverse()
+		if len(styles) == 1 and num_new_items != 1:
+			styles = styles*num_new_items
 		for i, ls in enumerate(styles):
 			lines[len(lines)-1-i].set_linestyle(ls)
 	return axes, (lines, labels)
