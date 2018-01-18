@@ -683,9 +683,11 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 					axes = _add_plot_tile(axes, i, j, x, y)
 				# Add additional data to lower tiles if provided
 				if i > j and data is not None:
-					ax.annotate(str(data[i][j]), xy=(0.5, 0.5),
+					axes.annotate(str(data[i][j]), xy=(0.5, 0.5),
 							xycoords="axes fraction", va="center", ha="center",
 							fontsize=fontsize)
+					axes.set_xticklabels([])
+					axes.set_yticklabels([])
 			# Create phase portraits for lower tiles only
 			elif re.match("lower", place_tiles):
 				# Create lower tile phase portraits
@@ -696,6 +698,8 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 					axes.annotate(str(data[i][j]), xy=(0.5, 0.5),
 							xycoords="axes fraction", va="center", ha="center",
 							fontsize=fontsize)
+					axes.set_xticklabels([])
+					axes.set_yticklabels([])
 			# Create phase portraits for both upper and lower tiles
 			else:
 				axes = _add_plot_tile(axes, i, j, x, y)
