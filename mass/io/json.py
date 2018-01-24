@@ -477,7 +477,10 @@ def _model_from_dict(obj):
 										custom_rate=custom_rate)
 	except KeyError:
 		pass
-	obj["modules"] = set(obj["modules"])
+	try:
+		obj["modules"] = set(obj["modules"])
+	except KeyError:
+		pass
 
 	for k, v in iteritems(obj):
 		if k not in {'metabolites', 'reactions', 'genes',

@@ -140,7 +140,6 @@ class MassModel(Object):
 			self.fixed_concentrations = dict()
 			# For storing added models and modules
 			self.modules = set()
-			self.modules.add(self.id)
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -1254,7 +1253,7 @@ class MassModel(Object):
 		# Copy custom parameters if there are custom rates
 		if len(new_model.custom_rates) != 0:
 			new_model._custom_parameters = self._custom_parameters
-			
+
 		# Create the new stoichiometric matrix for the model
 		new_model._S = self._create_stoichiometric_matrix(
 						matrix_type=self._matrix_type,
