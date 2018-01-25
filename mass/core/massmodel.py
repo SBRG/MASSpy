@@ -140,7 +140,6 @@ class MassModel(Object):
 			self.fixed_concentrations = dict()
 			# For storing added models and modules
 			self.modules = set()
-			self.modules.add(self.id)
 			# A dictionary of the compartments in the model
 			self.compartments = dict()
 			# A dictionary to store the units utilized in the model.
@@ -1192,7 +1191,8 @@ class MassModel(Object):
 		new_model = self.__class__()
 		# Define items to not copy by their references
 		do_not_copy_by_ref = {"metabolites", "reactions", "genes",
-							"initial_conditions","custom_rates", "_S"
+							"initial_conditions","_custom_rates",
+							"_custom_parameters", "_S",
 							"notes", "annotations"}
 		for attr in self.__dict__:
 			if attr not in do_not_copy_by_ref:
@@ -1250,6 +1250,9 @@ class MassModel(Object):
 				new_rxn._genes.add(new_gene)
 				new_gene._reaction.add(new_rxn)
 
+		# Copy custom parameters if there are custom rates
+		if len(new_model.custom_rates) != 0:
+			new_model._custom_parameters = self._custom_parameters
 
 		# Create the new stoichiometric matrix for the model
 		new_model._S = self._create_stoichiometric_matrix(

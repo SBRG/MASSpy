@@ -159,9 +159,8 @@ def generate_ode(metabolite):
 		else:
 			rate_law_expr = rxn.rate
 
-		if metabolite in rxn.reactants:
-			rate_law_expr = sp.Mul(-1, rate_law_expr)
-		metabolite._ode = sp.Add(metabolite._ode, rate_law_expr)
+		c = rxn.get_coefficient(metabolite.id)
+		metabolite._ode = sp.Add(metabolite._ode, sp.Mul(c, rate_law_expr))
 	return metabolite._ode
 
 def strip_time(sympy_exprs):

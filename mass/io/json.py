@@ -5,9 +5,10 @@ from __future__ import absolute_import
 
 # Import Necessary Packages
 import io
+import re
 import numpy as np
 from collections import OrderedDict
-from six import iteritems, string_types
+from six import iteritems, string_types, iterkeys
 from operator import attrgetter, itemgetter
 
 try:
@@ -290,6 +291,9 @@ def _metabolite_from_dict(metabolite_dict):
 	"""
 	new_metabolite = MassMetabolite()
 	for k, v in iteritems(metabolite_dict):
+		# Don't set blank initial conditions
+		if re.match("initial_condition", str(k)) and re.match("", str(v)):
+			continue
 		setattr(new_metabolite, k, v)
 	return new_metabolite
 
@@ -459,7 +463,8 @@ def _model_from_dict(obj):
 						for reaction in obj['reactions']])
 	# Add initial conditions
 	ics = obj["initial_conditions"]
-	ic_dict = {metab: ics[str(metab)] for metab in model.metabolites}
+	ic_dict = {metab: ics[str(metab)] for metab in model.metabolites
+				if str(metab) in iterkeys(ics)}
 	model.update_initial_conditions(ic_dict)
 
 	# Add custom rate laws
@@ -472,9 +477,13 @@ def _model_from_dict(obj):
 										custom_rate=custom_rate)
 	except KeyError:
 		pass
+	try:
+		obj["modules"] = set(obj["modules"])
+	except KeyError:
+		pass
 
 	for k, v in iteritems(obj):
 		if k not in {'metabolites', 'reactions', 'genes',
-			'initial_conditions', '_custom_rates', "_custom_parameters"}:
+				'initial_conditions', '_custom_rates'}:
 			setattr(model, k, v)
 	return model
