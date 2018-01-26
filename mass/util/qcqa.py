@@ -51,12 +51,13 @@ def qcqa_model(model, initial_conditions=False, parameters=False,
 				"thermodynamics"]
 	# The functions to perform for each check, and associated arguments if any.
 	function_and_args =[[get_missing_initial_conditions, None],
-						[get_missing_parameters, [True]*5],
-						[can_simulate, [[1,2,3]], False],
+						[get_missing_parameters, [None] + [True]*5],
+						[can_simulate, None],
 						[get_superfluous_parameters, None],
 						[parameter_consistency, [1e-9]],
 						[elemental_consistency, None],
 						[thermodynamic_consistency, None]]
+
 
 	# Check inputs
 	for i, check in enumerate(check_list):
@@ -111,7 +112,7 @@ def get_missing_initial_conditions(model):
 
 	return missing_ics
 
-def get_missing_parameters(model, kf=False, Keq=False,
+def get_missing_parameters(model, reaction_list=None, kf=False, Keq=False,
 							kr=False, ssflux=False, custom_parameters=False):
 	"""Get the parameters that are missing from the reactions that exist
 	in the Massmodel.
@@ -120,6 +121,9 @@ def get_missing_parameters(model, kf=False, Keq=False,
 	----------
 	model : mass.Massmodel
 		The MassModel or list of reactions to inspect.
+	reaction_list : list or mass.MassReaction, optional
+		A mass.MassReaction or a list of mass.MassReaction objects in the model
+		to be checked. If none provided, will use all reactions in the model.
 	kf : bool, optional
 		If True, check MassReactions for missing forward rate constants.
 	Keq : bool, optional
@@ -136,6 +140,14 @@ def get_missing_parameters(model, kf=False, Keq=False,
 	dictonary where keys are reactions and values are a list of
 		the missing parameters for the reaction.
 	"""
+	if reaction_list is None:
+		reaction_list = model.reactions
+	elif not hasattr(reaction_list, "__iter__"):
+		reaction_list = [reaction_list]
+	else:
+		for rxn in reaction_list:
+			if rxn not in model.reactions:
+				raise ValueError("Could not find reaction in the MassModel")
 	param_checks = [kf, Keq, kr, ssflux]
 	param_keys = ["kf", "Keq", "kr", "ssflux"]
 	attr_list = ["_forward_rate_constant", "_equilibrium_constant",
@@ -150,7 +162,7 @@ def get_missing_parameters(model, kf=False, Keq=False,
 			param_keys[i] = ("_sym_%s" % param_keys[i])
 
 	missing_param_dict = dict()
-	for rxn in model.reactions:
+	for rxn in reaction_list:
 		missing_params = list()
 		# If the reaction has custom rates and check is set to True
 		if rxn in iterkeys(model.custom_rates) and custom_parameters:
@@ -201,7 +213,7 @@ def get_missing_parameters(model, kf=False, Keq=False,
 			missing_param_dict[rxn] = missing_params
 	return missing_param_dict
 
-def can_simulate(model, rate_type=None):
+def can_simulate(model):
 	"""Check to see if the model has the required initial conditions and
 	parameters in order to be simulated with the given rate law type(s)
 
@@ -218,43 +230,41 @@ def can_simulate(model, rate_type=None):
 	A dictionary where keys are the rate types and values are bools indicating
 		if the model has met conditions for simulation.
 	"""
-	# Check inputs
-	if rate_type is None:
-		rate_type = [model._rtype]
-	if not isinstance(rate_type, list):
-		rate_type = [rate_type]
-
-	for i, rt in enumerate(rate_type):
-		rt = int(rt)
-		if rt not in {1,2,3}:
-			raise TypeError("Rate type must be integers 1,2, or 3")
-		else:
-			rate_type[i] = rt
-
 	# Check for missing initial conditions
 	missing_ics = get_missing_initial_conditions(model)
 
 	# Check for missing parameters
-	simulate_checks = {}
-	for rt in rate_type:
-		if rt == 1:
-			missing_params = get_missing_parameters(model, kf=True, Keq=True,
-								kr=False, ssflux=False, custom_parameters=True)
-		elif rt == 2:
-			missing_params = get_missing_parameters(model, kf=True, Keq=False,
-								kr=True, ssflux=False, custom_parameters=True)
+	missing_params = dict()
+	for rxn in model.reactions:
+		missing_rxn_params = dict()
+		if rxn in iterkeys(model.custom_rates):
+			missing_params.update(get_missing_parameters(model, rxn, kf=True,
+											Keq=True, kr=True, ssflux=False,
+											custom_parameters=True))
+			continue
 
-		else:
-			missing_params = get_missing_parameters(model, kf=False, Keq=True,
-								kr=True, ssflux=False, custom_parameters=True)
+		missing_rxn_params.update(get_missing_parameters(model, rxn, kf=True,
+											Keq=True, kr=True, ssflux=False,
+											custom_parameters=False))
+		try:
+			# Reversible reactions require 2 parameters
+			if rxn.reversible and len(missing_rxn_params[rxn]) > 1:
+				missing_params.update(missing_rxn_params)
+			# Irreversible reactions require a forward rate constant
+			elif not rxn.reversible and len(missing_rxn_params[rxn]) == 1:
+				missing_params.update(missing_rxn_params)
+			else:
+				pass
+		# No missing parameters found for that reaction
+		except KeyError:
+			pass
 
-		# Set check results based on missing initial conditions and parameters
-		if len(missing_params) != 0 or len(missing_ics) != 0:
-			simulate_checks.update({rt: False})
-		else:
-			simulate_checks.update({rt: True})
-
-	return simulate_checks
+	# Set check results based on missing initial conditions and parameters
+	if len(missing_params) != 0 or len(missing_ics) != 0:
+		simulate_check = False
+	else:
+		simulate_check = True
+	return simulate_check
 
 def get_superfluous_parameters(model):
 	"""Get extra parameters required for massmodel simulation. superfluous
@@ -387,9 +397,7 @@ def _qcqa_summary(to_display):
 			continue
 
 		if re.match("Can Simulate", header):
-			table_list = []
-			for rate_type, sim_check in iteritems(item):
-				table_list += ["Rate Type %s: %s" % (rate_type, sim_check)]
+			table_list = [item]
 			sim_checks[header] = table_list
 			continue
 
