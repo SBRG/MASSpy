@@ -432,11 +432,13 @@ def model_to_xml(model):
 			_set_attrib(species, "boundaryCondition", "false")
 
 	# add in parameters (external metabolites)
+
 	for ext in model.get_external_metabolites:
-		param = SubElement(SubElement(xml_model, "listOfParameters"),
-										"parameter", id=ext)
-		_set_attrib(param, "value", model.fixed_concentrations[ext])
-		_set_attrib(param, "constant", "true")
+		if ext in iterkeys(model.fixed_concentrations):
+			param = SubElement(SubElement(xml_model, "listOfParameters"),
+											"parameter", id=ext)
+			_set_attrib(param, "value", model.fixed_concentrations[ext])
+			_set_attrib(param, "constant", "true")
 
 	# add in genes
 	if len(model.genes) != 0:

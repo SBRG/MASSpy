@@ -587,13 +587,13 @@ def _sort_symbols(model):
 		# Ensure reversible reactions have at least 2 parameters and
 		# define rate type based on those parameters
 		if rxn.reversible:
-			if re.search("kf", p_types[0]) and re.search("Keq", p_types[1]):
+			if "kf_" in p_types and "Keq" in p_types:
 				rxn._rtype = 1
-			elif re.search("kf", p_types[0]) and re.search("kr", p_types[1]):
+			elif "kf_" in p_types and "kr_" in p_types:
 				rxn._rtype = 2
-			elif re.search("Keq", p_types[0]) and re.search("kr", p_types[1]):
+			elif "Keq" in p_types and "kr_" in p_types:
 				rxn._rtype = 3
-		# Irreversible reactions need a kf always
+		# Irrev reactions need a kf, and calc_PERC use Keq and and ssflux
 		else:
 			rxn._rtype = 1
 		rate_dict.update({rxn: rxn.generate_rate_law(rate_type=rxn._rtype,

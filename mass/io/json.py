@@ -58,12 +58,11 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 
 ## Internal Attribute List for MassModels
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-	"name", "_rtype", "_custom_rates", "_custom_parameters",
+	"name", "_custom_rates", "_custom_parameters",
 	"fixed_concentrations", "compartments", "modules", "units", "_matrix_type",
 	"_dtype", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
 	"name": None,
-	"_rtype": 1,
 	"_custom_rates": {},
 	"_custom_parameters": {},
 	"fixed_concentrations": {},
@@ -155,6 +154,7 @@ def write_json_model(model, filename, pretty=False, **kwargs):
 	"""
 	obj = _model_to_dict(model)
 	obj[u"version"] = JSON_SPEC
+
 	try:
 		if len(obj[u"_custom_rates"]) != 0:
 			custom_rate_dict = dict()
@@ -469,10 +469,12 @@ def _model_from_dict(obj):
 
 	# Add custom rate laws
 	try:
+		model._custom_parameters.update(obj[u"_custom_parameters"])
+	except KeyError:
+		pass
+	try:
 		if len(obj[u"_custom_rates"]) != 0:
-			model._custom_parameters.update(obj[u"_custom_parameters"])
 			for rxn, custom_rate in iteritems(obj[u"_custom_rates"]):
-
 				model.add_custom_rate(model.reactions.get_by_id(rxn),
 										custom_rate=custom_rate)
 	except KeyError:
@@ -481,9 +483,8 @@ def _model_from_dict(obj):
 		obj["modules"] = set(obj["modules"])
 	except KeyError:
 		pass
-
 	for k, v in iteritems(obj):
 		if k not in {'metabolites', 'reactions', 'genes',
-				'initial_conditions', '_custom_rates'}:
+				'initial_conditions', '_custom_rates', "_custom_parameters"}:
 			setattr(model, k, v)
 	return model
