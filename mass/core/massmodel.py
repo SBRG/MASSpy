@@ -134,7 +134,6 @@ class MassModel(Object):
 			# A dictionary of initial conditions for MassMetabolites
 			self.initial_conditions = dict()
 			# For storing of custom rate laws and fixed concentrations
-			self._rtype = 1
 			self._custom_rates= dict()
 			self._custom_parameters = dict()
 			self.fixed_concentrations = dict()
@@ -174,7 +173,7 @@ class MassModel(Object):
 		dictionary where keys are the reaction objects and values are the
 		sympy rate law expressions
 		"""
-		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=self._rtype,
+		rate_dict =  {rxn: rxn.generate_rate_law(rate_type=rxn._rtype,
 								sympy_expr=True, update_reaction=True)
 								for rxn in self.reactions}
 		if self.custom_rates != {}:
@@ -817,7 +816,8 @@ class MassModel(Object):
 		if len(reaction_list) == 0:
 			return None
 		if update_reactions:
-			self._rtype = rate_type
+			for rxn in self.reactions:
+				rxn._rtype = rate_type
 		# Get the rates
 		rates = {rxn :
 				rxn.generate_rate_law(rate_type, sympy_expr, update_reactions)
@@ -1427,8 +1427,6 @@ class MassModel(Object):
 			return None
 
 		#  Group symbols in rate_laws
-		if self._rtype != 1:
-			self._rtype = 1
 		odes, rates, symbols = expressions._sort_symbols(self)
 		metabolites = symbols[0]
 		rate_params = symbols[1]

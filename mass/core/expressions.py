@@ -576,10 +576,32 @@ def _get_mass_action_ratio_expr(reaction):
 def _sort_symbols(model):
 	"""Internal use. Collect and sort the symbols in expressions of a model
 	into different sets, and adjust odes and rates accordingly"""
-	# Initialize sets to store the symbols
-	rate_dict = model.generate_rate_laws(rate_type=model._rtype,
-							sympy_expr=True, update_reactions=True)
+	rate_dict = dict()
+	for rxn in model.reactions:
+		# Ignore reactions with custom rates
+		if rxn in model.custom_rates:
+			rate_dict.update({rxn: model.custom_rates[rxn]})
+			continue
+		# Get the types of defined paramters
+		p_types = [parameter[:3] for parameter in iterkeys(rxn.parameters)]
+		# Ensure reversible reactions have at least 2 parameters and
+		# define rate type based on those parameters
+		if rxn.reversible:
+			if "kf_" in p_types and "Keq" in p_types:
+				rxn._rtype = 1
+			elif "kf_" in p_types and "kr_" in p_types:
+				rxn._rtype = 2
+			elif "Keq" in p_types and "kr_" in p_types:
+				rxn._rtype = 3
+		# Irrev reactions need a kf, and calc_PERC use Keq and and ssflux
+		else:
+			rxn._rtype = 1
+		rate_dict.update({rxn: rxn.generate_rate_law(rate_type=rxn._rtype,
+													sympy_expr=True,
+													update_reaction=True)})
+
 	ode_dict = model.odes
+	# Initialize sets to store the symbols
 	metab_funcs = set()
 	rate_symbols = set()
 	fixed_symbols = set()

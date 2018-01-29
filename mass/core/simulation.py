@@ -113,24 +113,12 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 	if not isinstance(max_step, float):
 		raise TypeError("max_step must be an integer")
 
-	sim_check = qcqa.can_simulate(model, model._rtype)
-	if not sim_check[model._rtype]:
-		sim_check = qcqa.can_simulate(model, [1,2,3])
-		possible_rate_types = [rt for rt, check in iteritems(sim_check)
-								if check is True]
-		if len(possible_rate_types) != 0:
-			model._rtype = possible_rate_types[0]
-		else:
-			warn("Unable to simulate")
-			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
+	sim_check = qcqa.can_simulate(model)
+	if not sim_check:
+		warn("Unable to simulate")
+		qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
-			return [None, None]
-
-	if model._rtype == 3:
-		warn("Using type 3 rate laws can create inaccurate results for "
-			 "irreversible reactions, please generate type 1 or type 2 "
-			"rates if there are kinetically irreversible reactions in the "
-			"model (kr = 0 and Keq = inf, or reversible=False)")
+		return [None, None]
 	model.repair()
 	# Collect sympy symbols and make dictionariess for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
@@ -168,7 +156,6 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 		args = lambda_func_and_args[0]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
 							for arg in args]).T
-
 		for i in range(0, len(f)):
 			if len(args) != 0:
 				f[i] = lambda_func(*concs[i,:])
@@ -234,18 +221,12 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 	if not isinstance(model, MassModel):
 		raise TypeError("model must be a MassModel")
 
-	sim_check = qcqa.can_simulate(model, model._rtype)
-	if not sim_check[model._rtype]:
-		sim_check = qcqa.can_simulate(model, [1,2,3])
-		possible_rate_types = [rt for rt, check in iteritems(sim_check)
-								if check is True]
-		if len(possible_rate_types) != 0:
-			model._rtype = possible_rate_types[0]
-		else:
-			warn("Unable to find steady state due to missing values")
-			qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
+	sim_check = qcqa.can_simulate(model)
+	if not sim_check:
+		warn("Unable to find steady state due to missing values")
+		qcqa.qcqa_model(model, initial_conditions=True, parameters=True,
 							simulation=True)
-			return [None, None]
+		return [None, None]
 
 	if perturbations is None:
 		perturbations = {}
@@ -531,15 +512,15 @@ def _make_lambda_rates(model, metabolites, rate_dict, values):
 	"""Make a lambda function that uses the concentration solutions to
 	calculate the flux values"""
 	# Turn metabolite functions into metabolite symbols
-	metab_syms = list(sp.Symbol(model.metabolites.get_by_id(
-					str(m_func)[:-3]).id) for m_func in metabolites)
-	metab_func_to_sym = {}
+	metab_objects = list(model.metabolites.get_by_id(str(m_func)[:-3])
+						for m_func in metabolites)
+	metab_syms = list(sp.Symbol(m.id) for m in metab_objects)
 
 	metab_func_to_sym = dict((metab_func, metab_syms[i])
 							for i, metab_func in enumerate(list(metabolites)))
 	for rxn, rate in iteritems(rate_dict):
 		rate = rate.subs(metab_func_to_sym).subs(values)
-		args = tuple(sp.Symbol(m.id) for m in iterkeys(rxn.metabolites)
+		args = tuple(sp.Symbol(m.id) for m in metab_objects
 					if sp.Symbol(m.id) in rate.atoms(sp.Symbol))
 		rate_dict[rxn] = [args, sp.lambdify(args, rate, "numpy")]
 	return rate_dict

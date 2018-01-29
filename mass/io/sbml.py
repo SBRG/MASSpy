@@ -305,18 +305,25 @@ def parse_xml_into_model(xml, number=float):
 
 		# Test to see mathml rate matches standard massreaction rate
 		# if no match, add mathml rate as custom rate law for reaction
-		curr_string = _remove_trailing_zeroes(str(strip_time(reaction.rate)))
+		for rxn_rate_type in [1, 2, 3]:
+			reaction._rtype = rxn_rate_type
+			curr_string = strip_time(reaction.rate)[0]
+			curr_string = _remove_trailing_zeroes(str(curr_string))
+			if result_from_mathml is None:
+				pass
+			elif curr_string == _remove_trailing_zeroes(result_from_mathml):
+				break
 
+		curr_string = strip_time(reaction.rate)[0]
+		curr_string = _remove_trailing_zeroes(str(curr_string))
 		if result_from_mathml is None:
 			pass
 		elif curr_string != _remove_trailing_zeroes(result_from_mathml):
 			custom_rate_dict[reaction] = result_from_mathml
-
 	try:
 		model.add_reactions(reactions)
 	except ValueError as e:
 		warn(str(e))
-
 
 	for custom_rxn, custom_rate in iteritems(custom_rate_dict):
 		model.add_custom_rate(
@@ -432,11 +439,13 @@ def model_to_xml(model):
 			_set_attrib(species, "boundaryCondition", "false")
 
 	# add in parameters (external metabolites)
+
 	for ext in model.get_external_metabolites:
-		param = SubElement(SubElement(xml_model, "listOfParameters"),
-										"parameter", id=ext)
-		_set_attrib(param, "value", model.fixed_concentrations[ext])
-		_set_attrib(param, "constant", "true")
+		if ext in iterkeys(model.fixed_concentrations):
+			param = SubElement(SubElement(xml_model, "listOfParameters"),
+											"parameter", id=ext)
+			_set_attrib(param, "value", model.fixed_concentrations[ext])
+			_set_attrib(param, "constant", "true")
 
 	# add in genes
 	if len(model.genes) != 0:
@@ -493,7 +502,7 @@ def model_to_xml(model):
 		_set_attrib(sbml_ssflux, "value", rxn.ssflux)
 
 		# add in local parameters (custom parameters)
-		c_param_list = list(model.custom_parameters.keys())
+		c_param_list = list(iterkeys(model.custom_parameters))
 		try:
 			c_rate = model.custom_rates[rxn]
 		except KeyError:
