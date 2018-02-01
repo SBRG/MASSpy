@@ -1022,7 +1022,9 @@ class MassModel(Object):
 		"""
 		# Set defaults for the elemental matrix
 		if matrix_type is None:
-			matrix_type = 'dataframe'
+			matrix_type = 'dense'
+		else:
+			matrix_type = matrix_type.lower()
 		if dtype is None:
 			dtype = np.int64
 
@@ -1054,11 +1056,61 @@ class MassModel(Object):
 		# Convert matrix to dataframe if matrix type is a dataframe
 		if matrix_type == 'dataframe':
 			metab_ids = [metab.id for metab in self.metabolites]
-			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq, columns=metab_ids)
+			e_matrix = pd.DataFrame(e_matrix, index=CHOPNSq,
+									columns=metab_ids, dtype=dtype)
 		if matrix_type == 'symbolic':
 			e_matrix = sp.Matrix(e_matrix)
 
 		return e_matrix
+
+	def get_elemental_charge_balancing(self, matrix_type=None, dtype=None):
+		"""Get the elemental matrix of a model
+
+		Parameters
+		----------
+		matrix_type: string {'dense', 'dok', 'lil', 'DataFrame'}, optional
+			If None, will utilize the matrix type initialized with the original
+			model. Otherwise reconstruct the S matrix with the specified type.
+			Types can include 'dense' for a standard  numpy.array, 'dok' or
+			'lil' to obtain the scipy sparse matrix of the corresponding type,
+			DataFrame for a pandas 'DataFrame' where species (excluding genes)
+			are row indicies and reactions are column indicices, and 'symbolic'
+			for a sympy.Matrix'.
+		dtype : data-type, optional
+			The desired data-type for the array. If None, defaults to float
+
+		Returns
+		-------
+		matrix of class 'dtype'
+			The elemental matrix for the given MassModel
+		"""
+		# Set defaults for the elemental matrix
+		if matrix_type is None:
+			matrix_type = 'dense'
+		else:
+			matrix_type = matrix_type.lower()
+		if dtype is None:
+			dtype = np.int64
+
+		# No need to construct a matrix if there are no metabolites
+		if len(self.metabolites) == 0:
+			return None
+
+		CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q' ]
+
+		e_matrix = self.get_elemental_matrix()
+		s_matrix = self.update_S(matrix_type="dense", update_model=False)
+		charge_b_matrix = e_matrix.dot(s_matrix).astype(dtype)
+
+		# Convert matrix to dataframe if matrix type is a dataframe
+		if matrix_type == 'dataframe':
+			rxn_ids = [rxn.id for rxn in self.reactions]
+			charge_b_matrix = pd.DataFrame(charge_b_matrix, index=CHOPNSq,
+											columns=rxn_ids, dtype=dtype)
+		if matrix_type == 'symbolic':
+			charge_b_matrix = sp.Matrix(charge_b_matrix)
+
+		return charge_b_matrix
 
 	def add_fixed_concentrations(self, fixed_conc_dict=None):
 		"""Add fixed concentrations for metabolites, setting their ODEs
