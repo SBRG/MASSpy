@@ -1,0 +1,801 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sbml xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" level="3" sboTerm="SBO:0000624" version="1" xmlns="http://www.sbml.org/sbml/level3/version1/core" fbc:required="true">
+  <model fbc:strict="true" id="Glycolysis">
+    <listOfUnitDefinitions>
+      <unitDefinition id="Millimoles">
+        <listOfUnits>
+          <unit kind="mole" multiplier="1" exponent="1" scale="-3"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="Liters">
+        <listOfUnits>
+          <unit kind="litre" multiplier="1" exponent="1" scale="0"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="Hours">
+        <listOfUnits>
+          <unit kind="second" multiplier="3600" exponent="1" scale="0"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment constant="true" id="c" name="Cytosol"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_glc__D_c" name="D-Glucose" compartment="c" fbc:charge="0" fbc:chemicalFormula="C6H12O6" initialConcentration="1.0" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P" initialConcentration="0.0486" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P" initialConcentration="0.0198" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2" initialConcentration="0.0146" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_dhap_c" name="Dihydroxyacetone phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P" initialConcentration="0.16" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P" initialConcentration="0.00728" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2" initialConcentration="0.000243" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P" initialConcentration="0.0773" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M__2pg_c" name="D-Glycerate 2-phosphate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P" initialConcentration="0.0113" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P" initialConcentration="0.017" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_pyr_c" name="Pyruvate" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C3H3O3" initialConcentration="0.060301" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_lac__L_c" name="L-Lactate" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C3H5O3" initialConcentration="1.36" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_nad_c" name="Nicotinamide adenine dinucleotide" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C21H26N7O14P2" initialConcentration="0.0589" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_nadh_c" name="Nicotinamide adenine dinucleotide - reduced" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C21H27N7O14P2" initialConcentration="0.0301" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_amp_c" name="AMP" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P" initialConcentration="0.086728" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_adp_c" name="ADP" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2" initialConcentration="0.29" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_atp_c" name="ATP" compartment="c" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3" initialConcentration="1.6" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_pi_c" name="Phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="HPO4" initialConcentration="2.5" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_h_c" name="H+" compartment="c" fbc:charge="1" fbc:chemicalFormula="H" initialConcentration="9e-05" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfSpecies>
+      <species hasOnlySubstanceUnits="false" id="M_h2o_c" name="H2O" compartment="c" fbc:charge="0" fbc:chemicalFormula="H2O" initialConcentration="1.0" constant="false" boundaryCondition="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="amp_e" value="1" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
+      <parameter id="glc__D_e" value="1" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
+      <parameter id="h2o_e" value="1" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
+      <parameter id="h_e" value="6.30957e-05" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
+      <parameter id="lac__L_e" value="1" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
+      <parameter id="pyr_e" value="0.06" constant="true"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction fast="false" id="R_HEX1" reversible="true" name="Hexokinase (D-glucose:ATP)" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_HEX1 </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> atp_c </ci>
+        <ci> glc__D_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> adp_c </ci>
+          <ci> g6p_c </ci>
+        </apply>
+        <ci> Keq_HEX1 </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1" name="kf_HEX1" value="0.7000072543398843"/>
+            <localParameter id="Keq_HEX1" name="Keq_HEX1" value="850"/>
+            <localParameter id="kr_HEX1" name="kr_HEX1"/>
+            <localParameter id="ssflux_HEX1" name="ssflux_HEX1" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_glc__D_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_g6p_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_PGI" reversible="true" name="Glucose-6-phosphate isomerase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_PGI </ci>
+    <apply>
+      <minus/>
+      <ci> g6p_c </ci>
+      <apply>
+        <divide/>
+        <ci> f6p_c </ci>
+        <ci> Keq_PGI </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PGI" name="kf_PGI" value="3644.4444444444907"/>
+            <localParameter id="Keq_PGI" name="Keq_PGI" value="0.41"/>
+            <localParameter id="kr_PGI" name="kr_PGI"/>
+            <localParameter id="ssflux_PGI" name="ssflux_PGI" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_g6p_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_f6p_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_PFK" reversible="true" name="Phosphofructokinase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_PFK </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> atp_c </ci>
+        <ci> f6p_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> adp_c </ci>
+          <ci> fdp_c </ci>
+        </apply>
+        <ci> Keq_PFK </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK" name="kf_PFK" value="35.36878374779938"/>
+            <localParameter id="Keq_PFK" name="Keq_PFK" value="310"/>
+            <localParameter id="kr_PFK" name="kr_PFK"/>
+            <localParameter id="ssflux_PFK" name="ssflux_PFK" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_f6p_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_fdp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_FBA" reversible="true" name="Fructose-bisphosphate aldolase" compartment="Glyolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_FBA </ci>
+    <apply>
+      <minus/>
+      <ci> fdp_c </ci>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> dhap_c </ci>
+          <ci> g3p_c </ci>
+        </apply>
+        <ci> Keq_FBA </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_FBA" name="kf_FBA" value="2834.5679012345754"/>
+            <localParameter id="Keq_FBA" name="Keq_FBA" value="0.082"/>
+            <localParameter id="kr_FBA" name="kr_FBA"/>
+            <localParameter id="ssflux_FBA" name="ssflux_FBA" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_fdp_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_dhap_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_g3p_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_TPI" reversible="true" name="Triose-phosphate isomerase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_TPI </ci>
+    <apply>
+      <minus/>
+      <ci> dhap_c </ci>
+      <apply>
+        <divide/>
+        <ci> g3p_c </ci>
+        <ci> Keq_TPI </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_TPI" name="kf_TPI" value="34.35572752492935"/>
+            <localParameter id="Keq_TPI" name="Keq_TPI" value="0.0571429"/>
+            <localParameter id="kr_TPI" name="kr_TPI"/>
+            <localParameter id="ssflux_TPI" name="ssflux_TPI" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_dhap_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_g3p_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_GAPD" reversible="true" name="Glyceraldehyde-3-phosphate dehydrogenase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_GAPD </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> g3p_c </ci>
+        <ci> nad_c </ci>
+        <ci> pi_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> _13dpg_c </ci>
+          <ci> nadh_c </ci>
+        </apply>
+        <ci> Keq_GAPD </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_GAPD" name="kf_GAPD" value="3376.7492421768247"/>
+            <localParameter id="Keq_GAPD" name="Keq_GAPD" value="0.0179"/>
+            <localParameter id="kr_GAPD" name="kr_GAPD"/>
+            <localParameter id="ssflux_GAPD" name="ssflux_GAPD" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_g3p_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_nad_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pi_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M__13dpg_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_nadh_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_PGK" reversible="true" name="Phosphoglycerate kinase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_PGK </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> _13dpg_c </ci>
+        <ci> adp_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> _3pg_c </ci>
+          <ci> atp_c </ci>
+        </apply>
+        <ci> Keq_PGK </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PGK" name="kf_PGK" value="1273531.2697410057"/>
+            <localParameter id="Keq_PGK" name="Keq_PGK" value="1800"/>
+            <localParameter id="kr_PGK" name="kr_PGK"/>
+            <localParameter id="ssflux_PGK" name="ssflux_PGK" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M__13dpg_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M__3pg_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_PGM" reversible="true" name="Phosphoglycerate mutase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_PGM </ci>
+    <apply>
+      <minus/>
+      <ci> _3pg_c </ci>
+      <apply>
+        <divide/>
+        <ci> _2pg_c </ci>
+        <ci> Keq_PGM </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PGM" name="kf_PGM" value="4868.589299253447"/>
+            <localParameter id="Keq_PGM" name="Keq_PGM" value="0.147059"/>
+            <localParameter id="kr_PGM" name="kr_PGM"/>
+            <localParameter id="ssflux_PGM" name="ssflux_PGM" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M__3pg_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M__2pg_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_ENO" reversible="true" name="Enolase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_ENO </ci>
+    <apply>
+      <minus/>
+      <ci> _2pg_c </ci>
+      <apply>
+        <divide/>
+        <ci> pep_c </ci>
+        <ci> Keq_ENO </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_ENO" name="kf_ENO" value="1763.7405253935262"/>
+            <localParameter id="Keq_ENO" name="Keq_ENO" value="1.69492"/>
+            <localParameter id="kr_ENO" name="kr_ENO"/>
+            <localParameter id="ssflux_ENO" name="ssflux_ENO" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M__2pg_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_h2o_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pep_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_PYK" reversible="true" name="Pyruvate kinase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_PYK </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> adp_c </ci>
+        <ci> pep_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> atp_c </ci>
+          <ci> pyr_c </ci>
+        </apply>
+        <ci> Keq_PYK </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PYK" name="kf_PYK" value="454.38555191136817"/>
+            <localParameter id="Keq_PYK" name="Keq_PYK" value="363000"/>
+            <localParameter id="kr_PYK" name="kr_PYK"/>
+            <localParameter id="ssflux_PYK" name="ssflux_PYK" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pep_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pyr_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_LDH_L" reversible="true" name="L-lactate dehydrogenase" compartment="Glycolysis">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_LDH_L </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <times/>
+        <ci> nadh_c </ci>
+        <ci> pyr_c </ci>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> lac__L_c </ci>
+          <ci> nad_c </ci>
+        </apply>
+        <ci> Keq_LDH_L </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_LDH_L" name="kf_LDH_L" value="1112.5739886027807"/>
+            <localParameter id="Keq_LDH_L" name="Keq_LDH_L" value="26300"/>
+            <localParameter id="kr_LDH_L" name="kr_LDH_L"/>
+            <localParameter id="ssflux_LDH_L" name="ssflux_LDH_L" value="2.016"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_nadh_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pyr_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_lac__L_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_nad_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_DM_amp_e" reversible="false" name="AMP demand" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> amp_c </ci>
+    <ci> kf_DM_amp_e </ci>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_DM_amp_e" name="kf_DM_amp_e" value="0.16142403673088654"/>
+            <localParameter id="Keq_DM_amp_e" name="Keq_DM_amp_e" value="inf"/>
+            <localParameter id="kr_DM_amp_e" name="kr_DM_amp_e" value="0.0"/>
+            <localParameter id="ssflux_DM_amp_e" name="ssflux_DM_amp_e" value="0.014"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_amp_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction fast="false" id="R_ADK1" reversible="true" name="Adenylate kinase" compartment="Misc.">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_ADK1 </ci>
+    <apply>
+      <minus/>
+      <apply>
+        <power/>
+        <ci> adp_c </ci>
+        <cn type="integer"> 2 </cn>
+      </apply>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> amp_c </ci>
+          <ci> atp_c </ci>
+        </apply>
+        <ci> Keq_ADK1 </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_ADK1" name="kf_ADK1" value="100000.0"/>
+            <localParameter id="Keq_ADK1" name="Keq_ADK1" value="1.65"/>
+            <localParameter id="kr_ADK1" name="kr_ADK1"/>
+            <localParameter id="ssflux_ADK1" name="ssflux_ADK1" value="-0.0"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_amp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_EX_pyr_e" reversible="true" name="Pyruvate exchange" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_EX_pyr_e </ci>
+    <apply>
+      <minus/>
+      <ci> pyr_c </ci>
+      <apply>
+        <divide/>
+        <ci> pyr_e </ci>
+        <ci> Keq_EX_pyr_e </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_EX_pyr_e" name="kf_EX_pyr_e" value="744.1860465116214"/>
+            <localParameter id="Keq_EX_pyr_e" name="Keq_EX_pyr_e" value="1"/>
+            <localParameter id="kr_EX_pyr_e" name="kr_EX_pyr_e"/>
+            <localParameter id="ssflux_EX_pyr_e" name="ssflux_EX_pyr_e" value="0.224"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_pyr_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction fast="false" id="R_EX_lac__L_e" reversible="true" name="L-Lactate exchange" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_EX_lac__L_e </ci>
+    <apply>
+      <minus/>
+      <ci> lac__L_c </ci>
+      <apply>
+        <divide/>
+        <ci> lac__L_e </ci>
+        <ci> Keq_EX_lac__L_e </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_EX_lac__L_e" name="kf_EX_lac__L_e" value="5.599999999999999"/>
+            <localParameter id="Keq_EX_lac__L_e" name="Keq_EX_lac__L_e" value="1"/>
+            <localParameter id="kr_EX_lac__L_e" name="kr_EX_lac__L_e"/>
+            <localParameter id="ssflux_EX_lac__L_e" name="ssflux_EX_lac__L_e" value="2.016"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_lac__L_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction fast="false" id="R_ATPM" reversible="true" name="ATP maintenance requirement" compartment="Pseudo">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_ATPM </ci>
+    <apply>
+      <minus/>
+      <ci> atp_c </ci>
+      <apply>
+        <divide/>
+        <apply>
+          <times/>
+          <ci> adp_c </ci>
+          <ci> pi_c </ci>
+        </apply>
+        <ci> Keq_ATPM </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_ATPM" name="kf_ATPM" value="1.4000000000000001"/>
+            <localParameter id="Keq_ATPM" name="Keq_ATPM" value="inf"/>
+            <localParameter id="kr_ATPM" name="kr_ATPM"/>
+            <localParameter id="ssflux_ATPM" name="ssflux_ATPM" value="2.24"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_atp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h2o_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_adp_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_pi_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_DM_nadh" reversible="true" name="Demand NADH" compartment="Pseudo">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_DM_nadh </ci>
+    <apply>
+      <minus/>
+      <ci> nadh_c </ci>
+      <apply>
+        <divide/>
+        <ci> nad_c </ci>
+        <ci> Keq_DM_nadh </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_DM_nadh" name="kf_DM_nadh" value="7.44186046511628"/>
+            <localParameter id="Keq_DM_nadh" name="Keq_DM_nadh" value="inf"/>
+            <localParameter id="kr_DM_nadh" name="kr_DM_nadh"/>
+            <localParameter id="ssflux_DM_nadh" name="ssflux_DM_nadh" value="0.224"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_nadh_c" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_nad_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_S_glc__D_e" reversible="false" name="D-Glucose source" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> glc__D_e </ci>
+    <ci> kf_S_glc__D_e </ci>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_S_glc__D_e" name="kf_S_glc__D_e" value="1.12"/>
+            <localParameter id="Keq_S_glc__D_e" name="Keq_S_glc__D_e" value="inf"/>
+            <localParameter id="kr_S_glc__D_e" name="kr_S_glc__D_e" value="0.0"/>
+            <localParameter id="ssflux_S_glc__D_e" name="ssflux_S_glc__D_e" value="1.12"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_glc__D_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_S_amp_e" reversible="false" name="AMP source" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> amp_e </ci>
+    <ci> kf_S_amp_e </ci>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_S_amp_e" name="kf_S_amp_e" value="0.014"/>
+            <localParameter id="Keq_S_amp_e" name="Keq_S_amp_e" value="inf"/>
+            <localParameter id="kr_S_amp_e" name="kr_S_amp_e" value="0.0"/>
+            <localParameter id="ssflux_S_amp_e" name="ssflux_S_amp_e" value="0.014"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfProducts>
+          <speciesReference constant="true" species="M_amp_c" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction fast="false" id="R_EX_h_e" reversible="true" name="H+ exchange" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_EX_h_e </ci>
+    <apply>
+      <minus/>
+      <ci> h_c </ci>
+      <apply>
+        <divide/>
+        <ci> h_e </ci>
+        <ci> Keq_EX_h_e </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_EX_h_e" name="kf_EX_h_e" value="100000.0"/>
+            <localParameter id="Keq_EX_h_e" name="Keq_EX_h_e" value="1"/>
+            <localParameter id="kr_EX_h_e" name="kr_EX_h_e"/>
+            <localParameter id="ssflux_EX_h_e" name="ssflux_EX_h_e" value="2.688"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_h_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction fast="false" id="R_EX_h2o_e" reversible="true" name="H2O exchange" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_EX_h2o_e </ci>
+    <apply>
+      <minus/>
+      <ci> h2o_c </ci>
+      <apply>
+        <divide/>
+        <ci> h2o_e </ci>
+        <ci> Keq_EX_h2o_e </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_EX_h2o_e" name="kf_EX_h2o_e" value="100000.0"/>
+            <localParameter id="Keq_EX_h2o_e" name="Keq_EX_h2o_e" value="1"/>
+            <localParameter id="kr_EX_h2o_e" name="kr_EX_h2o_e"/>
+            <localParameter id="ssflux_EX_h2o_e" name="ssflux_EX_h2o_e" value="0.0"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_h2o_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
