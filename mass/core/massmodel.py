@@ -233,11 +233,16 @@ class MassModel(Object):
 	@property
 	def parameters(self):
 		"""Get all of the parameters associated with a MassModel"""
-		parameters = {}
-		for rxn in self.reactions:
-			parameters.update(rxn.parameters)
-			parameters.update(self.fixed_concentrations)
-			parameters.update(self.custom_parameters)
+		parameters = dict();
+		for p_type in ["kfs", "Keqs", "krs"]:
+			p_type_dict = dict()
+			for rxn in self.reactions:
+				sym_p = rxn.__dict__["_sym_%s" % p_type[:-1]]
+				if sym_p in rxn.parameters:
+					p_type_dict.update({sym_p :rxn.parameters[sym_p]})
+			parameters.update({p_type: p_type_dict})
+		parameters.update({"Fixed": self.fixed_concentrations})
+		parameters.update({"Custom": self.custom_parameters})
 		return parameters
 
 	# Methods
@@ -1900,6 +1905,9 @@ class MassModel(Object):
 					<td><strong>Stoichiometric Matrix</strong></td>
 					<td>{dim_S_matrix}</td>
 				</tr><tr>
+					<td><strong>Matrix Rank</strong></td>
+					<td>{mat_rank}</td>
+				</tr><tr>
 					<td><strong>Matrix Type</strong></td>
 					<td>{S_type}</td>
 				</tr><tr>
@@ -1909,14 +1917,17 @@ class MassModel(Object):
 					<td><strong>Number of Reactions</strong></td>
 					<td>{num_reactions}</td>
 				</tr><tr>
-					<td><strong>Number of Genes</strong></td>
-					<td>{num_genes}</td>
-				</tr><tr>
-					<td><strong>Number of Parameters</strong></td>
-					<td>{num_param}</td>
-				</tr><tr>
 					<td><strong>Number of Initial Conditions</strong></td>
 					<td>{num_ic}</td>
+				</tr><tr>
+					<td><strong>Number of Forward Rate Constants</strong></td>
+					<td>{num_kfs}</td>
+				</tr><tr>
+					<td><strong>Number of Equilibrium Constants</strong></td>
+					<td>{num_Keqs}</td>
+				</tr><tr>
+					<td><strong>Number of Irreversible Reactions</strong></td>
+					<td>{num_irreversible}</td>
 				</tr><tr>
 					<td><strong>Number of Exchanges</strong></td>
 					<td>{num_exchanges}</td>
@@ -1924,14 +1935,11 @@ class MassModel(Object):
 					<td><strong>Number of Fixed Concentrations</strong></td>
 					<td>{num_fixed}</td>
 				</tr><tr>
-					<td><strong>Number of Irreversible Reactions</strong></td>
-					<td>{num_irreversible}</td>
-				</tr><tr>
-					<td><strong>Matrix Rank</strong></td>
-					<td>{mat_rank}</td>
-				</tr><tr>
 					<td><strong>Number of Custom Rates</strong></td>
 					<td>{num_custom_rates}</td>
+				</tr><tr>
+					<td><strong>Number of Genes</strong></td>
+					<td>{num_genes}</td>
 				</tr><tr>
 					<td><strong>Modules</strong></td>
 					<td>{modules}</td>
@@ -1945,18 +1953,19 @@ class MassModel(Object):
 			</table>
 		""".format(name=self.id, address='0x0%x' % id(self),
 					dim_S_matrix=dim_S,
+					mat_rank=rank,
 					S_type="{}, {}".format(self._matrix_type,
 									 self._dtype.__name__),
 					num_metabolites=len(self.metabolites),
 					num_reactions=len(self.reactions),
-					num_genes=len(self.genes),
-					num_param=len(self.parameters),
 					num_ic= len(self.initial_conditions),
+					num_kfs=len(self.parameters["kfs"]),
+					num_Keqs=len(self.parameters["Keqs"]),
+					num_irreversible=len(self.get_irreversible_reactions),
 					num_exchanges=len(self.exchanges),
 					num_fixed=len(self.fixed_concentrations),
-					num_irreversible=len(self.get_irreversible_reactions),
-					mat_rank=rank,
 					num_custom_rates=len(self.custom_rates),
+					num_genes=len(self.genes),
 					modules=", ".join([str(m) for m in self.modules
 										if m is not None]),
 					compartments=", ".join(v if v else k for \
