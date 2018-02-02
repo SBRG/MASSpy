@@ -32,7 +32,7 @@ except IOError:
 
 setup(
 	name="masspy",
-	version="0.1.0a11",
+	version="0.1.0a12",
 	description="MASSpy is a package for kinetic modeling and simulation of "
 				"biological networks",
 	license="LGPL/GPL v2+",
