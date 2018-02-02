@@ -26,9 +26,7 @@ from cobra.io.sbml3 import annotate_cobra_from_sbml, annotate_sbml_from_cobra
 
 from mass.core import MassMetabolite, MassReaction, MassModel
 from mass.core.expressions import strip_time
-
-class MassSBMLError(Exception):
-	pass
+from mass.exceptions import MassSBMLError
 
 try:
 	from lxml.etree import (
