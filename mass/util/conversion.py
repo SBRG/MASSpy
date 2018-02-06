@@ -263,7 +263,7 @@ def to_cobra_model(mass_model, cobra_id=None):
 
 	# Generate a new ID if none is specified
 	if cobra_id is None:
-		cobra_id = mass_model.id + "_mass"
+		cobra_id = mass_model.id + "_cobra"
 
 	# Generate the cobra Model
 	cobra_model = Model(id_or_model=cobra_id, name=mass_model.name)
