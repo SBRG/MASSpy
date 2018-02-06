@@ -178,6 +178,17 @@ def get_missing_parameters(model, reaction_list=None, kf=False, Keq=False,
 					else:
 						# Add to missing parameters if value is None
 						missing_params.append(str(sym))
+				# If the symbol is in the fixed concentrations, check the value
+				elif str(sym) in iterkeys(model.fixed_concentrations):
+					try:
+						sym = model.metabolites.get_by_id(str(sym))
+					except:
+						sym = str(sym)
+					if model.fixed_concentrations[sym] is not None:
+						continue
+					else:
+						# Add to missing parameters if value is None
+						missing_params.append(str(sym))
 				elif re.search("kf|Keq|kr", str(sym)) and \
 						re.split("\_", str(sym), maxsplit=1):
 						p_type= re.split("\_", str(sym), maxsplit=1)[0]

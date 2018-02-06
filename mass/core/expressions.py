@@ -240,7 +240,13 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 	metab_symbols = dict((metab.id, sp.Function(metab.id, nonnegative=True)(t))
 					for metab in iterkeys(reaction.metabolites)
 					if re.search("[%s]" % metab.id, custom_rate_law))
-
+	# Get fixed concentrations as symbols if they are in the custom rate law
+	if reaction._model is not None:
+		fix_symbols= dict((str(fixed), sp.Symbol(str(fixed), nonnegative=True))
+					for fixed in iterkeys(reaction._model.fixed_concentrations)
+					if re.search("[%s]" % str(fixed), custom_rate_law))
+	else:
+		fix_symbols = {}
 	# Get rate parameters as symbols if they are in the custom rate law
 	rate_params = dict((reaction.__dict__[p], sp.Symbol(reaction.__dict__[p]))
 					for p in ["_sym_kf", "_sym_Keq", "_sym_kr"]
@@ -252,10 +258,9 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 
 	# Create custom rate expression
 	symbol_dict = {}
-	for dictionary in [metab_symbols, rate_params, custom_params]:
+	for dictionary in [metab_symbols, fix_symbols, rate_params, custom_params]:
 		symbol_dict.update(dictionary)
 	custom_rate_expression = sp.sympify(custom_rate_law, locals=symbol_dict)
-
 	return custom_rate_expression
 
 ## Internal
