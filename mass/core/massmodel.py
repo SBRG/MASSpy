@@ -831,7 +831,7 @@ class MassModel(Object):
 			rates.update(self.custom_rates)
 		return rates
 
-	def get_mass_action_ratios(self, reaction_list=None,sympy_expr=False):
+	def get_mass_action_ratios(self, reaction_list=None, sympy_expr=False):
 		"""Get the mass action ratios for a list of reactions in a MassModel
 		and return them as human readable strings or as sympy expressions
 		for simulations
@@ -1403,6 +1403,79 @@ class MassModel(Object):
 			merged_model.modules.add(self.id)
 		return merged_model
 
+	def compute_ssfluxes(self, pathways, independent_fluxes,
+						update_reactions=False):
+		"""Calculate the unique steady state flux vector for each
+		reaction (rxn.ssflux) in the MassModel using the defined pathways,
+		individually defined fluxes and steady state concentrations.
+
+		Note: The number of individually defined fluxes must be the same as
+			the number of pathways in order to determine the solution. For the
+			best results, the number of pathways must be equal to the dimension
+			of the nullspace.
+
+		Parameters
+		----------
+		pathways : array or array-like
+			An array or array-like object that defines the pathways through the
+			MassModel. Pathways must be the same length as the number of
+			reactions in the model. For best results, the number of pathways to
+			specify must equal the dimension of the left nullspace.
+		independent_fluxes : dict
+			A dictionary of steady state fluxes where MassReactions are keys
+			and fluxes are the values to utilize for calculation of all other
+			steady state fluxes. Must be the same length as the number of
+			specified pathways.
+		update_reactions : bool, optional
+			Whether to update the steady state fluxes in the MassReactions.
+			If True, will update the ssflux attribute inside the
+			MassReactions with the calculated steady state fluxes.
+
+		Return
+		------
+		ssfluxes : numpy.ndarray
+			A numpy array of the calculated steady state fluxes. The indices of
+			the values correspond to the indicies of the reactions in the
+			MassModel.reactions attribute.
+		"""
+		# Check inputs:
+		if not isinstance(pathways, (np.ndarray, list)):
+			raise TypeError("Pathways must be numpy.ndarrays or array-like, "
+							"such as a list of lists. ")
+		pathways = np.array(pathways)
+		if len(self.reactions) != pathways.shape[1]:
+			raise ValueError("Pathways must have the same number of columns as"
+							"the number of reactions in the model")
+
+		if not isinstance(independent_fluxes, dict):
+			raise TypeError("independent_fluxes must be a dictionary where"
+							" keys are MassReactions and values are fluxes")
+
+		if not isinstance(update_reactions, bool):
+			raise TypeError("update_reactions must be a bool")
+
+		coeffs = list()
+		values = list()
+		for i, rxn in enumerate(self.reactions):
+			if rxn in independent_fluxes:
+				values.append(independent_fluxes[rxn])
+				coeffs.append([path[i] for path in pathways])
+		# Flip the transposed matrix to have coefficients in the correct places
+		coeffs = np.flip(np.array(coeffs).T, axis=1)
+		# Flip values to match
+		values = np.flip(np.array(values), axis=0)
+		# Inverse the coefficient matrix
+		coeffs = np.linalg.inv(coeffs)
+		# Obtain the dot product of values and coefficients, then with pathways
+		ssfluxes = values.dot(coeffs).dot(pathways)
+
+		# Update reaction ssflux attribute if desired
+		if update_reactions:
+			for i, rxn in enumerate(self.reactions):
+				rxn.ssflux = ssfluxes[i]
+
+		return ssfluxes
+
 	def calc_PERCS(self, steady_state_concentrations=None,
 					steady_state_fluxes=None, at_equilibrium_default=100000.,
 					update_reactions=False):
@@ -1423,15 +1496,12 @@ class MassModel(Object):
 		at_equilibrium_default : float, optional
 			The value to set the pseudo order rate constant if the reaction is
 			at equilibrium. Will default to 100,000
-		update_parameters : bool, optional
+		update_reactions : bool, optional
 			Whether to update the forward rate constants in the MassReactions.
 			If True, will update the forward rate constants inside the
 			MassReactions with the calculated pseudo order rate constants
 		"""
-		# Check inputs
-		if steady_state_concentrations is None:
-			steady_state_concentrations = self.initial_conditions
-		if not isinstance(steady_state_concentrations, dict):
+		if not isinstance(steady_state_concentrations, (dict, type(None))):
 			raise TypeError("Steady state concentrations must be a dictionary"
 							"where keys are MassMetabolites and values are "
 							"concentrations")
@@ -1467,6 +1537,7 @@ class MassModel(Object):
 		# Use model initial conditions for the steady state concentratiosn
 		# and check for missing initial conditions
 		if steady_state_concentrations is None:
+			steady_state_concentrations = self.initial_conditions
 			missing_concs = qcqa.get_missing_initial_conditions(self)
 		# Use the given steady state concentrations and
 		# check for missing concentrations
@@ -1499,7 +1570,6 @@ class MassModel(Object):
 			symbols = rate.atoms(sp.Symbol)
 			for sym in symbols:
 				if sym in rate_params:
-
 					if re.search("Keq", str(sym)):
 						values.update({sym : rxn.Keq})
 					else:
