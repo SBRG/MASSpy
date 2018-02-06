@@ -88,7 +88,7 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 			raise TypeError("numpoints must an integer")
 		if abs(time[0]) < 1e-9:
 			time = (1e-6, time[1])
-		time = np.geomspace(time[0], time[1], int(numpoints))
+		time = np.geomspace(time[0], time[1], int(numpoints), endpoint=True)
 
 	if not isinstance(time, (np.ndarray, list)):
 		raise TypeError("time must be a list or numpy.ndarray of time "
@@ -247,7 +247,7 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time = np.geomspace(1e-6, 10**power, int(10**power))
+			time = np.geomspace(1e-6, 10**power, int(10**power), endpoint=True)
 			[c_profile, f_profile] = options[strategy](
 									model, time,
 									perturbations=perturbations)

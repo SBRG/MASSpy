@@ -8,6 +8,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.axes._axes as _axes
+from matplotlib.figure import Figure as _figure
 from matplotlib.ticker import MultipleLocator
 from cycler import cycler
 from warnings import warn
@@ -528,8 +529,8 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 	return fig
 
 def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
-						data=None, poi=None, poi_color=None, poi_labels=False,
-						fontsize=None, **kwargs):
+						fig=None, data=None, poi=None, poi_color=None,
+						poi_labels=False, fontsize=None, **kwargs):
 	"""Generates a tiled phase portrait for all items in a given
 	solution_profile
 
@@ -552,6 +553,9 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 	place_tiles : {'upper', 'lower', 'both'}
 		A string representing whether to place subplots on the upper right
 		triangular section, the lower left triangular section, or both.
+	fig : matplotlib.figure, optional
+		The matplotlib.figure object to be used for generating the tiled
+		phase portrait. If None, will generate a new figure.
 	data : array_like, shape (N, N), optional
 		Additional data to display on the tiled phase portrait if place_tiles
 		is not set to both. Must matrix of shape (N, N) where N = number of
@@ -619,12 +623,18 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 					"numpy.triu(data) for placement on upper tiles or "
 					"numpy.tril(data) for placement on lower tiles")
 				place_tiles = "both"
+	if fig is None:
+		fig = plt.figure()
+	elif not isinstance(fig, _figure):
+		raise TypeError("fig must be a matplotlib.figure.Figure object")
+	else:
+		fig.clf()
 	# Obtain the options dictonary and check inputs
 	options_dict = _handle_plot_options(kwargs, "tiled")
 	time = _check_main_inputs(solution_profile, time, options_dict)
 
 	# Generate main figure, set size and dpi  if desired.
-	fig, ax_main = plt.subplots(nrows=n_keys, ncols=n_keys)
+	ax_main = fig.subplots(nrows=n_keys, ncols=n_keys)
 	if options_dict["dpi"] is not None:
 		fig.set_dpi(options_dict["dpi"])
 	fig.set_size_inches(options_dict["figsize"])
@@ -651,7 +661,7 @@ def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
 
 	# Adjust the font size scalar
 	if fontsize is None:
-		fontsize = max(options_dict["figsize"][0]*1.5, 15)
+		fontsize = "large"
 	# Add title if desired
 	if options_dict["title"] is not None:
 		fig.suptitle(options_dict["title"],
@@ -909,7 +919,8 @@ def _check_main_inputs(solution_profile, time, options_dict):
 		if abs(time[0]) < 1e-9:
 			time = (1e-9, time[1])
 		# Generate numbers spaced evenly on a log scale
-		time = np.geomspace(time[0], time[1], options_dict["numpoints"])
+		time = np.geomspace(time[0], time[1], options_dict["numpoints"],
+							endpoint=True)
 	if not isinstance(time, (np.ndarray, list)):
 		raise TypeError("time must be a list or numpy.ndarray of time "
 						"points, or a tuple of form (start_point, end_point).")
