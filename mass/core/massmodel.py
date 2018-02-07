@@ -1270,7 +1270,7 @@ class MassModel(Object):
 			new_metab._model = new_model
 			new_model.metabolites.append(new_metab)
 			# Copy the initial condition
-			if metab in iterkeys(self.initial_conditions) :
+			if metab in iterkeys(self.initial_conditions):
 				ic = self.initial_conditions[metab]
 				new_model.initial_conditions[new_metab] = ic
 
@@ -1387,12 +1387,15 @@ class MassModel(Object):
 		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
 		for m, ic in iteritems(second_model.initial_conditions):
 			if m.id not in existing_ics:
+				m = merged_model.metabolites.get_by_id(m.id)
 				merged_model.update_initial_conditions({m : ic})
 
 		existing_fcs = [m.id if isinstance(m,MassMetabolite) else m
 						for m in iterkeys(merged_model.fixed_concentrations)]
 		for m, fc in iteritems(second_model.fixed_concentrations):
 			if str(m) not in existing_fcs:
+				if m in merged_model.metabolites:
+					m = merged_model.metabolites.get_by_id(m.id)
 				merged_model.add_fixed_concentrations({m : fc})
 
 		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
