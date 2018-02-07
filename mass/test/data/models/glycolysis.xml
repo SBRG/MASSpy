@@ -524,7 +524,7 @@
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_DM_amp_e" name="kf_DM_amp_e" value="0.16142403673088654"/>
+            <localParameter id="kf_DM_amp_e" name="kf_DM_amp_e" value="0.1614240367308865"/>
             <localParameter id="Keq_DM_amp_e" name="Keq_DM_amp_e" value="inf"/>
             <localParameter id="kr_DM_amp_e" name="kr_DM_amp_e" value="0.0"/>
             <localParameter id="ssflux_DM_amp_e" name="ssflux_DM_amp_e" value="0.014"/>
@@ -592,7 +592,7 @@
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_EX_pyr_e" name="kf_EX_pyr_e" value="744.1860465116214"/>
+            <localParameter id="kf_EX_pyr_e" name="kf_EX_pyr_e" value="744.1860465116215"/>
             <localParameter id="Keq_EX_pyr_e" name="Keq_EX_pyr_e" value="1"/>
             <localParameter id="kr_EX_pyr_e" name="kr_EX_pyr_e"/>
             <localParameter id="ssflux_EX_pyr_e" name="ssflux_EX_pyr_e" value="0.224"/>
@@ -630,31 +630,19 @@
           <speciesReference constant="true" species="M_lac__L_c" stoichiometry="1"/>
         </listOfReactants>
       </reaction>
-      <reaction fast="false" id="R_ATPM" reversible="true" name="ATP maintenance requirement" compartment="Pseudo">
+      <reaction fast="false" id="R_ATPM" reversible="false" name="ATP maintenance requirement" compartment="Pseudo">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
     <times/>
+    <ci> atp_c </ci>
     <ci> kf_ATPM </ci>
-    <apply>
-      <minus/>
-      <ci> atp_c </ci>
-      <apply>
-        <divide/>
-        <apply>
-          <times/>
-          <ci> adp_c </ci>
-          <ci> pi_c </ci>
-        </apply>
-        <ci> Keq_ATPM </ci>
-      </apply>
-    </apply>
   </apply>
 </math>
           <listOfLocalParameters>
             <localParameter id="kf_ATPM" name="kf_ATPM" value="1.4000000000000001"/>
             <localParameter id="Keq_ATPM" name="Keq_ATPM" value="inf"/>
-            <localParameter id="kr_ATPM" name="kr_ATPM"/>
+            <localParameter id="kr_ATPM" name="kr_ATPM" value="0.0"/>
             <localParameter id="ssflux_ATPM" name="ssflux_ATPM" value="2.24"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -668,27 +656,19 @@
           <speciesReference constant="true" species="M_pi_c" stoichiometry="1"/>
         </listOfProducts>
       </reaction>
-      <reaction fast="false" id="R_DM_nadh" reversible="true" name="Demand NADH" compartment="Pseudo">
+      <reaction fast="false" id="R_DM_nadh" reversible="false" name="Demand NADH" compartment="Pseudo">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
     <times/>
     <ci> kf_DM_nadh </ci>
-    <apply>
-      <minus/>
-      <ci> nadh_c </ci>
-      <apply>
-        <divide/>
-        <ci> nad_c </ci>
-        <ci> Keq_DM_nadh </ci>
-      </apply>
-    </apply>
+    <ci> nadh_c </ci>
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_DM_nadh" name="kf_DM_nadh" value="7.44186046511628"/>
+            <localParameter id="kf_DM_nadh" name="kf_DM_nadh" value="7.441860465116281"/>
             <localParameter id="Keq_DM_nadh" name="Keq_DM_nadh" value="inf"/>
-            <localParameter id="kr_DM_nadh" name="kr_DM_nadh"/>
+            <localParameter id="kr_DM_nadh" name="kr_DM_nadh" value="0.0"/>
             <localParameter id="ssflux_DM_nadh" name="ssflux_DM_nadh" value="0.224"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -730,7 +710,7 @@
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_S_amp_e" name="kf_S_amp_e" value="0.014"/>
+            <localParameter id="kf_S_amp_e" name="kf_S_amp_e" value="0.013999999999999999"/>
             <localParameter id="Keq_S_amp_e" name="Keq_S_amp_e" value="inf"/>
             <localParameter id="kr_S_amp_e" name="kr_S_amp_e" value="0.0"/>
             <localParameter id="ssflux_S_amp_e" name="ssflux_S_amp_e" value="0.014"/>
@@ -758,7 +738,7 @@
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_EX_h_e" name="kf_EX_h_e" value="100000.0"/>
+            <localParameter id="kf_EX_h_e" name="kf_EX_h_e" value="100000.00000000003"/>
             <localParameter id="Keq_EX_h_e" name="Keq_EX_h_e" value="1"/>
             <localParameter id="kr_EX_h_e" name="kr_EX_h_e"/>
             <localParameter id="ssflux_EX_h_e" name="ssflux_EX_h_e" value="2.688"/>
