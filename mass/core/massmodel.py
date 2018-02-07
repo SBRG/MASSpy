@@ -1327,10 +1327,11 @@ class MassModel(Object):
 		"""Merge two massmodels to create one MassModel object with
 		the reactions and metabolites from both massmodels.
 
-		Initial conditions, custom rate laws, and custom rate parameters will
-		also be added from the second model into the first model. However,
-		initial conditions and custom rate laws are assumed to be the same if
-		they have the same identifier and therefore will not be added.
+		Initial conditions, fixed concentrations, custom rate laws, and
+		custom rate parameters will also be added from the second model into
+		the first model. However, initial conditions and custom rate laws are
+		assumed to be the same if they have the same identifier and therefore
+		will not be added.
 
 		Parameters
 		----------
@@ -1382,11 +1383,17 @@ class MassModel(Object):
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
 		merged_model.add_reactions(new_reactions, True)
 		merged_model.repair()
-		# Add custom rates, custom parameters, and initial conditions
+		# Add initial conditions, fixed concs., custom rates and parameters.
 		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
 		for m, ic in iteritems(second_model.initial_conditions):
 			if m.id not in existing_ics:
 				merged_model.update_initial_conditions({m : ic})
+
+		existing_fcs = [m.id if isinstance(m,MassMetabolite) else m
+						for m in iterkeys(merged_model.fixed_concentrations)]
+		for m, fc in iteritems(second_model.fixed_concentrations):
+			if str(m) not in existing_fcs:
+				merged_model.add_fixed_concentrations({m : fc})
 
 		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
 		for r, rate in iteritems(second_model._custom_rates):
