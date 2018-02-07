@@ -745,13 +745,14 @@ class MassModel(Object):
 
 		if exchange_type in type_dict:
 			values = type_dict[exchange_type]
-			rxn_id = "{}_{}".format(values[0], metabolite.id)
+			rxn_id = metabolite.id
 			_c = re.search("^\w*\S(?!<\_)(\_\S+)$", metabolite.id)
 			if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-				rxn_id = re.sub(_c.group(1), "_e", rxn_id)
+				rxn_id = re.sub(_c.group(1), "_e", rxn_id, count=1)
+			rxn_id = "{}_{}".format(values[0], rxn_id)
 			if rxn_id in self.reactions:
 				warn("Reaction %s already exists in model" % rxn_id)
-				return None
+				return self.reactions.get_by_id(rxn_id)
 			c = values[1]
 			reversible = values[2]
 		else:
@@ -1591,6 +1592,8 @@ class MassModel(Object):
 			else:
 				equation = sp.Eq(steady_state_fluxes[rxn], rate.subs(values))
 				sol = set(sp.solveset(equation, perc, domain=sp.S.Reals))
+				if len(sol) == 0:
+					sol = {float(at_equilibrium_default)}
 			percs_dict.update({str(perc): float(sol.pop())})
 
 			if update_reactions:
