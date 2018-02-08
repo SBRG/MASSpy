@@ -189,7 +189,7 @@
 "h_c":1,
 "pi_c":1
 },
-"_reversible":true,
+"_reversible":false,
 "_forward_rate_constant":1.4000000000000001,
 "_equilibrium_constant":"inf",
 "_genes":[],
@@ -204,7 +204,7 @@
 "amp_c":-1
 },
 "_reversible":false,
-"_forward_rate_constant":0.16142403673088654,
+"_forward_rate_constant":0.1614240367308865,
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
@@ -219,8 +219,8 @@
 "nad_c":1,
 "nadh_c":-1
 },
-"_reversible":true,
-"_forward_rate_constant":7.44186046511628,
+"_reversible":false,
+"_forward_rate_constant":7.441860465116281,
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
@@ -264,7 +264,7 @@
 "h_c":-1
 },
 "_reversible":true,
-"_forward_rate_constant":100000.0,
+"_forward_rate_constant":100000.00000000003,
 "_equilibrium_constant":1,
 "_genes":[],
 "_gene_reaction_rule":"",
@@ -292,7 +292,7 @@
 "pyr_c":-1
 },
 "_reversible":true,
-"_forward_rate_constant":744.1860465116214,
+"_forward_rate_constant":744.1860465116215,
 "_equilibrium_constant":1,
 "_genes":[],
 "_gene_reaction_rule":"",
@@ -460,7 +460,7 @@
 "amp_c":1
 },
 "_reversible":false,
-"_forward_rate_constant":0.014,
+"_forward_rate_constant":0.013999999999999999,
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
@@ -537,5 +537,8 @@
 "Time":"Hours"
 },
 "_matrix_type":"dataframe",
+"notes":{
+"Literature":[]
+},
 "version":"1"
 }

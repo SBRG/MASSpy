@@ -483,6 +483,18 @@ class MassReaction(Object):
 
 	# Methods
 	## Public
+	def reverse_stoichiometry(self):
+		"""Reverse the stoichiometry of the reaction, making the products
+		into the reactants and the reactants into the products. Only works
+		on reversible reactions.
+		"""
+		if not self.reversible:
+			warn("Can only reverse stoichiometry for reversible reactions")
+			return None
+		for metab, coeff in iteritems(self.metabolites):
+			self._metabolites[metab] = -1*coeff
+
+
 	def generate_rate_law(self, rate_type=1, sympy_expr=False,
 						update_reaction=False):
 		"""Generates the rate law for the reaction as a human readable string.

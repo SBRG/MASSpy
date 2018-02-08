@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 # Import necesary packages
 import re
+from warnings import warn
 import sympy as sp
 from tabulate import tabulate
 from six import iteritems, iterkeys, itervalues
@@ -178,7 +179,18 @@ def get_missing_parameters(model, reaction_list=None, kf=False, Keq=False,
 					else:
 						# Add to missing parameters if value is None
 						missing_params.append(str(sym))
-				elif re.search("kf|Keq|kr", str(sym)) and \
+				# If the symbol is in the fixed concentrations, check the value
+				elif str(sym) in iterkeys(model.fixed_concentrations):
+					try:
+						sym = model.metabolites.get_by_id(str(sym))
+					except:
+						sym = str(sym)
+					if model.fixed_concentrations[sym] is not None:
+						continue
+					else:
+						# Add to missing parameters if value is None
+						missing_params.append(str(sym))
+				elif re.search("^kf|^Keq|^kr", str(sym)) and \
 						re.split("\_", str(sym), maxsplit=1):
 						p_type= re.split("\_", str(sym), maxsplit=1)[0]
 						prop_f = rxn.__class__.__dict__[p_type]
@@ -188,6 +200,23 @@ def get_missing_parameters(model, reaction_list=None, kf=False, Keq=False,
 						# Add if value is none and not already added
 						else:
 							missing_params.append(str(sym))
+				# Handle unique scenario where parameter may have been defined
+				# as (rxn.id)_(p_type) instead of (p_type)_(rxn.id)
+				elif re.search("kf|Keq|kr", str(sym)) and \
+					re.split("\_", str(sym), maxsplit=1):
+					split_list = re.split("\_", str(sym), maxsplit=1)
+					if split_list[0] == rxn.id and \
+						re.match("kf$|Keq$|kr$",split_list[1]):
+						warn("If the reaction parameter identified in %s"
+						" is to be used, it should be defined as"
+						" %s_%s. Otherwise, the parameter needs to be "
+						"defined as a custom parameter" % (
+						rxn.id, split_list[1], split_list[0]))
+						missing_params.append(str(sym))
+						continue
+					else:
+						missing_params.append(str(sym))
+						continue
 				# Add to missing parameters if not found anywhere
 				else:
 					missing_params.append(str(sym))
@@ -328,7 +357,7 @@ def elemental_consistency(model):
 		if not rxn.exchange and rxn.check_mass_balance() != {}:
 			unbalanced = ""
 			for elem, amount in iteritems(rxn.check_mass_balance()):
-				unbalanced += "%s: %.1f;" % (elem, amount)
+				unbalanced += "%s:%.1f; " % (elem, amount)
 			elem_consistency[rxn] = unbalanced.rstrip("; ") + " unbalanced"
 
 	return elem_consistency
@@ -386,7 +415,11 @@ def _qcqa_summary(to_display):
 				missing_params = ": "
 				for param in missing:
 					if re.split("\_", param, maxsplit=1):
-						missing_params += re.split("\_", param)[0] + "; "
+						if re.search("^kf|^Keq|^kr",
+							re.split("\_", param, maxsplit=1)[0]):
+							missing_params += re.split("\_", param)[0] + "; "
+						else:
+							missing_params += param + "; "
 					else:
 						missing_params += "; "
 				missing_params = "%s%s" % (rxn.id, missing_params.rstrip("; "))

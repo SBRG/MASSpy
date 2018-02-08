@@ -745,13 +745,14 @@ class MassModel(Object):
 
 		if exchange_type in type_dict:
 			values = type_dict[exchange_type]
-			rxn_id = "{}_{}".format(values[0], metabolite.id)
+			rxn_id = metabolite.id
 			_c = re.search("^\w*\S(?!<\_)(\_\S+)$", metabolite.id)
 			if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-				rxn_id = re.sub(_c.group(1), "_e", rxn_id)
+				rxn_id = re.sub(_c.group(1), "_e", rxn_id, count=1)
+			rxn_id = "{}_{}".format(values[0], rxn_id)
 			if rxn_id in self.reactions:
 				warn("Reaction %s already exists in model" % rxn_id)
-				return None
+				return self.reactions.get_by_id(rxn_id)
 			c = values[1]
 			reversible = values[2]
 		else:
@@ -1269,7 +1270,7 @@ class MassModel(Object):
 			new_metab._model = new_model
 			new_model.metabolites.append(new_metab)
 			# Copy the initial condition
-			if metab in iterkeys(self.initial_conditions) :
+			if metab in iterkeys(self.initial_conditions):
 				ic = self.initial_conditions[metab]
 				new_model.initial_conditions[new_metab] = ic
 
@@ -1326,10 +1327,11 @@ class MassModel(Object):
 		"""Merge two massmodels to create one MassModel object with
 		the reactions and metabolites from both massmodels.
 
-		Initial conditions, custom rate laws, and custom rate parameters will
-		also be added from the second model into the first model. However,
-		initial conditions and custom rate laws are assumed to be the same if
-		they have the same identifier and therefore will not be added.
+		Initial conditions, fixed concentrations, custom rate laws, and
+		custom rate parameters will also be added from the second model into
+		the first model. However, initial conditions and custom rate laws are
+		assumed to be the same if they have the same identifier and therefore
+		will not be added.
 
 		Parameters
 		----------
@@ -1381,11 +1383,20 @@ class MassModel(Object):
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
 		merged_model.add_reactions(new_reactions, True)
 		merged_model.repair()
-		# Add custom rates, custom parameters, and initial conditions
+		# Add initial conditions, fixed concs., custom rates and parameters.
 		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
 		for m, ic in iteritems(second_model.initial_conditions):
 			if m.id not in existing_ics:
+				m = merged_model.metabolites.get_by_id(m.id)
 				merged_model.update_initial_conditions({m : ic})
+
+		existing_fcs = [m.id if isinstance(m,MassMetabolite) else m
+						for m in iterkeys(merged_model.fixed_concentrations)]
+		for m, fc in iteritems(second_model.fixed_concentrations):
+			if str(m) not in existing_fcs:
+				if m in merged_model.metabolites:
+					m = merged_model.metabolites.get_by_id(m.id)
+				merged_model.add_fixed_concentrations({m : fc})
 
 		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
 		for r, rate in iteritems(second_model._custom_rates):
@@ -1591,6 +1602,8 @@ class MassModel(Object):
 			else:
 				equation = sp.Eq(steady_state_fluxes[rxn], rate.subs(values))
 				sol = set(sp.solveset(equation, perc, domain=sp.S.Reals))
+				if len(sol) == 0:
+					sol = {float(at_equilibrium_default)}
 			percs_dict.update({str(perc): float(sol.pop())})
 
 			if update_reactions:
