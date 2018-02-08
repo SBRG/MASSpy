@@ -357,7 +357,7 @@ def elemental_consistency(model):
 		if not rxn.exchange and rxn.check_mass_balance() != {}:
 			unbalanced = ""
 			for elem, amount in iteritems(rxn.check_mass_balance()):
-				unbalanced += "%s: %.1f;" % (elem, amount)
+				unbalanced += "%s:%.1f; " % (elem, amount)
 			elem_consistency[rxn] = unbalanced.rstrip("; ") + " unbalanced"
 
 	return elem_consistency
