@@ -22,34 +22,34 @@
       <compartment constant="true" id="c" name="Cytosol"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P" initialConcentration="0.020677" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P" initialConcentration="0.0198" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P" initialConcentration="0.0486" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P" initialConcentration="0.007602" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P" initialConcentration="0.00728" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P" initialConcentration="0.001762" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P" initialConcentration="0.001754" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M__6pgc_c" name="6-Phospho-D-gluconate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C6H10O10P" initialConcentration="0.045463" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M__6pgc_c" name="6-Phospho-D-gluconate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C6H10O10P" initialConcentration="0.037475" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_ru5p__D_c" name="D-Ribulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.029223" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_ru5p__D_c" name="D-Ribulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.004937" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_xu5p__D_c" name="D-Xylulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.08764" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_xu5p__D_c" name="D-Xylulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.014784" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.00145" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.012669" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_s7p_c" name="Sedoheptulose 7-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C7H13O10P" initialConcentration="0.013177" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_s7p_c" name="Sedoheptulose 7-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C7H13O10P" initialConcentration="0.023988" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_e4p_c" name="D-Erythrose 4-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C4H7O7P" initialConcentration="0.000901" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_e4p_c" name="D-Erythrose 4-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C4H7O7P" initialConcentration="0.005075" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3" initialConcentration="0.0002" constant="false" boundaryCondition="false"/>
@@ -233,7 +233,7 @@
             <localParameter id="kf_RPE" name="kf_RPE" value="15284.67711119561"/>
             <localParameter id="Keq_RPE" name="Keq_RPE" value="3"/>
             <localParameter id="kr_RPE" name="kr_RPE"/>
-            <localParameter id="ssflux_RPE" name="ssflux_RPE" value="0.139237"/>
+            <localParameter id="ssflux_RPE" name="ssflux_RPE" value="0.133333"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -251,27 +251,27 @@
     <ci> kf_RPI </ci>
     <apply>
       <minus/>
-      <ci> r5p_c </ci>
+      <ci> ru5p__D_c </ci>
       <apply>
         <divide/>
-        <ci> ru5p__D_c </ci>
+        <ci> r5p_c </ci>
         <ci> Keq_RPI </ci>
       </apply>
     </apply>
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_RPI" name="kf_RPI" value="7.133129920265219"/>
+            <localParameter id="kf_RPI" name="kf_RPI" value="10564.620050794427"/>
             <localParameter id="Keq_RPI" name="Keq_RPI" value="2.57"/>
             <localParameter id="kr_RPI" name="kr_RPI"/>
-            <localParameter id="ssflux_RPI" name="ssflux_RPI" value="-0.070763"/>
+            <localParameter id="ssflux_RPI" name="ssflux_RPI" value="0.076667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
-          <speciesReference constant="true" species="M_r5p_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_ru5p__D_c" stoichiometry="1"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference constant="true" species="M_ru5p__D_c" stoichiometry="1"/>
+          <speciesReference constant="true" species="M_r5p_c" stoichiometry="1"/>
         </listOfProducts>
       </reaction>
       <reaction fast="false" id="R_TKT1" reversible="true" name="Transketolase" compartment="Pentose Phosphate Pathway">
@@ -303,7 +303,7 @@
             <localParameter id="kf_TKT1" name="kf_TKT1" value="1595.951974553812"/>
             <localParameter id="Keq_TKT1" name="Keq_TKT1" value="1.2"/>
             <localParameter id="kr_TKT1" name="kr_TKT1"/>
-            <localParameter id="ssflux_TKT1" name="ssflux_TKT1" value="0.069618"/>
+            <localParameter id="ssflux_TKT1" name="ssflux_TKT1" value="0.066667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -344,7 +344,7 @@
             <localParameter id="kf_TKT2" name="kf_TKT2" value="1092.2464352900831"/>
             <localParameter id="Keq_TKT2" name="Keq_TKT2" value="10.3"/>
             <localParameter id="kr_TKT2" name="kr_TKT2"/>
-            <localParameter id="ssflux_TKT2" name="ssflux_TKT2" value="0.069618"/>
+            <localParameter id="ssflux_TKT2" name="ssflux_TKT2" value="0.066667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -385,7 +385,7 @@
             <localParameter id="kf_TALA" name="kf_TALA" value="844.6161380129796"/>
             <localParameter id="Keq_TALA" name="Keq_TALA" value="1.05"/>
             <localParameter id="kr_TALA" name="kr_TALA"/>
-            <localParameter id="ssflux_TALA" name="ssflux_TALA" value="0.069618"/>
+            <localParameter id="ssflux_TALA" name="ssflux_TALA" value="0.066667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -507,84 +507,60 @@
           <speciesReference constant="true" species="M_g6p_c" stoichiometry="1"/>
         </listOfProducts>
       </reaction>
-      <reaction fast="false" id="R_EX_f6p_e" reversible="true" name="D-Fructose 6-phosphate exchange" compartment="Transport/Exchange">
+      <reaction fast="false" id="R_DM_f6p_e" reversible="false" name="D-Fructose 6-phosphate demand" compartment="Transport/Exchange">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
     <times/>
-    <ci> kf_EX_f6p_e </ci>
-    <apply>
-      <minus/>
-      <ci> f6p_c </ci>
-      <apply>
-        <divide/>
-        <ci> f6p_e </ci>
-        <ci> Keq_EX_f6p_e </ci>
-      </apply>
-    </apply>
+    <ci> f6p_c </ci>
+    <ci> kf_DM_f6p_e </ci>
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_EX_f6p_e" name="kf_EX_f6p_e" value="6.734006734006732"/>
-            <localParameter id="Keq_EX_f6p_e" name="Keq_EX_f6p_e" value="inf"/>
-            <localParameter id="kr_EX_f6p_e" name="kr_EX_f6p_e"/>
-            <localParameter id="ssflux_EX_f6p_e" name="ssflux_EX_f6p_e" value="0.139237"/>
+            <localParameter id="kf_DM_f6p_e" name="kf_DM_f6p_e" value="6.734006734006732"/>
+            <localParameter id="Keq_DM_f6p_e" name="Keq_DM_f6p_e" value="inf"/>
+            <localParameter id="kr_DM_f6p_e" name="kr_DM_f6p_e" value="0.0"/>
+            <localParameter id="ssflux_DM_f6p_e" name="ssflux_DM_f6p_e" value="0.133333"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
           <speciesReference constant="true" species="M_f6p_c" stoichiometry="1"/>
         </listOfReactants>
       </reaction>
-      <reaction fast="false" id="R_EX_g3p_e" reversible="true" name="Glyceraldehyde 3-phosphate exchange" compartment="Transport/Exchange">
+      <reaction fast="false" id="R_DM_g3p_e" reversible="false" name="Glyceraldehyde 3-phosphate demand" compartment="Transport/Exchange">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
     <times/>
-    <ci> kf_EX_g3p_e </ci>
-    <apply>
-      <minus/>
-      <ci> g3p_c </ci>
-      <apply>
-        <divide/>
-        <ci> g3p_e </ci>
-        <ci> Keq_EX_g3p_e </ci>
-      </apply>
-    </apply>
+    <ci> g3p_c </ci>
+    <ci> kf_DM_g3p_e </ci>
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_EX_g3p_e" name="kf_EX_g3p_e" value="9.157509157509155"/>
-            <localParameter id="Keq_EX_g3p_e" name="Keq_EX_g3p_e" value="inf"/>
-            <localParameter id="kr_EX_g3p_e" name="kr_EX_g3p_e"/>
-            <localParameter id="ssflux_EX_g3p_e" name="ssflux_EX_g3p_e" value="0.069618"/>
+            <localParameter id="kf_DM_g3p_e" name="kf_DM_g3p_e" value="9.157509157509155"/>
+            <localParameter id="Keq_DM_g3p_e" name="Keq_DM_g3p_e" value="inf"/>
+            <localParameter id="kr_DM_g3p_e" name="kr_DM_g3p_e" value="0.0"/>
+            <localParameter id="ssflux_DM_g3p_e" name="ssflux_DM_g3p_e" value="0.066667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
           <speciesReference constant="true" species="M_g3p_c" stoichiometry="1"/>
         </listOfReactants>
       </reaction>
-      <reaction fast="false" id="R_EX_r5p_e" reversible="true" name="Alpha-D-Ribose 5-phosphate exchange" compartment="Transport/Exchange">
+      <reaction fast="false" id="R_DM_r5p_e" reversible="false" name="Alpha-D-Ribose 5-phosphate demand" compartment="Transport/Exchange">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
     <times/>
-    <ci> kf_EX_r5p_e </ci>
-    <apply>
-      <minus/>
-      <ci> r5p_c </ci>
-      <apply>
-        <divide/>
-        <ci> r5p_e </ci>
-        <ci> Keq_EX_r5p_e </ci>
-      </apply>
-    </apply>
+    <ci> kf_DM_r5p_e </ci>
+    <ci> r5p_c </ci>
   </apply>
 </math>
           <listOfLocalParameters>
-            <localParameter id="kf_EX_r5p_e" name="kf_EX_r5p_e" value="0.7893345120728712"/>
-            <localParameter id="Keq_EX_r5p_e" name="Keq_EX_r5p_e" value="inf"/>
-            <localParameter id="kr_EX_r5p_e" name="kr_EX_r5p_e"/>
-            <localParameter id="ssflux_EX_r5p_e" name="ssflux_EX_r5p_e" value="0.001145"/>
+            <localParameter id="kf_DM_r5p_e" name="kf_DM_r5p_e" value="0.7893345120728712"/>
+            <localParameter id="Keq_DM_r5p_e" name="Keq_DM_r5p_e" value="inf"/>
+            <localParameter id="kr_DM_r5p_e" name="kr_DM_r5p_e" value="0.0"/>
+            <localParameter id="ssflux_DM_r5p_e" name="ssflux_DM_r5p_e" value="0.01"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>

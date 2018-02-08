@@ -140,6 +140,48 @@
 ],
 "reactions":[
 {
+"id":"DM_f6p_e",
+"name":"D-Fructose 6-phosphate demand",
+"metabolites":{
+"f6p_c":-1
+},
+"_reversible":false,
+"_forward_rate_constant":6.734006734006732,
+"_equilibrium_constant":"inf",
+"_genes":[],
+"_gene_reaction_rule":"",
+"ssflux":0.133333,
+"subsystem":"Transport/Exchange"
+},
+{
+"id":"DM_g3p_e",
+"name":"Glyceraldehyde 3-phosphate demand",
+"metabolites":{
+"g3p_c":-1
+},
+"_reversible":false,
+"_forward_rate_constant":9.157509157509155,
+"_equilibrium_constant":"inf",
+"_genes":[],
+"_gene_reaction_rule":"",
+"ssflux":0.066667,
+"subsystem":"Transport/Exchange"
+},
+{
+"id":"DM_r5p_e",
+"name":"Alpha-D-Ribose 5-phosphate demand",
+"metabolites":{
+"r5p_c":-1
+},
+"_reversible":false,
+"_forward_rate_constant":0.7893345120728712,
+"_equilibrium_constant":"inf",
+"_genes":[],
+"_gene_reaction_rule":"",
+"ssflux":0.01,
+"subsystem":"Transport/Exchange"
+},
+{
 "id":"EX_co2_e",
 "name":"CO2 exchange",
 "metabolites":{
@@ -151,34 +193,6 @@
 "_genes":[],
 "_gene_reaction_rule":"",
 "ssflux":0.21,
-"subsystem":"Transport/Exchange"
-},
-{
-"id":"EX_f6p_e",
-"name":"D-Fructose 6-phosphate exchange",
-"metabolites":{
-"f6p_c":-1
-},
-"_reversible":true,
-"_forward_rate_constant":6.734006734006732,
-"_equilibrium_constant":"inf",
-"_genes":[],
-"_gene_reaction_rule":"",
-"ssflux":0.139237,
-"subsystem":"Transport/Exchange"
-},
-{
-"id":"EX_g3p_e",
-"name":"Glyceraldehyde 3-phosphate exchange",
-"metabolites":{
-"g3p_c":-1
-},
-"_reversible":true,
-"_forward_rate_constant":9.157509157509155,
-"_equilibrium_constant":"inf",
-"_genes":[],
-"_gene_reaction_rule":"",
-"ssflux":0.069618,
 "subsystem":"Transport/Exchange"
 },
 {
@@ -221,20 +235,6 @@
 "_genes":[],
 "_gene_reaction_rule":"",
 "ssflux":0.84,
-"subsystem":"Transport/Exchange"
-},
-{
-"id":"EX_r5p_e",
-"name":"Alpha-D-Ribose 5-phosphate exchange",
-"metabolites":{
-"r5p_c":-1
-},
-"_reversible":true,
-"_forward_rate_constant":0.7893345120728712,
-"_equilibrium_constant":"inf",
-"_genes":[],
-"_gene_reaction_rule":"",
-"ssflux":0.001145,
 "subsystem":"Transport/Exchange"
 },
 {
@@ -336,22 +336,22 @@
 "_equilibrium_constant":3,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.139237,
+"ssflux":0.133333,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
 "id":"RPI",
 "name":"Ribulose 5-Phosphate Isomerase",
 "metabolites":{
-"r5p_c":-1,
-"ru5p__D_c":1
+"r5p_c":1,
+"ru5p__D_c":-1
 },
 "_reversible":true,
-"_forward_rate_constant":7.133129920265219,
+"_forward_rate_constant":10564.620050794427,
 "_equilibrium_constant":2.57,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":-0.070763,
+"ssflux":0.076667,
 "subsystem":"Glyolysis"
 },
 {
@@ -368,7 +368,7 @@
 "_equilibrium_constant":1.05,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.069618,
+"ssflux":0.066667,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
@@ -385,7 +385,7 @@
 "_equilibrium_constant":1.2,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.069618,
+"ssflux":0.066667,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
@@ -402,18 +402,18 @@
 "_equilibrium_constant":10.3,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.069618,
+"ssflux":0.066667,
 "subsystem":"Pentose Phosphate Pathway"
 }
 ],
 "genes":[],
 "initial_conditions":{
-"_6pgc_c":0.045463,
-"_6pgl_c":0.001762,
+"_6pgc_c":0.037475,
+"_6pgl_c":0.001754,
 "co2_c":1.000002,
-"e4p_c":0.000901,
-"f6p_c":0.020677,
-"g3p_c":0.007602,
+"e4p_c":0.005075,
+"f6p_c":0.0198,
+"g3p_c":0.00728,
 "g6p_c":0.0486,
 "gthox_c":0.12,
 "gthrd_c":3.2,
@@ -421,10 +421,10 @@
 "h_c":7.1e-05,
 "nadp_c":0.0002,
 "nadph_c":0.0658,
-"r5p_c":0.00145,
-"ru5p__D_c":0.029223,
-"s7p_c":0.013177,
-"xu5p__D_c":0.08764
+"r5p_c":0.012669,
+"ru5p__D_c":0.004937,
+"s7p_c":0.023988,
+"xu5p__D_c":0.014784
 },
 "fixed_concentrations":{
 "f6p_e":1,
