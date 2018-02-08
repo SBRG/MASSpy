@@ -58,7 +58,7 @@
       <species hasOnlySubstanceUnits="false" id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3" initialConcentration="0.0658" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_gthrd_c" name="Reduced glutathione" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C10H15N3O6S,C10H16N3O6S" initialConcentration="3.2" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_gthrd_c" name="Reduced glutathione" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C10H16N3O6S" initialConcentration="3.2" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_gthox_c" name="Oxidized glutathione" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C20H30N6O12S2" initialConcentration="0.12" constant="false" boundaryCondition="false"/>
