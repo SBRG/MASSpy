@@ -31,25 +31,25 @@
       <species hasOnlySubstanceUnits="false" id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P" initialConcentration="0.00728" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P" initialConcentration="0.001754" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P" initialConcentration="0.00175424" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M__6pgc_c" name="6-Phospho-D-gluconate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C6H10O10P" initialConcentration="0.037475" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M__6pgc_c" name="6-Phospho-D-gluconate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C6H10O10P" initialConcentration="0.0374753" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_ru5p__D_c" name="D-Ribulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.004937" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_ru5p__D_c" name="D-Ribulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.00493679" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_xu5p__D_c" name="D-Xylulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.014784" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_xu5p__D_c" name="D-Xylulose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.0147842" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.012669" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P" initialConcentration="0.0126689" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_s7p_c" name="Sedoheptulose 7-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C7H13O10P" initialConcentration="0.023988" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_e4p_c" name="D-Erythrose 4-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C4H7O7P" initialConcentration="0.005075" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_e4p_c" name="D-Erythrose 4-phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C4H7O7P" initialConcentration="0.00507507" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3" initialConcentration="0.0002" constant="false" boundaryCondition="false"/>
@@ -58,19 +58,19 @@
       <species hasOnlySubstanceUnits="false" id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3" initialConcentration="0.0658" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_gthrd_c" name="Reduced glutathione" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C10H15N3O6S,C10H16N3O6S" initialConcentration="3.2" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_gthrd_c" name="Reduced glutathione" compartment="c" fbc:charge="-1" fbc:chemicalFormula="C10H16N3O6S" initialConcentration="3.2" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_gthox_c" name="Oxidized glutathione" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C20H30N6O12S2" initialConcentration="0.12" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_co2_c" name="CO2" compartment="c" fbc:charge="0" fbc:chemicalFormula="CO2" initialConcentration="1.000002" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_co2_c" name="CO2" compartment="c" fbc:charge="0" fbc:chemicalFormula="CO2" initialConcentration="1.0" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_h_c" name="H+" compartment="c" fbc:charge="1" fbc:chemicalFormula="H" initialConcentration="7.1e-05" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_h_c" name="H+" compartment="c" fbc:charge="1" fbc:chemicalFormula="H" initialConcentration="7.14957e-05" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_h2o_c" name="H2O" compartment="c" fbc:charge="0" fbc:chemicalFormula="H2O" initialConcentration="0.999998" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_h2o_c" name="H2O" compartment="c" fbc:charge="0" fbc:chemicalFormula="H2O" initialConcentration="1" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfParameters>
       <parameter id="co2_e" value="1" constant="true"/>
@@ -233,7 +233,7 @@
             <localParameter id="kf_RPE" name="kf_RPE" value="15284.67711119561"/>
             <localParameter id="Keq_RPE" name="Keq_RPE" value="3"/>
             <localParameter id="kr_RPE" name="kr_RPE"/>
-            <localParameter id="ssflux_RPE" name="ssflux_RPE" value="0.133333"/>
+            <localParameter id="ssflux_RPE" name="ssflux_RPE" value="0.133333333333"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -264,7 +264,7 @@
             <localParameter id="kf_RPI" name="kf_RPI" value="10564.620050794427"/>
             <localParameter id="Keq_RPI" name="Keq_RPI" value="2.57"/>
             <localParameter id="kr_RPI" name="kr_RPI"/>
-            <localParameter id="ssflux_RPI" name="ssflux_RPI" value="0.076667"/>
+            <localParameter id="ssflux_RPI" name="ssflux_RPI" value="0.0766666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -303,7 +303,7 @@
             <localParameter id="kf_TKT1" name="kf_TKT1" value="1595.951974553812"/>
             <localParameter id="Keq_TKT1" name="Keq_TKT1" value="1.2"/>
             <localParameter id="kr_TKT1" name="kr_TKT1"/>
-            <localParameter id="ssflux_TKT1" name="ssflux_TKT1" value="0.066667"/>
+            <localParameter id="ssflux_TKT1" name="ssflux_TKT1" value="0.0666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -344,7 +344,7 @@
             <localParameter id="kf_TKT2" name="kf_TKT2" value="1092.2464352900831"/>
             <localParameter id="Keq_TKT2" name="Keq_TKT2" value="10.3"/>
             <localParameter id="kr_TKT2" name="kr_TKT2"/>
-            <localParameter id="ssflux_TKT2" name="ssflux_TKT2" value="0.066667"/>
+            <localParameter id="ssflux_TKT2" name="ssflux_TKT2" value="0.0666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -385,7 +385,7 @@
             <localParameter id="kf_TALA" name="kf_TALA" value="844.6161380129796"/>
             <localParameter id="Keq_TALA" name="Keq_TALA" value="1.05"/>
             <localParameter id="kr_TALA" name="kr_TALA"/>
-            <localParameter id="ssflux_TALA" name="ssflux_TALA" value="0.066667"/>
+            <localParameter id="ssflux_TALA" name="ssflux_TALA" value="0.0666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -520,7 +520,7 @@
             <localParameter id="kf_DM_f6p_e" name="kf_DM_f6p_e" value="6.734006734006732"/>
             <localParameter id="Keq_DM_f6p_e" name="Keq_DM_f6p_e" value="inf"/>
             <localParameter id="kr_DM_f6p_e" name="kr_DM_f6p_e" value="0.0"/>
-            <localParameter id="ssflux_DM_f6p_e" name="ssflux_DM_f6p_e" value="0.133333"/>
+            <localParameter id="ssflux_DM_f6p_e" name="ssflux_DM_f6p_e" value="0.133333333333"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
@@ -540,7 +540,7 @@
             <localParameter id="kf_DM_g3p_e" name="kf_DM_g3p_e" value="9.157509157509155"/>
             <localParameter id="Keq_DM_g3p_e" name="Keq_DM_g3p_e" value="inf"/>
             <localParameter id="kr_DM_g3p_e" name="kr_DM_g3p_e" value="0.0"/>
-            <localParameter id="ssflux_DM_g3p_e" name="ssflux_DM_g3p_e" value="0.066667"/>
+            <localParameter id="ssflux_DM_g3p_e" name="ssflux_DM_g3p_e" value="0.0666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
