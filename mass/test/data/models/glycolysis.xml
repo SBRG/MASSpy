@@ -64,7 +64,7 @@
       <species hasOnlySubstanceUnits="false" id="M_nadh_c" name="Nicotinamide adenine dinucleotide - reduced" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C21H27N7O14P2" initialConcentration="0.0301" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_amp_c" name="AMP" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P" initialConcentration="0.086728" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_amp_c" name="AMP" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P" initialConcentration="0.0867281" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_adp_c" name="ADP" compartment="c" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2" initialConcentration="0.29" constant="false" boundaryCondition="false"/>
@@ -76,7 +76,7 @@
       <species hasOnlySubstanceUnits="false" id="M_pi_c" name="Phosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="HPO4" initialConcentration="2.5" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_h_c" name="H+" compartment="c" fbc:charge="1" fbc:chemicalFormula="H" initialConcentration="9e-05" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_h_c" name="H+" compartment="c" fbc:charge="1" fbc:chemicalFormula="H" initialConcentration="8.99757e-05" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_h2o_c" name="H2O" compartment="c" fbc:charge="0" fbc:chemicalFormula="H2O" initialConcentration="1.0" constant="false" boundaryCondition="false"/>
@@ -563,7 +563,7 @@
             <localParameter id="kf_ADK1" name="kf_ADK1" value="100000.0"/>
             <localParameter id="Keq_ADK1" name="Keq_ADK1" value="1.65"/>
             <localParameter id="kr_ADK1" name="kr_ADK1"/>
-            <localParameter id="ssflux_ADK1" name="ssflux_ADK1" value="-0.0"/>
+            <localParameter id="ssflux_ADK1" name="ssflux_ADK1" value="0.0"/>
           </listOfLocalParameters>
         </kineticLaw>
         <listOfReactants>
