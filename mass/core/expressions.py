@@ -237,12 +237,12 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 		custom_parameter_list = []
 
 	# Get metabolites as symbols if they are in the custom rate law
-	metab_symbols = dict((metab.id, sp.Function(metab.id, nonnegative=True)(t))
+	metab_symbols = dict((metab.id, sp.Function(metab.id)(t))
 					for metab in iterkeys(reaction.metabolites)
 					if re.search("[%s]" % metab.id, custom_rate_law))
 	# Get fixed concentrations as symbols if they are in the custom rate law
 	if reaction._model is not None:
-		fix_symbols= dict((str(fixed), sp.Symbol(str(fixed), nonnegative=True))
+		fix_symbols= dict((str(fixed), sp.Symbol(str(fixed)))
 					for fixed in iterkeys(reaction._model.fixed_concentrations)
 					if re.search("[%s]" % str(fixed), custom_rate_law))
 	else:
@@ -397,13 +397,12 @@ def _generate_rate_expr_type_1(reaction):
 	# For exchange reactions
 	if reaction.exchange and len(reaction.reactants) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_f = sp.Mul(rate_law_f, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -418,13 +417,12 @@ def _generate_rate_expr_type_1(reaction):
 	rate_law_r = sp.Pow(sp.var(reaction._sym_Keq), -1)
 	# For exchange reactions
 	if reaction.exchange and len(reaction.products) == 0:
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_r = sp.Mul(rate_law_r, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -446,13 +444,12 @@ def _generate_rate_expr_type_2(reaction):
 	# For exchange reactions
 	if reaction.exchange and len(reaction.reactants) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_f = sp.Mul(rate_law_f, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -468,13 +465,12 @@ def _generate_rate_expr_type_2(reaction):
 	# For exchange reactions
 	if reaction.exchange and len(reaction.products) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_r = sp.Mul(rate_law_r, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -495,13 +491,12 @@ def _generate_rate_expr_type_3(reaction):
 	# For exchange reactions
 	if reaction.exchange and len(reaction.reactants) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_f = sp.Mul(rate_law_f, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_f = sp.Mul(rate_law_f, metab_ode)
@@ -517,13 +512,12 @@ def _generate_rate_expr_type_3(reaction):
 	# For exchange reactions
 	if reaction.exchange and len(reaction.products) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		rate_law_r = sp.Mul(rate_law_r, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				rate_law_r = sp.Mul(rate_law_r, metab_ode)
@@ -545,13 +539,12 @@ def _get_mass_action_ratio_expr(reaction):
 	reactant_bits = sp.S.One
 	if reaction.exchange and len(reaction.reactants) == 0:
 		# Generate an "external" metabolite for exchanges
-		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+		metab_ode = sp.Symbol(reaction.get_external_metabolite)
 		reactant_bits = sp.Mul(reactant_bits, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.reactants:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				reactant_bits = sp.Mul(reactant_bits, metab_ode)
@@ -563,12 +556,12 @@ def _get_mass_action_ratio_expr(reaction):
 	if reaction.exchange and len(reaction.products) == 0:
 		# Generate an "external" metabolite for exchanges
 		metab_ode = sp.Symbol(reaction.get_external_metabolite,
-								nonnegative=True)
+								)
 		product_bits = sp.Mul(product_bits, metab_ode)
 	# For all other reactions
 	else:
 		for metab in reaction.products:
-			metab_ode = sp.Symbol(metab.id, nonnegative=True)(t)
+			metab_ode = sp.Symbol(metab.id)(t)
 			coeff = abs(reaction.get_coefficient(metab.id))
 			if coeff == 1:
 				product_bits = sp.Mul(product_bits, metab_ode)
@@ -631,7 +624,7 @@ def _sort_symbols(model):
 		for func in functions:
 			metab = model.metabolites.get_by_id(str(func)[:-3])
 			if metab in iterkeys(model.fixed_concentrations):
-				metab_sym = sp.Symbol(metab.id, nonnegative=True)
+				metab_sym = sp.Symbol(metab.id)
 				ode_dict[item] = expression.subs({func: metab_sym})
 				for reaction, rate in iteritems(model.rates):
 					rate_dict[reaction] = rate.subs({func: metab_sym})

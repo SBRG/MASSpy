@@ -378,7 +378,7 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 				# from the metabolite set in the iteration
 				for metab_func in metabolites.copy():
 					if(re.match(metab.id, str(metab_func)[:-3])):
-						metab_sym = sp.Symbol(metab.id, nonnegative=True)
+						metab_sym = sp.Symbol(metab.id)
 						# Remove metabolite from functions and
 						# add to fixed_concs set.
 						metabolites.remove(metab_func)
