@@ -76,6 +76,7 @@ setup(
 		"lxml"
 	],
 	tests_require=[],
+	include_package_data=True,
 	package_data={
          '': [
              'test/data/*',
