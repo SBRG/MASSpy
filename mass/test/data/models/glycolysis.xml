@@ -97,6 +97,9 @@
       <parameter id="lac__L_e" value="1" constant="true"/>
     </listOfParameters>
     <listOfParameters>
+      <parameter id="pi_e" value="2.5" constant="true"/>
+    </listOfParameters>
+    <listOfParameters>
       <parameter id="pyr_e" value="0.06" constant="true"/>
     </listOfParameters>
     <listOfReactions>
@@ -774,6 +777,34 @@
         </kineticLaw>
         <listOfReactants>
           <speciesReference constant="true" species="M_h2o_c" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction fast="false" id="R_EX_pi_e" reversible="true" name="Phosphate exchange" compartment="Transport/Exchange">
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <apply>
+    <times/>
+    <ci> kf_EX_pi_e </ci>
+    <apply>
+      <minus/>
+      <ci> pi_c </ci>
+      <apply>
+        <divide/>
+        <ci> pi_e </ci>
+        <ci> Keq_EX_pi_e </ci>
+      </apply>
+    </apply>
+  </apply>
+</math>
+          <listOfLocalParameters>
+            <localParameter id="kf_EX_pi_e" name="kf_EX_pi_e" value="828.0"/>
+            <localParameter id="Keq_EX_pi_e" name="Keq_EX_pi_e" value="1"/>
+            <localParameter id="kr_EX_pi_e" name="kr_EX_pi_e"/>
+            <localParameter id="ssflux_EX_pi_e" name="ssflux_EX_pi_e" value="0.0"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+        <listOfReactants>
+          <speciesReference constant="true" species="M_pi_c" stoichiometry="1"/>
         </listOfReactants>
       </reaction>
     </listOfReactions>
