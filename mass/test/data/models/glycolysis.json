@@ -176,7 +176,7 @@
 "_equilibrium_constant":1.65,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":-0.0,
+"ssflux":0.0,
 "subsystem":"Misc."
 },
 {
@@ -224,7 +224,7 @@
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.224,
+"ssflux":0.22400000000000003,
 "subsystem":"Pseudo"
 },
 {
@@ -286,6 +286,20 @@
 "subsystem":"Transport/Exchange"
 },
 {
+"id":"EX_pi_e",
+"name":"Phosphate exchange",
+"metabolites":{
+"pi_c":-1
+},
+"_reversible":true,
+"_forward_rate_constant":828.0,
+"_equilibrium_constant":1,
+"_genes":[],
+"_gene_reaction_rule":"",
+"ssflux":0.0,
+"subsystem":"Transport/Exchange"
+},
+{
 "id":"EX_pyr_e",
 "name":"Pyruvate exchange",
 "metabolites":{
@@ -296,7 +310,7 @@
 "_equilibrium_constant":1,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.224,
+"ssflux":0.22400000000000003,
 "subsystem":"Transport/Exchange"
 },
 {
@@ -503,7 +517,7 @@
 "_2pg_c":0.0113,
 "_3pg_c":0.0773,
 "adp_c":0.29,
-"amp_c":0.086728,
+"amp_c":0.0867281,
 "atp_c":1.6,
 "dhap_c":0.16,
 "f6p_c":0.0198,
@@ -512,7 +526,7 @@
 "g6p_c":0.0486,
 "glc__D_c":1.0,
 "h2o_c":1.0,
-"h_c":9e-05,
+"h_c":8.99757e-05,
 "lac__L_c":1.36,
 "nad_c":0.0589,
 "nadh_c":0.0301,
@@ -526,7 +540,8 @@
 "pyr_e":0.06,
 "h_e":6.30957e-05,
 "h2o_e":1,
-"amp_e":1
+"amp_e":1,
+"pi_e":2.5
 },
 "compartments":{
 "c":"Cytosol"
@@ -538,7 +553,14 @@
 },
 "_matrix_type":"dataframe",
 "notes":{
-"Literature":[]
+"Literature":[
+"R. Heinrich, S. M. Rapoport, and T. A. Rapoport. Metabolic regulations and mathematical models. Prog. Biophys. Molec. Biol., 32:1\u201382, 1977.",
+"A. Joshi. Integrated Metabolic Dynamics in the Human Red Blood Cell. PhD thesis, University of Michigan, 1988.",
+"N. Jamshidi, S.J. Wiback, and B.O. Palsson. In silico model-driven assess- ment of the effects of single nucleotide polymorphisms (SNPs) on human red blood cell metabolism. Genome Research, 12:1687\u20131692, 2002.,A. Joshi. Integrated Metabolic Dynamics in the Human Red Blood Cell. PhD thesis, University of Michigan, 1988.",
+"A. Joshi and B.O. Palsson. Metabolic dynamics in the human red cell. Part IV\u2013data prediction and some model computations. J. theor. Biol., 142:69\u201385, 1990.",
+"A. Joshi and B.O. Palsson. Metabolic dynamics in the human red cell. Part I I \u2013interactions with the environment. J. theor. Biol., 141:529\u2013545, 1989.",
+"Prankerd, T. A. J., & Altman, K. I. (1954). A study of the metabolism of phosphorus in mammalian red cells. Biochemical Journal, 58(4), 622\u2013633."
+]
 },
 "version":"1"
 }
