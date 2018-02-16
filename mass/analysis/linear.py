@@ -526,7 +526,7 @@ def left_nullspace(A, atol=1e-13, rtol=0):
 		with shape (k, n), where n is the estimated dimension of the
 		left nullspace of `A`.  The columns of `lns` are a basis for the
 		left nullspace; each element in numpy.dot(A.T, lns) will be
-		approximatelyzero.
+		approximately zero.
 	"""
 	lns = nullspace(A.T, atol, rtol)
 	return lns
