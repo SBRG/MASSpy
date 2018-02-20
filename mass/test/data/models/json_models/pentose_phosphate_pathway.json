@@ -71,7 +71,7 @@
 "initial_condition":3.2,
 "charge":-1,
 "compartment":"c",
-"formula":"C10H15N3O6S,C10H16N3O6S"
+"formula":"C10H16N3O6S"
 },
 {
 "id":"h2o_c",
@@ -150,7 +150,7 @@
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.133333,
+"ssflux":0.1333333333333333,
 "subsystem":"Transport/Exchange"
 },
 {
@@ -164,7 +164,7 @@
 "_equilibrium_constant":"inf",
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.066667,
+"ssflux":0.06666666666666665,
 "subsystem":"Transport/Exchange"
 },
 {
@@ -336,7 +336,7 @@
 "_equilibrium_constant":3,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.133333,
+"ssflux":0.1333333333333333,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
@@ -351,7 +351,7 @@
 "_equilibrium_constant":2.57,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.076667,
+"ssflux":0.07666666666666665,
 "subsystem":"Glyolysis"
 },
 {
@@ -368,7 +368,7 @@
 "_equilibrium_constant":1.05,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.066667,
+"ssflux":0.06666666666666665,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
@@ -385,7 +385,7 @@
 "_equilibrium_constant":1.2,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.066667,
+"ssflux":0.06666666666666665,
 "subsystem":"Pentose Phosphate Pathway"
 },
 {
@@ -402,29 +402,29 @@
 "_equilibrium_constant":10.3,
 "_genes":[],
 "_gene_reaction_rule":"",
-"ssflux":0.066667,
+"ssflux":0.06666666666666665,
 "subsystem":"Pentose Phosphate Pathway"
 }
 ],
 "genes":[],
 "initial_conditions":{
-"_6pgc_c":0.037475,
-"_6pgl_c":0.001754,
-"co2_c":1.000002,
-"e4p_c":0.005075,
+"_6pgc_c":0.0374753,
+"_6pgl_c":0.00175424,
+"co2_c":1.0,
+"e4p_c":0.00507507,
 "f6p_c":0.0198,
 "g3p_c":0.00728,
 "g6p_c":0.0486,
 "gthox_c":0.12,
 "gthrd_c":3.2,
-"h2o_c":0.999998,
-"h_c":7.1e-05,
+"h2o_c":1,
+"h_c":7.14957e-05,
 "nadp_c":0.0002,
 "nadph_c":0.0658,
-"r5p_c":0.012669,
-"ru5p__D_c":0.004937,
+"r5p_c":0.0126689,
+"ru5p__D_c":0.00493679,
 "s7p_c":0.023988,
-"xu5p__D_c":0.014784
+"xu5p__D_c":0.0147842
 },
 "fixed_concentrations":{
 "f6p_e":1,

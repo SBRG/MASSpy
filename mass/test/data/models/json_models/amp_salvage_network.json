@@ -67,7 +67,7 @@
 },
 {
 "id":"imp_c",
-"name":"IMP",
+"name":"Inosine monophosphate",
 "initial_condition":0.01,
 "charge":-2,
 "compartment":"c",
@@ -75,7 +75,7 @@
 },
 {
 "id":"ins_c",
-"name":"Inosince",
+"name":"Inosine",
 "initial_condition":0.001,
 "charge":0,
 "compartment":"c",
@@ -298,7 +298,7 @@
 },
 {
 "id":"EX_ins_e",
-"name":"Inosince exchange",
+"name":"Inosine exchange",
 "metabolites":{
 "ins_c":-1
 },

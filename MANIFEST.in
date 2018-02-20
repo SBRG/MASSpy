@@ -1,5 +1,5 @@
 include README.rst INSTALL.rst LICENSE
 include mass
-include mass/test/data/models/*.json
-include mass/test/data/models/*.xml
+include mass/test/data/models/json_models/*.json
+include mass/test/data/models/sbml_models/*.xml
 include mass/test/data/maps/*.json

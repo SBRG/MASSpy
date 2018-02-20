@@ -28,10 +28,10 @@
       <species hasOnlySubstanceUnits="false" id="M_ade_c" name="Adenine" compartment="c" fbc:charge="0" fbc:chemicalFormula="C5H5N5" initialConcentration="0.001" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_imp_c" name="IMP" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C10H11N4O8P" initialConcentration="0.01" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_imp_c" name="Inosine monophosphate" compartment="c" fbc:charge="-2" fbc:chemicalFormula="C10H11N4O8P" initialConcentration="0.01" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
-      <species hasOnlySubstanceUnits="false" id="M_ins_c" name="Inosince" compartment="c" fbc:charge="0" fbc:chemicalFormula="C10H12N4O5" initialConcentration="0.001" constant="false" boundaryCondition="false"/>
+      <species hasOnlySubstanceUnits="false" id="M_ins_c" name="Inosine" compartment="c" fbc:charge="0" fbc:chemicalFormula="C10H12N4O5" initialConcentration="0.001" constant="false" boundaryCondition="false"/>
     </listOfSpecies>
     <listOfSpecies>
       <species hasOnlySubstanceUnits="false" id="M_hxan_c" name="Hypoxanthine" compartment="c" fbc:charge="0" fbc:chemicalFormula="C5H4N4O" initialConcentration="0.002" constant="false" boundaryCondition="false"/>
@@ -435,7 +435,7 @@
           <speciesReference constant="true" species="M_ade_c" stoichiometry="1"/>
         </listOfReactants>
       </reaction>
-      <reaction fast="false" id="R_EX_ins_e" reversible="true" name="Inosince exchange" compartment="Transport/Exchange">
+      <reaction fast="false" id="R_EX_ins_e" reversible="true" name="Inosine exchange" compartment="Transport/Exchange">
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
   <apply>
