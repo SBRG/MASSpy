@@ -2049,8 +2049,8 @@ class MassModel(Object):
 					num_fixed=len(self.fixed_concentrations),
 					num_custom_rates=len(self.custom_rates),
 					num_genes=len(self.genes),
-					modules=", ".join([str(m) for m in self.modules
-										if m is not None]),
+					modules="<br> ".join([str(m) for m in self.modules
+										if m is not None]) + "</br>",
 					compartments=", ".join(v if v else k for \
 										k,v in iteritems(self.compartments)),
 					units=", ".join(v if v else k for \
