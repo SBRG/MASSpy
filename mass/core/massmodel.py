@@ -1471,14 +1471,11 @@ class MassModel(Object):
 			if rxn in independent_fluxes:
 				values.append(independent_fluxes[rxn])
 				coeffs.append([path[i] for path in pathways])
-		# Flip the transposed matrix to have coefficients in the correct places
-		coeffs = np.flip(np.array(coeffs).T, axis=1)
-		# Flip values to match
-		values = np.flip(np.array(values), axis=0)
 		# Inverse the coefficient matrix
 		coeffs = np.linalg.inv(coeffs)
+
 		# Obtain the dot product of values and coefficients, then with pathways
-		ssfluxes = values.dot(coeffs).dot(pathways)
+		ssfluxes = np.inner(pathways.T, np.inner(coeffs, values))
 
 		# Update reaction ssflux attribute if desired
 		if update_reactions:
@@ -1597,14 +1594,18 @@ class MassModel(Object):
 
 			# Set equilbrium default if no flux
 			if flux == 0:
-				sol = {float(at_equilibrium_default)}
+				sol = at_equilibrium_default
 			# Otherwise calculate the PERC
 			else:
 				equation = sp.Eq(steady_state_fluxes[rxn], rate.subs(values))
 				sol = set(sp.solveset(equation, perc, domain=sp.S.Reals))
 				if len(sol) == 0:
-					sol = {float(at_equilibrium_default)}
-			percs_dict.update({str(perc): float(sol.pop())})
+					sol = float(at_equilibrium_default)
+				else:
+					sol = float(sol.pop())
+				if sol <= 0:
+					sol = float(at_equilibrium_default)
+			percs_dict.update({str(perc): sol})
 
 			if update_reactions:
 				rxn.kf = percs_dict[str(perc)]
