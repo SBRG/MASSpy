@@ -536,7 +536,7 @@ class MassModel(Object):
 					context(partial(setattr, metab, '_initial_condition',
 									existing_ics[metab]))
 
-	def add_reactions(self, reaction_list, update_stoichiometry=False):
+	def add_reactions(self, reaction_list):
 		"""Add MassReactions and their rates to the MassModel.
 
 		MassReactions with identifiers identical to a reaction already in the
@@ -550,8 +550,6 @@ class MassModel(Object):
 		----------
 		reaction_list : list
 			A list of MassReaction objects to add to the MassModel
-		update_stoichiometry : bool, optional
-			If True, will update the matrix after adding the new reactions.
 		"""
 		# If the reaction list is not a list
 		if not hasattr(reaction_list, '__iter__'):
@@ -617,19 +615,14 @@ class MassModel(Object):
 
 		# Add reactions to the model
 		self.reactions += reaction_list
-		if update_stoichiometry:
-			self.update_S(reaction_list=reaction_list, update_model=True)
 
 		if context:
 			context(partial(self.reactions.__isub__, reaction_list))
 			for rxn in reaction_list:
 				context(partial(setattr, rxn, '_model', None))
-			if update_stoichiometry:
-				context(partial(self.update_S, None, None, None, True))
 
 
-	def remove_reactions(self, reaction_list, remove_orphans=False,
-						update_stoichiometry=False):
+	def remove_reactions(self, reaction_list, remove_orphans=False):
 		"""Remove MassReactions from the MassModel
 
 		The change is reverted upon exit when using the MassModel as a context.
@@ -641,8 +634,6 @@ class MassModel(Object):
 		remove_orphans : bool, optional
 			Remove orphaned genes and MassMetabolites from the
 			MassModel as well.
-		update_stoichiometry : bool, optional
-			If True, will update the matrix after adding the new reactions.
 		"""
 		# If the reaction list is not a list
 		if not hasattr(reaction_list, '__iter__'):
@@ -687,20 +678,14 @@ class MassModel(Object):
 
 		# Remove reactions from the model
 		self.reactions -= reaction_list
-		if update_stoichiometry:
-			self.update_S(reaction_list=None, update_model=True)
 
 		if context:
 			context(partial(self.reactions.__iadd__, reaction_list))
 			for rxn in reaction_list:
 				context(partial(setattr, rxn, '_model', self))
-			if update_stoichiometry:
-				context(partial(self.update_S, reaction_list,
-							None, None, True))
 
 	def add_exchange(self, metabolite, exchange_type="exchange",
-						external_concentration=0.,
-						update_stoichiometry=True):
+						external_concentration=0.):
 		"""Add an exchange reaction for a given metabolite using the
 		pre-defined exchange types "exchange" for reversibly into or exiting
 		the compartment, "source" for irreversibly into the compartment,
@@ -719,9 +704,6 @@ class MassModel(Object):
 		reversible : bool, optional
 			If True, exchange is reversible. When using a user-defined type,
 			must specify the reversiblity
-		update_stoichiometry : bool, optional
-			If True, will update the matrix after adding the new reactions.
-
 		Returns
 		-------
 		mass.MassReaction
@@ -763,7 +745,7 @@ class MassModel(Object):
 		rxn = MassReaction(id=rxn_id, name=rxn_name,
 					subsystem="Transport/Exchange",reversible=reversible)
 		rxn.add_metabolites({metabolite: c})
-		self.add_reactions([rxn], update_stoichiometry)
+		self.add_reactions([rxn])
 		self.add_fixed_concentrations(fixed_conc_dict={
 			rxn.get_external_metabolite : external_concentration})
 
@@ -1381,7 +1363,7 @@ class MassModel(Object):
 				lambda rxn: rxn.id in self.reactions)
 			for rxn in existing_reactions:
 				rxn.id = "{}_{}".format(prefix_existing, rxn.id)
-		merged_model.add_reactions(new_reactions, True)
+		merged_model.add_reactions(new_reactions)
 		merged_model.repair()
 		# Add initial conditions, fixed concs., custom rates and parameters.
 		existing_ics =[m.id for m in iterkeys(merged_model.initial_conditions)]
