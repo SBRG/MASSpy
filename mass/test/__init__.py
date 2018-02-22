@@ -25,6 +25,9 @@ except ImportError:
     pytest = None
 
 file_re = re.compile("(\s+|\S+)\.(%s*)$" % _filetypes)
+json_re = re.compile("json")
+xml_re = re.compile("xml")
+txt_re = re.compile("txt")
 mass_dir = abspath(join(dirname(abspath(__file__)), ".."))
 mass_loc = abspath(join(mass_dir, ".."))
 data_dir = join(mass_dir, "test", "data", "")
@@ -63,21 +66,27 @@ def create_test_model(model_name):
             filetypes = _filetypes.split("|")
         for ext in filetypes:
             filepath = model_name
+            if json_re.match(ext):
+                model_folder = "json_models"
+            if xml_re.match(ext):
+                model_folder = "sbml_models"
+            if txt_re.match(ext):
+                model_folder = "txt_models"
             if not file_re.match(filepath):
                 filepath = "%s.%s" %(filepath, ext)
-            if filepath in listdir(join(data_dir, "models", "")):
-                filepath = join(data_dir, "models", filepath)
+            if filepath in listdir(join(data_dir, "models" ,model_folder, "")):
+                filepath = join(data_dir, "models", model_folder, filepath)
             else:
                 continue
             # Load SBML model if dependencies installed
-            if re.match(ext, "xml") and re.search(ext, _filetypes):
+            if xml_re.match(ext) and re.search(ext, _filetypes):
                 return read_sbml_model(filepath)
             # Raise error on attempt to load SBML without required dependencies
-            elif re.match(ext, "xml") and not re.search(ext, _filetypes):
+            elif xml_re.match(ext) and not re.search(ext, _filetypes):
                 raise _MassSBMLError("Cannot import SBML models without "
                                     "SBML dependencies installed")
             # Load json model
-            elif re.match(ext, "json") and re.search(ext, _filetypes):
+            elif json_re.match(ext) and re.search(ext, _filetypes):
                 return read_json_model(filepath)
 
         warn("Wrong extension specified. Cannot load model")
@@ -85,14 +94,14 @@ def create_test_model(model_name):
 
     elif file_re.match(model_name):
         ext = file_re.match(model_name).group(2)
-        if re.match(ext, "xml") and re.search(ext, _filetypes):
+        if xml_re.match(ext) and re.search(ext, _filetypes):
             return read_sbml_model(model_name)
         # Raise error on attempt to load SBML without required dependencies
-        elif re.match(ext, "xml") and not re.search(ext, _filetypes):
+        elif xml_re.match(ext) and not re.search(ext, _filetypes):
             raise _MassSBMLError("Cannot import SBML models without "
                                 "SBML dependencies installed")
         # Load json model
-        elif re.match(ext, "json") and re.search(ext, _filetypes):
+        elif json_re.match(ext) and re.search(ext, _filetypes):
             return read_json_model(model_name)
     else:
         raise ValueError("Could not recognize file type")
@@ -114,10 +123,12 @@ def _make_model_set():
     model_set = set()
     model_dir = join(data_dir, "models", "")
 
-    for model in listdir(model_dir):
-        if file_re.match(model):
-            model = file_re.match(model).group(1)
-            model_set.add(model)
+    for model_folder in listdir(model_dir):
+        if re.search("models", model_folder):
+            for model in listdir(join(model_dir, model_folder, "")):
+                if file_re.match(model):
+                    model = file_re.match(model).group(1)
+                    model_set.add(model)
 
     return model_set
 

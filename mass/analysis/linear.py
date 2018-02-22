@@ -523,12 +523,12 @@ def left_nullspace(A, atol=1e-13, rtol=0):
 	-------
 	lns : ndarray
 		If `A` is an array with shape (m, k), then `lns` will be an array
-		with shape (k, n), where n is the estimated dimension of the
-		left nullspace of `A`.  The columns of `lns` are a basis for the
-		left nullspace; each element in numpy.dot(A.T, lns) will be
-		approximatelyzero.
+		with shape (n, m), where n is the estimated dimension of the
+		left nullspace of `A`.  The rows of `lns` are a basis for the
+		left nullspace; each element in numpy.dot(lns A) will be
+		approximately zero.
 	"""
-	lns = nullspace(A.T, atol, rtol)
+	lns = nullspace(A.T, atol, rtol).T
 	return lns
 
 def columnspace(A, atol=1e-13, rtol=0):

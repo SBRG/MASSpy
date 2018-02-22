@@ -8,6 +8,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.axes._axes as _axes
+from matplotlib import cm
 from matplotlib.figure import Figure as _figure
 from matplotlib.ticker import MultipleLocator
 from cycler import cycler
@@ -801,22 +802,24 @@ def _set_plot_observables(solution_profile, observable):
 
 def _set_colors_and_styles(axes, options_dict, num_new_items):
 	"""Internal method. Set linecolors and styles for a plot"""
-	# Use a larger colormap if more than 20 items are to be plotted and no
-	# colors were specified by the user.
+
 	labels = [l.get_label() for l in  axes.get_lines()
 							if not re.search("_line+|poi+", l.get_label())]
 	lines = [axes.get_lines()[i] for i, l in enumerate(axes.get_lines())
 								if not re.search("_line+|poi+", l.get_label())]
-
 	# Set linecolors and adjust legend entries from last to first one
 	# to preserve previous linecolors on the axes
 	if options_dict["linecolor"] is not None:
 		colors = options_dict["linecolor"].copy()
-		colors.reverse()
-		if len(colors) == 1 and num_new_items != 1:
-			colors = colors*num_new_items
-		for i, lc in enumerate(colors):
-			lines[len(lines)-1-i].set_color(lc)
+	# Otherwise use default colormaps depending on the number of items
+	else:
+		colors = _get_base_colormap(len(lines))
+	colors.reverse()
+	if len(colors) == 1 and num_new_items != 1:
+		colors = colors*num_new_items
+	for i, lc in enumerate(colors):
+		lines[len(lines)-1-i].set_color(lc)
+
 	# Set linestyles and adjust legend entries from last to first one
 	# to preserve previous linecolors on the axes
 	if options_dict["linestyle"] is not None:
@@ -1138,18 +1141,18 @@ def _update_lines(options_dict, line_option, value):
 	# Update options
 	options_dict.update({line_option: value})
 
-def _get_base_colormap():
+def _get_base_colormap(n_items):
 	"""Internal method. Use a larger colormap if more than 20 items are
 	to be plotted"""
-	cm = plt.cm.get_cmap("tab20")
-	colors1 = [cm.colors[i] for i in range(len(cm.colors))]
-	cm = plt.cm.get_cmap('tab20b')
-	colors2 = [cm.colors[i] for i in range(len(cm.colors))]
-	cm = plt.cm.get_cmap('tab20c')
-	colors3 = [cm.colors[i] for i in range(len(cm.colors))]
-	colors = colors1 + colors2 + colors3
-
-	return colors
+	if n_items > 10 and n_items <= 20:
+		cmap = cm.tab20.colors
+	elif n_items > 20 and n_items <= 60:
+		cmap = cm.tab20.colors + cm.tab20b.colors + cm.tab20c.colors
+	elif n_items > 60:
+		cmap = cm.nipy_spectral(np.linspace(0, 1, n_items))
+	else:
+		cmap = cm.tab10.colors
+	return list(cmap)[:n_items]
 
 ## Internal variables
 _base_plot_defaults = {
