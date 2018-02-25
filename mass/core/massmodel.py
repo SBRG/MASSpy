@@ -728,6 +728,10 @@ class MassModel(Object):
 		if exchange_type in type_dict:
 			values = type_dict[exchange_type]
 			rxn_id = metabolite.id
+			# Remove leading underscore if necessary
+			if re.match("\_", rxn_id[0]):
+				rxn_id = rxn_id[1:]
+			# Find compartment and replace with "_e" for external/extracellular
 			_c = re.search("^\w*\S(?!<\_)(\_\S+)$", metabolite.id)
 			if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
 				rxn_id = re.sub(_c.group(1), "_e", rxn_id, count=1)
