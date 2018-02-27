@@ -28,6 +28,8 @@ Keq_re = re.compile("Keq|equilibrium_constant")
 kr_re = re.compile("kr|reverse_rate_constant")
 ic_re = re.compile("ic|initial_condition")
 fixed_re = re.compile("fix|fixed")
+function_re = re.compile("func|function")
+
 
 # Public
 def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
@@ -99,7 +101,8 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 		raise TypeError("Perturbations must be in a dictionary")
 	else:
 		full_pert_check = re.compile("|".join([pert_type.pattern
-					for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+					for pert_type in [kf_re, Keq_re, kr_re,
+										ic_re, fixed_re, function_re]]))
 		for perturb, value in iteritems(perturbations):
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
@@ -120,7 +123,7 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 							simulation=True)
 		return [None, None]
 	model.repair()
-	# Collect sympy symbols and make dictionariess for odes and rates
+	# Collect sympy symbols and make dictionaries for odes and rates
 	odes, rates, symbols = expressions._sort_symbols(model)
 	# Perturb the system if perturbations exist
 	if len(perturbations) != 0:
@@ -128,7 +131,6 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 													symbols, perturbations)
 	# Get values to substitute into ODEs and the metabolite initial conditions
 	values, ics = _get_values(model, perturbations, symbols)
-
 	metab_syms = symbols[0]
 	fixed_syms = symbols[2]
 	# Make lambda functions of the odes and rates
@@ -137,7 +139,6 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 	# Integrate the odes to obtain the concentration solutions
 	time, c = _integrate_odes(time, lam_odes, lam_jacb, ics,
 								nsteps, first_step, min_step, max_step)
-
 	# Map metbaolite ids to their concentration solutions
 	c_profile = dict()
 	for i, sym in enumerate(metab_syms):
@@ -155,10 +156,12 @@ def simulate(model, time, perturbations=None, numpoints=1000, nsteps=500,
 		lambda_func = lambda_func_and_args[1]
 		args = lambda_func_and_args[0]
 		concs = np.array([c_profile[model.metabolites.get_by_id(str(arg))]
-							for arg in args]).T
+							for arg in args if arg is not sp.Symbol("t")]).T
 		for i in range(0, len(f)):
-			if len(args) != 0:
+			if len(args) != 0 and args[-1] != sp.Symbol("t"):
 				f[i] = lambda_func(*concs[i,:])
+			elif len(args) != 0 and args[-1] == sp.Symbol("t"):
+				f[i] = lambda_func(*concs[i,:], time[i])
 			else:
 				f[i] = lambda_func()
 		f_profile[rxn] = f
@@ -234,7 +237,8 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 		raise TypeError("Perturbations must be in a dictionary")
 	else:
 		full_pert_check = re.compile("|".join([pert_type.pattern
-					for pert_type in [kf_re, Keq_re, kr_re, ic_re, fixed_re]]))
+					for pert_type in [kf_re, Keq_re, kr_re,
+										ic_re, fixed_re, function_re]]))
 		for perturb, value in iteritems(perturbations):
 			if not full_pert_check.search(perturb):
 				raise TypeError("Perturbation not recognized")
@@ -402,10 +406,19 @@ def _perturb(model, ode_dict, rate_dict, symbol_list, perturbations):
 					conc_perturbs.update({metab: value})
 		# Handle initial condition perturbations
 		if ic_re.match(to_perturb):
+			if item_id not in model.metabolites:
+				raise KeyError("%s is not a MassMetabolite object found "
+								"in the model.metabolites DictList." % item_id)
 			conc_perturbs.update(
 							{model.metabolites.get_by_id(item_id): value})
 			continue
-
+		if function_re.match(to_perturb):
+			try:
+				metab = model.metabolites.get_by_id(item_id)
+			except KeyError:
+				metab = item_id
+			finally:
+				conc_perturbs.update({metab: sp.sympify(value)})
 	symbol_list = [metabolites, rate_params, fixed_concs, custom_params]
 	perturb_list = [conc_perturbs, rate_perturbs]
 	return ode_dict, rate_dict, symbol_list, perturb_list
@@ -423,7 +436,6 @@ def _get_values(model, perturbations, symbol_list):
 	rate_params = symbol_list[1]
 	fixed_concs = symbol_list[2]
 	custom_params = symbol_list[3]
-
 	# For rate parameters
 	values = dict()
 	for param_sym in rate_params:
@@ -522,5 +534,7 @@ def _make_lambda_rates(model, metabolites, rate_dict, values):
 		rate = rate.subs(metab_func_to_sym).subs(values)
 		args = tuple(sp.Symbol(m.id) for m in metab_objects
 					if sp.Symbol(m.id) in rate.atoms(sp.Symbol))
+		if t in rate.atoms(sp.Symbol):
+			args += tuple([t])
 		rate_dict[rxn] = [args, sp.lambdify(args, rate, "numpy")]
 	return rate_dict
