@@ -73,7 +73,9 @@ class MassMetabolite(Species):
 	@property
 	def elements(self):
 		"""Dictionary of elements as keys and their count in the
-		metabolite as integers.
+		metabolite as integers. Enzyme and macromolecule moieties encolsed by
+		brackets are treated as one entity and are counted once.
+
 
 		Identical to the method in cobra.core.metabolite
 		"""
@@ -89,6 +91,12 @@ class MassMetabolite(Species):
 			warn("invalid formula (has parenthesis) in '%s'" % self.formula)
 			return None
 		composition = {}
+		if "[" in tmp_formula and "]" in tmp_formula:
+			s = tmp_formula.index("["); e = tmp_formula.index("]") + 1;
+			moiety = tmp_formula[s:e][1:-1]
+			composition[moiety] = 1
+			tmp_formula = tmp_formula.replace(tmp_formula[s:e], "")
+
 		parsed = element_re.findall(tmp_formula)
 		for (element, count) in parsed:
 			if count == '':
