@@ -1384,15 +1384,17 @@ class MassModel(Object):
 					m = merged_model.metabolites.get_by_id(m.id)
 				merged_model.add_fixed_concentrations({m : fc})
 
-		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
-		for r, rate in iteritems(second_model._custom_rates):
-			if r.id not in existing_cr:
-				merged_model._custom_rates.update({r : rate})
-
 		existing_cp = [p for p in iterkeys(merged_model._custom_parameters)]
 		for p, val in iteritems(second_model._custom_parameters):
 			if p not in existing_cp:
 				merged_model._custom_parameters.update({p : val})
+
+		existing_cr = [r.id for r in iterkeys(merged_model._custom_rates)]
+		for r, rate in iteritems(second_model._custom_rates):
+			if r.id not in existing_cr:
+				merged_model._custom_rates.update({
+								merged_model.reactions.get_by_id(r.id) : rate})
+
 		# Add old models to the module set
 		if second_model.id not in merged_model.modules:
 			merged_model.modules.add(second_model.id)

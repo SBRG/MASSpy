@@ -235,7 +235,7 @@ def create_custom_rate(reaction, custom_rate_law, custom_parameter_list=None):
 								"list of strings")
 	else:
 		custom_parameter_list = []
-
+	custom_rate_law = custom_rate_law.replace("(t)", "")
 	# Get metabolites as symbols if they are in the custom rate law
 	metab_symbols = dict((metab.id, sp.Function(metab.id)(t))
 					for metab in iterkeys(reaction.metabolites)

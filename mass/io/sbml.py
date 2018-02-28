@@ -322,10 +322,10 @@ def parse_xml_into_model(xml, number=float):
 		model.add_reactions(reactions)
 	except ValueError as e:
 		warn(str(e))
-
 	for custom_rxn, custom_rate in iteritems(custom_rate_dict):
-		model.add_custom_rate(
-			custom_rxn, custom_rate, custom_param_dict[custom_rxn])
+		rxn = model.reactions.get_by_id(custom_rxn.id)
+		model.add_custom_rate(custom_rxn, custom_rate,
+					custom_param_dict[custom_rxn])
 
 	# add external metabolites (parameters)
 	ext_dict = {}
