@@ -247,11 +247,12 @@ def find_steady_state(model, strategy="simulate", perturbations=None,
 	# Perform the simulate strategy
 	if strategy is "simulate":
 		# Start with final time point at 10^3, quit after trying 10^6
-		power = 1
+		power = 3
 		fail_power = 6
 		while power <= fail_power:
 			retry = False
-			time = np.geomspace(1e-6, 10**power, int(10**power), endpoint=True)
+			time = np.geomspace(1e-6, 10**power, int((10**power)/4),
+								endpoint=True)
 			[c_profile, f_profile] = options[strategy](
 									model, time,
 									perturbations=perturbations)
@@ -439,6 +440,8 @@ def _get_values(model, perturbations, symbol_list):
 	# For rate parameters
 	values = dict()
 	for param_sym in rate_params:
+		if param_sym in custom_params:
+			continue
 		[p_type, rid] = re.split("\_", str(param_sym), maxsplit=1)
 		# Use the perturbation value if it exists
 		if "%s_%s" % (p_type, rid) in iterkeys(rate_perturbs):
@@ -495,11 +498,15 @@ def _make_lambda_odes(model, metabolites, ode_dict, values):
 
 	# Get ode equations and Jacobian matrix
 	odes = metab_matrix.diff(t).subs(eqs)
-	jacb = sp.Matrix([[fj.diff(m) for m in metab_matrix] for fj in odes])
-	# Build lambda functions for odes and Jacobian
 	lambda_odes = sp.lambdify((metab_matrix, t), odes.subs(values), "numpy")
-	lambda_jacb = sp.lambdify((metab_matrix, t), jacb.subs(values), "numpy")
 
+	try: #FIXME Necessary due to bug in sympy, fix when sympy is updated
+		jacb = sp.Matrix([[fj.diff(m) for m in metab_matrix] for fj in odes])
+		lambda_jacb = sp.lambdify((metab_matrix, t), jacb.subs(values), "numpy")
+	except:
+		jacb = None
+		lambda_jacb = None
+	# Build lambda functions for odes and Jacobian
 	return [lambda_odes, lambda_jacb]
 
 def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, nsteps, first_step,
@@ -511,13 +518,17 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, nsteps, first_step,
 	def f(y, t):
 		res = np.array(lam_odes(y, t)).T[0]
 		return list(res)
-
-	def j(y, t):
-		res = lam_jacb(y, t)
-		return list(res)
-
+	if lam_jacb is not None:
+		#FIXME Necessary due to bug in sympy, fix when sympy is updated
+		def j(y, t):
+			res = lam_jacb(y, t)
+			return list(res)
+	else:
+		j = None
+	# FIXME Integrate new solvers
 	y = odeint(f, ics, t_vector, Dfun=j, h0=first_step, mxstep=nsteps,
-											hmax=max_step, hmin=min_step)
+											hmax=max_step, hmin=min_step,
+											atol=1e-5)
 	return t_vector, y
 
 def _make_lambda_rates(model, metabolites, rate_dict, values):

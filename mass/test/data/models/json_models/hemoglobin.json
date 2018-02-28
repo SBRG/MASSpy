@@ -31,7 +31,7 @@
 "initial_condition":0.046209608049656195,
 "charge":-5,
 "compartment":"c",
-"formula":"HbC3H3O10P2"
+"formula":"[Hb]-C3H3O10P2"
 },
 {
 "id":"h2o_c",
@@ -55,7 +55,7 @@
 "initial_condition":0.050085289191380965,
 "charge":0,
 "compartment":"c",
-"formula":"HbO2"
+"formula":"[Hb]-O2"
 },
 {
 "id":"hb_2o2_c",
@@ -63,7 +63,7 @@
 "initial_condition":0.07362532834168697,
 "charge":0,
 "compartment":"c",
-"formula":"HbO4"
+"formula":"[Hb]-O4"
 },
 {
 "id":"hb_3o2_c",
@@ -71,7 +71,7 @@
 "initial_condition":0.2628417272450733,
 "charge":0,
 "compartment":"c",
-"formula":"HbO6"
+"formula":"[Hb]-O6"
 },
 {
 "id":"hb_4o2_c",
@@ -79,7 +79,7 @@
 "initial_condition":6.807612746462968,
 "charge":0,
 "compartment":"c",
-"formula":"HbO8"
+"formula":"[Hb]-O8"
 },
 {
 "id":"hb_c",
@@ -87,7 +87,7 @@
 "initial_condition":0.0596253007092338,
 "charge":0,
 "compartment":"c",
-"formula":"Hb"
+"formula":"[Hb]"
 },
 {
 "id":"o2_c",
