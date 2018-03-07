@@ -4,208 +4,156 @@
 {
 "id":"adp_c",
 "name":"ADP",
-"initial_condition":0.29,
-"charge":-3,
 "compartment":"c",
 "formula":"C10H12N5O10P2"
 },
 {
 "id":"amp_c",
 "name":"AMP",
-"initial_condition":0.0867281,
-"charge":-2,
 "compartment":"c",
 "formula":"C10H12N5O7P"
 },
 {
 "id":"atp_c",
 "name":"ATP",
-"initial_condition":1.6,
-"charge":-4,
 "compartment":"c",
 "formula":"C10H12N5O13P3"
 },
 {
 "id":"f6p_c",
 "name":"D-Fructose 6-phosphate",
-"initial_condition":0.0198,
-"charge":-2,
 "compartment":"c",
 "formula":"C6H11O9P"
 },
 {
 "id":"fdp_c",
 "name":"D-Fructose 1,6-bisphosphate",
-"initial_condition":0.0146,
-"charge":-4,
 "compartment":"c",
 "formula":"C6H10O12P2"
 },
 {
 "id":"h_c",
 "name":"H+",
-"initial_condition":8.99757e-05,
-"charge":1,
 "compartment":"c",
 "formula":"H"
 },
 {
 "id":"pfk_R0_AF_c",
 "name":"Phosphofructokinase-ATP-F6P complex",
-"initial_condition":6.46642e-11,
-"charge":-6,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O13P3-C6H11O9P"
 },
 {
 "id":"pfk_R0_A_c",
 "name":"Phosphofructokinase-ATP complex",
-"initial_condition":1.3030299999999997e-07,
-"charge":-4,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O13P3"
 },
 {
 "id":"pfk_R0_c",
 "name":"Phosphofructokinase",
-"initial_condition":3.92651e-08,
-"charge":0,
 "compartment":"c",
 "formula":"[PFK]"
 },
 {
 "id":"pfk_R1_AF_c",
 "name":"Phosphofructokinase-ATP-F6P complex (1 AMP)",
-"initial_condition":6.79782e-10,
-"charge":-8,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O7P-C10H12N5O13P3-C6H11O9P"
 },
 {
 "id":"pfk_R1_A_c",
 "name":"Phosphofructokinase-ATP complex (1 AMP)",
-"initial_condition":1.3698099999999998e-06,
-"charge":-6,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O7P-C10H12N5O13P3"
 },
 {
 "id":"pfk_R1_c",
 "name":"Phosphofructokinase (1 AMP)",
-"initial_condition":4.1277499999999994e-07,
-"charge":-2,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O7P"
 },
 {
 "id":"pfk_R2_AF_c",
 "name":"Phosphofructokinase-ATP-F6P complex (2 AMP)",
-"initial_condition":2.6798300000000002e-09,
-"charge":-10,
 "compartment":"c",
 "formula":"[PFK]-C20H24N10O14P2-C10H12N5O13P3-C6H11O9P"
 },
 {
 "id":"pfk_R2_A_c",
 "name":"Phosphofructokinase-ATP complex (2 AMP)",
-"initial_condition":5.4000299999999995e-06,
-"charge":-8,
 "compartment":"c",
 "formula":"[PFK]-C20H24N10O14P2-C10H12N5O13P3"
 },
 {
 "id":"pfk_R2_c",
 "name":"Phosphofructokinase (2 AMP)",
-"initial_condition":1.62724e-06,
-"charge":-4,
 "compartment":"c",
 "formula":"[PFK]-C20H24N10O14P2"
 },
 {
 "id":"pfk_R3_AF_c",
 "name":"Phosphofructokinase-ATP-F6P complex (3 AMP)",
-"initial_condition":4.695280000000001e-09,
-"charge":-12,
 "compartment":"c",
 "formula":"[PFK]-C30H36N15O21P3-C10H12N5O13P3-C6H11O9P"
 },
 {
 "id":"pfk_R3_A_c",
 "name":"Phosphofructokinase-ATP complex (3 AMP)",
-"initial_condition":9.46131e-06,
-"charge":-10,
 "compartment":"c",
 "formula":"[PFK]-C30H36N15O21P3-C10H12N5O13P3"
 },
 {
 "id":"pfk_R3_c",
 "name":"Phosphofructokinase (3 AMP)",
-"initial_condition":2.8510499999999996e-06,
-"charge":-6,
 "compartment":"c",
 "formula":"[PFK]-C30H36N15O21P3"
 },
 {
 "id":"pfk_R4_AF_c",
 "name":"Phosphofructokinase-ATP-F6P complex (4 AMP)",
-"initial_condition":3.08495e-09,
-"charge":-14,
 "compartment":"c",
 "formula":"[PFK]-C40H48N20O28P4-C10H12N5O13P3-C6H11O9P"
 },
 {
 "id":"pfk_R4_A_c",
 "name":"Phosphofructokinase-ATP complex (4 AMP)",
-"initial_condition":6.21638e-06,
-"charge":-12,
 "compartment":"c",
 "formula":"[PFK]-C40H48N20O28P4-C10H12N5O13P3"
 },
 {
 "id":"pfk_R4_c",
 "name":"Phosphofructokinase (4 AMP)",
-"initial_condition":1.8732299999999999e-06,
-"charge":-8,
 "compartment":"c",
 "formula":"[PFK]-C40H48N20O28P4"
 },
 {
 "id":"pfk_T0_c",
 "name":"Phosphofructokinase (Tense)",
-"initial_condition":4.31916e-11,
-"charge":0,
 "compartment":"c",
 "formula":"[PFK]"
 },
 {
 "id":"pfk_T1_c",
 "name":"Phosphofructokinase (1 ATP)",
-"initial_condition":2.76427e-09,
-"charge":-4,
 "compartment":"c",
 "formula":"[PFK]-C10H12N5O13P3"
 },
 {
 "id":"pfk_T2_c",
 "name":"Phosphofructokinase (2 ATP)",
-"initial_condition":6.634240000000001e-08,
-"charge":-8,
 "compartment":"c",
 "formula":"[PFK]-C20H24N10O26P6"
 },
 {
 "id":"pfk_T3_c",
 "name":"Phosphofructokinase (3 ATP)",
-"initial_condition":7.07652e-07,
-"charge":-12,
 "compartment":"c",
 "formula":"[PFK]-C30H36N15O39P9"
 },
 {
 "id":"pfk_T4_c",
 "name":"Phosphofructokinase (4 ATP)",
-"initial_condition":2.83061e-06,
-"charge":-16,
 "compartment":"c",
 "formula":"[PFK]-C40H48N20O52P12"
 }
@@ -215,8 +163,8 @@
 "id":"PFK_L",
 "name":"PFK R/T Transition",
 "metabolites":{
-"pfk_R0_c":-1,
-"pfk_T0_c":1
+"pfk_R0_c":-1.0,
+"pfk_T0_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -230,9 +178,9 @@
 "id":"PFK_R01",
 "name":"PFK_R0-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_R0_A_c":1,
-"pfk_R0_c":-1
+"atp_c":-1.0,
+"pfk_R0_A_c":1.0,
+"pfk_R0_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -246,9 +194,9 @@
 "id":"PFK_R02",
 "name":"PFK_R0_A-F6P binding",
 "metabolites":{
-"f6p_c":-1,
-"pfk_R0_AF_c":1,
-"pfk_R0_A_c":-1
+"f6p_c":-1.0,
+"pfk_R0_AF_c":1.0,
+"pfk_R0_A_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -262,11 +210,11 @@
 "id":"PFK_R03",
 "name":"PFK_R0_AF catalyzation",
 "metabolites":{
-"adp_c":1,
-"fdp_c":1,
-"h_c":1,
-"pfk_R0_AF_c":-1,
-"pfk_R0_c":1
+"adp_c":1.0,
+"fdp_c":1.0,
+"h_c":1.0,
+"pfk_R0_AF_c":-1.0,
+"pfk_R0_c":1.0
 },
 "_reversible":false,
 "_forward_rate_constant":"",
@@ -280,9 +228,9 @@
 "id":"PFK_R10",
 "name":"PFK_R0-AMP binding",
 "metabolites":{
-"amp_c":-1,
-"pfk_R0_c":-1,
-"pfk_R1_c":1
+"amp_c":-1.0,
+"pfk_R0_c":-1.0,
+"pfk_R1_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -296,9 +244,9 @@
 "id":"PFK_R11",
 "name":"PFK_R1-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_R1_A_c":1,
-"pfk_R1_c":-1
+"atp_c":-1.0,
+"pfk_R1_A_c":1.0,
+"pfk_R1_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -312,9 +260,9 @@
 "id":"PFK_R12",
 "name":"PFK_R1_A-F6P binding",
 "metabolites":{
-"f6p_c":-1,
-"pfk_R1_AF_c":1,
-"pfk_R1_A_c":-1
+"f6p_c":-1.0,
+"pfk_R1_AF_c":1.0,
+"pfk_R1_A_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -328,11 +276,11 @@
 "id":"PFK_R13",
 "name":"PFK_R1_AF catalyzation",
 "metabolites":{
-"adp_c":1,
-"fdp_c":1,
-"h_c":1,
-"pfk_R1_AF_c":-1,
-"pfk_R1_c":1
+"adp_c":1.0,
+"fdp_c":1.0,
+"h_c":1.0,
+"pfk_R1_AF_c":-1.0,
+"pfk_R1_c":1.0
 },
 "_reversible":false,
 "_forward_rate_constant":"",
@@ -346,9 +294,9 @@
 "id":"PFK_R20",
 "name":"PFK_R1-AMP binding",
 "metabolites":{
-"amp_c":-1,
-"pfk_R1_c":-1,
-"pfk_R2_c":1
+"amp_c":-1.0,
+"pfk_R1_c":-1.0,
+"pfk_R2_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -362,9 +310,9 @@
 "id":"PFK_R21",
 "name":"PFK_R2-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_R2_A_c":1,
-"pfk_R2_c":-1
+"atp_c":-1.0,
+"pfk_R2_A_c":1.0,
+"pfk_R2_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -378,9 +326,9 @@
 "id":"PFK_R22",
 "name":"PFK_R2_A-F6P binding",
 "metabolites":{
-"f6p_c":-1,
-"pfk_R2_AF_c":1,
-"pfk_R2_A_c":-1
+"f6p_c":-1.0,
+"pfk_R2_AF_c":1.0,
+"pfk_R2_A_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -394,11 +342,11 @@
 "id":"PFK_R23",
 "name":"PFK_R2_AF catalyzation",
 "metabolites":{
-"adp_c":1,
-"fdp_c":1,
-"h_c":1,
-"pfk_R2_AF_c":-1,
-"pfk_R2_c":1
+"adp_c":1.0,
+"fdp_c":1.0,
+"h_c":1.0,
+"pfk_R2_AF_c":-1.0,
+"pfk_R2_c":1.0
 },
 "_reversible":false,
 "_forward_rate_constant":"",
@@ -412,9 +360,9 @@
 "id":"PFK_R30",
 "name":"PFK_R2-AMP binding",
 "metabolites":{
-"amp_c":-1,
-"pfk_R2_c":-1,
-"pfk_R3_c":1
+"amp_c":-1.0,
+"pfk_R2_c":-1.0,
+"pfk_R3_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -428,9 +376,9 @@
 "id":"PFK_R31",
 "name":"PFK_R3-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_R3_A_c":1,
-"pfk_R3_c":-1
+"atp_c":-1.0,
+"pfk_R3_A_c":1.0,
+"pfk_R3_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -444,9 +392,9 @@
 "id":"PFK_R32",
 "name":"PFK_R3_A-F6P binding",
 "metabolites":{
-"f6p_c":-1,
-"pfk_R3_AF_c":1,
-"pfk_R3_A_c":-1
+"f6p_c":-1.0,
+"pfk_R3_AF_c":1.0,
+"pfk_R3_A_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -460,11 +408,11 @@
 "id":"PFK_R33",
 "name":"PFK_R3_AF catalyzation",
 "metabolites":{
-"adp_c":1,
-"fdp_c":1,
-"h_c":1,
-"pfk_R3_AF_c":-1,
-"pfk_R3_c":1
+"adp_c":1.0,
+"fdp_c":1.0,
+"h_c":1.0,
+"pfk_R3_AF_c":-1.0,
+"pfk_R3_c":1.0
 },
 "_reversible":false,
 "_forward_rate_constant":"",
@@ -478,9 +426,9 @@
 "id":"PFK_R40",
 "name":"PFK_R3-AMP binding",
 "metabolites":{
-"amp_c":-1,
-"pfk_R3_c":-1,
-"pfk_R4_c":1
+"amp_c":-1.0,
+"pfk_R3_c":-1.0,
+"pfk_R4_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -494,9 +442,9 @@
 "id":"PFK_R41",
 "name":"PFK_R4-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_R4_A_c":1,
-"pfk_R4_c":-1
+"atp_c":-1.0,
+"pfk_R4_A_c":1.0,
+"pfk_R4_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -510,9 +458,9 @@
 "id":"PFK_R42",
 "name":"PFK_R4_A-F6P binding",
 "metabolites":{
-"f6p_c":-1,
-"pfk_R4_AF_c":1,
-"pfk_R4_A_c":-1
+"f6p_c":-1.0,
+"pfk_R4_AF_c":1.0,
+"pfk_R4_A_c":-1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -526,11 +474,11 @@
 "id":"PFK_R43",
 "name":"PFK_R4_AF catalyzation",
 "metabolites":{
-"adp_c":1,
-"fdp_c":1,
-"h_c":1,
-"pfk_R4_AF_c":-1,
-"pfk_R4_c":1
+"adp_c":1.0,
+"fdp_c":1.0,
+"h_c":1.0,
+"pfk_R4_AF_c":-1.0,
+"pfk_R4_c":1.0
 },
 "_reversible":false,
 "_forward_rate_constant":"",
@@ -544,9 +492,9 @@
 "id":"PFK_T1",
 "name":"PFK_T1-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_T0_c":-1,
-"pfk_T1_c":1
+"atp_c":-1.0,
+"pfk_T0_c":-1.0,
+"pfk_T1_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -560,9 +508,9 @@
 "id":"PFK_T2",
 "name":"PFK_T2-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_T1_c":-1,
-"pfk_T2_c":1
+"atp_c":-1.0,
+"pfk_T1_c":-1.0,
+"pfk_T2_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -576,9 +524,9 @@
 "id":"PFK_T3",
 "name":"PFK_T3-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_T2_c":-1,
-"pfk_T3_c":1
+"atp_c":-1.0,
+"pfk_T2_c":-1.0,
+"pfk_T3_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -592,9 +540,9 @@
 "id":"PFK_T4",
 "name":"PFK_T4-ATP binding",
 "metabolites":{
-"atp_c":-1,
-"pfk_T3_c":-1,
-"pfk_T4_c":1
+"atp_c":-1.0,
+"pfk_T3_c":-1.0,
+"pfk_T4_c":1.0
 },
 "_reversible":true,
 "_forward_rate_constant":"",
@@ -637,45 +585,44 @@
 "_custom_rates":{
 "PFK_R01":"kf_A*(atp_c(t)*pfk_R0_c(t) - pfk_R0_A_c(t)/Keq_A)",
 "PFK_R02":"kf_F*(f6p_c(t)*pfk_R0_A_c(t) - pfk_R0_AF_c(t)/Keq_F)",
-"PFK_R03":"kf_PFK*pfk_R0_AF_c(t)",
 "PFK_R11":"kf_A*(atp_c(t)*pfk_R1_c(t) - pfk_R1_A_c(t)/Keq_A)",
 "PFK_R12":"kf_F*(f6p_c(t)*pfk_R1_A_c(t) - pfk_R1_AF_c(t)/Keq_F)",
-"PFK_R13":"kf_PFK*pfk_R1_AF_c(t)",
 "PFK_R21":"kf_A*(atp_c(t)*pfk_R2_c(t) - pfk_R2_A_c(t)/Keq_A)",
 "PFK_R22":"kf_F*(f6p_c(t)*pfk_R2_A_c(t) - pfk_R2_AF_c(t)/Keq_F)",
-"PFK_R23":"kf_PFK*pfk_R2_AF_c(t)",
 "PFK_R31":"kf_A*(atp_c(t)*pfk_R3_c(t) - pfk_R3_A_c(t)/Keq_A)",
 "PFK_R32":"kf_F*(f6p_c(t)*pfk_R3_A_c(t) - pfk_R3_AF_c(t)/Keq_F)",
-"PFK_R33":"kf_PFK*pfk_R3_AF_c(t)",
 "PFK_R41":"kf_A*(atp_c(t)*pfk_R4_c(t) - pfk_R4_A_c(t)/Keq_A)",
 "PFK_R42":"kf_F*(f6p_c(t)*pfk_R4_A_c(t) - pfk_R4_AF_c(t)/Keq_F)",
-"PFK_R43":"kf_PFK*pfk_R4_AF_c(t)",
-"PFK_R10":"kf_ACT*(amp_c(t)*pfk_R0_c(t) - pfk_R1_c(t)/Keq_ACT)",
-"PFK_R20":"kf_ACT*(amp_c(t)*pfk_R1_c(t) - pfk_R2_c(t)/Keq_ACT)",
-"PFK_R30":"kf_ACT*(amp_c(t)*pfk_R2_c(t) - pfk_R3_c(t)/Keq_ACT)",
-"PFK_R40":"kf_ACT*(amp_c(t)*pfk_R3_c(t) - pfk_R4_c(t)/Keq_ACT)",
-"PFK_T1":"kf_I*(atp_c(t)*pfk_T0_c(t) - pfk_T1_c(t)/Keq_I)",
-"PFK_T2":"kf_I*(atp_c(t)*pfk_T1_c(t) - pfk_T2_c(t)/Keq_I)",
-"PFK_T3":"kf_I*(atp_c(t)*pfk_T2_c(t) - pfk_T3_c(t)/Keq_I)",
-"PFK_T4":"kf_I*(atp_c(t)*pfk_T3_c(t) - pfk_T4_c(t)/Keq_I)",
-"PFK_L":"kf_L*(pfk_R0_c(t) - pfk_T0_c(t)/Keq_L)"
+"PFK_R10":"kf_ACT*(4*amp_c(t)*pfk_R0_c(t) - pfk_R1_c(t)/Keq_ACT)",
+"PFK_R20":"kf_ACT*(3*amp_c(t)*pfk_R1_c(t) - 2*pfk_R2_c(t)/Keq_ACT)",
+"PFK_R30":"kf_ACT*(2*amp_c(t)*pfk_R2_c(t) - 3*pfk_R3_c(t)/Keq_ACT)",
+"PFK_R40":"kf_ACT*(amp_c(t)*pfk_R3_c(t) - 4*pfk_R4_c(t)/Keq_ACT)",
+"PFK_T1":"kf_I*(4*atp_c(t)*pfk_T0_c(t) - pfk_T1_c(t)/Keq_I)",
+"PFK_T2":"kf_I*(3*atp_c(t)*pfk_T1_c(t) - 2*pfk_T2_c(t)/Keq_I)",
+"PFK_T3":"kf_I*(2*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t)/Keq_I)",
+"PFK_T4":"kf_I*(atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t)/Keq_I)",
+"PFK_L":"kf_L*(pfk_R0_c(t) - pfk_T0_c(t)/Keq_L)",
+"PFK_R03":"kf_PFK*pfk_R0_AF_c(t)",
+"PFK_R13":"kf_PFK*pfk_R1_AF_c(t)",
+"PFK_R23":"kf_PFK*pfk_R2_AF_c(t)",
+"PFK_R33":"kf_PFK*pfk_R3_AF_c(t)",
+"PFK_R43":"kf_PFK*pfk_R4_AF_c(t)"
 },
 "_custom_parameters":{
-"Keq_A":0.068,
 "kf_A":119781,
-"Keq_F":0.1,
 "kf_F":2511660.0,
 "kf_PFK":99959800.0,
-"Keq_ACT":0.033,
-"kf_ACT":1000000.0,
-"Keq_I":0.1,
 "kf_I":1000000.0,
-"Keq_L":0.0011,
-"kf_L":1000000000000.0
+"kf_ACT":1000000.0,
+"kf_L":1000000000000.0,
+"Keq_A":0.068,
+"Keq_F":0.1,
+"Keq_ACT":0.033,
+"Keq_I":0.1,
+"Keq_L":0.0011
 },
 "compartments":{
 "c":"Cytosol"
 },
-"_matrix_type":"dataframe",
 "version":"1"
 }
