@@ -109,7 +109,7 @@ def get_missing_initial_conditions(model):
 		rate_syms = [str(sym)[:-3] if re.search("\(t\)", str(sym))
 									else str(sym)
 									for sym in list(rate_syms)]
-		missing_ics = [metab for metab in missing_ics if metab in rate_syms]
+		missing_ics = [metab for metab in missing_ics if metab.id in rate_syms]
 
 	return missing_ics
 
