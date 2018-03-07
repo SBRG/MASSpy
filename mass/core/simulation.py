@@ -528,7 +528,7 @@ def _integrate_odes(t_vector, lam_odes, lam_jacb, ics, nsteps, first_step,
 	# FIXME Integrate new solvers
 	y = odeint(f, ics, t_vector, Dfun=j, h0=first_step, mxstep=nsteps,
 											hmax=max_step, hmin=min_step,
-											atol=1e-6, ixpr=True)
+											atol=1e-5, ixpr=True)
 	return t_vector, y
 
 def _make_lambda_rates(model, metabolites, rate_dict, values):
