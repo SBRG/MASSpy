@@ -391,7 +391,6 @@ def plot_simulation(solution_profile, time, axes=None, observable=None,
 	# Add all other features to the plot
 	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
-	fig.tight_layout()
 	return fig
 
 def plot_phase_portrait(solution_profile, time, x, y, axes=None,
@@ -526,7 +525,6 @@ def plot_phase_portrait(solution_profile, time, x, y, axes=None,
 	# Add all other features to the plot
 	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
 	# Return figure instance
-	fig.tight_layout()
 	return fig
 
 def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
