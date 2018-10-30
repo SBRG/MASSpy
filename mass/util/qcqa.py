@@ -1,454 +1,854 @@
 # -*- coding: utf-8 -*-
-
-# Compatibility with Python 2.7
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
-# Import necesary packages
-import re
-from warnings import warn
-import sympy as sp
+import warnings
+from collections import Counter
+from math import ceil, floor
+
+from mass.util.util import ensure_iterable
+
+from six import iteritems, iterkeys
+
+import sympy as sym
+
 from tabulate import tabulate
-from six import iteritems, iterkeys, itervalues
 
-# Class begins
-## Set a float infinity
-inf = float('inf')
-## Global symbol for time
-t = sp.Symbol("t")
-## Public
-def qcqa_model(model, initial_conditions=False, parameters=False,
-			simulation=False, superfluous=False, param_consistency=False,
-			elemental=False, thermodynamics=False):
-	"""Run a series of quality control and assessment tests on a massmodel and
-	return a summary of the test results. Default value for all is False.
-
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	initial_conditions : bool, optional
-		Check for missing initial_conditions in the model
-	parameters : bool, optional
-		Check for missing parameters in the model and ensure the model
-		parameters are consistent if there are superfluous parameters
-	simulation : bool, optional
-		Check to see if the model can be simulated
-	superfluous : bool, optional
-		Check for superfluous parameters in the model
-	param_consistency : bool, optional
-		Check for parameter consistency in the model
-	elemental : bool, optional
-		Check for elemental consistency in the model. Ignores the exchanges.
-	thermodynamics : bool, optional
-		Check for thermodynamic consistency in the model.
-	"""
-	# List of bools indicating what QCQA functions to perform
-	check_list = [initial_conditions, parameters, simulation, superfluous,
-				param_consistency, elemental, thermodynamics]
-
-	# Names of the inputs
-	name_list = ["initial_conditions", "parameters", "simulation",
-				"superfluous", "param_consistency","elemental",
-				"thermodynamics"]
-	# The functions to perform for each check, and associated arguments if any.
-	function_and_args =[[get_missing_initial_conditions, None],
-						[get_missing_parameters, [None] + [True]*5],
-						[can_simulate, None],
-						[get_superfluous_parameters, None],
-						[parameter_consistency, [1e-9]],
-						[elemental_consistency, None],
-						[thermodynamic_consistency, None]]
+# Global
+_T_SYM = sym.Symbol("t")
 
 
-	# Check inputs
-	for i, check in enumerate(check_list):
-		if not isinstance(check, bool):
-			raise TypeError("%s must be a bool" % name_list[i])
+def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
+               superfluous=False, elemental=False, thermodynamic=False,
+               tol=1e-9):
+    """Check the model quality and print a summary of the results.
 
-	# Create a list of results to display in the QCQA report
-	to_display = []
-	for i, check in enumerate(check_list):
-		# If the check is set to True, perform the function and
-		# pass any existing arguments.
-		if check:
-			function = function_and_args[i][0]
-			args = function_and_args[i][1]
-			if args is not None:
-				to_display.append(function(model, *args))
-			else:
-				to_display.append(function(model))
-		# Set result to None if function check is not enabled.
-		else:
-			to_display.append(None)
-	# Print report
-	reports = _qcqa_summary(to_display)
-	for report in reports:
-		print("%s\n" % report)
+    Checking the model quality involves running a series of quality control and
+    assessment tests to determine consistency (e.g. elemental, thermodynamic)
+    in the model, missing values, and whether the model can be simulated.
 
-def get_missing_initial_conditions(model):
-	"""Get the initial conditions that are missing from the MassModel for the
-	metabolites that exist in the Massmodel.
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    parameters: bool, optional
+        If True, then check for undefined parameters in the model.
+    concentrations: bool, optional
+        If True, then check for undefined initial conditions and fixed
+        concentrations in the model.
+    fluxes: bool, optional
+        If True, then check for undefined steady state fluxes in the model.
+    superfluous: bool, optional
+        If True, then check for superfluous parameters in the model and ensure
+        existing parameters are consistent with one another if superfluous
+        parameters are present.
+    elemental: bool, optional
+        If True, then check for elemental consistency in the model.
+        Exchange reactions are ignored.
+    thermodynamic: bool, optional
+        If True, then check for thermodynamic consistency in the model.
+        Exchange reactions are ignored.
+    tol: float, optional
+        The tolerance used in consistency checking.
 
-	Parameters
-	----------
-	model_or_metabolite_list : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check inputs
-	missing_ics = [metab for metab in model.metabolites
-					if metab not in iterkeys(model.initial_conditions)]
-	missing_ics += [metab for metab in model.get_external_metabolites
-					if metab not in iterkeys(model.fixed_concentrations)]
-	# Determine which initial conditions are not necessary and remove them.
-	if len(missing_ics) != 0:
-		rate_symbol_sets = [r.atoms(sp.Function, sp.Symbol)
-							for r in itervalues(model.rates)]
-		rate_syms = set()
-		for symbol_sets in rate_symbol_sets:
-			rate_syms = rate_syms.union(symbol_sets)
-		rate_syms = [str(sym)[:-3] if re.search("\(t\)", str(sym))
-									else str(sym)
-									for sym in list(rate_syms)]
-		missing_ics = [metab for metab in missing_ics if metab.id in rate_syms]
+    """
+    # Set up empty lists for storing QC/QA report items.
+    table_items = [[], [], []]
+    # Get missing parameters
+    if True in [parameters, fluxes]:
+        results = _mk_parameter_content(model, tol, parameters, fluxes)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
 
-	return missing_ics
+    # Get missing initial and fixed concentrations
+    if concentrations:
+        results = _mk_concentration_content(model)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
 
-def get_missing_parameters(model, reaction_list=None, kf=False, Keq=False,
-							kr=False, ssflux=False, custom_parameters=False):
-	"""Get the parameters that are missing from the reactions that exist
-	in the Massmodel.
+    # Check for the desired consistencies in the values.
+    if True in [superfluous, elemental, thermodynamic]:
+        results = _mk_consistency_content(model, tol, superfluous, elemental,
+                                          thermodynamic)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
 
-	Parameters
-	----------
-	model : mass.Massmodel
-		The MassModel or list of reactions to inspect.
-	reaction_list : list or mass.MassReaction, optional
-		A mass.MassReaction or a list of mass.MassReaction objects in the model
-		to be checked. If none provided, will use all reactions in the model.
-	kf : bool, optional
-		If True, check MassReactions for missing forward rate constants.
-	Keq : bool, optional
-		If True, check MassReactions for missing equilibrium rate constants.
-	kr : bool, optional
-		If True, check MassReactions for missing reverse rate constants.
-	ssflux : bool, optional
-		If True, check MassReactions for missing steady state fluxes.
-	ssflux : bool, optional
-		If True, check the model for missing custom parameters.
+    # Check if simulatable
+    checks = is_simulatable(model)
+    report = _format_table_for_print(table_items, checks, model.id)
+    print(report)
 
-	Returns
-	-------
-	dictonary where keys are reactions and values are a list of
-		the missing parameters for the reaction.
-	"""
-	if reaction_list is None:
-		reaction_list = model.reactions
-	elif not hasattr(reaction_list, "__iter__"):
-		reaction_list = [reaction_list]
-	else:
-		for rxn in reaction_list:
-			if rxn not in model.reactions:
-				raise ValueError("Could not find reaction in the MassModel")
-	param_checks = [kf, Keq, kr, ssflux]
-	param_keys = ["kf", "Keq", "kr", "ssflux"]
-	attr_list = ["_forward_rate_constant", "_equilibrium_constant",
-				"_reverse_rate_constant", "ssflux"]
 
-	# Check inputs
-	for i, param in enumerate(param_checks):
-		if not isinstance(param, bool):
-			raise TypeError("%s must be a bool" % param_keys[i])
-		#If input type is correct, set parameters as their symbolic attributes
-		if param_keys[i] != "ssflux":
-			param_keys[i] = ("_sym_%s" % param_keys[i])
+def qcqa_simulation(simulation, model, parameters=False, concentrations=False,
+                    superfluous=False, thermodynamic=False, tol=1e-9):
+    """Check the Simulation quality and print a summary of the results.
 
-	missing_param_dict = dict()
-	for rxn in reaction_list:
-		missing_params = list()
-		# If the reaction has custom rates and check is set to True
-		if rxn in iterkeys(model.custom_rates) and custom_parameters:
-			symbols = model.custom_rates[rxn].atoms(sp.Symbol)
-			for sym in symbols:
-				# Ignore time symbol
-				if sym is t:
-					continue
-				# If the symbol is in the custom parameters, check the value
-				elif str(sym) in iterkeys(model.custom_parameters):
-					if model.custom_parameters[str(sym)] is not None:
-						continue
-					else:
-						# Add to missing parameters if value is None
-						missing_params.append(str(sym))
-				# If the symbol is in the fixed concentrations, check the value
-				elif str(sym) in iterkeys(model.fixed_concentrations):
-					try:
-						sym = model.metabolites.get_by_id(str(sym))
-					except:
-						sym = str(sym)
-					if model.fixed_concentrations[sym] is not None:
-						continue
-					else:
-						# Add to missing parameters if value is None
-						missing_params.append(str(sym))
-				elif re.search("^kf|^Keq|^kr", str(sym)) and \
-						re.split("\_", str(sym), maxsplit=1):
-						p_type= re.split("\_", str(sym), maxsplit=1)[0]
-						prop_f = rxn.__class__.__dict__[p_type]
-						if prop_f.fget(rxn) is not None or \
-							str(sym) in missing_params:
-							continue
-						# Add if value is none and not already added
-						else:
-							missing_params.append(str(sym))
-				# Handle unique scenario where parameter may have been defined
-				# as (rxn.id)_(p_type) instead of (p_type)_(rxn.id)
-				elif re.search("kf|Keq|kr", str(sym)) and \
-					re.split("\_", str(sym), maxsplit=1):
-					split_list = re.split("\_", str(sym), maxsplit=1)
-					if split_list[0] == rxn.id and \
-						re.match("kf$|Keq$|kr$",split_list[1]):
-						warn("If the reaction parameter identified in %s"
-						" is to be used, it should be defined as"
-						" %s_%s. Otherwise, the parameter needs to be "
-						"defined as a custom parameter" % (
-						rxn.id, split_list[1], split_list[0]))
-						missing_params.append(str(sym))
-						continue
-					else:
-						missing_params.append(str(sym))
-						continue
-				# Add to missing parameters if not found anywhere
-				else:
-					missing_params.append(str(sym))
-		# If no custom rate, search for parameters from parameter checks
-		else:
-			for i, param_check in enumerate(param_checks):
-				# Move on to next parameter if set to False
-				if not param_check:
-					# Next parameter if set to False
-					continue
-				param = rxn.__dict__[attr_list[i]]
-				param_name = rxn.__dict__[param_keys[i]]
-				if param is not None:
-					continue
-				elif param_keys[i] != "ssflux":
-					missing_params.append(param_name)
-				else:
-					missing_params.append(param_keys[i])
+    Checking the Simulation quality involves running a series of quality
+    control and assessment tests to determine consistency (e.g. numerical,
+    thermodynamic) in the stored values, missing values, and whether the
+    Simulation object contains what is needed in order to simulate the
+    given model.
 
-		if len(missing_params) == 0:
-			continue
-		else:
-			missing_param_dict[rxn] = missing_params
-	return missing_param_dict
+    Parameters
+    ----------
+    simulation: mass.Simulation
+        The Simulation to inspect.
+    model: mass.MassModel
+        The MassModel to inspect.
+    parameters: bool, optional
+        If True, then check for undefined parameters in the model.
+    concentrations: bool, optional
+        If True, then check for undefined initial conditions and fixed
+        concentrations in the model.
+    superfluous: bool, optional
+        If True, then check for superfluous parameters in the model and ensure
+        existing parameters are consistent with one another if superfluous
+        parameters are present.
+    thermodynamic: bool, optional
+        If True, then check for thermodynamic consistency in the model.
+        Exchange reactions are ignored.
+    tol: float, optional
+        The tolerance used in consistency checking.
 
-def can_simulate(model):
-	"""Check to see if the model has the required initial conditions and
-	parameters in order to be simulated with the given rate law type(s)
+    """
+    # Set up empty lists for storing QC/QA report items.
+    table_items = [[], [], []]
+    # Get missing parameters
+    if parameters:
+        results = _mk_parameter_content(model, tol, parameters, False,
+                                        simulation=simulation)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
 
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	rate_type :  int {1,2,3} or list, optional
-		What rate type(s) to check for the ability to simulate.
-		If None, will use the model's current rate type.
+    # Get missing initial and fixed concentrations
+    if concentrations:
+        results = _mk_concentration_content(model, simulation=simulation)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
 
-	Returns
-	-------
-	A dictionary where keys are the rate types and values are bools indicating
-		if the model has met conditions for simulation.
-	"""
-	# Check for missing initial conditions
-	missing_ics = get_missing_initial_conditions(model)
+    # Check for the desired consistencies in the values.
+    if True in [superfluous, thermodynamic]:
+        results = _mk_consistency_content(model, tol, superfluous, False,
+                                          thermodynamic, simulation=simulation)
+        for to_add, item_list in zip(results, table_items):
+            item_list.extend(to_add)
+    # Check if simulatable
+    checks = is_simulatable(model, simulation=simulation)
+    report = _format_table_for_print(table_items, checks, model.id,
+                                     sim_id=simulation.id)
+    print(report)
 
-	# Check for missing parameters
-	missing_params = dict()
-	for rxn in model.reactions:
-		missing_rxn_params = dict()
-		if rxn in iterkeys(model.custom_rates):
-			missing_params.update(get_missing_parameters(model, rxn, kf=True,
-											Keq=True, kr=True, ssflux=False,
-											custom_parameters=True))
-			continue
 
-		missing_rxn_params.update(get_missing_parameters(model, rxn, kf=True,
-											Keq=True, kr=True, ssflux=False,
-											custom_parameters=False))
-		try:
-			# Reversible reactions require 2 parameters
-			if rxn.reversible and len(missing_rxn_params[rxn]) > 1:
-				missing_params.update(missing_rxn_params)
-			# Irreversible reactions require a forward rate constant
-			elif not rxn.reversible and len(missing_rxn_params[rxn]) == 1:
-				missing_params.update(missing_rxn_params)
-			else:
-				pass
-		# No missing parameters found for that reaction
-		except KeyError:
-			pass
+def get_missing_reaction_parameters(model, simulation=None,
+                                    reaction_list=None):
+    """Identify the missing parameters for reactions in a model.
 
-	# Set check results based on missing initial conditions and parameters
-	if len(missing_params) != 0 or len(missing_ics) != 0:
-		simulate_check = False
-	else:
-		simulate_check = True
-	return simulate_check
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    reaction_list: list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
 
-def get_superfluous_parameters(model):
-	"""Get extra parameters required for massmodel simulation. superfluous
-	parameters are extra parameters that are not necessarily required for
-	simulating the model.
+    Returns
+    -------
+    missing: dict
+        A dictionary with MassReactions objects as keys and a string
+        identifying the missing parameters as values. Returns as
+        empty if there are no missing values.
 
-	Primarily a concern when model.kr != (model.Keq / model.kf).
+    Note
+    ----
+    Will include standard reaction parameters in custom rate laws. To get
+        missing custom parameters for reactions with custom rate expressions,
+        use qcqa.get_missing_custom_parameters instead.
 
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Get superfluous parameters
-	superfluous_parameters = {}
-	for rxn in model.reactions:
-		if len(rxn.parameters) == 3:
-			superfluous_parameters[rxn] = [rxn._sym_kr]
+    See Also
+    --------
+    qcqa_model
 
-	return superfluous_parameters
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
 
-def parameter_consistency(model, tol=1e-9):
-	"""Performs a consistency check on the rate constants and the equilibrium
-	constant if there are superfluous parameters. If there are no missing or
-	superfluous parameters, parameters are considered consistent.
+    if simulation is not None:
+        count = _mk_simulation_param_counter(model, simulation, reaction_list)
+    else:
+        count = []
 
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	tol : float, optional
-		The tolerance for parameter consistency. Parameters are considered
-		consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
-	"""
-	# Check inputs
-	if not isinstance(tol, float):
-		raise TypeError("tol must be a float")
+    missing = {}
+    for rxn in reaction_list:
+        missing_params = []
+        parameter_keys = [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr]
+        for key in parameter_keys:
+            try:
+                rxn.parameters[key]
+            except KeyError:
+                if not rxn.reversible and key is rxn._sym_kr:
+                    pass
+                else:
+                    missing_params.append(key)
+        if not count:
+            missing_params = "; ".join([k.split("_")[0]
+                                        for k in missing_params]).rstrip("; ")
+        else:
+            missing_params = "; ".join([k.split("_")[0]
+                                        for k in missing_params
+                                        if count[rxn.id] < 2]).rstrip("; ")
+        if missing_params:
+            missing[rxn] = "{0}".format(missing_params.rstrip("; "))
 
-	# Get superfluous parameters
-	param_consistency = {}
-	superfluous_parameters = get_superfluous_parameters(model)
-	for rxn, superfluous in iteritems(superfluous_parameters):
-		param_consistency[rxn] = (abs(rxn.kr - rxn.kf/rxn.Keq) <=tol)
+    return missing
 
-	return param_consistency
 
-def elemental_consistency(model):
-	"""Performs a consistency check on the reactions in the model to ensure
-	they are mass balanced and charged balanced.
+def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
+    """Identify the missing custom parameters in a model.
 
-	Exchange reactions are ignored because they are not typically balanced
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    reaction_list : list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
 
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check for elemental consistency
-	elem_consistency = {}
-	for rxn in model.reactions:
-		if not rxn.exchange and rxn.check_mass_balance() != {}:
-			unbalanced = ""
-			for elem, amount in iteritems(rxn.check_mass_balance()):
-				unbalanced += "%s:%.1f; " % (elem, amount)
-			elem_consistency[rxn] = unbalanced.rstrip("; ") + " unbalanced"
+    Returns
+    -------
+    missing: dict
+        A dictionary with MassReactions objects as keys and a string
+        identifying the missing custom parameters as values. Returns as
+        empty if there are no missing values.
 
-	return elem_consistency
+    Note
+    ----
+    Will not include standard reaction parameters. To get missing standard
+        reaction parameters for reactions with custom rate laws, use
+        qcqa.get_missing_reaction_parameters instead.
 
-def thermodynamic_consistency(model):
-	"""Performs a consistency check on the thermodynamics of the model.
+    See Also
+    --------
+    qcqa_model
 
-	Parameters
-	----------
-	model : mass.massmodel
-		The MassModel to inspect
-	"""
-	# Check inputs
-	print("FIXME: IMPLEMENT THERMO CONSISTENTCY")
-	return
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
 
-## Internal
-def _qcqa_summary(to_display):
-	"""Internal use. Create reports to print out based on the QCQA results.
-	Returns a list of tabulated reports for printing.
+    if simulation is not None:
+        existing_customs = simulation.view_parameter_values(model)[model.id]
+    else:
+        existing_customs = []
+    missing = {}
+    # Filter out reactions without custom rates
+    reaction_list = [reaction for reaction in reaction_list
+                     if reaction in model.custom_rates]
 
-	Parameters
-	----------
-	to_display: list
-		A list of the QCQA results to report
-	"""
-	name_list = ["Missing Initial Conditions", "Missing Parameters",
-				"Can Simulate","Superfluous Parameters",
-				"Parameter Consistency", "Elemental Consistency",
-				"Thermodynamic Consistency"]
+    for rxn in reaction_list:
+        rate = model.custom_rates[rxn]
+        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))]
+        customs = []
+        for parameter in symbols:
+            if parameter not in [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr] \
+               and parameter is not "t":
+                try:
+                    value = model.custom_parameters[parameter]
+                    if value is None:
+                        customs.append(parameter)
+                except KeyError:
+                    customs.append(parameter)
+        if existing_customs:
+            customs = [custom for custom in customs
+                       if sym.Symbol(custom) not in existing_customs
+                       or existing_customs[sym.Symbol(custom)] is None]
+        missing[rxn] = "; ".join(customs)
 
-	headers = []
-	item_list = []
-	for i, display_item in enumerate(to_display):
-		if display_item is not None:
-			headers.append(name_list[i])
-			item_list.append(display_item)
+    return missing
 
-	missing_dict = {}
-	sim_checks = {}
-	consistencies = {}
-	reports = []
-	for i, item in enumerate(item_list):
-		header = headers[i]
-		# Set up printout for missing initial conditions
-		if re.match("Missing Initial Conditions", header):
-			if len(item) != 0:
-				missing_dict[header] = item
-			continue
-		# Set up printout for missing parameters
-		if re.match("Missing Parameters", header) or \
-			re.match("Superfluous Parameters", header):
-			table_list = []
-			for rxn, missing in iteritems(item):
-				missing_params = ": "
-				for param in missing:
-					if re.split("\_", param, maxsplit=1):
-						if re.search("^kf|^Keq|^kr",
-							re.split("\_", param, maxsplit=1)[0]):
-							missing_params += re.split("\_", param)[0] + "; "
-						else:
-							missing_params += param + "; "
-					else:
-						missing_params += "; "
-				missing_params = "%s%s" % (rxn.id, missing_params.rstrip("; "))
-				table_list.append(missing_params)
 
-			if len(table_list) != 0:
-				missing_dict[header] = table_list
-			continue
+def get_missing_steady_state_fluxes(model, reaction_list=None):
+    """Identify the missing steady state flux values for reactions in a model.
 
-		if re.match("Can Simulate", header):
-			table_list = [item]
-			sim_checks[header] = table_list
-			continue
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    reaction_list : list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
 
-		if re.match("Parameter Consistency", header) or \
-			re.match("Elemental Consistency", header):
-			table_list = []
-			if len(item) != 0:
-				for rxn, consistency in iteritems(item):
-					table_list += ["%s: %s" % (rxn.id, consistency)]
-				consistencies[header] = table_list
-			continue
+    Returns
+    -------
+    missing: list
+        A list of reactions with missing steady state fluxes values. Returns as
+        empty if there are no missing values.
 
-	reports.append("QCQA REPORT\n" + "="*11)
-	if sim_checks != {}:
-		reports.append(tabulate(sim_checks, headers="keys",stralign="center"))
-	if missing_dict != {}:
-		reports.append(tabulate(missing_dict, headers="keys",stralign="left"))
-	if consistencies != {}:
-		reports.append(tabulate(consistencies, headers="keys",stralign="left"))
+    See Also
+    --------
+    qcqa_model
 
-	return reports
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
+
+    missing = [rxn for rxn in reaction_list if rxn.steady_state_flux is None]
+
+    return missing
+
+
+def get_missing_initial_conditions(model, simulation=None,
+                                   metabolite_list=None):
+    """Identify the missing initial conditions for metabolites in a model.
+
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    metabolite_list : list of mass.MassMetabolites, optional
+        A list of mass.MassMetabolite objects in the model to be checked.
+        If None provided, will use all metabolites in the model.
+
+    Returns
+    -------
+    missing: list
+        A list of metabolites with missing initial conditions. Returns as
+        empty if there are no missing values.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if metabolite_list is None:
+        metabolite_list = model.metabolites
+    metabolite_list = ensure_iterable(metabolite_list)
+
+    missing = [met for met in metabolite_list
+               if met not in model.initial_conditions
+               and met not in model.fixed_concentrations
+               or model.initial_conditions[met] is None]
+
+    if simulation is not None:
+        exist = simulation.view_initial_concentration_values(model)
+        missing = [met for met in missing
+                   if not sym.Function(str(met))(_T_SYM) in exist[model.id]
+                   or exist[model.id][sym.Function(str(met))(_T_SYM)] is None]
+
+    return missing
+
+
+def get_missing_fixed_concentrations(model, simulation=None,
+                                     metabolite_list=None):
+    """Identify the missing fixed concentrations for metabolites in a model.
+
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    metabolite_list : list of mass.MassMetabolites, optional
+        A list of mass.MassMetabolite objects in the model to be checked.
+        If None provided, will use all external metabolites in the model.
+
+    Returns
+    -------
+    missing: list
+        A list of metabolites with missing fixed concentrations. Returns as
+        empty if there are no missing values.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if metabolite_list is None:
+        metabolite_list = model.external_metabolites
+    metabolite_list = ensure_iterable(metabolite_list)
+
+    missing = [met for met in metabolite_list
+               if met not in model.fixed_concentrations
+               and met not in model.initial_conditions
+               or model.fixed_concentrations[met] is None]
+
+    if simulation is not None:
+        existing = simulation.view_parameter_values(model)
+        missing = [met for met in missing
+                   if not sym.Symbol(str(met)) in existing[model.id]
+                   or existing[model.id][sym.Symbol(str(met))] is None]
+
+    return missing
+
+
+def check_superfluous_consistency(model, simulation=None, tol=1e-9,
+                                  reaction_list=None):
+    """Check parameters of model reactions to ensure numerical consistentency.
+
+    Parameter numerical consistency includes checking reaction rate constants
+    and equilibrium constants to ensure they are mathematically consistent with
+    one another. If there are no superfluous parameters, existing parameters
+    are considered consistent.
+
+    Parameters
+    ----------
+    model: mass.massmodel
+        The MassModel to inspect
+    tol: float, optional
+        The tolerance for parameter consistency. Parameters are considered
+        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
+    reaction_list: list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
+
+    Returns
+    -------
+    inconsistent: dict
+        A dictionary with MassReactions objects as keys and a string
+        identifying the inconsistencies as values. Returns as empty if there
+        are no missing values.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if simulation is not None:
+        existing = simulation.view_parameter_values(model)[model.id]
+
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
+
+    superfluous = {}
+    for rxn in reaction_list:
+        try:
+            if simulation is not None:
+                keys = [sym.Symbol("{0}_{1}".format(param_type, rxn.id))
+                        for param_type in ["kf", "Keq", "kr"]]
+                kf, Keq, kr = [existing[key] for key in keys]
+            else:
+                keys = [rxn._sym_kf, rxn._sym_Keq, rxn._sym_kr]
+                kf, Keq, kr = [rxn.parameters[key] for key in keys]
+            superfluous[rxn] = _is_consistent(kf, Keq, kr, tol)
+        except KeyError:
+            pass
+
+    return superfluous
+
+
+def check_elemental_consistency(model, reaction_list=None):
+    """Check the reactions in the model to ensure elemental consistentency.
+
+    Elemental consistency includes checking reactions to ensure they are mass
+    and charged balanced. Exchange reactions are ignored because they are
+    typically unbalanced.
+
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    reaction_list : list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
+
+    Returns
+    -------
+    inconsistent: dict
+        A dictionary with MassReactions objects as keys and a string
+        identifying the inconsistencies as values. Returns as empty if there
+        are no missing values.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
+
+    inconsistent = {}
+    for reaction in reaction_list:
+        if not reaction.exchange and reaction.check_mass_balance():
+            unbalanced = ""
+            for elem, amount in iteritems(reaction.check_mass_balance()):
+                unbalanced += "{0}: {1:.1f}; ".format(elem, amount)
+            inconsistent[reaction] = unbalanced.rstrip("; ")
+
+    return inconsistent
+
+
+def check_thermodynamic_consistency(model, tol=1e-9, reaction_list=None):
+    """Check the model reactions for thermodynamic consistency.
+
+    Parameters
+    ----------
+    model: mass.massmodel
+        The MassModel to inspect
+    tol: float, optional
+        The tolerance for parameter consistency. Parameters are considered
+        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
+    reaction_list: list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
+
+    Returns
+    -------
+    inconsistent: dict
+        A dictionary with MassReactions objects as keys and a string
+        identifying the inconsistencies as values. Returns as empty if there
+        are no missing values.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
+
+    inconsistent = {}
+    warnings.warn("Thermodynamic consistency checking will be implemented"
+                  " in a future updated", FutureWarning)
+    return inconsistent
+
+
+def check_reaction_parameters(model, simulation=None, tol=1e-9,
+                              reaction_list=None):
+    """Check the model reactions for missing and superfluous parameters.
+
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+
+    Returns
+    -------
+    missing: dict
+        A dictionary with MassReactions objects as keys and missing parameters
+        as values. Returns as empty if there are no missing values.
+    superfluous: dict
+        A dictionary with MassReactions objects as keys and superfluous
+        parameters as values. Returns as empty if there are no superfluous
+        parameters.
+    reaction_list: list of mass.MassReaction, optional
+        A list of mass.MassReaction objects in the model to be checked.
+        If None provided, will use all reactions in the model.
+
+    See Also
+    --------
+    qcqa_model
+
+    """
+    if reaction_list is None:
+        reaction_list = model.reactions
+    reaction_list = ensure_iterable(reaction_list)
+
+    if simulation is not None:
+        existing_parameters = simulation.view_parameter_values(model)[model.id]
+        count = _mk_simulation_param_counter(model, simulation, reaction_list)
+    else:
+        count = []
+
+    missing = []
+    superfluous = []
+    customs = {}
+    for rxn in reaction_list:
+        if rxn in model.custom_rates:
+            missing_customs = _check_custom_for_standard(model, rxn)
+            if simulation is not None:
+                param_keys = [sym.Symbol("{0}_{1}".format(param, rxn.id))
+                              for param in missing_customs[rxn].split("; ")]
+                missing_customs = [str(param).split("_")[0]
+                                   for param in param_keys
+                                   if param not in existing_parameters
+                                   or existing_parameters[param] is None]
+            customs.update({rxn: "; ".join(missing_customs)})
+        # Address reactions that are missing parameters
+        elif (len(rxn.parameters) < 2 and not count) or count[rxn.id] < 2:
+            missing.append(rxn)
+        # Address reactions that have superfluous parameters
+        elif (len(rxn.parameters) > 2 and not count) or count[rxn.id] > 2:
+            superfluous.append(rxn)
+        # Only two reaction parameters exist, no consistency check required
+        else:
+            pass
+
+    if missing:
+        missing = get_missing_reaction_parameters(model, simulation, missing)
+    else:
+        missing = {}
+
+    if superfluous:
+        superfluous = check_superfluous_consistency(model, simulation,
+                                                    tol, superfluous)
+    else:
+        superfluous = {}
+
+    missing.update(customs)
+
+    return missing, superfluous
+
+
+def is_simulatable(model, simulation=None):
+    """Determine whether a model can be simulated.
+
+    Parameters
+    ----------
+    model: mass.MassModel
+        The MassModel to inspect.
+    simulation: mass.Simulation, optional
+        If provided, will check whether the model in the given Simulation
+        object can be simulated.
+
+    Returns
+    -------
+    simulate_check: bool
+        True if the model can be simulated, False otherwise.
+    consistency_check: bool
+        True if the model has no numerical consistency issues, False otherwise.
+
+    See Also
+    --------
+    qcqa_model
+    qcqa_simulation
+
+    """
+    missing_params, superfluous = check_reaction_parameters(model, simulation)
+    missing_concs = get_missing_initial_conditions(model, simulation)
+    missing_concs += get_missing_fixed_concentrations(model, simulation)
+    missing_params.update(get_missing_custom_parameters(model, simulation))
+    consistency_check = True
+    if superfluous:
+        for rxn, consistency in iteritems(superfluous):
+            if consistency is "Inconsistent":
+                consistency_check = False
+
+    if missing_params or missing_concs:
+        simulate_check = False
+    else:
+        simulate_check = True
+
+    return [simulate_check, consistency_check]
+
+
+# Internal
+def _mk_parameter_content(model, tol, parameters, fluxes, simulation=None):
+    """Create the content for summarizing missing reaction parameters.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    missing = []
+    headers = []
+    # Check standard reaction parameters if desired.
+    if parameters:
+        headers.append("Reaction Parameters")
+        missing_params = check_reaction_parameters(model, simulation, tol)[0]
+        missing_params = ["{0}: {1}".format(rxn.id, params)
+                          for rxn, params in iteritems(missing_params)]
+        missing.append("\n".join(missing_params))
+        # Check custom parameters
+        headers.append("Custom Parameters")
+        missing_params = get_missing_custom_parameters(model, simulation)
+        missing_params = ["{0}: {1}".format(rxn.id, params)
+                          for rxn, params in iteritems(missing_params)]
+        missing.append("\n".join(missing_params))
+
+    # Check steady state fluxes if desired.
+    if fluxes:
+        headers.append("S.S. Fluxes")
+        missing_params = get_missing_steady_state_fluxes(model)
+        missing.append("\n".join([r.id for r in missing_params]))
+
+    section = "MISSING PARAMETERS"
+    content_lists, columns, sections = _mk_content(missing, headers, section)
+    return content_lists, columns, sections
+
+
+def _mk_concentration_content(model, simulation=None):
+    """Create the content for summarizing missing concentrations.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    missing = []
+    for function in [get_missing_initial_conditions,
+                     get_missing_fixed_concentrations]:
+        missing_conc = [str(m) for m in function(model, simulation)]
+        missing.append("\n".join(missing_conc))
+
+    headers = ["Initial Conditions", "Fixed Concentrations"]
+    section = "MISSING CONCENTRATIONS"
+    content_lists, columns, sections = _mk_content(missing, headers, section)
+    return content_lists, columns, sections
+
+
+def _mk_consistency_content(model, tol, superfluous, elemental, thermodynamic,
+                            simulation=None):
+    """Create the content for summarizing missing reaction parameters.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    missing = []
+    headers = []
+    # Check superfluous parameters and their consistency if desired
+    if superfluous:
+        headers.append("Superfluous Parameters")
+        inconsistent = check_reaction_parameters(model, simulation, tol)[1]
+        inconsistent = ["{0}: {1}".format(rxn.id, consistency)
+                        for rxn, consistency in iteritems(inconsistent)]
+        missing.append("\n".join(inconsistent))
+    # Check elemental consistency if desired
+    if elemental:
+        headers.append("Elemental")
+        inconsistent = check_elemental_consistency(model)
+        inconsistent = ["{0}: {{{1}}} unbalanced".format(reaction.id, unbal)
+                        for reaction, unbal in iteritems(inconsistent)]
+        missing.append("\n".join(inconsistent))
+
+    # Check thermodynamic consistency if desired
+    if thermodynamic:
+        headers.append("Thermodynamic")
+        inconsistent = check_thermodynamic_consistency(model, tol)
+        missing.append("\n".join(inconsistent))
+
+    section = "CONSISTENCY CHECKS"
+    content_lists, columns, sections = _mk_content(missing, headers, section)
+    return content_lists, columns, sections
+
+
+def _mk_content(missing, headers, section):
+    """Check if content exists and add to table setup lists if it does.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    content_lists = []
+    columns = []
+    sections = []
+    for content, head in zip(missing, headers):
+        if content:
+            content_lists.append(content)
+            columns.append(head)
+    if content_lists and columns:
+        content_lists = [content_lists]
+        columns = [columns]
+        sections.append(section)
+
+    return content_lists, columns, sections
+
+
+def _format_table_for_print(table_items, checks, model_id, sim_id=None):
+    """Format qcqa report table such that it is ready to be printed.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    def make_formatted_table(content, header_list, table_format,
+                             str_alignment):
+        formatted_table = tabulate(content, headers=header_list,
+                                   tablefmt=table_format,
+                                   stralign=str_alignment)
+        return formatted_table
+
+    simulate_check, consistency_check = checks
+    # Unpack table items
+    content_lists, columns, sections = table_items
+
+    # Create tables
+    tables = [make_formatted_table([content], header, 'simple', u'left')
+              for content, header in zip(content_lists, columns)]
+    # Format based on longest string in the inner tables if content exists
+    if tables:
+        # Determine longest line in the table, minimum length of 42 characters
+        max_len = max([len(table.split('\n')[1]) for table in tables] + [42])
+        sections = [["{0}{1}{2}".format(" " * ceil((max_len - len(section))/2),
+                    section, " " * floor((max_len - len(section))/2))]
+                    for section in sections]
+
+    # Format all indivual pieces of the report
+    tables = [make_formatted_table([[table]], section, 'rst', u'left')
+              for table, section in zip(tables, sections)]
+    tables = [[table] for table in tables]
+    report_head = ""
+    if sim_id is not None:
+        report_head += "SIMULATION OBJECT ID: {0}\nSPECIFIC ".format(sim_id)
+
+    # Create and print report
+    report_head += ("MODEL ID: {0}\nSIMULATABLE: {1};\nNUMERICAL CONSISTENCY: "
+                    "{2}".format(model_id, simulate_check, consistency_check))
+    report = make_formatted_table(tables, [report_head], 'fancy_grid', u'left')
+    return report
+
+
+def _check_custom_for_standard(model, reaction):
+    """Check for missing standard reaction parameters in custom rate laws.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    customs = {}
+    if reaction in model.custom_rates:
+        symbols = list(model.custom_rates[reaction].atoms(sym.Symbol))
+        symbols = sorted([str(s) for s in symbols
+                         if str(s) in [reaction._sym_Keq, reaction._sym_kf,
+                                       reaction._sym_kr]])
+        for param in symbols:
+            try:
+                reaction.parameters[param]
+            except KeyError:
+                if reaction not in customs:
+                    customs[reaction] = "{0}; ".format(param.split("_")[0])
+                else:
+                    customs[reaction] += "{0}; ".format(param.split("_")[0])
+        if reaction in customs:
+            customs[reaction] = customs[reaction].rstrip("; ")
+    return customs
+
+
+def _mk_simulation_param_counter(model, simulation, reaction_list):
+    """Make a reaction parameter counter for a model in a Simulation.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    count = []
+    if simulation is not None:
+        existing_parameters = simulation.view_parameter_values(model)[model.id]
+        for param in iterkeys(existing_parameters):
+            param_split = str(param).split("_", 1)
+            if param_split[0] in ["kf", "Keq", "kr"] and \
+               param_split[1] in [r.id for r in reaction_list]:
+                count.append(param_split[1])
+            elif str(param) not in model.external_metabolites:
+                count.append(str(param))
+        count = Counter(count)
+    return count
+
+
+def _is_consistent(kf, Keq, kr, tol):
+    """Determine whether the reaction parameters are numerically consistency.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    return "Consistent" if (abs(kr - kf/Keq) <= tol) else "Inconsistent"

@@ -1,322 +1,376 @@
 # -*- coding: utf-8 -*-
-
-# Compatibility with Python 2.7
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
-# Import necesary packages
-from six import iteritems
 
-# cobra
 from cobra.core.metabolite import Metabolite
 from cobra.core.model import Model
 from cobra.core.reaction import Reaction
 
-# mass
 from mass.core import massmetabolite
 from mass.core import massmodel
 from mass.core import massreaction
 
-# Class begins
-## Public
-def to_cobra_metabolite(mass_metabolite, cobra_id=None):
-	"""To create a cobra Metabolite from a mass MassMetabolite.
+from six import iteritems, string_types
 
-	Parameters
-	----------
-	mass_metabolite : mass.MassMetabolite
-		The MassMetabolite for creating the cobra.Metabolite object
-	cobra_id : string, optional
-		id for the new cobra Metabolite. If no id is specified,
-		one will automatically be generated with the
-		MassMetabolite object's current id.
 
-	Returns
-	-------
-	cobra.Metabolite
-		The new cobra Metabolite
+# Public
+def convert_mass_to_cobra(object, prefix=None):
+    """Create a new cobra Object from a given mass Object.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(mass_metabolite, massmetabolite.MassMetabolite):
-		raise TypeError("Must be a mass MassMetabolite.")
+    Parameters
+    ----------
+    object: MassMetabolite, MassModel, or MassReaction
+        The mass Object to convert into a new cobra Object.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	# Generate a new ID if none is specified
-	if cobra_id is None:
-		cobra_id = mass_metabolite.id
+    Returns
+    -------
+    Object of class 'cobra'
+        The new 'cobra' object.
 
-	# Generate the cobra Metabolite
-	cobra_metab = Metabolite(id=cobra_id, name=mass_metabolite.name,
-							formula=mass_metabolite.formula,
-							charge=mass_metabolite.charge,
-							compartment=mass_metabolite.compartment)
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	cobra_metab._constraint_sense = mass_metabolite._constraint_sense
-	cobra_metab._bound = mass_metabolite._bound
+    """
+    conversion_dict = {massmetabolite.MassMetabolite: mass_to_cobra_metabolite,
+                       massreaction.MassReaction: mass_to_cobra_reaction,
+                       massmodel.MassModel: mass_to_cobra_model}
 
-	return cobra_metab
+    if type(object) not in conversion_dict:
+        raise TypeError("object must be a mass object")
+    else:
+        conversion_function = conversion_dict[type(object)]
 
-def to_massmetabolite(cobra_metabolite, mass_id=None):
-	"""To create a mass MassMetabolite from a cobra Metabolite.
+    return conversion_function(object, prefix=prefix)
 
-	Parameters
-	----------
-	cobra_metabolite : cobra.Metabolite
-		The Metabolite for creating the mass.MassMetabolite object
-	mass_id : string, optional
-		id for the new mass MassMetabolite. If no id is specified,
-		one will automatically be generated with the
-		Metabolite object's current id.
 
-	Returns
-	-------
-	mass.MassMetabolite
-		The new mass MassMetsbolite object
+def convert_cobra_to_mass(object, prefix=None):
+    """Create a new mass Object from a given cobra Object.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(cobra_metabolite, Metabolite):
-		raise TypeError("Must be a cobra Metabolite.")
+    Parameters
+    ----------
+    object: Metabolite, Model, or Reaction
+        The cobra Object to convert into a new mass Object.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	# Generate a new ID if none is specified
-	if mass_id is None:
-		mass_id = cobra_metabolite.id
+    Returns
+    -------
+    new_object: Object of class 'mass'
+        The new 'mass' object.
 
-	# Generate the mass MassMetabolite
-	mass_metab = massmetabolite.MassMetabolite(id=mass_id,
-				name=cobra_metabolite.name, formula=cobra_metabolite.formula,
-				charge=cobra_metabolite.charge,
-				compartment=cobra_metabolite.compartment)
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	mass_metab._constraint_sense = cobra_metabolite._constraint_sense
-	mass_metab._bound = cobra_metabolite._bound
+    """
+    conversion_dict = {Metabolite: cobra_to_mass_metabolite,
+                       Reaction: cobra_to_mass_reaction,
+                       Model: cobra_to_mass_model}
+    if type(object) not in conversion_dict:
+        raise TypeError("object must be a cobra object")
+    else:
+        conversion_function = conversion_dict[type(object)]
 
-	return mass_metab
+    return conversion_function(object, prefix=prefix)
 
-def to_cobra_reaction(mass_reaction, cobra_id=None,
-					upper_bound=None, lower_bound=None):
-	"""To create a cobra Reaction from a mass MassReaction.
 
-	If the lower and/or upper bounds are not specified, the reversibility
-	will be used to determine the bounds for initializing the reaction.
+def mass_to_cobra_metabolite(metabolite, prefix=None):
+    """Create a new cobra.Metabolite from the given mass.MassMetabolite.
 
-	For reversible MassReaction objects:
-		upper_bound=1000, lower_bound=-1000,
-	For irreversible MassReaction objects:
-		lower_bound=0, upper_bound=1000
+    Parameters
+    ----------
+    metabolite: mass.MassMetabolite
+        The mass.MassMetabolite to convert into a new cobra.Metabolite.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	Parameters
-	----------
-	mass_reaction : mass.MassReacion
-		The MassReaction for creating the cobra.Reaction object
-	cobra_id : string, optional
-		id for the new cobra Reaction. If no id is specified,
-		one will automatically be generated with the
-		MassReaction object's current id.
-	lower_bound : float, optional
-		The initialized lower bound of the cobra Reaction.
-	upper_bound : float, optional
-		The initialized upper bound of the cobra Reaction
+    Returns
+    -------
+    cobra.Metabolite
+        The new cobra.Metabolite object.
 
-	Returns
-	-------
-	cobra.Reaction
-		The new cobra Reaction object
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(mass_reaction, massreaction.MassReaction):
-		raise TypeError("Must be a mass MassReaction.")
+    """
+    return _convert_metabolite(metabolite, Metabolite,
+                               massmetabolite.MassMetabolite, prefix)
 
-	# Generate a new ID if none is specified
-	if cobra_id is None:
-		cobra_id = mass_reaction.id
 
-	# Generate the bounds
-	if upper_bound is None:
-		ub = mass_reaction.upper_bound
-	if lower_bound is None:
-		lb = mass_reaction.lower_bound
+def cobra_to_mass_metabolite(metabolite, prefix=None):
+    """Create a new mass.MassMetabolite from the given cobra.Metabolite.
 
-	# Generate the cobra Reaction
-	cobra_rxn = Reaction(id=cobra_id, name=mass_reaction.name,
-						subsystem=mass_reaction.subsystem, lower_bound=lb,
-						upper_bound=ub, objective_coefficient=0.)
-	cobra_rxn.variable_kind = mass_reaction.variable_kind
-	# Generate and add cobra Metabolites
-	cobra_metabs = {to_cobra_metabolite(metab) : coefficient
-					for metab, coefficient in \
-					iteritems(mass_reaction._metabolites)}
-	cobra_rxn.add_metabolites(cobra_metabs)
+    Parameters
+    ----------
+    metabolite: cobra.Metabolite
+        The cobra.Metabolite to convert into a new mass.MassMetabolite.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	# Generate and add new genes
-	for gene in mass_reaction._genes:
-		cobra_rxn._genes.add(gene.copy())
-	# Add the gene reaction rule
-	cobra_rxn._gene_reaction_rule = mass_reaction._gene_reaction_rule
-	# Make new metaboltites and genes aware they are involved in this reaction
-	cobra_rxn._update_awareness()
-	return cobra_rxn
+    Returns
+    -------
+    mass.MassMetabolite
+        The new mass.MassMetabolite object.
 
-def to_massreaction(cobra_reaction, mass_id=None,
-					kinetic_reversibility=None):
-	"""To create a MassReaction from a cobra Reaction.
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	If kinetic_reversibility is not specifiied, will try to infer
-	reversibility from the upper and lower bounds of the cobra object.
+    """
+    return _convert_metabolite(metabolite, massmetabolite.MassMetabolite,
+                               Metabolite, prefix)
 
-	Reversible if lower_bound < 0 < upper_bound. Otherwise irreversible
 
-	Parameters
-	----------
-	cobra_reaction : cobra.Reaction
-		The cobra Reaction for creating the mass.MassReaction object
-	mass_id : string, optional
-		id for the new mass MassReaction. If no id is specified,
-		one will automatically be generated with the
-		Reaction object's current id.
-	kinetic_reversibility : bool, optional
-		The reversibility of the mass MassReaction.
+def mass_to_cobra_reaction(reaction, prefix=None, convert_metabolites=True,
+                           lower_bound=None, upper_bound=None):
+    """Create a new cobra.Reaction from the given mass.MassReaction.
 
-	Returns
-	-------
-	mass.MassReaction
-		The new mass MassReaction object
+    Parameters
+    ----------
+    reaction: mass.MassReaction
+        The mass.MassReaction to convert into a new cobra.Reaction.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(cobra_reaction, Reaction):
-		raise TypeError("Must be a cobra Reaction.")
+    Returns
+    -------
+    cobra.Reaction
+        The new cobra.Reaction object.
 
-	# Generate a new ID if none is specified
-	if mass_id is None:
-		mass_id = cobra_reaction.id
+    Notes
+    -----
+    The lower and upper bounds for the cobra.Reaction are inferred from the
+        kinetic reversibility of the mass.MassReaction if not provided.
 
-	# Infer kinetic reversibility from bounds if none is specified
-	if kinetic_reversibility is None:
-		kinetic_reversibility = cobra_reaction.reversibility
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	# Generate the mass MassReaction
-	mass_rxn = massreaction.MassReaction(id=mass_id, name=cobra_reaction.name,
-										subsystem=cobra_reaction.subsystem,
-										reversible=kinetic_reversibility)
-	# Store old cobra information
-	mass_rxn.variable_kind = cobra_reaction.variable_kind
-	mass_rxn.objective_coefficient = 0.
-	mass_rxn.lower_bound = cobra_reaction.lower_bound
-	mass_rxn.upper_bound = cobra_reaction.upper_bound
+    """
+    new_reaction = _convert_reaction(reaction, Reaction,
+                                     massreaction.MassReaction, prefix)
+    if lower_bound is not None:
+        new_reaction.lower_bound = lower_bound
+    if upper_bound is not None:
+        new_reaction.upper_bound = upper_bound
 
-	# Generate and add mass MassMetsabolites
-	mass_metabs = {to_massmetabolite(cobra_metab): coeff
-			for cobra_metab, coeff in iteritems(cobra_reaction._metabolites)}
-	mass_rxn.add_metabolites(mass_metabs)
+    # Add converted metabolites
+    if convert_metabolites:
+        new_metabolites = {mass_to_cobra_metabolite(met, prefix=prefix): c
+                           for met, c in iteritems(reaction._metabolites)}
+        new_reaction.add_metabolites(new_metabolites)
+    return new_reaction
 
-	# Generate and add new genes
-	for gene in cobra_reaction._genes:
-		mass_rxn._genes.add(gene.copy())
-	# Add the gene reaction rule
-	mass_rxn._gene_reaction_rule = cobra_reaction._gene_reaction_rule
-	# Make new metaboltites and genes aware they are involved in this reaction
-	mass_rxn._update_awareness()
-	return mass_rxn
 
-def to_cobra_model(mass_model, cobra_id=None):
-	"""To create a cobra Model from a mass MassModel.
+def cobra_to_mass_reaction(reaction, prefix=None, convert_metabolites=True,
+                           kinetic_reversibility=None):
+    """Create a new mass.MassReaction from the given cobra.Reaction.
 
-	Parameters
-	----------
-	mass_model : mass.MassModel
-		The MassModel for creating the cobra.Model object
-	cobra_id : string, optional
-		id for the new cobra Model. If no id is specified,
-		one will automatically be generated with the
-		MassModel object's current id + _cobra.
+    Parameters
+    ----------
+    reaction: cobra.Reaction
+        The cobra.Reaction to convert into a new mass.MassReaction.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	Returns
-	-------
-	cobra.Model
-		The new cobra Model object
+    Returns
+    -------
+    mass.MassReaction
+        The new mass.MassReaction object.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(mass_model, massmodel.MassModel):
-		raise TypeError("Must be a mass MassModel.")
+    Notes
+    -----
+    Kinetic reversibility for the mass.MassReaction is inferred from the lower
+        and upper bounds of the cobra.Reaction if not provided.
 
-	# Generate a new ID if none is specified
-	if cobra_id is None:
-		cobra_id = mass_model.id + "_cobra"
 
-	# Generate the cobra Model
-	cobra_model = Model(id_or_model=cobra_id, name=mass_model.name)
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	# Add reactions and metabolites
-	cobra_rxns = [to_cobra_reaction(rxn) for rxn in mass_model.reactions]
-	cobra_model.add_reactions(cobra_rxns)
-	# Add compartments
-	cobra_model.compartments = mass_model.compartments.copy()
-	# Repair the new model
-	cobra_model.repair(rebuild_index=True, rebuild_relationships=True)
-	return cobra_model
+    """
+    new_reaction = _convert_reaction(reaction, massreaction.MassReaction,
+                                     Reaction, prefix)
+    if kinetic_reversibility is not None:
+        new_reaction.reversible = kinetic_reversibility
 
-def to_massmodel(cobra_model, mass_id=None):
-	"""To create a mass MassModel from a cobra Model.
+    # Add converted metabolites
+    if convert_metabolites:
+        new_metabolites = {cobra_to_mass_metabolite(met, prefix=prefix): c
+                           for met, c in iteritems(reaction._metabolites)}
+        new_reaction.add_metabolites(new_metabolites)
+    return new_reaction
 
-	Parameters
-	----------
-	cobra_model : cobra.Model
-		The Model for creating the mass.MassModel object
-	mass_id : string, optional
-		id for the new mass MassModel. If no id is specified,
-		one will automatically be generated with the
-		Model object's current id + _mass.
 
-	Returns
-	-------
-	mass.MassModel
-		The new mass MassModel object
+def mass_to_cobra_model(model, prefix=None):
+    """Create a new cobra.Model from the given mass.MassModel.
 
-	Warnings
-	--------
-	All similar fields will initialize to be identical to the input object.
-	All other fields will initialize to default values.
-	"""
-	# Check the input
-	if not isinstance(cobra_model, Model):
-		raise TypeError("Must be a cobra Model.")
+    Parameters
+    ----------
+    model: mass.MassModel
+        The mass.MassModel to convert into a new cobra.Model.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
 
-	# Generate a new ID if none is specified
-	if mass_id is None:
-		mass_id = cobra_model.id + "_mass"
+    Returns
+    -------
+    cobra.Model
+        The new cobra.Model object.
 
-	# Generate the mass MassModel
-	mass_model = massmodel.MassModel(id_or_massmodel=mass_id,
-									name=cobra_model.name)
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
 
-	# Add reactions and metabolites
-	mass_rxns = [to_massreaction(rxn) for rxn in cobra_model.reactions]
-	mass_model.add_reactions(mass_rxns)
+    """
+    new_model = _convert_model(model, Model, massmodel.MassModel, prefix)
+    # Add converted reactions and their converted metabolites
+    new_reactions = [mass_to_cobra_reaction(rxn, prefix=prefix)
+                     for rxn in model.reactions]
+    new_model.add_reactions(new_reactions)
+    # Copy compartments
+    new_model.compartments = model.compartments.copy()
+    new_model.repair(rebuild_index=True, rebuild_relationships=True)
+    return new_model
 
-	# Add compartments
-	mass_model.compartments = cobra_model.compartments.copy()
-	# Repair the new model
-	mass_model.repair(rebuild_index=True, rebuild_relationships=True)
-	return mass_model
+
+def cobra_to_mass_model(model, prefix=None):
+    """Create a new mass.MassModel from the given cobra.Model.
+
+    Parameters
+    ----------
+    model: cobra.Model
+        The cobra.Reaction to convert into a new mass.MassModel.
+    prefix: str, optional
+        If provided, the string is used to prefix the identifier of the
+        returned object and any assoicated objects.
+
+    Returns
+    -------
+    mass.MassModel
+        The new mass.MassModel object.
+
+    Warnings
+    --------
+    All similar fields will initialize to be identical to the input object,
+    and all other fields will initialize to default values.
+
+    """
+    new_model = _convert_model(model, massmodel.MassModel, Model, prefix)
+    # Add converted reactions and their converted metabolites
+    new_reactions = [cobra_to_mass_reaction(rxn, prefix=prefix)
+                     for rxn in model.reactions]
+    new_model.add_reactions(new_reactions)
+    # Copy compartments
+    new_model.compartments = model.compartments.copy()
+    new_model.repair(rebuild_index=True, rebuild_relationships=True)
+    return new_model
+
+
+# Internal
+def _convert_metabolite(metabolite, to_class, from_class, prefix):
+    """Convert a metabolite of class 'to_class' from class 'from_class'.
+
+    Warnings
+    --------
+    This method is intended for internal use only. To safely convert between
+    cobra and mass objects, use the corresponding conversion method.
+    """
+    if not isinstance(metabolite, from_class):
+        raise TypeError("metabolite must be of {0}"
+                        .format(from_class))
+
+    id_str = _prefix_id_str(metabolite, prefix)
+
+    new_metabolite = to_class(id=id_str, name=metabolite.name,
+                              formula=metabolite.formula,
+                              charge=metabolite.charge,
+                              compartment=metabolite.compartment)
+    new_metabolite._constraint_sense = metabolite._constraint_sense
+    new_metabolite._bound = metabolite._bound
+
+    return new_metabolite
+
+
+def _convert_reaction(reaction, to_class, from_class, prefix):
+    """Convert a reaction of class 'to_class' from class 'from_class'.
+
+    Warnings
+    --------
+    This method is intended for internal use only. To safely convert between
+    cobra and mass objects, use the corresponding conversion method.
+    """
+    if not isinstance(reaction, from_class):
+        raise TypeError("reaction must be of {0}"
+                        .format(from_class))
+
+    id_str = _prefix_id_str(reaction, prefix)
+
+    new_reaction = to_class(id=id_str, name=reaction.name,
+                            subsystem=reaction.subsystem)
+
+    new_reaction.lower_bound = reaction.lower_bound
+    new_reaction.upper_bound = reaction.upper_bound
+    new_reaction.variable_kind = reaction.variable_kind
+
+    # Generate and add new genes
+    for gene in reaction._genes:
+        new_reaction._genes.add(gene.copy())
+    # Add the gene reaction rule
+    new_reaction._gene_reaction_rule = reaction._gene_reaction_rule
+
+    return new_reaction
+
+
+def _convert_model(model, to_class, from_class, prefix):
+    """Convert a model of class 'to_class' from class 'from_class'.
+
+    Warnings
+    --------
+    This method is intended for internal use only. To safely convert between
+    cobra and mass objects, use the corresponding conversion method.
+    """
+    if not isinstance(model, from_class):
+        raise TypeError("model must be of {0}"
+                        .format(from_class))
+
+    id_str = _prefix_id_str(model, prefix)
+
+    new_model = to_class(id_or_model=id_str, name=model.name)
+    return new_model
+
+
+def _prefix_id_str(item, prefix):
+    """Add the prefix to the ID string and return the new string.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
+    if prefix is not None:
+        if not isinstance(prefix, string_types):
+            raise TypeError("prefix must be a str")
+        else:
+            id_str = "{0}_{1}".format(prefix, item.id)
+    else:
+        id_str = item.id
+
+    return id_str
