@@ -203,7 +203,7 @@ class Simulation(Object):
         return getattr(self, "_models", None)
 
     def get_concentration_solutions(self, models=None):
-        """Return a dict of concentration solutions for a list of models.
+        """Return a dict of Conc. Solutions for a list of models.
 
         Parameters
         ----------
@@ -222,7 +222,7 @@ class Simulation(Object):
         return self._lookup_solutions(models, _msol._CONC_STR)
 
     def get_flux_solutions(self, models=None):
-        """Return a dict of flux solutions for a list of models.
+        """Return a dict of Flux Solutions for a list of models.
 
         Models must already exist in the Simulation object.
 
@@ -241,6 +241,44 @@ class Simulation(Object):
 
         """
         return self._lookup_solutions(models, _msol._FLUX_STR)
+
+    def get_pool_solutions(self, models=None):
+        """Return a dict of Pool Solutions for a list of models.
+
+        Parameters
+        ----------
+        models: mass.MassModel, list of mass.MassModels, None
+            The model or models to lookup. If None provided, all models in
+            the Simulation object will be used. Otherwise, any provided
+            models must already be present in the Simulation object.
+
+        Returns
+        -------
+        solution_dict: dict
+            A dictionary with model identifiers as keys and the corresponding
+            Solution objects as values.
+
+        """
+        return self._lookup_solutions(models, _msol._POOL_STR)
+
+    def get_netflux_solutions(self, models=None):
+        """Return a dict of NetFlux Solutions for a list of models.
+
+        Parameters
+        ----------
+        models: mass.MassModel, list of mass.MassModels, None
+            The model or models to lookup. If None provided, all models in
+            the Simulation object will be used. Otherwise, any provided
+            models must already be present in the Simulation object.
+
+        Returns
+        -------
+        solution_dict: dict
+            A dictionary with model identifiers as keys and the corresponding
+            Solution objects as values.
+
+        """
+        return self._lookup_solutions(models, _msol._NETFLUX_STR)
 
     def view_model_values(self, model):
         """Return copies of stored numerical values associated with a model.
