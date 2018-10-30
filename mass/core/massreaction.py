@@ -1,1143 +1,1185 @@
 # -*- coding: utf-8 -*-
-
-# Compatibility with Python 2.7
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
-# Import necesary packages
 import re
-from warnings import warn
-from functools import partial
-from copy import copy, deepcopy
-from operator import attrgetter
 from collections import defaultdict
-from six import iteritems, iterkeys, string_types, integer_types
+from copy import copy, deepcopy
+from functools import partial
+from operator import attrgetter
+from warnings import warn
 
-# from cobra
+from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
-from cobra.core.gene import Gene, ast2str, parse_gpr, eval_gpr
-from cobra.util.context import resettable, get_context
+from cobra.util.context import get_context
 
-# from mass
 from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 
-# Class begins
-## Set a float infinity (Compatibility with Python 2.7)
-inf = float('inf')
-## precompiled regular expressions
-### Matches and/or in a gene reaction rule
-and_or_search = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
-uppercase_AND = re.compile(r'\bAND\b')
-uppercase_OR = re.compile(r'\bOR\b')
-gpr_clean = re.compile(' {2,}')
-### This regular expression finds any single letter compartment enclosed in
-### square brackets at the beginning of the string.
-### For example [c] : foo --> bar
-compartment_finder = re.compile("^\s*(\[[A-Za-z]\])\s*:*")
-### Regular expressions to match the arrows for building reactions from strings
-_reversible_arrow_finder = re.compile("<(-+|=+)>")
-_forward_arrow_finder = re.compile("(-+|=+)>")
-_reverse_arrow_finder = re.compile("<(-+|=+)")
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-# Class definition
+
+# Global
+INF = float("inf")
+# Precompiled regular expressions for gene reaction rules
+_and_or_search_re = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
+_uppercase_AND_re = re.compile(r'\bAND\b')
+_uppercase_OR_re = re.compile(r'\bOR\b')
+_gpr_clean_re = re.compile(' {2,}')
+# Precompiled regular expression to find any single letter compartment enclosed
+# in square brackets at the beginning of the string (e.g. [c] : foo --> bar").
+_compartment_finder_re = re.compile("^\s*(\[[A-Za-z]\])\s*:*")
+# Precompiled regular expressions to build reactions from strings.
+_reversible_arrow_finder_re = re.compile("<(-+|=+)>")
+_forward_arrow_finder_re = re.compile("(-+|=+)>")
+_reverse_arrow_finder_re = re.compile("<(-+|=+)")
+
+
 class MassReaction(Object):
-	"""MassReaction is a class for holding kinetic information regarding a
-	biochemical reaction in a mass.MassModel object
-
-	Parameters
-	----------
-	id : string
-		The identifier to associate with this reaction
-	name : string
-		A human readable name for the reaction
-	subsystem : string
-		The subsystem where the reaction is meant to occur
-	reversible : bool
-		The kinetic reversibility of the reaction
-
-	Attributes
-	----------
-	ssflux : float or None
-		The steady state flux for the reaction. Can store a steady state flux
-		and be utilized in pseudo rate constnant calculations.
-	"""
-	def __init__(self, id=None, name="", subsystem=None, reversible=True,
-				ssflux=None):
-		"""Initialize the MassReaction Object"""
-		# Check inputs to ensure they are the correct types
-		if not isinstance(name, string_types):
-			raise TypeError("name must be a string type")
-		if not isinstance(subsystem, (string_types, type(None))):
-			raise TypeError("subsystem must be a string type")
-		if not isinstance(reversible, bool):
-			raise TypeError("reversible must be a boolean")
-
-		Object.__init__(self, id, name)
-		self.subsystem = subsystem
-		self._reversible = reversible
-		self.ssflux = ssflux
-		# The forward, reverse, and equilibrium constants as strings
-		# for symbolic expressions
-		self._sym_kf = ("kf_%s" % id)
-		self._sym_kr = ("kr_%s" % id)
-		self._sym_Keq = ("Keq_%s" % id)
-
-		# The forward, reverse, and equilbrium constants for simulation
-		self._forward_rate_constant = None
-		# No reverse rate constant for an irreversible reaction.
-		# Therefore initialized to 0.
-		if self._reversible:
-			self._reverse_rate_constant = None
-			self._equilibrium_constant = None
-		else:
-			self._reverse_rate_constant = 0.
-			self._equilibrium_constant = inf
-
-		# The rate law equation for simulation
-		self._rate_law = None
-		self._rate_expr = None
-		self._rtype = 1
-
-		# A dictionary of metabolites and their stoichiometric
-		# coefficients for this kinetic reaction
-		self._metabolites = dict()
-
-		# The compartments where partaking metabolites are located
-		self._compartments = None
-
-		# The massmodel that the reaction is associated with
-		self._model = None
-
-		# The genes associated with the kinetic reaction
-		self._genes = set()
-		self._gene_reaction_rule = ""
-
-		# The Gibbs reaction energy assoicated with this reaction
-		self._gibbs_reaction_energy = None
-
-		# For cobra compatibility if desired and escher visualization
-		self.objective_coefficient = 0.
-		self.variable_kind = 'continuous'
-		if self._reversible:
-			self.lower_bound = -1000.
-			self.upper_bound = 1000.
-		else:
-			self.lower_bound = 0.
-			self.upper_bound = 1000.
-
-
-	# Properties
-	@property
-	def reversible(self):
-		"""Returns the kinetic reversible of the reaction"""
-		return self._reversible
-
-	@reversible.setter
-	def reversible(self, value):
-		"""Set the kinetic reversibility of the reaction. Will initialize to
-		default values for the reverse rate constant when the kinetic
-		reversibility is changed to True, and will set the reverse rate
-		constant to 0 if changed to False
-
-		Parameters
-		----------
-		reversible : bool
-			True for kinetically reversible reaction, False for irreversible
-		"""
-		if not isinstance(value, bool):
-			raise TypeError("Must be a boolean True or False")
-
-		self._reversible = value
-		if value:
-			self._reverse_rate_constant = None
-			self._equilibrium_constant = None
-		else:
-			self._reverse_rate_constant = 0.
-			self._equilibrium_constant = inf
-
-	@property
-	def forward_rate_constant(self):
-		"""Returns the forward rate constant associated with this reaction"""
-		return self._forward_rate_constant
-
-	@forward_rate_constant.setter
-	def forward_rate_constant(self, value):
-		"""Set the forward rate constant for this reaction"""
-		self._forward_rate_constant = value
-
-	@property
-	def reverse_rate_constant(self):
-		"""Returns the reverse rate constant associated with this reaction"""
-		return self._reverse_rate_constant
-
-	@reverse_rate_constant.setter
-	def reverse_rate_constant(self, value):
-		"""Set the reverse rate constant for this reaction.
-		If the reaction is not reversible, warns the user"""
-		if self._reversible:
-			self._reverse_rate_constant = value
-		else:
-			warn("Cannot set reverse rate constant for irreversible reactions")
-
-	@property
-	def equilibrium_constant(self):
-		"""Returns the equilibrium constant associated with this reaction"""
-		return self._equilibrium_constant
-
-	@equilibrium_constant.setter
-	def equilibrium_constant(self, value):
-		"""Set the equilibrium constant for this reaction"""
-		if self._reversible:
-			self._equilibrium_constant = value
-		else:
-			warn("Cannot set equilibrium constant for irreversible reactions")
-
-	@property
-	def rate_constants(self):
-		"""Returns a list containing the rate constants."""
-		return [self._forward_rate_constant, self._reverse_rate_constant]
-
-	@property
-	def parameters(self):
-		"""Returns a dictionary of all reaction parameters"""
-		param = dict()
-		key_list = [self._sym_kf, self._sym_Keq,]
-		attr_list = ["_forward_rate_constant", "_equilibrium_constant" ]
-		if self.reversible:
-			key_list += [self._sym_kr]
-			attr_list += ["_reverse_rate_constant"]
-
-		for i, attr in enumerate(attr_list):
-			if self.__dict__[attr] is not None:
-				param.update({key_list[i] : self.__dict__[attr]})
-		return param
-
-	@property
-	def metabolites(self):
-		"""Returns the metabolites of the reaction as a read-only copy"""
-		return self._metabolites.copy()
-
-	@property
-	def reactants(self):
-		"""Returns a list of the reactants for the reaction
-
-		Identical to the method in cobra.core.reaction
-		"""
-		return [m for m, c in iteritems(self._metabolites) if c < 0]
-
-	@property
-	def products(self):
-		"""Returns a list of the products for the reaction
-
-		Identical to the method in cobra.core.reaction
-		"""
-		return [m for m, c in iteritems(self._metabolites) if c >= 0]
-
-	@property
-	def stoichiometry(self):
-		"""Returns a list containing the stoichiometry of the reaction"""
-		return [c for m, c in iteritems(self._metabolites)]
-
-	@property
-	def rate(self):
-		"""Returns the rate law as a sympy expression"""
-		if self._model is not None and self in self._model.custom_rates:
-			return self._model.custom_rates[self]
-		else:
-			return expressions.generate_rate_law(self, rate_type=self._rtype,
-									sympy_expr=True,  update_reaction=True)
-
-	@property
-	def model(self):
-		"""Returns the massmodel the reaction is associated with"""
-		return self._model
-
-	@property
-	def reaction(self):
-		"""Return the reaction as a human readable string
-
-		Similar to the method in cobra.core.reaction
-		"""
-		return self.build_reaction_string()
-
-	@reaction.setter
-	def reaction(self, reaction_string):
-		"""Use a human readable string to set the reaction.
-		The direction of the arrow is used to determine reversibility.
-
-		Similar to the method in cobra.core.reaction
-		Parameters
-		----------
-		reaction_string : string
-			String representation of the reaction. For example:
-			'A + B <=> C' for reversible reactions
-			'A + B --> C' for irreversible reactions where A & B are reactants
-			'A + B <-- C' for irreversible reactions where A & B are products
-
-		Warnings
-		--------
-		Care must be taken when doing setting a reaction in this manner to
-			ensure the reaction's id matches those in the model.
-
-		For forward and reversible arrows, reactants are searched on the
-			left side of the arrow while products are searched on the right.
-			For reverse arrows, reactants are searched on the left side of
-			the arrow while products are searched on the right.
-		"""
-		return self.build_reaction_from_string(reaction_string)
-
-	@property
-	def compartments(self):
-		"""Returns a set of compartments that metabolites are in
-
-		Identical to the method in cobra.core.reaction
-		"""
-		if self._compartments is None:
-			self._compartments = {met.compartment for met in self._metabolites
-								  if met.compartment is not None}
-		return self._compartments
-
-	@property
-	def exchange(self):
-		"""Whether or not this reaction is an exchange reaction
-		Returns True if the reaction has either no products or reactants
-
-		Identical to the boundary method in cobra.core.reaction
-
-		.. note:: These are reactions with a sink or source
-		"""
-		return (len(self.metabolites) == 1 and
-			not (self.reactants and self.products))
-
-	@property
-	def get_external_metabolite(self):
-		"""Get an "external" metabolite for exchanges.	Primarily used for
-		setting fixed concentrations in the MassModel.
-
-		Returns a string representation of the external metabolite, or None if
-		reaction is not an exchange.
-		"""
-		if self.exchange:
-			for metab in self.metabolites:
-				_c = re.search("^\w*\S(?!<\_)(\_\S+)$", metab.id)
-				if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-					ext_metab = re.sub(_c.group(1), "_e", metab.id)
-				else:
-					ext_metab = "{}{}".format(metab.id, "_e")
-			return ext_metab
-		else:
-			return None
-	@property
-	def genes(self):
-		"""Returns a frozenset of the genes associated with the reaction"""
-		return frozenset(self._genes)
-
-	@property
-	def gene_reaction_rule(self):
-		"""Returns the gene reaction rule as a string"""
-		return self._gene_reaction_rule
-
-	@gene_reaction_rule.setter
-	def gene_reaction_rule(self, new_rule):
-		"""Set the gene reaction rule using a string, associated the new genes
-		and dissociated the old genes for the reaction
-
-		Similar to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		new_rule : string
-			String representation of the new reaction rule
-		"""
-		if get_context(self):
-			warn("Context management not implemented for gene reaction rules")
-
-		self._gene_reaction_rule = new_rule.strip()
-		try:
-			_, gene_names = parse_gpr(self._gene_reaction_rule)
-		except (SyntaxError, TypeError) as e:
-			if "AND" in new_rule or "OR" in new_rule:
-				warn("uppercase AND/OR found in rule '%s' for %s" %
-						(new_rule, repr(self)))
-				new_rule = uppercase_AND.sub("and", new_rule)
-				new_rule = uppercase_OR.sub("or", new_rule)
-				self.gene_reaction_rule = new_rule
-				return
-			warn("malformed gene_reaction_rule '%s' for %s" %
-					(new_rule, repr(self)))
-			tmp_str = and_or_search.sub('', self._gene_reaction_rule)
-			gene_names = set((gpr_clean.sub(' ', tmp_str).split(' ')))
-		if '' in gene_names:
-			gene_names.remove('')
-		old_genes = self._genes
-		if self._model is None:
-			self._genes = {Gene(i) for i in gene_names}
-		else:
-			massmodel_genes = self._model.genes
-			self._genes = set()
-			for id in gene_names:
-				if massmodel_genes.has_id(id):
-					self._genes.add(massmodel_genes.get_by_id(id))
-				else:
-					new_gene = Gene(id)
-					# Must be new_gene._model due to inheritance
-					# of cobra gene class
-					new_gene._model = self._model
-					self._genes.add(new_gene)
-					massmodel_genes.append(new_gene)
-
-		# Make the genes aware that it is involved in this reaction
-		for g in self._genes:
-			g._reaction.add(self)
-
-		# Make the old genes aware that they are no
-		# longer involved in this reaction
-		for g in old_genes:
-			if g not in self._genes: # if an old gene is not a new gene
-				try:
-					g._reaction.remove(self)
-				except:
-					warn("Could not remove old gene %s from reaction %s" %
-						(g.id, self.id))
-
-	@property
-	def gene_name_reaction_rule(self):
-		"""Display gene_reaction_rule with names
-
-		Identical to the method in cobra.core.reaction
-
-		Warnings
-		--------
-		Do NOT use this string for computation. It is intended to give a
-			representation of the rule using more familiar gene names instead
-			of the often cryptic ids.
-		"""
-		names = {i.id: i.name for i in self._genes}
-		ast = parse_gpr(self._gene_reaction_rule)[0]
-		return ast2str(ast, names=names)
-
-	@property
-	def functional(self):
-		"""Check if all required enzymes for reaction are functional.
-
-		Returns True if the gene-protein-reaction (GPR) rule is fulfilled for
-			this reaction, or if reaction is not associated to a massmodel,
-			otherwise returns False.
-
-		Identical to the method in cobra.core.reaction
-		"""
-		if self._model:
-			tree, _ = parse_gpr(self.gene_reaction_rule)
-			return eval_gpr(tree, {gene.id for gene in self.genes if
-								   not gene.functional})
-		return True
-
-	@property
-	def gibbs_reaction_energy(self):
-		"""Returns the Gibbs reaction energy of the reaction"""
-		return self._gibbs_reaction_energy
-
-	@gibbs_reaction_energy.setter
-	def gibbs_reaction_energy(self, value):
-		"""Set the Gibbs reaction energy of the reaction"""
-		if not isinstance(value, (integer_types, float)):
-			raise TypeError("Must be an integer or float")
-
-		self._gibbs_reaction_energy = value
-
-	# Shorthands
-	@property
-	def kf(self):
-		"""Shorthand for getting the forward rate constant"""
-		return self._forward_rate_constant
-
-	@kf.setter
-	def kf(self, value):
-		"""Shorthand for setting the forward rate constant"""
-		self.forward_rate_constant = value
-
-	@property
-	def kr(self):
-		"""Shorthand for getting the reverse rate constant"""
-		return self.reverse_rate_constant
-
-	@kr.setter
-	def kr(self, value):
-		"""Shorthand for setting the reverse rate constant"""
-		self.reverse_rate_constant = value
-
-	@property
-	def Keq(self):
-		"""Shorthand for getting the equilibrium constant"""
-		return self._equilibrium_constant
-
-	@Keq.setter
-	def Keq(self, value):
-		"""Shorthand for setting the forward rate constant"""
-		self.equilibrium_constant = value
-
-	@property
-	def S(self):
-		"""Shorthand for the reaction stoichiometry"""
-		return [c for m, c in iteritems(self._metabolites)]
-
-	# Methods
-	## Public
-	def reverse_stoichiometry(self):
-		"""Reverse the stoichiometry of the reaction, making the products
-		into the reactants and the reactants into the products. Only works
-		on reversible reactions.
-		"""
-		if not self.reversible:
-			warn("Can only reverse stoichiometry for reversible reactions")
-			return None
-		for metab, coeff in iteritems(self.metabolites):
-			self._metabolites[metab] = -1*coeff
-
-
-	def generate_rate_law(self, rate_type=1, sympy_expr=False,
-						update_reaction=False):
-		"""Generates the rate law for the reaction as a human readable string.
-		or as a sympy expression for simulation.
-
-		The type determines which rate law format to return.
-		For example: A <=> B
-
-		type=1: kf*(A - B/Keq)
-		type=2: kf*A - kr*B
-		type=3: kr*(Keq*A - B)
-
-		Parameters
-		----------
-		rate_type : int {1, 2, 3}, optional
-			The type of rate law to display. Must be 1, 2, of 3.
-			type 1 will utilize kf and Keq,
-			type 2 will utilize kf and kr,
-			type 3 will utilize kr and Keq.
-		sympy_expr : bool, optional
-			If True, will output a sympy expression, otherwise
-			will output a human readable string.
-		update_reaction : bool, optional
-			If True, will update the MassReaction in addition to returning the
-			rate law. Otherwise just return the rate law.
-
-		Returns
-		-------
-		string representation or sympy expression of the rate law
-		"""
-		return expressions.generate_rate_law(self, rate_type, sympy_expr,
-										update_reaction)
-
-	def get_mass_action_ratio(self, sympy_expr=False):
-		"""Get the mass action ratio for the reaction as
-		a human readable string or a sympy expression for simulation.
-
-		Parameters
-		----------
-		sympy_expr : bool, optional
-			If True, will output a sympy expression, otherwise
-			will output a human readable string.
-
-		Returns
-		-------
-		string representation or sympy expression of the mass action ratio
-		"""
-		return expressions.get_mass_action_ratio(self, sympy_expr=sympy_expr)
-
-	def get_disequilibrium_ratio(self, sympy_expr=False):
-		"""Get the disequilibrium ratio for the reaction as
-		a human readable string or a sympy expression for simulation.
-
-		Parameters
-		----------
-		sympy_expr : bool, optional
-			If True, will output a sympy expression, otherwise
-			will output a human readable string.
-
-		Returns
-		-------
-		string representation or sympy expression of the disequilibrium ratio
-		"""
-		return expressions.get_disequilibrium_ratio(self,sympy_expr=sympy_expr)
-
-	def remove_from_model(self, remove_orphans=False):
-		"""Removes the reaction from a massmodel.
-
-		This removes all associations between a reaction, the associated
-		massmodel, metabolites and genes.
-
-		The change is reverted upon exit when using the massmodel as a context.
-
-		Identical to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		remove_orphans : bool, optional
-			Remove orphaned genes and metabolites from the massmodel as well
-		"""
-		return self._model.remove_reactions([self],remove_orphans)
-
-	def copy(self):
-		"""Copy a reaction.
-
-		The rate constants, rate laws, referenced metabolites, and genes are
-		also copied.
-		"""
-		# No references to massmodel when copying
-		massmodel = self._model
-		self._model = None
-		for i in self._metabolites:
-			i._model = None
-		for i in self._genes:
-			i._model = None
-
-		# The reaction can be copied
-		new_massreaction = deepcopy(self)
-		# Restore the references
-		self._model = massmodel
-		for i in self._metabolites:
-			i._model = massmodel
-		for i in self._genes:
-			i._model = massmodel
-
-		return new_massreaction
-
-	def get_coefficient(self, metabolite_id):
-		"""Return the stoichiometric coefficients of a metabolite
-		in the reaction.
-
-		Similar to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		metabolite_id : string or mass.MassMetabolite object.
-		"""
-		if isinstance(metabolite_id, MassMetabolite):
-			return self._metabolites[metabolite_id]
-
-		_id_to_metabolites = {m.id: m for m in self._metabolites}
-		return self._metabolites[_id_to_metabolites[metabolite_id]]
-
-	def get_coefficients(self, metabolite_ids):
-		"""Return the stoichiometric coefficients for a list of
-		metabolites in the reaction.
-
-		Identical to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		metabolite_ids : iterable
-			Containing strings or mass.MassMetabolite objects.
-		"""
-		return map(self.get_coefficient, metabolite_ids)
-
-	def add_metabolites(self, metabolites_to_add, combine=True,
-						reversibly=True):
-		"""Add metabolites and stoichiometric coefficients to the reaction.
-		If the final coefficient for a metabolite is 0 then it is removed
-		from the reaction.
-
-		The change is reverted upon exit when using the massmodel as a context.
-
-		Similar to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		metabolites_to_add : dict
-			Dictionary with MassMetabolite objects or metabolite identifiers as
-			keys and coefficients as values. If keys are strings (name of a
-			metabolite) the reaction must already be part of a massmodel and a
-			metabolite with the given name must exist in the massmodel.
-		combine : bool, optional
-			Describes behavior a metabolite already exists in the reaction.
-			True causes the coefficients to be added.
-			False causes the coefficient to be replaced.
-		reversibly : bool, optional
-			Whether to add the change to the context to make the change
-			reversibly or not (primarily intended for internal use).
-		"""
-		for metabolite, coefficient in iteritems(metabolites_to_add):
-			if not isinstance(metabolite, MassMetabolite):
-				raise TypeError("%s is not a MassMetabolite object"
-								% metabolite.id)
-
-		old_coefficients = self.metabolites
-		new_metabolites = []
-		_id_to_metabolites = dict([(x.id, x) for x in self._metabolites])
-
-		for metabolite, coefficient in iteritems(metabolites_to_add):
-			met_id = str(metabolite)
-			# If a metabolite already exists in the reaction then
-			# just add them.
-			if met_id in _id_to_metabolites:
-				reaction_metabolite = _id_to_metabolites[met_id]
-				if combine:
-					self._metabolites[reaction_metabolite] += coefficient
-				else:
-					self._metabolites[reaction_metabolite] = coefficient
-			else:
-				# If the reaction is in a massmodel, ensure we aren't using
-				# a duplicate metabolite.
-				if self._model:
-					try:
-						metabolite = \
-							self._model.metabolites.get_by_id(met_id)
-					except KeyError as e:
-						if isinstance(metabolite, MassMetabolite):
-							new_metabolites.append(metabolite)
-						else:
-							# do we want to handle creation here?
-							raise e
-				elif isinstance(metabolite, string_types):
-					raise ValueError("Reaction '%s' does not belong to a "
-									 "massmodel. Either add the reaction to a "
-									 "massmodel or use MassMetabolite objects "
-									 "instead of strings as keys."
-									 % self.id)
-				self._metabolites[metabolite] = coefficient
-				# make the metabolite aware it is involved in this reaction
-				metabolite._reaction.add(self)
-
-		for metabolite, the_coefficient in list(self._metabolites.items()):
-			if the_coefficient == 0:
-				# make the metabolite aware that it no longer participates
-				# in this reaction
-				metabolite._reaction.remove(self)
-				self._metabolites.pop(metabolite)
-
-		massmodel = self.model
-		context = get_context(self)
-		if context and reversibly:
-			if combine:
-				# Just subtract the metabolites that were added
-				context(partial(
-						self.subtract_metabolites, metabolites_to_add,
-						combine=True, reversibly=False))
-			else:
-				# Reset the metabolites with add_metabolites
-				mets_to_reset = {key: old_coefficients[
-								massmodel.metabolites.get_by_any(key)[0]]
-								for key in iterkeys(metabolites_to_add)}
-
-	def subtract_metabolites(self, metabolites_to_subtract, combine=True,
-							reversibly=True):
-		"""This function will 'subtract' metabolites from a reaction, which
-		means add the metabolites with -1*coefficient. If the final coefficient
-		for a metabolite is 0 then the metabolite is removed from the reaction.
-
-		The change is reverted upon exit when using the massmodel as a context.
-
-		Similar to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		metabolites_to_subtract : dict
-			Dictionary with MassMetabolite objects or metabolite identifiers as
-			keys and coefficients as values. If keys are strings (name of a
-			metabolite) the reaction must already be part of a massmodel and a
-			metabolite with the given name must exist in the massmodel.
-		combine : bool, optional
-			Describes behavior a metabolite already exists in the reaction.
-			True causes the coefficients to be added.
-			False causes the coefficient to be replaced.
-		reversibly : bool, optional
-			Whether to add the change to the context to make the change
-			reversibly or not (primarily intended for internal use).
-
-		Note: A final coefficient < 0 implies a reactant.
-
-		Warnings
-		--------
-		To add a cobra Metabolite object to a MassReaction object, the
-			cobra Metabolite must first be converted to a MassMetabolite
-			through the from_cobra method in the mass.core.massmetabolite class
-		"""
-		self.add_metabolites({
-			k: -v for k, v in iteritems(metabolites_to_subtract)},
-			combine=combine, reversibly=reversibly)
-
-	def build_reaction_string(self, use_metabolite_names=False):
-		"""Generate a human readable reaction string
-
-		Parameters
-		----------
-		use_metabolite_names : bool, optional
-			If True, use metabolite names instead of identifiers.
-			Default is False.
-
-		Similar to the method in cobra.core.reaction
-		"""
-		def format(number):
-			return "" if number == 1 else str(number).rstrip(".") + " "
-
-		id_type = "id"
-		if use_metabolite_names:
-			id_type = "name"
-		reactant_bits = []
-		product_bits = []
-		for metab in sorted(self._metabolites, key=attrgetter("id")):
-			coefficient = self._metabolites[metab]
-			metab_name = str(getattr(metab, id_type))
-			if coefficient >= 0:
-				product_bits.append(format(coefficient) + metab_name)
-			else:
-				reactant_bits.append(format(abs(coefficient)) + metab_name)
-		reaction_string = " + ".join(reactant_bits)
-		if self._reversible:
-			reaction_string += " <=> "
-		else:
-			reaction_string += " --> "
-		reaction_string += " + ".join(product_bits)
-		return reaction_string
-
-
-	def check_mass_balance(self):
-		"""Compute mass and charge balance for the reaction
-
-		returns a dict of {element: amount} for unbalanced elements.
-		"charge" is treated as an element in this dict
-		This should be empty for balanced reactions.
-
-		Identical to the method in cobra.core.reaction
-		"""
-		reaction_element_dict = defaultdict(int)
-		for metabolite, coefficient in iteritems(self._metabolites):
-			if metabolite.charge is not None:
-				reaction_element_dict["charge"] += \
-					coefficient * metabolite.charge
-			if metabolite.elements is None:
-				raise ValueError("No elements found in metabolite %s"
-								 % metabolite.id)
-			for element, amount in iteritems(metabolite.elements):
-				reaction_element_dict[element] += coefficient * amount
-		# filter out 0 values
-		return {k: v for k, v in iteritems(reaction_element_dict) if v != 0}
-
-	def get_compartments(self):
-		"""Return a list of compartments the metabolites are in
-
-		Identical to the method in cobra.core.reaction
-		"""
-		return list(self.compartments)
-
-	def build_reaction_from_string(self, reaction_string, verbose=True,
-								   fwd_arrow=None, rev_arrow=None,
-								   reversible_arrow=None, term_split="+"):
-		"""Builds reaction from reaction equation reaction_string using parser
-
-		Takes a string and using the specifications supplied in the optional
-		arguments infers a set of metabolites, metabolite compartments and
-		stoichiometries for the reaction.  It also infers the reversibility
-		of the reaction from the reaction arrow.
-
-		Changes to the associated massmodel are reverted upon exit when using
-		the massmodel as a context.
-
-		Similar to the method in cobra.core.reaction.
-
-		Parameters
-		----------
-		reaction_str : string
-			A string containing a reaction formula (equation)
-		verbose: bool, optional
-			Setting verbosity of function
-		fwd_arrow : re.compile, optional
-			For forward irreversible reaction arrows
-		rev_arrow : re.compile, optional
-			For backward irreversible reaction arrows
-		reversible_arrow : re.compile, optional
-			For reversible reaction arrows
-		term_split : string, optional
-			Dividing individual metabolite entries. Default is '+'
-
-		"""
-		# Set the arrows
-		forward_arrow_finder = _forward_arrow_finder if fwd_arrow is None \
-			else re.compile(re.escape(fwd_arrow))
-		reverse_arrow_finder = _reverse_arrow_finder if rev_arrow is None \
-			else re.compile(re.escape(rev_arrow))
-		reversible_arrow_finder = _reverse_arrow_finder \
-			if reversible_arrow is None \
-			else re.compile(re.escape(reversible_arrow))
-		if self._model is None:
-			warn("No massmodel found")
-			massmodel = None
-		else:
-			massmodel = self._model
-		found_compartments = compartment_finder.findall(reaction_string)
-		if len(found_compartments) == 1:
-			compartment = found_compartments[0]
-		else:
-			compartment = ""
-
-		#Reversible reaction
-		arrow_match = reversible_arrow_finder.search(reaction_string)
-		if arrow_match is not None:
-			self._reversible = True
-			# Reactants left of the arrow, products on the right
-			reactant_str = reaction_string[:arrow_match.start()].strip()
-			product_str = reaction_string[arrow_match.end():].strip()
-		else: # Irreversible reaction
-			# Try forward reaction
-			arrow_match = forward_arrow_finder.search(reaction_string)
-			if arrow_match is not None:
-				self._reversible = False
-				# Reactants left of the arrow, products on the right
-				reactant_str = reaction_string[:arrow_match.start()].strip()
-				product_str = reaction_string[arrow_match.end():].strip()
-			else: # Try the reverse arrow
-				arrow_match = reverse_arrow_finder.search(reaction_string)
-				if arrow_match is None:
-					raise ValueError("No suitable arrow found in '%s'" %
-										reaction_str)
-				else:
-					self._reversible = False
-					# Reactants right of the arrow, products on the left
-					reactant_str = reaction_string[arrow_match.end():].strip()
-					product_str = reaction_string[:arrow_match.start()].strip()
-
-		self.subtract_metabolites(self.metabolites, combine=True)
-
-		for substr, factor in ((reactant_str, -1), (product_str, 1)):
-			if len(substr) == 0:
-				continue
-			for term in substr.split(term_split):
-				term = term.strip()
-				if term.lower() == "nothing":
-					continue
-				if " " in term:
-					num_str, met_id = term.split()
-					num = float(num_str.lstrip("(").rstrip(")")) * factor
-				else:
-					met_id = term
-					num = factor
-				met_id += compartment
-				try:
-					met = massmodel.metabolites.get_by_id(met_id)
-				except KeyError:
-					if verbose:
-						print("Unknown metabolite '%s' created" % met_id)
-					met = MassMetabolite(met_id)
-				self.add_metabolites({met: num})
-
-	def knock_out(self):
-		"""Knockout reaction by setting its rate_constants to 0.
-
-		Similar to the method in cobra.core.reaction"""
-		self.forward_rate_constant = 0.
-		if self._reversible:
-			self.reverse_rate_constant = 0.
-			self.equilibrium_constant = inf
-
-	## Internal
-	def _associate_gene(self, cobra_gene):
-		"""Associates a cobra.Gene object with a mass.MassReaction.
-
-		Identical to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		cobra_gene : cobra.core.Gene.Gene
-		"""
-		self._genes.add(cobra_gene)
-		cobra_gene._reaction.add(self)
-		cobra_gene._model = self._model
-
-	def _dissociate_gene(self, cobra_gene):
-		"""Dissociates a cobra.Gene object with a mass.MassReaction.
-
-		Identical to the method in cobra.core.reaction
-
-		Parameters
-		----------
-		cobra_gene : cobra.core.Gene.Gene
-		"""
-		self._genes.discard(cobra_gene)
-		cobra_gene._reaction.discard(self)
-
-	def _set_id_with_model(self, value):
-		"""Set the id of the MassReaction object to the associated massmodel.
-
-		Similar to the method in cobra.core.reaction
-		"""
-
-		if value in self.massmodel.reactions:
-			raise ValueError("The massmodel already contains a reaction with "
-								"the id:", value)
-		self._id = value
-		self.massmodel.reactions._generate_index()
-
-	def _update_awareness(self):
-		"""Make sure all metabolites and genes that are associated with
-		this reaction are aware of it.
-		"""
-		for metab in self._metabolites:
-			metab._reaction.add(self)
-		for gene in self._genes:
-			gene._reaction.add(self)
-
-	def _repr_html_(self):
-		return """
-			<table>
-				<tr>
-					<td><strong>Reaction identifier</strong></td>
-					<td>{id}</td>
-				</tr><tr>
-					<td><strong>Name</strong></td>
-					<td>{name}</td>
-				</tr><tr>
-					<td><strong>Memory address</strong></td>
-					<td>{address}</td>
-				</tr><tr>
-					<td><strong>Subsystem</strong></td>
-					<td>{subsystem}</td>
-				</tr><tr>
-					<td><strong>Stoichiometry</strong></td>
-					<td>
-						<p style='text-align:right'>{stoich_id}</p>
-						<p style='text-align:right'>{stoich_name}</p>
-					</td>
-				</tr><tr>
-					<td><strong>GPR</strong></td>
-					<td>{gpr}</td>
-				</tr><tr>
-					<td><strong>Kinetic Reversibility</strong></td>
-					<td>{reversibility}</td>
-				</tr>
-			</table>
-		""".format(id=self.id, name=self.name,
-				subsystem=self.subsystem, address='0x0%x' % id(self),
-				stoich_id=self.build_reaction_string(),
-				stoich_name=self.build_reaction_string(True),
-				gpr=self.gene_reaction_rule,
-				reversibility=self._reversible)
-
-
-	# Module Dunders
-	## All dunders are similar or identical to cobra.core.reaction dunders
-	def __copy__(self):
-		"""Create a copy of the mass reaction
-
-		Similar to the method in cobra.core.reaction
-		"""
-		massreaction_copy = copy(super(MassReaction, self))
-		return massreaction_copy
-
-	def __deepcopy__(self, memo):
-		"""Create a deepcopy of the mass reaction
-
-		Similar to the method in cobra.core.reaction
-		"""
-		massreaction_deepcopy = deepcopy(super(MassReaction, self), memo)
-		return massreaction_deepcopy
-
-	def __setstate__(self, state):
-		"""Probably not necessary to set _model as the mass.MassModel that
-		contains self sets the _model attribute for all metabolites and
-		genes in the reaction.
-
-		However, to increase performance speed we do want to let the metabolite
-		and gene know that they are employed in this reaction
-
-		Similar to the method in cobra.core.reaction
-		"""
-		self.__dict__.update(state)
-		for x in state["_metabolites"]:
-			setattr(x, "_model", self._model)
-			x._reaction.add(self)
-		for x in state["_genes"]:
-			setattr(x, "_model", self._model)
-			x._reaction.add(self)
-
-	def __add__(self, other):
-		"""Add two mass reactions
-
-		The stoichiometry will be the combined stoichiometry of the two
-		reactions, and the gene reaction rule will be both rules combined by an
-		and. All other attributes (i.e. rate constants) will match those of
-		the first reaction, Return a new MassReaction object.
-
-		Similar to the method in cobra.core.reaction
-		"""
-		new_massreaction = self.copy()
-		new_massreaction += other
-		return new_massreaction
-
-	def __iadd__(self, other):
-		"""Add two mass reactions
-
-		The stoichiometry will be the combined stoichiometry of the two
-		reactions, and the gene reaction rule will be both rules combined by an
-		and. All other attributes (i.e. rate constants) will match those of the
-		first reaction. Return the same MassReaction object with its updates
-
-		Identical to the method in cobra.core.reaction
-		"""
-		self.add_metabolites(other._metabolites, combine=True)
-		gpr1 = self.gene_reaction_rule.strip()
-		gpr2 = other.gene_reaction_rule.strip()
-		if gpr1 != "" and gpr2 != "":
-			self.gene_reaction_rule = ("(%s) and (%s)" % \
-										(self.gene_reaction_rule,
-										other.gene_reaction_rule))
-		elif gpr1 != "" and gpr2 == "":
-			self.gene_reaction_rule = gpr1
-		elif gpr1 == "" and gpr2 != "":
-			self.gene_reaction_rule = gpr2
-		return self
-
-	def __sub__(self, other):
-		"""Subtract two mass reactions
-
-		The stoichiometry will be the combined stoichiometry of the two
-		reactions, and the gene reaction rule will be both rules combined by an
-		'and'. All other attributes (i.e. rate constants) will match those of
-		the first reaction. Return a new MassReaction object.
-
-		Similar to the method in cobra.core.reaction
-		"""
-		new_massreaction = self.copy()
-		new_massreaction -= other
-		return new_massreaction
-
-	def __isub__(self, other):
-		"""Subtract two mass reactions
-
-		The stoichiometry will be the combined stoichiometry of the two
-		reactions.
-
-		Similar to the method in cobra.core.reaction
-		"""
-		self.subtract_metabolites(other._metabolites, combine = True)
-		return self
-
-
-	def __mul__(self, coefficient):
-		"""Scale coefficients in a reaction by a given value.
-		Return a new MassReaction object
-
-		E.g. A -> B becomes 2A -> 2B.
-		"""
-		new_massreaction = self.copy()
-		new_massreaction *= coefficient
-		return new_massreaction
-
-	def __imul__(self, coefficient):
-		"""Scale coefficients in a reaction by a given value.
-		Return the same MassReaction object with its updates
-
-		E.g. A -> B becomes 2A -> 2B.
-
-		Similar to the method in cobra.core.reaction
-		"""
-		self._metabolites = {met: value * coefficient
-							for met, value in iteritems(self._metabolites)}
-		return self
-
-	def __str__(self):
-		"""Create an id string with the stoichiometry
-
-		Identical to the method in cobra.core.reaction
-		"""
-		return "{id}: {stoichiometry}".format(
-			id=self.id, stoichiometry=self.build_reaction_string())
+    """Class for holding kinetic information regarding a biochemical reaction.
+
+    Parameters
+    ----------
+    id: str
+        The identifier associated with the MassReaction.
+    name: str, optional
+        A human readable name for the reaction.
+    subsystem: str, optional
+        The subsystem where the reaction is meant to occur.
+    reversible: bool, optional
+        The kinetic reversibility of the reaction. Irreversible reactions have
+        an equilibrium constant of infinity and a reverse rate constant of 0.
+        If not provided, the reaction is assumed to be reversible.
+
+    Attributes
+    ----------
+    steady_state_flux: float, optional
+        The stored (typically steady state) flux for the reaction. Stored flux
+        values can be accessed for operations such as PERC calculations.
+
+    """
+
+    def __init__(self, id=None, name="", subsystem="", reversible=True,
+                 steady_state_flux=None):
+        """Initialize the MassReaction Object."""
+        # Check inputs to ensure they are the correct types.
+        if not isinstance(id, string_types) and id is not None:
+            raise TypeError("id must be a str")
+        if not isinstance(name, string_types):
+            raise TypeError("name must be a str")
+        if not isinstance(subsystem, string_types):
+            raise TypeError("subsystem must be a str")
+        if not isinstance(reversible, bool) and reversible is not None:
+            raise TypeError("reversible must be a bool")
+        if not isinstance(steady_state_flux, (integer_types, float)) and \
+           steady_state_flux is not None:
+            raise TypeError("steady_state_flux must be an int or float")
+
+        Object.__init__(self, id, name)
+        self.subsystem = subsystem
+        self._reversible = reversible
+        self.steady_state_flux = steady_state_flux
+        # Rate and equilibrium constant parameter identifiers for expressions.
+        self._sym_kf = "kf_{0}".format(id)
+        self._sym_kr = "kr_{0}".format(id)
+        self._sym_Keq = "Keq_{0}".format(id)
+        # Rate and equilibrium constant parameters for reactions. The reverse
+        # and equilibrium constants for irreversible reactions are set here.
+        # For cobra compatibility, lower and upper bounds are also set.
+        self._forward_rate_constant = None
+        if self._reversible:
+            self._reverse_rate_constant = None
+            self._equilibrium_constant = None
+            self.lower_bound = -1000.
+            self.upper_bound = 1000.
+        else:
+            self._reverse_rate_constant = 0.
+            self._equilibrium_constant = INF
+            self.lower_bound = 0.
+            self.upper_bound = 1000.
+
+        self.objective_coefficient = 0.
+        self.variable_kind = 'continuous'
+
+        # Rate type and law and as a sympy expression for simulation.
+        self._rtype = 1
+        self._rate_expr = None
+
+        # A dictionary of metabolites and their stoichiometric coefficients.
+        self._metabolites = {}
+
+        # The compartments where partaking metabolites are located.
+        self._compartments = None
+
+        # The associated MassModel.
+        self._model = None
+
+        # The genes associated with the reaction.
+        self._genes = set()
+        self._gene_reaction_rule = ""
+
+        # The Gibbs reaction energy associated with the reaction.
+        self._gibbs_reaction_energy = None
+
+    # Public
+    @property
+    def reversible(self):
+        """Return the kinetic reversibility of the reaction."""
+        return getattr(self, "_reversible")
+
+    @reversible.setter
+    def reversible(self, value):
+        """Set the kinetic reversibility of the reaction.
+
+        Warnings
+        --------
+        Changing the reversibility will reset the equilibrium constant, the
+            reverse rate constant, and the lower flux bound to the defaults.
+
+        """
+        if not isinstance(value, bool):
+            raise TypeError("value must be a bool")
+
+        if value != self.reversible:
+            self._reversible = value
+            if value:
+                setattr(self, "_reverse_rate_constant", None)
+                setattr(self, "_equilibrium_constant", None)
+                setattr(self, "lower_bound", 0)
+            else:
+                setattr(self, "_reverse_rate_constant", 0)
+                setattr(self, "_equilibrium_constant", INF)
+                setattr(self, "lower_bound", 0)
+
+    @property
+    def forward_rate_constant(self):
+        """Return the forward rate constant (kf) of the reaction."""
+        return getattr(self, "_forward_rate_constant")
+
+    @forward_rate_constant.setter
+    def forward_rate_constant(self, value):
+        """Set the forward rate constant (kf) of the reaction."""
+        setattr(self, "_forward_rate_constant", value)
+
+    @property
+    def reverse_rate_constant(self):
+        """Return the reverse rate constant (kr) of the reaction."""
+        return getattr(self, "_reverse_rate_constant")
+
+    @reverse_rate_constant.setter
+    def reverse_rate_constant(self, value):
+        """Set the reverse rate constant (kr) of the reaction.
+
+        If reaction is not reversible, will warn the user instead.
+        """
+        if self.reversible:
+            setattr(self, "_reverse_rate_constant", value)
+        else:
+            warn("Cannot set the reverse rate constant for an irreversible "
+                 "reaction")
+
+    @property
+    def equilibrium_constant(self):
+        """Return the equilibrium constant (Keq) of the reaction."""
+        return getattr(self, "_equilibrium_constant")
+
+    @equilibrium_constant.setter
+    def equilibrium_constant(self, value):
+        """Set the equilibrium constant (Keq) of the reaction.
+
+        If reaction is not reversible, will warn the user instead.
+        """
+        if self._reversible:
+            setattr(self, "_equilibrium_constant", value)
+        else:
+            warn("Cannot set the equilibrium constant for an irreversible "
+                 "reaction")
+
+    @property
+    def parameters(self):
+        """Return a dictionary of all reaction parameters.
+
+        Notes
+        -----
+        Reverse rate constants are only included for reversible reactions.
+        Only standard parameters are accessed here. Custom parameters can only
+            be accessed through the model.
+
+        """
+        keys = [self._sym_kf, self._sym_Keq]
+        attrs = ["_forward_rate_constant", "_equilibrium_constant"]
+        # Return reverse rate constants for reversible reactions.
+        if self.reversible:
+            keys += [self._sym_kr]
+            attrs += ["_reverse_rate_constant"]
+        parameters = {key: self.__dict__[attr]
+                      for key, attr in zip(keys, attrs)
+                      if self.__dict__[attr] is not None}
+
+        return parameters
+
+    @property
+    def metabolites(self):
+        """Return the metabolites of a reaction as a read only copy."""
+        return getattr(self, "_metabolites").copy()
+
+    @property
+    def reactants(self):
+        """Return a list of reactants for the reaction."""
+        return [m for m, c in iteritems(self._metabolites) if c < 0]
+
+    @property
+    def products(self):
+        """Return a list of products for the reaction."""
+        return [m for m, c in iteritems(self._metabolites) if c >= 0]
+
+    @property
+    def stoichiometry(self):
+        """Return a list of containing the stoichiometry for the reaction."""
+        return [c for c in itervalues(self._metabolites)]
+
+    @property
+    def rate(self):
+        """Return the current rate for the reaction as a sympy expression.
+
+        If reaction has a custom rate law in its associated MassModel, the
+        custom rate law will be returned instead.
+        """
+        if self.model is not None and self in self.model.custom_rates:
+            rate = self._model.custom_rates[self]
+        elif self._rate_expr is None:
+            rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
+                                     update_reaction=True)
+        else:
+            rate = getattr(self, "_rate_expr")
+
+        return rate
+
+    @property
+    def model(self):
+        """Return the MassModel associated with the reaction."""
+        return getattr(self, "_model")
+
+    @property
+    def reaction(self):
+        """Return the reaction as a human readable string."""
+        return self.build_reaction_string()
+
+    @reaction.setter
+    def reaction(self, reaction_string):
+        """Set the reaction using a human readable string.
+
+        Parameters
+        ----------
+        reaction_string: str
+            String representation of the reaction. For example:
+                'A + B <=> C' for reversible reactions.
+                'A + B --> C' for irreversible reactions, A & B are reactants.
+                'A + B <-- C' for irreversible reactions, A & B are products.
+
+        Notes
+        -----
+        The direction of the arrow is used to determine reversibility.
+
+        Warnings
+        --------
+        Care must be taken when setting a reaction in this manner to ensure the
+            reaction identifier matches those in an assoicated model.
+
+        For forward and reversible arrows, reactants are searched on the left
+            side of the arrow while products are searched on the right side.
+            For reverse arrows, reactants are searched on the right side of the
+            arrow while products are searched on the left side.
+
+        """
+        return self.build_reaction_from_string(reaction_string)
+
+    @property
+    def compartments(self):
+        """Return the set of compartments where the metabolites are located."""
+        setattr(self, "_compartments", set(met.compartment
+                                           for met in self._metabolites
+                                           if met is not None))
+        return getattr(self, "_compartments")
+
+    @property
+    def exchange(self):
+        """Determine whether or not the reaction is an exchange reaction.
+
+        Will return True if the reaction has no products or no reactants.
+
+        Notes
+        -----
+        These are reactions with a sink or a source term (e.g. 'A --> ')
+
+        """
+        return (len(self.metabolites) == 1 and
+                not (self.reactants and self.products))
+
+    @property
+    def external_metabolite(self):
+        """Return an 'external' metabolite for exchange reactions.
+
+        Returns
+        -------
+        external_metabolite: str
+            String representation of the 'external' metabolite of the exchange,
+            or None if the reaction is not considered exchange.
+
+        Warnings
+        --------
+        When generating the string representation of the 'external' metabolite,
+            any recognized pre-existing compartment is replace with 'e'.
+            Therefore it is highly recommended to use 'e' only to define an
+            external or extracellular compartment as 'e' prevent confusion and
+            possible errors from occuring.
+
+        See Also
+        --------
+        MassReaction.exchange
+
+        """
+        if self.exchange:
+            for met in self.metabolites:
+                _c = re.search("^\w*\S(?!<\_)(\_\S+)$", met.id)
+                if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
+                    external_metabolite = re.sub(_c.group(1), "_e", met.id)
+                else:
+                    external_metabolite = "{0}{1}".format(met.id, "_e")
+        else:
+            external_metabolite = None
+
+        return external_metabolite
+
+    @property
+    def genes(self):
+        """Return a frozenset of the genes associated with the reaction."""
+        return frozenset(getattr(self, "_genes"))
+
+    @property
+    def gene_reaction_rule(self):
+        """Return the gene reaction rule for the reaction as a string."""
+        return getattr(self, "_gene_reaction_rule")
+
+    @gene_reaction_rule.setter
+    def gene_reaction_rule(self, new_rule):
+        """Set the gene reaction rule of a reaction using a string.
+
+        New genes will be associated with the reaction and old genes will be
+        dissociated from the reaction.
+
+        Parameters
+        ----------
+        new_rule: str
+            String representation of the new reaction rule.
+
+        """
+        if get_context(self):
+            warn("Context management not implemented for gene reaction rules")
+        self._gene_reaction_rule = new_rule.strip()
+        try:
+            _, gene_names = parse_gpr(self._gene_reaction_rule)
+        except (SyntaxError, TypeError):
+            if "AND" in new_rule or "OR" in new_rule:
+                warn("uppercase AND/OR found in rule '{0}' for {1}"
+                     .format(new_rule, repr(self)))
+                new_rule = _uppercase_AND_re.sub("and", new_rule)
+                new_rule = _uppercase_OR_re.sub("or", new_rule)
+                self.gene_reaction_rule = new_rule
+                return
+            warn("malformed gene_reaction_rule '{0}' for {1}"
+                 .format(new_rule, repr(self)))
+            tmp_str = _and_or_search_re.sub('', self._gene_reaction_rule)
+            gene_names = set((_gpr_clean_re.sub(' ', tmp_str).split(' ')))
+        if '' in gene_names:
+            gene_names.remove('')
+        old_genes = self._genes
+        if self._model is None:
+            self._genes = {Gene(i) for i in gene_names}
+        else:
+            massmodel_genes = self._model.genes
+            self._genes = set()
+            for g_id in gene_names:
+                if massmodel_genes.has_id(g_id):
+                    self._genes.add(massmodel_genes.get_by_id(g_id))
+                else:
+                    new_gene = Gene(g_id)
+                    # Must be new_gene._model due to inheritance
+                    # of cobra gene class
+                    new_gene._model = self._model
+                    self._genes.add(new_gene)
+                    massmodel_genes.append(new_gene)
+
+        # Make the genes aware that it is involved in this reaction
+        for g in self._genes:
+            g._reaction.add(self)
+
+        # Make the old genes aware that they are no longer involved.
+        for g in old_genes:
+            if g not in self._genes:  # if an old gene is not a new gene
+                try:
+                    g._reaction.remove(self)
+                except ValueError:
+                    warn("Could not remove old gene {0} from reaction {1}"
+                         .format(g.id, self.id))
+
+    @property
+    def gene_name_reaction_rule(self):
+        """Display gene_reaction_rule with names.
+
+        Warnings
+        --------
+        Do NOT use this string for computation. It is intended to give a
+            representation of the rule using more familiar gene names instead
+            of the often cryptic ids.
+
+        """
+        names = {i.id: i.name for i in self._genes}
+        ast = parse_gpr(self._gene_reaction_rule)[0]
+
+        return ast2str(ast, names=names)
+
+    @property
+    def functional(self):
+        """Check if all required enzymes for the reaction are functional.
+
+        Returns
+        -------
+        True if the gene-protein-reaction (GPR) rule is fulfilled for
+            the reaction, or if the reaction does not have an assoicated
+            MassModel. Otherwise returns False.
+
+        """
+        if self._model:
+            tree, _ = parse_gpr(self.gene_reaction_rule)
+            return eval_gpr(tree, {gene.id for gene in self.genes
+                                   if not gene.functional})
+
+        return True
+
+    # TODO Add in when thermodynamics are finished
+    # @property
+    # def gibbs_reaction_energy(self):
+    #     """Return the Gibbs reaction energy of the reaction."""
+    #     return self._gibbs_reaction_energy
+    #
+    # @gibbs_reaction_energy.setter
+    # def gibbs_reaction_energy(self, value):
+    #     """Set the Gibbs reaction energy for the reaction."""
+    #     if not isinstance(value, (integer_types, float)) and \
+    #        value is not None:
+    #         raise TypeError("Must be an int or float")
+    #     self._gibbs_reaction_energy = value
+
+    # Shorthands
+    @property
+    def kf(self):
+        """Shorthand method to get the forward rate constant (kf)."""
+        return self.forward_rate_constant
+
+    @kf.setter
+    def kf(self, value):
+        """Shorthand method to set the forward rate constant (kf)."""
+        self.forward_rate_constant = value
+
+    @property
+    def kr(self):
+        """Shorthand method to get the reverse rate constant (kr)."""
+        return self.reverse_rate_constant
+
+    @kr.setter
+    def kr(self, value):
+        """Shorthand method to set the reverse rate constant (kr)."""
+        self.reverse_rate_constant = value
+
+    @property
+    def Keq(self):
+        """Shorthand method to get the equilibrium constant (Keq)."""
+        return self.equilibrium_constant
+
+    @Keq.setter
+    def Keq(self, value):
+        """Shorthand method to set the equilibrium constant (Keq)."""
+        self.equilibrium_constant = value
+
+    @property
+    def S(self):
+        """Shorthand method to get the reaction stoichiometry."""
+        return self.stoichiometry
+
+    # TODO Add in when thermodynamics are finished
+    # @property
+    # def gre(self):
+    #     """Shorthand method to get the Gibbs reaction energy."""
+    #     return self.gibbs_reaction_energy
+    #
+    # @gre.setter
+    # def gre(self, value):
+    #     """Shorthand method to set the Gibbs reaction energy."""
+    #     self.gibbs_reaction_energy = value
+
+    @property
+    def ssflux(self):
+        """Shorthand method to get the reaction steady state flux."""
+        return self.steady_state_flux
+
+    @ssflux.setter
+    def ssflux(self, value):
+        """Shorthand method to set the reaction steady state flux."""
+        self.steady_state_flux = value
+
+    def reverse_stoichiometry(self, inplace=False):
+        """Reverse the stoichiometry of the reaction.
+
+        Reversing the stoichiometry will turn the products into the reactants
+        and the reactants into the products.
+
+        Parameters
+        ----------
+        inplace: bool, optional
+            If True, modify the reaction directly. Otherwise a new MassReaction
+            Object is created, and modified.
+
+        Returns
+        -------
+        new_reaction: mass.MassReaction
+            Returns the original MassReaction if inplace=True. Otherwise return
+            a modified copy of the original MassReaction.
+
+        Warnings
+        --------
+        Only the stoichiometry of the reaction is modified. The reaction
+        parameters (e.g. rate and equilibrium constants) are not altered.
+
+        """
+        if inplace:
+            new_reaction = self
+        else:
+            new_reaction = self.copy()
+
+        for met, coeff in iteritems(new_reaction.metabolites):
+            new_reaction._metabolites[met] = -1*coeff
+
+        return new_reaction
+
+    def get_rate_law(self, rate_type=1, sympy_expr=True,
+                     update_reaction=False):
+        """Get the rate law for the reaction.
+
+        Parameters
+        ----------
+        rate type: int {1, 2, 3}, optional
+            The type of rate law to display. Must be 1, 2, or 3.
+            Type 1 will utilize kf and Keq.
+            Type 2 will utilize kf and kr.
+            Type 3 will utilize kr and Keq.
+        sympy_expr: bool, optional
+            If True, output is a sympy expression. Otherwise the output is a
+            string.
+        update_reaction: bool, optional
+            If True, update the MassReaction in addition to returning the rate
+            law.
+
+        Returns
+        -------
+        The rate law expression as a str or sympy expression
+
+        """
+        return expressions.generate_rate_law(self, rate_type, sympy_expr,
+                                             update_reaction)
+
+    def get_mass_action_ratio(self):
+        """Get the mass action ratio of the reaction as a sympy expression.
+
+        Returns
+        -------
+        The mass action ratio as a sympy expression.
+
+        """
+        return expressions.generate_mass_action_ratio(self)
+
+    def get_disquilibrium_ratio(self):
+        """Get the disequilibrium ratio of the reaction as a sympy expression.
+
+        Returns
+        -------
+        The disequilibrium ratio as a sympy expression.
+
+        """
+        return expressions.generate_disequilibrium_ratio(self)
+
+    def remove_from_model(self, remove_orphans=False):
+        """Remove the reaction from the MassModel.
+
+        This removes all associations between a reaction, the associated
+        MassModel, metabolites, and genes.
+
+        The change is reverted upon exit when using the MassModel as a context.
+
+        Parameters
+        ----------
+        remove_orphans: bool, optional
+            Remove orphaned genes and metabolites from the MassModel as well.
+
+        """
+        return self._model.remove_reactions([self], remove_orphans)
+
+    def copy(self):
+        """Copy a reaction.
+
+        The reaction parameters, referenced metabolites, and genes are also
+        copied.
+        """
+        # No references to the MassModel when copying the MassReaction
+        model = self._model
+        setattr(self, "_model", None)
+        for i in self._metabolites:
+            setattr(i, "_model", None)
+        for i in self._genes:
+            setattr(i, "_model", None)
+
+        # The reaction can now be copied
+        reaction_copy = deepcopy(self)
+        # Restore references for the original MassReaction
+        setattr(self, "_model", model)
+        for i in self._metabolites:
+            setattr(i, "_model", model)
+        for i in self._genes:
+            setattr(i, "_model", model)
+
+        return reaction_copy
+
+    def get_coefficient(self, metabolite_id):
+        """Return the coefficient of a metabolite in the reaction.
+
+        Parameters
+        ---------
+        metabolite_id: str, mass.MassMetabolite
+            The MassMetabolite or the string identifier of the MassMetabolite
+            whose coefficient is desired.
+
+        """
+        if isinstance(metabolite_id, MassMetabolite):
+            return self._metabolites[metabolite_id]
+
+        _id_to_mets = {m.id: m for m in self._metabolites}
+        return self._metabolites[_id_to_mets[metabolite_id]]
+
+    def get_coefficients(self, metabolite_ids):
+        """Return the coefficients for a list of metabolites in the reaction.
+
+        Parameters
+        ---------
+        metabolite_ids: iterable
+            Iterable of the mass.MassMetabolites or their string identifiers.
+
+        """
+        return map(self.get_coefficient, metabolite_ids)
+
+    def get_compartments(self):
+        """Return a list of compartments where the metabolites are located."""
+        return list(self.compartments)
+
+    def add_metabolites(self, metabolites_to_add, combine=True,
+                        reversibly=True):
+        """Add metabolites and their coefficients to the reaction.
+
+        If the final coefficient for a metabolite is 0 then it is removed from
+        the reaction.
+
+        The change is reverted upon exit when using the MassModel as a context.
+
+        Parameters
+        ----------
+        metabolites_to_add: dict
+            A dictionary with MassMetabolite objects or metabolite identifiers
+            as keys and stoichiometric coefficients as values. If keys are
+            strings (id of a metabolite), the reaction must already be part of
+            a MassModel and a MassMetabolite with the given id must already
+            exist in the MassModel.
+        combine: bool, optional
+            If True, the metabolite coefficients are combined together.
+            Otherwise the coefficients are replaced.
+        reversibly: bool, optional
+            Whether to add the change to the context to make the change
+            reversible (primarily intended for internal use).
+
+        Warnings
+        --------
+        A cobra Metabolite cannot be directly added to a MassReaction. Instead,
+            the cobra Metabolite must first be converted to a MassMetabolite
+            through the mass.util.conversion class.
+
+        Notes
+        -----
+        A final coefficient of < 0 implies a reactant and a final
+            coefficient of > 0 implies a product.
+
+        See Also
+        --------
+        MassReaction.subtract_metabolites
+
+        """
+        old_coefficients = self.metabolites
+        new_metabolites = []
+        _id_to_metabolites = {x.id: x for x in self._metabolites}
+
+        for metabolite, coefficient in iteritems(metabolites_to_add):
+            # Make sure metabolites being added belong to the same model, or
+            # else copy them.
+            if isinstance(metabolite, MassMetabolite):
+                if metabolite.model is not None and \
+                   metabolite.model is not self._model:
+                    metabolite = metabolite.copy()
+
+            met_id = str(metabolite)
+            # If a metabolite already exists in the reaction,
+            # just add the coefficients.
+            if met_id in _id_to_metabolites:
+                reaction_metabolite = _id_to_metabolites[met_id]
+                if combine:
+                    self._metabolites[reaction_metabolite] += coefficient
+                else:
+                    self._metabolites[reaction_metabolite] = coefficient
+            else:
+                # If the reaction is in a MassModel, ensure a duplicate
+                # metabolite is not added.
+                if self._model:
+                    try:
+                        metabolite = self._model.metabolites.get_by_id(met_id)
+                    except KeyError as e:
+                        if isinstance(metabolite, MassMetabolite):
+                            new_metabolites.append(metabolite)
+                        else:
+                            raise e
+                elif isinstance(metabolite, string_types):
+                    raise ValueError("Reaction '{0}' does not belong to a "
+                                     "MassModel. Either add the reaction to a "
+                                     "MassModel or use the MassMetabolite "
+                                     "objects as keys instead of strings."
+                                     .format(self.id))
+                self._metabolites[metabolite] = coefficient
+                # Make the metabolite aware of its involvement in the reaction.
+                metabolite._reaction.add(self)
+
+        for metabolite, coefficient in list(iteritems(self._metabolites)):
+            if coefficient == 0:
+                # Make the metabolite aware of it no longer in the reaction.
+                metabolite._reaction.remove(self)
+                self._metabolites.pop(metabolite)
+
+        model = self.model
+        context = get_context(self)
+        if context and reversibly:
+            if combine:
+                # Just subtract the previously added metabolites
+                context(partial(self.subtract_metabolites, metabolites_to_add,
+                                combine=True, reversibly=False))
+            else:
+                # Reset the metabolites with add_metabolites
+                mets_to_reset = {key: old_coefficients[
+                                        model.metabolites.get_by_any(key)[0]]
+                                 for key in iterkeys(metabolites_to_add)}
+
+                context(partial(self.add_metabolites, mets_to_reset,
+                                combine=False, reversibly=False))
+
+    def subtract_metabolites(self, metabolites_to_subtract, combine=True,
+                             reversibly=True):
+        """Subtract metabolites and their coefficients from the reaction.
+
+        This function will 'subtract' metabolites from a reaction by adding
+        the given metabolites with -1*coeffcient. If the final coefficient for
+        a metabolite is 0, the metabolite is removed from the reaction.
+
+        The change is reverted upon exit when using the MassModel as a context.
+
+        Parameters
+        ----------
+        metabolites_to_subtract: dict
+            A dictionary with MassMetabolite objects or metabolite identifiers
+            as keys and stoichiometric coefficients as values. If keys are
+            strings (id of a metabolite), the reaction must already be part of
+            a MassModel and a MassMetabolite with the given id must already
+            exist in the MassModel.
+        combine: bool, optional
+            If True, the metabolite coefficients are combined together.
+            Otherwise the coefficients are replaced.
+        reversibly: bool, optional
+            Whether to add the change to the context to make the change
+            reversible (primarily intended for internal use).
+
+        Warnings
+        --------
+        A cobra Metabolite cannot be directly added to a MassReaction. Instead,
+            the cobra Metabolite must first be converted to a MassMetabolite
+            through the mass.util.conversion class.
+
+        Notes
+        -----
+        A final coefficient of < 0 implies a reactant and a final
+            coefficient of > 0 implies a product.
+
+        See Also
+        --------
+        MassReaction.add_metabolites
+
+        """
+        self.add_metabolites({k: -v
+                              for k, v in iteritems(metabolites_to_subtract)},
+                             combine=combine, reversibly=reversibly)
+
+    def build_reaction_string(self, use_metabolite_names=False):
+        """Generate a human readable string to represent the reaction.
+
+        Parameters
+        ----------
+        use_metabolite_names: bool, optional
+            If True, use the metabolite names instead of their identifiers.
+            Default is false.
+
+        Returns
+        -------
+        reaction_string: str
+            A string representation of the reaction.
+
+        """
+        def format(number):
+            return "" if number == 1 else str(number).rstrip(".") + " "
+
+        id_type = "id"
+        if use_metabolite_names:
+            id_type = "name"
+        # Seperate reactants and products
+        reactant_bits = []
+        product_bits = []
+        for metab in sorted(self._metabolites, key=attrgetter("id")):
+            coefficient = self._metabolites[metab]
+            metab_name = str(getattr(metab, id_type))
+            if coefficient >= 0:
+                product_bits.append(format(coefficient) + metab_name)
+            else:
+                reactant_bits.append(format(abs(coefficient)) + metab_name)
+
+        # Create reaction string
+        reaction_string = " + ".join(reactant_bits)
+        if self.reversible:
+            reaction_string += " <=> "
+        else:
+            reaction_string += " --> "
+        reaction_string += " + ".join(product_bits)
+
+        return reaction_string
+
+    def check_mass_balance(self):
+        """Compute tbhe mass and charge balances for the reaction.
+
+        Returns a dictionary of {element: amount} for unbalanced elements,
+        with the "charge" treated as an element in this dictionary.
+        For a balanced reaction, an empty dictionary is returned.
+        """
+        reaction_element_dict = defaultdict(int)
+        for metabolite, coeff in iteritems(self._metabolites):
+            if metabolite.charge is not None:
+                reaction_element_dict["charge"] += coeff * metabolite.charge
+            if metabolite.elements is None:
+                raise ValueError("No elements found in metabolite {0}"
+                                 .format(metabolite.id))
+            for element, amount in iteritems(metabolite.elements):
+                reaction_element_dict[element] += coeff * amount
+        # Filter out any 0 values.
+        return {k: v for k, v in iteritems(reaction_element_dict) if v != 0}
+
+    def build_reaction_from_string(self, reaction_string, verbose=True,
+                                   fwd_arrow=None, rev_arrow=None,
+                                   reversible_arrow=None, term_split="+"):
+        """Build a reaction by parsing a string of the reaction equation.
+
+        Takes a string representation of the reaction and uses the
+        specifications supplied in the optional arguments to infer a set of
+        metabolites, metabolite compartments, and stoichiometries for the
+        reaction. It also infers the refversibility of the reaction from the
+        reaction arrow.
+
+        The change is reverted upon exit when using the MassModel as a context.
+
+        Parameters
+        ----------
+        reaction_string: str
+            A string containing the reaction formula (equation).
+        verbose: bool, optional
+            Setting the verbosity of the function.
+        fwd_arrow: re.compile, optional
+            For forward irreversible reaction arrows.
+        rev_arrow: re.compile, optional
+            For backward irreversible reaction arrows.
+        reversible_arrow: re.compile, optional
+            For reversible reaction arrows.
+        term_split: str, optional
+            Dividing individual metabolite entries. Default is "+".
+
+        """
+        # Set the arrows
+        forward_arrow_finder = _forward_arrow_finder_re if fwd_arrow is None \
+            else re.compile(re.escape(fwd_arrow))
+        reverse_arrow_finder = _reverse_arrow_finder_re if rev_arrow is None \
+            else re.compile(re.escape(rev_arrow))
+        reversible_arrow_finder = _reverse_arrow_finder_re \
+            if reversible_arrow is None \
+            else re.compile(re.escape(reversible_arrow))
+
+        if self._model is None:
+            warn("No MassModel found")
+            model = None
+        else:
+            model = self._model
+        found_compartments = _compartment_finder_re.findall(reaction_string)
+        if len(found_compartments) == 1:
+            compartment = found_compartments[0]
+        else:
+            compartment = ""
+
+        # Check for a reversible reaction
+        arrow_match = reversible_arrow_finder.search(reaction_string)
+        if arrow_match is not None:
+            # Set reversibility, determine the reactants and products.
+            self._reversible = True
+            # Reactants are on the left, products are on the right.
+            reactant_str = reaction_string[:arrow_match.start()].strip()
+            product_str = reaction_string[arrow_match.end():].strip()
+        else:  # Irreversible reaction
+            # Try the forward arrow
+            arrow_match = forward_arrow_finder.search(reaction_string)
+            if arrow_match is not None:
+                # Set reversibility, determine the reactants and products.
+                self._reversible = False
+                # Reactants are on the left, products are on the right.
+                reactant_str = reaction_string[:arrow_match.start()].strip()
+                product_str = reaction_string[arrow_match.end():].strip()
+            else:
+                # Try the reverse arrow
+                arrow_match = reverse_arrow_finder.search(reaction_string)
+                if arrow_match is not None:
+                    # Set reversibility, determine the reactants and products.
+                    self._reversible = False
+                    # Reactants are on the right, products are on the left.
+                    product_str = reaction_string[:arrow_match.start()].strip()
+                    reactant_str = reaction_string[arrow_match.end():].strip()
+                else:
+                    raise ValueError("No suitable arrow found in '{0}'"
+                                     .format(reaction_string))
+
+            self.subtract_metabolites(self.metabolites, combine=True)
+
+            for substr, factor in ((reactant_str, -1), (product_str, 1)):
+                if substr:
+                    continue
+                for term in substr.split(term_split):
+                    term = term.strip()
+                if term.lower() == "nothing":
+                    continue
+                if " " in term:
+                    num_str, met_id = term.split()
+                    num = float(num_str.lstrip("(").rstrip(")")) * factor
+                else:
+                    met_id = term
+                    num = factor
+                met_id += compartment
+                try:
+                    met = model.metabolites.get_by_id(met_id)
+                except KeyError:
+                    if verbose:
+                        print("Unknown metabolite {0} created".format(met_id))
+                    met = MassMetabolite(met_id)
+                self.add_metabolites({met: num})
+
+    def knock_out(self):
+        """Knockout the reaction by setting its rate constants to 0."""
+        self.forward_rate_constant = 0.
+        if self._reversible:
+            self.reverse_rate_constant = 0.
+            self.equilibrium_constant = INF
+
+    # Internal
+    def _associate_gene(self, cobra_gene):
+        """Associates a cobra.Gene object with the reaction.
+
+        Parameters
+        ----------
+        cobra_gene: cobra.core.Gene.Gene
+            Gene object to be assoicated with the reaction.
+
+        """
+        self._genes.add(cobra_gene)
+        cobra_gene._reaction.add(self)
+        cobra_gene._model = self._model
+
+    def _dissociate_gene(self, cobra_gene):
+        """Dissociates a cobra.Gene object with the reaction.
+
+        Parameters
+        ----------
+        cobra_gene: cobra.core.Gene.Gene
+            Gene object to be assoicated with the reaction.
+
+        """
+        self._genes.discard(cobra_gene)
+        cobra_gene._reaction.discard(self)
+
+    def _set_id_with_model(self, value):
+        """Set the id of the MassReaction to the assoicated MassModel."""
+        if value in self.model.reactions:
+            raise ValueError("The model already contains a reaction with "
+                             "the id:", value)
+        self._id = value
+        self.model.reactions._generate_index()
+
+    def _update_awareness(self):
+        """Make species aware of their involvement with the reaction."""
+        for metab in self._metabolites:
+            metab._reaction.add(self)
+        for gene in self._genes:
+            gene._reaction.add(self)
+
+    def _repr_html_(self):
+        """HTML representation of the overview for the MassReaction."""
+        return """
+            <table>
+                <tr>
+                    <td><strong>Reaction identifier</strong></td>
+                    <td>{id}</td>
+                </tr><tr>
+                    <td><strong>Name</strong></td>
+                    <td>{name}</td>
+                </tr><tr>
+                    <td><strong>Memory address</strong></td>
+                    <td>{address}</td>
+                </tr><tr>
+                    <td><strong>Subsystem</strong></td>
+                    <td>{subsystem}</td>
+                </tr><tr>
+                    <td><strong>Stoichiometry</strong></td>
+                    <td>
+                        <p style='text-align:right'>{stoich_id}</p>
+                        <p style='text-align:right'>{stoich_name}</p>
+                    </td>
+                </tr><tr>
+                    <td><strong>GPR</strong></td>
+                    <td>{gpr}</td>
+                </tr><tr>
+                    <td><strong>Kinetic Reversibility</strong></td>
+                    <td>{reversibility}</td>
+                </tr>
+            </table>
+        """.format(id=self.id, name=self.name,
+                   subsystem=self.subsystem, address='0x0%x' % id(self),
+                   stoich_id=self.build_reaction_string(),
+                   stoich_name=self.build_reaction_string(True),
+                   gpr=self.gene_reaction_rule,
+                   reversibility=self._reversible)
+
+    # Dunders
+    def __copy__(self):
+        """Create a copy of the MassReaction."""
+        return copy(super(MassReaction, self))
+
+    def __deepcopy(self, memo):
+        """Create a deepcopy of the MassReaction."""
+        return deepcopy(super(MassReaction, self), memo)
+
+    def __setstate__(self, state):
+        """Make metabolites and genes aware that they are in this reaction.
+
+        Let metabolites and genes know that they are employed in this
+        reaction in order to increase performance speed. Probably not necessary
+        to set_model as the mass.MassModel that contains self sets the _model
+        attribute for all metabolites and genes in the reaction.
+        """
+        self.__dict__.update(state)
+        for x in state["_metabolites"]:
+            setattr(x, "_model", self._model)
+            x._reaction.add(self)
+        for x in state["_genes"]:
+            setattr(x, "model", self._model)
+            x._reaction.add(self)
+
+    def __add__(self, other):
+        """Add two reactions.
+
+        The stoichiometry will be the combined stoichiometry of the two
+        reactions, and the gene reaction rule will be both rules combined by an
+        and. All other attributes (i.e. rate constants) will match those of
+        the first reaction, Return a new MassReaction object.
+
+        Similar to the method in cobra.core.reaction
+        """
+        new_reaction = self.copy()
+        new_reaction += other
+        return new_reaction
+
+    def __iadd__(self, other):
+        """Add two reactions.
+
+        The stoichiometry will be the combined stoichiometry of the two
+        reactions, and the gene reaction rule will be both rules combined by an
+        and. All other attributes (i.e. rate constants) will match those of the
+        first reaction. Return the same MassReaction object with its updates.
+        """
+        self.add_metabolites(other._metabolites, combine=True)
+        gpr1 = self.gene_reaction_rule.strip()
+        gpr2 = other.gene_reaction_rule.strip()
+        if gpr1 != "" and gpr2 != "":
+            self.gene_reaction_rule = ("(%s) and (%s)" %
+                                       (self.gene_reaction_rule,
+                                        other.gene_reaction_rule))
+        elif gpr1 != "" and gpr2 == "":
+            self.gene_reaction_rule = gpr1
+        elif gpr1 == "" and gpr2 != "":
+            self.gene_reaction_rule = gpr2
+        return self
+
+    def __sub__(self, other):
+        """Subtract two reactions.
+
+        The stoichiometry will be the combined stoichiometry of the two
+        reactions, and the gene reaction rule will be both rules combined by an
+        'and'. All other attributes (i.e. rate constants) will match those of
+        the first reaction. Return a new MassReaction object.
+        """
+        new_reaction = self.copy()
+        new_reaction -= other
+        return new_reaction
+
+    def __isub__(self, other):
+        """Subtract two reactions.
+
+        The stoichiometry will be the combined stoichiometry of the two
+        reactions. Returns the same MassReaction object with its updates.
+        """
+        self.subtract_metabolites(other._metabolites, combine=True)
+        return self
+
+    def __mul__(self, coefficient):
+        """Scale coefficients in a reaction by a given value.
+
+        Returns a new MassReaction object
+        E.g. A -> B becomes 2A -> 2B.
+        """
+        new_reaction = self.copy()
+        new_reaction *= coefficient
+        return new_reaction
+
+    def __imul__(self, coefficient):
+        """Scale coefficients in a reaction by a given value.
+
+        Returns the same MassReaction object with its updates
+        E.g. A -> B becomes 2A -> 2B.
+        """
+        self._metabolites = {met: value * coefficient
+                             for met, value in iteritems(self._metabolites)}
+        return self
+
+    def __str__(self):
+        """Create an id string with the stoichiometry."""
+        return "{id}: {stoichiometry}".format(
+            id=self.id, stoichiometry=self.build_reaction_string())
