@@ -63,8 +63,6 @@ class MassMetabolite(Species):
         self._initial_condition = None
         # Gibbs energy of formation of the metabolite
         self._gibbs_formation_energy = None
-        # ODE for the metabolite's concentration
-        self._ode = None
 
         # For cobra compatibility
         self._constraint_sense = "E"
@@ -174,7 +172,7 @@ class MassMetabolite(Species):
 
         Will return None if metabolite is not associated with a MassReaction.
         """
-        return expressions.generate_ode(self, update_metabolite=True)
+        return expressions.generate_ode(self)
 
     @property
     def formula_weight(self):

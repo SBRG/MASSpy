@@ -271,7 +271,7 @@ def jacobian(model, jacobian_type="Jx", strip_time=True,
                             matrix_type="symbolic")
     stoich_mat = model._mk_stoich_matrix(matrix_type="symbolic",
                                          update_model=False)
-    if re.match("Jx", jacobian_type):
+    if "Jx" == jacobian_type:
         jacobian_mat = stoich_mat * gradient_mat
         identifiers = [m.id for m in model.metabolites]
     else:
@@ -363,6 +363,10 @@ def left_nullspace(A, atol=1e-13, rtol=0):
         left nullspace; each element in numpy.dot(lns A) will be
         approximately zero.
 
+    See ALso
+    --------
+    nullspace: Base function.
+
     Notes
     -----
     If both `atol` and `rtol` are positive, the combined tolerance is the
@@ -450,6 +454,10 @@ def rowspace(A, atol=1e-13, rtol=0):
         with shape (m, n), where n is the estimated dimension of the rowspace
         of `A`. The columns of rs are a basis for the rowspace.
 
+    See Also
+    --------
+    columnspace: Base function.
+
     Notes
     -----
     If both `atol` and `rtol` are positive, the combined tolerance is the
@@ -510,11 +518,8 @@ def matrix_rank(A, atol=1e-13, rtol=0):
 def svd(A, **kwargs):
     """Get the singular value decomposition of 'A'.
 
-    This function utilizes the scipy.linalg.svd method to obtain the singular
-    value decompostion (svd) of matrix 'A'.
-
-    Other kwargs are the same as those for scipy.linalg.svd. For more details:
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.svd.html
+    `kwargs`` are passed on to ``scipy.linalg.svd``
+    See documentation for ``scipy.linalg.svd`` for more details.
 
     Parameters
     ----------
@@ -527,7 +532,7 @@ def svd(A, **kwargs):
 
     See Also
     --------
-    scipy.linalg.svd
+    scipy.linalg.svd: Base function.
         svd and its arguments are the same as this method. The only difference
         is that matrices of various formats are converted in order to ensure
         the correct input for scipy.linalg.svd.
@@ -540,11 +545,8 @@ def svd(A, **kwargs):
 def eig(A, left=False, right=False, **kwargs):
     """Get the eigenvalues of 'A'.
 
-    This function utilizes the scipy.linalg.eig method to obtain the
-    eigenvalues and of matrix 'A'.
-
-    Other kwargs are the same as those for scipy.linalg.eig. For more details:
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eig.html
+    `kwargs`` are passed on to ``scipy.linalg.eig``
+    See documentation for ``scipy.linalg.eig`` for more details.
 
     Parameters
     ----------
@@ -569,7 +571,7 @@ def eig(A, left=False, right=False, **kwargs):
 
     See Also
     --------
-    scipy.linalg.eig
+    scipy.linalg.eig: Base function.
         svd and its arguments are the same as this method. The only difference
         is that matrices of various formats are converted in order to ensure
         the correct input for scipy.linalg.eig.

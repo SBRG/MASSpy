@@ -103,7 +103,6 @@ class MassReaction(Object):
 
         # Rate type and law and as a sympy expression for simulation.
         self._rtype = 1
-        self._rate_expr = None
 
         # A dictionary of metabolites and their stoichiometric coefficients.
         self._metabolites = {}
@@ -247,11 +246,9 @@ class MassReaction(Object):
         """
         if self.model is not None and self in self.model.custom_rates:
             rate = self._model.custom_rates[self]
-        elif self._rate_expr is None:
+        else:
             rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
                                      update_reaction=True)
-        else:
-            rate = getattr(self, "_rate_expr")
 
         return rate
 

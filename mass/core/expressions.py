@@ -66,7 +66,6 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         raise ValueError("rate_type must be 1, 2, or 3")
 
     if update_reaction:
-        reaction._rate_expr = rate_expr
         reaction._rtype = rate_type
 
     if not sympy_expr:
@@ -121,7 +120,7 @@ def generate_disequilibrium_ratio(reaction):
     return diseq_ratio
 
 
-def generate_ode(metabolite, update_metabolite=True):
+def generate_ode(metabolite):
     """Generate the ODE for a given metabolite as a sympy expression.
 
     Parameters
@@ -144,9 +143,6 @@ def generate_ode(metabolite, update_metabolite=True):
                                        rxn.rate))
     else:
         ode = None
-
-    if update_metabolite:
-        metabolite._ode = ode
 
     return ode
 

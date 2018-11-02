@@ -140,11 +140,11 @@ class MassModel(Object):
             # Initialize dictionaries for initial conditions, custom rates,
             # custom parameters, fixed concentrations, compartments, and units.
             self.initial_conditions = {}
+            self.fixed_concentrations = {}
             self.custom_rates = {}
             self.custom_parameters = {}
-            self.fixed_concentrations = {}
-            self.units = {}
             self._compartments = {}
+            self.units = {}
             # Initialize a set to store the modules
             self.modules = set()
             # Store the stoichiometric matrix, its matrix type, and data type
