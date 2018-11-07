@@ -79,10 +79,6 @@ class MassReaction(Object):
         self.subsystem = subsystem
         self._reversible = reversible
         self.steady_state_flux = steady_state_flux
-        # Rate and equilibrium constant parameter identifiers for expressions.
-        self._sym_kf = "kf_{0}".format(id)
-        self._sym_kr = "kr_{0}".format(id)
-        self._sym_Keq = "Keq_{0}".format(id)
         # Rate and equilibrium constant parameters for reactions. The reverse
         # and equilibrium constants for irreversible reactions are set here.
         # For cobra compatibility, lower and upper bounds are also set.
@@ -205,15 +201,15 @@ class MassReaction(Object):
             be accessed through the model.
 
         """
-        keys = [self._sym_kf, self._sym_Keq]
+        keys = [self.kf_str, self.Keq_str]
         attrs = ["_forward_rate_constant", "_equilibrium_constant"]
         # Return reverse rate constants for reversible reactions.
         if self.reversible:
-            keys += [self._sym_kr]
+            keys += [self.kr_str]
             attrs += ["_reverse_rate_constant"]
-        parameters = {key: self.__dict__[attr]
+        parameters = {key: getattr(self, attr)
                       for key, attr in zip(keys, attrs)
-                      if self.__dict__[attr] is not None}
+                      if getattr(self, attr) is not None}
 
         return parameters
 
@@ -340,9 +336,9 @@ class MassReaction(Object):
             for met in self.metabolites:
                 _c = re.search("^\w*\S(?!<\_)(\_\S+)$", met.id)
                 if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-                    external_metabolite = re.sub(_c.group(1), "_e", met.id)
+                    external_metabolite = met.id.replace(_c.group(1), "_e")
                 else:
-                    external_metabolite = "{0}{1}".format(met.id, "_e")
+                    external_metabolite = met.id + "_e"
         else:
             external_metabolite = None
 
@@ -467,6 +463,21 @@ class MassReaction(Object):
     #        value is not None:
     #         raise TypeError("Must be an int or float")
     #     self._gibbs_reaction_energy = value
+
+    @property
+    def kf_str(self):
+        """Return the string representation of the forward rate constant."""
+        return "kf_" + self.id
+
+    @property
+    def Keq_str(self):
+        """Return the string representation of the equilibrium constant."""
+        return "Keq_" + self.id
+
+    @property
+    def kr_str(self):
+        """Return the string representation of the reverse rate constant."""
+        return "kr_" + self.id
 
     # Shorthands
     @property

@@ -181,12 +181,12 @@ def get_missing_reaction_parameters(model, simulation=None,
     missing = {}
     for rxn in reaction_list:
         missing_params = []
-        parameter_keys = [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr]
+        parameter_keys = [rxn.Keq_str, rxn.kf_str, rxn.kr_str]
         for key in parameter_keys:
             try:
                 rxn.parameters[key]
             except KeyError:
-                if not rxn.reversible and key is rxn._sym_kr:
+                if not rxn.reversible and key is rxn.kr_str:
                     pass
                 else:
                     missing_params.append(key)
@@ -250,7 +250,7 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
         symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))]
         customs = []
         for parameter in symbols:
-            if parameter not in [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr] \
+            if parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str] \
                and parameter is not "t":
                 try:
                     value = model.custom_parameters[parameter]
@@ -427,7 +427,7 @@ def check_superfluous_consistency(model, simulation=None, tol=1e-9,
                         for param_type in ["kf", "Keq", "kr"]]
                 kf, Keq, kr = [existing[key] for key in keys]
             else:
-                keys = [rxn._sym_kf, rxn._sym_Keq, rxn._sym_kr]
+                keys = [rxn.kf_str, rxn.Keq_str, rxn.kr_str]
                 kf, Keq, kr = [rxn.parameters[key] for key in keys]
             superfluous[rxn] = _is_consistent(kf, Keq, kr, tol)
         except KeyError:
@@ -806,8 +806,8 @@ def _check_custom_for_standard(model, reaction):
     if reaction in model.custom_rates:
         symbols = list(model.custom_rates[reaction].atoms(sym.Symbol))
         symbols = sorted([str(s) for s in symbols
-                         if str(s) in [reaction._sym_Keq, reaction._sym_kf,
-                                       reaction._sym_kr]])
+                         if str(s) in [reaction.Keq_str, reaction.kf_str,
+                                       reaction.kr_str]])
         for param in symbols:
             try:
                 reaction.parameters[param]

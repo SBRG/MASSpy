@@ -263,10 +263,10 @@ class MassModel(Object):
         parameters = {}
         # Sort rate and equilibrium constants into seperate dictionaries,
         # then add dictionaries to returned parameter dictionary.
-        for p_type in ["kfs", "Keqs", "krs"]:
+        for p_type in ["kf", "Keq", "kr"]:
             p_type_dict = {}
             for rxn in self.reactions:
-                p_sym = rxn.__dict__["_sym_{0}".format(p_type[:-1])]
+                p_sym = getattr(rxn, p_type + "_str")
                 if p_sym in rxn.parameters:
                     p_type_dict.update({p_sym: rxn.parameters[p_sym]})
             parameters.update({p_type: p_type_dict})
@@ -1517,8 +1517,8 @@ class MassModel(Object):
             for symbol in list(rate.atoms(sym.Symbol)):
                 if str(symbol) in steady_state_concentrations:
                     values[symbol] = steady_state_concentrations[str(symbol)]
-                elif str(symbol) in [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr]:
-                    if str(symbol) is rxn._sym_kf:
+                elif str(symbol) in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]:
+                    if str(symbol) is rxn.kf_str:
                         perc = symbol
                     else:
                         values[symbol] = rxn.parameters[str(symbol)]
@@ -1835,8 +1835,8 @@ class MassModel(Object):
                    num_metabolites=len(self.metabolites),
                    num_reactions=len(self.reactions),
                    num_ic=len(self.initial_conditions),
-                   num_kfs=len(self.parameters["kfs"]),
-                   num_Keqs=len(self.parameters["Keqs"]),
+                   num_kfs=len(self.parameters["kf"]),
+                   num_Keqs=len(self.parameters["Keq"]),
                    num_irreversible=len(self.irreversible_reactions),
                    num_exchanges=len(self.exchanges),
                    num_fixed=len(self.fixed_concentrations),
