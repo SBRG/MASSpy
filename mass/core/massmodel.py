@@ -539,8 +539,6 @@ class MassModel(Object):
         """
         if not isinstance(initial_conditions, dict):
             raise TypeError("initial_conditions must be a dictionary.")
-        if not initial_conditions:
-            return
 
         # Check whether a metabolite already exists in the model,
         # ignoring those that do not.
@@ -894,7 +892,7 @@ class MassModel(Object):
             The string representation of the custom rate expression. The string
             representation of the custom rate will be used to create a sympy
             expression that represents the custom rate.
-        custom_parameters: dict
+        custom_parameters: dict, optional
             A dictionary of custom parameters for the custom rate where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. The string representation of the custom
@@ -1098,7 +1096,7 @@ class MassModel(Object):
             A dictionary of fixed concentrations where metabolites are the keys
             and fixed concentration value. The metabolite must already exist
             in the model, or it must be the string representation of the
-            "external" metabolite in an exchange reaction. (e.g. 'MetabID_Xt')
+            "external" metabolite in an exchange reaction. (e.g. 'MetabID_e')
 
         Notes
         -----

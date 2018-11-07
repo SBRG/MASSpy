@@ -8,7 +8,7 @@ initial concentrations for quick access, and handling simulation results.
 Perturbations can also be implemented in simulations as long as they follow the
 following guidelines:
 
-Valid keys for  perturbation dictionary can include the following:
+Valid keys for perturbation dictionary can include the following:
 
     "RxnID.forward_rate_constant" or "RxnID.kf"
     "RxnID.equilibrium_constant" or "RxnID.Keq"
@@ -738,7 +738,6 @@ class Simulation(Object):
             for function in [self._get_parameter_from_model,
                              self._get_ics_from_model]:
                 values = function(model)
-                print(values)
                 new_values.add(values)
 
         self._values = new_values
