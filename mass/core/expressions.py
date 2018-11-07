@@ -35,7 +35,8 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
     Returns
     -------
     rate_law: str or sympy expression
-        The rate law expression.
+        The rate law expression. Will return a blank string if no metabolites
+        are associated with the reaction.
 
     """
     # Check inputs
@@ -49,7 +50,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         rate_type = int(rate_type)
 
     if not reaction.metabolites:
-        return None
+        return ""
 
     # Remove H+ and H2O from the reaction if necessary
     rxn = _ignore_h_and_h2o(reaction)
@@ -167,8 +168,9 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
 
     Returns
     -------
-    custom_rate_expression: sympy expression
-        A sympy expression of the custom rate
+    custom_rate_expression: sympy expression, None
+        A sympy expression of the custom rate. If no metabolites are assoicated
+        with the reaction, None will be returned.
 
     Warnings
     --------
