@@ -20,7 +20,7 @@ from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 
 # Global
-INF = float("inf")
+_INF = float("inf")
 # Precompiled regular expressions for gene reaction rules
 _and_or_search_re = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
 _uppercase_AND_re = re.compile(r'\bAND\b')
@@ -94,7 +94,7 @@ class MassReaction(Object):
             self.upper_bound = 1000.
         else:
             self._reverse_rate_constant = 0.
-            self._equilibrium_constant = INF
+            self._equilibrium_constant = _INF
             self.lower_bound = 0.
             self.upper_bound = 1000.
 
@@ -147,7 +147,7 @@ class MassReaction(Object):
                 setattr(self, "lower_bound", 0)
             else:
                 setattr(self, "_reverse_rate_constant", 0)
-                setattr(self, "_equilibrium_constant", INF)
+                setattr(self, "_equilibrium_constant", _INF)
                 setattr(self, "lower_bound", 0)
 
     @property
@@ -995,7 +995,7 @@ class MassReaction(Object):
         self.forward_rate_constant = 0.
         if self._reversible:
             self.reverse_rate_constant = 0.
-            self.equilibrium_constant = INF
+            self.equilibrium_constant = _INF
 
     # Internal
     def _associate_gene(self, cobra_gene):
