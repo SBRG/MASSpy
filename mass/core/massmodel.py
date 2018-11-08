@@ -1340,7 +1340,7 @@ class MassModel(Object):
         else:
             merged_model = self.copy()
             if new_model_id is None:
-                new_model_id = "{}_{}".format(self.id, second_model.id)
+                new_model_id = self.id + "_" + second_model.id
         merged_model.id = new_model_id
 
         # Add the reactions of the second model to the first model.
@@ -1348,7 +1348,7 @@ class MassModel(Object):
         if prefix_existing is not None:
             existing = new_reactions.query(lambda r: r.id in self.reactions)
             for rxn in existing:
-                rxn.id = "{0}_{1}".format(prefix_existing, rxn.id)
+                rxn.id = prefix_existing + "_" + rxn.id
         merged_model.add_reactions(new_reactions)
         merged_model.repair()
 
