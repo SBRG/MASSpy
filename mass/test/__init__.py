@@ -9,7 +9,7 @@ from warnings import warn
 from os import listdir
 from os.path import abspath, dirname, join
 
-from mass.io.json import read_json_model
+from mass.io.json import load_json_model
 
 from mass.exceptions import MassSBMLError as _MassSBMLError
 _filetypes = "xml|json|txt"
@@ -87,7 +87,7 @@ def create_test_model(model_name):
                                     "SBML dependencies installed")
             # Load json model
             elif json_re.match(ext) and re.search(ext, _filetypes):
-                return read_json_model(filepath)
+                return load_json_model(filepath)
 
         warn("Wrong extension specified. Cannot load model")
         return None
@@ -102,7 +102,7 @@ def create_test_model(model_name):
                                 "SBML dependencies installed")
         # Load json model
         elif json_re.match(ext) and re.search(ext, _filetypes):
-            return read_json_model(model_name)
+            return load_json_model(model_name)
     else:
         raise ValueError("Could not recognize file type")
 
