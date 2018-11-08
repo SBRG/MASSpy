@@ -20,7 +20,7 @@ from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 
 # Global
-INF = float("inf")
+_INF = float("inf")
 # Precompiled regular expressions for gene reaction rules
 _and_or_search_re = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
 _uppercase_AND_re = re.compile(r'\bAND\b')
@@ -79,10 +79,6 @@ class MassReaction(Object):
         self.subsystem = subsystem
         self._reversible = reversible
         self.steady_state_flux = steady_state_flux
-        # Rate and equilibrium constant parameter identifiers for expressions.
-        self._sym_kf = "kf_{0}".format(id)
-        self._sym_kr = "kr_{0}".format(id)
-        self._sym_Keq = "Keq_{0}".format(id)
         # Rate and equilibrium constant parameters for reactions. The reverse
         # and equilibrium constants for irreversible reactions are set here.
         # For cobra compatibility, lower and upper bounds are also set.
@@ -94,7 +90,7 @@ class MassReaction(Object):
             self.upper_bound = 1000.
         else:
             self._reverse_rate_constant = 0.
-            self._equilibrium_constant = INF
+            self._equilibrium_constant = _INF
             self.lower_bound = 0.
             self.upper_bound = 1000.
 
@@ -103,7 +99,6 @@ class MassReaction(Object):
 
         # Rate type and law and as a sympy expression for simulation.
         self._rtype = 1
-        self._rate_expr = None
 
         # A dictionary of metabolites and their stoichiometric coefficients.
         self._metabolites = {}
@@ -148,7 +143,7 @@ class MassReaction(Object):
                 setattr(self, "lower_bound", 0)
             else:
                 setattr(self, "_reverse_rate_constant", 0)
-                setattr(self, "_equilibrium_constant", INF)
+                setattr(self, "_equilibrium_constant", _INF)
                 setattr(self, "lower_bound", 0)
 
     @property
@@ -206,15 +201,15 @@ class MassReaction(Object):
             be accessed through the model.
 
         """
-        keys = [self._sym_kf, self._sym_Keq]
+        keys = [self.kf_str, self.Keq_str]
         attrs = ["_forward_rate_constant", "_equilibrium_constant"]
         # Return reverse rate constants for reversible reactions.
         if self.reversible:
-            keys += [self._sym_kr]
+            keys += [self.kr_str]
             attrs += ["_reverse_rate_constant"]
-        parameters = {key: self.__dict__[attr]
+        parameters = {key: getattr(self, attr)
                       for key, attr in zip(keys, attrs)
-                      if self.__dict__[attr] is not None}
+                      if getattr(self, attr) is not None}
 
         return parameters
 
@@ -247,11 +242,9 @@ class MassReaction(Object):
         """
         if self.model is not None and self in self.model.custom_rates:
             rate = self._model.custom_rates[self]
-        elif self._rate_expr is None:
+        else:
             rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
                                      update_reaction=True)
-        else:
-            rate = getattr(self, "_rate_expr")
 
         return rate
 
@@ -343,9 +336,9 @@ class MassReaction(Object):
             for met in self.metabolites:
                 _c = re.search("^\w*\S(?!<\_)(\_\S+)$", met.id)
                 if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-                    external_metabolite = re.sub(_c.group(1), "_e", met.id)
+                    external_metabolite = met.id.replace(_c.group(1), "_e")
                 else:
-                    external_metabolite = "{0}{1}".format(met.id, "_e")
+                    external_metabolite = met.id + "_e"
         else:
             external_metabolite = None
 
@@ -470,6 +463,21 @@ class MassReaction(Object):
     #        value is not None:
     #         raise TypeError("Must be an int or float")
     #     self._gibbs_reaction_energy = value
+
+    @property
+    def kf_str(self):
+        """Return the string representation of the forward rate constant."""
+        return "kf_" + self.id
+
+    @property
+    def Keq_str(self):
+        """Return the string representation of the equilibrium constant."""
+        return "Keq_" + self.id
+
+    @property
+    def kr_str(self):
+        """Return the string representation of the reverse rate constant."""
+        return "kr_" + self.id
 
     # Shorthands
     @property
@@ -998,7 +1006,7 @@ class MassReaction(Object):
         self.forward_rate_constant = 0.
         if self._reversible:
             self.reverse_rate_constant = 0.
-            self.equilibrium_constant = INF
+            self.equilibrium_constant = _INF
 
     # Internal
     def _associate_gene(self, cobra_gene):

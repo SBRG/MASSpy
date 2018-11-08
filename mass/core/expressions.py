@@ -35,7 +35,8 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
     Returns
     -------
     rate_law: str or sympy expression
-        The rate law expression.
+        The rate law expression. Will return a blank string if no metabolites
+        are associated with the reaction.
 
     """
     # Check inputs
@@ -49,7 +50,7 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         rate_type = int(rate_type)
 
     if not reaction.metabolites:
-        return None
+        return ""
 
     # Remove H+ and H2O from the reaction if necessary
     rxn = _ignore_h_and_h2o(reaction)
@@ -66,7 +67,6 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         raise ValueError("rate_type must be 1, 2, or 3")
 
     if update_reaction:
-        reaction._rate_expr = rate_expr
         reaction._rtype = rate_type
 
     if not sympy_expr:
@@ -116,12 +116,12 @@ def generate_disequilibrium_ratio(reaction):
 
     """
     diseq_ratio = sym.Mul(generate_mass_action_ratio(reaction),
-                          sym.Pow(sym.var(reaction._sym_Keq), -1))
+                          sym.Pow(sym.var(reaction.Keq_str), -1))
 
     return diseq_ratio
 
 
-def generate_ode(metabolite, update_metabolite=True):
+def generate_ode(metabolite):
     """Generate the ODE for a given metabolite as a sympy expression.
 
     Parameters
@@ -144,9 +144,6 @@ def generate_ode(metabolite, update_metabolite=True):
                                        rxn.rate))
     else:
         ode = None
-
-    if update_metabolite:
-        metabolite._ode = ode
 
     return ode
 
@@ -171,8 +168,9 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
 
     Returns
     -------
-    custom_rate_expression: sympy expression
-        A sympy expression of the custom rate
+    custom_rate_expression: sympy expression, None
+        A sympy expression of the custom rate. If no metabolites are assoicated
+        with the reaction, None will be returned.
 
     Warnings
     --------
@@ -208,23 +206,23 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     custom_rate_expression = custom_rate.replace("(t)", "")
 
     # Get metabolites as symbols if they are in the custom rate law
-    met_syms = {met.id: sym.Function(met.id)(_T_SYM)
+    met_syms = {str(met): sym.Function(str(met))(_T_SYM)
                 for met in iterkeys(reaction.metabolites)
-                if re.search("[{0}]".format(met.id), custom_rate)}
+                if re.search("[" + str(met) + "]", custom_rate)}
 
     # Get fixed concentrations as symbols if they are in the custom rate law
     if reaction._model is not None:
         fix_syms = {str(met): sym.Symbol(str(met))
                     for met in reaction._model.fixed_concentrations
-                    if re.search("[{0}]".format(str(met)), custom_rate)}
+                    if re.search("[" + str(met) + "]", custom_rate)}
 
     else:
         fix_syms = {}
 
     # Get rate parameters as symbols if they are in the custom rate law
-    rate_syms = {reaction.__dict__[p]: sym.Symbol(reaction.__dict__[p])
-                 for p in ["_sym_kf", "_sym_Keq", "_sym_kr"]
-                 if re.search(str(reaction.__dict__[p]), custom_rate)}
+    rate_syms = {getattr(reaction, p): sym.Symbol(getattr(reaction, p))
+                 for p in ["kf_str", "Keq_str", "kr_str"]
+                 if re.search(str(getattr(reaction, p)), custom_rate)}
     # Get custom parameters as symbols
     custom_syms = {custom: sym.Symbol(custom) for custom in custom_parameters}
 
@@ -264,15 +262,15 @@ def _format_metabs_str(expr, rxn, mets, left_sign):
         l, r = "", "*"
     # For exchange reactions
     if rxn.exchange and not mets:
-        expr += "{0}{1}(t){2}".format(l, rxn.external_metabolite, r)
+        expr += l + rxn.external_metabolite + "(t)" + r
     # For all other reactions
     else:
         for met in mets:
             coeff = abs(rxn.get_coefficient(met.id))
             if coeff == 1:
-                expr += "{0}{1}(t){2}".format(l, met.id, r)
+                expr += l + met.id + "(t)" + r
             else:
-                expr += "{0}{1}(t)**{3}{2}".format(l, met.id, r, coeff)
+                expr += l + met.id + "(t)**" + coeff + r
     return expr
 
 
@@ -305,12 +303,12 @@ def _generate_rate_str_1(reaction):
 
     # Return rate if reaction is irreversible
     if not reaction.reversible:
-        return reaction._sym_kf + rate_law
+        return reaction.kf_str + rate_law
 
     # Generate reverse rate
-    rate_law = "{0}*({1} - ".format(reaction._sym_kf, rate_law.lstrip("*"))
+    rate_law = reaction.kf_str + "*(" + rate_law.lstrip("*")
     rate_law = _format_metabs_str(rate_law, reaction, reaction.products, False)
-    rate_law = "{0} / {1})".format(rate_law.rstrip("*"), reaction._sym_Keq)
+    rate_law = rate_law.rstrip("*") + "/" + reaction.Keq_str + ")"
 
     return rate_law
 
@@ -326,11 +324,10 @@ def _generate_rate_str_2(reaction):
 
     # Return rate if reaction is irreversible
     if not reaction.reversible:
-        return reaction._sym_kf + rate_law
+        return reaction.kf_str + rate_law
 
     # Generate reverse rate
-    rate_law = "{0}{1} - {2}".format(reaction._sym_kf, rate_law,
-                                     reaction._sym_kr)
+    rate_law = reaction.kf_str + rate_law + " - " + reaction.kr_str
     rate_law = _format_metabs_str(rate_law, reaction, reaction.products, True)
 
     return rate_law
@@ -347,12 +344,14 @@ def _generate_rate_str_3(reaction):
 
     # Return rate if reaction is irreversible
     if not reaction.reversible:
-        return "{0}*{1}{2}".format(reaction._sym_kr, reaction._sym_Keq,
-                                   rate_law)
+        rate_law = reaction.kr_str + "*" + reaction.Keq_str + rate_law
+        return rate_law
 
     # Generate reverse rate
-    rate_law = '{0}*({1}{2} - '.format(reaction._sym_kr, reaction._sym_Keq,
+    rate_law = '{0}*({1}{2} - '.format(reaction.kr_str, reaction.Keq_str,
                                        rate_law)
+
+    rate_law = reaction.kr_str + "*(" + reaction.Keq_str + rate_law + " - "
     rate_law = _format_metabs_str(rate_law, reaction, reaction.products, False)
     rate_law = rate_law.rstrip("*") + ')'
 
@@ -371,14 +370,14 @@ def _generate_rate_sym_1(reaction):
 
     # Return rate if reaction is irreversible
     if not reaction.reversible:
-        return sym.Mul(sym.var(reaction._sym_kf), rate_law_f)
+        return sym.Mul(sym.var(reaction.kf_str), rate_law_f)
 
     # Generate reverse rate
-    rate_law_r = sym.Pow(sym.var(reaction._sym_Keq), -1)
+    rate_law_r = sym.Pow(sym.var(reaction.Keq_str), -1)
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
     # Combine forward and reverse rates, and return rate law
-    return sym.Mul(sym.var(reaction._sym_kf),
+    return sym.Mul(sym.var(reaction.kf_str),
                    sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
 
 
@@ -389,7 +388,7 @@ def _generate_rate_sym_2(reaction):
     expression. To safely generate a rate law, use generate_rate_law.
     """
     # Generate forward rate
-    rate_law_f = sym.var(reaction._sym_kf)
+    rate_law_f = sym.var(reaction.kf_str)
     rate_law_f = _format_metabs_sym(rate_law_f, reaction, reaction.reactants)
 
     # Return rate if reaction is irreversible
@@ -397,7 +396,7 @@ def _generate_rate_sym_2(reaction):
         return rate_law_f
 
     # Generate reverse rate
-    rate_law_r = sym.var(reaction._sym_kr)
+    rate_law_r = sym.var(reaction.kr_str)
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
     # Combine forward and reverse rates, and return rate law
@@ -411,19 +410,19 @@ def _generate_rate_sym_3(reaction):
     expression. To safely generate a rate law, use generate_rate_law.
     """
     # Generate forward rate
-    rate_law_f = sym.var(reaction._sym_Keq)
+    rate_law_f = sym.var(reaction.Keq_str)
     rate_law_f = _format_metabs_sym(rate_law_f, reaction, reaction.reactants)
 
     # Return rate if reaction is irreversible
     if not reaction.reversible:
-        return sym.Mul(sym.var(reaction._sym_kr), rate_law_f)
+        return sym.Mul(sym.var(reaction.kr_str), rate_law_f)
 
     # Generate reverse rate
     rate_law_r = sym.S.One
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
     # Combine forward and reverse rates, and return rate law
-    return sym.Mul(sym.var(reaction._sym_kr),
+    return sym.Mul(sym.var(reaction.kr_str),
                    sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
 
 

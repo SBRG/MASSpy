@@ -140,11 +140,11 @@ class MassModel(Object):
             # Initialize dictionaries for initial conditions, custom rates,
             # custom parameters, fixed concentrations, compartments, and units.
             self.initial_conditions = {}
+            self.fixed_concentrations = {}
             self.custom_rates = {}
             self.custom_parameters = {}
-            self.fixed_concentrations = {}
-            self.units = {}
             self._compartments = {}
+            self.units = {}
             # Initialize a set to store the modules
             self.modules = set()
             # Store the stoichiometric matrix, its matrix type, and data type
@@ -263,10 +263,10 @@ class MassModel(Object):
         parameters = {}
         # Sort rate and equilibrium constants into seperate dictionaries,
         # then add dictionaries to returned parameter dictionary.
-        for p_type in ["kfs", "Keqs", "krs"]:
+        for p_type in ["kf", "Keq", "kr"]:
             p_type_dict = {}
             for rxn in self.reactions:
-                p_sym = rxn.__dict__["_sym_{0}".format(p_type[:-1])]
+                p_sym = getattr(rxn, p_type + "_str")
                 if p_sym in rxn.parameters:
                     p_type_dict.update({p_sym: rxn.parameters[p_sym]})
             parameters.update({p_type: p_type_dict})
@@ -539,8 +539,6 @@ class MassModel(Object):
         """
         if not isinstance(initial_conditions, dict):
             raise TypeError("initial_conditions must be a dictionary.")
-        if not initial_conditions:
-            return
 
         # Check whether a metabolite already exists in the model,
         # ignoring those that do not.
@@ -894,7 +892,7 @@ class MassModel(Object):
             The string representation of the custom rate expression. The string
             representation of the custom rate will be used to create a sympy
             expression that represents the custom rate.
-        custom_parameters: dict
+        custom_parameters: dict, optional
             A dictionary of custom parameters for the custom rate where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. The string representation of the custom
@@ -1098,7 +1096,7 @@ class MassModel(Object):
             A dictionary of fixed concentrations where metabolites are the keys
             and fixed concentration value. The metabolite must already exist
             in the model, or it must be the string representation of the
-            "external" metabolite in an exchange reaction. (e.g. 'MetabID_Xt')
+            "external" metabolite in an exchange reaction. (e.g. 'MetabID_e')
 
         Notes
         -----
@@ -1342,7 +1340,7 @@ class MassModel(Object):
         else:
             merged_model = self.copy()
             if new_model_id is None:
-                new_model_id = "{}_{}".format(self.id, second_model.id)
+                new_model_id = self.id + "_" + second_model.id
         merged_model.id = new_model_id
 
         # Add the reactions of the second model to the first model.
@@ -1350,7 +1348,7 @@ class MassModel(Object):
         if prefix_existing is not None:
             existing = new_reactions.query(lambda r: r.id in self.reactions)
             for rxn in existing:
-                rxn.id = "{0}_{1}".format(prefix_existing, rxn.id)
+                rxn.id = prefix_existing + "_" + rxn.id
         merged_model.add_reactions(new_reactions)
         merged_model.repair()
 
@@ -1519,8 +1517,8 @@ class MassModel(Object):
             for symbol in list(rate.atoms(sym.Symbol)):
                 if str(symbol) in steady_state_concentrations:
                     values[symbol] = steady_state_concentrations[str(symbol)]
-                elif str(symbol) in [rxn._sym_Keq, rxn._sym_kf, rxn._sym_kr]:
-                    if str(symbol) is rxn._sym_kf:
+                elif str(symbol) in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]:
+                    if str(symbol) is rxn.kf_str:
                         perc = symbol
                     else:
                         values[symbol] = rxn.parameters[str(symbol)]
@@ -1837,8 +1835,8 @@ class MassModel(Object):
                    num_metabolites=len(self.metabolites),
                    num_reactions=len(self.reactions),
                    num_ic=len(self.initial_conditions),
-                   num_kfs=len(self.parameters["kfs"]),
-                   num_Keqs=len(self.parameters["Keqs"]),
+                   num_kfs=len(self.parameters["kf"]),
+                   num_Keqs=len(self.parameters["Keq"]),
                    num_irreversible=len(self.irreversible_reactions),
                    num_exchanges=len(self.exchanges),
                    num_fixed=len(self.fixed_concentrations),
