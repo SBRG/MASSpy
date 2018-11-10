@@ -171,10 +171,8 @@ class MassModel(Object):
         will be prioritized and returned in the dictionary instead of the
         automatically generated mass action rate law expression.
         """
-        return dict((rxn, self.custom_rates[rxn]) if rxn in self.custom_rates
-                    else (rxn, rxn.get_rate_law(rate_type=rxn._rtype,
-                                                update_reaction=True))
-                    for rxn in self.reactions)
+        return self.get_rate_laws(self.reactions, rate_type=0, sympy_expr=True,
+                                  update_reactions=True)
 
     @property
     def ordinary_differential_equations(self):
@@ -766,7 +764,7 @@ class MassModel(Object):
 
         return exchange_rxn
 
-    def get_rate_laws(self, reaction_list=None, rate_type=1, sympy_expr=True,
+    def get_rate_laws(self, reaction_list=None, rate_type=0, sympy_expr=True,
                       update_reactions=False):
         """Get the rate laws for a list of reactions in the model.
 
@@ -777,7 +775,9 @@ class MassModel(Object):
             already exist in the model. If None, then return the rates for all
             reactions in the model.
         rate_type: int {1, 2, 3}, optional
-            The type of rate law to display. Must be 1, 2, or 3. Default is 1.
+            The type of rate law to display. Must be 0, 1, 2, or 3. If 0,
+            the type of rate law is determined by what is currently set in the
+            reaction. Default is 0.
             Type 1 will utilize the forward rate and equilibrium constants.
             Type 2 will utilize the forward rate and reverse rate constants.
             Type 3 will utilize the equilibrium and reverse rate constants.
@@ -801,8 +801,8 @@ class MassModel(Object):
             raise TypeError("sympy_expr must be a bool")
         else:
             rate_type = int(rate_type)
-            if rate_type not in {1, 2, 3}:
-                raise ValueError("rate_type must be 1, 2, or 3")
+            if rate_type not in {0, 1, 2, 3}:
+                raise ValueError("rate_type must be 0, 1, 2, or 3")
 
         # Use the MassModel reactions if no reaction list is given
         if reaction_list is None:
@@ -810,9 +810,15 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        rate_dict = {rxn: rxn.get_rate_law(rate_type, sympy_expr,
-                                           update_reactions)
-                     for rxn in reaction_list}
+        if rate_type == 0:
+            rate_dict = {rxn: rxn.get_rate_law(rxn._rtype, sympy_expr,
+                                               update_reactions)
+                         for rxn in reaction_list}
+
+        else:
+            rate_dict = {rxn: rxn.get_rate_law(rate_type, sympy_expr,
+                                               update_reactions)
+                         for rxn in reaction_list}
 
         if not self.custom_rates:
             rate_dict.update(self.custom_rates)
@@ -1023,8 +1029,7 @@ class MassModel(Object):
         """
         # Set up for matrix construction if matrix types are correct.
         (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type=matrix_type, dtype=dtype,
-            matrix_type_default="dense", dtype_default=np.float64)
+            matrix_type=matrix_type, dtype=dtype)
         # Build the elemental matrix
         elem_mat = matrix_constructor((len(CHOPNSq), len(self.metabolites)))
         # Get indices for elements and metabolites

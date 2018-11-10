@@ -151,7 +151,7 @@ class Simulation(Object):
         self._models = DictList([reference_model])
 
         # Get initial condition and parameter values, and store.
-        param_vals = self._get_parameter_from_model(reference_model)
+        param_vals = self._get_parameters_from_model(reference_model)
         ic_vals = self._get_ics_from_model(reference_model)
         self._values = DictList([param_vals, ic_vals])
         self._solutions = DictList()
@@ -735,7 +735,7 @@ class Simulation(Object):
 
         new_values = DictList()
         for model in models:
-            for function in [self._get_parameter_from_model,
+            for function in [self._get_parameters_from_model,
                              self._get_ics_from_model]:
                 values = function(model)
                 new_values.add(values)
@@ -959,7 +959,7 @@ class Simulation(Object):
                 models.remove(model)
         return models
 
-    def _get_parameter_from_model(self, model):
+    def _get_parameters_from_model(self, model):
         """Get a dict of parameters as sympy symbols and their values.
 
         Warnings
@@ -969,7 +969,8 @@ class Simulation(Object):
         """
         values = {}
         for key, dictionary in iteritems(model.parameters):
-            values.update({sym.Symbol(k): v for k, v in iteritems(dictionary)})
+            values.update({sym.Symbol(str(k)): v
+                          for k, v in iteritems(dictionary)})
         return _msol._DictWithID("{0}_parameters".format(model.id),
                                  dictionary=values)
 
@@ -1180,6 +1181,7 @@ class Simulation(Object):
             if met_func in ics:
                 equations[met_func.diff(_T_SYM)] = equation.subs(parameters)
                 ordered_ics[met_func] = ics[met_func]
+
         # Account for functions
         if functions:
             for met, func in iteritems(functions):

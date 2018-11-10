@@ -62,15 +62,15 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         3: [_generate_rate_sym_3, _generate_rate_str_3]}
 
     try:
-        rate_expr = rate_constructor[rate_type][0](rxn)
+        rate_expr = rate_constructor[rate_type][0 if sympy_expr else 1](rxn)
     except KeyError:
         raise ValueError("rate_type must be 1, 2, or 3")
 
     if update_reaction:
         reaction._rtype = rate_type
 
-    if not sympy_expr:
-        rate_expr = rate_constructor[rate_type][1](rxn)
+    if reaction.model is not None:
+        rate_expr = _strip_time_for_fixed_mets(reaction, rate_expr)
 
     return rate_expr
 
@@ -288,7 +288,6 @@ def _format_metabs_sym(expr, rxn, mets):
                 expr = sym.Mul(expr, met_ode)
             else:
                 expr = sym.Mul(expr, sym.Pow(met_ode, coeff))
-
     return expr
 
 
@@ -376,9 +375,10 @@ def _generate_rate_sym_1(reaction):
     rate_law_r = sym.Pow(sym.var(reaction.Keq_str), -1)
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
-    # Combine forward and reverse rates, and return rate law
-    return sym.Mul(sym.var(reaction.kf_str),
-                   sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
+    # Combine forward and reverse rates
+    rate_law = sym.Mul(sym.var(reaction.kf_str),
+                       sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
+    return rate_law
 
 
 def _generate_rate_sym_2(reaction):
@@ -399,8 +399,10 @@ def _generate_rate_sym_2(reaction):
     rate_law_r = sym.var(reaction.kr_str)
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
-    # Combine forward and reverse rates, and return rate law
-    return sym.Add(rate_law_f, sym.Mul(-1, rate_law_r))
+    # Combine forward and reverse rates
+    rate_law = sym.Add(rate_law_f, sym.Mul(-1, rate_law_r))
+
+    return rate_law
 
 
 def _generate_rate_sym_3(reaction):
@@ -421,22 +423,24 @@ def _generate_rate_sym_3(reaction):
     rate_law_r = sym.S.One
     rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
 
-    # Combine forward and reverse rates, and return rate law
-    return sym.Mul(sym.var(reaction.kr_str),
-                   sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
+    # Combine forward and reverse rates
+    rate_law = sym.Mul(sym.var(reaction.kr_str),
+                       sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
+
+    return rate_law
 
 
-def _determine_reaction_rtype(rxn):
+def _determine_reaction_rtype(reaction):
     """Determine rate to use based on a reaction's available parameters.
 
     Designed for internal use. Will return the rate law type based on
     numerically defined parameters, with priority given to rate type 1.
     """
     # Get available parameters for a reaction.
-    p_types = [param[:3] for param in iterkeys(rxn.parameters)]
+    p_types = [param[:3] for param in iterkeys(reaction.parameters)]
     # Ensure reversible reactions have at least two parameters, and define
     # rate type accordingly. Defaults to type 1.
-    if rxn.reversible:
+    if reaction.reversible:
         if "kf_" in p_types and "Keq" in p_types:
             rt = 1
         elif "kf_" in p_types and "kr_" in p_types:
@@ -450,3 +454,13 @@ def _determine_reaction_rtype(rxn):
         rt = 1
 
     return rt
+
+
+def _strip_time_for_fixed_mets(reaction, rate_expr):
+    mets_to_strip = [met for met in reaction._metabolites
+                     if met in reaction.model.fixed_concentrations]
+    if mets_to_strip:
+        sub_mets_stripped = {sym.Function(str(m))(_T_SYM): sym.Symbol(str(m))
+                             for m in mets_to_strip}
+        rate_expr = rate_expr.subs(sub_mets_stripped)
+    return rate_expr
