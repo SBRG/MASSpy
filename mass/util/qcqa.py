@@ -325,9 +325,16 @@ def get_missing_initial_conditions(model, simulation=None,
         metabolite_list = model.metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
+    # missing = [met for met in metabolite_list
+    #            if met not in model.initial_conditions
+    #            and met not in model.fixed_concentrations
+    #            or model.initial_conditions[met] is None]
+
+    # Filter out fixed concentration metabolites
     missing = [met for met in metabolite_list
-               if met not in model.initial_conditions
-               and met not in model.fixed_concentrations
+               if met not in model.fixed_concentrations]
+
+    missing = [met for met in missing if met not in model.initial_conditions
                or model.initial_conditions[met] is None]
 
     if simulation is not None:
@@ -366,9 +373,16 @@ def get_missing_fixed_concentrations(model, simulation=None,
         metabolite_list = model.external_metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
+    # missing = [met for met in metabolite_list
+    #            if met not in model.fixed_concentrations
+    #            and met not in model.initial_conditions
+    #            or model.fixed_concentrations[met] is None]
+
+    # Filter out initial concentrations
     missing = [met for met in metabolite_list
-               if met not in model.fixed_concentrations
-               and met not in model.initial_conditions
+               if met not in model.initial_conditions]
+
+    missing = [met for met in missing if met not in model.fixed_concentrations
                or model.fixed_concentrations[met] is None]
 
     if simulation is not None:
