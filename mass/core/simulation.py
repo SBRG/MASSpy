@@ -49,7 +49,7 @@ from math import log10
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
-from mass.core import solutions as _msol
+from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
 from mass.exceptions import MassSimulationError
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
