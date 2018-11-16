@@ -17,7 +17,7 @@ from mass.core import (
 from mass.util.qcqa import qcqa_model, qcqa_simulation
 from mass.util.util import show_versions, strip_time
 
-__version__ = "0.1.0a24"
+__version__ = "0.1.0a25"
 
 # set the warning format to be prettier and fit on one line
 _mass_path = _dirname(_abspath(__file__))
