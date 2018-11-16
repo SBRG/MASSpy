@@ -1,1194 +1,969 @@
 # -*- coding: utf-8 -*-
-
-# Compatibility with Python 2.7
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
-# Import necesary packages
-import re
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.axes._axes as _axes
-from matplotlib import cm
-from matplotlib.figure import Figure as _figure
-from matplotlib.ticker import MultipleLocator
-from cycler import cycler
+import math
+from collections import Hashable, Iterable, OrderedDict
 from warnings import warn
-from six import iteritems, iterkeys, itervalues, integer_types, string_types
-# Class begins
-## Precompiled regular expression for legend location and
-## plot_tiled_phase_portrait options
-legend_loc_re = re.compile("best|upper right|upper left|lower left|lower right"
-							"|right|center left|center right|lower center|"
-							"upper center|center|left outside|right outside|"
-							"lower outside|upper outside")
-ptpp_options = re.compile("both|upper|lower")
-plot_re = re.compile("plot")
-tiled_re = re.compile("tiled")
-## Public Methods
-def get_plot_defaults():
-	"""Return a copy of the default options for plot_simulation and
-	plot_phase_portrait
-
-	The following are possible ``kwarg`` arguments that can be provided to
-	plot_simulation and plot_phase_portrait methods.
-
-	plot_function : {"plot", "semilogx", "semilogy", "loglog"}
-		A string representing which matplotlib.pyplot plotting function to use.
-		Accepted values are {"plot", "semilogx", "semilogy", "loglog"}.
-			"plot" uses an linear x-axis and a linear y-axis
-			"semilogx" uses an logarithmic x-axis and a linear y-axis
-			"semilogy" uses an linear x-axis and a logarithmic y-axis
-			"loglog" uses an logarithmic x-axis and a logarithmic y-axis
-		Default value is "plot"
-	numpoints : int or float
-		An integer defining the amount of time points to generate between the
-		start time and end time points should the time input be a tuple.
-		Time points are generated using numpy.geomspace(start, end, numpoints).
-		If a float is provided, it will be converted to an integer.
-	figsize : tuple
-	 	A tuple of two ints or floats specifying the size (in inches) of the
-		generated figure if no axes object is provided. The values specify the
-		width (x) and length (y) of the figure, and are passed to the
-		figure.set_size_inches method. The default figure size is (6.0, 4.0)
-		for plot_simulation and (5.0, 5.0) for plot_phase_portrait if "figsize"
-		is not in ``kwargs``.
-	tick_labels : bool
-		If True, will display the tick labels for the x-axis and y-axis.
-		Otherwise, the labels are removed.
-	x_major_ticks : int or float
-		Set the major tick locator for the x-axis to multiples of the given
-		value. The given value is passed to a matplotlib.ticker.MultipleLocator
-		instance and is set by the axes.xaxis.set_major_locator method.
-	x_minor_ticks : int or float
-		Set the minor tick locator for the x-axis to multiples of the given
-		value. The given value is passed to a matplotlib.ticker.MultipleLocator
-		instance andis set by the axes.xaxis.set_minor_locator method.
-	y_major_ticks : int or float
-		Set the major tick locator for the y-axis to multiples of the given
-		value. The given value is passed to a matplotlib.ticker.MultipleLocator
-		instance and is set by the axes.yaxis.set_major_locator method.
-	y_minor_ticks : int or float
-		Set the minor tick locator for the y-axis to multiples of the given
-		value. The given value is passed to a matplotlib.ticker.MultipleLocator
-		instance andis set by the axes.yaxis.set_minor_locator method.
-	linecolor : iterable of strings, optional
-		An iterable of strings representing colors from matplotlib.colors to
-		use for the solution color when plotting. If an iterable containing
-		color specification strings is provided, the length of the iterable
-		must be equal to the number of items to be plotted.
-		If None provided, will use default colormaps.
-	linestyle : iterable of strings, optional
-		An iterable of strings representing linestyles to use for the solution
-		line when plotting. If an iterable containing style specification
-		strings is provided, the length of the iterable must be equal to the
-		number of items to be plotted. If None provided, will use the default
-		styling of solid lines.
-	grid : tuple
-		A tuple containing two bools specifying whether to add gridlines on the
-		x-axis or y-axis respecitvely. If True, dashed gridlines will be added
-		using the axes.xaxis.grid and axes.yaxis.grid method. Otherwise,
-		no gridlines are plotted.
-	dpi : float
-		A float value specifying how many dots per inch (dpi) to use in a
-		generated figure. Passes argument to the figure.set_dpi method.
-	title : string, tuple
-		Either a string to use as a title, or a tuple where the first value is
-		the string to use as a title, and the second value is a dictionary
-		of font options to pass to the axes.set_title method. Dictionary keys
-		must be one of the six matplotlib.font_manager font properties.
-		See matplotlib.fontmanager documentation for more details.
-		When setting new defaults, the new value must be the tuple.
-	xlabel : string, tuple
-		Either a string to use as a x-axis label, or a tuple where the first
-		value is the string to use as a x-axis label, and the second value is
-		a dictionary of font options to pass to the axes.set_xlabel method.
-		Dictionary keys must be one of the six matplotlib.font_manager
-		font properties. See matplotlib.fontmanager documentation for more
-		details. When setting new defaults, the new value must be the tuple.
-	ylabel : string, tuple
-		Either a string to use as a y-axis label, or a tuple where the first
-		value is the string to use as a y-axis label, and the second value is
-		a dictionary of font options to pass to the axes.set_ylabel method.
-		Dictionary keys must be one of the six matplotlib.font_manager
-		font properties. See matplotlib.fontmanager documentation for more
-		details. When setting new defaults, the new value must be the tuple.
-	xlim : tuple
-		A tuple of integers or floats of form (xmin, xmax) specifying the
-		limits of the x-axis. Arguments are passed to the axes.set_xlim method.
-	ylim : tuple
-		A tuple of integers or floats of form (ymin, ymax) specifying the
-		limits of the y-axis. Arguments are passed to the axes.set_ylim method.
-	legend : tuple or list iterable
-		If provided, strings to use as legend entries. The size of the legend
-		text can optionally defined by a numerical value at the end of the
-		iterable, and the legend location is optionally defined by a string in
-		the second to last entry of the iterable (if legend size is defined),
-		or last entry of the iterable (if no legend size defined). The number
-		of defined legend entries must equal the number of plotted solutions.
-
-		For plot_simulation, the default legend are the solution profile keys,
-		and for plot_phase_portrait, the default legend is None. Default legend
-		location is 'best', and default legend size is 10.
-
-		Accepted location values are the following: {"best", "upper right",
-			"upper left", "lower left". "lower right", "right", "center"
-			"left", "center right". "lower center" "upper center", and "center"
-			for locations inside the plot, and "left outside", "right outside",
-			"lower outside", and "upper outside" for outside the plot.
-		Examples: legend=['a', 'b', 'center', 15],
-				  legend=['right outside', 20]
-
-	See Also:
-	---------
-	set_plot_defaults(**custom)
-	restore_plot_defaults()
-	"""
-	return _plot_defaults.copy()
-
-def get_tiled_defaults():
-	"""Return a copy of the default options for plot_tiled_phase_portrait
-
-	The following are possible ``kwarg`` arguments that can be provided to
-	the plot_tiled_phase_portrait method.
-
-	plot_function : {"plot", "semilogx", "semilogy", "loglog"}
-		A string representing which matplotlib.pyplot plotting function to use
-		for each phase portrait on the tiled phase portrait.
-		Accepted values are {"plot", "semilogx", "semilogy", "loglog"}.
-			"plot" uses an linear x-axis and a linear y-axis
-			"semilogx" uses an logarithmic x-axis and a linear y-axis
-			"semilogy" uses an linear x-axis and a logarithmic y-axis
-			"loglog" uses an logarithmic x-axis and a logarithmic y-axis
-		Default value is "plot"
-	numpoints : int or float
-		An integer defining the amount of time points to generate between the
-		start time and end time points should the time input be a tuple.
-		Time points are generated using numpy.geomspace(start, end, numpoints).
-		If a float is provided, it will be converted to an integer.
-	figsize : tuple
-	 	A tuple of two ints or floats specifying the size (in inches) of the
-		generated figure if no axes object is provided. The values specify the
-		width (x) and length (y) of the main figure, and are passed to the
-		figure.set_size_inches method. The default figure size is (5.0, 5.0)
-		for plot_tiled_phase_portrait if "figsize" is not in ``kwargs``.
-	tick_labels : bool
-		If True, will display the tick labels for the x-axis and y-axis.
-		Otherwise, the labels are removed.
-	x_major_ticks : int or float
-		Set the major tick locator for the x-axis on each phase portrait to
-		multiples of the given value. The given value is passed to a
-		matplotlib.ticker.MultipleLocator instance and is set by the
-		axes.xaxis.set_major_locator method for each phase portrait tile.
-	x_minor_ticks : int or float
-		Set the minor tick locator for the x-axis on each phase portrait to
-		multiples of the given value. The given value is passed to a
-		matplotlib.ticker.MultipleLocator instance and is set by the
-		axes.xaxis.set_minor_locator method for each phase portrait tile.
-	y_major_ticks : int or float
-		Set the major tick locator for the y-axis on each phase portrait to
-		multiples of the given value. The given value is passed to a
-		matplotlib.ticker.MultipleLocator instance and is set by the
-		axes.yaxis.set_major_locator method for each phase portrait tile.
-	y_minor_ticks : int or float
-		Set the minor tick locator for the y-axis on each phase portrait to
-		multiples of the given value. The given value is passed to a
-		matplotlib.ticker.MultipleLocator instance and is set by the
-		axes.yaxis.set_minor_locator method for each phase portrait tile.
-	linecolor : string
-		A string representing a color from matplotlib.colors to use for the
-		solution line when plotting all phase portraits of the tiled phase
-		portrait. If None provided, will the default colormaps.
-	linestyle : string
-		A string representing linestyle to use for the solution line when
-		plotting all phase portraits of the tiled phase portrait. If None
-		provided, will use the defaultstyling of solid lines.
-	grid : tuple
-		A tuple containing two bools specifying whether to add gridlines on the
-		x-axis or y-axis of each phase portrait respecitvely. If True, dashed
-		gridlines will be added using the axes.xaxis.grid and
-		axes.yaxis.grid method. Otherwise, no gridlines are plotted.
-	dpi : float
-		A float value specifying how many dots per inch (dpi) to use in a
-		generated figure. Passes argument to the figure.set_dpi method.
-	title : string
-		A string to use as a title for the tiled phase portrait. The title is
-		set using the figure.suptitle method
-
-	See Also:
-	---------
-	set_tiled_defaults(**custom)
-	restore_tiled_defaults()
-	"""
-	return _tiled_defaults.copy()
-
-def set_plot_defaults(**custom):
-	"""Allows user to change the global default options for plot_simulation and
-	plot_phase_portrait (provided if ``kwargs`` are not not specified).
-
-	``kwargs`` are passed on to various matplotlib methods.
-    See get_plot_defaults() for a full description of possible ``kwargs``.
-
-	Parameters:
-	-----------
-	**custom: dict
-		A dictionary of ``kwargs`` with options as the keys (str) and the
-		desired option defaults as the values
-
-	See Also:
-	---------
-	get_plot_defaults()
-	restore_plot_defaults()
-	"""
-	options_dict = _handle_plot_options(custom, "plot")
-	_plot_defaults.update(options_dict)
-
-def set_tiled_defaults(**custom):
-	"""Allows user to change the global default options for
-	plot_tiled_phase_portrait (provided if ``kwargs`` are not not specified).
-
-	``kwargs`` are passed on to various matplotlib methods.
-    See get_tiled_defaults() for a full description of possible ``kwargs``.
-
-	Parameters:
-	-----------
-	**custom: dict
-		A dictionary of ``kwargs`` with options as the keys (str) and the
-		desired option defaults as the values
-
-	See Also:
-	---------
-	get_tiled_defaults()
-	restore_tiled_defaults()
-	"""
-	options_dict = _handle_plot_options(custom, "tiled")
-	_tiled_defaults.update(options_dict)
-
-def restore_plot_defaults():
-	"""Restores plot default options to their original values
-
-	See Also:
-	---------
-	get_plot_defaults()
-	set_plot_defaults(**custom)
-	"""
-	_plot_defaults = _base_plot_defaults
-	print("Original plot defaults restored")
-
-def restore_tiled_defaults():
-	"""Restores tiled default options to their original values
-
-	See Also:
-	---------
-	get_tiled_defaults()
-	set_tiled_defaults(**custom)
-	"""
-	_tiled_defaults = _base_tiled_defaults
-	print("Original tiled defaults restored")
-
-def plot_simulation(solution_profile, time, axes=None, observable=None,
-					**kwargs):
-	"""Generates a plot of the data in the solution_profile over time.
-
-	``kwargs`` are passed on to various matplotlib methods.
-	See get_plot_defaults() for a full description of possible ``kwargs``.
-
-	Parameters
-	----------
-	solution_profile : dict
-        A dict of interpolating functions containing the solution profiles to
-		be plotted. The keys are strings, mass.MassMetabolite objects, or
-		mass.MassReaction objects, and the values are interpolating functions
-		of the corresponding solution.
-	time : tuple, list, or numpy.ndarray
-		A tuple containing the start and end time points, or a list of
-		numerical values to treat as time points for the solutions. If a tuple
-		of form (start point, end_point) is provided, a time vector is
-		internally generated with optional kwarg "numpoints" specifying how
-		many points are in the generated vector.
-	axes : matplotlib.pyplot.axes, optional
-		A matplotlib.pyplot.axes instance to plot the data on. If None,
-		a figure and an axes will be generated for plotting instead.
-	observable : iterable of key(s) of the solution profile, optional
-		An iterable of the keys of the given solution_profile dictionary to
-		filter solutions such that only the solutions profiles for the given
-		"observables" will be plotted. If None, will plot the solutions for all
-		items in the given solution_profile dictionary.
-
-	Returns
-	-------
-	matplotlib.pyplot.figure
-		A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-	See Also:
-	---------
-	get_plot_defaults()
-	set_plot_defaults(**custom)
-	restore_plot_defaults()
-	"""
-	# Obtain the options dictonary and check inputs
-	options_dict = _handle_plot_options(kwargs, "plot")
-	time = _check_main_inputs(solution_profile, time, options_dict)
-	# Obtain list if solutions to be observed
-	observable = _set_plot_observables(solution_profile, observable)
-	# Generate a new figure if no axes provided
-	if axes is None:
-		fig, axes = plt.subplots(1, 1)
-		if "figsize" not in kwargs and options_dict["figsize"] == (5.0, 5.0):
-			fig.set_size_inches((6.0, 4.0))
-		else:
-			fig.set_size_inches(options_dict["figsize"])
-		if options_dict["dpi"] is not None:
-			fig.set_dpi(options_dict["dpi"])
-	# Otherwise ensure provided axes is a matplotlib.pyplot.axes instance.
-	elif not isinstance(axes, _axes.Axes):
-		raise TypeError("axes must be an instance of a "
-						"matplotlib.axes.axes.Axes object")
-	else:
-		fig = axes.get_figure()
-	# Set plot function
-	plot_function = {"loglog" : axes.loglog,
-					"semilogx" : axes.semilogx,
-					"semilogy" : axes.semilogy,
-					"plot" : axes.plot}[options_dict["plot_function"]]
-	# Get solutions
-	sols = np.array([prof(time) for prof in itervalues(observable)])
-	lgnd = options_dict["legend"][0]
-	# Create line labels
-	if lgnd is not None and len(lgnd) >= len(sols):
-		labels=lgnd
-	else:
-		if lgnd is not None and len(lgnd) != 0:
-			warn("Not enough legend entries provided, using the default "
-				"line labels instead")
-		# Obtain strings for legends
-		labels = [x if isinstance(x, string_types) else x.id
-					for x in list(iterkeys(observable))]
-		# Filter out leading underscores
-		labels = [s if not re.search('^[^A-Za-z0-9]*', s)
-				else re.sub('^[^A-Za-z0-9]*', '', s) for s in labels]
-	# Create Plot
-	for sol, label in zip(sols, labels):
-		plot_function(time, sol, label=label)
-	# Set legend if provided
-	if lgnd is not None:
-		lgnd_loc = options_dict["legend"][1]
-		lgnd_font = options_dict["legend"][2]
-		if re.search("(\S+) outside", lgnd_loc):
-			lgnd_loc = re.search("(\S+) outside", lgnd_loc).group(1)
-			lgnd_loc, anchor, col = _place_legend_outside(lgnd_loc)
-		else:
-			anchor = None
-			col=1
-		# Set linecolors and linestyles, ensure legend is update accordingly
-		axes, labels = _set_colors_and_styles(axes, options_dict, len(sols))
-		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
-						bbox_to_anchor=anchor,
-						ncol=col)
-	# Set linecolors and linestyles if no legend
-	else:
-		axes, labels = _set_colors_and_styles(axes, options_dict, len(sols))
-	# Add all other features to the plot
-	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
-	# Return figure instance
-	return fig
-
-def plot_phase_portrait(solution_profile, time, x, y, axes=None,
-						poi="endpoints", poi_color="red", poi_labels=True,
-						**kwargs):
-	"""Generates a phase portrait of x,y in the solution_profile over time.
-
-	``kwargs`` are passed on to various matplotlib methods.
-	See get_plot_defaults() for a full description.
-
-	Parameters
-	----------
-	solution_profile : dict
-        A dict of interpolating functions containing the solution profiles to
-		be plotted. The keys are strings, mass.MassMetabolite objects, or
-		mass.MassReaction objects, and the values are interpolating functions
-		of the corresponding solution.
-	time : tuple, list, or numpy.ndarray
-		A tuple containing the start and end time points, or a list of
-		numerical values to treat as time points for the solutions. If a tuple
-		of form (start point, end_point) is provided, a time vector is
-		internally generated with optional kwarg "numpoints" specifying how
-		many points are in the generated vector.
-	x : mass.MassMetabolite, mass.MassReaction, or string
-		A key of the corresponding to the solution to plot on the x-axis of the
-		phase portrait. Must exist in the given solution_profile dictionary.
-	y : mass.MassMetabolite, mass.MassReaction, or string
-		A key of the corresponding to the solution to plot on the y-axis of the
-		phase portrait. Must exist in the given solution_profile dictionary.
-	axes : matplotlib.axes, optional
-		A matplotlib.axes._axes.Axes instance to plot the data on. If None,
-		a figure and an axes will be generated for plotting instead.
-	poi : tuple, list, or numpy.ndarray, or the string "endpoints", optional
-		An iterable of time "points of interest" to be annotated on each
-		phase portrait, or the string "endpoints" to annotate the start and
-		end time points. If None provided, will not annotate any time points.
-	poi_color : string, iterable of strings, optional
-		A string or an iterable of strings of colors from matplotlib.colors to
-		use for annotation of "points of interest" for the plot. If a single
-		color is provided, all annotated time points will be that color. If an
-		iterable of color strings are provided, the length of the iterable must
-		be equal to the length of the provided poi iterable. If None provided,
-		will default to "red".
-	poi_labels : bool, optional
-		If True, will label annotated time "points of interest" with their
-		time values. Otherwise will not label the time points.
-
-	Returns
-	-------
-	matplotlib.pyplot.figure
-		A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-	See Also:
-	---------
-	get_plot_defaults()
-	set_plot_defaults(**custom)
-	restore_plot_defaults()
-	"""
-	# Obtain the options dictonary and check inputs
-	options_dict = _handle_plot_options(kwargs, "plot")
-	time = _check_main_inputs(solution_profile, time, options_dict)
-	# Obtain list of solutions to be observed
-	x_observable = _set_plot_observables(solution_profile, x)
-	y_observable = _set_plot_observables(solution_profile, y)
-	# Generate figure if no axes passed
-	if axes is None:
-		fig, axes = plt.subplots(nrows=1, ncols=1)
-		fig.set_size_inches(options_dict["figsize"])
-		if options_dict["dpi"] is not None:
-			fig.set_dpi(options_dict["dpi"])
-	# Otherwise ensure provided axes is a matplotlib.pyplot.axes instance.
-	elif not isinstance(axes, _axes.Axes):
-		raise TypeError("axes must be an instance of a "
-						"matplotlib.axes.axes.Axes object")
-	else:
-		fig = axes.get_figure()
-	# Set plot function
-	plot_function = {"loglog" : axes.loglog,
-					"semilogx" : axes.semilogx,
-					"semilogy" : axes.semilogy,
-					"plot" : axes.plot}[options_dict["plot_function"]]
-	# Obtain solutions
-	x_sols = np.array([prof(time) for prof in itervalues(x_observable)])
-	y_sols = np.array([prof(time) for prof in itervalues(y_observable)])
-	lgnd = options_dict["legend"][0]
-	# # Create line labels and plot solutions
-	item_count = 0
-	for i in range(0, len(x_sols)):
-		for j in range(0, len(y_sols)):
-			if lgnd is None or len(lgnd) < len(x_sols)*len(y_sols):
-				if lgnd is not None and len(lgnd) != 0:
-					warn("Not enough legend entries provided, using the "
-						"default line labels instead")
-				labels = list()
-				# Ensure labels are strings
-				for label in [list(iterkeys(x_observable))[i],
-								list(iterkeys(y_observable))[j]]:
-					if not isinstance(label, string_types):
-						label = label.id
-						# Filter out leading underscores
-						if re.search('^[^A-Za-z0-9]*', label):
-							label = re.sub('^[^A-Za-z0-9]*', '', label)
-					labels += [label]
-				label = "%s vs. %s" % (labels[0], labels[1])
-				item_count += 1
-			else:
-				label = lgnd[item_count]
-				item_count += 1
-			plot_function(x_sols[i], y_sols[j], label=label)
-	# Set legend if provided
-	if lgnd is not None:
-		lgnd_loc = options_dict["legend"][1]
-		lgnd_font = options_dict["legend"][2]
-		if re.search("(\S+) outside", lgnd_loc):
-			lgnd_loc = re.search("(\S+) outside", lgnd_loc).group(1)
-			lgnd_loc, anchor, col = _place_legend_outside(lgnd_loc)
-		else:
-			anchor = None
-			col=1
-		# Set linecolors and linestyles, ensure legend is update accordingly
-		axes, labels = _set_colors_and_styles(axes, options_dict, item_count)
-		axes.legend(*labels, loc=lgnd_loc, fontsize=lgnd_font,
-					bbox_to_anchor=anchor, ncol=col)
-	# Set linecolors and linestyles if no legend
-	else:
-		axes, labels = _set_colors_and_styles(axes, options_dict, item_count)
-	# Label time points of interest
-	if poi is not None:
-		axes = _label_poi(axes, time, poi, poi_color, poi_labels,
-						plot_function, x_observable, y_observable)
-	# Add all other features to the plot
-	axes = _add_plot_options_to_plot(axes, options_dict, "plot")
-	# Return figure instance
-	return fig
-
-def plot_tiled_phase_portrait(solution_profile, time, place_tiles="both",
-						fig=None, data=None, poi=None, poi_color=None,
-						poi_labels=False, fontsize=None, **kwargs):
-	"""Generates a tiled phase portrait for all items in a given
-	solution_profile
-
-	``kwargs`` are passed on to various matplotlib methods.
-	See get_tiled_defaults() for a full description.
-
-	Parameters
-	----------
-	solution_profile : dict
-        An dict of interpolating functions containing the solution profiles to
-		be plotted. The keys are strings, mass.MassMetabolite objects, or
-		mass.MassReaction objects, and the values are interpolating functions
-		of the corresponding solution.
-	time : tuple, list, or numpy.ndarray
-		A tuple containing the start and end time points, or a list of
-		numerical values to treat as time points for the solutions. If a tuple
-		of form (start point, end_point) is provided, a time vector is
-		internally generated with optional kwarg "numpoints" specifying how
-		many points are in the generated vector.
-	place_tiles : {'upper', 'lower', 'both'}
-		A string representing whether to place subplots on the upper right
-		triangular section, the lower left triangular section, or both.
-	fig : matplotlib.figure, optional
-		The matplotlib.figure object to be used for generating the tiled
-		phase portrait. If None, will generate a new figure.
-	data : array_like, shape (N, N), optional
-		Additional data to display on the tiled phase portrait if place_tiles
-		is not set to both. Must matrix of shape (N, N) where N = number of
-		keys in the given solution_profile. When place_tiles is "upper", data
-		must be a lower triangular matrix with zeros on the main diagonal
-		(data = numpy.tril(matrix_for_annotation, k=-1)). When place_tiles is
-		"lower",data must be an upper triangular matrix with zeros on the main
-		diagonal (data = numpy.triu(matrix_for_annotation, k=1)).
-	poi : tuple, list, or numpy.ndarray, or the string "endpoints", optional
-		An iterable of time "points of interest" to be annotated on each
-		phase portrait, or the string "endpoints" to annotate the start and
-		end time points. If None provided, will not annotate any time points.
-	poi_color : string, iterable of strings, optional
-		A string or an iterable of strings of colors from matplotlib.colors to
-		use for annotation of "points of interest" for the plot. If a single
-		color is provided, all annotated time points will be that color. If an
-		iterable of color strings are provided, the length of the iterable must
-		be equal to the length of the provided poi iterable. If None provided,
-		will default to "red".
-	poi_labels : bool, optional
-		If True, will label annotated time "points of interest" with their
-		time values. Otherwise will not label the time points.
-	fontsize : integer, float, or string
-		The size of the font for common axis labels and the title, if provided.
-		Can be an integer or float, or one of the following strings:
-		{'xx-small’, ‘x-small’, ‘small’, ‘medium’, ‘large’, ‘x-large’,
-		‘xx-large’}
-
-	Returns
-	-------
-	matplotlib.pyplot.figure
-		A reference to the current figure instance. Shows plot when returned.
-        Can be used to modify plot after initial generation.
-
-	See Also:
-	---------
-	get_tiled_defaults()
-	set_tiled_defaults(**custom)
-	restore_tiled_defaults()
-	"""
-	# Check input
-	if not ptpp_options.match(place_tiles):
-		raise ValueError("place_tiles must be one of the following: "
-						"'both', 'upper', or 'lower'")
-	n_keys = len(solution_profile)
-	# Check the inputted optional data argument
-	if data is not None:
-		if not isinstance(data, np.ndarray):
-			data = np.array(data)
-		# Check dimensions of data matrix
-		if data.shape != (n_keys, n_keys):
-			raise ValueError("data must be an n x n matrix where n"
-						" is equal to the number of keys in solution_profile.")
-		# Change place_tiles if set to 'both'
-		if re.match("both", place_tiles):
-			warn("data provided while place_tiles set to both, will "
-					"attempting to correct place_tiles")
-			if (np.triu(data) == data).all() == True:
-				place_tiles = "lower"
-			elif (np.tril(data) == data).all() == True:
-				place_tiles = "upper"
-			else:
-				warn("Could not interpret data matrix, will not display data. "
-					"Check data matrix to ensure it is in the form of "
-					"numpy.triu(data) for placement on upper tiles or "
-					"numpy.tril(data) for placement on lower tiles")
-				place_tiles = "both"
-	if fig is None:
-		fig = plt.figure()
-	elif not isinstance(fig, _figure):
-		raise TypeError("fig must be a matplotlib.figure.Figure object")
-	else:
-		fig.clf()
-	# Obtain the options dictonary and check inputs
-	options_dict = _handle_plot_options(kwargs, "tiled")
-	time = _check_main_inputs(solution_profile, time, options_dict)
-
-	# Generate main figure, set size and dpi  if desired.
-	ax_main = fig.subplots(nrows=n_keys, ncols=n_keys)
-	if options_dict["dpi"] is not None:
-		fig.set_dpi(options_dict["dpi"])
-	fig.set_size_inches(options_dict["figsize"])
-
-	# Obtain sols
-	sols = np.array([prof(time) for prof in itervalues(solution_profile)])
-	# A function that uses the tiled options to generate each individual tile
-	def _add_plot_tile(axes, i, j, x, y):
-		plot_function = {"loglog" : axes.loglog,
-						"semilogx" : axes.semilogx,
-						"semilogy" : axes.semilogy,
-						"plot" : axes.plot}[options_dict["plot_function"]]
-		plot_function(sols[j], sols[i], c=options_dict["linecolor"],
-										ls=options_dict["linestyle"])
-		# Label points of interest if provided
-		if poi is not None:
-			axes = _label_poi(axes, time, poi, poi_color,
-						poi_labels, plot_function,
-						_set_plot_observables(solution_profile, x),
-						_set_plot_observables(solution_profile, y))
-
-		axes = _add_plot_options_to_plot(axes, options_dict, "tiled")
-		return axes
-
-	# Adjust the font size scalar
-	if fontsize is None:
-		fontsize = "large"
-	# Add title if desired
-	if options_dict["title"] is not None:
-		fig.suptitle(options_dict["title"],
-						fontsize=fontsize)
-	for i, y in enumerate(iterkeys(solution_profile)):
-		for j, x in enumerate(iterkeys(solution_profile)):
-			axes = ax_main[i][j]
-			# Set common axis labels
-			if i == n_keys-1:
-				label = x
-				if not isinstance(label, string_types):
-					label = label.id
-				axes.set_xlabel(label, fontdict={"size":fontsize})
-			if j == 0:
-				label = y
-				if not isinstance(label, string_types):
-					label = label.id
-				axes.set_ylabel(label, fontdict={"size":fontsize})
-			# Don't create phase portraits of items vs. themselves.
-			if i == j:
-				axes.annotate("X", xy=(0.5, 0.5), xycoords="axes fraction",
-						va="center", ha="center", fontsize=fontsize)
-			# Create phase portraits for upper tiles only
-			elif re.match("upper", place_tiles):
-				# Create upper tile phase portraits
-				if i < j:
-					axes = _add_plot_tile(axes, i, j, x, y)
-					continue
-				# Add additional data to lower tiles if provided
-				if i > j and data is not None:
-					axes.annotate(str(data[i][j]), xy=(0.5, 0.5),
-							xycoords="axes fraction", va="center", ha="center",
-							fontsize=fontsize)
-			# Create phase portraits for lower tiles only
-			elif re.match("lower", place_tiles):
-				# Create lower tile phase portraits
-				if i > j:
-					axes = _add_plot_tile(axes, i, j, x, y)
-					continue
-				# Add additional data to upper tiles if provided
-				if i < j and data is not None:
-					axes.annotate(str(data[i][j]), xy=(0.5, 0.5),
-							xycoords="axes fraction", va="center", ha="center",
-							fontsize=fontsize)
-			# Create phase portraits for both upper and lower tiles
-			else:
-				axes = _add_plot_tile(axes, i, j, x, y)
-				continue
-			axes.set_xticklabels([])
-			axes.set_yticklabels([])
-	# Return figure instance
-	return fig
-
-## Internal Methods
-def _add_plot_options_to_plot(axes, options_dict, plot_type):
-	"""Internal Method. Add plot features to the axes"""
-	# For plot_simulation and plot_phase_portrait specifically
-
-	if plot_re.match(plot_type):
-		# Set xlim
-		if options_dict["xlim"] != (None, None):
-			xmin, xmax = options_dict["xlim"]
-			# Account for 0 value on logarithmic scaling
-			if re.match("semilogx|loglog", options_dict["plot_function"]):
-				if xmin == 0:
-					xmin = 1e-6
-				if xmax == 0:
-					xmax = 1e-6
-			axes.set_xlim((xmin, xmax))
-		# Set ylim
-		if options_dict["ylim"] != (None, None):
-			ymin, ymax = options_dict["ylim"]
-			# Account for 0 value on logarithmic scaling
-			if re.match("semilogy|loglog", options_dict["plot_function"]):
-				if ymin == 0:
-					ymin = 1e-6
-				if ymax == 0:
-					ymax = 1e-6
-			axes.set_ylim((ymin, ymax))
-		# Set title if desired
-		if options_dict["title"][0] is not None:
-			axes.set_title(options_dict["title"][0],
-						fontdict=options_dict["title"][1])
-		# Set xlabel if desired
-		if options_dict["xlabel"][0] is not None:
-			axes.set_xlabel(options_dict["xlabel"][0],
-						fontdict=options_dict["xlabel"][1])
-		# Set ylabel if desired
-		if options_dict["ylabel"][0] is not None:
-			axes.set_ylabel(options_dict["ylabel"][0],
-						fontdict=options_dict["ylabel"][1])
-
-	# Set xgrid and y grid if deisred
-	if options_dict["grid"][0]:
-		axes.xaxis.grid(True, linestyle="--")
-	if options_dict["grid"][1]:
-		axes.yaxis.grid(True, linestyle="--")
-	# Set options for ticks and ticklabels
-	if not options_dict["tick_labels"]:
-		axes.set_xticklabels([])
-		axes.set_yticklabels([])
-	for tick_type in ["x_major_ticks", "x_minor_ticks",
-						"y_major_ticks", "y_minor_ticks"]:
-		if options_dict[tick_type] is not None:
-			# x-axis ticks
-			if re.match("x", tick_type[0]):
-				axis = axes.xaxis
-			# y-axis ticks
-			else:
-				axis = axes.yaxis
-			# Major ticks
-			if re.search("major", tick_type):
-				axis.set_major_locator(options_dict[tick_type])
-			# Minor ticks
-			else:
-				axis.set_minor_locator(options_dict[tick_type])
-	return axes
-
-def _set_plot_observables(solution_profile, observable):
-	"""Internal method. Check and return a list of solution profiles to be
-		observed in the plot"""
-	# If no observables provided, use entire solution profile
-	if observable is None:
-		observable = solution_profile
-	# If a single observable is provided, make it iterable
-	elif not hasattr(observable, '__iter__') or \
-		isinstance(observable, string_types):
-			observable = [observable]
-	# Check to ensure specified observables are in the solution profile
-	if not set(observable).issubset(set(iterkeys(solution_profile))):
-		raise ValueError("observable must keys from the solution_profile")
-	# Create a dictionary of solution profile observables
-	else:
-		observable = dict((x, solution_profile[x]) for x in observable)
-
-	return observable
-
-def _set_colors_and_styles(axes, options_dict, num_new_items):
-	"""Internal method. Set linecolors and styles for a plot"""
-
-	labels = [l.get_label() for l in  axes.get_lines()
-							if not re.search("_line+|poi+", l.get_label())]
-	lines = [axes.get_lines()[i] for i, l in enumerate(axes.get_lines())
-								if not re.search("_line+|poi+", l.get_label())]
-	# Set linecolors and adjust legend entries from last to first one
-	# to preserve previous linecolors on the axes
-	if options_dict["linecolor"] is not None:
-		colors = options_dict["linecolor"].copy()
-	# Otherwise use default colormaps depending on the number of items
-	else:
-		colors = _get_base_colormap(len(lines))
-	colors.reverse()
-	if len(colors) == 1 and num_new_items != 1:
-		colors = colors*num_new_items
-	for i, lc in enumerate(colors):
-		lines[len(lines)-1-i].set_color(lc)
-
-	# Set linestyles and adjust legend entries from last to first one
-	# to preserve previous linecolors on the axes
-	if options_dict["linestyle"] is not None:
-		styles = options_dict["linestyle"].copy()
-		styles.reverse()
-		if len(styles) == 1 and num_new_items != 1:
-			styles = styles*num_new_items
-		for i, ls in enumerate(styles):
-			lines[len(lines)-1-i].set_linestyle(ls)
-	return axes, (lines, labels)
-
-def _handle_plot_options(kwargs, plot_type):
-	"""Internal method. Using the default options as the base, creates the
-	option dictionary and adds customized options, if any"""
-	# Handle options for plot_simulation and plot_phase_portrait
-	if plot_re.match(plot_type):
-		# Get current default options
-		options_dict = get_plot_defaults()
-		if kwargs is not None:
-			# Otherwise update the options dictionary with the kwargs
-			for key, value in iteritems(kwargs):
-				# Option for type of plot
-				if re.match("plot_function", key):
-					_update_plot_function(options_dict, value)
-				# Option for number of points
-				if re.match("numpoints", key):
-					_update_numpoints(options_dict, value)
-				# Option for figure size
-				if re.match("figsize", key):
-					_update_figsize(options_dict, value)
-				# Option for legend
-				if re.match("legend", key):
-					_update_legend(options_dict, value)
-				# Option for title, xlabel, ylabel text and font size
-				if re.match("title|xlabel|ylabel", key):
-					_update_labels(options_dict, key, value)
-				# Option for xlim and ylim
-				if re.match("xlim|ylim", key):
-					_update_limits(options_dict, key, value)
-				# Option for grid
-				if re.match("grid", key):
-					_update_grid(options_dict, value)
-				# Option for dpi
-				if re.match("dpi", key):
-					_update_dpi(options_dict, value)
-				# Option for major and minor ticks
-				if re.match("tick_labels|x_major_ticks|y_major_ticks|"
-							"x_minor_ticks|y_minor_ticks", key):
-					_update_ticks(options_dict, key, value)
-				# Option for linecolors and styles
-				if re.match("linecolor|linestyle", key):
-					_update_lines(options_dict, key, value)
-
-	# Handle options for plot_tiled_phase_portrait
-	if tiled_re.match(plot_type):
-		# Get current default options
-		options_dict = get_tiled_defaults()
-		if kwargs is not None:
-			# Otherwise update the options dictionary with the kwargs
-			for key, value in iteritems(kwargs):
-				# Option for type of plot
-				if re.match("plot_function", key):
-					_update_plot_function(options_dict, value)
-				# Option for number of points
-				if re.match("numpoints", key):
-					_update_numpoints(options_dict, value)
-				# Option for figure size
-				if re.match("figsize", key):
-					_update_figsize(options_dict, value)
-				# Option for title
-				if re.match("title", key):
-					if not isinstance(value, string_types):
-						raise TypeError("%s must be a string" % key)
-					options_dict[key] = value
-				# Option for grid
-				if re.match("grid", key):
-					_update_grid(options_dict, value)
-				# Option for dpi
-				if re.match("dpi", key):
-					_update_dpi(options_dict, value)
-				# Option for major and minor ticks
-				if re.match("tick_labels|x_major_ticks|y_major_ticks|"
-							"x_minor_ticks|y_minor_ticks", key):
-					_update_ticks(options_dict, key, value)
-				# Option for linecolors and styles
-				if re.match("linecolor|linestyle", key):
-					_update_lines(options_dict, key, value)
-	# Return the new options as a dict, or return default options if no kwargs
-	return options_dict
-
-def _check_main_inputs(solution_profile, time, options_dict):
-	"""Internal method. Check solution_profile and time inputs, return
-	the time vector"""
-	# Check solution_profile
-	if not isinstance(solution_profile, dict):
-		raise TypeError("solution profile must be a dictionary.")
-	# Check time
-	if isinstance(time, tuple):
-		# Cannot use 0 in log spacing, adjust to a small value instead.
-		if abs(time[0]) < 1e-9:
-			time = (1e-9, time[1])
-		# Generate numbers spaced evenly on a log scale
-		time = np.geomspace(time[0], time[1], options_dict["numpoints"],
-							endpoint=True)
-	if not isinstance(time, (np.ndarray, list)):
-		raise TypeError("time must be a list or numpy.ndarray of time "
-						"points, or a tuple of form (start_point, end_point).")
-	return time
-
-def _label_poi(axes, time, poi, poi_color, poi_labels, plot_function,
-				x_observable, y_observable):
-	"""Internal method. Annotate the points of interest for phase portraits"""
-	# Annotate time points of interest
-	if isinstance(poi, string_types):
-		# If a string input, ensure it is recognizable.
-		if not re.match("endpoints", poi):
-			raise ValueError("poi cannot be a string other than "
-								"'endpoints'")
-		# Adjust annotation for time point correction
-		elif time[0] == 1e-9:
-			poi = [0, time[-1]]
-		else:
-			poi = [time[0], time[-1]]
-	# Turn poi into an iterable if only a single point provided.
-	elif not hasattr(poi, '__iter__'):
-		poi = [poi]
-	# Default to red if None provided
-	if poi_color is None:
-		poi_color = "red"
-	# Turn poi_color into an iterable if only a single color provided.
-	if isinstance(poi_color , string_types):
-		 poi_color = [poi_color]
-	# Check to ensure the lengths are the same
-	if len(poi_color) != len(poi):
-		# If more than one poi and only one poi_color, use color for all poi.
-		if len(poi_color) == 1:
-			poi_color = [poi_color[0] for i in range(0, len(poi))]
-		else:
-			raise ValueError("Length of poi_color must be equal to the "
-							"length of poi")
-	# Default to False if None provided.
-	if poi_labels is None:
-		poi_labels = False
-	# Ensure poi_labels is a bool
-	elif not isinstance(poi_labels, bool):
-		raise TypeError("poi_labels must be a bool")
-
-	# Get the x, y solutions coordinates of the provided time poi
-	for i in range(0, len(x_observable)):
-		x_poi_coords = np.array([profile(poi)
-							for profile in itervalues(x_observable)])[i]
-		for j in range(0, len(y_observable)):
-			y_poi_coords = np.array([profile(poi)
-								for profile in itervalues(y_observable)])[j]
-			# Plot the points
-			for k in range(0, len(poi)):
-				plot_function(x_poi_coords[k], y_poi_coords[k], 'o',
-								color=poi_color[k], label=("poi_%s" % poi[k]))
-				# Label points with time value if desired.
-				if poi_labels:
-					axes.annotate("   t=%s" % poi[k],
-								xy=(x_poi_coords[k], y_poi_coords[k]),
-								xycoords='data',
-								xytext=(x_poi_coords[k], y_poi_coords[k]),
-								textcoords='offset points')
-	return axes
-
-def _place_legend_outside(lgnd_loc):
-	"""Internal method. Determine where the legend needs to be anchored
-	outside of the plot and return location and anchor coordinates."""
-	# Place legend outside the plot on the left
-	if re.match(lgnd_loc, "left"):
-		lgnd_loc = "center right"
-		anchor = (-0.15, 0.5)
-		col = 1
-	# Place legend outside the plot on the right
-	elif re.match(lgnd_loc, "right"):
-		lgnd_loc = "center left"
-		anchor = (1.05, 0.5)
-		col = 1
-	# Place legend outside the plot on the top
-	elif re.match(lgnd_loc, "upper"):
-		lgnd_loc = "lower center"
-		anchor = (0.5, 1.15)
-		col = 4
-	# Place legend outside the plot on the bottom
-	elif re.match(lgnd_loc, "lower"):
-		lgnd_loc = "upper center"
-		anchor = (0.5, -0.2)
-		col = 4
-	# Place legend in best location if unknown option used.
-	else:
-		warn("Unrecognized legend entry, will use 'best' instead")
-		lgnd_loc = "best"
-		anchor = None
-		col = 1
-	return lgnd_loc, anchor, col
-
-def _update_plot_function(options_dict, value):
-	"""Internal method. Update "plot_function" to user-defined number"""
-	# Check input type for option
-	if value not in {"loglog", "semilogx", "semilogy", "plot"}:
-		raise ValueError('plot_function must be one of the following: '
-					'{"loglog", "semilogx", "semilogy", "plot"}')
-	# Update options
-	options_dict.update({"plot_function": value})
-
-def _update_numpoints(options_dict, value):
-	"""Internal method. Update "numpoints" to user-defined number"""
-	# Check input type for option
-	if not isinstance(value, (integer_types, float)):
-		raise TypeError("numpoints must be an integer")
-	# Update options
-	options_dict.update({"numpoints": int(value)})
-
-def _update_figsize(options_dict, value):
-	"""Internal method. Update "figsize" to user-defined number"""
-	# Check input type for option
-	if not isinstance(value, tuple):
-		raise TypeError("figsize must be a tuple of ints")
-	elif value[0] <=0 or value[1] <=0:
-		raise ValueError("figsize must have positive dimensions")
-	# Update options
-	options_dict.update({"figsize": value})
-
-def _update_legend(options_dict, value):
-	"""Internal method. Update "legend" to user-defined number"""
-	# Check input type for option
-	loc = options_dict["legend"][1]
-	fontsize = options_dict["legend"][2]
-	if value is not None:
-		if not hasattr(value, '__iter__'):
-			raise TypeError("legend must be an iterable")
-		if isinstance(value, string_types):
-			value = [value]
-		# Check if fontsize for the legend was specified
-		if isinstance(value[-1], (integer_types, float)):
-			fontsize = value.pop(-1)
-		# Check if legend location was specified, otherwise use default
-		if len(value) != 0:
-			if legend_loc_re.match(value[-1]):
-				loc = value.pop(-1)
-
-			for entry in value:
-				if not isinstance(entry, string_types):
-					raise TypeError("legend entries must be strings")
-
-	# Update options
-	options_dict.update({"legend": (value, loc, fontsize)})
-
-def _update_labels(options_dict, label_type, value):
-	"""Internal method. Update "title", "xlabel" or "ylabel" to
-	user-defined number"""
-	# Check input types for option
-	if not hasattr(value, '__iter__'):
-		raise TypeError("%s must be an iterable" % label_type)
-	if isinstance(value, string_types):
-		value = (value, options_dict[label_type][1])
-	if not isinstance(value[1], dict):
-		raise TypeError("fontdict must be a dictionary")
-
-	# Update options
-	options_dict.update({label_type: value})
-
-def _update_limits(options_dict, lim_type, value):
-	"""Internal method. Update "xlim", or "ylim" to
-	user-defined number"""
-	# Check input types for option
-	if not hasattr(value, '__iter__') or len(value) != 2:
-		raise TypeError("%s must be an iterable of length 2" % lim_type)
-	elif not isinstance(value[0], (integer_types, float)) or \
-		not isinstance(value[1], (integer_types, float)):
-		raise TypeError("Limits must be ints or floats")
-	elif value[0] > value[1]:
-		warn("%smin is greater than %smax, swapping the values" % \
-				(lim_type[0], lim_type[0]))
-		value = (value[1], value[0])
-	else:
-		value = tuple(value)
-	# Update options
-	options_dict.update({lim_type: value})
-
-def _update_grid(options_dict, value):
-	# Check input type for option
-	if not hasattr(value, '__iter__') or len(value) != 2:
-		raise TypeError("%s must be an iterable of length 2" % lim_type)
-	if not isinstance(value[0], bool) or \
-		not isinstance(value[1], bool):
-		raise TypeError("grid must be bools")
-	# Update options
-	options_dict.update({"grid": value})
-
-def _update_dpi(options_dict, value):
-	# Check input type for option
-	if not isinstance(value, (integer_types, float)):
-		raise TypeError("dpi must be an integer or float")
-	# Update options
-	options_dict.update({"dpi": value})
-
-def _update_ticks(options_dict, tick_type, value):
-	# Check input type for option
-	if re.match("tick_labels", tick_type):
-		if not isinstance(value, bool):
-			raise TypeError("%s must be a bool" % tick_type)
-	else:
-		if not isinstance(value, (integer_types, float)):
-			raise TypeError("%s must be an integer or float" % tick_type)
-		value = MultipleLocator(value)
-		# Update options
-	options_dict.update({tick_type: value})
-
-def _update_lines(options_dict, line_option, value):
-	# Check input type for option
-	if isinstance(value, string_types):
-		value = [value]
-	if not hasattr(value, "__iter__"):
-		raise TypeError("%s must be a string or an iterable of strings"
-						% line_option)
-	# Update options
-	options_dict.update({line_option: value})
-
-def _get_base_colormap(n_items):
-	"""Internal method. Use a larger colormap if more than 20 items are
-	to be plotted"""
-	if n_items > 10 and n_items <= 20:
-		cmap = cm.tab20.colors
-	elif n_items > 20 and n_items <= 60:
-		cmap = cm.tab20.colors + cm.tab20b.colors + cm.tab20c.colors
-	elif n_items > 60:
-		cmap = cm.nipy_spectral(np.linspace(0, 1, n_items))
-	else:
-		cmap = cm.tab10.colors
-	return list(cmap)[:n_items]
-
-## Internal variables
-_base_plot_defaults = {
-	"plot_function" : "plot",
-	"numpoints"     : 1e3,
-	"figsize"       : (5.0, 5.0),
-	"tick_labels"   : True,
-	"x_major_ticks" : None,
-	"x_minor_ticks" : None,
-	"y_major_ticks" : None,
-	"y_minor_ticks" : None,
-	"linecolor"     : None,
-	"linestyle"     : None,
-	"grid" 	 : (False, False),
-	"dpi"    : None,
-	"title"  : (None, {"size": 10}),
-	"xlabel" : (None, {"size": 10}),
-	"ylabel" : (None, {"size": 10}),
-	"xlim"   : (None, None),
-	"ylim"   : (None, None),
-	"legend" : (None, "best", 10),
-}
-
-_base_tiled_defaults = {
-	"plot_function" : "plot",
-	"numpoints"     : 1e3,
-	"figsize"       : (5.0, 5.0),
-	"tick_labels"   : False,
-	"x_major_ticks" : None,
-	"x_minor_ticks" : None,
-	"y_major_ticks" : None,
-	"y_minor_ticks" : None,
-	"linecolor"     : None,
-	"linestyle"     : None,
-	"grid" 	 : (False, False),
-	"dpi"    : None,
-	"title"  : None
-}
-
-_plot_defaults = _base_plot_defaults
-_tiled_defaults = _base_tiled_defaults
+
+from cycler import Cycler
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+
+import numpy as np
+
+from six import integer_types, iteritems, iterkeys, string_types
+
+_ZERO_TOL = 1e-6
+_FONTSIZES = [
+    'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
+_LEGEND_LOCS = [
+    "best", "upper right", "upper left", "lower left", "lower right", "right",
+    "center left", "center right", "lower center", "upper center", "center",
+    "left outside", "right outside", "lower outside", "upper outside"]
+
+_custom_default_options = {"plot": {}, "tiled": {}}
+
+
+def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
+                    **kwargs):
+    """Generate a plot of the time profile for the given Solution object.
+
+    Accepted ``kwargs`` are passed on to various matplotlib methods.
+    Default ``kwargs`` values can be viewed via get_defaults(plot_type="plot").
+    See set_defaults() for a full description of the possible ``kwargs``.
+
+    Parameters
+    ----------
+    solution: mass.Solution
+        The mass.Solution object containing the solutions to be plotted.
+    observable: str, iterable of str, optional
+        A string or an iterable of strings corresponding to items to display in
+        the given 'solution'. Objects can also be provided as long as their ids
+        exist as keys in the given 'solution'. If None provided then all items
+        in the given 'solution' are displayed.
+    time: iterable, optional
+        Either an iterable of two values containing the initial and final time
+        points, or an iterable of values to treat as time points for the
+        solutions. If None provided, the time points used in creating the
+        Solution object will be used (accessed via solution.t).
+    ax: matplotlib.axes.Axes, optional
+        A matplotlib.pyplot.axes instance to plot the data on. If None,
+        the current axis is used (accessed via plt.gca()).
+    legend: tuple of length 3, str, iterable of str, optional
+        If a tuple of length 3 provided, it should be of the following format:
+        (list of labels, str for legend loc, str for legend fontsize), allowing
+        for full control over the displayed legend.
+        If providing a string, can be a single label (when plotting one line),
+        the legend location, or the fontsize for the legend.
+        If an iterable of strings are provided, they are assumed to be line
+        labels unless they correspond to a legend location or legend fontsize.
+        If legend is not None but no labels provided, default labels
+        representing the keys in the solution object will be used.
+        Accepted locations are standard matplotlib legend locations plus
+        {"left outside", "right outside", "lower outside", "upper outside"}
+        Accepted fontsize values are standard matplotlib legend fontsizes.
+        Examples:
+            Only legend labels: legend=["A", "B", "C"]
+            Only legend properties: legend=("best", "medium")
+            Labels and properties: legend=(["A", "B", "C"], "best", "medium")
+    **kwargs
+
+    Returns
+    -------
+    ax: matplotlib.axes.Axes
+        A reference to the matplotlib.axes.Axes object used for plotting.
+
+    See Also
+    --------
+    get_defaults: Default values for options
+    set_defaults: Descriptions of accepted kwargs and input formats.
+
+    """
+    # Copy the solution object and validate the time input
+    solution, time = _format_solution_and_time_input(solution, time)
+    # Get observable solutions
+    observable_solutions = _set_plot_observables(solution, time, observable)
+    # Get current axis if none provided, otherwise check its type
+    if ax is None:
+        ax = plt.gca()
+    if not isinstance(ax, Axes):
+        raise TypeError("ax must be a matplotlib.axes Axes object.")
+
+    # Update plot options with provided kwargs
+    options = _update_kwargs("plot", **kwargs)
+    # Set the plotting function.
+    plot_function = _set_plot_function(ax, options["plot_function"])
+
+    # Use the property cycler for the axis if provided
+    if options["prop_cycle"] is not None:
+        ax.set_prop_cycle(options["prop_cycle"])
+
+    # Use the plotting function to plot the observable data.
+    default_labels = []
+    for label, sol in iteritems(observable_solutions):
+        plot_function(time, sol, label=label)
+        default_labels += [label]
+
+    # Set axis options which include labels, limits, and gridlines.
+    _set_axis_options(ax, options)
+    # Set line colors and styles if no cycler provided.
+    if options["prop_cycle"] is None:
+        _set_line_properties(ax, options, len(default_labels))
+
+    # Set the legend
+    if legend is not None:
+        _set_axis_legend(ax, legend, default_labels, options)
+
+    return ax
+
+
+def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
+                        **kwargs):
+    """Generate a plot of the time profile for the given Solution object.
+
+    Accepted ``kwargs`` are passed on to various matplotlib methods.
+    Default ``kwargs`` values can be viewed via get_defaults(plot_type="plot").
+    See get_defaults() for a full description of the possible ``kwargs``.
+
+    Parameters
+    ----------
+    solution: mass.Solution
+        The mass.Solution object containing the solutions to be plotted.
+    x: str, iterable of str
+        A string or an iterable of strings corresponding to items in
+        the given 'solution' to plot as the x-axis. Objects can also be
+        provided as long as their ids exist as keys in the given 'solution'.
+    y: str, iterable of str
+        A string or an iterable of strings corresponding to items in
+        the given 'solution' to plot as the y-axis. Objects can also be
+        provided as long as their ids exist as keys in the given 'solution'.
+    time: iterable, optional
+        Either an iterable of two values containing the initial and final time
+        points, or an iterable of values to treat as time points for the
+        solutions. If None provided, the time points used in creating the
+        Solution object will be used (accessed via solution.t).
+    ax: matplotlib.axes.Axes, optional
+        A matplotlib.pyplot.axes instance to plot the data on. If None,
+        the current axis is used (accessed via plt.gca()).
+    legend: tuple of length 3, str, iterable of str, optional
+        If a tuple of length 3 provided, it should be of the following format:
+        (list of labels, str for legend loc, str for legend fontsize), allowing
+        for full control over the displayed legend.
+        If providing a string, can be a single label (when plotting one line),
+        the legend location, or the fontsize for the legend.
+        If an iterable of strings are provided, they are assumed to be line
+        labels unless they correspond to a legend location or legend fontsize.
+        If legend is not None but no labels provided, default labels
+        representing the keys in the solution object will be used.
+        Accepted locations are standard matplotlib legend locations plus
+        {"left outside", "right outside", "lower outside", "upper outside"}
+        Accepted fontsize values are standard matplotlib legend fontsizes.
+        Examples:
+            Only legend labels: legend=["A", "B", "C"]
+            Only legend properties: legend=("best", "medium")
+            Labels and properties: legend=(["A", "B", "C"], "best", "medium")
+    **kwargs
+
+    Returns
+    -------
+    ax: matplotlib.axes.Axes
+        A reference to the matplotlib.axes.Axes object used for plotting.
+
+    See Also
+    --------
+    get_defaults: Default values for options
+    set_defaults: Descriptions of accepted kwargs and input formats.
+
+    """
+    # Copy the solution object and validate the time input
+    solution, time = _format_solution_and_time_input(solution, time)
+    # Get observable solutions
+    x_sols = _set_plot_observables(solution, time, x)
+    y_sols = _set_plot_observables(solution, time, y)
+    # Get current axis if none provided, otherwise check its type
+    if ax is None:
+        ax = plt.gca()
+    if not isinstance(ax, Axes):
+        raise TypeError("ax must be a matplotlib.axes Axes object.")
+
+    # Update plot options with provided kwargs
+    options = _update_kwargs("plot", **kwargs)
+    # Set the plotting function
+    plot_function = _set_plot_function(ax, options["plot_function"])
+
+    # Use the property cycler for the axis if provided
+    if options["prop_cycle"] is not None:
+        ax.set_prop_cycle(options["prop_cycle"])
+
+    # Use the plotting function to plot the observable data
+    default_labels = []
+    for x_label, x_sol in iteritems(x_sols):
+        for y_label, y_sol in iteritems(y_sols):
+            label = "{0} vs. {1}".format(x_label, y_label)
+            plot_function(x_sol, y_sol, label=label)
+            default_labels += [label]
+
+    # Set axis options which include labels, limits, and gridlines.
+    _set_axis_options(ax, options)
+    # Set line colors and styles if no cycler provided.
+    if options["prop_cycle"] is None:
+        _set_line_properties(ax, options, len(default_labels))
+
+    # Set the legend
+    if legend is not None:
+        _set_axis_legend(ax, legend, default_labels, options)
+
+    return ax
+
+
+def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
+                              display_data=None, **kwargs):
+    """TODO DOCSTRING."""
+    solution, time = _format_solution_and_time_input(solution, time)
+    observable_solutions = _set_plot_observables(solution, time, observable)
+    n_sols = len(observable_solutions)
+
+    tile_options = _update_kwargs("tiled", **kwargs)
+    print(tile_options)
+    # Create figure with N x N subplots where N is the number of osolutions
+    fig, axes = plt.subplots(nrows=n_sols, ncols=n_sols,
+                             figsize=tile_options["figsize"])
+
+    for i, y in enumerate(observable_solutions):
+        for j, x in enumerate(observable_solutions):
+            # Get the corresponding axis
+            ax = axes[i][j]
+            # Set common axis labels
+            if i == n_sols - 1:
+                ax.set_xlabel(x, fontdict={"size": tile_options["fontsize"]})
+            if j == 0:
+                ax.set_ylabel(y, fontdict={"size": tile_options["fontsize"]})
+
+            if i == j:
+                ax.set_facecolor(tile_options["diag_color"])
+
+            elif tile_options["placement"] == "upper":
+                if i < j:
+                    ax = plot_phase_portrait(solution, x, y, time, ax=ax)
+                elif display_data is not None and i > j:
+                    ax.annotate(str(display_data[i][j]), xy=(0.5, 0.5),
+                                xycoords="axes fraction", va="center",
+                                ha="center", fontsize=tile_options["fontsize"])
+                    ax.set_facecolor(tile_options["data_color"])
+                else:
+                    ax.set_facecolor(tile_options["none_color"])
+
+            elif tile_options["placement"] == "lower":
+                if i > j:
+                    ax = plot_phase_portrait(solution, x, y, time, ax=ax)
+                elif display_data is not None and i < j:
+                    ax.annotate(str(display_data[i][j]), xy=(0.5, 0.5),
+                                xycoords="axes fraction", va="center",
+                                ha="center", fontsize=tile_options["fontsize"])
+                    ax.set_facecolor(tile_options["data_color"])
+                else:
+                    ax.set_facecolor(tile_options["none_color"])
+            else:
+                ax = plot_phase_portrait(solution, x, y, time, ax=ax)
+
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+
+    return axes
+
+
+def get_default_colors(n_items, start=0):
+    """Return a list of the colors for a given number of items.
+
+    This function is primarily for internal use.
+
+    Parameters
+    ----------
+    n_items: int
+        Number of items that need a color.
+    start: int
+        The index of where to start the cmap.
+
+    Returns
+    -------
+    list:
+        A list of of (n_items - start) colors.
+
+    """
+    for parameter, value in zip(["n_items", "start"], [n_items, start]):
+        if not isinstance(value, integer_types):
+            raise TypeError(parameter + " must be an integer.")
+
+    if n_items > 10 and n_items <= 20:
+        cmap = mpl.cm.tab20.colors
+    elif n_items > 20 and n_items <= 60:
+        cmap = (mpl.cm.tab20.colors + mpl.cm.tab20b.colors
+                + mpl.cm.tab20c.colors)
+    elif n_items > 60:
+        cmap = mpl.cm.nipy_spectral(np.linspace(0, 1, n_items))
+    else:
+        cmap = mpl.cm.tab10.colors
+
+    return list(cmap)[start:n_items]
+
+
+def get_defaults(plot_type):
+    """Get the default values for options of a plotting function.
+
+    Parameters
+    ----------
+    plot_type: str
+        The type of plotting function used. Accepted 'plot_type' values are
+        {"plot", "tiled"}, with "plot" corresponding to the 'plot_simulation'
+        and 'plot_phase_portrait' functions, and with "tiled" corresponding to
+        the 'plot_tiled_phase_portrait' function.
+
+    Returns
+    -------
+    options: dict
+        A dict containing key:value pairs of the possible options and their
+        default values for a given "plot_type".
+
+    See Also
+    --------
+    set_defaults: Descriptions of accepted kwargs and input formats.
+
+    """
+    if plot_type not in {"plot", "tiled"}:
+        raise ValueError("Unrecognized 'plot_type' value.")
+
+    options = {
+        "plot_function": "plot",
+        "grid": None,
+        "prop_cycle": None,
+        "linecolor": None,
+        "linestyle": None,
+    }
+    # Update dict for single plot specific options
+    if _custom_default_options[plot_type]:
+        options = _custom_default_options[plot_type]
+    elif plot_type is "plot":
+        options.update({
+            "title": (None, {"size": "medium"}),
+            "xlabel": (None, {"size": "medium"}),
+            "ylabel": (None, {"size": "medium"}),
+            "xlim": (None, None),
+            "ylim": (None, None),
+            "default_legend_loc": "best",
+            "default_legend_fontsize": "medium",
+            "default_legend_ncol": None,
+        })
+    # Update dict for tiled specific options
+    elif plot_type is "tiled":
+        options.update({
+            "figsize": (8., 8.),
+            "placement": "both",
+            "fontsize": "medium",
+            "diag_color": "black",
+            "data_color": "gray",
+            "none_color": "white",
+        })
+    else:
+        pass
+
+    return options
+
+
+def set_defaults(plot_type, **kwargs):
+    """Get the default values for options of a plotting function.
+
+    Parameters
+    ----------
+    plot_type: str
+        The type of plotting function used. Accepted 'plot_type' values are
+        {"plot", "tiled"}, with "plot" corresponding to the 'plot_simulation'
+        and 'plot_phase_portrait' functions, and with "tiled" corresponding to
+        the 'plot_tiled_phase_portrait' function.
+    kwargs:
+        plot_function: str
+            A string representing the plotting function to use.
+            Accepted values are {"plot", "semilogx", "semilogy", "loglog"}.
+                "plot" uses an linear x-axis and a linear y-axis
+                "semilogx" uses an logarithmic x-axis and a linear y-axis
+                "semilogy" uses an linear x-axis and a logarithmic y-axis
+                "loglog" uses an logarithmic x-axis and a logarithmic y-axis
+            Default value is "plot".
+        grid: tuple, bool
+            If providing a tuple, the expected format is ("which", "axis"),
+            where the values for "which" and "axis" are passed to the
+            corresponding argument passed to axes.grid. Accepted values include
+            {"major", "minor", "both"} for "which" and {"x", "y, "both"} for
+            "axis". If True is provided, gridlines are set with using default
+            values for "which" and "axis", and gridlines are removed if False.
+        prop_cycle: cylcer.Cyler
+            Set a property cycler to control colors and other style properties
+            for multiline plots. The property cycler is validated through the
+            matplotlib.rcsetup.cycler function and set through the
+            axes.set_prop_cycle function. Providing a property cycler will
+            cause "linecolor" and "linestyle" kwargs to be ignored.
+        linecolor: str, iterable of str, None
+            A string or an iterable of strings representing matplotlib.colors
+            to use as line colors. If a single string is provided, the color
+            will be applied to all solutions to be plotted. If an iterable of
+            strings is provided, it must be equal to the number of lines
+            to be newly plotted. All colors are validated using the
+            matplotlib.colors.is_color_like function. If None provided, will
+            use colors obtained from the get_default_colors function.
+            Will be ignored if a property cycler is provided via prop_cycle.
+        linestyle: str, iterable of str, None
+            A string or an iterable of strings representing matplotlib
+            recognized linestyles. If a single string is provided, the
+            linestyle will be applied to all solutions to be plotted. If an
+            iterable of strings is provided, it must be equal to the number of
+            lines to be newly plotted. If None provided, will use solid lines.
+            Will be ignored if a property cycler is provided via prop_cycle.
+        title: string, tuple
+            Either a string to use as a title, or a tuple where the first value
+            is the title as a string, and the second value is a dict of font
+            options to pass to axes.set_title function. Keys must be one of the
+            six matplotlib.font_manager font properties. When setting new
+            defaults, the new value must be the tuple.
+        xlabel: string, tuple
+            Either a string to use as the x-axis label, or a tuple where the
+            first value is the label as a string, and the second value is a
+            dict of font options to pass to axes.set_xlabel function. Keys must
+            be one of the six matplotlib.font_manager font properties. When
+            setting new defaults, the new value must be the tuple.
+            Only valid for plot_type="plot".
+        ylabel: string, tuple
+            Either a string to use as the y-axis label, or a tuple where the
+            first value is the label as a string, and the second value is a
+            dict of font options to pass to axes.set_ylabel function. Keys must
+            be one of the six matplotlib.font_manager font properties. When
+            setting new defaults, the new value must be the tuple.
+            Only valid for plot_type="plot".
+        xlim: tuple
+            A tuple of integers or floats of form (xmin, xmax) specifying the
+            limits of the x-axis. Args are passed to axes.set_xlim function.
+            Only valid for plot_type="plot".
+        ylim: tuple
+            A tuple of integers or floats of form (ymin, ymax) specifying the
+            limits of the y-axis. Args are passed to axes.set_ylim function.
+            Only valid for plot_type="plot".
+        default_legend_loc: str
+            The default legend location if no location was provided to the
+            legend arg of the plotting function. Ideally, this kwarg should not
+            be used directly in the plotting function, but as a kwarg for
+            setting a new default location for the set_defaults function.
+            Only valid for plot_type="plot".
+        default_legend_fontsize: float, str
+            The default legend fontsize if no fontsize was provided to the
+            legend arg of the plotting function. Ideally, this kwarg should not
+            be used directly in the plotting function, but as a kwarg for
+            setting a new default fontsize for the set_defaults function.
+            Valid values include
+            Only valid for plot_type="plot".
+        legend_ncol: int, optional
+            An int representing the number of columns for the legend. If
+            None, then ncols=int(math.ceil(math.sqrt(n_items)/3)).
+            Only valid for plot_type="plot".
+        figsize:
+            Only valid for plot_type="tiled".
+        placement:
+            Only valid for plot_type="tiled".
+        fontsize:
+            Only valid for plot_type="tiled".
+        diag_color:
+            Only valid for plot_type="tiled".
+        none_color:
+            Only valid for plot_type="tiled".
+
+    Returns
+    -------
+    dict:
+        A dict containing key:value pairs of the possible options and their
+        new default values for a given "plot_type".
+
+    See Also
+    --------
+    get_defaults: Default values for options
+
+    """
+    if plot_type not in {"plot", "tiled"}:
+        raise ValueError("Unrecognized 'plot_type' value.")
+
+    if kwargs:
+        options = _update_kwargs(plot_type, **kwargs)
+        _custom_default_options[plot_type].update(options)
+    else:
+        _custom_default_options[plot_type] = {}
+
+    return _custom_default_options[plot_type]
+
+
+# Internal
+def _format_solution_and_time_input(solution, time):
+    """Copy the solution object and format the time input (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Copy the solution object to prevent modifications to the original
+    solution = solution.copy()
+
+    # Use time stored in Solution if None provided
+    if time is None:
+        time = solution.t
+    # Create an array of time points to use if time bounds provided.
+    elif len(time) == 2:
+        # TODO Find a better method of determining numpoints to use.
+        if abs(time[0]) < _ZERO_TOL:
+            time = (_ZERO_TOL, time[-1])
+        time = np.geomspace(time[0], time[1], solution.numpoints)
+    # Use the array of time points provided
+    elif isinstance(time, Iterable) and not isinstance(time, string_types):
+        time = np.array(sorted(time))
+
+    # If time input is not recognized, then raise an error
+    else:
+        raise TypeError("Unrecognized 'time' input")
+
+    return solution, time
+
+
+def _set_plot_observables(solution, time, observable):
+    """Set plot observables and return the solution values (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Return all items in the solution if no observables are provided.
+    if observable is None:
+        observable = solution.solutions
+
+    # If a single observable is provided, make it iterable.
+    if not hasattr(observable, '__iter__') or \
+       isinstance(observable, string_types):
+        observable = [observable]
+
+    # Replace objects providfed in observable with their identifiers.
+    observable = [getattr(x, "id", x) for x in observable]
+
+    # Check to ensure specified observables are in the Solution object
+    if not set(observable).issubset(set(iterkeys(solution))):
+        raise ValueError("observable must keys from the solution")
+
+    # Turn solutions into interpolating functions if the timepoints provided
+    # are not identical to those used in the simulation.
+    if solution.t.all() != time.all():
+        solution.interpolate = True
+
+    observable = OrderedDict((x, solution[x])
+                             if isinstance(solution[x], np.ndarray)
+                             else (x, solution[x](time)) for x in observable)
+
+    return observable
+
+
+def _set_plot_function(ax, option):
+    """Set the plotting function to be used (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    plotting_functions_dict = {"plot": ax.plot,
+                               "semilogx": ax.semilogx,
+                               "semilogy": ax.semilogy,
+                               "loglog": ax.loglog}
+
+    return plotting_functions_dict[option]
+
+
+def _set_axis_options(ax, options):
+    """Set axis labels, titles, limits, and gridlines (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Set the xlabel, ylabel, and the title if provided.
+    for key, setter in zip(["xlabel", "ylabel", "title"],
+                           [ax.set_xlabel, ax.set_ylabel, ax.set_title]):
+        if options[key][0] is not None:
+            setter(options[key][0], fontdict=options[key][1])
+
+    # Set the xlim and the ylim if provided.
+    for key, setter in zip(["xlim", "ylim"], [ax.set_xlim, ax.set_ylim]):
+        if options[key] != (None, None):
+            limits = list(options[key])
+            if 0. in limits:
+                plot_func = options["plot_function"]
+                if key == "xlim" and plot_func in ["loglog", "semilogx"] \
+                   or key == "ylim" and plot_func in ["loglog", "semilogy"]:
+                    limits[limits.index(0.)] = _ZERO_TOL
+            setter(tuple(limits))
+
+    # Set the gridlines if provided.
+    if options["grid"] is not None:
+        if isinstance(options["grid"], bool):
+            ax.grid(options["grid"])
+        else:
+            ax.grid(True, which=options["grid"][0], axis=options["grid"][1])
+
+
+def _set_line_properties(ax, options, n_new):
+    """Set line colors and styles (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Get the current lines on the plot.
+    lines = [line for line in ax.get_lines()]
+    # Get default values for linestyles and linecolors.
+    default_dict = {
+        "linecolor": get_default_colors(len(lines), start=len(lines) - n_new),
+        "linestyle": ["-"]*n_new
+        }
+
+    for key in ["linecolor", "linestyle"]:
+        # Set the property if given
+        if options[key] is not None:
+            to_apply = options[key].copy()
+        # Skip linestyles if not given
+        elif options[key] is None and key is "linestyle":
+            continue
+        else:
+            to_apply = default_dict[key]
+
+        # Apply to all newly plotted items if only one value provided.
+        if len(to_apply) == 1 and n_new != 1:
+            to_apply = to_apply*n_new
+        # Use default values if the input does not match the number of newly
+        # plotted lines.
+        elif len(to_apply) != n_new:
+            warn("Wrong number of {0}s provided, will use default {0}s "
+                 "instead.".format(key))
+            to_apply = default_dict[key]
+        else:
+            pass
+        # Set from the last line to the first line to
+        # preserve previously plotted lines.
+        to_apply.reverse()
+        for i, value in enumerate(to_apply):
+            if key is "linestyle":
+                lines[len(lines)-1-i].set_linestyle(value)
+            else:
+                lines[len(lines)-1-i].set_color(value)
+
+
+def _set_axis_legend(ax, legend, default_labels, options):
+    """Set axis legend and associated properties (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Initialize default values for fontsize, legend location
+    font = options["default_legend_fontsize"]
+    loc = options["default_legend_loc"]
+    ncol = options["default_legend_ncol"]
+    legend = list(v if isinstance(v, string_types) else list(v)
+                  for v in legend)
+    # Parse through legend input if provided as a tuple.
+    if len(legend) <= 3:
+        while legend:
+            brk = False
+            font, brk = _get_legend_values(legend, _FONTSIZES, font, brk)
+            loc, brk = _get_legend_values(legend, _LEGEND_LOCS, loc, brk)
+            if legend and isinstance(legend[0], string_types):
+                legend = [legend]
+            items, brk = _get_legend_values(legend, [], default_labels, brk)
+            if legend and not brk:
+                if isinstance(legend[-1], string_types):
+                    msg = ("Could not interpret legend parameter '{0}'"
+                           .format(legend[-1]))
+                else:
+                    msg = ("'{0}' required != '{1}' provided".format(
+                           len(default_labels), len(legend[-1])))
+                msg += ", will attempt to use default legend values instead."
+                warn(msg)
+                del legend[-1]
+            if not legend:
+                break
+    # Set the legend if only labels are provided.
+    elif (all(isinstance(entry, string_types) for entry in legend) and
+          len(legend) == len(default_labels)):
+        items = legend
+    # Use default values if input could not be interpreted.
+    else:
+        warn("Could not interpret the legend input, will use the default "
+             "entries and parameters instead.")
+        items = default_labels
+    # Get the legend properties
+    property_dict = _get_legend_properties(options, loc, ncol, len(items))
+    property_dict.update({"fontsize": font})
+
+    # Apply new labels to the lines and make/update the legend.
+    lines = [line for line in ax.get_lines()]
+    for new_label, line in zip(items, lines[len(lines) - len(items):]):
+        line.set_label(new_label)
+
+    labels = [line.get_label() for line in lines]
+
+    ax.legend(lines, labels, **property_dict)
+
+
+def _update_kwargs(plot_type, **kwargs):
+    """Validate kwargs and update their corresponding values (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    options = get_defaults(plot_type)
+    # Return default options if no kwargs provided.
+    if kwargs:
+        update_functions_dict = {
+            "plot_function": _update_plot_function,
+            "xlabel": _update_labels,
+            "ylabel": _update_labels,
+            "title": _update_labels,
+            "xlim": _update_limits,
+            "ylim": _update_limits,
+            "grid": _update_grid,
+            "linecolor": _update_lines,
+            "linestyle": _update_lines,
+            "prop_cycle": _update_lines,
+            "default_legend_loc": _update_legend_properties,
+            "default_legend_fontsize": _update_legend_properties,
+            "default_legend_ncol": _update_legend_properties,
+            "placement": _update_tiles,
+            "diag_color": _update_tiles,
+            "data_color": _update_tiles,
+            "none_color": _update_tiles,
+        }
+        # Iterate through kwargs and update options.
+        for key, value in iteritems(kwargs):
+            if key in update_functions_dict and key in options:
+                update_functions_dict[key](options, key, value)
+            else:
+                warn("kwarg '" + str(key) + "' not recognized")
+    return options
+
+
+def _update_plot_function(options, key, value):
+    """Validate the 'plot_function' kwarg (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    allowed_plotting_functions = {"loglog", "semilogx", "semilogy", "plot"}
+    if value not in allowed_plotting_functions:
+        raise ValueError(str(key) + "must be one of the following: " +
+                         str(allowed_plotting_functions))
+    options[key] = value
+
+
+def _update_labels(options, key, value):
+    """Validate kwargs for axis labels (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Check input types for option
+    if not hasattr(value, '__iter__'):
+        raise TypeError(str(key) + " must be an iterable")
+    if isinstance(value, string_types):
+        value = (value, options[key][1])
+    if not isinstance(value[1], dict):
+        raise TypeError("fontdict must be a dictionary")
+    # Update options
+    options[key] = value
+
+
+def _update_limits(options, key, value):
+    """Validate kwargs for axis limits (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if not hasattr(value, '__iter__') or len(value) != 2:
+        raise TypeError(str(key) + " must be an iterable of length 2")
+    elif not all(isinstance(v, (float, integer_types))for v in value):
+        raise TypeError("Limits must be ints or floats")
+    elif value[0] > value[1]:
+        warn("{0}min is greater than {0}max, attempting to swap values"
+             .format(key[0]))
+        value = (value[1], value[0])
+    else:
+        value = tuple(value)
+    # Update options
+    options[key] = value
+
+
+def _update_grid(options, key, value):
+    """Validate the 'grid' kwarg (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    which_args = ["major", "minor", "both"]
+    axis_args = ["x", "y", "both"]
+
+    if isinstance(value, string_types):
+        if value in which_args:
+            value = (value, "both")
+        else:
+            value = ("both", value)
+
+    if isinstance(value, bool):
+        pass
+    elif len(value) == 2 and all(isinstance(v, string_types) for v in value):
+        if value[0] not in which_args:
+            raise ValueError("The first value must be one of the following: "
+                             + str(which_args))
+        if value[1] not in axis_args:
+            raise ValueError("The second value must be one of the following: "
+                             + str(axis_args))
+    else:
+        raise TypeError(str(key) + " must be string or a tuple of strings")
+
+    options[key] = value
+
+
+def _update_lines(options, key, value):
+    """Validate kwargs for line properties (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    is_color_like = mpl.colors.is_color_like
+    if isinstance(value, string_types):
+        value = [value]
+
+    if isinstance(value, Cycler):
+        value = mpl.rcsetup.cycler(value)
+    elif (not isinstance(value, Iterable) or
+          not all(isinstance(v, string_types) for v in value)):
+        raise TypeError(key + " must be a string or an iterable of strings.")
+    elif key is "linecolor" and not all(is_color_like(v) for v in value):
+        raise ValueError("Invalid colors found: " + str(
+                         [v for v in value if not is_color_like(v)]))
+    else:
+        pass
+    options[key] = value
+
+
+def _update_legend_properties(options, key, value):
+    """Validate kwargs for legend properties (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    allowed_dict = {"default_legend_loc": _LEGEND_LOCS,
+                    "default_legend_fontsize": _FONTSIZES}
+    if not isinstance(value, (integer_types, float)):
+        if key is "default_legend_ncol":
+            raise TypeError(key + " must be a numerical value.")
+        if value not in allowed_dict[key]:
+            raise ValueError(key + " must be one of the following: "
+                             + str(allowed_dict[key]))
+    elif value < 0:
+        raise ValueError(key + " must be a non negative value")
+    elif key is "default_legend_loc" and value > 10:
+        raise ValueError(key + " must be a value between 0 and 10, inclusive.")
+    else:
+        pass
+
+    options[key] = value
+
+
+def _get_legend_values(legend, allowable, default, success):
+    """Help set legend location, fontsize, and entries (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    parameter = None
+    if legend:
+        if allowable:
+            if isinstance(legend[-1], Hashable) and \
+               (isinstance(legend[-1], (integer_types, float)) or
+               legend[-1] in allowable):
+                parameter = legend.pop(-1)
+                success = True
+        elif (not isinstance(legend[-1], Hashable) and
+              len(legend[-1]) == len(default)):
+                parameter = legend.pop(-1)
+                success = True
+        else:
+            parameter = default
+    else:
+        parameter = default
+
+    if parameter is None:
+        parameter = default
+    return parameter, success
+
+
+def _get_legend_properties(options, loc, ncol, n_items):
+    """Help set legend location and number of columns (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    loc_anchor_dict = {"left outside": ("center right", (-0.15, 0.5)),
+                       "right outside": ("center left", (1.05, 0.5)),
+                       "lower outside": ("upper center", (0.5, -0.2)),
+                       "upper outside": ("lower center", (0.5, 1.15))}
+    if loc in loc_anchor_dict:
+        loc, anchor = loc_anchor_dict[loc]
+    else:
+        anchor = None
+
+    if ncol is None:
+        ncol = int(math.ceil(math.sqrt(n_items)/3))
+
+    return {"loc": loc, "bbox_to_anchor": anchor, "ncol": ncol}
+
+
+def _update_tiles(options, key, value):
+    """Validate kwargs for tile placement and color (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if key is "placement" and value not in {"both", "lower", "upper"}:
+        raise ValueError(key + " must be one of the following: "
+                         + str({'both', 'lower', 'upper'}))
+    if "_color" in key and not mpl.colors.is_color_like(value):
+        raise ValueError("Invalid color input: " + str(value))
+
+    options[key] = value

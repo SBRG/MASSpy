@@ -10,7 +10,10 @@ from os.path import dirname as _dirname
 
 from mass import (analysis, io)
 from mass.core import (
-    MassMetabolite, MassModel, MassReaction, Simulation)
+    MassMetabolite, MassModel, MassReaction, Simulation, get_defaults,
+    plot_phase_portrait, plot_simulation, plot_tiled_phase_portrait,
+    set_defaults)
+
 from mass.util.qcqa import qcqa_model, qcqa_simulation
 from mass.util.util import show_versions, strip_time
 
