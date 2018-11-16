@@ -438,7 +438,7 @@ class Simulation(Object):
             integration. Only returned if ``return_obj=True``.
 
         """
-        if time is None:
+        if time is None or len(time) != 2 or isinstance(time, string_types):
             raise ValueError("time must be a tuple of 2 floats.")
         args = zip(["interpolate", "verbose", "return_obj", update_solutions],
                    [interpolate, verbose, return_obj, update_solutions])
@@ -758,11 +758,11 @@ class Simulation(Object):
             A string or a list of strings defining the pooling formula. All
             metabolites to be pooled must exist in the solution of the Solution
             objects found in self.get_concentration_solutions().
-        parameters : dictionary, optional
+        parameters : dict, optional
             A dictionary of aditional parameters to be used in the pools,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
-        group_ids : string or list, optional
+        group_ids : str, list, optional
             String identifiers to use for the pools. The number of identifiers
             must match the number of pools. If None, will use default
             identifiers of 'p1', 'p2', etc.
@@ -775,9 +775,6 @@ class Simulation(Object):
 
         """
         sols = self.get_concentration_solutions()
-        parameters = {sym.Symbol(param): val
-                      for param, val in iteritems(parameters)}
-
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
         elif len(pools) != len(group_ids):
@@ -818,9 +815,6 @@ class Simulation(Object):
 
         """
         sols = self.get_flux_solutions()
-        parameters = {sym.Symbol(param): val
-                      for param, val in iteritems(parameters)}
-
         if group_ids is None:
             group_ids = ["net{0}".format(str(i + 1))
                          for i in range(len(netfluxes))]
