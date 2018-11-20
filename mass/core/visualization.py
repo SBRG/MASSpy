@@ -8,15 +8,17 @@ from warnings import warn
 
 from cycler import Cycler
 
+from mass.util.util import ensure_iterable
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 import numpy as np
 
-from six import integer_types, iteritems, iterkeys, string_types
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-_ZERO_TOL = 1e-6
+_ZERO_TOL = 1e-9
 _FONTSIZES = [
     'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
 _LEGEND_LOCS = [
@@ -32,7 +34,7 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
     """Generate a plot of the time profile for the given Solution object.
 
     Accepted ``kwargs`` are passed on to various matplotlib methods.
-    Default ``kwargs`` values can be viewed via get_defaults(plot_type="plot").
+    Default ``kwargs`` values can be viewed via get_defaults("plot").
     See set_defaults() for a full description of the possible ``kwargs``.
 
     Parameters
@@ -83,7 +85,7 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
 
     """
     # Copy the solution object and validate the time input
-    solution, time = _format_solution_and_time_input(solution, time)
+    solution, time = _fmt_solution_and_time_input(solution, time)
     # Get observable solutions
     observable_solutions = _set_plot_observables(solution, time, observable)
     # Get current axis if none provided, otherwise check its type
@@ -121,12 +123,12 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
 
 
 def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
-                        **kwargs):
+                        time_poi=None, poi_labels=True, **kwargs):
     """Generate a plot of the time profile for the given Solution object.
 
     Accepted ``kwargs`` are passed on to various matplotlib methods.
-    Default ``kwargs`` values can be viewed via get_defaults(plot_type="plot").
-    See get_defaults() for a full description of the possible ``kwargs``.
+    Default ``kwargs`` values can be viewed via get_defaults("plot").
+    See set_defaults() for a full description of the possible ``kwargs``.
 
     Parameters
     ----------
@@ -165,6 +167,15 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
             Only legend labels: legend=["A", "B", "C"]
             Only legend properties: legend=("best", "medium")
             Labels and properties: legend=(["A", "B", "C"], "best", "medium")
+    time_poi: list, dict, optional
+        Either an iterable of time "points of interest" (poi) to annotate, or
+        a dict of time poi to annotate where keys are the time points and
+        values are strings representing matplotlib recognized color for that
+        time point. If None provided, only the initial and final time points
+        are annotated, with default colors "red" and "blue" respectively.
+    poi_labels: bool, optional
+        If True, will label annotated time "points of interest" with their time
+        values. Otherwise, time "points of interest" will not be labeled.
     **kwargs
 
     Returns
@@ -179,7 +190,7 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
 
     """
     # Copy the solution object and validate the time input
-    solution, time = _format_solution_and_time_input(solution, time)
+    solution, time = _fmt_solution_and_time_input(solution, time)
     # Get observable solutions
     x_sols = _set_plot_observables(solution, time, x)
     y_sols = _set_plot_observables(solution, time, y)
@@ -200,6 +211,7 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
 
     # Use the plotting function to plot the observable data
     default_labels = []
+
     for x_label, x_sol in iteritems(x_sols):
         for y_label, y_sol in iteritems(y_sols):
             label = "{0} vs. {1}".format(x_label, y_label)
@@ -216,63 +228,191 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
     if legend is not None:
         _set_axis_legend(ax, legend, default_labels, options)
 
+    endpoints = [time[0], time[-1]]
+    _annotate_time_points_of_interest(ax, options["plot_function"], solution,
+                                      x, y, time_poi, endpoints, poi_labels)
+
     return ax
 
 
 def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
-                              display_data=None, **kwargs):
-    """TODO DOCSTRING."""
-    solution, time = _format_solution_and_time_input(solution, time)
+                              time_poi=None, poi_labels=True,
+                              display_data=None, empty_tiles="upper",
+                              **kwargs):
+    """Generate a tiled phase portrait for items in a given Solution object.
+
+    Accepted ``kwargs`` are passed on to various matplotlib methods.
+    Default ``kwargs`` values can be viewed via get_defaults("tiled").
+    See set_defaults() for a full description of the possible ``kwargs``.
+
+    Parameters
+    ----------
+    solution: mass.Solution
+        The mass.Solution object containing the solutions to be plotted.
+    observable: str, iterable of str, optional
+        A string or an iterable of strings corresponding to items in the given
+        'solution' to plot against each other in the tiled phase portrait.
+        Objects can also be provided as long as their ids exist as keys in the
+        given 'solution'. If None provided then all items in the given
+        'solution' are displayed.
+    time: iterable, optional
+        Either an iterable of two values containing the initial and final time
+        points, or an iterable of values to treat as time points for the
+        solutions. If None provided, the time points used in creating the
+        Solution object will be used (accessed via solution.t).
+    ax: matplotlib.axes.Axes, optional
+        A matplotlib.pyplot.axes instance to plot the data on. If None,
+        the current axis is used (accessed via plt.gca()).
+    time_poi: list, dict, optional
+        Either an iterable of time "points of interest" (poi) to annotate, or
+        a dict of time poi to annotate where keys are the time points and
+        values are strings representing matplotlib recognized color for that
+        time point. If None provided, only the initial and final time points
+        are annotated, with default colors "red" and "blue" respectively.
+    poi_labels: bool, optional
+        If True, will make a legend for annotated time "points of interest".
+        Otherwise, time "points of interest" will not be labeled.
+    display_data: array_like, shape (N, N), optional
+        Additional data to display on the tiled phase portrait. Must matrix of
+        shape (N, N) where N = number of observables. The value at [i, j] of
+        the data must correspond to a empty tile at the [i, j] position of the
+        tiled phase portrait. All other values are ignored.".
+    empty_tiles: str, optional
+        A string representing whether to place empty tiles on the lower left
+        triangular section (i > j), the upper right triangular section
+        (i < j). Plot tiles are placed opposite of data tiles. Accepted
+        values are {"lower", "upper"}. If None provided then phase portraits
+        are placed on all tiles. Default is 'upper'.
+    **kwargs
+
+    Returns
+    -------
+    ax: matplotlib.axes.Axes
+        A reference to the matplotlib.axes.Axes object used for plotting.
+
+    See Also
+    --------
+    get_defaults: Default values for options
+    set_defaults: Descriptions of accepted kwargs and input formats.
+
+    """
+    solution, time = _fmt_solution_and_time_input(solution, time)
     observable_solutions = _set_plot_observables(solution, time, observable)
-    n_sols = len(observable_solutions)
+    N = len(observable_solutions)
 
-    tile_options = _update_kwargs("tiled", **kwargs)
-    print(tile_options)
-    # Create figure with N x N subplots where N is the number of osolutions
-    fig, axes = plt.subplots(nrows=n_sols, ncols=n_sols,
-                             figsize=tile_options["figsize"])
+    # Get current axis if none provided, otherwise check its type
+    if ax is None:
+        ax = plt.gca()
+    if not isinstance(ax, Axes):
+        raise TypeError("ax must be a matplotlib.axes Axes object.")
 
+    options = _update_kwargs("tiled", **kwargs)
+    display_data, empty_tiles = _fmt_empty_tiles(display_data, empty_tiles, N)
+
+    fontsize = options["fontsize"]
+    # Create N x N subplots where N is the number of observable solutions
+    ax.axis("off")
+    s = (1/N)
     for i, y in enumerate(observable_solutions):
         for j, x in enumerate(observable_solutions):
-            # Get the corresponding axis
-            ax = axes[i][j]
-            # Set common axis labels
-            if i == n_sols - 1:
-                ax.set_xlabel(x, fontdict={"size": tile_options["fontsize"]})
-            if j == 0:
-                ax.set_ylabel(y, fontdict={"size": tile_options["fontsize"]})
+            subax = ax.inset_axes(bounds=[i*s, 1-s*(j+1), s, s])
+            plot_args = [solution, x, y, time, subax, time_poi]
+            data_args = [i, j, display_data, empty_tiles]
+            subax.set_xmargin(0.15)
+            subax.set_ymargin(0.15)
+            subax.set_xticks([])
+            subax.set_yticks([])
+            if j == N - 1:
+                subax.set_xlabel(y, fontdict={"size": fontsize})
+            if i == 0:
+                subax.set_ylabel(x, fontdict={"size": fontsize})
+            _place_tile(i, j, options, plot_args, data_args)
 
-            if i == j:
-                ax.set_facecolor(tile_options["diag_color"])
+    if poi_labels:
+        endpoints = [round(time[i], int(abs(math.log10(_ZERO_TOL))))
+                     for i in [0, -1]]
+        time_poi, poi_color = _validate_time_poi_input(time_poi, endpoints)
+        points = [mpl.lines.Line2D([], [], label="t={0}".format(t), color=c,
+                                   marker="o", linestyle=" ")
+                  for t, c in zip(time_poi, poi_color)]
+        ax.legend(handles=points, loc="center left", bbox_to_anchor=(1.0, .5))
 
-            elif tile_options["placement"] == "upper":
-                if i < j:
-                    ax = plot_phase_portrait(solution, x, y, time, ax=ax)
-                elif display_data is not None and i > j:
-                    ax.annotate(str(display_data[i][j]), xy=(0.5, 0.5),
-                                xycoords="axes fraction", va="center",
-                                ha="center", fontsize=tile_options["fontsize"])
-                    ax.set_facecolor(tile_options["data_color"])
-                else:
-                    ax.set_facecolor(tile_options["none_color"])
+    if options["title"] is not None:
+        ax.set_title(options["title"][0],
+                     fontdict=options["title"][1])
+    return ax
 
-            elif tile_options["placement"] == "lower":
-                if i > j:
-                    ax = plot_phase_portrait(solution, x, y, time, ax=ax)
-                elif display_data is not None and i < j:
-                    ax.annotate(str(display_data[i][j]), xy=(0.5, 0.5),
-                                xycoords="axes fraction", va="center",
-                                ha="center", fontsize=tile_options["fontsize"])
-                    ax.set_facecolor(tile_options["data_color"])
-                else:
-                    ax.set_facecolor(tile_options["none_color"])
-            else:
-                ax = plot_phase_portrait(solution, x, y, time, ax=ax)
 
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
+def make_display_data(N, to_display, display_format="{}",
+                      empty_tiles="upper"):
+    """Make a matrix recognized by 'plot_tiled_phase_portrait'.
 
-    return axes
+    Items from the 'to_display' list are displayed on empty tiles starting from
+    the upper leftmost tile and moving across and down tiles until reaching the
+    lower rightmost tile. A tile can be skipped by providing an empty list or
+    an empty string for that tile.
+
+    Parameters
+    ----------
+    N: int
+        The dimensions of the returned matrix. Should be equal to the number of
+        observable solutions for the relevant tiled phase portrait.
+    to_display: list
+        The values to display on the tiles without plots.
+    display_format: str, optional
+        THe desired string format for the provided values. All items in the
+        provided in 'to_display' must be able to adhere to this format.
+    empty_tiles: str, optional
+        Either 'upper' or 'lower' to indicate whether to format the matrix for
+        empty upper tiles or empty lower tiles. Should correspond to the
+        'empty_tiles' kwarg provided to the 'plot_tiled_phase_portrait'
+        function.
+
+    Returns
+    -------
+    display_data: numpy.ndarray
+        A numpy array containing the values from 'to_display' formatted for the
+        'display_data' argument in the 'plot_tiled_phase_portrait' function.
+
+    Notes
+    -----
+    This function is a simple helper function with the purpose of is to create
+    the formatted matrix that the 'display_data' argument can recognize for
+    displaying additional data on tiles without plots for the
+    'plot_tiled_phase_portrait' function.
+
+    """
+    compare_dict = {"lower": np.greater, "upper": np.less}
+    if empty_tiles in compare_dict:
+        compare = compare_dict[empty_tiles]
+    else:
+        raise ValueError("'empty_tiles' must be one of the following: "
+                         "{'lower', 'upper'}")
+
+    if to_display is None:
+        to_display = []
+    to_display = ensure_iterable(to_display)
+
+    c = 0
+    display_data = np.zeros((N, N), dtype=object)
+    for i in range(N):
+        for j in range(N):
+            display_data[i, j] = ""
+            try:
+                if compare([i], [j]) and c < len(to_display):
+                    if to_display[c]:
+                        if not isinstance(to_display[c], string_types) \
+                           and hasattr(to_display[c], '__iter__'):
+                            display_data[i, j] = str(display_format
+                                                     .format(*to_display[c]))
+                        else:
+                            display_data[i, j] = str(display_format
+                                                     .format(to_display[c]))
+                    c += 1
+            except (ValueError, IndexError):
+                raise ValueError("Could not format 'to_display' values to the "
+                                 "'display_format'.")
+    return display_data
 
 
 def get_default_colors(n_items, start=0):
@@ -341,13 +481,13 @@ def get_defaults(plot_type):
         "prop_cycle": None,
         "linecolor": None,
         "linestyle": None,
+        "title": (None, {"size": "medium"}),
     }
     # Update dict for single plot specific options
     if _custom_default_options[plot_type]:
         options = _custom_default_options[plot_type]
     elif plot_type is "plot":
         options.update({
-            "title": (None, {"size": "medium"}),
             "xlabel": (None, {"size": "medium"}),
             "ylabel": (None, {"size": "medium"}),
             "xlim": (None, None),
@@ -360,10 +500,10 @@ def get_defaults(plot_type):
     elif plot_type is "tiled":
         options.update({
             "figsize": (8., 8.),
-            "placement": "both",
-            "fontsize": "medium",
+            "fontsize": "large",
+            "empty_tiles": "upper",
             "diag_color": "black",
-            "data_color": "gray",
+            "data_color": "lightgray",
             "none_color": "white",
         })
     else:
@@ -448,32 +588,43 @@ def set_defaults(plot_type, **kwargs):
             A tuple of integers or floats of form (ymin, ymax) specifying the
             limits of the y-axis. Args are passed to axes.set_ylim function.
             Only valid for plot_type="plot".
-        default_legend_loc: str
+        default_legend_loc: str, float
             The default legend location if no location was provided to the
             legend arg of the plotting function. Ideally, this kwarg should not
             be used directly in the plotting function, but as a kwarg for
             setting a new default location for the set_defaults function.
+            Accepted locations are standard matplotlib legend locations plus
+            {"left outside", "right outside", "lower outside", "upper outside"}
             Only valid for plot_type="plot".
-        default_legend_fontsize: float, str
+        default_legend_fontsize: str, float
             The default legend fontsize if no fontsize was provided to the
             legend arg of the plotting function. Ideally, this kwarg should not
             be used directly in the plotting function, but as a kwarg for
             setting a new default fontsize for the set_defaults function.
-            Valid values include
+            Accepted fontsize values are standard matplotlib legend fontsizes.
             Only valid for plot_type="plot".
         legend_ncol: int, optional
             An int representing the number of columns for the legend. If
             None, then ncols=int(math.ceil(math.sqrt(n_items)/3)).
             Only valid for plot_type="plot".
-        figsize:
+        fontsize: str, float
+            The size of the font for the common axis labels and titles.
+            Accepted fontsize values are standard matplotlib legend fontsizes.
             Only valid for plot_type="tiled".
-        placement:
+        diag_color: str
+            A string representing the color to make the diagonal tiles in the
+            tiled phase portrait. All colors are validated using the
+            matplotlib.colors.is_color_like function.
             Only valid for plot_type="tiled".
-        fontsize:
+        data_color: str
+            A string representing the color to make the tiles displaying data
+            in the tiled phase portrait. All colors are validated using the
+            matplotlib.colors.is_color_like function.
             Only valid for plot_type="tiled".
-        diag_color:
-            Only valid for plot_type="tiled".
-        none_color:
+        none_color: str
+            A string representing the color to make the empty tiles in the
+            tiled phase portrait. All colors are validated using the
+            matplotlib.colors.is_color_like function.
             Only valid for plot_type="tiled".
 
     Returns
@@ -500,7 +651,7 @@ def set_defaults(plot_type, **kwargs):
 
 
 # Internal
-def _format_solution_and_time_input(solution, time):
+def _fmt_solution_and_time_input(solution, time):
     """Copy the solution object and format the time input (Helper function).
 
     Warnings
@@ -557,7 +708,10 @@ def _set_plot_observables(solution, time, observable):
 
     # Turn solutions into interpolating functions if the timepoints provided
     # are not identical to those used in the simulation.
-    if solution.t.all() != time.all():
+    if not isinstance(time, np.ndarray):
+        time = np.array(time)
+
+    if not np.array_equal(solution.t, time):
         solution.interpolate = True
 
     observable = OrderedDict((x, solution[x])
@@ -625,7 +779,7 @@ def _set_line_properties(ax, options, n_new):
 
     """
     # Get the current lines on the plot.
-    lines = [line for line in ax.get_lines()]
+    lines = _filter_lines(ax)
     # Get default values for linestyles and linecolors.
     default_dict = {
         "linecolor": get_default_colors(len(lines), start=len(lines) - n_new),
@@ -712,13 +866,104 @@ def _set_axis_legend(ax, legend, default_labels, options):
     property_dict.update({"fontsize": font})
 
     # Apply new labels to the lines and make/update the legend.
-    lines = [line for line in ax.get_lines()]
+    lines = _filter_lines(ax)
     for new_label, line in zip(items, lines[len(lines) - len(items):]):
         line.set_label(new_label)
 
     labels = [line.get_label() for line in lines]
 
     ax.legend(lines, labels, **property_dict)
+
+
+def _validate_time_poi_input(time_poi, endpoints):
+    """Validate time_poi input and return with poi colors (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Use endpoints if no time points of interest provided
+    if time_poi is None:
+        time_poi = endpoints
+        poi_color = ["red", "blue"]
+    # Seperate time points of interest and their corresponding colors
+    elif isinstance(time_poi, dict):
+        poi_color = list(itervalues(time_poi))
+        time_poi = list(iterkeys(time_poi))
+    else:
+        time_poi = ensure_iterable(time_poi)
+        poi_color = ["red"] * len(time_poi)
+    return time_poi, poi_color
+
+
+def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
+                                      time_poi, endpoints, poi_labels):
+    """Annotate time "points of interest" for the given axis (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Set the plotting function
+    plot_function = _set_plot_function(ax, plot_function)
+    time_poi, poi_color = _validate_time_poi_input(time_poi, endpoints)
+
+    x_pois = _set_plot_observables(solution, time_poi, x)
+    y_pois = _set_plot_observables(solution, time_poi, y)
+
+    for i, [t, c] in enumerate(zip(time_poi, poi_color)):
+        for x_label, x_poi in iteritems(x_pois):
+            for y_label, y_poi in iteritems(y_pois):
+                xy = (x_poi[i], y_poi[i])
+                label = "t={0}".format(t)
+                plot_function(*xy, label=label, color=c,
+                              marker="o", linestyle="")
+                if poi_labels:
+                    ax.annotate("    " + label, xy=xy, xycoords="data",
+                                xytext=xy, textcoords='offset points')
+
+
+def _place_tile(i, j, options, plot_args, data_args):
+    """Generate and place tiles for a tiled phase portrait (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    solution, x, y, time, subax, time_poi = plot_args
+    i, j, display_data, empty_tiles = data_args
+
+    def _make_tile(condition, options, plot_args, data_args):
+        solution, x, y, time, subax, time_poi = plot_args
+        i, j, display_data, empty_tiles = data_args
+        if condition:
+            subax = plot_phase_portrait(solution, x, y, time, ax=subax,
+                                        time_poi=time_poi,
+                                        poi_labels=False)
+        elif display_data is not None and not condition:
+            if not str(display_data[j, i]):
+                subax.set_facecolor(options["none_color"])
+            else:
+                subax.annotate(str(display_data[j, i]), xy=(0.5, 0.5),
+                               xycoords="axes fraction", va="center",
+                               ha="center", fontsize=options["fontsize"])
+                subax.set_facecolor(options["data_color"])
+        else:
+            subax.set_facecolor(options["none_color"])
+
+    if i == j:
+        subax.set_facecolor(options["diag_color"])
+    elif empty_tiles == "upper":
+        _make_tile(i < j, options, plot_args, data_args)
+    elif empty_tiles == "lower":
+        _make_tile(i > j, options, plot_args, data_args)
+    else:
+        subax = plot_phase_portrait(solution, x, y, time, ax=subax,
+                                    time_poi=time_poi,
+                                    poi_labels=False)
 
 
 def _update_kwargs(plot_type, **kwargs):
@@ -746,7 +991,8 @@ def _update_kwargs(plot_type, **kwargs):
             "default_legend_loc": _update_legend_properties,
             "default_legend_fontsize": _update_legend_properties,
             "default_legend_ncol": _update_legend_properties,
-            "placement": _update_tiles,
+            "fontsize": _update_tiles,
+            "empty_tiles": _update_tiles,
             "diag_color": _update_tiles,
             "data_color": _update_tiles,
             "none_color": _update_tiles,
@@ -953,17 +1199,59 @@ def _get_legend_properties(options, loc, ncol, n_items):
 
 
 def _update_tiles(options, key, value):
-    """Validate kwargs for tile placement and color (Helper function).
+    """Validate kwargs for plot placement and tile color (Helper function).
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    if key is "placement" and value not in {"both", "lower", "upper"}:
-        raise ValueError(key + " must be one of the following: "
-                         + str({'both', 'lower', 'upper'}))
+    if key is "empty_tiles" is not None and value not in {"lower", "upper"}:
+        raise ValueError(key + "must be either 'lower', 'upper', or None.")
+
     if "_color" in key and not mpl.colors.is_color_like(value):
         raise ValueError("Invalid color input: " + str(value))
 
+    if key is "fontsize" and (value not in _FONTSIZES and
+       (isinstance(value, (integer_types, float)) and value < 0)):
+        raise ValueError(key + " must be a non-negative value or one of the "
+                         "following: " + str(_FONTSIZES))
+
     options[key] = value
+
+
+def _fmt_empty_tiles(display_data, empty_tiles, N):
+    """Validate the input for data to display (Helper function).
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if display_data is not None:
+        # Ensure data is a numpy array and of N x N dimensions
+        if not isinstance(display_data, np.ndarray):
+            display_data = np.array(display_data)
+        if not np.array_equal(display_data.shape, (N, N)):
+            raise ValueError("display_data must be an N x N matrix where N is "
+                             "equal to the number of observable solutions.")
+            display_data = None
+
+    return display_data, empty_tiles
+
+
+def _filter_lines(ax, to_return="lines"):
+    """Filter axis lines to seperate plotted lines from plotted time_pois.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if to_return not in {"lines", "tpoi"}:
+        raise ValueError("Unrecognized 'to_return' value")
+
+    if to_return == "lines":
+        return [l for l in ax.get_lines() if "t=" != l.get_label()[:2]]
+    else:
+        return [l for l in ax.get_lines() if "t=" == l.get_label()[:2]]
