@@ -49,7 +49,7 @@ from math import log10
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
-from mass.core import solutions as _msol
+from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
 from mass.exceptions import MassSimulationError
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
@@ -151,7 +151,7 @@ class Simulation(Object):
         self._models = DictList([reference_model])
 
         # Get initial condition and parameter values, and store.
-        param_vals = self._get_parameter_from_model(reference_model)
+        param_vals = self._get_parameters_from_model(reference_model)
         ic_vals = self._get_ics_from_model(reference_model)
         self._values = DictList([param_vals, ic_vals])
         self._solutions = DictList()
@@ -438,7 +438,7 @@ class Simulation(Object):
             integration. Only returned if ``return_obj=True``.
 
         """
-        if time is None:
+        if time is None or len(time) != 2 or isinstance(time, string_types):
             raise ValueError("time must be a tuple of 2 floats.")
         args = zip(["interpolate", "verbose", "return_obj", update_solutions],
                    [interpolate, verbose, return_obj, update_solutions])
@@ -720,6 +720,8 @@ class Simulation(Object):
     def update_values(self, models=None):
         """Update the Simulation with the models current numerical values.
 
+        Values include initial conditions and all parameters.
+
         Parameters
         ----------
         models: mass.MassModel, list of mass.MassModels, None
@@ -735,14 +737,14 @@ class Simulation(Object):
 
         new_values = DictList()
         for model in models:
-            for function in [self._get_parameter_from_model,
+            for function in [self._get_parameters_from_model,
                              self._get_ics_from_model]:
                 values = function(model)
                 new_values.add(values)
 
         self._values = new_values
 
-    def make_pools(self, pools, parameters=None, group_ids=None):
+    def make_pools(self, pools, parameters=None):
         """Create Pool Solutions for a given list of pools.
 
         Example: For the reaction v1: x1 <=> x2 with Keq = 2,  a conservation
@@ -754,18 +756,15 @@ class Simulation(Object):
 
         Parameters
         ----------
-        pools : string or list
-            A string or a list of strings defining the pooling formula. All
-            metabolites to be pooled must exist in the solution of the Solution
-            objects found in self.get_concentration_solutions().
-        parameters : dictionary, optional
+        pools : str, list of str, dict
+            Either a string or a list of strings defining the pooling formula,
+            or a dict where keys are pool identifiers and values are the
+            corresponding pools. All metabolites to be pooled must exist in
+            the Solution objects found in self.get_concentration_solutions().
+        parameters : dict, optional
             A dictionary of aditional parameters to be used in the pools,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
-        group_ids : string or list, optional
-            String identifiers to use for the pools. The number of identifiers
-            must match the number of pools. If None, will use default
-            identifiers of 'p1', 'p2', etc.
 
         Returns
         -------
@@ -774,21 +773,26 @@ class Simulation(Object):
             pool solutions.
 
         """
+        group_ids = None
+
+        if isinstance(pools, string_types):
+            pools = [pools]
+        elif isinstance(pools, dict):
+            group_ids = list(iterkeys(pools))
+            pools = list(itervalues(pools))
+        else:
+            pools = ensure_iterable(pools)
+
         sols = self.get_concentration_solutions()
-        parameters = {sym.Symbol(param): val
-                      for param, val in iteritems(parameters)}
 
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
-        elif len(pools) != len(group_ids):
-            raise ValueError("Number of provided identifiers does not match "
-                             "the number of pools to create.")
 
         pool_solutions = self._create_group(sols, pools, parameters, group_ids,
                                             _msol._POOL_STR)
         return pool_solutions
 
-    def make_netfluxes(self, netfluxes, parameters=None, group_ids=None):
+    def make_netfluxes(self, netfluxes, parameters=None):
         """Create NetFlux Solutions for a given list of flux summations.
 
         Example: To sum the fluxes of v1 and v2 scaled,
@@ -801,14 +805,15 @@ class Simulation(Object):
             A string or a list of strings defining the pooling formula. All
             metabolites to be pooled must exist in the solution of the Solution
             objects found in self.get_concentration_solutions().
+        netfluxes : str, list of str, dict
+            Either a string or a list of strings defining the netflux formula,
+            or a dict where keys are netflux identifiers and values are the
+            corresponding netfluxes. All fluxes to be combined must exist in
+            the Solution objects found in self.get_flux_solutions().
         parameters : dictionary, optional
             A dictionary of aditional parameters to be used in the pools,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
-        group_ids : string or list, optional
-            String identifiers to use for the net flux groups. The number of
-            identifiers must match the number of net flux groups. If None, will
-            use default identifiers of 'net1', 'net2', etc.
 
         Returns
         -------
@@ -817,16 +822,19 @@ class Simulation(Object):
             pool solutions.
 
         """
-        sols = self.get_flux_solutions()
-        parameters = {sym.Symbol(param): val
-                      for param, val in iteritems(parameters)}
+        group_ids = None
+        if isinstance(netfluxes, string_types):
+            netfluxes = [netfluxes]
+        elif isinstance(netfluxes, dict):
+            group_ids = list(iterkeys(netfluxes))
+            netfluxes = list(itervalues(netfluxes))
+        else:
+            netfluxes = ensure_iterable(netfluxes)
 
+        sols = self.get_flux_solutions()
         if group_ids is None:
             group_ids = ["net{0}".format(str(i + 1))
                          for i in range(len(netfluxes))]
-        elif len(netfluxes) != len(group_ids):
-            raise ValueError("Number of provided identifiers does not match "
-                             "the number of net flux groups to create.")
 
         netflux_solutions = self._create_group(sols, netfluxes, parameters,
                                                group_ids, _msol._NETFLUX_STR)
@@ -842,11 +850,6 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        if isinstance(to_create, string_types):
-            to_create = [to_create]
-        else:
-            to_create = ensure_iterable(to_create)
-
         group_solutions = DictList()
         for model_id, sol in iteritems(sols):
             groups_sol_dict = {}
@@ -861,6 +864,8 @@ class Simulation(Object):
                 if parameters is not None:
                     local_syms.update({str(param): param
                                       for param in iterkeys(parameters)})
+                else:
+                    parameters = {}
                 try:
                     expr = sym.sympify(group, locals=local_syms)
                     expr = expr.subs(parameters)
@@ -959,7 +964,7 @@ class Simulation(Object):
                 models.remove(model)
         return models
 
-    def _get_parameter_from_model(self, model):
+    def _get_parameters_from_model(self, model):
         """Get a dict of parameters as sympy symbols and their values.
 
         Warnings
@@ -969,7 +974,8 @@ class Simulation(Object):
         """
         values = {}
         for key, dictionary in iteritems(model.parameters):
-            values.update({sym.Symbol(k): v for k, v in iteritems(dictionary)})
+            values.update({sym.Symbol(str(k)): v
+                          for k, v in iteritems(dictionary)})
         return _msol._DictWithID("{0}_parameters".format(model.id),
                                  dictionary=values)
 
@@ -1180,6 +1186,7 @@ class Simulation(Object):
             if met_func in ics:
                 equations[met_func.diff(_T_SYM)] = equation.subs(parameters)
                 ordered_ics[met_func] = ics[met_func]
+
         # Account for functions
         if functions:
             for met, func in iteritems(functions):

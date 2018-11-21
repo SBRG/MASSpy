@@ -109,43 +109,30 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
     if matrix_type not in _MATRIX_TYPES:
         raise ValueError("Unrecognized matrix_type.")
 
-    # Define small conversion functions based on the original matrix type.
-    def _to_dense(matrix):
-        if isinstance(matrix, np.ndarray):
-            pass
-        elif isinstance(matrix, pd.DataFrame):
-            matrix = matrix.as_matrix()
-        elif isinstance(matrix, sym.Matrix):
-            matrix = np.array(matrix)
+    # Convert the matrix type
+    conversion_method_dict = dict(zip(
+        _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil,  _to_dense, _to_dense]))
+
+    # try:
+    #     matrix = conversion_method_dict[matrix_type](matrix)
+    # except TypeError:
+    #     warnings.warn("Could not cast matrix as the given matrix_type.")
+    #     return matrix
+    try:
+        matrix = conversion_method_dict[matrix_type](matrix)
+        # Convert the dtype
+        if not re.match("symbolic", matrix_type):
+            if re.match("DataFrame", matrix_type):
+                matrix = pd.DataFrame(matrix, index=row_ids, columns=col_ids)
+            try:
+                matrix = matrix.astype(dtype)
+            except TypeError:
+                warnings.warn("Could not cast matrix as the given dtype")
         else:
-            matrix = matrix.toarray()
+            matrix = sym.Matrix(matrix)
+    except TypeError:
+        warnings.warn("Could not cast matrix as the given matrix_type")
 
-        return matrix
-
-    def _to_lil(matrix):
-        if isinstance(matrix, sym.Matrix):
-            matrix = np.array(matrix)
-        return lil_matrix(matrix)
-
-    def _to_dok(matrix):
-        if isinstance(matrix, sym.Matrix):
-            matrix = np.array(matrix)
-        return dok_matrix(matrix)
-
-    # Convert the matrix type and return it.
-    conversion_method_dict = dict(zip(_MATRIX_TYPES,
-                                      [_to_dense, _to_dok, _to_lil,
-                                       _to_dense, _to_dense]))
-    matrix = conversion_method_dict[matrix_type](matrix)
-    if not re.match("symbolic", matrix_type):
-        if re.match("DataFrame", matrix_type):
-            matrix = pd.DataFrame(matrix, index=row_ids, columns=col_ids)
-        try:
-            matrix.astype(dtype)
-        except TypeError:
-            warnings.warn("Could not cast matrix as the given dtype")
-    else:
-        matrix = sym.Matrix(matrix)
     return matrix
 
 
@@ -191,3 +178,29 @@ def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
                                    np.zeros, np.zeros]))
     constructor = matrix_constructor[matrix_type]
     return (constructor, matrix_type, dtype)
+
+
+# Define small conversion functions based on the original matrix type.
+def _to_dense(matrix):
+    if isinstance(matrix, np.ndarray):
+        pass
+    elif isinstance(matrix, pd.DataFrame):
+        matrix = matrix.as_matrix()
+    elif isinstance(matrix, sym.Matrix):
+        matrix = np.array(matrix)
+    else:
+        matrix = matrix.toarray()
+
+    return matrix
+
+
+def _to_lil(matrix):
+    if isinstance(matrix, sym.Matrix):
+        matrix = sym.matrix2numpy(matrix, dtype=float)
+    return lil_matrix(matrix)
+
+
+def _to_dok(matrix):
+    if isinstance(matrix, sym.Matrix):
+        matrix = sym.matrix2numpy(matrix, dtype=float)
+    return dok_matrix(matrix)

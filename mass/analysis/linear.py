@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import re
 import warnings
 
-from mass.core import expressions
 from mass.util.util import convert_matrix
 
 import numpy as np
@@ -26,17 +25,14 @@ ext_metab_re = re.compile("\_e")
 
 
 # Public
-def gradient(model, strip_time=True, use_parameter_values=True,
-             use_concentration_values=True, matrix_type=None):
+def gradient(model, use_parameter_values=True, use_concentration_values=True,
+             matrix_type="dense"):
     """Create the gradient matrix for a given model.
 
     Parameters
     ----------
     model: mass.MassModel
         The MassModel object to construct the matrix for.
-    strip_time: bool, optional
-        If True, will strip the time dependency on concentration solutions in
-        the returned matrix. (e.g. MetabID(t) -> MetabID)
     use_parameter_values: bool, optional
         Whether to substitute the numerical values for parameters into the
         matrix. If True, then numerical values of the kinetic parameters are
@@ -53,7 +49,7 @@ def gradient(model, strip_time=True, use_parameter_values=True,
         obtain the corresponding scipy.sparse matrix, 'DataFrame' for a
         pandas.DataFrame, and 'symbolic' for a sympy.MutableDenseMatrix. For
         all matrix types, species (excluding  genes) are the row indicies and
-        reactions are the column indicies. If None, defaults to "dense".
+        reactions are the column indicies. Defaults to "dense".
 
     Returns
     -------
@@ -61,19 +57,11 @@ def gradient(model, strip_time=True, use_parameter_values=True,
         The gradient matrix for the model returned as the given matrix_type.
 
     """
+    # Get model rates and metabolites dependent on time.
+    rates = model.rates
+
     # Construct the base gradient matrix
-    gradient_mat = sym.Matrix(np.zeros((len(model.metabolites),
-                                        len(model.reactions))))
-
-    # Get rates and symbols
-    rates, symbols = expressions._sort_symbols(model)[1:]
-
-    # Strip time if desired
-    if strip_time:
-        rates = expressions.strip_time(rates)
-        metab_list = [sym.Symbol(m.id) for m in model.metabolites]
-    else:
-        metab_list = [sym.Symbol(m.id)(_T_SYM) for m in model.metabolites]
+    gradient_mat = sym.Matrix(np.zeros((len(rates), len(model.metabolites))))
 
     # Get index for metabolites and reactions
     r_ind = model.reactions.index
@@ -81,46 +69,43 @@ def gradient(model, strip_time=True, use_parameter_values=True,
 
     # Create the gradient matrix
     for rxn, rate in iteritems(rates):
-        for i, met in enumerate(model.metabolites):
-            gradient_mat[r_ind(rxn), m_ind(met)] = rate.diff(metab_list[i])
+        for met in model.metabolites:
+            met_func = sym.Function(str(met))(_T_SYM)
+            gradient_mat[r_ind(rxn), m_ind(met)] = rate.diff(met_func)
 
-    # Get values for substitution if necessary
-    if use_parameter_values or use_concentration_values:
-        values = dict()
-        if use_concentration_values:
-            values.update({metab_list[i]: model.initial_conditions[m]
-                           for i, m in enumerate(model.metabolites)
-                           if m in model.initial_conditions})
+    # Get values for substitution
+    if use_concentration_values or use_parameter_values:
+        values = {}
         if use_parameter_values:
-            # Get values for rate parameters
-            for param_sym in symbols[1]:
-                [p_type, rxn] = re.split("\_", str(param_sym), maxsplit=1)
-                rxn = model.reactions.get_by_id(rxn)
-                values.update({param_sym:
-                               rxn.__class__.__dict__[p_type].fget(rxn)})
-            # Get values for fixed concentrations
-            for met_sym in symbols[2]:
-                met = str(met_sym)
-                if ext_metab_re.search(met):
-                    values.update({met_sym: model.fixed_concentrations[met]})
-                else:
-                    met = model.metabolites.get_by_id(met)
-                    values.update({met_sym: model.fixed_concentrations[met]})
-            # Get values for custom parameters
-            values.update({custom_sym: model.custom_parameters[str(custom_sym)]
-                           for custom_sym in symbols[3]})
+            model_parameters = model.parameters
+            # fixed_concs = model_parameters.pop("Fixed")
+
+            for key, dictionary in iteritems(model_parameters):
+                values.update({sym.Symbol(str(k)): v
+                              for k, v in iteritems(dictionary)})
+
+        if use_concentration_values:
+            values.update({sym.Function(str(k))(_T_SYM): v
+                           for k, v in iteritems(model.initial_conditions)})
+
         # Substitute values into the matrix
         gradient_mat = gradient_mat.subs(values)
 
+    # Try to cast matrix as a float if all values could be computed
+    if gradient_mat.is_symbolic():
+        dtype = object
+    else:
+        dtype = np.float64
+
     gradient_mat = convert_matrix(gradient_mat, matrix_type=matrix_type,
-                                  dtype=np.float64,
+                                  dtype=dtype,
                                   row_ids=[r.id for r in model.reactions],
                                   col_ids=[m.id for m in model.metabolites])
     return gradient_mat
 
 
-def kappa(model, strip_time=True, use_parameter_values=True,
-          use_concentration_values=True, matrix_type=None):
+def kappa(model, use_parameter_values=True, use_concentration_values=True,
+          matrix_type="dense"):
     """Create the kappa matrix for a given model.
 
     The kappa matrix is the diagnolization of the norms for the rows in the
@@ -130,9 +115,6 @@ def kappa(model, strip_time=True, use_parameter_values=True,
     ----------
     model: mass.MassModel
         The MassModel object to construct the matrix for.
-    strip_time: bool, optional
-        If True, will strip the time dependency on concentration solutions in
-        the returned matrix. (e.g. MetabID(t) -> MetabID)
     use_parameter_values: bool, optional
         Whether to substitute the numerical values for parameters into the
         matrix. If True, then numerical values of the kinetic parameters are
@@ -157,10 +139,8 @@ def kappa(model, strip_time=True, use_parameter_values=True,
         The kappa matrix for the model returned as the given matrix_type.
 
     """
-    gradient_mat = gradient(model=model, strip_time=strip_time,
-                            use_parameter_values=use_parameter_values,
-                            use_concentration_values=use_concentration_values,
-                            matrix_type=matrix_type)
+    gradient_mat = gradient(model, use_parameter_values,
+                            use_concentration_values, matrix_type)
     kappa_mat = sym.diag(*[gradient_mat[row, :].norm()
                            for row in range(gradient_mat.rows)])
     kappa_mat = kappa_mat.subs({sym.nan: sym.S.Zero})
@@ -171,8 +151,8 @@ def kappa(model, strip_time=True, use_parameter_values=True,
     return kappa_mat
 
 
-def gamma(model, strip_time=True, use_parameter_values=True,
-          use_concentration_values=True, matrix_type=None):
+def gamma(model, use_parameter_values=True, use_concentration_values=True,
+          matrix_type="dense"):
     """Create the gamma matrix for a given model.
 
     The gamma matrix are the 1-norms of the gradient matrix.
@@ -208,10 +188,8 @@ def gamma(model, strip_time=True, use_parameter_values=True,
         The gamma matrix for the model returned as the given matrix_type.
 
     """
-    gradient_mat = gradient(model=model, strip_time=strip_time,
-                            use_parameter_values=use_parameter_values,
-                            use_concentration_values=use_concentration_values,
-                            matrix_type=matrix_type)
+    gradient_mat = gradient(model, use_parameter_values,
+                            use_concentration_values, matrix_type)
     gamma_mat = sym.Matrix([gradient_mat[row, :].normalized()
                             for row in range(gradient_mat.rows)])
     gamma_mat = gamma_mat.subs({sym.nan: sym.S.Zero})
@@ -222,9 +200,8 @@ def gamma(model, strip_time=True, use_parameter_values=True,
     return gamma_mat
 
 
-def jacobian(model, jacobian_type="Jx", strip_time=True,
-             use_parameter_values=True, use_concentration_values=True,
-             matrix_type=None):
+def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
+             use_concentration_values=True, matrix_type="dense"):
     """Get the jacobian matrix for a given model.
 
     Parameters
@@ -265,10 +242,8 @@ def jacobian(model, jacobian_type="Jx", strip_time=True,
     if jacobian_type not in {"Jx", "Jv"}:
         raise ValueError("jacobian_type must be either 'Jx' or Jv'")
 
-    gradient_mat = gradient(model=model, strip_time=strip_time,
-                            use_parameter_values=use_parameter_values,
-                            use_concentration_values=use_concentration_values,
-                            matrix_type="symbolic")
+    gradient_mat = gradient(model, use_parameter_values,
+                            use_concentration_values, matrix_type="symbolic")
     stoich_mat = model._mk_stoich_matrix(matrix_type="symbolic",
                                          update_model=False)
     if "Jx" == jacobian_type:

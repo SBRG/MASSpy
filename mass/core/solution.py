@@ -2,9 +2,12 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
+from copy import copy, deepcopy
 import re
 
 from mass.core.massmodel import MassModel
+
+import pandas as pd
 
 from scipy.interpolate import interp1d
 
@@ -94,7 +97,7 @@ class Solution(_DictWithID):
     """
 
     def __init__(self, id_or_model, solution_type, solution_dictionary=None,
-                 time_points=None, interpolate=False):
+                 time=None, interpolate=False):
         """Container with an identifier for "solution_type" solutions."""
         valid_check = [True if _re.match(solution_type) else False
                        for _re in [_conc_re, _flux_re, _pool_re, _netflux_re]]
@@ -108,12 +111,28 @@ class Solution(_DictWithID):
 
         _DictWithID.__init__(self, id_or_model, dictionary=solution_dictionary)
         self._solution_type = solution_type
-        self._time_points = time_points
+        self._time = time
         self._interpolate = interpolate
         self._groups = None
 
     @property
-    def solution(self):
+    def t(self):
+        """Return time points used in computing the solution."""
+        return getattr(self, "_time", None)
+
+    @property
+    def df(self):
+        """Return the Solution object as a pandas.DataFrame."""
+        if self.interpolate:
+            sols = {k: v(self.t) for k, v in iteritems(self.solutions)}
+        else:
+            sols = self.solutions
+        df = pd.DataFrame.from_dict(sols)
+        df.index = pd.Series(self.t, name="Time")
+        return df
+
+    @property
+    def solutions(self):
         """Return a normal dict containing solutions of the Solution object."""
         return dict(self)
 
@@ -123,37 +142,26 @@ class Solution(_DictWithID):
         return getattr(self, "_solution_type", None)
 
     @property
-    def time_range(self):
-        """Return initial and final times used in computing the solution."""
-        if self.t0 and self.tf:
-            return (self.t0, self.tf)
-
-    @property
-    def time_points(self):
-        """Return time points used in computing the solution."""
-        return getattr(self, "_time_points", None)
-
-    @property
-    def t(self):
-        """Shorthand to return time points used in computing the solution."""
-        return self.time_points
-
-    @property
-    def sol(self):
-        """Shorthand to return time points used in computing the solution."""
-        return self.solution
-
-    @property
     def t0(self):
         """Return the initial time point used in computing the solution."""
-        if self.time_points is not None and (len(self.time_points) >= 2):
-            return self.time_points[0]
+        if self.t is not None and (len(self.t) >= 2):
+            return self.t[0]
 
     @property
     def tf(self):
         """Return the final time point used in computing the solution."""
-        if self.time_points is not None and (len(self.time_points) >= 2):
-            return self.time_points[-1]
+        if self.t is not None and (len(self.t) >= 2):
+            return self.t[-1]
+
+    @property
+    def numpoints(self):
+        """Return the number of time points used to compute the solutions."""
+        return int(len(self.t))
+
+    @property
+    def groups(self):
+        """Return the groups used to create grouped solutions if they exist."""
+        return getattr(self, "_groups", None)
 
     @property
     def interpolate(self):
@@ -184,10 +192,13 @@ class Solution(_DictWithID):
 
         self._interpolate = value
 
-    @property
-    def groups(self):
-        """Return the groups used to create grouped solutions if they exist."""
-        return getattr(self, "_groups", None)
+    def copy(self):
+        """Copy a Solution object."""
+        return copy(self)
+
+    def __copy__(self):
+        """Create a copy of the Solution object."""
+        return copy(super(Solution, self))
 
     def __repr__(self):
         """Representation of the Solution object."""

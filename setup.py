@@ -12,8 +12,10 @@ setup_requirements = []
 if {'pytest', 'test', 'ptr'}.intersection(argv):
     setup_requirements.append("pytest-runner")
 
-# extras = {}
-# extras["all"] = sorted(list(extras))
+extras = {
+    "sbml": ["python-libsbml", "lxml"]
+}
+extras["all"] = sorted(list(extras))
 
 try:
     with open('README.rst') as handle:
@@ -27,17 +29,15 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.0a24",
+        version="0.1.0a25",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
             "cobra==0.13.4",
             "future==0.16.0",
-            "lxml==4.2.5",
             "matplotlib==3.0.0",
             "numpy==1.15.2",
             "pandas==0.23.4",
-            "python-libsbml==5.17.0",
             "scipy==1.1.0",
             "six==1.11.0",
             "sympy==1.3",
@@ -53,9 +53,9 @@ if __name__ == "__main__":
                  'test/data/*',
              ]
         },
-        author="ZHaiman and the masspy development team at SBRG",
+        author="masspy development team at SBRG",
         author_email="zhaiman@eng.ucsd.edu",
-        maintainer="ZHaiman",
+        maintainer="Zachary B. Haiman",
         maintainer_email="zhaiman@eng.ucsd.edu",
         description="MASSpy is a package for kinetic modeling and simulation "
                     "of biological networks",
