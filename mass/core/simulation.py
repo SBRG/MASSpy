@@ -214,9 +214,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._CONC_STR)
@@ -235,9 +236,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._FLUX_STR)
@@ -254,9 +256,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._POOL_STR)
@@ -273,9 +276,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._NETFLUX_STR)
@@ -768,9 +772,10 @@ class Simulation(Object):
 
         Returns
         -------
-        pool_solutions: DictList of mass.Solution objects
+        pool_solutions: mass.Solution, DictList of mass.Solution objects
             A DictList of mass.Solution object each containing the dict of
-            pool solutions.
+            pool solutions, or a single mass.Solution object if there is only
+            one model in the Simulation object.
 
         """
         group_ids = None
@@ -784,12 +789,14 @@ class Simulation(Object):
             pools = ensure_iterable(pools)
 
         sols = self.get_concentration_solutions()
-
+        if isinstance(sols, _msol.Solution):
+            sols = {sols.id.replace("_ConcSol", ""): sols}
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
 
         pool_solutions = self._create_group(sols, pools, parameters, group_ids,
                                             _msol._POOL_STR)
+
         return pool_solutions
 
     def make_netfluxes(self, netfluxes, parameters=None):
@@ -817,9 +824,10 @@ class Simulation(Object):
 
         Returns
         -------
-        netflux_solutions: DictList of mass.Solution objects
+        netflux_solutions: mass.Solution, DictList of mass.Solution objects
             A DictList of mass.Solution object each containing the dict of
-            pool solutions.
+            netflux solutions, or a single mass.Solution object if there is
+            only one model in the Simulation object.
 
         """
         group_ids = None
@@ -832,6 +840,9 @@ class Simulation(Object):
             netfluxes = ensure_iterable(netfluxes)
 
         sols = self.get_flux_solutions()
+        if isinstance(sols, _msol.Solution):
+            sols = {sols.id.replace("_FluxSol", ""): sols}
+
         if group_ids is None:
             group_ids = ["net{0}".format(str(i + 1))
                          for i in range(len(netfluxes))]
@@ -875,7 +886,6 @@ class Simulation(Object):
 
                 func = sym.lambdify(args=[sym.Symbol(arg) for arg in args],
                                     expr=expr, modules=_LAMBDIFY_MODULE)
-
                 values = np.array([sol[arg] for arg in args])
                 groups_sol_dict.update({g_id: func(*values)})
             group_sol = _msol.Solution(model_id, sol_type, groups_sol_dict,
@@ -888,6 +898,9 @@ class Simulation(Object):
             group_solutions.add(group_sol)
 
         self._update_solution_storage(group_solutions)
+
+        if len(group_solutions) == 1:
+            group_solutions = group_solutions[0]
 
         return group_solutions
 
@@ -926,8 +939,11 @@ class Simulation(Object):
                               .format(sol_type, model.id))
                 models.remove(model)
 
-        solutions_dict = {model.id: sol for model, sol in zip(models, sols)}
-        return solutions_dict
+        solutions = {model.id: sol for model, sol in zip(models, sols)}
+        if len(solutions) == 1:
+            return solutions[models[0].id]
+        else:
+            return solutions
 
     def _check_for_one_model(self, model, verbose=False):
         """Determine whether model is present in the Simulation object.
