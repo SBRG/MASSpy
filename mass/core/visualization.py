@@ -108,7 +108,6 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
     for label, sol in iteritems(observable_solutions):
         plot_function(time, sol, label=label)
         default_labels += [label]
-
     # Set axis options which include labels, limits, and gridlines.
     _set_axis_options(ax, options)
     # Set line colors and styles if no cycler provided.
@@ -829,6 +828,7 @@ def _set_axis_legend(ax, legend, default_labels, options):
     font = options["default_legend_fontsize"]
     loc = options["default_legend_loc"]
     ncol = options["default_legend_ncol"]
+    legend = [legend] if isinstance(legend, string_types) else legend
     legend = list(v if isinstance(v, string_types) else list(v)
                   for v in legend)
     # Parse through legend input if provided as a tuple.
