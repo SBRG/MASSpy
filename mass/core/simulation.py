@@ -875,7 +875,7 @@ class Simulation(Object):
                 args = sorted([arg for arg in items if arg in group])
                 local_syms = {str(arg): sym.Symbol(arg) for arg in args}
                 if parameters is not None:
-                    local_syms.update({str(param): param
+                    local_syms.update({str(param): sym.Symbol(param)
                                       for param in iterkeys(parameters)})
                 else:
                     parameters = {}
