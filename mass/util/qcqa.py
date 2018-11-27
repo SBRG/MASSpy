@@ -580,10 +580,12 @@ def check_reaction_parameters(model, simulation=None, tol=1e-9,
                                    or existing_parameters[param] is None]
             customs.update({rxn: "; ".join(missing_customs)})
         # Address reactions that are missing parameters
-        elif (len(rxn.parameters) < 2 and not count) or count[rxn.id] < 2:
+        elif (len(rxn.parameters) < 2 and not count) or \
+             (isinstance(count, dict) and count[rxn.id] < 2):
             missing.append(rxn)
         # Address reactions that have superfluous parameters
-        elif (len(rxn.parameters) > 2 and not count) or count[rxn.id] > 2:
+        elif (len(rxn.parameters) > 2 and not count) or \
+             (isinstance(count, dict) and count[rxn.id] > 2):
             superfluous.append(rxn)
         # Only two reaction parameters exist, no consistency check required
         else:

@@ -116,6 +116,8 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
 
     # Set the legend
     if legend is not None:
+        # Filter out any leading underscores in default labels
+        default_labels = [s if s[0] != "_" else s[1:] for s in default_labels]
         _set_axis_legend(ax, legend, default_labels, options)
 
     return ax
@@ -660,7 +662,6 @@ def _fmt_solution_and_time_input(solution, time):
     """
     # Copy the solution object to prevent modifications to the original
     solution = solution.copy()
-
     # Use time stored in Solution if None provided
     if time is None:
         time = solution.t
@@ -673,11 +674,9 @@ def _fmt_solution_and_time_input(solution, time):
     # Use the array of time points provided
     elif isinstance(time, Iterable) and not isinstance(time, string_types):
         time = np.array(sorted(time))
-
     # If time input is not recognized, then raise an error
     else:
         raise TypeError("Unrecognized 'time' input")
-
     return solution, time
 
 

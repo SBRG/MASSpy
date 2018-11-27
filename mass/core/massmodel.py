@@ -1523,7 +1523,7 @@ class MassModel(Object):
                 if str(symbol) in steady_state_concentrations:
                     values[symbol] = steady_state_concentrations[str(symbol)]
                 elif str(symbol) in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]:
-                    if str(symbol) is rxn.kf_str:
+                    if str(symbol) == rxn.kf_str:
                         perc = symbol
                     else:
                         values[symbol] = rxn.parameters[str(symbol)]

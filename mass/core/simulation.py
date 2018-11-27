@@ -77,7 +77,7 @@ _custom_re = re.compile("custom")
 _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
-_ZERO_TOL = 1e-6
+_ZERO_TOL = 1e-9
 # Define default option dicts for solvers
 _scipy_default_options = _msol._DictWithID(
         id="scipy", dictionary={
@@ -870,6 +870,8 @@ class Simulation(Object):
                 sol.interpolate = False
             groups_id_dict = dict(zip(new_ids, to_create))
             for g_id, group in iteritems(groups_id_dict):
+                if isinstance(group, sym.Basic):
+                    group = str(strip_time(group))
                 args = sorted([arg for arg in items if arg in group])
                 local_syms = {str(arg): sym.Symbol(arg) for arg in args}
                 if parameters is not None:
@@ -1364,8 +1366,7 @@ class Simulation(Object):
             parameters, ics = self._apply_perturbations(model, perts)
         # Just get value substituion dicts if no perturbations provided.
         else:
-            parameters = self.get_model_parameter_values(model)
-            ics = self.get_model_ic_values(model)
+            parameters, ics = self.view_model_values(model)
 
         ordered_ics = OrderedDict()
         equations = OrderedDict()
@@ -1377,7 +1378,7 @@ class Simulation(Object):
 
         args = strip_time(list(iterkeys(equations)))
         lambda_eqs = sym.lambdify(args, strip_time(itervalues(equations)),
-                                  module=_LAMBDIFY_MODULE)
+                                  modules=_LAMBDIFY_MODULE)
 
         # Make lambda function callable
         def root_func(ics):
