@@ -7,9 +7,9 @@ from cobra.core.metabolite import Metabolite
 from cobra.core.model import Model
 from cobra.core.reaction import Reaction
 
-from mass.core import massmetabolite
-from mass.core import massmodel
-from mass.core import massreaction
+from mass.core.massmetabolite import MassMetabolite
+from mass.core.massmodel import MassModel
+from mass.core.massreaction import MassReaction
 
 from six import iteritems, string_types
 
@@ -37,9 +37,9 @@ def convert_mass_to_cobra(object, prefix=None):
     and all other fields will initialize to default values.
 
     """
-    conversion_dict = {massmetabolite.MassMetabolite: mass_to_cobra_metabolite,
-                       massreaction.MassReaction: mass_to_cobra_reaction,
-                       massmodel.MassModel: mass_to_cobra_model}
+    conversion_dict = {MassMetabolite: mass_to_cobra_metabolite,
+                       MassReaction: mass_to_cobra_reaction,
+                       MassModel: mass_to_cobra_model}
 
     if type(object) not in conversion_dict:
         raise TypeError("object must be a mass object")
@@ -104,8 +104,7 @@ def mass_to_cobra_metabolite(metabolite, prefix=None):
     and all other fields will initialize to default values.
 
     """
-    return _convert_metabolite(metabolite, Metabolite,
-                               massmetabolite.MassMetabolite, prefix)
+    return _convert_metabolite(metabolite, Metabolite, MassMetabolite, prefix)
 
 
 def cobra_to_mass_metabolite(metabolite, prefix=None):
@@ -130,8 +129,7 @@ def cobra_to_mass_metabolite(metabolite, prefix=None):
     and all other fields will initialize to default values.
 
     """
-    return _convert_metabolite(metabolite, massmetabolite.MassMetabolite,
-                               Metabolite, prefix)
+    return _convert_metabolite(metabolite, MassMetabolite, Metabolite, prefix)
 
 
 def mass_to_cobra_reaction(reaction, prefix=None, convert_metabolites=True,
@@ -162,8 +160,7 @@ def mass_to_cobra_reaction(reaction, prefix=None, convert_metabolites=True,
     and all other fields will initialize to default values.
 
     """
-    new_reaction = _convert_reaction(reaction, Reaction,
-                                     massreaction.MassReaction, prefix)
+    new_reaction = _convert_reaction(reaction, Reaction, MassReaction, prefix)
     if lower_bound is not None:
         new_reaction.lower_bound = lower_bound
     if upper_bound is not None:
@@ -206,8 +203,7 @@ def cobra_to_mass_reaction(reaction, prefix=None, convert_metabolites=True,
     and all other fields will initialize to default values.
 
     """
-    new_reaction = _convert_reaction(reaction, massreaction.MassReaction,
-                                     Reaction, prefix)
+    new_reaction = _convert_reaction(reaction, MassReaction, Reaction, prefix)
     if kinetic_reversibility is not None:
         new_reaction.reversible = kinetic_reversibility
 
@@ -241,7 +237,7 @@ def mass_to_cobra_model(model, prefix=None):
     and all other fields will initialize to default values.
 
     """
-    new_model = _convert_model(model, Model, massmodel.MassModel, prefix)
+    new_model = _convert_model(model, Model, MassModel, prefix)
     # Add converted reactions and their converted metabolites
     new_reactions = [mass_to_cobra_reaction(rxn, prefix=prefix)
                      for rxn in model.reactions]
@@ -274,7 +270,7 @@ def cobra_to_mass_model(model, prefix=None):
     and all other fields will initialize to default values.
 
     """
-    new_model = _convert_model(model, massmodel.MassModel, Model, prefix)
+    new_model = _convert_model(model, MassModel, Model, prefix)
     # Add converted reactions and their converted metabolites
     new_reactions = [cobra_to_mass_reaction(rxn, prefix=prefix)
                      for rxn in model.reactions]

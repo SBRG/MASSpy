@@ -12,9 +12,9 @@ from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 from cobra.util.context import HistoryManager, get_context
 
-from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
+from mass.util import expressions
 from mass.util.util import (_get_matrix_constructor, convert_matrix,
                             ensure_iterable, strip_time)
 
