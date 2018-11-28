@@ -83,7 +83,8 @@ class Solution(_DictWithID):
     ----------
     id_or_model: str, MassModel
         A string identifier or a MassModel to associate with the solution. If
-        a MassModel, the MassModel identifier will be used.
+        a MassModel, the MassModel identifier will be used, and a reference to
+        the model is stored.
     solution_type: str
         The type of solution being stored. Can be one of the following:
         {"concentration", "flux"}
@@ -105,7 +106,10 @@ class Solution(_DictWithID):
             raise ValueError("'{0}' is not a valid solution type."
                              .format(solution_type))
         if isinstance(id_or_model, MassModel):
+            self._model = id_or_model
             id_or_model = id_or_model.id
+        else:
+            self._model = None
 
         id_or_model = "{0}_{1}Sol".format(id_or_model, solution_type)
 
@@ -191,6 +195,11 @@ class Solution(_DictWithID):
                     self[key] = sol(self.t)
 
         self._interpolate = value
+
+    @property
+    def model(self):
+        """Return the model used in creating the Solution if one was used."""
+        return getattr(self, "_model", None)
 
     def copy(self):
         """Copy a Solution object."""

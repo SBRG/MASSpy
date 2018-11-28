@@ -8,6 +8,7 @@ from warnings import warn
 
 from cycler import Cycler
 
+from mass.analysis import linear
 from mass.util.util import ensure_iterable
 
 import matplotlib as mpl
@@ -18,7 +19,7 @@ import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-_ZERO_TOL = 1e-9
+_ZERO_TOL = 1e-8
 _FONTSIZES = [
     'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
 _LEGEND_LOCS = [
@@ -667,10 +668,7 @@ def _fmt_solution_and_time_input(solution, time):
         time = solution.t
     # Create an array of time points to use if time bounds provided.
     elif len(time) == 2:
-        # TODO Find a better method of determining numpoints to use.
-        if abs(time[0]) < _ZERO_TOL:
-            time = (_ZERO_TOL, time[-1])
-        time = np.geomspace(time[0], time[1], solution.numpoints)
+        time = _make_time_vector(solution, time)
     # Use the array of time points provided
     elif isinstance(time, Iterable) and not isinstance(time, string_types):
         time = np.array(sorted(time))
@@ -1254,3 +1252,29 @@ def _filter_lines(ax, to_return="lines"):
         return [l for l in ax.get_lines() if "t=" != l.get_label()[:2]]
     else:
         return [l for l in ax.get_lines() if "t=" == l.get_label()[:2]]
+
+
+def _make_time_vector(solution, time):
+    """Create a time array using the model timescales and given time bounds.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    J = linear.jacobian(solution.model)
+    rank = linear.matrix_rank(J)
+    timescales = np.real_if_close(-1/np.sort(linear.eig(J))[:rank])
+
+    min_ts = min([ts for ts in timescales if ts >= time[0]])
+    max_ts = max([ts for ts in timescales if ts <= time[-1]])
+    end = max(time[-1], max_ts)
+    if time[0] == 0:
+        start = min_ts/100
+        t_vec = np.concatenate([[0], np.geomspace(start, end,
+                                                  solution.numpoints)])
+    else:
+        start = min(time[0], min_ts)
+        t_vec = np.geomspace(start, end, solution.numpoints)
+
+    return t_vec

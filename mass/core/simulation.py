@@ -77,7 +77,7 @@ _custom_re = re.compile("custom")
 _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
-_ZERO_TOL = 1e-9
+_ZERO_TOL = 1e-8
 # Define default option dicts for solvers
 _scipy_default_options = _msol._DictWithID(
         id="scipy", dictionary={
@@ -473,13 +473,15 @@ class Simulation(Object):
             # Setup ODEs for integration
             [odes, jacb, ics] = self._make_odes_functions(model, parameters,
                                                           ics, functions)
-            # Integrate ODEs to obtain concentration solutions, Model id passed
-            # in order to provide the id for the Solution object inside.
-            conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
-                                                     ics, options, model.id)
+            # Integrate ODEs to obtain concentration solutions
+            t, conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
+                                                        ics, options)
+            # Create Solution object for concentrations
+            conc_sol = _msol.Solution(model, _msol._CONC_STR, conc_sol, t)
+
             # Calculate flux solutions using the concentration solutions
             flux_sol = self._calculate_flux_solutions(model, parameters,
-                                                      conc_sol, conc_sol.t)
+                                                      conc_sol, t)
 
             # Turn solutions into interpolating functions if desired
             if interpolate:
@@ -862,7 +864,7 @@ class Simulation(Object):
 
         """
         group_solutions = DictList()
-        for model_id, sol in iteritems(sols):
+        for sol in itervalues(sols):
             groups_sol_dict = {}
             items = [key for key in iterkeys(sol)]
             interpolate = sol.interpolate
@@ -890,7 +892,7 @@ class Simulation(Object):
                                     expr=expr, modules=_LAMBDIFY_MODULE)
                 values = np.array([sol[arg] for arg in args])
                 groups_sol_dict.update({g_id: func(*values)})
-            group_sol = _msol.Solution(model_id, sol_type, groups_sol_dict,
+            group_sol = _msol.Solution(sol.model, sol_type, groups_sol_dict,
                                        sol.t)
             group_sol._groups = groups_id_dict
             if interpolate:
@@ -1228,7 +1230,7 @@ class Simulation(Object):
 
         return [lambda_odes, lambda_jacb, ordered_ics]
 
-    def _integrate_odes(self, time, odes, jacb, ics, new_options, id_str):
+    def _integrate_odes(self, time, odes, jacb, ics, new_options):
         """Integrate the ODEs using the set solver and its options.
 
         Warnings
@@ -1247,9 +1249,8 @@ class Simulation(Object):
         # Map identifiers to their solutions, and store in a Solution object.
         id_list = strip_time(list(iterkeys(ics)))
         concs = {str(_id): sol for _id, sol in zip(id_list, concs)}
-        conc_sol = _msol.Solution(id_str, _msol._CONC_STR, concs, t)
 
-        return conc_sol, sol_obj
+        return t, concs, sol_obj
 
     def _calculate_flux_solutions(self, model, parameters, conc_sol, t):
         """Calculate fluxes using rate equations and concentrations solutions.
@@ -1330,7 +1331,7 @@ class Simulation(Object):
         """
         # Try simulating using a final time of 10^3 up to 10^6.
         power = 3
-        fail = 6
+        fail = 7
         while power <= fail:
             retry = False
             solutions = self.simulate_model(model, time=(0, 10**power),
@@ -1340,8 +1341,9 @@ class Simulation(Object):
                                             update_solutions=False)
             # Check to see if concentrations reached a steady state.
             for met, sol in iteritems(solutions[0]):
-                if not abs(sol[-1] - sol[-2]) <= _ZERO_TOL:
+                if not round(abs(sol[-1] - sol[-2]), chop) <= _ZERO_TOL:
                     retry = True
+                    break
             if not retry:
                 break
             power += 1
