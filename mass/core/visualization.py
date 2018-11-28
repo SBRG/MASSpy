@@ -314,8 +314,8 @@ def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
     # Create N x N subplots where N is the number of observable solutions
     ax.axis("off")
     s = (1/N)
-    for i, y in enumerate(observable_solutions):
-        for j, x in enumerate(observable_solutions):
+    for i, x in enumerate(observable_solutions):
+        for j, y in enumerate(observable_solutions):
             subax = ax.inset_axes(bounds=[i*s, 1-s*(j+1), s, s])
             plot_args = [solution, x, y, time, subax, time_poi]
             data_args = [i, j, display_data, empty_tiles]
@@ -324,9 +324,9 @@ def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
             subax.set_xticks([])
             subax.set_yticks([])
             if j == N - 1:
-                subax.set_xlabel(y, fontdict={"size": fontsize})
+                subax.set_xlabel(x, fontdict={"size": fontsize})
             if i == 0:
-                subax.set_ylabel(x, fontdict={"size": fontsize})
+                subax.set_ylabel(y, fontdict={"size": fontsize})
             _place_tile(i, j, options, plot_args, data_args)
 
     if poi_labels:
