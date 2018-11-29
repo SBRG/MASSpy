@@ -14,7 +14,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import iteritems
+from six import iteritems, string_types
 
 import sympy as sym
 
@@ -74,7 +74,8 @@ def ensure_iterable(list_to_check):
     # Make metabolite_list iterable if necessary
     if list_to_check is None:
         list_to_check = list()
-    if not hasattr(list_to_check, "__iter__"):
+    if not hasattr(list_to_check, "__iter__") or \
+       isinstance(list_to_check, string_types):
         list_to_check = [list_to_check]
 
     list_to_check = list(list_to_check)
