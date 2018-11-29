@@ -1158,12 +1158,10 @@ class MassModel(Object):
 
         """
         metabolite_list = ensure_iterable(metabolite_list)
-
-        for met in metabolite_list:
-            if met not in self.external_metabolites and \
-             met not in self.metabolites:
-                raise ValueError("Did not find {0} in model metabolites or in "
-                                 "exchange reactions.".format(met))
+        # Check whether a metabolite already exists in the model,
+        # ignoring those that do not.
+        metabolite_list = [met for met in metabolite_list
+                           if met in self.fixed_concentrations]
 
         # Keep track of existing concentrations for context management.
         context = get_context(self)
