@@ -211,11 +211,21 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
     if options["prop_cycle"] is not None:
         ax.set_prop_cycle(options["prop_cycle"])
 
+    def find_poi_bounds(poi_bounds, key, sol):
+        s_min, s_max = poi_bounds[key]
+        if (s_min, s_max) == (None, None):
+            s_min, s_max = (min(sol), max(sol))
+        else:
+            s_min, s_max = (min(s_min, min(sol)), max(s_max, max(sol)))
+        poi_bounds[key] = s_min, s_max
+
     # Use the plotting function to plot the observable data
     default_labels = []
-
+    poi_bounds = {"x": (None, None), "y": (None, None)}
     for x_label, x_sol in iteritems(x_sols):
+        find_poi_bounds(poi_bounds, "x", x_sol)
         for y_label, y_sol in iteritems(y_sols):
+            find_poi_bounds(poi_bounds, "y", y_sol)
             label = "{0} vs. {1}".format(x_label, y_label)
             plot_function(x_sol, y_sol, label=label)
             default_labels += [label]
@@ -232,7 +242,8 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
 
     endpoints = [time[0], time[-1]]
     _annotate_time_points_of_interest(ax, options["plot_function"], solution,
-                                      x, y, time_poi, endpoints, poi_labels)
+                                      x, y, time_poi, endpoints, poi_labels,
+                                      poi_bounds)
 
     return ax
 
@@ -886,6 +897,7 @@ def _validate_time_poi_input(time_poi, endpoints):
         poi_color = ["red", "blue"]
     # Seperate time points of interest and their corresponding colors
     elif isinstance(time_poi, dict):
+        time_poi = OrderedDict((k, time_poi[k]) for k in sorted(time_poi))
         poi_color = list(itervalues(time_poi))
         time_poi = list(iterkeys(time_poi))
     else:
@@ -895,7 +907,8 @@ def _validate_time_poi_input(time_poi, endpoints):
 
 
 def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
-                                      time_poi, endpoints, poi_labels):
+                                      time_poi, endpoints, poi_labels,
+                                      plot_bounds):
     """Annotate time "points of interest" for the given axis (Helper function).
 
     Warnings
@@ -910,11 +923,22 @@ def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
     x_pois = _set_plot_observables(solution, time_poi, x)
     y_pois = _set_plot_observables(solution, time_poi, y)
 
+    def poi_in_bounds(bounds, coord):
+        if bounds[0] <= coord and coord <= bounds[-1]:
+            return True
+        else:
+            return False
+
     for i, [t, c] in enumerate(zip(time_poi, poi_color)):
         for x_label, x_poi in iteritems(x_pois):
+            if not poi_in_bounds(plot_bounds["x"], x_poi[i]):
+                continue
             for y_label, y_poi in iteritems(y_pois):
+                if not poi_in_bounds(plot_bounds["y"], y_poi[i]):
+                    continue
                 xy = (x_poi[i], y_poi[i])
                 label = "t={0}".format(t)
+
                 plot_function(*xy, label=label, color=c,
                               marker="o", linestyle="")
                 if poi_labels:
