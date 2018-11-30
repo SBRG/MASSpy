@@ -53,7 +53,7 @@ from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
 from mass.exceptions import MassSimulationError
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
-from mass.util.util import ensure_iterable, strip_time
+from mass.util.util import _GLOBAL_ZERO_TOL, ensure_iterable, strip_time
 
 import numpy as np
 
@@ -65,6 +65,7 @@ from six import iteritems, iterkeys, itervalues, string_types
 import sympy as sym
 
 
+_ZERO_TOL = _GLOBAL_ZERO_TOL
 # Pre-compiled regular expressions for perturbations
 _kf_re = re.compile("forward_rate_constant|kf")
 _Keq_re = re.compile("equilibrium_constant|Keq")
@@ -77,7 +78,6 @@ _custom_re = re.compile("custom")
 _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
-_ZERO_TOL = 1e-8
 # Define default option dicts for solvers
 _scipy_default_options = _msol._DictWithID(
         id="scipy", dictionary={

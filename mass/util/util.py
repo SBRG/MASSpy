@@ -19,6 +19,7 @@ from six import iteritems, string_types
 import sympy as sym
 
 _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
+_GLOBAL_ZERO_TOL = 1e-8
 
 
 # Public
