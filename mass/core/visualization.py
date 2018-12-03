@@ -8,8 +8,9 @@ from warnings import warn
 
 from cycler import Cycler
 
+from mass import config as _config
 from mass.analysis import linear
-from mass.util.util import _GLOBAL_ZERO_TOL, ensure_iterable
+from mass.util.util import ensure_iterable
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-_ZERO_TOL = _GLOBAL_ZERO_TOL
+_ZERO_TOL = _config.ZERO_TOLERANCE
 _FONTSIZES = [
     'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
 _LEGEND_LOCS = [

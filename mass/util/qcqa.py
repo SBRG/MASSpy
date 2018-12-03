@@ -6,6 +6,7 @@ import warnings
 from collections import Counter
 from math import ceil, floor
 
+from mass import config as _config
 from mass.util.util import ensure_iterable
 
 from six import iteritems, iterkeys
@@ -16,11 +17,12 @@ from tabulate import tabulate
 
 # Global
 _T_SYM = sym.Symbol("t")
+_ZERO_TOL = _config.ZERO_TOLERANCE
 
 
 def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
                superfluous=False, elemental=False, thermodynamic=False,
-               tol=1e-9):
+               tol=None):
     """Check the model quality and print a summary of the results.
 
     Checking the model quality involves running a series of quality control and
@@ -49,9 +51,11 @@ def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
         If True, then check for thermodynamic consistency in the model.
         Exchange reactions are ignored.
     tol: float, optional
-        The tolerance used in consistency checking.
+        The tolerance used in consistency checking. If None provided, the
+        global zero tolerance is used.
 
     """
+    tol = _set_tolerance(tol)
     # Set up empty lists for storing QC/QA report items.
     table_items = [[], [], []]
     # Get missing parameters
@@ -80,7 +84,7 @@ def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
 
 
 def qcqa_simulation(simulation, model, parameters=False, concentrations=False,
-                    superfluous=False, thermodynamic=False, tol=1e-9):
+                    superfluous=False, thermodynamic=False, tol=None):
     """Check the Simulation quality and print a summary of the results.
 
     Checking the Simulation quality involves running a series of quality
@@ -108,9 +112,11 @@ def qcqa_simulation(simulation, model, parameters=False, concentrations=False,
         If True, then check for thermodynamic consistency in the model.
         Exchange reactions are ignored.
     tol: float, optional
-        The tolerance used in consistency checking.
+        The tolerance used in consistency checking. If None provided, the
+        global zero tolerance is used.
 
     """
+    tol = _set_tolerance(tol)
     # Set up empty lists for storing QC/QA report items.
     table_items = [[], [], []]
     # Get missing parameters
@@ -325,11 +331,6 @@ def get_missing_initial_conditions(model, simulation=None,
         metabolite_list = model.metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
-    # missing = [met for met in metabolite_list
-    #            if met not in model.initial_conditions
-    #            and met not in model.fixed_concentrations
-    #            or model.initial_conditions[met] is None]
-
     # Filter out fixed concentration metabolites
     missing = [met for met in metabolite_list
                if met not in model.fixed_concentrations]
@@ -373,11 +374,6 @@ def get_missing_fixed_concentrations(model, simulation=None,
         metabolite_list = model.external_metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
-    # missing = [met for met in metabolite_list
-    #            if met not in model.fixed_concentrations
-    #            and met not in model.initial_conditions
-    #            or model.fixed_concentrations[met] is None]
-
     # Filter out initial concentrations
     missing = [met for met in metabolite_list
                if met not in model.initial_conditions]
@@ -394,7 +390,7 @@ def get_missing_fixed_concentrations(model, simulation=None,
     return missing
 
 
-def check_superfluous_consistency(model, simulation=None, tol=1e-9,
+def check_superfluous_consistency(model, simulation=None, tol=None,
                                   reaction_list=None):
     """Check parameters of model reactions to ensure numerical consistentency.
 
@@ -409,7 +405,8 @@ def check_superfluous_consistency(model, simulation=None, tol=1e-9,
         The MassModel to inspect
     tol: float, optional
         The tolerance for parameter consistency. Parameters are considered
-        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
+        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol. If None provided, the
+        global zero tolerance is used.
     reaction_list: list of mass.MassReaction, optional
         A list of mass.MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
@@ -426,6 +423,7 @@ def check_superfluous_consistency(model, simulation=None, tol=1e-9,
     qcqa_model
 
     """
+    tol = _set_tolerance(tol)
     if simulation is not None:
         existing = simulation.view_parameter_values(model)[model.id]
 
@@ -492,7 +490,7 @@ def check_elemental_consistency(model, reaction_list=None):
     return inconsistent
 
 
-def check_thermodynamic_consistency(model, tol=1e-9, reaction_list=None):
+def check_thermodynamic_consistency(model, tol=None, reaction_list=None):
     """Check the model reactions for thermodynamic consistency.
 
     Parameters
@@ -501,7 +499,8 @@ def check_thermodynamic_consistency(model, tol=1e-9, reaction_list=None):
         The MassModel to inspect
     tol: float, optional
         The tolerance for parameter consistency. Parameters are considered
-        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol.
+        consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol. If None provided, the
+        global zero tolerance is used.
     reaction_list: list of mass.MassReaction, optional
         A list of mass.MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
@@ -518,6 +517,7 @@ def check_thermodynamic_consistency(model, tol=1e-9, reaction_list=None):
     qcqa_model
 
     """
+    tol = _set_tolerance(tol)
     if reaction_list is None:
         reaction_list = model.reactions
     reaction_list = ensure_iterable(reaction_list)
@@ -528,7 +528,7 @@ def check_thermodynamic_consistency(model, tol=1e-9, reaction_list=None):
     return inconsistent
 
 
-def check_reaction_parameters(model, simulation=None, tol=1e-9,
+def check_reaction_parameters(model, simulation=None, tol=None,
                               reaction_list=None):
     """Check the model reactions for missing and superfluous parameters.
 
@@ -555,6 +555,7 @@ def check_reaction_parameters(model, simulation=None, tol=1e-9,
     qcqa_model
 
     """
+    tol = _set_tolerance(tol)
     if reaction_list is None:
         reaction_list = model.reactions
     reaction_list = ensure_iterable(reaction_list)
@@ -868,3 +869,19 @@ def _is_consistent(kf, Keq, kr, tol):
 
     """
     return "Consistent" if (abs(kr - kf/Keq) <= tol) else "Inconsistent"
+
+
+def _set_tolerance(tol):
+    """Check value type and return the value for the zero tolerance.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if tol is None:
+        return _ZERO_TOL
+    elif not isinstance(tol, float):
+        raise TypeError("tol must be a float")
+    else:
+        return tol

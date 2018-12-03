@@ -49,11 +49,12 @@ from math import log10
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
+from mass import config as _config
 from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
 from mass.exceptions import MassSimulationError
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
-from mass.util.util import _GLOBAL_ZERO_TOL, ensure_iterable, strip_time
+from mass.util.util import ensure_iterable, strip_time
 
 import numpy as np
 
@@ -65,7 +66,7 @@ from six import iteritems, iterkeys, itervalues, string_types
 import sympy as sym
 
 
-_ZERO_TOL = _GLOBAL_ZERO_TOL
+_ZERO_TOL = _config.ZERO_TOLERANCE
 # Pre-compiled regular expressions for perturbations
 _kf_re = re.compile("forward_rate_constant|kf")
 _Keq_re = re.compile("equilibrium_constant|Keq")

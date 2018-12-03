@@ -19,7 +19,6 @@ from six import iteritems, string_types
 import sympy as sym
 
 _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
-_GLOBAL_ZERO_TOL = 1e-8
 
 
 # Public
@@ -115,11 +114,6 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
     conversion_method_dict = dict(zip(
         _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil,  _to_dense, _to_dense]))
 
-    # try:
-    #     matrix = conversion_method_dict[matrix_type](matrix)
-    # except TypeError:
-    #     warnings.warn("Could not cast matrix as the given matrix_type.")
-    #     return matrix
     try:
         matrix = conversion_method_dict[matrix_type](matrix)
         # Convert the dtype
