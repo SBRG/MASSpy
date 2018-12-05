@@ -513,9 +513,7 @@ def get_defaults(plot_type):
     # Update dict for tiled specific options
     elif plot_type is "tiled":
         options.update({
-            "figsize": (8., 8.),
             "fontsize": "large",
-            "empty_tiles": "upper",
             "diag_color": "black",
             "data_color": "lightgray",
             "none_color": "white",
@@ -1014,7 +1012,6 @@ def _update_kwargs(plot_type, **kwargs):
             "default_legend_fontsize": _update_legend_properties,
             "default_legend_ncol": _update_legend_properties,
             "fontsize": _update_tiles,
-            "empty_tiles": _update_tiles,
             "diag_color": _update_tiles,
             "data_color": _update_tiles,
             "none_color": _update_tiles,
@@ -1221,16 +1218,13 @@ def _get_legend_properties(options, loc, ncol, n_items):
 
 
 def _update_tiles(options, key, value):
-    """Validate kwargs for plot placement and tile color (Helper function).
+    """Validate kwargs for tile color and fontsize (Helper function).
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    if key is "empty_tiles" is not None and value not in {"lower", "upper"}:
-        raise ValueError(key + "must be either 'lower', 'upper', or None.")
-
     if "_color" in key and not mpl.colors.is_color_like(value):
         raise ValueError("Invalid color input: " + str(value))
 
@@ -1250,6 +1244,8 @@ def _fmt_empty_tiles(display_data, empty_tiles, N):
     This method is intended for internal use only.
 
     """
+    if empty_tiles is not None and empty_tiles not in {"lower", "upper"}:
+        raise ValueError("empty_tiles must be 'lower', 'upper', or None.")
     if display_data is not None:
         # Ensure data is a numpy array and of N x N dimensions
         if not isinstance(display_data, np.ndarray):
