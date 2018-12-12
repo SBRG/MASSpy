@@ -2,10 +2,11 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-from copy import copy, deepcopy
 import re
+from copy import copy
 
 from mass.core.massmodel import MassModel
+from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
 
 import pandas as pd
 
@@ -83,11 +84,24 @@ class Solution(_DictWithID):
     ----------
     id_or_model: str, MassModel
         A string identifier or a MassModel to associate with the solution. If
-        a MassModel, the MassModel identifier will be used.
+        a MassModel, the MassModel identifier will be used, and a reference to
+        the model is stored.
     solution_type: str
         The type of solution being stored. Can be one of the following:
         {"concentration", "flux"}
-
+    solution_dictionary: dict, optional
+        A dict containing the solutions to store in the Solution object. If
+        None provided then the Solution object will be initialized with no
+        solutions. Solutions can be added or changed later using various dict
+        methods (i.e. Solution.update(solution_dictionary))
+    time: array-like, optional
+        An array-like object containing the time points used in calculating the
+        solutions to be stored.
+    interpolate: bool, optional
+        A bool indicating whether solutions should be stored as interpolating
+        functions. If True, solutions are stored as scipy.interpolate.interp1d
+        objects. If False, solutions are stored as numpy arrays. Default value
+        is False.
 
     Notes
     -----
@@ -104,8 +118,14 @@ class Solution(_DictWithID):
         if True not in valid_check:
             raise ValueError("'{0}' is not a valid solution type."
                              .format(solution_type))
+        if not isinstance(interpolate, bool):
+            raise TypeError("interpolate must be a bool")
+
         if isinstance(id_or_model, MassModel):
+            self._model = id_or_model
             id_or_model = id_or_model.id
+        else:
+            self._model = None
 
         id_or_model = "{0}_{1}Sol".format(id_or_model, solution_type)
 
@@ -191,6 +211,31 @@ class Solution(_DictWithID):
                     self[key] = sol(self.t)
 
         self._interpolate = value
+
+    @property
+    def preview_time_profile(self):
+        """Generate a preview of the time profile for the solution."""
+        options = {"plot_function": "semilogx",
+                   "grid": ("major", "x"),
+                   "title": "Time Profile for " + self.id,
+                   "xlabel": "Time",
+                   "ylabel": (self.solution_type + "es"
+                              if self.solution_type[-1] == "x"
+                              else self.solution_type + "s")}
+
+        plot_simulation(self, legend="right outside", **options)
+
+    @property
+    def preview_phase_portraits(self):
+        """Generate a preview of the phase portraits for the solution."""
+        ax = plot_tiled_phase_portrait(self, empty_tiles=None,
+                                       title="Phase portraits for " + self.id)
+        ax.get_figure().set_size_inches((7, 7))
+
+    @property
+    def model(self):
+        """Return the model used in creating the Solution if one was used."""
+        return getattr(self, "_model", None)
 
     def copy(self):
         """Copy a Solution object."""

@@ -12,9 +12,9 @@ from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 from cobra.util.context import HistoryManager, get_context
 
-from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
+from mass.util import expressions
 from mass.util.util import (_get_matrix_constructor, convert_matrix,
                             ensure_iterable, strip_time)
 
@@ -1158,12 +1158,10 @@ class MassModel(Object):
 
         """
         metabolite_list = ensure_iterable(metabolite_list)
-
-        for met in metabolite_list:
-            if met not in self.external_metabolites and \
-             met not in self.metabolites:
-                raise ValueError("Did not find {0} in model metabolites or in "
-                                 "exchange reactions.".format(met))
+        # Check whether a metabolite already exists in the model,
+        # ignoring those that do not.
+        metabolite_list = [met for met in metabolite_list
+                           if met in self.fixed_concentrations]
 
         # Keep track of existing concentrations for context management.
         context = get_context(self)
@@ -1523,7 +1521,7 @@ class MassModel(Object):
                 if str(symbol) in steady_state_concentrations:
                     values[symbol] = steady_state_concentrations[str(symbol)]
                 elif str(symbol) in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]:
-                    if str(symbol) is rxn.kf_str:
+                    if str(symbol) == rxn.kf_str:
                         perc = symbol
                     else:
                         values[symbol] = rxn.parameters[str(symbol)]

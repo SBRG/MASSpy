@@ -13,8 +13,8 @@ from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
 from cobra.util.context import get_context
 
-from mass.core import expressions
 from mass.core.massmetabolite import MassMetabolite
+from mass.util import expressions
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 

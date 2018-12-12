@@ -7,7 +7,7 @@ from warnings import warn
 
 from cobra.core.species import Species
 
-from mass.core import expressions
+from mass.util import expressions
 
 from six import integer_types, string_types
 

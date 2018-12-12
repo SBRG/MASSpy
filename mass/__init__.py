@@ -10,14 +10,15 @@ from os.path import dirname as _dirname
 
 from mass import (analysis, io)
 from mass.core import (
-    MassMetabolite, MassModel, MassReaction, Simulation, get_defaults,
-    make_display_data, plot_phase_portrait, plot_simulation,
-    plot_tiled_phase_portrait, set_defaults)
+    convert_cobra_to_mass, convert_mass_to_cobra, MassMetabolite, MassModel,
+    MassReaction, Simulation, get_defaults, make_display_data,
+    plot_phase_portrait, plot_simulation, plot_tiled_phase_portrait,
+    set_defaults)
 
-from mass.util.qcqa import qcqa_model, qcqa_simulation
-from mass.util.util import show_versions, strip_time
+from mass.util import (
+    is_simulatable, qcqa_model, qcqa_simulation, show_versions, strip_time)
 
-__version__ = "0.1.0a25"
+__version__ = "0.1.0a26"
 
 # set the warning format to be prettier and fit on one line
 _mass_path = _dirname(_abspath(__file__))

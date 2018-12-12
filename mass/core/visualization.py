@@ -8,6 +8,8 @@ from warnings import warn
 
 from cycler import Cycler
 
+from mass import config as _config
+from mass.analysis import linear
 from mass.util.util import ensure_iterable
 
 import matplotlib as mpl
@@ -18,7 +20,7 @@ import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-_ZERO_TOL = 1e-9
+_ZERO_TOL = _config.ZERO_TOLERANCE
 _FONTSIZES = [
     'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
 _LEGEND_LOCS = [
@@ -108,7 +110,6 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
     for label, sol in iteritems(observable_solutions):
         plot_function(time, sol, label=label)
         default_labels += [label]
-
     # Set axis options which include labels, limits, and gridlines.
     _set_axis_options(ax, options)
     # Set line colors and styles if no cycler provided.
@@ -117,6 +118,8 @@ def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
 
     # Set the legend
     if legend is not None:
+        # Filter out any leading underscores in default labels
+        default_labels = [s if s[0] != "_" else s[1:] for s in default_labels]
         _set_axis_legend(ax, legend, default_labels, options)
 
     return ax
@@ -209,11 +212,21 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
     if options["prop_cycle"] is not None:
         ax.set_prop_cycle(options["prop_cycle"])
 
+    def find_poi_bounds(poi_bounds, key, sol):
+        s_min, s_max = poi_bounds[key]
+        if (s_min, s_max) == (None, None):
+            s_min, s_max = (min(sol), max(sol))
+        else:
+            s_min, s_max = (min(s_min, min(sol)), max(s_max, max(sol)))
+        poi_bounds[key] = s_min, s_max
+
     # Use the plotting function to plot the observable data
     default_labels = []
-
+    poi_bounds = {"x": (None, None), "y": (None, None)}
     for x_label, x_sol in iteritems(x_sols):
+        find_poi_bounds(poi_bounds, "x", x_sol)
         for y_label, y_sol in iteritems(y_sols):
+            find_poi_bounds(poi_bounds, "y", y_sol)
             label = "{0} vs. {1}".format(x_label, y_label)
             plot_function(x_sol, y_sol, label=label)
             default_labels += [label]
@@ -230,7 +243,8 @@ def plot_phase_portrait(solution, x, y, time=None, ax=None, legend=None,
 
     endpoints = [time[0], time[-1]]
     _annotate_time_points_of_interest(ax, options["plot_function"], solution,
-                                      x, y, time_poi, endpoints, poi_labels)
+                                      x, y, time_poi, endpoints, poi_labels,
+                                      poi_bounds)
 
     return ax
 
@@ -313,8 +327,8 @@ def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
     # Create N x N subplots where N is the number of observable solutions
     ax.axis("off")
     s = (1/N)
-    for i, y in enumerate(observable_solutions):
-        for j, x in enumerate(observable_solutions):
+    for i, x in enumerate(observable_solutions):
+        for j, y in enumerate(observable_solutions):
             subax = ax.inset_axes(bounds=[i*s, 1-s*(j+1), s, s])
             plot_args = [solution, x, y, time, subax, time_poi]
             data_args = [i, j, display_data, empty_tiles]
@@ -323,9 +337,9 @@ def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
             subax.set_xticks([])
             subax.set_yticks([])
             if j == N - 1:
-                subax.set_xlabel(y, fontdict={"size": fontsize})
+                subax.set_xlabel(x, fontdict={"size": fontsize})
             if i == 0:
-                subax.set_ylabel(x, fontdict={"size": fontsize})
+                subax.set_ylabel(y, fontdict={"size": fontsize})
             _place_tile(i, j, options, plot_args, data_args)
 
     if poi_labels:
@@ -499,9 +513,7 @@ def get_defaults(plot_type):
     # Update dict for tiled specific options
     elif plot_type is "tiled":
         options.update({
-            "figsize": (8., 8.),
             "fontsize": "large",
-            "empty_tiles": "upper",
             "diag_color": "black",
             "data_color": "lightgray",
             "none_color": "white",
@@ -661,24 +673,18 @@ def _fmt_solution_and_time_input(solution, time):
     """
     # Copy the solution object to prevent modifications to the original
     solution = solution.copy()
-
     # Use time stored in Solution if None provided
     if time is None:
         time = solution.t
     # Create an array of time points to use if time bounds provided.
     elif len(time) == 2:
-        # TODO Find a better method of determining numpoints to use.
-        if abs(time[0]) < _ZERO_TOL:
-            time = (_ZERO_TOL, time[-1])
-        time = np.geomspace(time[0], time[1], solution.numpoints)
+        time = _make_time_vector(solution, time)
     # Use the array of time points provided
     elif isinstance(time, Iterable) and not isinstance(time, string_types):
         time = np.array(sorted(time))
-
     # If time input is not recognized, then raise an error
     else:
         raise TypeError("Unrecognized 'time' input")
-
     return solution, time
 
 
@@ -829,6 +835,7 @@ def _set_axis_legend(ax, legend, default_labels, options):
     font = options["default_legend_fontsize"]
     loc = options["default_legend_loc"]
     ncol = options["default_legend_ncol"]
+    legend = [legend] if isinstance(legend, string_types) else legend
     legend = list(v if isinstance(v, string_types) else list(v)
                   for v in legend)
     # Parse through legend input if provided as a tuple.
@@ -889,6 +896,7 @@ def _validate_time_poi_input(time_poi, endpoints):
         poi_color = ["red", "blue"]
     # Seperate time points of interest and their corresponding colors
     elif isinstance(time_poi, dict):
+        time_poi = OrderedDict((k, time_poi[k]) for k in sorted(time_poi))
         poi_color = list(itervalues(time_poi))
         time_poi = list(iterkeys(time_poi))
     else:
@@ -898,7 +906,8 @@ def _validate_time_poi_input(time_poi, endpoints):
 
 
 def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
-                                      time_poi, endpoints, poi_labels):
+                                      time_poi, endpoints, poi_labels,
+                                      plot_bounds):
     """Annotate time "points of interest" for the given axis (Helper function).
 
     Warnings
@@ -913,11 +922,22 @@ def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
     x_pois = _set_plot_observables(solution, time_poi, x)
     y_pois = _set_plot_observables(solution, time_poi, y)
 
+    def poi_in_bounds(bounds, coord):
+        if bounds[0] <= coord and coord <= bounds[-1]:
+            return True
+        else:
+            return False
+
     for i, [t, c] in enumerate(zip(time_poi, poi_color)):
         for x_label, x_poi in iteritems(x_pois):
+            if not poi_in_bounds(plot_bounds["x"], x_poi[i]):
+                continue
             for y_label, y_poi in iteritems(y_pois):
+                if not poi_in_bounds(plot_bounds["y"], y_poi[i]):
+                    continue
                 xy = (x_poi[i], y_poi[i])
                 label = "t={0}".format(t)
+
                 plot_function(*xy, label=label, color=c,
                               marker="o", linestyle="")
                 if poi_labels:
@@ -992,7 +1012,6 @@ def _update_kwargs(plot_type, **kwargs):
             "default_legend_fontsize": _update_legend_properties,
             "default_legend_ncol": _update_legend_properties,
             "fontsize": _update_tiles,
-            "empty_tiles": _update_tiles,
             "diag_color": _update_tiles,
             "data_color": _update_tiles,
             "none_color": _update_tiles,
@@ -1199,16 +1218,13 @@ def _get_legend_properties(options, loc, ncol, n_items):
 
 
 def _update_tiles(options, key, value):
-    """Validate kwargs for plot placement and tile color (Helper function).
+    """Validate kwargs for tile color and fontsize (Helper function).
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    if key is "empty_tiles" is not None and value not in {"lower", "upper"}:
-        raise ValueError(key + "must be either 'lower', 'upper', or None.")
-
     if "_color" in key and not mpl.colors.is_color_like(value):
         raise ValueError("Invalid color input: " + str(value))
 
@@ -1228,6 +1244,8 @@ def _fmt_empty_tiles(display_data, empty_tiles, N):
     This method is intended for internal use only.
 
     """
+    if empty_tiles is not None and empty_tiles not in {"lower", "upper"}:
+        raise ValueError("empty_tiles must be 'lower', 'upper', or None.")
     if display_data is not None:
         # Ensure data is a numpy array and of N x N dimensions
         if not isinstance(display_data, np.ndarray):
@@ -1255,3 +1273,29 @@ def _filter_lines(ax, to_return="lines"):
         return [l for l in ax.get_lines() if "t=" != l.get_label()[:2]]
     else:
         return [l for l in ax.get_lines() if "t=" == l.get_label()[:2]]
+
+
+def _make_time_vector(solution, time):
+    """Create a time array using the model timescales and given time bounds.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    J = linear.jacobian(solution.model)
+    rank = linear.matrix_rank(J)
+    timescales = np.real_if_close(-1/np.sort(linear.eig(J))[:rank])
+
+    min_ts = min([ts for ts in timescales if ts >= time[0]])
+    max_ts = max([ts for ts in timescales if ts <= time[-1]])
+    end = max(time[-1], max_ts)
+    if time[0] == 0:
+        start = min_ts/100
+        t_vec = np.concatenate([[0], np.geomspace(start, end,
+                                                  solution.numpoints)])
+    else:
+        start = min(time[0], min_ts)
+        t_vec = np.geomspace(start, end, solution.numpoints)
+
+    return t_vec

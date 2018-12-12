@@ -49,6 +49,7 @@ from math import log10
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
+from mass import config as _config
 from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
 from mass.exceptions import MassSimulationError
@@ -65,6 +66,7 @@ from six import iteritems, iterkeys, itervalues, string_types
 import sympy as sym
 
 
+_ZERO_TOL = _config.ZERO_TOLERANCE
 # Pre-compiled regular expressions for perturbations
 _kf_re = re.compile("forward_rate_constant|kf")
 _Keq_re = re.compile("equilibrium_constant|Keq")
@@ -77,7 +79,6 @@ _custom_re = re.compile("custom")
 _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
-_ZERO_TOL = 1e-6
 # Define default option dicts for solvers
 _scipy_default_options = _msol._DictWithID(
         id="scipy", dictionary={
@@ -214,9 +215,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._CONC_STR)
@@ -235,9 +237,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._FLUX_STR)
@@ -254,9 +257,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._POOL_STR)
@@ -273,9 +277,10 @@ class Simulation(Object):
 
         Returns
         -------
-        solution_dict: dict
-            A dictionary with model identifiers as keys and the corresponding
-            Solution objects as values.
+        solutions: mass.Solution, dict
+            Either a Solution object if there is only one model, or a dict
+            with model identifiers as keys and the corresponding Solution
+            objects as values for multiple models.
 
         """
         return self._lookup_solutions(models, _msol._NETFLUX_STR)
@@ -469,13 +474,15 @@ class Simulation(Object):
             # Setup ODEs for integration
             [odes, jacb, ics] = self._make_odes_functions(model, parameters,
                                                           ics, functions)
-            # Integrate ODEs to obtain concentration solutions, Model id passed
-            # in order to provide the id for the Solution object inside.
-            conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
-                                                     ics, options, model.id)
+            # Integrate ODEs to obtain concentration solutions
+            t, conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
+                                                        ics, options)
+            # Create Solution object for concentrations
+            conc_sol = _msol.Solution(model, _msol._CONC_STR, conc_sol, t)
+
             # Calculate flux solutions using the concentration solutions
             flux_sol = self._calculate_flux_solutions(model, parameters,
-                                                      conc_sol, conc_sol.t)
+                                                      conc_sol, t)
 
             # Turn solutions into interpolating functions if desired
             if interpolate:
@@ -768,9 +775,10 @@ class Simulation(Object):
 
         Returns
         -------
-        pool_solutions: DictList of mass.Solution objects
+        pool_solutions: mass.Solution, DictList of mass.Solution objects
             A DictList of mass.Solution object each containing the dict of
-            pool solutions.
+            pool solutions, or a single mass.Solution object if there is only
+            one model in the Simulation object.
 
         """
         group_ids = None
@@ -784,12 +792,14 @@ class Simulation(Object):
             pools = ensure_iterable(pools)
 
         sols = self.get_concentration_solutions()
-
+        if isinstance(sols, _msol.Solution):
+            sols = {sols.id.replace("_ConcSol", ""): sols}
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
 
         pool_solutions = self._create_group(sols, pools, parameters, group_ids,
                                             _msol._POOL_STR)
+
         return pool_solutions
 
     def make_netfluxes(self, netfluxes, parameters=None):
@@ -817,9 +827,10 @@ class Simulation(Object):
 
         Returns
         -------
-        netflux_solutions: DictList of mass.Solution objects
+        netflux_solutions: mass.Solution, DictList of mass.Solution objects
             A DictList of mass.Solution object each containing the dict of
-            pool solutions.
+            netflux solutions, or a single mass.Solution object if there is
+            only one model in the Simulation object.
 
         """
         group_ids = None
@@ -832,6 +843,9 @@ class Simulation(Object):
             netfluxes = ensure_iterable(netfluxes)
 
         sols = self.get_flux_solutions()
+        if isinstance(sols, _msol.Solution):
+            sols = {sols.id.replace("_FluxSol", ""): sols}
+
         if group_ids is None:
             group_ids = ["net{0}".format(str(i + 1))
                          for i in range(len(netfluxes))]
@@ -851,7 +865,7 @@ class Simulation(Object):
 
         """
         group_solutions = DictList()
-        for model_id, sol in iteritems(sols):
+        for sol in itervalues(sols):
             groups_sol_dict = {}
             items = [key for key in iterkeys(sol)]
             interpolate = sol.interpolate
@@ -859,10 +873,12 @@ class Simulation(Object):
                 sol.interpolate = False
             groups_id_dict = dict(zip(new_ids, to_create))
             for g_id, group in iteritems(groups_id_dict):
+                if isinstance(group, sym.Basic):
+                    group = str(strip_time(group))
                 args = sorted([arg for arg in items if arg in group])
                 local_syms = {str(arg): sym.Symbol(arg) for arg in args}
                 if parameters is not None:
-                    local_syms.update({str(param): param
+                    local_syms.update({str(param): sym.Symbol(param)
                                       for param in iterkeys(parameters)})
                 else:
                     parameters = {}
@@ -875,10 +891,9 @@ class Simulation(Object):
 
                 func = sym.lambdify(args=[sym.Symbol(arg) for arg in args],
                                     expr=expr, modules=_LAMBDIFY_MODULE)
-
                 values = np.array([sol[arg] for arg in args])
                 groups_sol_dict.update({g_id: func(*values)})
-            group_sol = _msol.Solution(model_id, sol_type, groups_sol_dict,
+            group_sol = _msol.Solution(sol.model, sol_type, groups_sol_dict,
                                        sol.t)
             group_sol._groups = groups_id_dict
             if interpolate:
@@ -888,6 +903,9 @@ class Simulation(Object):
             group_solutions.add(group_sol)
 
         self._update_solution_storage(group_solutions)
+
+        if len(group_solutions) == 1:
+            group_solutions = group_solutions[0]
 
         return group_solutions
 
@@ -926,8 +944,11 @@ class Simulation(Object):
                               .format(sol_type, model.id))
                 models.remove(model)
 
-        solutions_dict = {model.id: sol for model, sol in zip(models, sols)}
-        return solutions_dict
+        solutions = {model.id: sol for model, sol in zip(models, sols)}
+        if len(solutions) == 1:
+            return solutions[models[0].id]
+        else:
+            return solutions
 
     def _check_for_one_model(self, model, verbose=False):
         """Determine whether model is present in the Simulation object.
@@ -1210,7 +1231,7 @@ class Simulation(Object):
 
         return [lambda_odes, lambda_jacb, ordered_ics]
 
-    def _integrate_odes(self, time, odes, jacb, ics, new_options, id_str):
+    def _integrate_odes(self, time, odes, jacb, ics, new_options):
         """Integrate the ODEs using the set solver and its options.
 
         Warnings
@@ -1229,9 +1250,8 @@ class Simulation(Object):
         # Map identifiers to their solutions, and store in a Solution object.
         id_list = strip_time(list(iterkeys(ics)))
         concs = {str(_id): sol for _id, sol in zip(id_list, concs)}
-        conc_sol = _msol.Solution(id_str, _msol._CONC_STR, concs, t)
 
-        return conc_sol, sol_obj
+        return t, concs, sol_obj
 
     def _calculate_flux_solutions(self, model, parameters, conc_sol, t):
         """Calculate fluxes using rate equations and concentrations solutions.
@@ -1312,7 +1332,7 @@ class Simulation(Object):
         """
         # Try simulating using a final time of 10^3 up to 10^6.
         power = 3
-        fail = 6
+        fail = 7
         while power <= fail:
             retry = False
             solutions = self.simulate_model(model, time=(0, 10**power),
@@ -1322,8 +1342,9 @@ class Simulation(Object):
                                             update_solutions=False)
             # Check to see if concentrations reached a steady state.
             for met, sol in iteritems(solutions[0]):
-                if not abs(sol[-1] - sol[-2]) <= _ZERO_TOL:
+                if not round(abs(sol[-1] - sol[-2]), chop) <= _ZERO_TOL:
                     retry = True
+                    break
             if not retry:
                 break
             power += 1
@@ -1348,8 +1369,7 @@ class Simulation(Object):
             parameters, ics = self._apply_perturbations(model, perts)
         # Just get value substituion dicts if no perturbations provided.
         else:
-            parameters = self.get_model_parameter_values(model)
-            ics = self.get_model_ic_values(model)
+            parameters, ics = self.view_model_values(model)
 
         ordered_ics = OrderedDict()
         equations = OrderedDict()
@@ -1361,7 +1381,7 @@ class Simulation(Object):
 
         args = strip_time(list(iterkeys(equations)))
         lambda_eqs = sym.lambdify(args, strip_time(itervalues(equations)),
-                                  module=_LAMBDIFY_MODULE)
+                                  modules=_LAMBDIFY_MODULE)
 
         # Make lambda function callable
         def root_func(ics):

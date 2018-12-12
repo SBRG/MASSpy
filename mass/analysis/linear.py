@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import re
-import warnings
 
 from mass.util.util import convert_matrix
 
@@ -554,103 +553,6 @@ def eig(A, left=False, right=False, **kwargs):
     """
     A = _ensure_dense_mat(A)
     return linalg.eig(A, left=left, right=right, **kwargs)
-
-
-def temporal_decomposition(model, jacobian_type='metabolite', eigtol=1e-10,
-                           zerotol=1e-10, as_percents=True, remove_imag=True,
-                           mode_equations=True, dynamic_invariants=True):
-    """Perform a temporal decomposition of the jacobian matrix of a model.
-
-    The timescales (ts) and the modal matrix (M) are returned, where ts[i] is
-    the time constant for M[i]. Will also return the equations for each mode as
-    a sympy expression where ts[i] is the time constant for m[i] if specified.
-
-    Parameters
-    ----------
-    model: mass.MassModel
-        The MassModel object to construct the matrix for
-    jacobian_type: {'Jx', 'Jv'}
-        Whether to obtain the jacobian matrix with respect to metabolites (Jx),
-        or to obtain the jacobian matrix with respect to the reactions (Jv).
-        Default is 'Jx'.
-    eigtol: float, optional
-        The absolute tolerance for a zero singular value of an eigenvalue.
-        Singular values smaller than `eigtol` are considered to be zero.
-    zerotol: float, optional
-        The absolute tolerance for a zero singular value in the modal matrix M.
-        Singular values smaller than `zerotol` are considered to be zero.
-    as_percents: bool, optional
-        If True, will normalize rows of the modal matrix such that the
-        sum(abs(M[i])) is equal to 1.
-    remove_imag: bool, optional
-        If True, will remove the complex part of the the values.
-    mode_equations: bool, optional
-        If True, will return the equations for each mode as a sympy expression
-    dynamic_invariants: bool, optional
-        If True, will include the dynamically invariant pools in the returned
-        modal matrix and mode equations .
-
-    Returns
-    -------
-    ts: numpy.array
-        A numpy array  where ts[i] is time constant for M[i].
-        Time invariants will have a time constant of np.inf.
-    M: numpy.array
-        A numpy array representing the modal matrix where M[i] is the row of
-        the matrix that corresponds to the time constant ts[i].
-    m: numpy.array
-            A numpy array representing the mode equations where m[i] is the
-            equation that corresponds to the time constant ts[i].
-
-    """
-    # TODO Refactor function in a new timescale_decomposition class later
-    J = jacobian(model, jacobian_type=jacobian_type, strip_time=True,
-                 use_parameter_values=True, use_concentration_values=True,
-                 matrix_type="dense")
-    # get the eigenvalues and matrix of eigenrows
-    w, vr = eig(J, left=False, right=True)
-    rank = matrix_rank(J, atol=eigtol)
-    # Define eigenvalues with real parts below the tolerance as zero.
-    for i, eigenvalue in enumerate(w):
-        if abs(eigenvalue.real) <= eigtol:
-            w[i] = 0
-    # Get indicies of eigenvalues and sort timescales and correspodning rows
-    # of the model matrix from fastest to slowest
-    ts = -1/np.sort(w)[:rank]
-    if dynamic_invariants:
-        indices = np.argsort(w)
-        ts = np.concatenate((ts, [np.inf]*(len(w)-rank)))
-    else:
-        indices = np.argsort(w)[:rank]
-    M = np.array([linalg.inv(vr)[index] for index in indices])
-    # Normalize rows by largest weight
-    for i, row in enumerate(M):
-        row = row//max(abs(row))
-        # Convert to percents if specificed
-        if as_percents:
-            row = row/sum(abs(row))
-        for j, val in enumerate(row):
-            val = np.real_if_close(val, tol=1/zerotol)
-            if abs(val.real) <= zerotol:
-                val = 0.
-            row[j] = val
-        M[i] = row
-    if remove_imag:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            M = M.astype(float)
-            ts = ts.astype(float)
-    # Get mode equations if specified
-    if mode_equations:
-        metab_funcs = [sym.Symbol(m.id)(_T_SYM) for m in model.metabolites]
-        m = [0]*len(ts)
-        e = abs(np.floor(np.log10(np.abs(zerotol))).astype(int))
-        for i, row in enumerate(M):
-            m[i] = sum([round(val, e)*metab_funcs[i]
-                        for i, val in enumerate(row)])
-        return ts, M, np.array(m)
-
-    return ts, M
 
 
 def _ensure_dense_mat(A):
