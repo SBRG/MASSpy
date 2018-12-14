@@ -68,6 +68,8 @@ class MassModel(Object):
 
     Attributes
     ----------
+    description: str
+        A human-readable description of the model.
     reactions: cobra.DictList
         A cobra.DictList where keys are the reaction identifiers and the
         values are the associated MassReaction objects.
@@ -133,6 +135,7 @@ class MassModel(Object):
             self.update_S(matrix_type=matrix_type, dtype=dtype)
         else:
             Object.__init__(self, id_or_model, name=name)
+            self.description = ''
             # Initialize DictLists for reactions, metabolites, and genes
             self.reactions = DictList()
             self.metabolites = DictList()
