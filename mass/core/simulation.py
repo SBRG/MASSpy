@@ -204,7 +204,7 @@ class Simulation(Object):
         return getattr(self, "_models", None)
 
     def get_concentration_solutions(self, models=None):
-        """Return a dict of Conc. Solutions for a list of models.
+        """Return the Conc. Solutions for a list of models.
 
         Parameters
         ----------
@@ -224,7 +224,7 @@ class Simulation(Object):
         return self._lookup_solutions(models, _msol._CONC_STR)
 
     def get_flux_solutions(self, models=None):
-        """Return a dict of Flux Solutions for a list of models.
+        """Return the Flux Solutions for a list of models.
 
         Models must already exist in the Simulation object.
 
@@ -246,7 +246,7 @@ class Simulation(Object):
         return self._lookup_solutions(models, _msol._FLUX_STR)
 
     def get_pool_solutions(self, models=None):
-        """Return a dict of Pool Solutions for a list of models.
+        """Return the Pool Solutions for a list of models.
 
         Parameters
         ----------
@@ -266,7 +266,7 @@ class Simulation(Object):
         return self._lookup_solutions(models, _msol._POOL_STR)
 
     def get_netflux_solutions(self, models=None):
-        """Return a dict of NetFlux Solutions for a list of models.
+        """Return the NetFlux Solutions for a list of models.
 
         Parameters
         ----------
@@ -326,11 +326,7 @@ class Simulation(Object):
         """
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, False)
-
+        models = self._get_models_for_method(models, False)
         parameters = self._values.get_by_any(["{0}_parameters".format(model.id)
                                               for model in models])
         value_dict = {model.id: parameter
@@ -356,11 +352,7 @@ class Simulation(Object):
         """
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, False)
-
+        models = self._get_models_for_method(models, False)
         ics = self._values.get_by_any(["{0}_ics".format(model.id)
                                        for model in models])
         value_dict = {model.id: ic for model, ic, in zip(models, ics)}
@@ -564,11 +556,7 @@ class Simulation(Object):
         """
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, verbose)
-
+        models = self._get_models_for_method(models, verbose)
         conc_solutions = DictList()
         flux_solutions = DictList()
         sol_objects = {}
@@ -621,7 +609,8 @@ class Simulation(Object):
         update_reactions : bool, optional
             If True, update the steady state flux attribute in each reaction.
         update_initial_conditions : bool, optional
-            If True, update the model initial conditions for each metabolite.
+            If True, update the model initial conditions for each metabolite,
+            and update the Simulation.
 
         Returns
         -------
@@ -658,6 +647,9 @@ class Simulation(Object):
             conc_sol = _msol.Solution(model, _msol._CONC_STR)
             flux_sol = _msol.Solution(model, _msol._FLUX_STR)
 
+        if update_initial_conditions:
+            self.update_values(model)
+
         return conc_sol, flux_sol
 
     def find_steady_state(self, models=None, strategy="simulate",
@@ -686,7 +678,8 @@ class Simulation(Object):
         update_reactions : bool, optional
             If True, update the steady state flux attribute in each reaction.
         update_initial_conditions : bool, optional
-            If True, update the model initial conditions for each metabolite.
+            If True, update the model initial conditions for each metabolite,
+            and update the Simulation.
 
         Returns
         -------
@@ -702,11 +695,7 @@ class Simulation(Object):
         """
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, verbose)
-
+        models = self._get_models_for_method(models, verbose)
         conc_solutions = DictList()
         flux_solutions = DictList()
 
@@ -721,6 +710,9 @@ class Simulation(Object):
             sols = list(sols)
             for sol, storage in zip(sols, [conc_solutions, flux_solutions]):
                 storage += [sol]
+
+        if update_initial_conditions:
+            self.update_values(models=models)
 
         return conc_solutions, flux_solutions
 
@@ -737,11 +729,7 @@ class Simulation(Object):
             models must already be present in the Simulation object.
 
         """
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, False)
-
+        models = self._get_models_for_method(models, False)
         new_values = DictList()
         for model in models:
             for function in [self._get_parameters_from_model,
@@ -919,10 +907,7 @@ class Simulation(Object):
         """
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
-        if models is None:
-            models = self.models
-        else:
-            models = self._check_for_multiple_models(models, False)
+        models = self._get_models_for_method(models, False)
         # Set up loop
         retry = True
         while retry:
@@ -1130,30 +1115,30 @@ class Simulation(Object):
             try:
                 for _re, key_fix in zip(_re_list, _key_fixes):
                     if _re.match(pert_type):
-                        if key_fix in _key_fixes[:3]:
-                            new_key = "{0}_{1}".format(key_fix, item)
-                        else:
-                            new_key = item + key_fix
-                        if old_key in str(value):
-                            if not "[{0}]".format(old_key) in str(value):
-                                raise ValueError
+                        new_key = "{0}_{1}".format(key_fix, item) \
+                                   if key_fix in _key_fixes[:3] \
+                                   else item + key_fix
+                        if (old_key in str(value) and
+                           "[{0}]".format(old_key) in str(value)):
                             value = value.replace(old_key, new_key)
                         else:
-                            # Try to convert value to a float
-                            try:
-                                value = float(value)
                             # If value cannot be converted, ensure perturbation
                             # is allowed and can be interpreted later.
-                            except ValueError:
-                                allowed = [_fix_re.search(new_key) and
-                                           _ic_re.search(str(value)),
-                                           _custom_re.search(new_key),
-                                           _func_re.search(new_key)]
-                                allowed = [True for b in allowed
-                                           if b is not None]
-                                if not allowed:
-                                    raise ValueError
+                            allow = [_fix_re.search(new_key) and
+                                     _ic_re.search(str(value)),
+                                     _custom_re.search(new_key),
+                                     _func_re.search(new_key)]
+                            if [True for b in allow if b is not None]:
+                                pass
+                            else:
+                                # Otherwise try to convert value to a float
+                                value = float(value)
                         validated[new_key.strip()] = value
+                    elif [True for other in _re_list if other != _re and
+                          other.match(pert_type)]:
+                            pass
+                    else:
+                        raise ValueError
             except ValueError:
                 raise MassSimulationError("Perturbation '{0!r} : {1!r}' not "
                                           "recognized.".format(old_key, value))
@@ -1428,3 +1413,17 @@ class Simulation(Object):
                 rxn.steady_state_flux = round(sol[-1], chop)
 
         return conc_sol, flux_sol
+
+    def _get_models_for_method(self, models, verbose):
+        """Return a copy of the DictList containing valid models.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        if models is None:
+            models = self.models
+        else:
+            models = self._check_for_multiple_models(models, verbose=verbose)
+        return models.copy()
