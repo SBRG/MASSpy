@@ -4,14 +4,14 @@ masspy - Mass Action Stoichiometric Simulation in Python
 What is masspy?
 ~~~~~~~~~~~~~~~
 The **M**\ass **A**\ction **S**\toichiometric **S**\imulation for **Py**\thon
-(masspy) is a modeling software package for the construction and
+(**masspy**) is a modeling software package for the construction and
 analysis of kinetic models of biochemical reaction systems.
 
 One of the main goals of masspy is to integrate seamlessly with  **cobrapy**,
 a widely used constraint-based reconstruction and analysis python package in
 order to provide a wide range of modeling techniques that can be utilized
 seperately or together. For further information about cobrapy, please visit
-their `github page <https://github.com/opencobra/cobrapy.>`_
+their `github page <https://github.com/opencobra/cobrapy.>`_.
 
 Cite
 ----
