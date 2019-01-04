@@ -463,7 +463,7 @@ def get_default_colors(n_items, start=0):
     elif n_items > 60:
         cmap = cm.get_cmap("nipy_spectral")(np.linspace(0, 1, n_items))
     else:
-        cmap = cm.get_cmap("tab10")(values)
+        cmap = cm.get_cmap("tab10")(np.linspace(0, 1, 10))
 
     return list(cmap)[start:n_items]
 

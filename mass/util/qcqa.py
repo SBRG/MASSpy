@@ -204,6 +204,10 @@ def get_missing_reaction_parameters(model, simulation=None,
             missing_params = "; ".join([k.split("_")[0]
                                         for k in missing_params
                                         if count[rxn.id] < 2]).rstrip("; ")
+        # Remove missing reverse rate constants for irreversible reactions
+        if not rxn.reversible and "kr" in missing_params:
+            missing_params = missing_params.replace("kr", "")
+
         if missing_params:
             missing[rxn] = "{0}".format(missing_params.rstrip("; "))
 
@@ -269,8 +273,8 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
             customs = [custom for custom in customs
                        if sym.Symbol(custom) not in existing_customs
                        or existing_customs[sym.Symbol(custom)] is None]
-        missing[rxn] = "; ".join(customs)
-
+        if customs:
+            missing[rxn] = "; ".join(customs)
     return missing
 
 
@@ -345,6 +349,8 @@ def get_missing_initial_conditions(model, simulation=None,
                    if not _mk_met_func(met) in exist[model.id]
                    or exist[model.id][_mk_met_func(met)] is None]
 
+    missing = _check_if_needed(model, missing)
+
     return missing
 
 
@@ -387,6 +393,8 @@ def get_missing_fixed_concentrations(model, simulation=None,
         missing = [met for met in missing
                    if not sym.Symbol(str(met)) in existing[model.id]
                    or existing[model.id][sym.Symbol(str(met))] is None]
+
+    missing = _check_if_needed(model, missing)
 
     return missing
 
@@ -573,14 +581,15 @@ def check_reaction_parameters(model, simulation=None, tol=None,
     for rxn in reaction_list:
         if rxn in model.custom_rates:
             missing_customs = _check_custom_for_standard(model, rxn)
-            if simulation is not None:
+            if simulation is not None and missing_customs:
                 param_keys = [sym.Symbol("{0}_{1}".format(param, rxn.id))
                               for param in missing_customs[rxn].split("; ")]
                 missing_customs = [str(param).split("_")[0]
                                    for param in param_keys
                                    if param not in existing_parameters
                                    or existing_parameters[param] is None]
-            customs.update({rxn: "; ".join(missing_customs)})
+            if missing_customs:
+                customs.update({rxn: "; ".join(missing_customs)})
         # Address reactions that are missing parameters
         elif (len(rxn.parameters) < 2 and not count) or \
              (isinstance(count, dict) and count[rxn.id] < 2):
@@ -592,7 +601,6 @@ def check_reaction_parameters(model, simulation=None, tol=None,
         # Only two reaction parameters exist, no consistency check required
         else:
             pass
-
     if missing:
         missing = get_missing_reaction_parameters(model, simulation, missing)
     else:
@@ -603,7 +611,6 @@ def check_reaction_parameters(model, simulation=None, tol=None,
                                                     tol, superfluous)
     else:
         superfluous = {}
-
     missing.update(customs)
 
     return missing, superfluous
@@ -887,3 +894,23 @@ def _set_tolerance(tol):
         raise TypeError("tol must be a float")
     else:
         return tol
+
+
+def _check_if_needed(model, missing):
+    """Get the time-dependent concentrations and/or parameters in rate laws.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    needed = set()
+    for rate in itervalues(model.rates):
+        needed.update(rate.atoms(sym.Function))
+        needed.update(rate.atoms(sym.Symbol))
+
+    missing = [met for met in missing 
+               if sym.Symbol(str(met)) in needed 
+               or _mk_met_func(str(met)) in needed]
+
+    return missing

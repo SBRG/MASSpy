@@ -823,7 +823,7 @@ class MassModel(Object):
                                                update_reactions)
                          for rxn in reaction_list}
 
-        if not self.custom_rates:
+        if self.custom_rates:
             rate_dict.update(self.custom_rates)
 
         return rate_dict

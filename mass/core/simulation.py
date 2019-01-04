@@ -460,6 +460,8 @@ class Simulation(Object):
             self._check_for_one_model(model, verbose)
             # Check whether a model can be simulated.
             self._assess_quality(model, verbose)
+            # Set appropriate rate laws for each reaction
+            self._set_rate_type(model)
             # Implement any perturbations and get the value substituion dicts.
             parameters, ics, functions = self._apply_perturbations(
                 model, perturbations)
@@ -845,6 +847,30 @@ class Simulation(Object):
         return netflux_solutions
 
     # Internal
+    def _set_rate_type(self, model):
+        for rxn in model.reactions:
+            # Ignore reactions with custom rates
+            if rxn in model.custom_rates:
+                continue
+            # Reversible reactions depend on at least two parameters.
+            elif rxn.reversible:
+                parameters = rxn.parameters
+                # Forward rate and equilibrium constants for type 1
+                if rxn.kf_str in parameters and rxn.Keq_str in parameters:
+                    rxn._rtype = 1
+                # Forward and reverse rate constants for type 2
+                elif rxn.kf_str in parameters and rxn.kr_str in parameters:
+                    rxn._rtype = 2
+                # Equilibrium and reverse rate constants for type 3
+                elif rxn.Keq_str in parameters and rxn.kr_str in parameters:
+                    rxn._rtype = 3
+                # Default to rtype=1
+                else:
+                    rxn._rtype = 1
+            # Irreversible reactions only depend on a kf
+            else:
+                rxn._rtype = 1
+
     def _create_group(self, sols, to_create, parameters, new_ids, sol_type):
         """Create a group and compute its solution.
 
