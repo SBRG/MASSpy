@@ -112,7 +112,7 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
 
     # Convert the matrix type
     conversion_method_dict = dict(zip(
-        _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil,  _to_dense, _to_dense]))
+        _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense]))
 
     try:
         matrix = conversion_method_dict[matrix_type](matrix)

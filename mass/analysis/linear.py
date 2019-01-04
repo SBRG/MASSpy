@@ -2,10 +2,6 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-import re
-
-from mass.util.util import convert_matrix
-
 import numpy as np
 
 import pandas as pd
@@ -13,14 +9,12 @@ import pandas as pd
 from scipy import linalg
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import iteritems
+from six import iteritems, itervalues
 
 import sympy as sym
 
-# Global
-_T_SYM = sym.Symbol("t")
-# Precompiled re for 'external' metabolites
-ext_metab_re = re.compile("\_e")
+from mass.util.expressions import _mk_met_func
+from mass.util.util import convert_matrix
 
 
 # Public
@@ -69,22 +63,20 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
     # Create the gradient matrix
     for rxn, rate in iteritems(rates):
         for met in model.metabolites:
-            met_func = sym.Function(str(met))(_T_SYM)
-            gradient_mat[r_ind(rxn), m_ind(met)] = rate.diff(met_func)
+            gradient_mat[r_ind(rxn), m_ind(met)] = rate.diff(_mk_met_func(met))
 
     # Get values for substitution
     if use_concentration_values or use_parameter_values:
         values = {}
         if use_parameter_values:
             model_parameters = model.parameters
-            # fixed_concs = model_parameters.pop("Fixed")
 
-            for key, dictionary in iteritems(model_parameters):
+            for dictionary in itervalues(model_parameters):
                 values.update({sym.Symbol(str(k)): v
-                              for k, v in iteritems(dictionary)})
+                               for k, v in iteritems(dictionary)})
 
         if use_concentration_values:
-            values.update({sym.Function(str(k))(_T_SYM): v
+            values.update({_mk_met_func(k): v
                            for k, v in iteritems(model.initial_conditions)})
 
         # Substitute values into the matrix
@@ -134,20 +126,20 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
 
     Returns
     -------
-    kappa_mat: matrix of type 'matrix_type'
+    kappa_matrix: matrix of type 'matrix_type'
         The kappa matrix for the model returned as the given matrix_type.
 
     """
-    gradient_mat = gradient(model, use_parameter_values,
-                            use_concentration_values, matrix_type)
-    kappa_mat = sym.diag(*[gradient_mat[row, :].norm()
-                           for row in range(gradient_mat.rows)])
-    kappa_mat = kappa_mat.subs({sym.nan: sym.S.Zero})
-    kappa_mat = convert_matrix(kappa_mat, matrix_type=matrix_type,
-                               dtype=np.float64,
-                               row_ids=[r.id for r in model.reactions],
-                               col_ids=[r.id for r in model.reactions])
-    return kappa_mat
+    gradient_matrix = gradient(model, use_parameter_values,
+                               use_concentration_values, matrix_type)
+    kappa_matrix = sym.diag(*[gradient_matrix[row, :].norm()
+                              for row in range(gradient_matrix.rows)])
+    kappa_matrix = kappa_matrix.subs({sym.nan: sym.S.Zero})
+    kappa_matrix = convert_matrix(kappa_matrix, matrix_type=matrix_type,
+                                  dtype=np.float64,
+                                  row_ids=[r.id for r in model.reactions],
+                                  col_ids=[r.id for r in model.reactions])
+    return kappa_matrix
 
 
 def gamma(model, use_parameter_values=True, use_concentration_values=True,
@@ -183,20 +175,20 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
 
     Returns
     -------
-    gamma_mat: matrix of type 'matrix_type'
+    gamma_matrix: matrix of type 'matrix_type'
         The gamma matrix for the model returned as the given matrix_type.
 
     """
-    gradient_mat = gradient(model, use_parameter_values,
-                            use_concentration_values, matrix_type)
-    gamma_mat = sym.Matrix([gradient_mat[row, :].normalized()
-                            for row in range(gradient_mat.rows)])
-    gamma_mat = gamma_mat.subs({sym.nan: sym.S.Zero})
-    gamma_mat = convert_matrix(gamma_mat, matrix_type=matrix_type,
-                               dtype=np.float64,
-                               row_ids=[r.id for r in model.reactions],
-                               col_ids=[m.id for m in model.metabolites])
-    return gamma_mat
+    gradient_matrix = gradient(model, use_parameter_values,
+                               use_concentration_values, matrix_type)
+    gamma_matrix = sym.Matrix([gradient_matrix[row, :].normalized()
+                               for row in range(gradient_matrix.rows)])
+    gamma_matrix = gamma_matrix.subs({sym.nan: sym.S.Zero})
+    gamma_matrix = convert_matrix(gamma_matrix, matrix_type=matrix_type,
+                                  dtype=np.float64,
+                                  row_ids=[r.id for r in model.reactions],
+                                  col_ids=[m.id for m in model.metabolites])
+    return gamma_matrix
 
 
 def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
@@ -234,43 +226,44 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
 
     Returns
     -------
-    jacobian_mat: matrix of type 'matrix_type'
+    jacobian_matrix: matrix of type 'matrix_type'
         The jacobian matrix for the model returned as the given matrix_type.
 
     """
     if jacobian_type not in {"Jx", "Jv"}:
         raise ValueError("jacobian_type must be either 'Jx' or Jv'")
 
-    gradient_mat = gradient(model, use_parameter_values,
-                            use_concentration_values, matrix_type="symbolic")
-    stoich_mat = model._mk_stoich_matrix(matrix_type="symbolic",
-                                         update_model=False)
-    if "Jx" == jacobian_type:
-        jacobian_mat = stoich_mat * gradient_mat
+    gradient_matrix = gradient(model, use_parameter_values,
+                               use_concentration_values,
+                               matrix_type="symbolic")
+    stoich_matrix = model._mk_stoich_matrix(matrix_type="symbolic",
+                                            update_model=False)
+    if jacobian_type == "Jx":
+        jacobian_matrix = stoich_matrix * gradient_matrix
         identifiers = [m.id for m in model.metabolites]
     else:
-        jacobian_mat = gradient_mat * stoich_mat
+        jacobian_matrix = gradient_matrix * stoich_matrix
         identifiers = [r.id for r in model.reactions]
 
-    jacobian_mat = convert_matrix(jacobian_mat, matrix_type=matrix_type,
-                                  dtype=np.float64,
-                                  row_ids=identifiers,
-                                  col_ids=identifiers)
-    return jacobian_mat
+    jacobian_matrix = convert_matrix(jacobian_matrix, matrix_type=matrix_type,
+                                     dtype=np.float64,
+                                     row_ids=identifiers,
+                                     col_ids=identifiers)
+    return jacobian_matrix
 
 
-def nullspace(A, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the nullspace of A.
+def nullspace(matrix, atol=1e-13, rtol=0):
+    """Compute an approximate basis for the nullspace of `matrix`.
 
     The algorithm used by this function is based on the singular value
-    decomposition of `A`.
+    decomposition of `matrix`.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
-        Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-        treated as a 2-D with shape (1, k)
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
+        array with length k will be treated as a 2-D with shape (1, k).
     atol: float, optional
         The absolute tolerance for a zero singular value.  Singular values
         smaller than `atol` are considered to be zero.
@@ -281,9 +274,9 @@ def nullspace(A, atol=1e-13, rtol=0):
     Returns
     -------
     ns: ndarray
-        If `A` is an array with shape (m, k), then `ns` will be an array
+        If `matrix` is an array with shape (m, k), then `ns` will be an array
         with shape (k, n), where n is the estimated dimension of the
-        nullspace of `A`.  The columns of `ns` are a basis for the
+        nullspace of `matrix`.  The columns of `ns` are a basis for the
         nullspace; each element in numpy.dot(A, ns) will be approximately
         zero.
 
@@ -295,8 +288,8 @@ def nullspace(A, atol=1e-13, rtol=0):
     Singular values smaller than `tol` are considered to be zero.
 
     """
-    A = np.atleast_2d(_ensure_dense_mat(A))
-    s, vh = linalg.svd(A)[1:]
+    matrix = np.atleast_2d(_ensure_dense_matrix(matrix))
+    s, vh = linalg.svd(matrix)[1:]
     tol = max(atol, rtol * s[0])
     nnz = (s >= tol).sum()
     ns = vh[nnz:].conj().T
@@ -309,18 +302,18 @@ def nullspace(A, atol=1e-13, rtol=0):
     return ns
 
 
-def left_nullspace(A, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the left nullspace of A.
+def left_nullspace(matrix, atol=1e-13, rtol=0):
+    """Compute an approximate basis for the left nullspace of `matrix`.
 
     The algorithm used by this function is based on the singular value
-    decomposition of `A`.
+    decomposition of `matrix`.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
-        Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-        treated as a 2-D with shape (1, k)
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
+        array with length k will be treated as a 2-D with shape (1, k).
     atol: float, optional
         The absolute tolerance for a zero singular value.  Singular values
         smaller than `atol` are considered to be zero.
@@ -331,13 +324,13 @@ def left_nullspace(A, atol=1e-13, rtol=0):
     Returns
     -------
     lns: ndarray
-        If `A` is an array with shape (m, k), then `lns` will be an array
+        If `matrix` is an array with shape (m, k), then `lns` will be an array
         with shape (n, m), where n is the estimated dimension of the
-        left nullspace of `A`.  The rows of `lns` are a basis for the
+        left nullspace of `matrix`.  The rows of `lns` are a basis for the
         left nullspace; each element in numpy.dot(lns A) will be
         approximately zero.
 
-    See ALso
+    See Also
     --------
     nullspace: Base function.
 
@@ -349,22 +342,22 @@ def left_nullspace(A, atol=1e-13, rtol=0):
     Singular values smaller than `tol` are considered to be zero.
 
     """
-    lns = nullspace(A.T, atol, rtol).T
+    lns = nullspace(matrix.T, atol, rtol).T
     return lns
 
 
-def columnspace(A, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the columnspace of A.
+def columnspace(matrix, atol=1e-13, rtol=0):
+    """Compute an approximate basis for the columnspace of `matrix`.
 
     This function utilizes the scipy.linalg.qr method to obtain an orthogonal
-    basis for the columnspace of A.
+    basis for the columnspace of `matrix`.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
-        Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-        treated as a 2-D with shape (1, k)
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
+        array with length k will be treated as a 2-D with shape (1, k).
     atol: float, optional
         The absolute tolerance for a zero singular value.  Singular values
         smaller than `atol` are considered to be zero.
@@ -375,9 +368,10 @@ def columnspace(A, atol=1e-13, rtol=0):
     Returns
     -------
     cs: numpy.ndarray
-        If `A` is an array with shape (m, k), then `cs` will be an array
+        If `matrix` is an array with shape (m, k), then `cs` will be an array
         with shape (m, n), where n is the estimated dimension of the
-        columnspace of `A`. The columns of cs are a basis for the columnspace.
+        columnspace of `matrix`. The columns of cs are a basis for the
+        columnspace.
 
     Notes
     -----
@@ -387,12 +381,12 @@ def columnspace(A, atol=1e-13, rtol=0):
     Singular values smaller than `tol` are considered to be zero.
 
     """
-    A = _ensure_dense_mat(A)
-    q = linalg.qr(A)[0]
-    cs = q[:, :matrix_rank(A, atol, rtol)]
+    matrix = _ensure_dense_matrix(matrix)
+    q = linalg.qr(matrix)[0]
+    cs = q[:, :matrix_rank(matrix, atol, rtol)]
 
     # Apply zero singular value tolerance
-    s = linalg.svd(A, compute_uv=False)
+    s = linalg.svd(matrix, compute_uv=False)
     tol = max(atol, rtol * s[0])
     for i, row in enumerate(cs):
         for j, val in enumerate(row):
@@ -402,18 +396,18 @@ def columnspace(A, atol=1e-13, rtol=0):
     return cs
 
 
-def rowspace(A, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the columnspace of A.
+def rowspace(matrix, atol=1e-13, rtol=0):
+    """Compute an approximate basis for the columnspace of `matrix`.
 
     This function utilizes the scipy.linalg.qr method to obtain an orthogonal
-    basis for the columnspace of A.
+    basis for the columnspace of `matrix`.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
-        Note: 'A' should be at most 2-D.  A 1-D array with length k will be
-        treated as a 2-D with shape (1, k)
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
+        array with length k will be treated as a 2-D with shape (1, k).
     atol: float, optional
         The absolute tolerance for a zero singular value.  Singular values
         smaller than `atol` are considered to be zero.
@@ -424,9 +418,9 @@ def rowspace(A, atol=1e-13, rtol=0):
     Returns
     -------
     rs: numpy.ndarray
-        If `A` is an array with shape (m, k), then `rs` will be an array
+        If `matrix` is an array with shape (m, k), then `rs` will be an array
         with shape (m, n), where n is the estimated dimension of the rowspace
-        of `A`. The columns of rs are a basis for the rowspace.
+        of `matrix`. The columns of rs are a basis for the rowspace.
 
     See Also
     --------
@@ -440,21 +434,22 @@ def rowspace(A, atol=1e-13, rtol=0):
     Singular values smaller than `tol` are considered to be zero.
 
     """
-    rs = columnspace(A.T, atol, rtol)
+    rs = columnspace(matrix.T, atol, rtol)
     return rs
 
 
-def matrix_rank(A, atol=1e-13, rtol=0):
+def matrix_rank(matrix, atol=1e-13, rtol=0):
     """Estimate the rank (i.e. the dimension of the nullspace) of a matrix.
 
     The algorithm used by this function is based on the singular value
-    decomposition of `A`.
+    decomposition of `matrix`.
 
     Parameters
     ----------
-    A: ndarray
-        A should be at most 2-D.  A 1-D array with length n will be treated
-        as a 2-D with shape (1, n)
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to obtain the rank of. Note: `matrix` should be at most 2-D.
+        A 1-D array with length k will be treated as a 2-D with shape (1, k).
     atol: float, optional
         The absolute tolerance for a zero singular value.  Singular values
         smaller than `atol` are considered to be zero.
@@ -482,27 +477,30 @@ def matrix_rank(A, atol=1e-13, rtol=0):
         provide the option of the absolute tolerance.
 
     """
-    A = np.atleast_2d(_ensure_dense_mat(A))
-    s = linalg.svd(A, compute_uv=False)
+    matrix = np.atleast_2d(_ensure_dense_matrix(matrix))
+    s = linalg.svd(matrix, compute_uv=False)
     tol = max(atol, rtol * s[0])
     rank = int((s >= tol).sum())
     return rank
 
 
-def svd(A, **kwargs):
-    """Get the singular value decomposition of 'A'.
+def svd(matrix, **kwargs):
+    """Get the singular value decomposition of `matrix`.
 
     `kwargs`` are passed on to ``scipy.linalg.svd``
     See documentation for ``scipy.linalg.svd`` for more details.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
+        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
+        array with length k will be treated as a 2-D with shape (1, k).
+
 
     Returns
     -------
-    matrix of the same type as 'A'
+    matrix of the same type as `matrix`.
 
     See Also
     --------
@@ -512,20 +510,20 @@ def svd(A, **kwargs):
         the correct input for scipy.linalg.svd.
 
     """
-    A = _ensure_dense_mat(A)
-    return linalg.svd(A, **kwargs)
+    matrix = _ensure_dense_matrix(matrix)
+    return linalg.svd(matrix, **kwargs)
 
 
-def eig(A, left=False, right=False, **kwargs):
-    """Get the eigenvalues of 'A'.
+def eig(matrix, left=False, right=False, **kwargs):
+    """Get the eigenvalues of `matrix`.
 
     `kwargs`` are passed on to ``scipy.linalg.eig``
     See documentation for ``scipy.linalg.eig`` for more details.
 
     Parameters
     ----------
-    A: numpy.ndarray, scipy.sparse dok matrix or lil matrix, pandas.DataFrame
-        or sympy.Matrix
+    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
+        pandas.DataFrame, or sympy.Matrix
     left: bool, optional
         Whether to calculate and return left eigenvectors. Default is False.
     right: bool, optional
@@ -551,24 +549,24 @@ def eig(A, left=False, right=False, **kwargs):
         the correct input for scipy.linalg.eig.
 
     """
-    A = _ensure_dense_mat(A)
-    return linalg.eig(A, left=left, right=right, **kwargs)
+    matrix = _ensure_dense_matrix(matrix)
+    return linalg.eig(matrix, left=left, right=right, **kwargs)
 
 
-def _ensure_dense_mat(A):
+def _ensure_dense_matrix(matrix):
     """Ensure matrix is dense before performing linear algebra operations.
 
     Warnings
     --------
     This method is intended for internal use only.
     """
-    if isinstance(A, (np.ndarray, pd.DataFrame)):
+    if isinstance(matrix, (np.ndarray, pd.DataFrame)):
         pass
-    elif isinstance(A, (dok_matrix, lil_matrix)):
-        A = A.toarray()
-    elif isinstance(A, sym.Matrix):
+    elif isinstance(matrix, (dok_matrix, lil_matrix)):
+        matrix = matrix.toarray()
+    elif isinstance(matrix, sym.Matrix):
         try:
-            A = np.array(A).astype(np.float64)
+            matrix = np.array(matrix).astype(np.float64)
         except TypeError:
             raise ValueError("Cannot have sympy symbols in the matrix. Try "
                              "substituting numerical values in first")
@@ -576,4 +574,4 @@ def _ensure_dense_mat(A):
         raise TypeError("Matrix must be one of the following formats: "
                         "numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
                         "pandas.DataFrame, or sympy.Matrix.")
-    return A
+    return matrix

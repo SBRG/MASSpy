@@ -8,9 +8,7 @@ from warnings import warn
 from six import integer_types, iteritems, iterkeys, string_types
 
 import sympy as sym
-
-# Global
-_T_SYM = sym.Symbol("t")
+from sympy.physics.vector import dynamicsymbols
 
 
 # Public
@@ -206,7 +204,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     custom_rate_expression = custom_rate.replace("(t)", "")
 
     # Get metabolites as symbols if they are in the custom rate law
-    met_syms = {str(met): sym.Function(str(met))(_T_SYM)
+    met_syms = {str(met): _mk_met_func(met)
                 for met in iterkeys(reaction.metabolites)
                 if re.search("[" + str(met) + "]", custom_rate)}
 
@@ -282,7 +280,7 @@ def _format_metabs_sym(expr, rxn, mets):
     # For all other reactions
     else:
         for met in mets:
-            met_ode = sym.Function(met.id)(_T_SYM)
+            met_ode = _mk_met_func(met)
             coeff = abs(rxn.get_coefficient(met.id))
             if coeff == 1:
                 expr = sym.Mul(expr, met_ode)
@@ -433,8 +431,12 @@ def _generate_rate_sym_3(reaction):
 def _determine_reaction_rtype(reaction):
     """Determine rate to use based on a reaction's available parameters.
 
-    Designed for internal use. Will return the rate law type based on
+    Will return the rate law type based on
     numerically defined parameters, with priority given to rate type 1.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
     """
     # Get available parameters for a reaction.
     p_types = [param[:3] for param in iterkeys(reaction.parameters)]
@@ -457,10 +459,26 @@ def _determine_reaction_rtype(reaction):
 
 
 def _strip_time_for_fixed_mets(reaction, rate_expr):
+    """Strip the time dependency of a sympy Function for fixed metabolites.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
     mets_to_strip = [met for met in reaction._metabolites
                      if met in reaction.model.fixed_concentrations]
     if mets_to_strip:
-        sub_mets_stripped = {sym.Function(str(m))(_T_SYM): sym.Symbol(str(m))
+        sub_mets_stripped = {_mk_met_func(m): sym.Symbol(str(m))
                              for m in mets_to_strip}
         rate_expr = rate_expr.subs(sub_mets_stripped)
     return rate_expr
+
+
+def _mk_met_func(met):
+    """Make an undefined sympy.Function of time.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
+    return dynamicsymbols(str(met))

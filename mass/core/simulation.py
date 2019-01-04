@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This modules addresses the simulation of mass.MassModels.
+"""The Simulation module addresses the simulation of mass.MassModels.
 
 The Simulation module is designed to address all aspects related to the
 simulation of one or more MassModel objects. These aspects include storing the
@@ -46,16 +46,6 @@ import warnings
 from collections import OrderedDict
 from math import log10
 
-from cobra.core.dictlist import DictList
-from cobra.core.object import Object
-
-from mass import config as _config
-from mass.core import solution as _msol
-from mass.core.massmodel import MassModel
-from mass.exceptions import MassSimulationError
-from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
-from mass.util.util import ensure_iterable, strip_time
-
 import numpy as np
 
 from scipy.integrate import solve_ivp
@@ -65,38 +55,48 @@ from six import iteritems, iterkeys, itervalues, string_types
 
 import sympy as sym
 
+from cobra.core.dictlist import DictList
+from cobra.core.object import Object
+
+from mass import config as _config
+from mass.core import solution as _msol
+from mass.core.massmodel import MassModel
+from mass.exceptions import MassSimulationError
+from mass.util.expressions import _mk_met_func
+from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
+from mass.util.util import ensure_iterable, strip_time
+
 
 _ZERO_TOL = _config.ZERO_TOLERANCE
 # Pre-compiled regular expressions for perturbations
-_kf_re = re.compile("forward_rate_constant|kf")
-_Keq_re = re.compile("equilibrium_constant|Keq")
-_kr_re = re.compile("reverse_rate_constant|kr")
-_ic_re = re.compile("initial_condition|ic")
-_fix_re = re.compile("fix|fixed")
-_func_re = re.compile("func|function")
-_custom_re = re.compile("custom")
+_KF_RE = re.compile("forward_rate_constant|kf")
+_KEQ_RE = re.compile("equilibrium_constant|Keq")
+_KR_RE = re.compile("reverse_rate_constant|kr")
+_IC_RE = re.compile("initial_condition|ic")
+_FIX_RE = re.compile("fix|fixed")
+_FUNC_RE = re.compile("func|function")
+_CUSTOM_RE = re.compile("custom")
 # Global symbol for time
 _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
 # Define default option dicts for solvers
 _scipy_default_options = _msol._DictWithID(
-        id="scipy", dictionary={
-            "method": "LSODA",
-            "dense_output": True,
-            "t_eval": None,
-            "events": None,
-            "vectorized": False,
-            "max_step": np.inf,
-            "rtol": 1e-6,
-            "atol": 1e-9,
-            "jac_sparsity": None,
-            "lband": None,
-            "uband": None,
-            "min_step": 0.,
-            "first_step": None,
-            }
-)
+    id="scipy", dictionary={
+        "method": "LSODA",
+        "dense_output": True,
+        "t_eval": None,
+        "events": None,
+        "vectorized": False,
+        "max_step": np.inf,
+        "rtol": 1e-6,
+        "atol": 1e-9,
+        "jac_sparsity": None,
+        "lband": None,
+        "uband": None,
+        "min_step": 0.,
+        "first_step": None,
+    })
 warnings.filterwarnings(action="ignore", module="scipy",
                         message="^internal gelsd")
 
@@ -462,7 +462,7 @@ class Simulation(Object):
             self._assess_quality(model, verbose)
             # Implement any perturbations and get the value substituion dicts.
             parameters, ics, functions = self._apply_perturbations(
-                                                model, perturbations)
+                model, perturbations)
             # Setup ODEs for integration
             [odes, jacb, ics] = self._make_odes_functions(model, parameters,
                                                           ics, functions)
@@ -575,7 +575,8 @@ class Simulation(Object):
                 sol_obj = sols.pop(2)
                 sol_objects[model.id] = sol_obj
 
-            self._update_solution_storage(sols)
+            if update_solutions:
+                self._update_solution_storage(sols)
             for sol, storage in zip(sols, [conc_solutions, flux_solutions]):
                 storage += [sol]
 
@@ -702,10 +703,10 @@ class Simulation(Object):
         # Find the steady state for models that are present.
         for model in models:
             sols = self.find_steady_state_model(
-                           model, strategy=strategy,
-                           perturbations=perturbations, verbose=verbose,
-                           update_initial_conditions=update_initial_conditions,
-                           update_reactions=update_reactions)
+                model, strategy=strategy, perturbations=perturbations,
+                verbose=verbose,
+                update_initial_conditions=update_initial_conditions,
+                update_reactions=update_reactions)
 
             sols = list(sols)
             for sol, storage in zip(sols, [conc_solutions, flux_solutions]):
@@ -867,13 +868,13 @@ class Simulation(Object):
                 local_syms = {str(arg): sym.Symbol(arg) for arg in args}
                 if parameters is not None:
                     local_syms.update({str(param): sym.Symbol(param)
-                                      for param in iterkeys(parameters)})
+                                       for param in iterkeys(parameters)})
                 else:
                     parameters = {}
                 try:
                     expr = sym.sympify(group, locals=local_syms)
                     expr = expr.subs(parameters)
-                except sym.SympifyError as e:
+                except sym.SympifyError:
                     raise ValueError("Could not convert expression '{0}: {1}' "
                                      "into a group.".format(g_id, group))
 
@@ -979,9 +980,9 @@ class Simulation(Object):
 
         """
         values = {}
-        for key, dictionary in iteritems(model.parameters):
+        for dictionary in itervalues(model.parameters):
             values.update({sym.Symbol(str(k)): v
-                          for k, v in iteritems(dictionary)})
+                           for k, v in iteritems(dictionary)})
         return _msol._DictWithID("{0}_parameters".format(model.id),
                                  dictionary=values)
 
@@ -993,7 +994,7 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        values = {sym.Function(str(k))(_T_SYM): v
+        values = {_mk_met_func(k): v
                   for k, v in iteritems(model.initial_conditions)}
         return _msol._DictWithID("{0}_ics".format(model.id),
                                  dictionary=values)
@@ -1064,9 +1065,10 @@ class Simulation(Object):
                     value_dict = parameters
                 else:
                     value_dict = ics
-                is_ic = _ic_re.search(item_str)
-                item_sym = self._perturbation_string_replace(
-                            item_str, value, "\.ic|\.fix", value_dict, True)
+                is_ic = _IC_RE.search(item_str)
+                item_sym = self._perturbation_string_replace(item_str, value,
+                                                             "\.ic|\.fix",
+                                                             value_dict, True)
                 # Switch dictionaries for ICs changed into fixed concentrations
                 if is_ic:
                     ics[item_sym] = value_dict[item_sym]
@@ -1083,7 +1085,7 @@ class Simulation(Object):
                     item_str, value, "\.func$", parameters, False)
 
                 functions.update({item_sym: parameters[item_sym]})
-                parameters[item_sym] = sym.Function(item_str[:-5])(_T_SYM)
+                parameters[item_sym] = _mk_met_func(item_str[:-5])
             # Perturb a custom parameter
             elif ".custom" in item_str[-7:]:
                 self._perturbation_string_replace(
@@ -1106,8 +1108,8 @@ class Simulation(Object):
         if not isinstance(perturbations, dict):
             raise TypeError("perturbations must be a dict.")
         validated = {}
-        _re_list = [_kf_re, _Keq_re, _kr_re, _ic_re,
-                    _fix_re, _func_re, _custom_re]
+        _re_list = [_KF_RE, _KEQ_RE, _KR_RE, _IC_RE,
+                    _FIX_RE, _FUNC_RE, _CUSTOM_RE]
         _key_fixes = ["kf", "Keq", "kr", ".ic", ".fix", ".func", ".custom"]
 
         for old_key, value in iteritems(perturbations):
@@ -1115,28 +1117,28 @@ class Simulation(Object):
             try:
                 for _re, key_fix in zip(_re_list, _key_fixes):
                     if _re.match(pert_type):
-                        new_key = "{0}_{1}".format(key_fix, item) \
-                                   if key_fix in _key_fixes[:3] \
-                                   else item + key_fix
-                        if (old_key in str(value) and
-                           "[{0}]".format(old_key) in str(value)):
+                        new_key = ("{0}_{1}".format(key_fix, item)
+                                   if key_fix in _key_fixes[:3]
+                                   else item + key_fix)
+                        if old_key in str(value) \
+                           and "[{0}]".format(old_key) in str(value):
                             value = value.replace(old_key, new_key)
                         else:
                             # If value cannot be converted, ensure perturbation
                             # is allowed and can be interpreted later.
-                            allow = [_fix_re.search(new_key) and
-                                     _ic_re.search(str(value)),
-                                     _custom_re.search(new_key),
-                                     _func_re.search(new_key)]
+                            allow = [_FIX_RE.search(new_key)
+                                     and _IC_RE.search(str(value)),
+                                     _CUSTOM_RE.search(new_key),
+                                     _FUNC_RE.search(new_key)]
                             if [True for b in allow if b is not None]:
                                 pass
                             else:
                                 # Otherwise try to convert value to a float
                                 value = float(value)
                         validated[new_key.strip()] = value
-                    elif [True for other in _re_list if other != _re and
-                          other.match(pert_type)]:
-                            pass
+                    elif [True for other in _re_list if other != _re
+                          and other.match(pert_type)]:
+                        pass
                     else:
                         raise ValueError
             except ValueError:
@@ -1154,8 +1156,8 @@ class Simulation(Object):
 
         """
         item_str = re.sub(elim_pattern, "", item_str)
-        if sym.Function(item_str)(_T_SYM) in value_dict:
-            item_sym = sym.Function(item_str)(_T_SYM)
+        if _mk_met_func(item_str) in value_dict:
+            item_sym = _mk_met_func(item_str)
         else:
             item_sym = sym.Symbol(item_str)
         if item_sym not in value_dict:
@@ -1188,7 +1190,7 @@ class Simulation(Object):
 
         # Set up matrix of ODEs
         for met, equation in iteritems(model.odes):
-            met_func = sym.Function(str(met))(_T_SYM)
+            met_func = _mk_met_func(met)
             if met_func in ics:
                 equations[met_func.diff(_T_SYM)] = equation.subs(parameters)
                 ordered_ics[met_func] = ics[met_func]
@@ -1196,7 +1198,7 @@ class Simulation(Object):
         # Account for functions
         if functions:
             for met, func in iteritems(functions):
-                met_func = sym.Function(str(met))(_T_SYM)
+                met_func = _mk_met_func(met)
                 equations[met_func.diff(_T_SYM)] = func.diff(_T_SYM)
                 ordered_ics[met_func] = ics[met]
 
@@ -1227,8 +1229,7 @@ class Simulation(Object):
         # TODO Add additional solvers here, fix for universal input and output
         # once additional solvers implemented
         integrator = {
-            "scipy": self._integrate_with_scipy,
-            }
+            "scipy": self._integrate_with_scipy}
 
         t, concs, sol_obj = integrator[self.solver](time, odes, jacb, ics,
                                                     new_options)
@@ -1257,10 +1258,10 @@ class Simulation(Object):
                 rate_function = sym.lambdify(args=args, expr=rate,
                                              modules=_LAMBDIFY_MODULE)
                 flux = np.array([rate_function(t[i], *concs[:, i])
-                                for i in range(len(t))])
+                                 for i in range(len(t))])
             # Constant flux, therefore flux is identical at each t
             else:
-                flux = np.array([float(rate)]*len(t))
+                flux = np.array([float(rate)] * len(t))
             fluxes[reaction.id] = flux
 
         flux_sol = _msol.Solution(model, _msol._FLUX_STR, fluxes, t)
@@ -1326,7 +1327,7 @@ class Simulation(Object):
                                             return_obj=False,
                                             update_solutions=False)
             # Check to see if concentrations reached a steady state.
-            for met, sol in iteritems(solutions[0]):
+            for sol in itervalues(solutions[0]):
                 if not round(abs(sol[-1] - sol[-2]), chop) <= _ZERO_TOL:
                     retry = True
                     break
@@ -1359,7 +1360,7 @@ class Simulation(Object):
         ordered_ics = OrderedDict()
         equations = OrderedDict()
         for met, equation in iteritems(model.odes):
-            met_func = sym.Function(str(met))(_T_SYM)
+            met_func = _mk_met_func(met)
             if met_func in ics:
                 equations[met_func] = equation.subs(parameters)
                 ordered_ics[met_func] = ics[met_func]

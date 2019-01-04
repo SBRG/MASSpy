@@ -2,6 +2,7 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
+from six import iteritems, string_types
 
 from cobra.core.metabolite import Metabolite
 from cobra.core.model import Model
@@ -11,16 +12,14 @@ from mass.core.massmetabolite import MassMetabolite
 from mass.core.massmodel import MassModel
 from mass.core.massreaction import MassReaction
 
-from six import iteritems, string_types
-
 
 # Public
-def convert_mass_to_cobra(object, prefix=None):
+def convert_mass_to_cobra(obj, prefix=None):
     """Create a new cobra Object from a given mass Object.
 
     Parameters
     ----------
-    object: MassMetabolite, MassModel, or MassReaction
+    obj: MassMetabolite, MassModel, or MassReaction
         The mass Object to convert into a new cobra Object.
     prefix: str, optional
         If provided, the string is used to prefix the identifier of the
@@ -40,16 +39,15 @@ def convert_mass_to_cobra(object, prefix=None):
     conversion_dict = {MassMetabolite: mass_to_cobra_metabolite,
                        MassReaction: mass_to_cobra_reaction,
                        MassModel: mass_to_cobra_model}
-
-    if type(object) not in conversion_dict:
+    try:
+        conversion_function = conversion_dict[type(obj)]
+    except KeyError:
         raise TypeError("object must be a mass object")
-    else:
-        conversion_function = conversion_dict[type(object)]
 
-    return conversion_function(object, prefix=prefix)
+    return conversion_function(obj, prefix=prefix)
 
 
-def convert_cobra_to_mass(object, prefix=None):
+def convert_cobra_to_mass(obj, prefix=None):
     """Create a new mass Object from a given cobra Object.
 
     Parameters
@@ -74,12 +72,12 @@ def convert_cobra_to_mass(object, prefix=None):
     conversion_dict = {Metabolite: cobra_to_mass_metabolite,
                        Reaction: cobra_to_mass_reaction,
                        Model: cobra_to_mass_model}
-    if type(object) not in conversion_dict:
-        raise TypeError("object must be a cobra object")
-    else:
-        conversion_function = conversion_dict[type(object)]
+    try:
+        conversion_function = conversion_dict[type(obj)]
+    except KeyError:
+        raise TypeError("obj must be a cobra object")
 
-    return conversion_function(object, prefix=prefix)
+    return conversion_function(obj, prefix=prefix)
 
 
 def mass_to_cobra_metabolite(metabolite, prefix=None):
@@ -248,7 +246,7 @@ def mass_to_cobra_model(model, prefix=None):
     return new_model
 
 
-def cobra_to_mass_model(model, prefix=None):
+def cobra_to_mass_model(model, prefix=None, kinetic_reversibility=None):
     """Create a new mass.MassModel from the given cobra.Model.
 
     Parameters
@@ -272,8 +270,10 @@ def cobra_to_mass_model(model, prefix=None):
     """
     new_model = _convert_model(model, MassModel, Model, prefix)
     # Add converted reactions and their converted metabolites
-    new_reactions = [cobra_to_mass_reaction(rxn, prefix=prefix)
-                     for rxn in model.reactions]
+    new_reactions = [
+        cobra_to_mass_reaction(rxn, prefix=prefix,
+                               kinetic_reversibility=kinetic_reversibility)
+        for rxn in model.reactions]
     new_model.add_reactions(new_reactions)
     # Copy compartments
     new_model.compartments = model.compartments.copy()
