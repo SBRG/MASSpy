@@ -305,7 +305,7 @@ class Simulation(Object):
         self._check_for_one_model(model)
         parameters, initial_conditions = self._values.get_by_any(
             ["{0}_parameters".format(model.id), "{0}_ics".format(model.id)])
-        return parameters, initial_conditions
+        return parameters.copy(), initial_conditions.copy()
 
     def view_parameter_values(self, models=None):
         """Return a copy of stored parameters for a list of models.
@@ -331,7 +331,7 @@ class Simulation(Object):
                                               for model in models])
         value_dict = {model.id: parameter
                       for model, parameter, in zip(models, parameters)}
-        return value_dict
+        return value_dict.copy()
 
     def view_initial_concentration_values(self, models=None):
         """Return a copy of stored initial concentrations for a list of models.
@@ -356,7 +356,7 @@ class Simulation(Object):
         ics = self._values.get_by_any(["{0}_ics".format(model.id)
                                        for model in models])
         value_dict = {model.id: ic for model, ic, in zip(models, ics)}
-        return value_dict
+        return value_dict.copy()
 
     def get_solver_options(self, solver=None):
         """Return a copy of the current solver options for a given solver.
