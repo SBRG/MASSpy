@@ -7,9 +7,9 @@ try:
 except ImportError:
     import json
 
-from mass.io.dict import model_from_dict, model_to_dict
-
 from six import string_types
+
+from mass.io.dict import model_from_dict, model_to_dict
 
 JSON_SPEC = "1"
 
@@ -106,10 +106,10 @@ def save_json_model(model, filename, sort=False, pretty=False,
 
     if pretty:
         dump_opts = {"indent": 4, "separators": (",", ": "),
-                     "sort_keys": True,  "allow_nan": False}
+                     "sort_keys": True, "allow_nan": False}
     else:
         dump_opts = {"indent": 4, "separators": (",", ": "),
-                     "sort_keys": True,  "allow_nan": False}
+                     "sort_keys": True, "allow_nan": False}
     dump_opts.update(**kwargs)
 
     if isinstance(filename, string_types):
@@ -156,6 +156,7 @@ json_schema = {
     "properties": {
         "id": {"type": "string"},
         "name": {"type": "string"},
+        "description": {"type": "string"},
         "version": {
             "type": "integer",
             "default": 1,
@@ -235,7 +236,7 @@ json_schema = {
                 },
                 "required": ["id", "name"],
                 "additionalProperties": False,
-                },
+            },
         },
         "genes": {
             "type": "array",
@@ -256,14 +257,14 @@ json_schema = {
             "allOf": {
                 "type": "number",
                 "minimum": 0,
-                },
+            },
         },
         "fixed_concentrations": {
             "type": "object",
             "allOf": {
                 "type": "number",
                 "minimum": 0,
-                },
+            },
         },
         "custom_rates": {
             "type": "object",

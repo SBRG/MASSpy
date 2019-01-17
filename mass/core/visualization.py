@@ -3,22 +3,24 @@
 from __future__ import absolute_import
 
 import math
-from collections import Hashable, Iterable, OrderedDict
+from collections import OrderedDict
+from collections.abc import Hashable, Iterable
 from warnings import warn
 
 from cycler import Cycler
 
-from mass import config as _config
-from mass.analysis import linear
-from mass.util.util import ensure_iterable
-
 import matplotlib as mpl
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
+
+from mass import config as _config
+from mass.analysis import linear
+from mass.util.util import ensure_iterable
 
 _ZERO_TOL = _config.ZERO_TOLERANCE
 _FONTSIZES = [
@@ -33,7 +35,7 @@ _custom_default_options = {"plot": {}, "tiled": {}}
 
 def plot_simulation(solution, observable=None, time=None, ax=None, legend=None,
                     **kwargs):
-    """Generate a plot of the time profile for the given Solution object.
+    """Create a plot of the time profile for the given Solution object.
 
     Accepted ``kwargs`` are passed on to various matplotlib methods.
     Default ``kwargs`` values can be viewed via get_defaults("plot").
@@ -326,10 +328,10 @@ def plot_tiled_phase_portrait(solution, observable=None, time=None, ax=None,
     fontsize = options["fontsize"]
     # Create N x N subplots where N is the number of observable solutions
     ax.axis("off")
-    s = (1/N)
+    s = (1 / N)
     for i, x in enumerate(observable_solutions):
         for j, y in enumerate(observable_solutions):
-            subax = ax.inset_axes(bounds=[i*s, 1-s*(j+1), s, s])
+            subax = ax.inset_axes(bounds=[i * s, 1 - s * (j + 1), s, s])
             plot_args = [solution, x, y, time, subax, time_poi]
             data_args = [i, j, display_data, empty_tiles]
             subax.set_xmargin(0.15)
@@ -451,15 +453,17 @@ def get_default_colors(n_items, start=0):
         if not isinstance(value, integer_types):
             raise TypeError(parameter + " must be an integer.")
 
+    values = np.linspace(0, 1, 20)
     if n_items > 10 and n_items <= 20:
-        cmap = mpl.cm.tab20.colors
+        cmap = cm.get_cmap("tab20")(values)
     elif n_items > 20 and n_items <= 60:
-        cmap = (mpl.cm.tab20.colors + mpl.cm.tab20b.colors
-                + mpl.cm.tab20c.colors)
+        cmap = np.vstack((cm.get_cmap("tab20")(values),
+                          cm.get_cmap("tab20b")(values),
+                          cm.get_cmap("tab20c")(values)))
     elif n_items > 60:
-        cmap = mpl.cm.nipy_spectral(np.linspace(0, 1, n_items))
+        cmap = cm.get_cmap("nipy_spectral")(np.linspace(0, 1, n_items))
     else:
-        cmap = mpl.cm.tab10.colors
+        cmap = cm.get_cmap("tab10")(np.linspace(0, 1, 10))
 
     return list(cmap)[start:n_items]
 
@@ -789,22 +793,21 @@ def _set_line_properties(ax, options, n_new):
     # Get default values for linestyles and linecolors.
     default_dict = {
         "linecolor": get_default_colors(len(lines), start=len(lines) - n_new),
-        "linestyle": ["-"]*n_new
-        }
+        "linestyle": ["-"] * n_new}
 
     for key in ["linecolor", "linestyle"]:
         # Set the property if given
         if options[key] is not None:
             to_apply = options[key].copy()
         # Skip linestyles if not given
-        elif options[key] is None and key is "linestyle":
+        elif options[key] is None and key == "linestyle":
             continue
         else:
             to_apply = default_dict[key]
 
         # Apply to all newly plotted items if only one value provided.
         if len(to_apply) == 1 and n_new != 1:
-            to_apply = to_apply*n_new
+            to_apply = to_apply * n_new
         # Use default values if the input does not match the number of newly
         # plotted lines.
         elif len(to_apply) != n_new:
@@ -818,9 +821,9 @@ def _set_line_properties(ax, options, n_new):
         to_apply.reverse()
         for i, value in enumerate(to_apply):
             if key is "linestyle":
-                lines[len(lines)-1-i].set_linestyle(value)
+                lines[len(lines) - 1 - i].set_linestyle(value)
             else:
-                lines[len(lines)-1-i].set_color(value)
+                lines[len(lines) - 1 - i].set_color(value)
 
 
 def _set_axis_legend(ax, legend, default_labels, options):
@@ -852,16 +855,16 @@ def _set_axis_legend(ax, legend, default_labels, options):
                     msg = ("Could not interpret legend parameter '{0}'"
                            .format(legend[-1]))
                 else:
-                    msg = ("'{0}' required != '{1}' provided".format(
-                           len(default_labels), len(legend[-1])))
+                    msg = ("'{0}' required != '{1}' provided"
+                           .format(len(default_labels), len(legend[-1])))
                 msg += ", will attempt to use default legend values instead."
                 warn(msg)
                 del legend[-1]
             if not legend:
                 break
     # Set the legend if only labels are provided.
-    elif (all(isinstance(entry, string_types) for entry in legend) and
-          len(legend) == len(default_labels)):
+    elif (all(isinstance(entry, string_types) for entry in legend)
+          and len(legend) == len(default_labels)):
         items = legend
     # Use default values if input could not be interpreted.
     else:
@@ -869,7 +872,7 @@ def _set_axis_legend(ax, legend, default_labels, options):
              "entries and parameters instead.")
         items = default_labels
     # Get the legend properties
-    property_dict = _get_legend_properties(options, loc, ncol, len(items))
+    property_dict = _get_legend_properties(loc, ncol, len(items))
     property_dict.update({"fontsize": font})
 
     # Apply new labels to the lines and make/update the legend.
@@ -929,10 +932,10 @@ def _annotate_time_points_of_interest(ax, plot_function, solution, x, y,
             return False
 
     for i, [t, c] in enumerate(zip(time_poi, poi_color)):
-        for x_label, x_poi in iteritems(x_pois):
+        for x_poi in itervalues(x_pois):
             if not poi_in_bounds(plot_bounds["x"], x_poi[i]):
                 continue
-            for y_label, y_poi in iteritems(y_pois):
+            for y_poi in itervalues(y_pois):
                 if not poi_in_bounds(plot_bounds["y"], y_poi[i]):
                     continue
                 xy = (x_poi[i], y_poi[i])
@@ -958,7 +961,7 @@ def _place_tile(i, j, options, plot_args, data_args):
 
     def _make_tile(condition, options, plot_args, data_args):
         solution, x, y, time, subax, time_poi = plot_args
-        i, j, display_data, empty_tiles = data_args
+        i, j = data_args[0:2]
         if condition:
             subax = plot_phase_portrait(solution, x, y, time, ax=subax,
                                         time_poi=time_poi,
@@ -1035,8 +1038,8 @@ def _update_plot_function(options, key, value):
     """
     allowed_plotting_functions = {"loglog", "semilogx", "semilogy", "plot"}
     if value not in allowed_plotting_functions:
-        raise ValueError(str(key) + "must be one of the following: " +
-                         str(allowed_plotting_functions))
+        raise ValueError(str(key) + "must be one of the following: "
+                         + str(allowed_plotting_functions))
     options[key] = value
 
 
@@ -1127,12 +1130,12 @@ def _update_lines(options, key, value):
 
     if isinstance(value, Cycler):
         value = mpl.rcsetup.cycler(value)
-    elif (not isinstance(value, Iterable) or
-          not all(isinstance(v, string_types) for v in value)):
+    elif (not isinstance(value, Iterable)
+          or not all(isinstance(v, string_types) for v in value)):
         raise TypeError(key + " must be a string or an iterable of strings.")
     elif key is "linecolor" and not all(is_color_like(v) for v in value):
-        raise ValueError("Invalid colors found: " + str(
-                         [v for v in value if not is_color_like(v)]))
+        raise ValueError("Invalid colors found: "
+                         + str([v for v in value if not is_color_like(v)]))
     else:
         pass
     options[key] = value
@@ -1174,27 +1177,26 @@ def _get_legend_values(legend, allowable, default, success):
     """
     parameter = None
     if legend:
+        item = legend[-1]
         if allowable:
-            if isinstance(legend[-1], Hashable) and \
-               (isinstance(legend[-1], (integer_types, float)) or
-               legend[-1] in allowable):
+            if ((isinstance(item, Hashable)
+                 and (isinstance(item, (integer_types, float))
+                      or item in allowable))):
                 parameter = legend.pop(-1)
                 success = True
-        elif (not isinstance(legend[-1], Hashable) and
-              len(legend[-1]) == len(default)):
-                parameter = legend.pop(-1)
-                success = True
+        elif (not isinstance(item, Hashable) and len(item) == len(default)):
+            parameter = legend.pop(-1)
+            success = True
         else:
             parameter = default
     else:
         parameter = default
-
     if parameter is None:
         parameter = default
     return parameter, success
 
 
-def _get_legend_properties(options, loc, ncol, n_items):
+def _get_legend_properties(loc, ncol, n_items):
     """Help set legend location and number of columns (Helper function).
 
     Warnings
@@ -1212,7 +1214,7 @@ def _get_legend_properties(options, loc, ncol, n_items):
         anchor = None
 
     if ncol is None:
-        ncol = int(math.ceil(math.sqrt(n_items)/3))
+        ncol = int(math.ceil(math.sqrt(n_items) / 3))
 
     return {"loc": loc, "bbox_to_anchor": anchor, "ncol": ncol}
 
@@ -1228,8 +1230,8 @@ def _update_tiles(options, key, value):
     if "_color" in key and not mpl.colors.is_color_like(value):
         raise ValueError("Invalid color input: " + str(value))
 
-    if key is "fontsize" and (value not in _FONTSIZES and
-       (isinstance(value, (integer_types, float)) and value < 0)):
+    if key == "fontsize" and value not in _FONTSIZES \
+       and (isinstance(value, (integer_types, float)) and value < 0):
         raise ValueError(key + " must be a non-negative value or one of the "
                          "following: " + str(_FONTSIZES))
 
@@ -1253,7 +1255,6 @@ def _fmt_empty_tiles(display_data, empty_tiles, N):
         if not np.array_equal(display_data.shape, (N, N)):
             raise ValueError("display_data must be an N x N matrix where N is "
                              "equal to the number of observable solutions.")
-            display_data = None
 
     return display_data, empty_tiles
 
@@ -1270,9 +1271,9 @@ def _filter_lines(ax, to_return="lines"):
         raise ValueError("Unrecognized 'to_return' value")
 
     if to_return == "lines":
-        return [l for l in ax.get_lines() if "t=" != l.get_label()[:2]]
+        return [l for l in ax.get_lines() if l.get_label()[:2] != "t="]
     else:
-        return [l for l in ax.get_lines() if "t=" == l.get_label()[:2]]
+        return [l for l in ax.get_lines() if l.get_label()[:2] == "t="]
 
 
 def _make_time_vector(solution, time):
@@ -1285,13 +1286,13 @@ def _make_time_vector(solution, time):
     """
     J = linear.jacobian(solution.model)
     rank = linear.matrix_rank(J)
-    timescales = np.real_if_close(-1/np.sort(linear.eig(J))[:rank])
+    timescales = np.real_if_close(-1 / np.sort(linear.eig(J))[:rank])
 
     min_ts = min([ts for ts in timescales if ts >= time[0]])
     max_ts = max([ts for ts in timescales if ts <= time[-1]])
     end = max(time[-1], max_ts)
     if time[0] == 0:
-        start = min_ts/100
+        start = min_ts / 100
         t_vec = np.concatenate([[0], np.geomspace(start, end,
                                                   solution.numpoints)])
     else:

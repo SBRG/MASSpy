@@ -6,13 +6,13 @@ from __future__ import absolute_import
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
 
-from cobra.core import Gene
-
-from mass.core import MassMetabolite, MassModel, MassReaction
-
 import numpy as np
 
 from six import iteritems, string_types
+
+from cobra.core import Gene
+
+from mass.core import MassMetabolite, MassModel, MassReaction
 
 # Global
 _INF = float("inf")
@@ -23,7 +23,7 @@ _REQUIRED_REACTION_ATTRIBUTES = [
 _ORDERED_OPTIONAL_REACTION_KEYS = [
     "subsystem", "steady_state_flux", "_forward_rate_constant",
     "_reverse_rate_constant", "_equilibrium_constant", "objective_coefficient",
-    "variable_kind", "_rtype",  "notes", "annotation"]
+    "variable_kind", "_rtype", "notes", "annotation"]
 _OPTIONAL_REACTION_ATTRIBUTES = {
     "subsystem": "",
     "steady_state_flux": None,
@@ -60,9 +60,11 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 }
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "compartments", "modules", "units", "notes", "annotation"]
+    "name", "description", "compartments", "modules", "units", "notes",
+    "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
+    "description": "",
     "compartments": {},
     "modules": set(),
     "units": {},
@@ -253,8 +255,8 @@ def model_from_dict(obj):
     # Add initial conditions to the model if they exist
     if "initial_conditions" in obj:
         model.update_initial_conditions({
-             model.metabolites.get_by_id(met): ic
-             for met, ic in iteritems(obj["initial_conditions"])})
+            model.metabolites.get_by_id(met): ic
+            for met, ic in iteritems(obj["initial_conditions"])})
 
     # Add fixed concentrations to the model if they exist
     if "fixed_concentrations" in obj:

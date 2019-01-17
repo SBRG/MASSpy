@@ -5,14 +5,14 @@ from __future__ import absolute_import
 import re
 from copy import copy
 
-from mass.core.massmodel import MassModel
-from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
-
 import pandas as pd
 
 from scipy.interpolate import interp1d
 
 from six import iteritems, string_types
+
+from mass.core.massmodel import MassModel
+from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
 
 
 # Strings of valid solution types
@@ -22,10 +22,10 @@ _POOL_STR = "Pool"
 _NETFLUX_STR = "NetFlux"
 
 # Pre-compiled regular expressions for valid solution types
-_conc_re = re.compile(_CONC_STR)
-_flux_re = re.compile(_FLUX_STR)
-_pool_re = re.compile(_POOL_STR)
-_netflux_re = re.compile(_NETFLUX_STR)
+_CONC_RE = re.compile(_CONC_STR)
+_FLUX_RE = re.compile(_FLUX_STR)
+_POOL_RE = re.compile(_POOL_STR)
+_NETFLUX_RE = re.compile(_NETFLUX_STR)
 
 
 class _DictWithID(dict):
@@ -57,6 +57,7 @@ class _DictWithID(dict):
 
     @property
     def id(self):
+        """Return identifier of the dictionary."""
         return getattr(self, "_id", None)
 
     @id.setter
@@ -93,7 +94,7 @@ class Solution(_DictWithID):
         A dict containing the solutions to store in the Solution object. If
         None provided then the Solution object will be initialized with no
         solutions. Solutions can be added or changed later using various dict
-        methods (i.e. Solution.update(solution_dictionary))
+        methods (i.e. Solution.update(solution_dictionary)).
     time: array-like, optional
         An array-like object containing the time points used in calculating the
         solutions to be stored.
@@ -114,7 +115,7 @@ class Solution(_DictWithID):
                  time=None, interpolate=False):
         """Container with an identifier for "solution_type" solutions."""
         valid_check = [True if _re.match(solution_type) else False
-                       for _re in [_conc_re, _flux_re, _pool_re, _netflux_re]]
+                       for _re in [_CONC_RE, _FLUX_RE, _POOL_RE, _NETFLUX_RE]]
         if True not in valid_check:
             raise ValueError("'{0}' is not a valid solution type."
                              .format(solution_type))
@@ -164,14 +165,14 @@ class Solution(_DictWithID):
     @property
     def t0(self):
         """Return the initial time point used in computing the solution."""
-        if self.t is not None and (len(self.t) >= 2):
-            return self.t[0]
+        if self._time is not None and (len(self._time) >= 2):
+            return self._time[0]
 
     @property
     def tf(self):
         """Return the final time point used in computing the solution."""
-        if self.t is not None and (len(self.t) >= 2):
-            return self.t[-1]
+        if self._time is not None and (len(self._time) >= 2):
+            return self._time[-1]
 
     @property
     def numpoints(self):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings. Reenable warnings for C0302, C901, R0912."""
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
 import logging
@@ -7,6 +7,12 @@ import re
 from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
+
+import numpy as np
+
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
+
+import sympy as sym
 
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
@@ -18,28 +24,22 @@ from mass.util import expressions
 from mass.util.util import (_get_matrix_constructor, convert_matrix,
                             ensure_iterable, strip_time)
 
-import numpy as np
-
-from six import integer_types, iteritems, iterkeys, itervalues, string_types
-
-import sympy as sym
-
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
 # Global
-CHOPNSq = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
+CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
 # Pre-compiled regular expressions for building reactions from strings
-_rxn_id_re = re.compile("^(\w+):")
-_met_id_re = re.compile("^s\[(\S+)[,|\]]")
-_reversible_arrow_re = re.compile("<(-+|=+)>")
-_forward_arrow_re = re.compile("(-+|=+)>")
-_reverse_arrow_re = re.compile("<(-+|=+)")
-_name_arg_re = re.compile("name=(\w+)")
-_formula_arg_re = re.compile("formula=(\w+)")
-_charge_arg_re = re.compile("charge=(\w+)")
-_compartment_re = re.compile("\](\[[A-Za-z]\])")
-_equals_re = re.compile("=")
+_RXN_ID_RE = re.compile("^(\w+):")
+_MET_ID_RE = re.compile("^s\[(\S+)[,|\]]")
+_REVERSIBLE_ARROW_RE = re.compile("<(-+|=+)>")
+_FORWARD_ARROW_RE = re.compile("(-+|=+)>")
+_REVERSE_ARROW_RE = re.compile("<(-+|=+)")
+_NAME_ARG_RE = re.compile("name=(\w+)")
+_FORMULA_ARG_RE = re.compile("formula=(\w+)")
+_CHARGE_ARG_RE = re.compile("charge=(\w+)")
+_COMPARTMENT_RE = re.compile("\](\[[A-Za-z]\])")
+_EQUALS_RE = re.compile("=")
 
 
 class MassModel(Object):
@@ -147,7 +147,7 @@ class MassModel(Object):
             self.custom_rates = {}
             self.custom_parameters = {}
             self._compartments = {}
-            self.units = {}
+            self._units = {}
             # Initialize a set to store the modules
             self.modules = set()
             # Store the stoichiometric matrix, its matrix type, and data type
@@ -448,7 +448,7 @@ class MassModel(Object):
 
         context = get_context(self)
         if context:
-            context(partial(self.metaboliteS.__iadd__, metabolite_list))
+            context(partial(self.metabolites.__iadd__, metabolite_list))
             context(partial(setattr, met, "_model", self)
                     for met in metabolite_list)
 
@@ -549,7 +549,7 @@ class MassModel(Object):
         # Keep track of existing initial conditions for context if needed.
         context = get_context(self)
         if context:
-            existing_ics = {met: self.initial_condition[met]
+            existing_ics = {met: self.initial_conditions[met]
                             for met in initial_conditions
                             if met in self.initial_conditions}
         # Update initial conditions
@@ -823,7 +823,7 @@ class MassModel(Object):
                                                update_reactions)
                          for rxn in reaction_list}
 
-        if not self.custom_rates:
+        if self.custom_rates:
             rate_dict.update(self.custom_rates)
 
         return rate_dict
@@ -927,7 +927,7 @@ class MassModel(Object):
         if existing_customs:
             for custom_parameter in iterkeys(existing_customs):
                 if re.search(custom_parameter, custom_rate) and \
-                 custom_parameter not in custom_parameter_list:
+                   custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
 
         custom_rate = expressions.create_custom_rate(reaction, custom_rate,
@@ -1034,14 +1034,14 @@ class MassModel(Object):
         (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
             matrix_type=matrix_type, dtype=dtype)
         # Build the elemental matrix
-        elem_mat = matrix_constructor((len(CHOPNSq), len(self.metabolites)))
+        elem_mat = matrix_constructor((len(CHOPNSQ), len(self.metabolites)))
         # Get indices for elements and metabolites
-        e_ind = CHOPNSq.index
+        e_ind = CHOPNSQ.index
         m_ind = self.metabolites.index
 
         # Fill the elemental matrix
         for met in self.metabolites:
-            for element in CHOPNSq:
+            for element in CHOPNSQ:
                 if element in iterkeys(met.elements):
                     amount = met.elements[element]
                 elif re.match("q", element) and met.charge is not None:
@@ -1051,7 +1051,7 @@ class MassModel(Object):
                 elem_mat[e_ind(element), m_ind(met)] = amount
         # Convert matrix to a dataframe if matrix type is a dataframe
         elem_mat = convert_matrix(elem_mat, matrix_type=matrix_type,
-                                  dtype=dtype, row_ids=CHOPNSq,
+                                  dtype=dtype, row_ids=CHOPNSQ,
                                   col_ids=[m.id for m in self.metabolites])
 
         return elem_mat
@@ -1088,7 +1088,7 @@ class MassModel(Object):
             dtype = np.float64
 
         charge_mat = convert_matrix(charge_mat, matrix_type=matrix_type,
-                                    dtype=dtype, row_ids=CHOPNSq,
+                                    dtype=dtype, row_ids=CHOPNSQ,
                                     col_ids=[r.id for r in self.reactions])
         return charge_mat
 
@@ -1119,7 +1119,7 @@ class MassModel(Object):
             raise TypeError("fixed_concentrations must be a dict.")
         for met, fixed_conc in iteritems(fixed_concentrations):
             if met not in self.external_metabolites and \
-             met not in self.metabolites:
+               met not in self.metabolites:
                 raise ValueError("Did not find {0} in model metabolites or in "
                                  "exchange reactions.".format(met))
 
@@ -1361,9 +1361,9 @@ class MassModel(Object):
         # Add initial conditions
         existing = [m.id for m in iterkeys(merged_model.initial_conditions)]
         merged_model.update_initial_conditions({
-             merged_model.metabolites.get_by_id(m.id): ic
-             for m, ic in iteritems(second_model.initial_conditions)
-             if m.id not in existing})
+            merged_model.metabolites.get_by_id(m.id): ic
+            for m, ic in iteritems(second_model.initial_conditions)
+            if m.id not in existing})
 
         # Add fixed concentrations
         existing = [m.id if isinstance(m, MassMetabolite) else m
@@ -1575,30 +1575,30 @@ class MassModel(Object):
                 raise TypeError("reaction_strings must be a string or a list "
                                 "of strings")
 
-        _metab_args = [_name_arg_re, _formula_arg_re, _charge_arg_re]
+        _metab_args = [_NAME_ARG_RE, _FORMULA_ARG_RE, _CHARGE_ARG_RE]
 
         for rxn_string in reaction_strings:
-            if not _rxn_id_re.search(rxn_string):
+            if not _RXN_ID_RE.search(rxn_string):
                 raise ValueError("Could not find an ID for "
                                  "'{0}'".format(rxn_string))
-            result = _rxn_id_re.search(rxn_string)
+            result = _RXN_ID_RE.search(rxn_string)
             rxn_id = result.group(1)
             rxn_string = rxn_string[result.end():]
             # Determine reaction reversibility
-            if _reversible_arrow_re.search(rxn_string):
-                arrow_loc = _reversible_arrow_re.search(rxn_string)
+            if _REVERSIBLE_ARROW_RE.search(rxn_string):
+                arrow_loc = _REVERSIBLE_ARROW_RE.search(rxn_string)
                 reversible = True
                 # Reactants left of the arrow, products on the right
                 reactant_str = rxn_string[:arrow_loc.start()].strip()
                 product_str = rxn_string[arrow_loc.end():].strip()
-            elif _forward_arrow_re.search(rxn_string):
-                arrow_loc = _forward_arrow_re.search(rxn_string)
+            elif _FORWARD_ARROW_RE.search(rxn_string):
+                arrow_loc = _FORWARD_ARROW_RE.search(rxn_string)
                 reversible = False
                 # Reactants left of the arrow, products on the right
                 reactant_str = rxn_string[:arrow_loc.start()].strip()
                 product_str = rxn_string[arrow_loc.end():].strip()
-            elif _reverse_arrow_re.search(rxn_string):
-                arrow_loc = _reverse_arrow_re.search(rxn_string)
+            elif _REVERSE_ARROW_RE.search(rxn_string):
+                arrow_loc = _REVERSE_ARROW_RE.search(rxn_string)
                 reversible = False
                 # Reactants right of the arrow, products on the left
                 reactant_str = rxn_string[:arrow_loc.end()].strip()
@@ -1608,6 +1608,7 @@ class MassModel(Object):
                                  "'{0}'".format(rxn_string))
             new_reaction = MassReaction(rxn_id, reversible=reversible)
 
+            d_re = re.compile("(\d) ")
             for substr, factor in zip([reactant_str, product_str], [-1, 1]):
                 if not substr:
                     continue
@@ -1616,22 +1617,22 @@ class MassModel(Object):
                     if re.match("nothing", term.lower()):
                         continue
                     # Find the compartment if it exists
-                    if _compartment_re.search(term):
-                        compartment = _compartment_re.search(term)
+                    if _COMPARTMENT_RE.search(term):
+                        compartment = _COMPARTMENT_RE.search(term)
                         compartment = compartment.group(1).strip("[|]")
-                        term = _compartment_re.sub("]", term)
+                        term = _COMPARTMENT_RE.sub("]", term)
                     else:
                         compartment = None
-                    if re.search("\d ", term):
-                        num = float(re.search("(\d) ", term).group(1))*factor
-                        metab_to_make = term[re.search("(\d) ", term).end():]
+                    if d_re.search(term):
+                        num = float(d_re.search(term).group(1)) * factor
+                        metab_to_make = term[d_re.search(term).end():]
                     else:
                         num = factor
                         metab_to_make = term
                     # Find the metabolite's ID
-                    if not _met_id_re.search(metab_to_make):
+                    if not _MET_ID_RE.search(metab_to_make):
                         raise ValueError("Could not locate the metabolite ID")
-                    met_id = _met_id_re.search(metab_to_make).group(1)
+                    met_id = _MET_ID_RE.search(metab_to_make).group(1)
                     # Use the metabolite in the model if it exists
                     try:
                         metab = self.metabolites.get_by_id(met_id)
@@ -1640,7 +1641,7 @@ class MassModel(Object):
                     # Set attributes for the metabolite
                     for arg in _metab_args:
                         if arg.search(metab_to_make):
-                            attr = _equals_re.split(arg.pattern)[0]
+                            attr = _EQUALS_RE.split(arg.pattern)[0]
                             val = arg.search(metab_to_make).group(1)
                             metab.__dict__[attr] = val
                     new_reaction.add_metabolites({metab: num})

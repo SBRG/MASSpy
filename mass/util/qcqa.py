@@ -6,14 +6,15 @@ import warnings
 from collections import Counter
 from math import ceil, floor
 
-from mass import config as _config
-from mass.util.util import ensure_iterable
-
-from six import iteritems, iterkeys
+from six import iteritems, iterkeys, itervalues
 
 import sympy as sym
 
 from tabulate import tabulate
+
+from mass import config as _config
+from mass.util.expressions import _mk_met_func
+from mass.util.util import ensure_iterable
 
 # Global
 _T_SYM = sym.Symbol("t")
@@ -203,6 +204,10 @@ def get_missing_reaction_parameters(model, simulation=None,
             missing_params = "; ".join([k.split("_")[0]
                                         for k in missing_params
                                         if count[rxn.id] < 2]).rstrip("; ")
+        # Remove missing reverse rate constants for irreversible reactions
+        if not rxn.reversible and "kr" in missing_params:
+            missing_params = missing_params.replace("kr", "")
+
         if missing_params:
             missing[rxn] = "{0}".format(missing_params.rstrip("; "))
 
@@ -268,8 +273,8 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
             customs = [custom for custom in customs
                        if sym.Symbol(custom) not in existing_customs
                        or existing_customs[sym.Symbol(custom)] is None]
-        missing[rxn] = "; ".join(customs)
-
+        if customs:
+            missing[rxn] = "; ".join(customs)
     return missing
 
 
@@ -341,8 +346,10 @@ def get_missing_initial_conditions(model, simulation=None,
     if simulation is not None:
         exist = simulation.view_initial_concentration_values(model)
         missing = [met for met in missing
-                   if not sym.Function(str(met))(_T_SYM) in exist[model.id]
-                   or exist[model.id][sym.Function(str(met))(_T_SYM)] is None]
+                   if not _mk_met_func(met) in exist[model.id]
+                   or exist[model.id][_mk_met_func(met)] is None]
+
+    missing = _check_if_needed(model, missing)
 
     return missing
 
@@ -386,6 +393,8 @@ def get_missing_fixed_concentrations(model, simulation=None,
         missing = [met for met in missing
                    if not sym.Symbol(str(met)) in existing[model.id]
                    or existing[model.id][sym.Symbol(str(met))] is None]
+
+    missing = _check_if_needed(model, missing)
 
     return missing
 
@@ -572,14 +581,15 @@ def check_reaction_parameters(model, simulation=None, tol=None,
     for rxn in reaction_list:
         if rxn in model.custom_rates:
             missing_customs = _check_custom_for_standard(model, rxn)
-            if simulation is not None:
+            if simulation is not None and missing_customs:
                 param_keys = [sym.Symbol("{0}_{1}".format(param, rxn.id))
                               for param in missing_customs[rxn].split("; ")]
                 missing_customs = [str(param).split("_")[0]
                                    for param in param_keys
                                    if param not in existing_parameters
                                    or existing_parameters[param] is None]
-            customs.update({rxn: "; ".join(missing_customs)})
+            if missing_customs:
+                customs.update({rxn: "; ".join(missing_customs)})
         # Address reactions that are missing parameters
         elif (len(rxn.parameters) < 2 and not count) or \
              (isinstance(count, dict) and count[rxn.id] < 2):
@@ -591,7 +601,6 @@ def check_reaction_parameters(model, simulation=None, tol=None,
         # Only two reaction parameters exist, no consistency check required
         else:
             pass
-
     if missing:
         missing = get_missing_reaction_parameters(model, simulation, missing)
     else:
@@ -602,7 +611,6 @@ def check_reaction_parameters(model, simulation=None, tol=None,
                                                     tol, superfluous)
     else:
         superfluous = {}
-
     missing.update(customs)
 
     return missing, superfluous
@@ -638,7 +646,7 @@ def is_simulatable(model, simulation=None):
     missing_params.update(get_missing_custom_parameters(model, simulation))
     consistency_check = True
     if superfluous:
-        for rxn, consistency in iteritems(superfluous):
+        for consistency in itervalues(superfluous):
             if consistency is "Inconsistent":
                 consistency_check = False
 
@@ -791,10 +799,11 @@ def _format_table_for_print(table_items, checks, model_id, sim_id=None):
     # Format based on longest string in the inner tables if content exists
     if tables:
         # Determine longest line in the table, minimum length of 42 characters
-        max_len = max([len(table.split('\n')[1]) for table in tables] + [42])
-        sections = [["{0}{1}{2}".format(" " * ceil((max_len - len(section))/2),
-                    section, " " * floor((max_len - len(section))/2))]
-                    for section in sections]
+        max_l = max([len(table.split('\n')[1]) for table in tables] + [42])
+        sections = [
+            ["{0}{1}{2}".format(" " * ceil((max_l - len(sect)) / 2),
+                                sect, " " * floor((max_l - len(sect)) / 2))]
+            for sect in sections]
 
     # Format all indivual pieces of the report
     tables = [make_formatted_table([[table]], section, 'rst', u'left')
@@ -823,8 +832,8 @@ def _check_custom_for_standard(model, reaction):
     if reaction in model.custom_rates:
         symbols = list(model.custom_rates[reaction].atoms(sym.Symbol))
         symbols = sorted([str(s) for s in symbols
-                         if str(s) in [reaction.Keq_str, reaction.kf_str,
-                                       reaction.kr_str]])
+                          if str(s) in [reaction.Keq_str, reaction.kf_str,
+                                        reaction.kr_str]])
         for param in symbols:
             try:
                 reaction.parameters[param]
@@ -868,7 +877,7 @@ def _is_consistent(kf, Keq, kr, tol):
     This method is intended for internal use only.
 
     """
-    return "Consistent" if (abs(kr - kf/Keq) <= tol) else "Inconsistent"
+    return "Consistent" if (abs(kr - (kf / Keq)) <= tol) else "Inconsistent"
 
 
 def _set_tolerance(tol):
@@ -885,3 +894,23 @@ def _set_tolerance(tol):
         raise TypeError("tol must be a float")
     else:
         return tol
+
+
+def _check_if_needed(model, missing):
+    """Get the time-dependent concentrations and/or parameters in rate laws.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    needed = set()
+    for rate in itervalues(model.rates):
+        needed.update(rate.atoms(sym.Function))
+        needed.update(rate.atoms(sym.Symbol))
+
+    missing = [met for met in missing 
+               if sym.Symbol(str(met)) in needed 
+               or _mk_met_func(str(met)) in needed]
+
+    return missing

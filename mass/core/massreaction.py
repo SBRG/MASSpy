@@ -9,6 +9,8 @@ from functools import partial
 from operator import attrgetter
 from warnings import warn
 
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
+
 from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
 from cobra.util.context import get_context
@@ -16,23 +18,21 @@ from cobra.util.context import get_context
 from mass.core.massmetabolite import MassMetabolite
 from mass.util import expressions
 
-from six import integer_types, iteritems, iterkeys, itervalues, string_types
-
 
 # Global
 _INF = float("inf")
 # Precompiled regular expressions for gene reaction rules
-_and_or_search_re = re.compile(r'\(| and| or|\+|\)', re.IGNORECASE)
-_uppercase_AND_re = re.compile(r'\bAND\b')
-_uppercase_OR_re = re.compile(r'\bOR\b')
-_gpr_clean_re = re.compile(' {2,}')
+_AND_OR_SEARCH_RE = re.compile('\(| and| or|\+|\)', re.IGNORECASE)
+_UPPERCASE_AND_RE = re.compile('\bAND\b')
+_UPPERCASE_OR_RE = re.compile('\bOR\b')
+_GPR_CLEAN_RE = re.compile(' {2,}')
 # Precompiled regular expression to find any single letter compartment enclosed
 # in square brackets at the beginning of the string (e.g. [c] : foo --> bar").
-_compartment_finder_re = re.compile("^\s*(\[[A-Za-z]\])\s*:*")
+_COMPARTMENT_FINDER_RE = re.compile("^\s*(\[[A-Za-z]\])\s*:*")
 # Precompiled regular expressions to build reactions from strings.
-_reversible_arrow_finder_re = re.compile("<(-+|=+)>")
-_forward_arrow_finder_re = re.compile("(-+|=+)>")
-_reverse_arrow_finder_re = re.compile("<(-+|=+)")
+_REVERSIBLE_ARROW_FINDER_RE = re.compile("<(-+|=+)>")
+_FORWARD_ARROW_FINDER_RE = re.compile("(-+|=+)>")
+_REVERSE_ARROW_FINDER_RE = re.compile("<(-+|=+)")
 
 
 class MassReaction(Object):
@@ -306,8 +306,8 @@ class MassReaction(Object):
         These are reactions with a sink or a source term (e.g. 'A --> ')
 
         """
-        return (len(self.metabolites) == 1 and
-                not (self.reactants and self.products))
+        return (len(self.metabolites) == 1 and not
+                (self.reactants and self.products))
 
     @property
     def external_metabolite(self):
@@ -376,14 +376,14 @@ class MassReaction(Object):
             if "AND" in new_rule or "OR" in new_rule:
                 warn("uppercase AND/OR found in rule '{0}' for {1}"
                      .format(new_rule, repr(self)))
-                new_rule = _uppercase_AND_re.sub("and", new_rule)
-                new_rule = _uppercase_OR_re.sub("or", new_rule)
+                new_rule = _UPPERCASE_AND_RE.sub("and", new_rule)
+                new_rule = _UPPERCASE_OR_RE.sub("or", new_rule)
                 self.gene_reaction_rule = new_rule
                 return
             warn("malformed gene_reaction_rule '{0}' for {1}"
                  .format(new_rule, repr(self)))
-            tmp_str = _and_or_search_re.sub('', self._gene_reaction_rule)
-            gene_names = set((_gpr_clean_re.sub(' ', tmp_str).split(' ')))
+            tmp_str = _AND_OR_SEARCH_RE.sub('', self._gene_reaction_rule)
+            gene_names = set((_GPR_CLEAN_RE.sub(' ', tmp_str).split(' ')))
         if '' in gene_names:
             gene_names.remove('')
         old_genes = self._genes
@@ -566,7 +566,7 @@ class MassReaction(Object):
             new_reaction = self.copy()
 
         for met, coeff in iteritems(new_reaction.metabolites):
-            new_reaction._metabolites[met] = -1*coeff
+            new_reaction._metabolites[met] = -1 * coeff
 
         return new_reaction
 
@@ -661,7 +661,7 @@ class MassReaction(Object):
         """Return the coefficient of a metabolite in the reaction.
 
         Parameters
-        ---------
+        ----------
         metabolite_id: str, mass.MassMetabolite
             The MassMetabolite or the string identifier of the MassMetabolite
             whose coefficient is desired.
@@ -677,7 +677,7 @@ class MassReaction(Object):
         """Return the coefficients for a list of metabolites in the reaction.
 
         Parameters
-        ---------
+        ----------
         metabolite_ids: iterable
             Iterable of the mass.MassMetabolites or their string identifiers.
 
@@ -785,9 +785,9 @@ class MassReaction(Object):
                                 combine=True, reversibly=False))
             else:
                 # Reset the metabolites with add_metabolites
-                mets_to_reset = {key: old_coefficients[
-                                        model.metabolites.get_by_any(key)[0]]
-                                 for key in iterkeys(metabolites_to_add)}
+                mets_to_reset = {
+                    key: old_coefficients[model.metabolites.get_by_any(key)[0]]
+                    for key in iterkeys(metabolites_to_add)}
 
                 context(partial(self.add_metabolites, mets_to_reset,
                                 combine=False, reversibly=False))
@@ -928,11 +928,11 @@ class MassReaction(Object):
 
         """
         # Set the arrows
-        forward_arrow_finder = _forward_arrow_finder_re if fwd_arrow is None \
+        forward_arrow_finder = _FORWARD_ARROW_FINDER_RE if fwd_arrow is None \
             else re.compile(re.escape(fwd_arrow))
-        reverse_arrow_finder = _reverse_arrow_finder_re if rev_arrow is None \
+        reverse_arrow_finder = _REVERSE_ARROW_FINDER_RE if rev_arrow is None \
             else re.compile(re.escape(rev_arrow))
-        reversible_arrow_finder = _reverse_arrow_finder_re \
+        reversible_arrow_finder = _REVERSE_ARROW_FINDER_RE \
             if reversible_arrow is None \
             else re.compile(re.escape(reversible_arrow))
 
@@ -941,7 +941,7 @@ class MassReaction(Object):
             model = None
         else:
             model = self._model
-        found_compartments = _compartment_finder_re.findall(reaction_string)
+        found_compartments = _COMPARTMENT_FINDER_RE.findall(reaction_string)
         if len(found_compartments) == 1:
             compartment = found_compartments[0]
         else:
@@ -984,22 +984,23 @@ class MassReaction(Object):
                     continue
                 for term in substr.split(term_split):
                     term = term.strip()
-                if term.lower() == "nothing":
-                    continue
-                if " " in term:
-                    num_str, met_id = term.split()
-                    num = float(num_str.lstrip("(").rstrip(")")) * factor
-                else:
-                    met_id = term
-                    num = factor
-                met_id += compartment
-                try:
-                    met = model.metabolites.get_by_id(met_id)
-                except KeyError:
-                    if verbose:
-                        print("Unknown metabolite {0} created".format(met_id))
-                    met = MassMetabolite(met_id)
-                self.add_metabolites({met: num})
+                    if term.lower() == "nothing":
+                        continue
+                    if " " in term:
+                        num_str, met_id = term.split()
+                        num = float(num_str.lstrip("(").rstrip(")")) * factor
+                    else:
+                        met_id = term
+                        num = factor
+                    met_id += compartment
+                    try:
+                        met = model.metabolites.get_by_id(met_id)
+                    except KeyError:
+                        if verbose:
+                            print("Unknown metabolite {0} created"
+                                  .format(met_id))
+                        met = MassMetabolite(met_id)
+                    self.add_metabolites({met: num})
 
     def knock_out(self):
         """Knockout the reaction by setting its rate constants to 0."""
