@@ -42,7 +42,7 @@ dictionary returning as False, and those with solutions returning as True.
 from __future__ import absolute_import
 
 import re
-import warnings
+from warnings import filterwarnings, warn
 from collections import OrderedDict
 from math import log10
 
@@ -97,8 +97,7 @@ _scipy_default_options = _msol._DictWithID(
         "min_step": 0.,
         "first_step": None,
     })
-warnings.filterwarnings(action="ignore", module="scipy",
-                        message="^internal gelsd")
+filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
 
 
 class Simulation(Object):
@@ -178,10 +177,10 @@ class Simulation(Object):
         if not isinstance(value, MassModel):
             raise TypeError("reference_model must be a mass.MassModel")
 
-        self._reference_model = value
         if value not in self.models:
-            # FIXME add to models using self.add_models once developed
-            pass
+            self.add_models(value)
+
+        self._reference_model = value
 
     @property
     def solver(self):
@@ -202,6 +201,70 @@ class Simulation(Object):
     def models(self):
         """Return a DictList of models associated with this Simulation."""
         return getattr(self, "_models", None)
+
+    def add_models(self, models):
+        """Add a list of models and associated values to the Simulation.
+
+        Parameters
+        ----------
+        models: mass.MassModel, list of mass.MassModels,
+            The model or models to add to the Simulation.
+
+        Notes
+        -----
+        If a model already exists in the Simulation, its associated numerical 
+            values will be updated instead.
+
+        """
+        models = ensure_iterable(models)
+        # Check whether a model is a MassModel object, then check if
+        # the model already exists in the Simulation, ignoring those that do.
+        for model in models:
+            if not isinstance(model, MassModel):
+                warn("Skipping {0}, not a MassModel object".format(model.id))
+                models.remove(model)
+
+            if model in self.models:
+                warn("Updating {0} as it already exists in the Simulation "
+                     "object.".format(model.id))
+                self.update_values(model)
+                models.remove(model)
+
+        for model in models:
+            self._values.add(self._get_parameters_from_model(model))
+            self._values.add(self._get_ics_from_model(model))
+            self.models.add(model)
+
+    def remove_models(self, models):
+        """Remove a list of models and associated values from the Simulation.
+
+        Parameters
+        ----------
+        models: mass.MassModel, list of mass.MassModels
+            The model or models to remove from the Simulation. The reference
+            model cannot be removed.
+
+        Notes
+        -----
+        The reference model will not be removed. To remove the reference model,
+            first change the reference model.
+
+        """
+        models = ensure_iterable(models)
+        # Check whether a model already exists in the Simulation,  
+        # ignoring those that do not.
+        model_list = []
+        for model in ensure_iterable(models):
+            try:
+                model_list.append(self.models.get_by_id(str(model)))
+            except KeyError:
+                pass
+
+        for model in model_list:
+            if model != self.reference_model:
+                for value_type in ["_parameters", "_ics"]:
+                    self._values.remove(model.id + value_type)
+                self.models.remove(model)
 
     def get_concentration_solutions(self, models=None):
         """Return the Conc. Solutions for a list of models.
@@ -304,7 +367,7 @@ class Simulation(Object):
         # Check for the presence of the model in the Simulation
         self._check_for_one_model(model)
         parameters, initial_conditions = self._values.get_by_any(
-            ["{0}_parameters".format(model.id), "{0}_ics".format(model.id)])
+            [model.id + "_parameters", model.id + "_ics"])
         return parameters.copy(), initial_conditions.copy()
 
     def view_parameter_values(self, models=None):
@@ -327,7 +390,7 @@ class Simulation(Object):
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
         models = self._get_models_for_method(models, False)
-        parameters = self._values.get_by_any(["{0}_parameters".format(model.id)
+        parameters = self._values.get_by_any([model.id + "_parameters"
                                               for model in models])
         value_dict = {model.id: parameter
                       for model, parameter, in zip(models, parameters)}
@@ -353,8 +416,7 @@ class Simulation(Object):
         # Check for models if a list provided, remove models from the list
         # that are not currently in the Simulation
         models = self._get_models_for_method(models, False)
-        ics = self._values.get_by_any(["{0}_ics".format(model.id)
-                                       for model in models])
+        ics = self._values.get_by_any([model.id + "_ics" for model in models])
         value_dict = {model.id: ic for model, ic, in zip(models, ics)}
         return value_dict.copy()
 
@@ -485,7 +547,7 @@ class Simulation(Object):
 
         # Return empty Solution objects if simulation cannot proceed.
         except MassSimulationError as e:
-            warnings.warn(str(e))
+            warn(str(e))
             # Create empty solution objects
             conc_sol = _msol.Solution(model, _msol._CONC_STR)
             flux_sol = _msol.Solution(model, _msol._FLUX_STR)
@@ -646,7 +708,7 @@ class Simulation(Object):
             flux_sol = _msol.Solution(model, _msol._FLUX_STR,
                                       solution_dictionary=flux_sol)
         except MassSimulationError as e:
-            warnings.warn(str(e))
+            warn(str(e))
             conc_sol = _msol.Solution(model, _msol._CONC_STR)
             flux_sol = _msol.Solution(model, _msol._FLUX_STR)
 
@@ -735,14 +797,15 @@ class Simulation(Object):
         models = self._get_models_for_method(models, False)
         new_values = DictList()
         for model in models:
-            for function in [self._get_parameters_from_model,
-                             self._get_ics_from_model]:
-                values = function(model)
-                new_values.add(values)
+            keys = [model.id + "_parameters", model.id + "_ics"]
+            funcs = [self._get_parameters_from_model, self._get_ics_from_model]
+            for key, func in zip(keys, funcs):
+                self._values.remove(key)
+                new_values.add(func(model))
 
-        self._values = new_values
+        self._values += new_values
 
-    def make_pools(self, pools, parameters=None):
+    def make_pools(self, pools, parameters=None, verbose=False):
         """Create Pool Solutions for a given list of pools.
 
         Example: For the reaction v1: x1 <=> x2 with Keq = 2,  a conservation
@@ -763,6 +826,9 @@ class Simulation(Object):
             A dictionary of aditional parameters to be used in the pools,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
+        verbose: bool, optional
+            If True, provide warnings when pools cannot be created using a 
+            particular Solution object. Default is False.
 
         Returns
         -------
@@ -770,6 +836,13 @@ class Simulation(Object):
             A DictList of mass.Solution object each containing the dict of
             pool solutions, or a single mass.Solution object if there is only
             one model in the Simulation object.
+
+        Notes
+        -----
+        If a pool cannot be created for a model due to including metabolites in 
+            the pool formula that are not part of the model, the creation of
+            that particular pool will be skipped. To enable a warning for when
+            pool creation is skipped, set 'verbose' equal to True.
 
         """
         group_ids = None
@@ -788,12 +861,13 @@ class Simulation(Object):
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
 
-        pool_solutions = self._create_group(sols, pools, parameters, group_ids,
-                                            _msol._POOL_STR)
+        pool_solutions = self._create_group(
+            sols=sols, to_create=pools, parameters=parameters, 
+            new_ids=group_ids, sol_type=_msol._POOL_STR, verbose=verbose)
 
         return pool_solutions
 
-    def make_netfluxes(self, netfluxes, parameters=None):
+    def make_netfluxes(self, netfluxes, parameters=None, verbose=False):
         """Create NetFlux Solutions for a given list of flux summations.
 
         Example: To sum the fluxes of v1 and v2 scaled,
@@ -802,10 +876,6 @@ class Simulation(Object):
 
         Parameters
         ----------
-        netfluxes : string or list
-            A string or a list of strings defining the pooling formula. All
-            metabolites to be pooled must exist in the solution of the Solution
-            objects found in self.get_concentration_solutions().
         netfluxes : str, list of str, dict
             Either a string or a list of strings defining the netflux formula,
             or a dict where keys are netflux identifiers and values are the
@@ -815,6 +885,9 @@ class Simulation(Object):
             A dictionary of aditional parameters to be used in the pools,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
+        verbose: bool, optional
+            If True, provide warnings when netfluxes cannot be created using a 
+            particular Solution object. Default is False.
 
         Returns
         -------
@@ -822,6 +895,13 @@ class Simulation(Object):
             A DictList of mass.Solution object each containing the dict of
             netflux solutions, or a single mass.Solution object if there is
             only one model in the Simulation object.
+
+        Notes
+        -----
+        If a netflux cannot be created for a model due to including reactions
+            in the netflux formula that are not part of the model, the creation
+            of that particular netflux will be skipped. To enable a warning for
+            when netflux creation is skipped, set 'verbose' equal to True.
 
         """
         group_ids = None
@@ -841,8 +921,9 @@ class Simulation(Object):
             group_ids = ["net{0}".format(str(i + 1))
                          for i in range(len(netfluxes))]
 
-        netflux_solutions = self._create_group(sols, netfluxes, parameters,
-                                               group_ids, _msol._NETFLUX_STR)
+        netflux_solutions = self._create_group(
+            sols=sols, to_create=netfluxes, parameters=parameters, 
+            new_ids=group_ids, sol_type=_msol._NETFLUX_STR, verbose=verbose)
 
         return netflux_solutions
 
@@ -871,7 +952,8 @@ class Simulation(Object):
             else:
                 rxn._rtype = 1
 
-    def _create_group(self, sols, to_create, parameters, new_ids, sol_type):
+    def _create_group(self, sols, to_create, parameters, new_ids, sol_type, 
+                      verbose):
         """Create a group and compute its solution.
 
         Warnings
@@ -900,6 +982,18 @@ class Simulation(Object):
                 try:
                     expr = sym.sympify(group, locals=local_syms)
                     expr = expr.subs(parameters)
+                    extras = [exp_sym for exp_sym in expr.atoms(sym.Symbol)
+                              if exp_sym not in list(itervalues(local_syms))]
+                    if extras:
+                        raise MassSimulationError
+
+                except MassSimulationError:
+                    if verbose:
+                        warn("For Solution '{0}', extra arguments {1} found. "
+                             "Therefore skipping creation of '{2}': {3}."
+                             .format(sol.id, extras, g_id, group))
+                    continue
+
                 except sym.SympifyError:
                     raise ValueError("Could not convert expression '{0}: {1}' "
                                      "into a group.".format(g_id, group))
@@ -952,8 +1046,7 @@ class Simulation(Object):
             except KeyError as e:
                 model = str(e).replace("_{0}Sol".format(sol_type), "")
                 model = self.models.get_by_id(model.strip("'"))
-                warnings.warn("No '{0}Sol' found for '{1}'"
-                              .format(sol_type, model.id))
+                warn("No '{0}Sol' found for '{1}'".format(sol_type, model.id))
                 models.remove(model)
 
         solutions = {model.id: sol for model, sol in zip(models, sols)}
@@ -993,7 +1086,7 @@ class Simulation(Object):
             try:
                 self._check_for_one_model(model, verbose)
             except MassSimulationError as e:
-                warnings.warn(e)
+                warn(e)
                 models.remove(model)
         return models
 
@@ -1009,8 +1102,7 @@ class Simulation(Object):
         for dictionary in itervalues(model.parameters):
             values.update({sym.Symbol(str(k)): v
                            for k, v in iteritems(dictionary)})
-        return _msol._DictWithID("{0}_parameters".format(model.id),
-                                 dictionary=values)
+        return _msol._DictWithID(model.id + "_parameters", dictionary=values)
 
     def _get_ics_from_model(self, model):
         """Get a dict of initial conditions as sympy symbols and their values.
@@ -1022,8 +1114,7 @@ class Simulation(Object):
         """
         values = {_mk_met_func(k): v
                   for k, v in iteritems(model.initial_conditions)}
-        return _msol._DictWithID("{0}_ics".format(model.id),
-                                 dictionary=values)
+        return _msol._DictWithID(model.id + "_ics", dictionary=values)
 
     def _assess_quality(self, model, verbose, obj="Simulation"):
         """Assess the model quality to determine whether it is simulatable.
@@ -1058,9 +1149,8 @@ class Simulation(Object):
                              .format({"Simulation", "Model"}))
 
         if not consistency_check:
-            warnings.warn("MassModel '{0}' has numerical consistency issues. "
-                          "Simulation results may not be accurate."
-                          .format(model.id))
+            warn("MassModel '{0}' has numerical consistency issues. Simulation"
+                 " results may not be accurate.".format(model.id))
 
         if not sim_check:
             raise MassSimulationError("Unable to simulate MassModel '{0}'"
@@ -1362,8 +1452,8 @@ class Simulation(Object):
             power += 1
 
         if power > fail:
-            warnings.warn("Unable to find a steady state for '{0}' using "
-                          "strategy 'simulate'.".format(model.id))
+            warn("Unable to find a steady state for '{0}' using strategy "
+                 "'simulate'.".format(model.id))
             return {}, {}
         else:
             return self._chop_store_sols(model, solutions, chop, update)
@@ -1404,8 +1494,8 @@ class Simulation(Object):
         # Warn if no steady state was reached and return empty sols.
         if not sol.success:
             if verbose:
-                warnings.warn("Unable to find a steady state for '{0}' using "
-                              "strategy 'roots'.".format(model.id))
+                warn("Unable to find a steady state for '{0}' using strategy "
+                     "'roots'.".format(model.id))
             return {}, {}
 
         # Create solutions and put in Solution objects to return
