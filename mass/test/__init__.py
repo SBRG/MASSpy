@@ -12,12 +12,13 @@ from os.path import abspath, dirname, join
 from mass.io.json import load_json_model
 
 from mass.exceptions import MassSBMLError as _MassSBMLError
+
 _filetypes = "xml|json|txt"
+
 try:
     from mass.io.sbml import read_sbml_model
 except _MassSBMLError:
-    _filetypes = _filetypes.split("|").pop()
-
+    _filetypes = "|".join(_filetypes.split("|")[1:])
 try:
     import pytest
     import pytest_benchmark
@@ -106,23 +107,9 @@ def create_test_model(model_name):
     else:
         raise ValueError("Could not recognize file type")
 
-def test_all(args=None):
-    """ alias for running all unit-tests on installed mass
-    """
-    if pytest:
-        args = args if args else []
-
-        return pytest.main(
-            ['--pyargs', 'mass', '--benchmark-skip', '-v', '-rs'] + args
-        )
-    else:
-        raise ImportError('missing package pytest and pytest_benchmark'
-                          ' required for testing')
-
 def _make_model_set():
     model_set = set()
     model_dir = join(data_dir, "models", "")
-
     for model_folder in listdir(model_dir):
         if re.search("models", model_folder):
             for model in listdir(join(model_dir, model_folder, "")):
@@ -135,3 +122,16 @@ def _make_model_set():
 def view_available_models():
     for model in list(sorted(_make_model_set())):
         print(model)
+
+def test_all(args=None):
+    """ alias for running all unit-tests on installed mass
+    """
+    if pytest:
+        args = args if args else []
+
+        return pytest.main(
+            ['--pyargs', 'mass', '--benchmark-skip', '-v', '-rs'] + args
+        )
+    else:
+        raise ImportError('missing package pytest and pytest_benchmark'
+                          ' required for testing')
