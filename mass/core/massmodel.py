@@ -853,12 +853,12 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = {rxn: rxn.get_mass_action_ratio(sympy_expr)
-                      for rxn in reaction_list}
-
+        ratio_dict = dict((rxn, rxn.get_mass_action_ratio()) if sympy_expr
+                          else (rxn, str(rxn.get_disequilibrium_ratio()))
+                          for rxn in reaction_list)
         return ratio_dict
 
-    def get_disquilibrium_ratios(self, reaction_list=None, sympy_expr=True):
+    def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=True):
         """Get the disequilibrium ratios for a list of reactions in the model.
 
         Parameters
@@ -873,7 +873,7 @@ class MassModel(Object):
 
         Returns
         -------
-        ratio_dict: dictionary of disequilibrium ratios where keys are the
+        ratio_dict: dict of disequilibrium ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -883,9 +883,9 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = {rxn: rxn.get_disequilibrium_ratio(sympy_expr)
-                      for rxn in reaction_list}
-
+        ratio_dict = dict((rxn, rxn.get_disequilibrium_ratio()) if sympy_expr
+                          else (rxn, str(rxn.get_disequilibrium_ratio()))
+                          for rxn in reaction_list)
         return ratio_dict
 
     def add_custom_rate(self, reaction, custom_rate, custom_parameters=None):
