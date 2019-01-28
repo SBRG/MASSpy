@@ -714,7 +714,7 @@ def _set_plot_observables(solution, time, observable):
 
     # Check to ensure specified observables are in the Solution object
     if not set(observable).issubset(set(iterkeys(solution))):
-        raise ValueError("observable must keys from the solution")
+        raise ValueError("observable solutions must keys from the Solution")
 
     # Turn solutions into interpolating functions if the timepoints provided
     # are not identical to those used in the simulation.
