@@ -201,18 +201,17 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     else:
         custom_parameters = []
 
-    custom_rate_expression = custom_rate.replace("(t)", "")
-
+    custom_rate_expr = custom_rate.replace("(t)", "")
     # Get metabolites as symbols if they are in the custom rate law
     met_syms = {str(met): _mk_met_func(met)
                 for met in iterkeys(reaction.metabolites)
-                if re.search("[" + str(met) + "]", custom_rate)}
+                if re.search("[" + str(met) + "]", custom_rate_expr)}
 
     # Get fixed concentrations as symbols if they are in the custom rate law
     if reaction._model is not None:
         fix_syms = {str(met): sym.Symbol(str(met))
                     for met in reaction._model.fixed_concentrations
-                    if re.search("[" + str(met) + "]", custom_rate)}
+                    if re.search("[" + str(met) + "]", custom_rate_expr)}
 
     else:
         fix_syms = {}
@@ -220,7 +219,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     # Get rate parameters as symbols if they are in the custom rate law
     rate_syms = {getattr(reaction, p): sym.Symbol(getattr(reaction, p))
                  for p in ["kf_str", "Keq_str", "kr_str"]
-                 if re.search(str(getattr(reaction, p)), custom_rate)}
+                 if re.search(str(getattr(reaction, p)), custom_rate_expr)}
     # Get custom parameters as symbols
     custom_syms = {custom: sym.Symbol(custom) for custom in custom_parameters}
 
@@ -228,9 +227,9 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     symbol_dict = {}
     for dictionary in [met_syms, fix_syms, rate_syms, custom_syms]:
         symbol_dict.update(dictionary)
-    custom_rate_expression = sym.sympify(custom_rate, locals=symbol_dict)
+    custom_rate_expr = sym.sympify(custom_rate_expr, locals=symbol_dict)
 
-    return custom_rate_expression
+    return custom_rate_expr
 
 
 # Internal
