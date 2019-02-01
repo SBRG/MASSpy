@@ -728,6 +728,12 @@ class MassModel(Object):
 
         """
         # Check whether a metabolite is a MassMetabolite object:
+        if isinstance(metabolite, string_types):
+            try:
+                metabolite = self.metabolites.get_by_id(metabolite)
+            except KeyError:
+                raise ValueError("metabolite must exist in the model")
+
         if not isinstance(metabolite, MassMetabolite):
             raise TypeError("metabolite must be a MassMetabolite object")
 
