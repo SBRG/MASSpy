@@ -279,6 +279,7 @@ def model_from_dict(obj):
     for k, v in iteritems(obj):
         if k == "id" or k in _ORDERED_OPTIONAL_MODEL_KEYS:
             setattr(model, k, v)
+    model.modules = set(sorted(model.modules))
 
     return model
 

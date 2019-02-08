@@ -606,7 +606,7 @@ class MassReaction(Object):
         """
         return expressions.generate_mass_action_ratio(self)
 
-    def get_disquilibrium_ratio(self):
+    def get_disequilibrium_ratio(self):
         """Get the disequilibrium ratio of the reaction as a sympy expression.
 
         Returns

@@ -7,13 +7,15 @@ from copy import copy
 
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 from scipy.interpolate import interp1d
 
 from six import iteritems, string_types
 
 from mass.core.massmodel import MassModel
 from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
-
+from mass.util.util import ensure_iterable
 
 # Strings of valid solution types
 _CONC_STR = "Conc"
@@ -138,8 +140,36 @@ class Solution(_DictWithID):
 
     @property
     def t(self):
-        """Return time points used in computing the solution."""
+        """Return time points stored in the Solution."""
         return getattr(self, "_time", None)
+
+    @t.setter
+    def t(self, value):
+        """Set the time points that are stored in the Solution.
+
+        Parameters
+        ----------
+        value: array-like, optional
+            An array-like object containing the time points used in calculating
+            the solutions to be stored.
+
+        Notes
+        -----
+        If the Solution is stored as numerical arrays and not as interpolating
+            functions, the numerical arrays of the solutions will be recomputed
+            to correspond to the new time points.
+
+        """
+        value = ensure_iterable(value)
+        if not self.interpolate:
+            intepolate = False
+            self.interpolate = True
+        else:
+            intepolate = True
+        self._time = value
+
+        if not intepolate:
+            self.interpolate = False
 
     @property
     def df(self):
@@ -215,7 +245,14 @@ class Solution(_DictWithID):
 
     @property
     def preview_time_profile(self):
-        """Generate a preview of the time profile for the solution."""
+        """Generate a preview of the time profile for the solution.
+
+        Notes
+        -----
+        Will clear and use the current axis (accessible via plt.gca()).
+
+        """
+        ax = plt.gca()
         options = {"plot_function": "semilogx",
                    "grid": ("major", "x"),
                    "title": "Time Profile for " + self.id,
@@ -223,13 +260,22 @@ class Solution(_DictWithID):
                    "ylabel": (self.solution_type + "es"
                               if self.solution_type[-1] == "x"
                               else self.solution_type + "s")}
-
-        plot_simulation(self, legend="right outside", **options)
+        ax.cla()
+        ax = plot_simulation(self, ax=ax, legend="right outside", **options)
+        ax.get_figure().set_size_inches((6, 4))
 
     @property
     def preview_phase_portraits(self):
-        """Generate a preview of the phase portraits for the solution."""
-        ax = plot_tiled_phase_portrait(self, empty_tiles=None,
+        """Generate a preview of the phase portraits for the solution.
+
+        Notes
+        -----
+        Will clear and use the current axis and (accessible via plt.gca()).
+
+        """
+        ax = plt.gca()
+        ax.cla()
+        ax = plot_tiled_phase_portrait(self, ax=ax, empty_tiles=None,
                                        title="Phase portraits for " + self.id)
         ax.get_figure().set_size_inches((7, 7))
 

@@ -728,6 +728,12 @@ class MassModel(Object):
 
         """
         # Check whether a metabolite is a MassMetabolite object:
+        if isinstance(metabolite, string_types):
+            try:
+                metabolite = self.metabolites.get_by_id(metabolite)
+            except KeyError:
+                raise ValueError("metabolite must exist in the model")
+
         if not isinstance(metabolite, MassMetabolite):
             raise TypeError("metabolite must be a MassMetabolite object")
 
@@ -853,12 +859,12 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = {rxn: rxn.get_mass_action_ratio(sympy_expr)
-                      for rxn in reaction_list}
-
+        ratio_dict = dict((rxn, rxn.get_mass_action_ratio()) if sympy_expr
+                          else (rxn, str(rxn.get_disequilibrium_ratio()))
+                          for rxn in reaction_list)
         return ratio_dict
 
-    def get_disquilibrium_ratios(self, reaction_list=None, sympy_expr=True):
+    def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=True):
         """Get the disequilibrium ratios for a list of reactions in the model.
 
         Parameters
@@ -873,7 +879,7 @@ class MassModel(Object):
 
         Returns
         -------
-        ratio_dict: dictionary of disequilibrium ratios where keys are the
+        ratio_dict: dict of disequilibrium ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -883,9 +889,9 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = {rxn: rxn.get_disequilibrium_ratio(sympy_expr)
-                      for rxn in reaction_list}
-
+        ratio_dict = dict((rxn, rxn.get_disequilibrium_ratio()) if sympy_expr
+                          else (rxn, str(rxn.get_disequilibrium_ratio()))
+                          for rxn in reaction_list)
         return ratio_dict
 
     def add_custom_rate(self, reaction, custom_rate, custom_parameters=None):
@@ -929,7 +935,6 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
-
         custom_rate = expressions.create_custom_rate(reaction, custom_rate,
                                                      custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
@@ -1302,30 +1307,29 @@ class MassModel(Object):
                                               update_model=True)
         return new_model
 
-    def merge(self, second_model, prefix_existing=None, inplace=False,
+    def merge(self, right, prefix_existing=None, inplace=False,
               new_model_id=None):
         """Merge two MassModels into one MassModel with the objects from both.
 
         The reactions, metabolites, genes, initial conditions, fixed
-        concentrations, custom rate laws, and rate parameter will be added from
-        the second model into the first model. In cases where identifiers for
-        objects or relevent dictionaries are identical, priority will be given
-        to what exists in the first model.
-
-        The change is reverted upon exit when using the MassModel as a context.
+        concentrations, custom rate laws, and rate parameters from right model
+        are also copied to left model. However, note that in cases where 
+        identifiers for objects are identical or a dict item has an identical 
+        key(s), priority will be given to what exists in the left model. 
 
         Parameters
         ----------
-        second_model: mass.MassModel
-            The second MassModel to merge into the first model.
+        right: mass.MassModel
+            The MassModel to merge into the left model.
         prefix_existing: str, optional
             If provided, the string is used to prefix the reaction identifier
             of a reaction in the second model if that reaction already exists
-            within the first model.
-        inplace: bool, optional
-            If True, then add the contents of the second model directly into
-            the first model. Otherwise, a new MassModel object is created, and
-            the first model is left untouched.
+            within the left model.
+        inplace : bool
+            Add reactions from right directly to left model object.
+            Otherwise, create a new model leaving the left model untouched.
+            When done within the model as context, changes to the models are
+            reverted upon exit.
         new_model_id: str, optional
             If provided, the string is used as the identifier for the merged
             model. If None and inplace is True, the model ID of the first model
@@ -1340,56 +1344,55 @@ class MassModel(Object):
         """
         # Set the merged model object and the ID of the merged model
         if inplace:
-            merged_model = self
-            if new_model_id is None:
-                new_model_id = self.id
+            new_model = self
         else:
-            merged_model = self.copy()
-            if new_model_id is None:
-                new_model_id = self.id + "_" + second_model.id
-        merged_model.id = new_model_id
+            new_model = self.copy()
+            new_model.id = self.id + "_" + right.id
+        if new_model_id is not None:
+            new_model.id = new_model_id
 
-        # Add the reactions of the second model to the first model.
-        new_reactions = deepcopy(second_model.reactions)
+        # Add the reactions from right to left model.
+        new_reactions = deepcopy(right.reactions)
         if prefix_existing is not None:
             existing = new_reactions.query(lambda r: r.id in self.reactions)
-            for rxn in existing:
-                rxn.id = prefix_existing + "_" + rxn.id
-        merged_model.add_reactions(new_reactions)
-        merged_model.repair()
+            for reaction in existing:
+                reaction.id = prefix_existing + "_" + reaction.id
+        new_model.add_reactions(new_reactions)
+        new_model.repair()
 
-        # Add initial conditions
-        existing = [m.id for m in iterkeys(merged_model.initial_conditions)]
-        merged_model.update_initial_conditions({
-            merged_model.metabolites.get_by_id(m.id): ic
-            for m, ic in iteritems(second_model.initial_conditions)
-            if m.id not in existing})
+        # Add initial conditions from right to left model.
+        existing = [met.id for met in iterkeys(new_model.initial_conditions)]
+        new_model.update_initial_conditions({
+            new_model.metabolites.get_by_id(met.id): ic 
+            for met, ic in iteritems(right.initial_conditions) 
+            if met.id not in existing})
 
-        # Add fixed concentrations
-        existing = [m.id if isinstance(m, MassMetabolite) else m
-                    for m in iterkeys(merged_model.fixed_concentrations)]
+        # Add fixed concentrations from right to left model.
+        existing = [met.id if isinstance(met, MassMetabolite) else met
+                    for met in iterkeys(new_model.fixed_concentrations)]
+        new_model.add_fixed_concentrations({
+            met: fc for met, fc in iteritems(right.fixed_concentrations)
+            if str(met) not in existing})
 
-        merged_model.add_fixed_concentrations({
-            m: fc for m, fc in iteritems(second_model.fixed_concentrations)
-            if str(m) not in existing})
+        # Add custom parameters from right to left model.
+        existing = [cp for cp in iterkeys(new_model.custom_parameters)]
+        new_model.custom_parameters.update({
+            cp: v for cp, v in iteritems(right.custom_parameters)
+            if cp not in existing})
 
-        # Add custom parameters
-        existing = [cp for cp in iterkeys(merged_model.custom_parameters)]
-        merged_model.custom_parameters.update(
-            {cp: v for cp, v in iteritems(second_model.custom_parameters)
-             if cp not in existing})
-        # Add custom rates
-        existing = [rxn.id for rxn in iterkeys(merged_model.custom_rates)]
-        merged_model.custom_rates.update(
-            {merged_model.reactions.get_by_id(rxn.id): cr
-             for rxn, cr in iteritems(second_model.custom_rates)
-             if rxn.id not in existing})
+        # Add custom rates from right to left model.
+        existing = [rxn.id for rxn in iterkeys(new_model.custom_rates)]
+        new_model.custom_rates.update({
+            new_model.reactions.get_by_id(rxn.id): custom_rate
+            for rxn, custom_rate in iteritems(right.custom_rates)
+            if rxn.id not in existing})
+
         # Add old models to the module set
-        merged_model.modules.add(second_model.id)
         if not inplace:
-            merged_model.modules.add(self.id)
+            new_model.modules.add(self.id)
+        new_model.modules.add(right.id)
 
-        return merged_model
+        return new_model
 
     def compute_steady_state_fluxes(self, pathways, independent_fluxes,
                                     update_reactions=False):
@@ -1499,11 +1502,11 @@ class MassModel(Object):
         # TODO Add QCQA check to ensure calculating percs cannot occur if
         # necessary values are not defined.
         if steady_state_concentrations is None:
-            steady_state_concentrations = self.fixed_concentrations
+            steady_state_concentrations = self.fixed_concentrations.copy()
             steady_state_concentrations.update(
                 {m.id: ic for m, ic in iteritems(self.initial_conditions)})
         if steady_state_fluxes is None:
-            steady_state_fluxes = self.steady_state_fluxes
+            steady_state_fluxes = self.steady_state_fluxes.copy()
 
         def calculate_sol(flux, rate_equation, perc, default):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
