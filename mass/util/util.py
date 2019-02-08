@@ -47,7 +47,7 @@ def Keq2k(sympy_expr, simplify=True):
 
     """
     new_expr = _apply_func_to_expressions(
-        sympy_expr, _replace_rate_symbol, args=["Keq"])
+        sympy_expr, _replace_rate_symbol, args=["Keq", simplify])
     return new_expr
 
 
@@ -71,7 +71,7 @@ def k2Keq(sympy_expr, simplify=True):
 
     """
     new_expr = _apply_func_to_expressions(
-        sympy_expr, _replace_rate_symbol, args=["kr"])
+        sympy_expr, _replace_rate_symbol, args=["kr", simplify])
     return new_expr
 
 
