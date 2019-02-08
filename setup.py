@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains the setup for the installation of masspy."""
+"""This module contains the setup for the installation of MASSpy."""
 from __future__ import absolute_import
 
 from sys import argv
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         install_requires=[
             "cobra==0.13.4",
             "future==0.16.0",
-            "matplotlib==3.0.0",
+            "matplotlib>=3.0.0",
             "numpy==1.15.2",
             "pandas==0.23.4",
             "scipy==1.1.0",
@@ -49,9 +49,9 @@ if __name__ == "__main__":
         ],
         # extras_require=extras,
         package_data={
-             '': [
-                 'test/data/*',
-             ]
+            '': [
+                'test/data/*',
+            ]
         },
         author="masspy development team at SBRG",
         author_email="zhaiman@eng.ucsd.edu",
