@@ -935,7 +935,6 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
-
         custom_rate = expressions.create_custom_rate(reaction, custom_rate,
                                                      custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
@@ -1383,7 +1382,7 @@ class MassModel(Object):
 
         # Add custom rates from right to left model.
         existing = [rxn.id for rxn in iterkeys(new_model.custom_rates)]
-        new_model.custom_parameters.update({
+        new_model.custom_rates.update({
             new_model.reactions.get_by_id(rxn.id): custom_rate
             for rxn, custom_rate in iteritems(right.custom_rates)
             if rxn.id not in existing})
