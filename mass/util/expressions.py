@@ -173,7 +173,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     Warnings
     --------
     Any metabolite in a custom rate expression must already exist as a
-        MassMetabolite in the MassReaction object.
+        MassMetabolite in the MassModel or MassReaction object.
 
     Notes
     -----
@@ -187,6 +187,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     if not reaction._metabolites:
         warn("No metabolites associated with this reaction")
         return None
+    model = reaction.model
 
     if not isinstance(custom_rate, string_types):
         raise TypeError("custom_rate must be a string")
@@ -202,10 +203,12 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
         custom_parameters = []
 
     custom_rate_expr = custom_rate.replace("(t)", "")
+
     # Get metabolites as symbols if they are in the custom rate law
+    obj_iter = (iterkeys(reaction.metabolites) 
+                if model is None else model.metabolites)
     met_syms = {str(met): _mk_met_func(met)
-                for met in iterkeys(reaction.metabolites)
-                if re.search("[" + str(met) + "]", custom_rate_expr)}
+                for met in obj_iter if re.search(str(met), custom_rate_expr)}
 
     # Get fixed concentrations as symbols if they are in the custom rate law
     if reaction._model is not None:
