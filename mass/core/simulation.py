@@ -585,7 +585,7 @@ class Simulation(Object):
             values. Default is True
         verbose: bool, optional
             If True, print a detailed report of why the simulation failed.
-            Default is False.
+            Default is True.
         return_obj: bool, optional
             If True, then the original solution object is also returned in
             addition to the mass.Solution objects.
@@ -652,7 +652,7 @@ class Simulation(Object):
     def find_steady_state_model(self, model, strategy="simulate",
                                 perturbations=None, verbose=True,
                                 update_initial_conditions=False,
-                                update_reactions=False):
+                                update_reactions=False, **options):
         """Find the steady state for a single model using the given strategy.
 
         Parameters
@@ -661,27 +661,25 @@ class Simulation(Object):
             The MassModel or the string identifier of the MassModel to
             simulate.
         strategy : 'simulate' or 'roots', tuple of len 2
-            Either a string representing the strategy to use to solve for the 
-            steady state, or a tuple containing the strategy and solver method. 
-            The strategy string can be 'simulate' to simulate the model to 
-            steady state using one of the following possible solver methods
-            {"LSODA", "BDF", "Radau", "RK23", "RK45"} (Default "LSODA"), or 
-            it can be 'roots' to calculate the roots using one of the following
-            solver methods {"hybr", "lm", "broyden1", "broyden2", "anderson", 
-            "linearmixing", "diagbroyden", "excitingmixing", 
-            "krylov", "df-sane"} (Default 'krylov').
+            A string representing the strategy to use to solve for the 
+            steady state. The strategy string can be 'simulate' to simulate the 
+            model to steady state or it can be 'roots' to calculate the roots. 
+            Default method for roots is Krylov.
         perturbations: dict, optional
             A dict of events to incorporate into the simulation, where keys are
             the object and type of event to incorporate and values are the
             change to be made.
         verbose: bool, optional
             If True, print a detailed report of why the method failed.
-            Default is False.
+            Default is True.
         update_reactions : bool, optional
             If True, update the steady state flux attribute in each reaction.
         update_initial_conditions : bool, optional
             If True, update the model initial conditions for each metabolite,
             and update the Simulation.
+        **options
+            Options for the solver. Options must correspond to the set solver
+            for the given stratgey, otherwise they will be ignored.
 
         Returns
         -------
@@ -696,32 +694,9 @@ class Simulation(Object):
         """
         # Check for the presence of the model in the Simulation
         self._check_for_one_model(model, verbose)
-
         strategy_dict = {"simulate": self._find_steady_state_simulate,
                          "roots": self._find_steady_state_roots}
-
-        method_dict = {
-            "simulate": ["BDF", "Radau", "RK23", "RK45", "LSODA"],
-            "roots": ["hybr", "lm", "broyden1", "broyden2", "anderson", 
-                      "linearmixing", "diagbroyden", "excitingmixing",
-                      "df-sane", "krylov"]}
-
-        method = None
-        if not isinstance(strategy, string_types):
-            if len(strategy) == 2:
-                strategy, method = strategy
-            else:
-                raise ValueError("Must be a tuple of form (strategy, method)")
-
-        if strategy in strategy_dict and method is None:
-            method = method_dict[strategy][-1]
-        elif strategy in strategy_dict and method in method_dict[strategy]:
-            pass
-        elif strategy in strategy_dict and method not in method_dict[strategy]:
-            raise ValueError("method for strategy '{0}' must be one of the "
-                             "following: {1!r}".format(
-                                 strategy, method_dict[strategy]))
-        else:
+        if strategy not in strategy_dict:
             raise ValueError("Unrecognized strategy. strategy must be "
                              "'simulate' or 'roots'.")
 
@@ -731,7 +706,7 @@ class Simulation(Object):
             # Check Simulation to determine whether simulation can proceed.
             self._assess_quality(model, verbose)
             conc_sol, flux_sol = strategy_dict[strategy](
-                method, model, perturbations, verbose, chop, update)
+                model, perturbations, verbose, chop, update, **options)
             conc_sol = _msol.Solution(model, _msol._CONC_STR,
                                       solution_dictionary=conc_sol)
             flux_sol = _msol.Solution(model, _msol._FLUX_STR,
@@ -749,7 +724,7 @@ class Simulation(Object):
     def find_steady_state(self, models=None, strategy="simulate",
                           perturbations=None, verbose=True,
                           update_initial_conditions=False,
-                          update_reactions=False):
+                          update_reactions=False, **options):
         """Find the steady state for MassModel(s) using the given strategy.
 
         Parameters
@@ -761,19 +736,22 @@ class Simulation(Object):
         strategy : 'simulate' or 'roots'
             A string representing the strategy to use to solve for the steady
             state. Can be 'simulate' to simulate the model to steady state, or
-            it can be 'roots' to calculate the roots using a 'Krylov' method.
+            it can be 'roots' to calculate the roots.
         perturbations: dict, optional
             A dict of events to incorporate into the simulation, where keys are
             the object and type of event to incorporate and values are the
             change to be made.
         verbose: bool, optional
             If True, print a detailed report of why the method failed.
-            Default is False.
+            Default is True.
         update_reactions : bool, optional
             If True, update the steady state flux attribute in each reaction.
         update_initial_conditions : bool, optional
             If True, update the model initial conditions for each metabolite,
             and update the Simulation.
+        **options
+            Options for the solver. Options must correspond to the set solver
+            for the given stratgey, otherwise they will be ignored.
 
         Returns
         -------
@@ -799,7 +777,8 @@ class Simulation(Object):
                 model, strategy=strategy, perturbations=perturbations,
                 verbose=verbose,
                 update_initial_conditions=update_initial_conditions,
-                update_reactions=update_reactions)
+                update_reactions=update_reactions,
+                **options)
 
             sols = list(sols)
             for sol, storage in zip(sols, [conc_solutions, flux_solutions]):
@@ -1066,9 +1045,9 @@ class Simulation(Object):
                 if not models:
                     sols = models
                     break
-                sols = self._solutions.get_by_any(["{0}_{1}Sol"
-                                                   .format(model.id, sol_type)
-                                                   for model in models])
+                sols = self._solutions.get_by_any([
+                    "{0}_{1}Sol".format(str(model), sol_type)
+                    for model in models])
                 retry = False
             # If a solution does not exist for a model, remove the model from
             # the list and try again.
@@ -1078,9 +1057,9 @@ class Simulation(Object):
                 warn("No '{0}Sol' found for '{1}'".format(sol_type, model.id))
                 models.remove(model)
 
-        solutions = {model.id: sol for model, sol in zip(models, sols)}
+        solutions = {str(model): sol for model, sol in zip(models, sols)}
         if len(solutions) == 1:
-            return solutions[models[0].id]
+            return solutions[str(models[0])]
         else:
             return solutions
 
@@ -1464,8 +1443,8 @@ class Simulation(Object):
         unmapped_concs = sol_obj.y
         return time, unmapped_concs, sol_obj
 
-    def _find_steady_state_simulate(self, method, model, perts, verbose, chop, 
-                                    update):
+    def _find_steady_state_simulate(self, model, perts, verbose, chop, 
+                                    update, **options):
         """Find the steady state solution of a model using 'simulate' strategy.
 
         Warnings
@@ -1483,7 +1462,7 @@ class Simulation(Object):
                                             interpolate=False, verbose=verbose,
                                             return_obj=False,
                                             update_solutions=False, 
-                                            method=method)
+                                            **options)
             # Check to see if concentrations reached a steady state.
             for sol in itervalues(solutions[0]):
                 if not round(abs(sol[-1] - sol[-2]), chop) <= _ZERO_TOL:
@@ -1500,8 +1479,8 @@ class Simulation(Object):
         else:
             return self._chop_store_sols(model, solutions, chop, update)
 
-    def _find_steady_state_roots(self, method, model, perts, verbose, chop, 
-                                 update):
+    def _find_steady_state_roots(self, model, perts, verbose, chop, 
+                                 update, **options):
         """Find the steady state solution of a model using 'roots' strategy.
 
         Warnings
@@ -1532,8 +1511,11 @@ class Simulation(Object):
         def root_func(ics):
             return lambda_eqs(*ics)
 
+        if "method" not in options:
+            options["method"] = "Krylov"
+
         ics = list(itervalues(ordered_ics))
-        sol = root(root_func, ics, method=method)
+        sol = root(root_func, ics, **options)
         # Warn if no steady state was reached and return empty sols.
         if not sol.success:
             if verbose:

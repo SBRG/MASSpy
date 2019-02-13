@@ -38,7 +38,7 @@ if __name__ == "__main__":
             "matplotlib>=3.0.0",
             "numpy==1.15.2",
             "pandas==0.23.4",
-            "scipy==1.1.0",
+            "scipy>=1.2.0",
             "six==1.11.0",
             "sympy==1.3",
             "tabulate==0.8.2",

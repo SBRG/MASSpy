@@ -701,7 +701,7 @@ class MassModel(Object):
                     for rxn in reaction_list)
 
     def add_exchange(self, metabolite, exchange_type="exchange",
-                     external_concentration=None):
+                     external_concentration=0.):
         """Add a pre-defined exchange reaction for a given metabolite.
 
         Pre-defined exchange types can be "exchange" for reversibly entering or
@@ -718,6 +718,7 @@ class MassModel(Object):
             The type of exchange reaction to create.
         external_concentration: float, optional
             The fixed concentration value to set for the the external species.
+            Default is 0.
 
         Returns
         -------
@@ -743,7 +744,7 @@ class MassModel(Object):
         # Set the type of exchange
         if exchange_type not in type_dict:
             raise ValueError("Exchange type must be either "
-                             "'exchange', 'source',  or 'sink'")
+                             "'exchange', 'source',  or 'demand'")
 
         else:
             values = type_dict[exchange_type]

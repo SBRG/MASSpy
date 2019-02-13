@@ -16,18 +16,18 @@
     "initial_conditions": {
         "_13dpg_c": 0.000243,
         "_2pg_c": 0.0113,
-        "_3pg_c": 0.07730001,
-        "adp_c": 0.28999996,
+        "_3pg_c": 0.0773,
+        "adp_c": 0.29,
         "amp_c": 0.0867281,
         "atp_c": 1.6,
-        "dhap_c": 0.16000001,
+        "dhap_c": 0.16,
         "f6p_c": 0.0198,
         "fdp_c": 0.0146,
         "g3p_c": 0.00728,
         "g6p_c": 0.0486,
         "glc__D_c": 1.0,
         "h2o_c": 1.0,
-        "h_c": 8.998e-05,
+        "h_c": 8.99757e-05,
         "lac__L_c": 1.36,
         "nad_c": 0.0589,
         "nadh_c": 0.0301,
@@ -432,7 +432,7 @@
                 "atp_c": 1
             },
             "name": "Adenylate kinase",
-            "steady_state_flux": -0.0,
+            "steady_state_flux": 0.0,
             "subsystem": "Misc.",
             "upper_bound": 1000.0
         },
@@ -447,7 +447,7 @@
                 "pyr_c": -1
             },
             "name": "Pyruvate exchange",
-            "steady_state_flux": 0.224,
+            "steady_state_flux": 0.22400000000000003,
             "subsystem": "Transport/Exchange",
             "upper_bound": 1000.0
         },
@@ -498,7 +498,7 @@
                 "nadh_c": -1
             },
             "name": "Demand NADH",
-            "steady_state_flux": 0.224,
+            "steady_state_flux": 0.22400000000000003,
             "subsystem": "Pseudo",
             "upper_bound": 1000.0
         },
@@ -573,7 +573,7 @@
                 "pi_c": -1
             },
             "name": "Phosphate exchange",
-            "steady_state_flux": -0.0,
+            "steady_state_flux": 0.0,
             "subsystem": "Transport/Exchange",
             "upper_bound": 1000.0
         }

@@ -1,0 +1,832 @@
+{
+    "compartments": {
+        "c": "Cytosol"
+    },
+    "custom_parameters": {
+        "Keq_A": 4.444444,
+        "Keq_ACT": 200.0,
+        "Keq_I": 0.294985,
+        "Keq_L": 19,
+        "Keq_P": 2.109705,
+        "kf_A": 1075973.0,
+        "kf_ACT": 1000000.0,
+        "kf_I": 1000000.0,
+        "kf_L": 1000000000000.0,
+        "kf_P": 355375.0,
+        "kf_PYK": 1236438.0
+    },
+    "custom_rates": {
+        "PYK_L": "kf_L*(pyk_R0_c(t) - pyk_T0_c(t)/Keq_L)",
+        "PYK_R01": "kf_A*(pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t)/Keq_A)",
+        "PYK_R02": "kf_P*(adp_c(t)*pyk_R0_c(t) - pyk_R0_A_c(t)/Keq_P)",
+        "PYK_R03": "kf_P*(pep_c(t)*pyk_R0_A_c(t) - pyk_R0_AP_c(t)/Keq_P)",
+        "PYK_R04": "kf_A*(adp_c(t)*pyk_R0_P_c(t) - pyk_R0_AP_c(t)/Keq_A)",
+        "PYK_R05": "kf_PYK*pyk_R0_AP_c(t)",
+        "PYK_R10": "kf_ACT*(4*fdp_c(t)*pyk_R0_c(t) - pyk_R1_c(t)/Keq_ACT)",
+        "PYK_R11": "kf_A*(pep_c(t)*pyk_R1_c(t) - pyk_R1_P_c(t)/Keq_A)",
+        "PYK_R12": "kf_P*(adp_c(t)*pyk_R1_c(t) - pyk_R1_A_c(t)/Keq_P)",
+        "PYK_R13": "kf_P*(pep_c(t)*pyk_R1_A_c(t) - pyk_R1_AP_c(t)/Keq_P)",
+        "PYK_R14": "kf_A*(adp_c(t)*pyk_R1_P_c(t) - pyk_R1_AP_c(t)/Keq_A)",
+        "PYK_R15": "kf_PYK*pyk_R1_AP_c(t)",
+        "PYK_R20": "kf_ACT*(3*fdp_c(t)*pyk_R1_c(t) - 2*pyk_R2_c(t)/Keq_ACT)",
+        "PYK_R21": "kf_A*(pep_c(t)*pyk_R2_c(t) - pyk_R2_P_c(t)/Keq_A)",
+        "PYK_R22": "kf_P*(adp_c(t)*pyk_R2_c(t) - pyk_R2_A_c(t)/Keq_P)",
+        "PYK_R23": "kf_P*(pep_c(t)*pyk_R2_A_c(t) - pyk_R2_AP_c(t)/Keq_P)",
+        "PYK_R24": "kf_A*(adp_c(t)*pyk_R2_P_c(t) - pyk_R2_AP_c(t)/Keq_A)",
+        "PYK_R25": "kf_PYK*pyk_R2_AP_c(t)",
+        "PYK_R30": "kf_ACT*(2*fdp_c(t)*pyk_R2_c(t) - 3*pyk_R3_c(t)/Keq_ACT)",
+        "PYK_R31": "kf_A*(pep_c(t)*pyk_R3_c(t) - pyk_R3_P_c(t)/Keq_A)",
+        "PYK_R32": "kf_P*(adp_c(t)*pyk_R3_c(t) - pyk_R3_A_c(t)/Keq_P)",
+        "PYK_R33": "kf_P*(pep_c(t)*pyk_R3_A_c(t) - pyk_R3_AP_c(t)/Keq_P)",
+        "PYK_R34": "kf_A*(adp_c(t)*pyk_R3_P_c(t) - pyk_R3_AP_c(t)/Keq_A)",
+        "PYK_R35": "kf_PYK*pyk_R3_AP_c(t)",
+        "PYK_R40": "kf_ACT*(fdp_c(t)*pyk_R3_c(t) - 4*pyk_R4_c(t)/Keq_ACT)",
+        "PYK_R41": "kf_A*(pep_c(t)*pyk_R4_c(t) - pyk_R4_P_c(t)/Keq_A)",
+        "PYK_R42": "kf_P*(adp_c(t)*pyk_R4_c(t) - pyk_R4_A_c(t)/Keq_P)",
+        "PYK_R43": "kf_P*(pep_c(t)*pyk_R4_A_c(t) - pyk_R4_AP_c(t)/Keq_P)",
+        "PYK_R44": "kf_A*(adp_c(t)*pyk_R4_P_c(t) - pyk_R4_AP_c(t)/Keq_A)",
+        "PYK_R45": "kf_PYK*pyk_R4_AP_c(t)",
+        "PYK_T1": "kf_I*(4*atp_c(t)*pyk_T0_c(t) - pyk_T1_c(t)/Keq_I)",
+        "PYK_T2": "kf_I*(3*atp_c(t)*pyk_T1_c(t) - 2*pyk_T2_c(t)/Keq_I)",
+        "PYK_T3": "kf_I*(2*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t)/Keq_I)",
+        "PYK_T4": "kf_I*(atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t)/Keq_I)"
+    },
+    "genes": [],
+    "id": "PYK",
+    "initial_conditions": {
+        "adp_c": 0.29,
+        "atp_c": 1.6,
+        "fdp_c": 0.0146,
+        "h_c": 8.99757e-05,
+        "pep_c": 0.017,
+        "pyk_R0_AP_c": 7.672402996690472e-09,
+        "pyk_R0_A_c": 1.2205237086839036e-08,
+        "pyk_R0_P_c": 8.139373321899255e-08,
+        "pyk_R0_c": 1.3859131701215793e-07,
+        "pyk_R1_AP_c": 8.96136670013447e-08,
+        "pyk_R1_A_c": 1.4255716917427997e-07,
+        "pyk_R1_P_c": 9.506788039978328e-07,
+        "pyk_R1_c": 1.6187465827020049e-06,
+        "pyk_R2_AP_c": 3.9250786146588986e-07,
+        "pyk_R2_A_c": 6.244004009833464e-07,
+        "pyk_R2_P_c": 4.163973161510509e-06,
+        "pyk_R2_c": 7.09011003223478e-06,
+        "pyk_R3_AP_c": 7.640819703202655e-07,
+        "pyk_R3_A_c": 1.2154994472475808e-06,
+        "pyk_R3_P_c": 8.105867754407124e-06,
+        "pyk_R3_c": 1.3802080862750374e-05,
+        "pyk_R4_AP_c": 5.577798383337939e-07,
+        "pyk_R4_A_c": 8.87314596490734e-07,
+        "pyk_R4_P_c": 5.917283460717202e-06,
+        "pyk_R4_c": 1.0075519029807773e-05,
+        "pyk_T0_c": 2.6332350232310004e-06,
+        "pyk_T1_c": 4.971299158902183e-06,
+        "pyk_T2_c": 3.5195038293112814e-06,
+        "pyk_T3_c": 1.1074151675315731e-06,
+        "pyk_T4_c": 1.3066845634590835e-07,
+        "pyr_c": 0.060301
+    },
+    "metabolites": [
+        {
+            "_initial_condition": 0.017,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H2O6P",
+            "id": "pep_c",
+            "name": "Phosphoenolpyruvate"
+        },
+        {
+            "_initial_condition": 0.060301,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C3H3O3",
+            "id": "pyr_c",
+            "name": "Pyruvate"
+        },
+        {
+            "_initial_condition": 0.0146,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C6H10O12P2",
+            "id": "fdp_c",
+            "name": "D-Fructose 1,6-bisphosphate"
+        },
+        {
+            "_initial_condition": 0.29,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP"
+        },
+        {
+            "_initial_condition": 1.6,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP"
+        },
+        {
+            "_initial_condition": 1.3859131701215793e-07,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[PYK]",
+            "id": "pyk_R0_c",
+            "name": "Pyruvate Kinase"
+        },
+        {
+            "_initial_condition": 1.2205237086839036e-08,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "[PYK]-C10H12N5O10P2",
+            "id": "pyk_R0_A_c",
+            "name": "Pyruvate Kinase-ADP complex"
+        },
+        {
+            "_initial_condition": 8.139373321899255e-08,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "[PYK]-C3H2O6P",
+            "id": "pyk_R0_P_c",
+            "name": "Pyruvate Kinase-PEP complex"
+        },
+        {
+            "_initial_condition": 7.672402996690472e-09,
+            "charge": -6,
+            "compartment": "c",
+            "formula": "[PYK]-C10H12N5O10P2-C3H2O6P",
+            "id": "pyk_R0_AP_c",
+            "name": "Pyruvate Kinase-ADP-PEP complex"
+        },
+        {
+            "_initial_condition": 1.6187465827020049e-06,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "[PYK]-C6H10O12P2",
+            "id": "pyk_R1_c",
+            "name": "Pyruvate Kinase (1 FDP)"
+        },
+        {
+            "_initial_condition": 1.4255716917427997e-07,
+            "charge": -7,
+            "compartment": "c",
+            "formula": "[PYK]-C6H10O12P2-C10H12N5O10P2",
+            "id": "pyk_R1_A_c",
+            "name": "Pyruvate Kinase-ADP complex (1 FDP)"
+        },
+        {
+            "_initial_condition": 9.506788039978328e-07,
+            "charge": -7,
+            "compartment": "c",
+            "formula": "[PYK]-C6H10O12P2-C3H2O6P",
+            "id": "pyk_R1_P_c",
+            "name": "Pyruvate Kinase-PEP complex (1 FDP)"
+        },
+        {
+            "_initial_condition": 8.96136670013447e-08,
+            "charge": -10,
+            "compartment": "c",
+            "formula": "[PYK]-C6H10O12P2-C10H12N5O10P2-C3H2O6P",
+            "id": "pyk_R1_AP_c",
+            "name": "Pyruvate Kinase-ADP-PEP complex (1 FDP)"
+        },
+        {
+            "_initial_condition": 7.09011003223478e-06,
+            "charge": -8,
+            "compartment": "c",
+            "formula": "[PYK]-C12H20O24P4",
+            "id": "pyk_R2_c",
+            "name": "Pyruvate Kinase (2 FDP)"
+        },
+        {
+            "_initial_condition": 6.244004009833464e-07,
+            "charge": -11,
+            "compartment": "c",
+            "formula": "[PYK]-C12H20O24P4-C10H12N5O10P2",
+            "id": "pyk_R2_A_c",
+            "name": "Pyruvate Kinase-ADP complex (2 FDP)"
+        },
+        {
+            "_initial_condition": 4.163973161510509e-06,
+            "charge": -11,
+            "compartment": "c",
+            "formula": "[PYK]-C12H20O24P4-C3H2O6P",
+            "id": "pyk_R2_P_c",
+            "name": "Pyruvate Kinase-PEP complex (2 FDP)"
+        },
+        {
+            "_initial_condition": 3.9250786146588986e-07,
+            "charge": -14,
+            "compartment": "c",
+            "formula": "[PYK]-C12H20O24P4-C10H12N5O10P2-C3H2O6P",
+            "id": "pyk_R2_AP_c",
+            "name": "Pyruvate Kinase-ADP-PEP complex (2 FDP)"
+        },
+        {
+            "_initial_condition": 1.3802080862750374e-05,
+            "charge": -12,
+            "compartment": "c",
+            "formula": "[PYK]-C18H30O36P6",
+            "id": "pyk_R3_c",
+            "name": "Pyruvate Kinase (3 FDP)"
+        },
+        {
+            "_initial_condition": 1.2154994472475808e-06,
+            "charge": -15,
+            "compartment": "c",
+            "formula": "[PYK]-C18H30O36P6-C10H12N5O10P2",
+            "id": "pyk_R3_A_c",
+            "name": "Pyruvate Kinase-ADP complex (3 FDP)"
+        },
+        {
+            "_initial_condition": 8.105867754407124e-06,
+            "charge": -15,
+            "compartment": "c",
+            "formula": "[PYK]-C18H30O36P6-C3H2O6P",
+            "id": "pyk_R3_P_c",
+            "name": "Pyruvate Kinase-PEP complex (3 FDP)"
+        },
+        {
+            "_initial_condition": 7.640819703202655e-07,
+            "charge": -18,
+            "compartment": "c",
+            "formula": "[PYK]-C18H30O36P6-C10H12N5O10P2-C3H2O6P",
+            "id": "pyk_R3_AP_c",
+            "name": "Pyruvate Kinase-ADP-PEP complex (3 FDP)"
+        },
+        {
+            "_initial_condition": 1.0075519029807773e-05,
+            "charge": -16,
+            "compartment": "c",
+            "formula": "[PYK]-C24H40O48P8",
+            "id": "pyk_R4_c",
+            "name": "Pyruvate Kinase (4 FDP)"
+        },
+        {
+            "_initial_condition": 8.87314596490734e-07,
+            "charge": -19,
+            "compartment": "c",
+            "formula": "[PYK]-C24H40O48P8-C10H12N5O10P2",
+            "id": "pyk_R4_A_c",
+            "name": "Pyruvate Kinase-ADP complex (4 FDP)"
+        },
+        {
+            "_initial_condition": 5.917283460717202e-06,
+            "charge": -19,
+            "compartment": "c",
+            "formula": "[PYK]-C24H40O48P8-C3H2O6P",
+            "id": "pyk_R4_P_c",
+            "name": "Pyruvate Kinase-PEP complex (4 FDP)"
+        },
+        {
+            "_initial_condition": 5.577798383337939e-07,
+            "charge": -22,
+            "compartment": "c",
+            "formula": "[PYK]-C24H40O48P8-C10H12N5O10P2-C3H2O6P",
+            "id": "pyk_R4_AP_c",
+            "name": "Pyruvate Kinase-ADP-PEP complex (4 FDP)"
+        },
+        {
+            "_initial_condition": 2.6332350232310004e-06,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[PYK]",
+            "id": "pyk_T0_c",
+            "name": "Pyruvate Kinase (Tense)"
+        },
+        {
+            "_initial_condition": 4.971299158902183e-06,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "[PYK]-C10H12N5O13P3",
+            "id": "pyk_T1_c",
+            "name": "Pyruvate Kinase (1 ATP)"
+        },
+        {
+            "_initial_condition": 3.5195038293112814e-06,
+            "charge": -8,
+            "compartment": "c",
+            "formula": "[PYK]-C20H24N10O26P6",
+            "id": "pyk_T2_c",
+            "name": "Pyruvate Kinase (2 ATP)"
+        },
+        {
+            "_initial_condition": 1.1074151675315731e-06,
+            "charge": -12,
+            "compartment": "c",
+            "formula": "[PYK]-C30H36N15O39P9",
+            "id": "pyk_T3_c",
+            "name": "Pyruvate Kinase (3 ATP)"
+        },
+        {
+            "_initial_condition": 1.3066845634590835e-07,
+            "charge": -16,
+            "compartment": "c",
+            "formula": "[PYK]-C40H48N20O52P12",
+            "id": "pyk_T4_c",
+            "name": "Pyruvate Kinase (4 ATP)"
+        },
+        {
+            "_initial_condition": 8.99757e-05,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "H",
+            "id": "h_c",
+            "name": "H+"
+        }
+    ],
+    "reactions": [
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R01",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R0_P_c": 1,
+                "pyk_R0_c": -1
+            },
+            "name": "PYK_R0-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R02",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R0_A_c": 1,
+                "pyk_R0_c": -1
+            },
+            "name": "PYK_R0-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R03",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R0_AP_c": 1,
+                "pyk_R0_A_c": -1
+            },
+            "name": "PYK_R0_A-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R04",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R0_AP_c": 1,
+                "pyk_R0_P_c": -1
+            },
+            "name": "PYK_R0_P-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_reversible": false,
+            "gene_reaction_rule": "",
+            "id": "PYK_R05",
+            "lower_bound": 0.0,
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R0_AP_c": -1,
+                "pyk_R0_c": 1,
+                "pyr_c": 1
+            },
+            "name": "PYK_R0_AP catalyzation",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R10",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R0_c": -1,
+                "pyk_R1_c": 1
+            },
+            "name": "PYK_R0-FDP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R11",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R1_P_c": 1,
+                "pyk_R1_c": -1
+            },
+            "name": "PYK_R1-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R12",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R1_A_c": 1,
+                "pyk_R1_c": -1
+            },
+            "name": "PYK_R1-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R13",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R1_AP_c": 1,
+                "pyk_R1_A_c": -1
+            },
+            "name": "PYK_R1_A-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R14",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R1_AP_c": 1,
+                "pyk_R1_P_c": -1
+            },
+            "name": "PYK_R1_P-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_reversible": false,
+            "gene_reaction_rule": "",
+            "id": "PYK_R15",
+            "lower_bound": 0.0,
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R1_AP_c": -1,
+                "pyk_R1_c": 1,
+                "pyr_c": 1
+            },
+            "name": "PYK_R1_AP catalyzation",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R20",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R1_c": -1,
+                "pyk_R2_c": 1
+            },
+            "name": "PYK_R1-FDP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R21",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R2_P_c": 1,
+                "pyk_R2_c": -1
+            },
+            "name": "PYK_R2-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R22",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R2_A_c": 1,
+                "pyk_R2_c": -1
+            },
+            "name": "PYK_R2-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R23",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R2_AP_c": 1,
+                "pyk_R2_A_c": -1
+            },
+            "name": "PYK_R2_A-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R24",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R2_AP_c": 1,
+                "pyk_R2_P_c": -1
+            },
+            "name": "PYK_R2_P-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_reversible": false,
+            "gene_reaction_rule": "",
+            "id": "PYK_R25",
+            "lower_bound": 0.0,
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R2_AP_c": -1,
+                "pyk_R2_c": 1,
+                "pyr_c": 1
+            },
+            "name": "PYK_R2_AP catalyzation",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R30",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R2_c": -1,
+                "pyk_R3_c": 1
+            },
+            "name": "PYK_R2-FDP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R31",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R3_P_c": 1,
+                "pyk_R3_c": -1
+            },
+            "name": "PYK_R3-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R32",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R3_A_c": 1,
+                "pyk_R3_c": -1
+            },
+            "name": "PYK_R3-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R33",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R3_AP_c": 1,
+                "pyk_R3_A_c": -1
+            },
+            "name": "PYK_R3_A-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R34",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R3_AP_c": 1,
+                "pyk_R3_P_c": -1
+            },
+            "name": "PYK_R3_P-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_reversible": false,
+            "gene_reaction_rule": "",
+            "id": "PYK_R35",
+            "lower_bound": 0.0,
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R3_AP_c": -1,
+                "pyk_R3_c": 1,
+                "pyr_c": 1
+            },
+            "name": "PYK_R3_AP catalyzation",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R40",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R3_c": -1,
+                "pyk_R4_c": 1
+            },
+            "name": "PYK_R3-FDP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R41",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R4_P_c": 1,
+                "pyk_R4_c": -1
+            },
+            "name": "PYK_R4-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R42",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R4_A_c": 1,
+                "pyk_R4_c": -1
+            },
+            "name": "PYK_R4-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R43",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R4_AP_c": 1,
+                "pyk_R4_A_c": -1
+            },
+            "name": "PYK_R4_A-PEP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_R44",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R4_AP_c": 1,
+                "pyk_R4_P_c": -1
+            },
+            "name": "PYK_R4_P-ADP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_reversible": false,
+            "gene_reaction_rule": "",
+            "id": "PYK_R45",
+            "lower_bound": 0.0,
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R4_AP_c": -1,
+                "pyk_R4_c": 1,
+                "pyr_c": 1
+            },
+            "name": "PYK_R4_AP catalyzation",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_L",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pyk_R0_c": -1,
+                "pyk_T0_c": 1
+            },
+            "name": "PYK R/T Transition",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_T1",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T0_c": -1,
+                "pyk_T1_c": 1
+            },
+            "name": "PYK_T0-ATP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_T2",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T1_c": -1,
+                "pyk_T2_c": 1
+            },
+            "name": "PYK_T1-ATP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_T3",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T2_c": -1,
+                "pyk_T3_c": 1
+            },
+            "name": "PYK_T2-ATP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PYK_T4",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T3_c": -1,
+                "pyk_T4_c": 1
+            },
+            "name": "PYK_T3-ATP binding",
+            "subsystem": "PYK",
+            "upper_bound": 1000.0
+        }
+    ],
+    "version": "1"
+}

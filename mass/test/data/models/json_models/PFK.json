@@ -3,17 +3,17 @@
         "c": "Cytosol"
     },
     "custom_parameters": {
-        "Keq_A": 0.068,
-        "Keq_ACT": 0.033,
-        "Keq_F": 0.1,
-        "Keq_I": 0.1,
+        "Keq_A": 14.705882,
+        "Keq_ACT": 30.30303,
+        "Keq_F": 10.0,
+        "Keq_I": 10.0,
         "Keq_L": 0.0011,
-        "kf_A": 119781,
+        "kf_A": 69028.0,
         "kf_ACT": 1000000.0,
-        "kf_F": 2511660.0,
+        "kf_F": 1456122.0,
         "kf_I": 1000000.0,
         "kf_L": 1000000000000.0,
-        "kf_PFK": 99959800.0
+        "kf_PFK": 971729.0
     },
     "custom_rates": {
         "PFK_L": "kf_L*(pfk_R0_c(t) - pfk_T0_c(t)/Keq_L)",
@@ -50,51 +50,31 @@
         "f6p_c": 0.0198,
         "fdp_c": 0.0146,
         "h_c": 8.99757e-05,
-        "pfk_R0_AF_c": 1e-10,
-        "pfk_R0_A_c": 1.303e-07,
-        "pfk_R0_c": 3.93e-08,
-        "pfk_R1_AF_c": 7e-10,
-        "pfk_R1_A_c": 1.3698e-06,
-        "pfk_R1_c": 4.128e-07,
-        "pfk_R2_AF_c": 2.7e-09,
-        "pfk_R2_A_c": 5.4e-06,
-        "pfk_R2_c": 1.6272e-06,
-        "pfk_R3_AF_c": 4.7e-09,
-        "pfk_R3_A_c": 9.4613e-06,
-        "pfk_R3_c": 2.851e-06,
-        "pfk_R4_AF_c": 3.1e-09,
-        "pfk_R4_A_c": 6.2164e-06,
-        "pfk_R4_c": 1.8732e-06,
-        "pfk_T0_c": 0.0,
-        "pfk_T1_c": 2.8e-09,
-        "pfk_T2_c": 6.63e-08,
-        "pfk_T3_c": 7.077e-07,
-        "pfk_T4_c": 2.8306e-06
+        "pfk_R0_AF_c": 6.651877701094581e-09,
+        "pfk_R0_A_c": 3.8034408477252746e-08,
+        "pfk_R0_c": 9.525704975390519e-08,
+        "pfk_R1_AF_c": 6.992784417555162e-08,
+        "pfk_R1_A_c": 3.9983660386133623e-07,
+        "pfk_R1_c": 1.0013894468802018e-06,
+        "pfk_R2_AF_c": 2.756685937473481e-07,
+        "pfk_R2_A_c": 1.576230407424834e-06,
+        "pfk_R2_c": 3.9476638221804915e-06,
+        "pfk_R3_AF_c": 4.829942094016037e-07,
+        "pfk_R3_A_c": 2.761686230266298e-06,
+        "pfk_R3_c": 6.916633994675796e-06,
+        "pfk_R4_AF_c": 3.173421976697213e-07,
+        "pfk_R4_A_c": 1.8145136329330187e-06,
+        "pfk_R4_c": 4.54444336934577e-06,
+        "pfk_T0_c": 1.047827547292957e-10,
+        "pfk_T1_c": 6.706096302674925e-09,
+        "pfk_T2_c": 1.609463112641982e-07,
+        "pfk_T3_c": 1.7167606534847808e-06,
+        "pfk_T4_c": 6.867042613939123e-06
     },
     "metabolites": [
         {
-            "_initial_condition": 0.28999996,
-            "compartment": "c",
-            "formula": "C10H12N5O10P2",
-            "id": "adp_c",
-            "name": "ADP"
-        },
-        {
-            "_initial_condition": 0.0867281,
-            "compartment": "c",
-            "formula": "C10H12N5O7P",
-            "id": "amp_c",
-            "name": "AMP"
-        },
-        {
-            "_initial_condition": 1.6,
-            "compartment": "c",
-            "formula": "C10H12N5O13P3",
-            "id": "atp_c",
-            "name": "ATP"
-        },
-        {
             "_initial_condition": 0.0198,
+            "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
             "id": "f6p_c",
@@ -102,133 +82,199 @@
         },
         {
             "_initial_condition": 0.0146,
+            "charge": -4,
             "compartment": "c",
             "formula": "C6H10O12P2",
             "id": "fdp_c",
             "name": "D-Fructose 1,6-bisphosphate"
         },
         {
-            "_initial_condition": 8.998e-05,
+            "_initial_condition": 0.0867281,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O7P",
+            "id": "amp_c",
+            "name": "AMP"
+        },
+        {
+            "_initial_condition": 0.29,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP"
+        },
+        {
+            "_initial_condition": 1.6,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP"
+        },
+        {
+            "_initial_condition": 8.99757e-05,
+            "charge": 1,
             "compartment": "c",
             "formula": "H",
             "id": "h_c",
             "name": "H+"
         },
         {
-            "compartment": "c",
-            "formula": "[PFK]-C10H12N5O13P3-C6H11O9P",
-            "id": "pfk_R0_AF_c",
-            "name": "Phosphofructokinase-ATP-F6P complex"
-        },
-        {
-            "compartment": "c",
-            "formula": "[PFK]-C10H12N5O13P3",
-            "id": "pfk_R0_A_c",
-            "name": "Phosphofructokinase-ATP complex"
-        },
-        {
+            "_initial_condition": 9.525704975390519e-08,
+            "charge": 0,
             "compartment": "c",
             "formula": "[PFK]",
             "id": "pfk_R0_c",
             "name": "Phosphofructokinase"
         },
         {
+            "_initial_condition": 3.8034408477252746e-08,
+            "charge": -4,
             "compartment": "c",
-            "formula": "[PFK]-C10H12N5O7P-C10H12N5O13P3-C6H11O9P",
-            "id": "pfk_R1_AF_c",
-            "name": "Phosphofructokinase-ATP-F6P complex (1 AMP)"
+            "formula": "[PFK]-C10H12N5O13P3",
+            "id": "pfk_R0_A_c",
+            "name": "Phosphofructokinase-ATP complex"
         },
         {
+            "_initial_condition": 6.651877701094581e-09,
+            "charge": -6,
             "compartment": "c",
-            "formula": "[PFK]-C10H12N5O7P-C10H12N5O13P3",
-            "id": "pfk_R1_A_c",
-            "name": "Phosphofructokinase-ATP complex (1 AMP)"
+            "formula": "[PFK]-C10H12N5O13P3-C6H11O9P",
+            "id": "pfk_R0_AF_c",
+            "name": "Phosphofructokinase-ATP-F6P complex"
         },
         {
+            "_initial_condition": 1.0013894468802018e-06,
+            "charge": -2,
             "compartment": "c",
             "formula": "[PFK]-C10H12N5O7P",
             "id": "pfk_R1_c",
             "name": "Phosphofructokinase (1 AMP)"
         },
         {
+            "_initial_condition": 3.9983660386133623e-07,
+            "charge": -6,
             "compartment": "c",
-            "formula": "[PFK]-C20H24N10O14P2-C10H12N5O13P3-C6H11O9P",
-            "id": "pfk_R2_AF_c",
-            "name": "Phosphofructokinase-ATP-F6P complex (2 AMP)"
+            "formula": "[PFK]-C10H12N5O7P-C10H12N5O13P3",
+            "id": "pfk_R1_A_c",
+            "name": "Phosphofructokinase-ATP complex (1 AMP)"
         },
         {
+            "_initial_condition": 6.992784417555162e-08,
+            "charge": -8,
             "compartment": "c",
-            "formula": "[PFK]-C20H24N10O14P2-C10H12N5O13P3",
-            "id": "pfk_R2_A_c",
-            "name": "Phosphofructokinase-ATP complex (2 AMP)"
+            "formula": "[PFK]-C10H12N5O7P-C10H12N5O13P3-C6H11O9P",
+            "id": "pfk_R1_AF_c",
+            "name": "Phosphofructokinase-ATP-F6P complex (1 AMP)"
         },
         {
+            "_initial_condition": 3.9476638221804915e-06,
+            "charge": -4,
             "compartment": "c",
             "formula": "[PFK]-C20H24N10O14P2",
             "id": "pfk_R2_c",
             "name": "Phosphofructokinase (2 AMP)"
         },
         {
+            "_initial_condition": 1.576230407424834e-06,
+            "charge": -8,
             "compartment": "c",
-            "formula": "[PFK]-C30H36N15O21P3-C10H12N5O13P3-C6H11O9P",
-            "id": "pfk_R3_AF_c",
-            "name": "Phosphofructokinase-ATP-F6P complex (3 AMP)"
+            "formula": "[PFK]-C20H24N10O14P2-C10H12N5O13P3",
+            "id": "pfk_R2_A_c",
+            "name": "Phosphofructokinase-ATP complex (2 AMP)"
         },
         {
+            "_initial_condition": 2.756685937473481e-07,
+            "charge": -10,
             "compartment": "c",
-            "formula": "[PFK]-C30H36N15O21P3-C10H12N5O13P3",
-            "id": "pfk_R3_A_c",
-            "name": "Phosphofructokinase-ATP complex (3 AMP)"
+            "formula": "[PFK]-C20H24N10O14P2-C10H12N5O13P3-C6H11O9P",
+            "id": "pfk_R2_AF_c",
+            "name": "Phosphofructokinase-ATP-F6P complex (2 AMP)"
         },
         {
+            "_initial_condition": 6.916633994675796e-06,
+            "charge": -6,
             "compartment": "c",
             "formula": "[PFK]-C30H36N15O21P3",
             "id": "pfk_R3_c",
             "name": "Phosphofructokinase (3 AMP)"
         },
         {
+            "_initial_condition": 2.761686230266298e-06,
+            "charge": -10,
             "compartment": "c",
-            "formula": "[PFK]-C40H48N20O28P4-C10H12N5O13P3-C6H11O9P",
-            "id": "pfk_R4_AF_c",
-            "name": "Phosphofructokinase-ATP-F6P complex (4 AMP)"
+            "formula": "[PFK]-C30H36N15O21P3-C10H12N5O13P3",
+            "id": "pfk_R3_A_c",
+            "name": "Phosphofructokinase-ATP complex (3 AMP)"
         },
         {
+            "_initial_condition": 4.829942094016037e-07,
+            "charge": -12,
             "compartment": "c",
-            "formula": "[PFK]-C40H48N20O28P4-C10H12N5O13P3",
-            "id": "pfk_R4_A_c",
-            "name": "Phosphofructokinase-ATP complex (4 AMP)"
+            "formula": "[PFK]-C30H36N15O21P3-C10H12N5O13P3-C6H11O9P",
+            "id": "pfk_R3_AF_c",
+            "name": "Phosphofructokinase-ATP-F6P complex (3 AMP)"
         },
         {
+            "_initial_condition": 4.54444336934577e-06,
+            "charge": -8,
             "compartment": "c",
             "formula": "[PFK]-C40H48N20O28P4",
             "id": "pfk_R4_c",
             "name": "Phosphofructokinase (4 AMP)"
         },
         {
+            "_initial_condition": 1.8145136329330187e-06,
+            "charge": -12,
+            "compartment": "c",
+            "formula": "[PFK]-C40H48N20O28P4-C10H12N5O13P3",
+            "id": "pfk_R4_A_c",
+            "name": "Phosphofructokinase-ATP complex (4 AMP)"
+        },
+        {
+            "_initial_condition": 3.173421976697213e-07,
+            "charge": -14,
+            "compartment": "c",
+            "formula": "[PFK]-C40H48N20O28P4-C10H12N5O13P3-C6H11O9P",
+            "id": "pfk_R4_AF_c",
+            "name": "Phosphofructokinase-ATP-F6P complex (4 AMP)"
+        },
+        {
+            "_initial_condition": 1.047827547292957e-10,
+            "charge": 0,
             "compartment": "c",
             "formula": "[PFK]",
             "id": "pfk_T0_c",
             "name": "Phosphofructokinase (Tense)"
         },
         {
+            "_initial_condition": 6.706096302674925e-09,
+            "charge": -4,
             "compartment": "c",
             "formula": "[PFK]-C10H12N5O13P3",
             "id": "pfk_T1_c",
             "name": "Phosphofructokinase (1 ATP)"
         },
         {
+            "_initial_condition": 1.609463112641982e-07,
+            "charge": -8,
             "compartment": "c",
             "formula": "[PFK]-C20H24N10O26P6",
             "id": "pfk_T2_c",
             "name": "Phosphofructokinase (2 ATP)"
         },
         {
+            "_initial_condition": 1.7167606534847808e-06,
+            "charge": -12,
             "compartment": "c",
             "formula": "[PFK]-C30H36N15O39P9",
             "id": "pfk_T3_c",
             "name": "Phosphofructokinase (3 ATP)"
         },
         {
+            "_initial_condition": 6.867042613939123e-06,
+            "charge": -16,
             "compartment": "c",
             "formula": "[PFK]-C40H48N20O52P12",
             "id": "pfk_T4_c",
@@ -239,29 +285,14 @@
         {
             "_reversible": true,
             "gene_reaction_rule": "",
-            "id": "PFK_L",
-            "lower_bound": -1000.0,
-            "metabolites": {
-                "pfk_R0_c": -1.0,
-                "pfk_T0_c": 1.0
-            },
-            "name": "PFK R/T Transition",
-            "steady_state_flux": "",
-            "subsystem": "PFK",
-            "upper_bound": 1000.0
-        },
-        {
-            "_reversible": true,
-            "gene_reaction_rule": "",
             "id": "PFK_R01",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_R0_A_c": 1.0,
-                "pfk_R0_c": -1.0
+                "atp_c": -1,
+                "pfk_R0_A_c": 1,
+                "pfk_R0_c": -1
             },
             "name": "PFK_R0-ATP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -271,12 +302,11 @@
             "id": "PFK_R02",
             "lower_bound": -1000.0,
             "metabolites": {
-                "f6p_c": -1.0,
-                "pfk_R0_AF_c": 1.0,
-                "pfk_R0_A_c": -1.0
+                "f6p_c": -1,
+                "pfk_R0_AF_c": 1,
+                "pfk_R0_A_c": -1
             },
             "name": "PFK_R0_A-F6P binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -285,16 +315,15 @@
             "_reversible": false,
             "gene_reaction_rule": "",
             "id": "PFK_R03",
-            "lower_bound": -1000.0,
+            "lower_bound": 0.0,
             "metabolites": {
-                "adp_c": 1.0,
-                "fdp_c": 1.0,
-                "h_c": 1.0,
-                "pfk_R0_AF_c": -1.0,
-                "pfk_R0_c": 1.0
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R0_AF_c": -1,
+                "pfk_R0_c": 1
             },
             "name": "PFK_R0_AF catalyzation",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -304,12 +333,11 @@
             "id": "PFK_R10",
             "lower_bound": -1000.0,
             "metabolites": {
-                "amp_c": -1.0,
-                "pfk_R0_c": -1.0,
-                "pfk_R1_c": 1.0
+                "amp_c": -1,
+                "pfk_R0_c": -1,
+                "pfk_R1_c": 1
             },
             "name": "PFK_R0-AMP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -319,12 +347,11 @@
             "id": "PFK_R11",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_R1_A_c": 1.0,
-                "pfk_R1_c": -1.0
+                "atp_c": -1,
+                "pfk_R1_A_c": 1,
+                "pfk_R1_c": -1
             },
             "name": "PFK_R1-ATP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -334,12 +361,11 @@
             "id": "PFK_R12",
             "lower_bound": -1000.0,
             "metabolites": {
-                "f6p_c": -1.0,
-                "pfk_R1_AF_c": 1.0,
-                "pfk_R1_A_c": -1.0
+                "f6p_c": -1,
+                "pfk_R1_AF_c": 1,
+                "pfk_R1_A_c": -1
             },
             "name": "PFK_R1_A-F6P binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -348,16 +374,15 @@
             "_reversible": false,
             "gene_reaction_rule": "",
             "id": "PFK_R13",
-            "lower_bound": -1000.0,
+            "lower_bound": 0.0,
             "metabolites": {
-                "adp_c": 1.0,
-                "fdp_c": 1.0,
-                "h_c": 1.0,
-                "pfk_R1_AF_c": -1.0,
-                "pfk_R1_c": 1.0
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R1_AF_c": -1,
+                "pfk_R1_c": 1
             },
             "name": "PFK_R1_AF catalyzation",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -367,12 +392,11 @@
             "id": "PFK_R20",
             "lower_bound": -1000.0,
             "metabolites": {
-                "amp_c": -1.0,
-                "pfk_R1_c": -1.0,
-                "pfk_R2_c": 1.0
+                "amp_c": -1,
+                "pfk_R1_c": -1,
+                "pfk_R2_c": 1
             },
             "name": "PFK_R1-AMP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -382,12 +406,11 @@
             "id": "PFK_R21",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_R2_A_c": 1.0,
-                "pfk_R2_c": -1.0
+                "atp_c": -1,
+                "pfk_R2_A_c": 1,
+                "pfk_R2_c": -1
             },
             "name": "PFK_R2-ATP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -397,12 +420,11 @@
             "id": "PFK_R22",
             "lower_bound": -1000.0,
             "metabolites": {
-                "f6p_c": -1.0,
-                "pfk_R2_AF_c": 1.0,
-                "pfk_R2_A_c": -1.0
+                "f6p_c": -1,
+                "pfk_R2_AF_c": 1,
+                "pfk_R2_A_c": -1
             },
             "name": "PFK_R2_A-F6P binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -411,16 +433,15 @@
             "_reversible": false,
             "gene_reaction_rule": "",
             "id": "PFK_R23",
-            "lower_bound": -1000.0,
+            "lower_bound": 0.0,
             "metabolites": {
-                "adp_c": 1.0,
-                "fdp_c": 1.0,
-                "h_c": 1.0,
-                "pfk_R2_AF_c": -1.0,
-                "pfk_R2_c": 1.0
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R2_AF_c": -1,
+                "pfk_R2_c": 1
             },
             "name": "PFK_R2_AF catalyzation",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -430,12 +451,11 @@
             "id": "PFK_R30",
             "lower_bound": -1000.0,
             "metabolites": {
-                "amp_c": -1.0,
-                "pfk_R2_c": -1.0,
-                "pfk_R3_c": 1.0
+                "amp_c": -1,
+                "pfk_R2_c": -1,
+                "pfk_R3_c": 1
             },
             "name": "PFK_R2-AMP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -445,12 +465,11 @@
             "id": "PFK_R31",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_R3_A_c": 1.0,
-                "pfk_R3_c": -1.0
+                "atp_c": -1,
+                "pfk_R3_A_c": 1,
+                "pfk_R3_c": -1
             },
             "name": "PFK_R3-ATP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -460,12 +479,11 @@
             "id": "PFK_R32",
             "lower_bound": -1000.0,
             "metabolites": {
-                "f6p_c": -1.0,
-                "pfk_R3_AF_c": 1.0,
-                "pfk_R3_A_c": -1.0
+                "f6p_c": -1,
+                "pfk_R3_AF_c": 1,
+                "pfk_R3_A_c": -1
             },
             "name": "PFK_R3_A-F6P binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -474,16 +492,15 @@
             "_reversible": false,
             "gene_reaction_rule": "",
             "id": "PFK_R33",
-            "lower_bound": -1000.0,
+            "lower_bound": 0.0,
             "metabolites": {
-                "adp_c": 1.0,
-                "fdp_c": 1.0,
-                "h_c": 1.0,
-                "pfk_R3_AF_c": -1.0,
-                "pfk_R3_c": 1.0
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R3_AF_c": -1,
+                "pfk_R3_c": 1
             },
             "name": "PFK_R3_AF catalyzation",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -493,12 +510,11 @@
             "id": "PFK_R40",
             "lower_bound": -1000.0,
             "metabolites": {
-                "amp_c": -1.0,
-                "pfk_R3_c": -1.0,
-                "pfk_R4_c": 1.0
+                "amp_c": -1,
+                "pfk_R3_c": -1,
+                "pfk_R4_c": 1
             },
             "name": "PFK_R3-AMP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -508,12 +524,11 @@
             "id": "PFK_R41",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_R4_A_c": 1.0,
-                "pfk_R4_c": -1.0
+                "atp_c": -1,
+                "pfk_R4_A_c": 1,
+                "pfk_R4_c": -1
             },
             "name": "PFK_R4-ATP binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -523,12 +538,11 @@
             "id": "PFK_R42",
             "lower_bound": -1000.0,
             "metabolites": {
-                "f6p_c": -1.0,
-                "pfk_R4_AF_c": 1.0,
-                "pfk_R4_A_c": -1.0
+                "f6p_c": -1,
+                "pfk_R4_AF_c": 1,
+                "pfk_R4_A_c": -1
             },
             "name": "PFK_R4_A-F6P binding",
-            "steady_state_flux": "",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -537,16 +551,28 @@
             "_reversible": false,
             "gene_reaction_rule": "",
             "id": "PFK_R43",
-            "lower_bound": -1000.0,
+            "lower_bound": 0.0,
             "metabolites": {
-                "adp_c": 1.0,
-                "fdp_c": 1.0,
-                "h_c": 1.0,
-                "pfk_R4_AF_c": -1.0,
-                "pfk_R4_c": 1.0
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R4_AF_c": -1,
+                "pfk_R4_c": 1
             },
             "name": "PFK_R4_AF catalyzation",
-            "steady_state_flux": "",
+            "subsystem": "PFK",
+            "upper_bound": 1000.0
+        },
+        {
+            "_reversible": true,
+            "gene_reaction_rule": "",
+            "id": "PFK_L",
+            "lower_bound": -1000.0,
+            "metabolites": {
+                "pfk_R0_c": -1,
+                "pfk_T0_c": 1
+            },
+            "name": "PFK R/T Transition",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -556,12 +582,11 @@
             "id": "PFK_T1",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_T0_c": -1.0,
-                "pfk_T1_c": 1.0
+                "atp_c": -1,
+                "pfk_T0_c": -1,
+                "pfk_T1_c": 1
             },
-            "name": "PFK_T1-ATP binding",
-            "steady_state_flux": "",
+            "name": "PFK_T0-ATP binding",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -571,12 +596,11 @@
             "id": "PFK_T2",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_T1_c": -1.0,
-                "pfk_T2_c": 1.0
+                "atp_c": -1,
+                "pfk_T1_c": -1,
+                "pfk_T2_c": 1
             },
-            "name": "PFK_T2-ATP binding",
-            "steady_state_flux": "",
+            "name": "PFK_T1-ATP binding",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -586,12 +610,11 @@
             "id": "PFK_T3",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_T2_c": -1.0,
-                "pfk_T3_c": 1.0
+                "atp_c": -1,
+                "pfk_T2_c": -1,
+                "pfk_T3_c": 1
             },
-            "name": "PFK_T3-ATP binding",
-            "steady_state_flux": "",
+            "name": "PFK_T2-ATP binding",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         },
@@ -601,12 +624,11 @@
             "id": "PFK_T4",
             "lower_bound": -1000.0,
             "metabolites": {
-                "atp_c": -1.0,
-                "pfk_T3_c": -1.0,
-                "pfk_T4_c": 1.0
+                "atp_c": -1,
+                "pfk_T3_c": -1,
+                "pfk_T4_c": 1
             },
-            "name": "PFK_T4-ATP binding",
-            "steady_state_flux": "",
+            "name": "PFK_T3-ATP binding",
             "subsystem": "PFK",
             "upper_bound": 1000.0
         }

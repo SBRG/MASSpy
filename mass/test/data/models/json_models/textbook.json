@@ -21,33 +21,33 @@
     "id": "Core-RBC-Model",
     "initial_conditions": {
         "_13dpg_c": 0.0003051,
-        "_23dpg_c": 3.89225358,
+        "_23dpg_c": 3.89225503,
         "_2pg_c": 0.01426657,
-        "_3pg_c": 0.09747343,
+        "_3pg_c": 0.09747345,
         "_6pgc_c": 0.04877853,
         "_6pgl_c": 0.00176584,
         "ade_c": 0.00099988,
         "adn_c": 0.00119991,
-        "adp_c": 0.22421216,
-        "amp_c": 0.06729101,
-        "atp_c": 1.23266835,
+        "adp_c": 0.22421214,
+        "amp_c": 0.067291,
+        "atp_c": 1.23266821,
         "co2_c": 1.0000021,
-        "dhap_c": 0.17280751,
-        "dhb_c": 0.05792549,
-        "e4p_c": 0.00516195,
+        "dhap_c": 0.17280752,
+        "dhb_c": 0.05792551,
+        "e4p_c": 0.00516196,
         "f6p_c": 0.02573503,
-        "fdp_c": 0.01727448,
-        "g3p_c": 0.00800927,
-        "g6p_c": 0.06307567,
-        "glc__D_c": 1.29799719,
+        "fdp_c": 0.01727449,
+        "g3p_c": 0.00800928,
+        "g6p_c": 0.06307568,
+        "glc__D_c": 1.29799734,
         "gthox_c": 0.11986607,
         "gthrd_c": 3.20026785,
         "h2o_c": 0.99999684,
-        "h_c": 9.002e-05,
+        "h_c": 9.001e-05,
         "hb_1o2_c": 0.05000439,
         "hb_2o2_c": 0.07350641,
         "hb_3o2_c": 0.2624172,
-        "hb_4o2_c": 6.79661751,
+        "hb_4o2_c": 6.79661749,
         "hb_c": 0.059529,
         "hxan_c": 0.00200097,
         "imp_c": 0.00775885,
@@ -456,10 +456,10 @@
         }
     ],
     "modules": [
+        "Pentose_Phosphate_Pathway",
         "Glycolysis",
-        "AMP_Salvage_Network",
         "Hemoglobin",
-        "Pentose_Phosphate_Pathway"
+        "AMP_Salvage_Network"
     ],
     "notes": {
         "Literature": [
@@ -474,7 +474,7 @@
     "reactions": [
         {
             "_equilibrium_constant": 850,
-            "_forward_rate_constant": 0.7000072543388836,
+            "_forward_rate_constant": 0.7000072543398842,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "HEX1",
@@ -509,7 +509,7 @@
         },
         {
             "_equilibrium_constant": 310,
-            "_forward_rate_constant": 34.905621101406375,
+            "_forward_rate_constant": 34.90562110348295,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "PFK",
@@ -528,7 +528,7 @@
         },
         {
             "_equilibrium_constant": 0.082,
-            "_forward_rate_constant": 2797.45484531006,
+            "_forward_rate_constant": 2797.448559670789,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "FBA",
@@ -545,7 +545,7 @@
         },
         {
             "_equilibrium_constant": 0.0571429,
-            "_forward_rate_constant": 33.905820692527264,
+            "_forward_rate_constant": 33.90583109305527,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "TPI",
@@ -581,7 +581,7 @@
         },
         {
             "_equilibrium_constant": 1800,
-            "_forward_rate_constant": 1061666.317616854,
+            "_forward_rate_constant": 1061655.085281118,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "PGK",
@@ -593,13 +593,13 @@
                 "atp_c": 1
             },
             "name": "Phosphoglycerate kinase",
-            "steady_state_flux": 1.75847993,
+            "steady_state_flux": 1.75847973,
             "subsystem": "Glycolysis",
             "upper_bound": 1000.0
         },
         {
             "_equilibrium_constant": 0.147059,
-            "_forward_rate_constant": 5017.001209193071,
+            "_forward_rate_constant": 5017.110252578886,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "PGM",
@@ -632,7 +632,7 @@
         },
         {
             "_equilibrium_constant": 363000,
-            "_forward_rate_constant": 468.24708050985544,
+            "_forward_rate_constant": 468.247015920569,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "PYK",
@@ -825,7 +825,7 @@
                 "h_c": 1
             },
             "name": "Adenosine kinase",
-            "steady_state_flux": 0.09244293,
+            "steady_state_flux": 0.09244292,
             "subsystem": "AMP Salvage Network",
             "upper_bound": 1000.0
         },
@@ -843,7 +843,7 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (AMP)",
-            "steady_state_flux": 0.09310617,
+            "steady_state_flux": 0.09310616,
             "subsystem": "AMP Salvage Network",
             "upper_bound": 1000.0
         },
@@ -879,7 +879,7 @@
                 "nh3_c": 1
             },
             "name": "Adenosine monophosphate deaminase",
-            "steady_state_flux": 0.01086239,
+            "steady_state_flux": 0.01086238,
             "subsystem": "AMP Salvage Network",
             "upper_bound": 1000.0
         },
@@ -897,7 +897,7 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (IMP)",
-            "steady_state_flux": 0.01086239,
+            "steady_state_flux": 0.01086238,
             "subsystem": "AMP Salvage Network",
             "upper_bound": 1000.0
         },
@@ -1004,7 +1004,7 @@
                 "h_c": 1
             },
             "name": "Diphosphoglyceromutase",
-            "steady_state_flux": 0.55370446,
+            "steady_state_flux": 0.55370467,
             "subsystem": "Hemoglobin",
             "upper_bound": 1000.0
         },
@@ -1022,7 +1022,7 @@
                 "pi_c": 1
             },
             "name": "Diphosphoglycerate phosphatase",
-            "steady_state_flux": 0.55370446,
+            "steady_state_flux": 0.55370467,
             "subsystem": "Hemoglobin",
             "upper_bound": 1000.0
         },
@@ -1126,7 +1126,7 @@
                 "pi_c": 1
             },
             "name": "ATP maintenance requirement",
-            "steady_state_flux": 1.72830375,
+            "steady_state_flux": 1.72830355,
             "subsystem": "Pseudo",
             "upper_bound": 1000.0
         },
@@ -1305,7 +1305,7 @@
         },
         {
             "_equilibrium_constant": 1,
-            "_forward_rate_constant": 133770.7633575482,
+            "_forward_rate_constant": 133792.1626984127,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "EX_h_e",
