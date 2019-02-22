@@ -14,7 +14,7 @@
         "pi_e": 2.5
     },
     "genes": [],
-    "id": "AMP_Salvage_Network",
+    "id": "AMP-Salvage-Network",
     "initial_conditions": {
         "ade_c": 0.00099986,
         "adn_c": 0.0011999,
