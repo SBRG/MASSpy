@@ -6,43 +6,41 @@
         "Keq_PYK_A": 4.444444,
         "Keq_PYK_ACT": 200.0,
         "Keq_PYK_I": 0.294985,
-        "Keq_PYK_L": 19,
         "Keq_PYK_P": 2.109705,
-        "kf_PYK": 4802874.0,
-        "kf_PYK_A": 5926181.0,
+        "kf_PYK": 1983457.0,
+        "kf_PYK_A": 4010584.0,
         "kf_PYK_ACT": 1000000.0,
         "kf_PYK_I": 1000000.0,
-        "kf_PYK_L": 1000000000000.0,
-        "kf_PYK_P": 9810594.0
+        "kf_PYK_P": 4010496.0
     },
     "custom_rates": {
         "PYK_L": "kf_PYK_L*(pyk_R0_c(t) - pyk_T0_c(t)/Keq_PYK_L)",
-        "PYK_R01": "kf_PYK_A*(pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t)/Keq_PYK_A)",
-        "PYK_R02": "kf_PYK_P*(adp_c(t)*pyk_R0_c(t) - pyk_R0_A_c(t)/Keq_PYK_P)",
+        "PYK_R01": "kf_PYK_P*(pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t)/Keq_PYK_P)",
+        "PYK_R02": "kf_PYK_A*(adp_c(t)*pyk_R0_c(t) - pyk_R0_A_c(t)/Keq_PYK_A)",
         "PYK_R03": "kf_PYK_P*(pep_c(t)*pyk_R0_A_c(t) - pyk_R0_AP_c(t)/Keq_PYK_P)",
         "PYK_R04": "kf_PYK_A*(adp_c(t)*pyk_R0_P_c(t) - pyk_R0_AP_c(t)/Keq_PYK_A)",
         "PYK_R05": "kf_PYK*pyk_R0_AP_c(t)",
         "PYK_R10": "kf_PYK_ACT*(4*fdp_c(t)*pyk_R0_c(t) - pyk_R1_c(t)/Keq_PYK_ACT)",
-        "PYK_R11": "kf_PYK_A*(pep_c(t)*pyk_R1_c(t) - pyk_R1_P_c(t)/Keq_PYK_A)",
-        "PYK_R12": "kf_PYK_P*(adp_c(t)*pyk_R1_c(t) - pyk_R1_A_c(t)/Keq_PYK_P)",
+        "PYK_R11": "kf_PYK_P*(pep_c(t)*pyk_R1_c(t) - pyk_R1_P_c(t)/Keq_PYK_P)",
+        "PYK_R12": "kf_PYK_A*(adp_c(t)*pyk_R1_c(t) - pyk_R1_A_c(t)/Keq_PYK_A)",
         "PYK_R13": "kf_PYK_P*(pep_c(t)*pyk_R1_A_c(t) - pyk_R1_AP_c(t)/Keq_PYK_P)",
         "PYK_R14": "kf_PYK_A*(adp_c(t)*pyk_R1_P_c(t) - pyk_R1_AP_c(t)/Keq_PYK_A)",
         "PYK_R15": "kf_PYK*pyk_R1_AP_c(t)",
         "PYK_R20": "kf_PYK_ACT*(3*fdp_c(t)*pyk_R1_c(t) - 2*pyk_R2_c(t)/Keq_PYK_ACT)",
-        "PYK_R21": "kf_PYK_A*(pep_c(t)*pyk_R2_c(t) - pyk_R2_P_c(t)/Keq_PYK_A)",
-        "PYK_R22": "kf_PYK_P*(adp_c(t)*pyk_R2_c(t) - pyk_R2_A_c(t)/Keq_PYK_P)",
+        "PYK_R21": "kf_PYK_P*(pep_c(t)*pyk_R2_c(t) - pyk_R2_P_c(t)/Keq_PYK_P)",
+        "PYK_R22": "kf_PYK_A*(adp_c(t)*pyk_R2_c(t) - pyk_R2_A_c(t)/Keq_PYK_A)",
         "PYK_R23": "kf_PYK_P*(pep_c(t)*pyk_R2_A_c(t) - pyk_R2_AP_c(t)/Keq_PYK_P)",
         "PYK_R24": "kf_PYK_A*(adp_c(t)*pyk_R2_P_c(t) - pyk_R2_AP_c(t)/Keq_PYK_A)",
         "PYK_R25": "kf_PYK*pyk_R2_AP_c(t)",
         "PYK_R30": "kf_PYK_ACT*(2*fdp_c(t)*pyk_R2_c(t) - 3*pyk_R3_c(t)/Keq_PYK_ACT)",
-        "PYK_R31": "kf_PYK_A*(pep_c(t)*pyk_R3_c(t) - pyk_R3_P_c(t)/Keq_PYK_A)",
-        "PYK_R32": "kf_PYK_P*(adp_c(t)*pyk_R3_c(t) - pyk_R3_A_c(t)/Keq_PYK_P)",
+        "PYK_R31": "kf_PYK_P*(pep_c(t)*pyk_R3_c(t) - pyk_R3_P_c(t)/Keq_PYK_P)",
+        "PYK_R32": "kf_PYK_A*(adp_c(t)*pyk_R3_c(t) - pyk_R3_A_c(t)/Keq_PYK_A)",
         "PYK_R33": "kf_PYK_P*(pep_c(t)*pyk_R3_A_c(t) - pyk_R3_AP_c(t)/Keq_PYK_P)",
         "PYK_R34": "kf_PYK_A*(adp_c(t)*pyk_R3_P_c(t) - pyk_R3_AP_c(t)/Keq_PYK_A)",
         "PYK_R35": "kf_PYK*pyk_R3_AP_c(t)",
         "PYK_R40": "kf_PYK_ACT*(fdp_c(t)*pyk_R3_c(t) - 4*pyk_R4_c(t)/Keq_PYK_ACT)",
-        "PYK_R41": "kf_PYK_A*(pep_c(t)*pyk_R4_c(t) - pyk_R4_P_c(t)/Keq_PYK_A)",
-        "PYK_R42": "kf_PYK_P*(adp_c(t)*pyk_R4_c(t) - pyk_R4_A_c(t)/Keq_PYK_P)",
+        "PYK_R41": "kf_PYK_P*(pep_c(t)*pyk_R4_c(t) - pyk_R4_P_c(t)/Keq_PYK_P)",
+        "PYK_R42": "kf_PYK_A*(adp_c(t)*pyk_R4_c(t) - pyk_R4_A_c(t)/Keq_PYK_A)",
         "PYK_R43": "kf_PYK_P*(pep_c(t)*pyk_R4_A_c(t) - pyk_R4_AP_c(t)/Keq_PYK_P)",
         "PYK_R44": "kf_PYK_A*(adp_c(t)*pyk_R4_P_c(t) - pyk_R4_AP_c(t)/Keq_PYK_A)",
         "PYK_R45": "kf_PYK*pyk_R4_AP_c(t)",
@@ -59,31 +57,31 @@
         "fdp_c": 0.0146,
         "h_c": 8.99757e-05,
         "pep_c": 0.017,
-        "pyk_R0_AP_c": 1.9751612506224344e-09,
-        "pyk_R0_A_c": 6.945124176617689e-09,
-        "pyk_R0_P_c": 8.280588895278854e-08,
-        "pyk_R0_c": 1.4551938458377946e-07,
-        "pyk_R1_AP_c": 2.306988340727003e-08,
-        "pyk_R1_A_c": 8.11190503828946e-08,
-        "pyk_R1_P_c": 9.671727829685699e-07,
-        "pyk_R1_c": 1.6996664119385445e-06,
-        "pyk_R2_AP_c": 1.0104608932384275e-07,
-        "pyk_R2_A_c": 3.5530144067707843e-07,
-        "pyk_R2_P_c": 4.236216789402337e-06,
-        "pyk_R2_c": 7.444538884290823e-06,
-        "pyk_R3_AP_c": 1.967030538837472e-07,
-        "pyk_R3_A_c": 6.916534711847127e-07,
-        "pyk_R3_P_c": 8.246502016703217e-06,
-        "pyk_R3_c": 1.4492035694752805e-05,
-        "pyk_R4_AP_c": 1.4359322933513549e-07,
-        "pyk_R4_A_c": 5.049070339648402e-07,
-        "pyk_R4_P_c": 6.019946472193349e-06,
-        "pyk_R4_c": 1.0579186057169547e-05,
-        "pyk_T0_c": 2.7648683070918094e-06,
-        "pyk_T1_c": 5.219810373270672e-06,
-        "pyk_T2_c": 3.6954409722270258e-06,
-        "pyk_T3_c": 1.1627739538964092e-06,
-        "pyk_T4_c": 1.3720046653644948e-07,
+        "pyk_R0_AP_c": 4.783e-09,
+        "pyk_R0_A_c": 1.35584e-07,
+        "pyk_R0_P_c": 3.848e-09,
+        "pyk_R0_c": 1.07423e-07,
+        "pyk_R1_AP_c": 5.5863e-08,
+        "pyk_R1_A_c": 1.583618e-06,
+        "pyk_R1_P_c": 4.4942e-08,
+        "pyk_R1_c": 1.254696e-06,
+        "pyk_R2_AP_c": 2.4468e-07,
+        "pyk_R2_A_c": 6.936246e-06,
+        "pyk_R2_P_c": 1.96847e-07,
+        "pyk_R2_c": 5.495569e-06,
+        "pyk_R3_AP_c": 4.7631e-07,
+        "pyk_R3_A_c": 1.3502559e-05,
+        "pyk_R3_P_c": 3.83196e-07,
+        "pyk_R3_c": 1.069804e-05,
+        "pyk_R4_AP_c": 3.47706e-07,
+        "pyk_R4_A_c": 9.856868e-06,
+        "pyk_R4_P_c": 2.79733e-07,
+        "pyk_R4_c": 7.809569e-06,
+        "pyk_T0_c": 2.04103e-06,
+        "pyk_T1_c": 3.853271e-06,
+        "pyk_T2_c": 2.72798e-06,
+        "pyk_T3_c": 8.58361e-07,
+        "pyk_T4_c": 1.01282e-07,
         "pyr_c": 0.060301
     },
     "metabolites": [
@@ -128,7 +126,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 1.4551938458377946e-07,
+            "_initial_condition": 1.07423e-07,
             "charge": 0,
             "compartment": "c",
             "formula": "[PYK]",
@@ -136,7 +134,7 @@
             "name": "Pyruvate Kinase"
         },
         {
-            "_initial_condition": 6.945124176617689e-09,
+            "_initial_condition": 1.35584e-07,
             "charge": -3,
             "compartment": "c",
             "formula": "[PYK]-C10H12N5O10P2",
@@ -144,7 +142,7 @@
             "name": "Pyruvate Kinase-ADP complex"
         },
         {
-            "_initial_condition": 8.280588895278854e-08,
+            "_initial_condition": 3.848e-09,
             "charge": -3,
             "compartment": "c",
             "formula": "[PYK]-C3H2O6P",
@@ -152,7 +150,7 @@
             "name": "Pyruvate Kinase-PEP complex"
         },
         {
-            "_initial_condition": 1.9751612506224344e-09,
+            "_initial_condition": 4.783e-09,
             "charge": -6,
             "compartment": "c",
             "formula": "[PYK]-C10H12N5O10P2-C3H2O6P",
@@ -160,7 +158,7 @@
             "name": "Pyruvate Kinase-ADP-PEP complex"
         },
         {
-            "_initial_condition": 1.6996664119385445e-06,
+            "_initial_condition": 1.254696e-06,
             "charge": -4,
             "compartment": "c",
             "formula": "[PYK]-C6H10O12P2",
@@ -168,7 +166,7 @@
             "name": "Pyruvate Kinase (1 FDP)"
         },
         {
-            "_initial_condition": 8.11190503828946e-08,
+            "_initial_condition": 1.583618e-06,
             "charge": -7,
             "compartment": "c",
             "formula": "[PYK]-C6H10O12P2-C10H12N5O10P2",
@@ -176,7 +174,7 @@
             "name": "Pyruvate Kinase-ADP complex (1 FDP)"
         },
         {
-            "_initial_condition": 9.671727829685699e-07,
+            "_initial_condition": 4.4942e-08,
             "charge": -7,
             "compartment": "c",
             "formula": "[PYK]-C6H10O12P2-C3H2O6P",
@@ -184,7 +182,7 @@
             "name": "Pyruvate Kinase-PEP complex (1 FDP)"
         },
         {
-            "_initial_condition": 2.306988340727003e-08,
+            "_initial_condition": 5.5863e-08,
             "charge": -10,
             "compartment": "c",
             "formula": "[PYK]-C6H10O12P2-C10H12N5O10P2-C3H2O6P",
@@ -192,7 +190,7 @@
             "name": "Pyruvate Kinase-ADP-PEP complex (1 FDP)"
         },
         {
-            "_initial_condition": 7.444538884290823e-06,
+            "_initial_condition": 5.495569e-06,
             "charge": -8,
             "compartment": "c",
             "formula": "[PYK]-C12H20O24P4",
@@ -200,7 +198,7 @@
             "name": "Pyruvate Kinase (2 FDP)"
         },
         {
-            "_initial_condition": 3.5530144067707843e-07,
+            "_initial_condition": 6.936246e-06,
             "charge": -11,
             "compartment": "c",
             "formula": "[PYK]-C12H20O24P4-C10H12N5O10P2",
@@ -208,7 +206,7 @@
             "name": "Pyruvate Kinase-ADP complex (2 FDP)"
         },
         {
-            "_initial_condition": 4.236216789402337e-06,
+            "_initial_condition": 1.96847e-07,
             "charge": -11,
             "compartment": "c",
             "formula": "[PYK]-C12H20O24P4-C3H2O6P",
@@ -216,7 +214,7 @@
             "name": "Pyruvate Kinase-PEP complex (2 FDP)"
         },
         {
-            "_initial_condition": 1.0104608932384275e-07,
+            "_initial_condition": 2.4468e-07,
             "charge": -14,
             "compartment": "c",
             "formula": "[PYK]-C12H20O24P4-C10H12N5O10P2-C3H2O6P",
@@ -224,7 +222,7 @@
             "name": "Pyruvate Kinase-ADP-PEP complex (2 FDP)"
         },
         {
-            "_initial_condition": 1.4492035694752805e-05,
+            "_initial_condition": 1.069804e-05,
             "charge": -12,
             "compartment": "c",
             "formula": "[PYK]-C18H30O36P6",
@@ -232,7 +230,7 @@
             "name": "Pyruvate Kinase (3 FDP)"
         },
         {
-            "_initial_condition": 6.916534711847127e-07,
+            "_initial_condition": 1.3502559e-05,
             "charge": -15,
             "compartment": "c",
             "formula": "[PYK]-C18H30O36P6-C10H12N5O10P2",
@@ -240,7 +238,7 @@
             "name": "Pyruvate Kinase-ADP complex (3 FDP)"
         },
         {
-            "_initial_condition": 8.246502016703217e-06,
+            "_initial_condition": 3.83196e-07,
             "charge": -15,
             "compartment": "c",
             "formula": "[PYK]-C18H30O36P6-C3H2O6P",
@@ -248,7 +246,7 @@
             "name": "Pyruvate Kinase-PEP complex (3 FDP)"
         },
         {
-            "_initial_condition": 1.967030538837472e-07,
+            "_initial_condition": 4.7631e-07,
             "charge": -18,
             "compartment": "c",
             "formula": "[PYK]-C18H30O36P6-C10H12N5O10P2-C3H2O6P",
@@ -256,7 +254,7 @@
             "name": "Pyruvate Kinase-ADP-PEP complex (3 FDP)"
         },
         {
-            "_initial_condition": 1.0579186057169547e-05,
+            "_initial_condition": 7.809569e-06,
             "charge": -16,
             "compartment": "c",
             "formula": "[PYK]-C24H40O48P8",
@@ -264,7 +262,7 @@
             "name": "Pyruvate Kinase (4 FDP)"
         },
         {
-            "_initial_condition": 5.049070339648402e-07,
+            "_initial_condition": 9.856868e-06,
             "charge": -19,
             "compartment": "c",
             "formula": "[PYK]-C24H40O48P8-C10H12N5O10P2",
@@ -272,7 +270,7 @@
             "name": "Pyruvate Kinase-ADP complex (4 FDP)"
         },
         {
-            "_initial_condition": 6.019946472193349e-06,
+            "_initial_condition": 2.79733e-07,
             "charge": -19,
             "compartment": "c",
             "formula": "[PYK]-C24H40O48P8-C3H2O6P",
@@ -280,7 +278,7 @@
             "name": "Pyruvate Kinase-PEP complex (4 FDP)"
         },
         {
-            "_initial_condition": 1.4359322933513549e-07,
+            "_initial_condition": 3.47706e-07,
             "charge": -22,
             "compartment": "c",
             "formula": "[PYK]-C24H40O48P8-C10H12N5O10P2-C3H2O6P",
@@ -288,7 +286,7 @@
             "name": "Pyruvate Kinase-ADP-PEP complex (4 FDP)"
         },
         {
-            "_initial_condition": 2.7648683070918094e-06,
+            "_initial_condition": 2.04103e-06,
             "charge": 0,
             "compartment": "c",
             "formula": "[PYK]",
@@ -296,7 +294,7 @@
             "name": "Pyruvate Kinase (Tense)"
         },
         {
-            "_initial_condition": 5.219810373270672e-06,
+            "_initial_condition": 3.853271e-06,
             "charge": -4,
             "compartment": "c",
             "formula": "[PYK]-C10H12N5O13P3",
@@ -304,7 +302,7 @@
             "name": "Pyruvate Kinase (1 ATP)"
         },
         {
-            "_initial_condition": 3.6954409722270258e-06,
+            "_initial_condition": 2.72798e-06,
             "charge": -8,
             "compartment": "c",
             "formula": "[PYK]-C20H24N10O26P6",
@@ -312,7 +310,7 @@
             "name": "Pyruvate Kinase (2 ATP)"
         },
         {
-            "_initial_condition": 1.1627739538964092e-06,
+            "_initial_condition": 8.58361e-07,
             "charge": -12,
             "compartment": "c",
             "formula": "[PYK]-C30H36N15O39P9",
@@ -320,7 +318,7 @@
             "name": "Pyruvate Kinase (3 ATP)"
         },
         {
-            "_initial_condition": 1.3720046653644948e-07,
+            "_initial_condition": 1.01282e-07,
             "charge": -16,
             "compartment": "c",
             "formula": "[PYK]-C40H48N20O52P12",
@@ -759,6 +757,8 @@
             "upper_bound": 1000.0
         },
         {
+            "_equilibrium_constant": 19,
+            "_forward_rate_constant": 1000000000000.0,
             "_reversible": true,
             "gene_reaction_rule": "",
             "id": "PYK_L",
