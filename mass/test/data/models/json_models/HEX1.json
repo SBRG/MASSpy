@@ -23,13 +23,13 @@
         "g6p_c": 0.0486,
         "glc__D_c": 1.0,
         "h_c": 8.99757e-05,
-        "hex1_adp_c": 1.6349094091690838e-06,
-        "hex1_atp_c": 2.9812425735689026e-06,
-        "hex1_c": 5.6376186523071845e-06,
-        "hex1_g6p_c": 4.109823997531938e-09,
-        "hex1_glc__D_23dpg_c": 3.938638925239739e-06,
-        "hex1_glc__D_atp_c": 2.8155478427735246e-06,
-        "hex1_glc__D_c": 6.987914758501391e-06
+        "hex1_adp_c": 1.634909e-06,
+        "hex1_atp_c": 2.981243e-06,
+        "hex1_c": 5.637619e-06,
+        "hex1_g6p_c": 4.11e-09,
+        "hex1_glc__D_23dpg_c": 3.938639e-06,
+        "hex1_glc__D_atp_c": 2.815548e-06,
+        "hex1_glc__D_c": 6.987915e-06
     },
     "metabolites": [
         {
@@ -81,7 +81,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 5.6376186523071845e-06,
+            "_initial_condition": 5.637619e-06,
             "charge": 0,
             "compartment": "c",
             "formula": "[HEX1]",
@@ -89,7 +89,7 @@
             "name": "Hexokinase (D-glucose:ATP)"
         },
         {
-            "_initial_condition": 2.9812425735689026e-06,
+            "_initial_condition": 2.981243e-06,
             "charge": -4,
             "compartment": "c",
             "formula": "[HEX1]-C10H12N5O13P3",
@@ -97,7 +97,7 @@
             "name": "Hexokinase-ATP complex"
         },
         {
-            "_initial_condition": 6.987914758501391e-06,
+            "_initial_condition": 6.987915e-06,
             "charge": 0,
             "compartment": "c",
             "formula": "[HEX1]-C6H12O6",
@@ -105,7 +105,7 @@
             "name": "Hexokinase-GLC complex"
         },
         {
-            "_initial_condition": 2.8155478427735246e-06,
+            "_initial_condition": 2.815548e-06,
             "charge": -4,
             "compartment": "c",
             "formula": "[HEX1]-C6H12O6-C10H12N5O13P3",
@@ -113,7 +113,7 @@
             "name": "Hexokinase-GLC-ATP complex"
         },
         {
-            "_initial_condition": 3.938638925239739e-06,
+            "_initial_condition": 3.938639e-06,
             "charge": -5,
             "compartment": "c",
             "formula": "[HEX1]-C6H12O6-C3H3O10P2",
@@ -121,7 +121,7 @@
             "name": "Hexokinase-GLC-23DPG complex"
         },
         {
-            "_initial_condition": 1.6349094091690838e-06,
+            "_initial_condition": 1.634909e-06,
             "charge": -3,
             "compartment": "c",
             "formula": "[HEX1]-C10H12N5O10P2",
@@ -129,7 +129,7 @@
             "name": "Hexokinase-ADP complex"
         },
         {
-            "_initial_condition": 4.109823997531938e-09,
+            "_initial_condition": 4.11e-09,
             "charge": -2,
             "compartment": "c",
             "formula": "[HEX1]-C6H11O9P",
