@@ -1418,6 +1418,8 @@ class Simulation(Object):
         for key, value in iteritems(new_options):
             if key in options:
                 options[key] = value
+            else:
+                warn("Unknown kwarg '{0}' provided.".format(key))
 
         # Set jacobian
         options["jac"] = jacb
