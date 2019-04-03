@@ -139,9 +139,15 @@ class MassMetabolite(Species):
     def initial_condition(self, value):
         """Set the initial condition of the metabolite.
 
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the concentration of the metabolite.
+
         Warnings
         --------
         Initial conditions of metabolites cannot be negative.
+
         """
         if not isinstance(value, (integer_types, float)) and \
            value is not None:
@@ -150,7 +156,7 @@ class MassMetabolite(Species):
             pass
         elif value < 0.:
             raise ValueError("Must be a non-negative number")
-        self._initial_condition = value
+        setattr(self, "_initial_condition", value)
 
     # TODO Add in when thermodynamics are finished
     # @property
@@ -214,6 +220,11 @@ class MassMetabolite(Species):
         """Shorthand getter for the metabolite's associated ODE."""
         return self.ordinary_differential_equation
 
+    @property
+    def model(self):
+        """Return the MassModel associated with the metabolite."""
+        return getattr(self, "_model")
+
     def remove_from_model(self, destructive=False):
         """Remove the metabolite's association from its MassModel.
 
@@ -230,10 +241,18 @@ class MassMetabolite(Species):
 
     # Internal
     def _set_id_with_model(self, value):
-        """Set the id of the MassMetabolite to the assoicated MassModel."""
-        if value in self._model.metabolites:
-            raise ValueError("The MassModel already contains a MassMetabolite"
-                             " with the id:{0}".format(value))
+        """Set the id of the MassMetabolite to the associated MassModel.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        if value in self.model.metabolites:
+            raise ValueError("The model already contains a metabolite with "
+                             "the id: ", value)
+        self._id = value
+        self.model.metabolites._generate_index()
 
     def _repr_html_(self):
         """HTML representation of the overview for the MassMetabolite."""
