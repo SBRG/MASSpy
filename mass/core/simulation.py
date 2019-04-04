@@ -328,7 +328,7 @@ class Simulation(Object):
         """
         return self._lookup_solutions(models, _msol._POOL_STR)
 
-    def get_netflux_solutions(self, models=None):
+    def get_net_flux_solutions(self, models=None):
         """Return the NetFlux Solutions for a list of models.
 
         Parameters
@@ -875,7 +875,7 @@ class Simulation(Object):
 
         return pool_solutions
 
-    def make_netfluxes(self, netfluxes, parameters=None, verbose=True):
+    def make_net_fluxes(self, net_fluxes, parameters=None, verbose=True):
         """Create NetFlux Solutions for a given list of flux summations.
 
         Example: To sum the fluxes of v1 and v2 scaled,
@@ -884,42 +884,43 @@ class Simulation(Object):
 
         Parameters
         ----------
-        netfluxes : str, list of str, dict
-            Either a string or a list of strings defining the netflux formula,
-            or a dict where keys are netflux identifiers and values are the
-            corresponding netfluxes. All fluxes to be combined must exist in
+        net_fluxes : str, list of str, dict
+            Either a string or a list of strings defining the net flux formula,
+            or a dict where keys are net flux identifiers and values are the
+            corresponding net fluxes. All fluxes to be combined must exist in
             the Solution objects found in self.get_flux_solutions().
         parameters : dictionary, optional
-            A dictionary of aditional parameters to be used in the pools,
+            A dictionary of aditional parameters to be used in the net fluxes,
             where the key:value pairs are the parameter identifiers and its
             numerical value.
         verbose: bool, optional
-            If True, provide warnings when netfluxes cannot be created using a 
+            If True, provide warnings when net fluxes cannot be created using a 
             particular Solution object. Default is True.
 
         Returns
         -------
-        netflux_solutions: mass.Solution, DictList of mass.Solution objects
+        net_flux_solutions: mass.Solution, DictList of mass.Solution objects
             A DictList of mass.Solution object each containing the dict of
-            netflux solutions, or a single mass.Solution object if there is
+            net flux solutions, or a single mass.Solution object if there is
             only one model in the Simulation object.
 
         Notes
         -----
-        If a netflux cannot be created for a model due to including reactions
-            in the netflux formula that are not part of the model, the creation
-            of that particular netflux will be skipped. To enable a warning for
-            when netflux creation is skipped, set 'verbose' equal to True.
+        If a net flux cannot be created for a model due to including reactions
+            in the net flux formula that are not part of the model, the 
+            creation of that particular net flux will be skipped. To enable a 
+            warning for when net flux creation is skipped, set 'verbose' equal
+            to True.
 
         """
         group_ids = None
-        if isinstance(netfluxes, string_types):
-            netfluxes = [netfluxes]
-        elif isinstance(netfluxes, dict):
-            group_ids = list(iterkeys(netfluxes))
-            netfluxes = list(itervalues(netfluxes))
+        if isinstance(net_fluxes, string_types):
+            net_fluxes = [net_fluxes]
+        elif isinstance(net_fluxes, dict):
+            group_ids = list(iterkeys(net_fluxes))
+            net_fluxes = list(itervalues(net_fluxes))
         else:
-            netfluxes = ensure_iterable(netfluxes)
+            net_fluxes = ensure_iterable(net_fluxes)
 
         sols = self.get_flux_solutions()
         if isinstance(sols, _msol.Solution):
@@ -927,13 +928,13 @@ class Simulation(Object):
 
         if group_ids is None:
             group_ids = ["net{0}".format(str(i + 1))
-                         for i in range(len(netfluxes))]
+                         for i in range(len(net_fluxes))]
 
-        netflux_solutions = self._create_group(
-            sols=sols, to_create=netfluxes, parameters=parameters, 
+        net_fluxes_solutions = self._create_group(
+            sols=sols, to_create=net_fluxes, parameters=parameters, 
             new_ids=group_ids, sol_type=_msol._NETFLUX_STR, verbose=verbose)
 
-        return netflux_solutions
+        return net_fluxes_solutions
 
     # Internal
     def _set_rate_type(self, model):
