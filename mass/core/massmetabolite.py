@@ -94,10 +94,11 @@ class MassMetabolite(Species):
                  .format(self.formula))
             tmp_formula = tmp_formula.replace("*", "")
         composition = {}
-        if "[" in tmp_formula and "]" in tmp_formula:
+        # Identify any moieties
+        while "[" in tmp_formula and "]" in tmp_formula:
             s = tmp_formula.index("[")
             e = tmp_formula.index("]") + 1
-            moiety = tmp_formula[s:e][1:-1]
+            moiety = tmp_formula[s:e]
             composition[moiety] = 1
             tmp_formula = tmp_formula.replace(tmp_formula[s:e], "")
 
@@ -240,6 +241,17 @@ class MassMetabolite(Species):
         return self._model.remove_metabolites(self, destructive)
 
     # Internal
+    def _remove_compartment_from_id_str(self):
+        """Remove the compartment from the ID str of the metabolite.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        _c_str = "_" + self.compartment if self.compartment else ""
+        return str(self).replace(_c_str, "")
+
     def _set_id_with_model(self, value):
         """Set the id of the MassMetabolite to the associated MassModel.
 
@@ -289,7 +301,7 @@ class MassMetabolite(Species):
                           ic=self._initial_condition,
                           gibbs=self._gibbs_formation_energy,
                           n_reactions=len(self.reactions),
-                          reactions='. '.join(r.id for r in self.reactions))
+                          reactions=', '.join(r.id for r in self.reactions))
 
 
 ELEMENTS_AND_MOLECULAR_WEIGHTS = {

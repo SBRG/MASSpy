@@ -9,7 +9,7 @@ import pandas as pd
 from scipy import linalg
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import iteritems, itervalues
+from six import iteritems
 
 import sympy as sym
 
@@ -69,11 +69,7 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
     if use_concentration_values or use_parameter_values:
         values = {}
         if use_parameter_values:
-            model_parameters = model.parameters
-
-            for dictionary in itervalues(model_parameters):
-                values.update({sym.Symbol(str(k)): v
-                               for k, v in iteritems(dictionary)})
+            values.update(model._get_all_parameters())
 
         if use_concentration_values:
             values.update({_mk_met_func(k): v
