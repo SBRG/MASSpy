@@ -42,9 +42,9 @@ dictionary returning as False, and those with solutions returning as True.
 from __future__ import absolute_import
 
 import re
-from warnings import filterwarnings, warn
 from collections import OrderedDict
 from math import log10
+from warnings import filterwarnings, warn
 
 import numpy as np
 
@@ -59,9 +59,11 @@ from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
 from mass import config as _config
-from mass.core import solution as _msol
 from mass.core.massmodel import MassModel
+from mass.core.solution import (
+    Solution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
 from mass.exceptions import MassSimulationError
+from mass.util.DictWithID import DictWithID 
 from mass.util.expressions import _mk_met_func
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
 from mass.util.util import ensure_iterable, strip_time
@@ -81,7 +83,7 @@ _T_SYM = sym.Symbol("t")
 _ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
 # Define default option dicts for solvers
-_scipy_default_options = _msol._DictWithID(
+_scipy_default_options = DictWithID(
     id="scipy", dictionary={
         "method": "LSODA",
         "dense_output": True,
@@ -284,7 +286,7 @@ class Simulation(Object):
             objects as values for multiple models.
 
         """
-        return self._lookup_solutions(models, _msol._CONC_STR)
+        return self._lookup_solutions(models, _CONC_STR)
 
     def get_flux_solutions(self, models=None):
         """Return the Flux Solutions for a list of models.
@@ -306,7 +308,7 @@ class Simulation(Object):
             objects as values for multiple models.
 
         """
-        return self._lookup_solutions(models, _msol._FLUX_STR)
+        return self._lookup_solutions(models, _FLUX_STR)
 
     def get_pool_solutions(self, models=None):
         """Return the Pool Solutions for a list of models.
@@ -326,7 +328,7 @@ class Simulation(Object):
             objects as values for multiple models.
 
         """
-        return self._lookup_solutions(models, _msol._POOL_STR)
+        return self._lookup_solutions(models, _POOL_STR)
 
     def get_net_flux_solutions(self, models=None):
         """Return the NetFlux Solutions for a list of models.
@@ -346,7 +348,7 @@ class Simulation(Object):
             objects as values for multiple models.
 
         """
-        return self._lookup_solutions(models, _msol._NETFLUX_STR)
+        return self._lookup_solutions(models, _NETFLUX_STR)
 
     def view_model_values(self, model):
         """Return copies of stored numerical values associated with a model.
@@ -534,7 +536,7 @@ class Simulation(Object):
             t, conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
                                                         ics, options)
             # Create Solution object for concentrations
-            conc_sol = _msol.Solution(model, _msol._CONC_STR, conc_sol, t)
+            conc_sol = Solution(model, _CONC_STR, conc_sol, t)
 
             # Calculate flux solutions using the concentration solutions
             flux_sol = self._calculate_flux_solutions(model, parameters,
@@ -549,8 +551,8 @@ class Simulation(Object):
         except MassSimulationError as e:
             warn(str(e))
             # Create empty solution objects
-            conc_sol = _msol.Solution(model, _msol._CONC_STR)
-            flux_sol = _msol.Solution(model, _msol._FLUX_STR)
+            conc_sol = Solution(model, _CONC_STR)
+            flux_sol = Solution(model, _FLUX_STR)
             sol_obj = None
 
         return _update_and_return(conc_sol, flux_sol, sol_obj,
@@ -707,14 +709,12 @@ class Simulation(Object):
             self._assess_quality(model, verbose)
             conc_sol, flux_sol = strategy_dict[strategy](
                 model, perturbations, verbose, chop, update, **options)
-            conc_sol = _msol.Solution(model, _msol._CONC_STR,
-                                      solution_dictionary=conc_sol)
-            flux_sol = _msol.Solution(model, _msol._FLUX_STR,
-                                      solution_dictionary=flux_sol)
+            conc_sol = Solution(model, _CONC_STR, solution_dictionary=conc_sol)
+            flux_sol = Solution(model, _FLUX_STR, solution_dictionary=flux_sol)
         except MassSimulationError as e:
             warn(str(e))
-            conc_sol = _msol.Solution(model, _msol._CONC_STR)
-            flux_sol = _msol.Solution(model, _msol._FLUX_STR)
+            conc_sol = Solution(model, _CONC_STR)
+            flux_sol = Solution(model, _FLUX_STR)
 
         if update_initial_conditions:
             self.update_values(model)
@@ -864,14 +864,14 @@ class Simulation(Object):
             pools = ensure_iterable(pools)
 
         sols = self.get_concentration_solutions()
-        if isinstance(sols, _msol.Solution):
+        if isinstance(sols, Solution):
             sols = {sols.id.replace("_ConcSol", ""): sols}
         if group_ids is None:
             group_ids = ["p{0}".format(str(i + 1)) for i in range(len(pools))]
 
         pool_solutions = self._create_group(
             sols=sols, to_create=pools, parameters=parameters, 
-            new_ids=group_ids, sol_type=_msol._POOL_STR, verbose=verbose)
+            new_ids=group_ids, sol_type=_POOL_STR, verbose=verbose)
 
         return pool_solutions
 
@@ -923,7 +923,7 @@ class Simulation(Object):
             net_fluxes = ensure_iterable(net_fluxes)
 
         sols = self.get_flux_solutions()
-        if isinstance(sols, _msol.Solution):
+        if isinstance(sols, Solution):
             sols = {sols.id.replace("_FluxSol", ""): sols}
 
         if group_ids is None:
@@ -932,7 +932,7 @@ class Simulation(Object):
 
         net_fluxes_solutions = self._create_group(
             sols=sols, to_create=net_fluxes, parameters=parameters, 
-            new_ids=group_ids, sol_type=_msol._NETFLUX_STR, verbose=verbose)
+            new_ids=group_ids, sol_type=_NETFLUX_STR, verbose=verbose)
 
         return net_fluxes_solutions
 
@@ -1011,8 +1011,7 @@ class Simulation(Object):
                                     expr=expr, modules=_LAMBDIFY_MODULE)
                 values = np.array([sol[arg] for arg in args])
                 groups_sol_dict.update({g_id: func(*values)})
-            group_sol = _msol.Solution(sol.model, sol_type, groups_sol_dict,
-                                       sol.t)
+            group_sol = Solution(sol.model, sol_type, groups_sol_dict, sol.t)
             group_sol._groups = groups_id_dict
             if interpolate:
                 sol.interpolate = interpolate
@@ -1107,11 +1106,10 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        values = {}
-        for dictionary in itervalues(model.parameters):
-            values.update({sym.Symbol(str(k)): v
-                           for k, v in iteritems(dictionary)})
-        return _msol._DictWithID(model.id + "_parameters", dictionary=values)
+        values = {sym.Symbol(str(k)): v 
+                  for k, v in iteritems(model._get_all_parameters())}
+
+        return DictWithID(model.id + "_parameters", dictionary=values)
 
     def _get_ics_from_model(self, model):
         """Get a dict of initial conditions as sympy symbols and their values.
@@ -1123,7 +1121,7 @@ class Simulation(Object):
         """
         values = {_mk_met_func(k): v
                   for k, v in iteritems(model.initial_conditions)}
-        return _msol._DictWithID(model.id + "_ics", dictionary=values)
+        return DictWithID(model.id + "_ics", dictionary=values)
 
     def _assess_quality(self, model, verbose, obj="Simulation"):
         """Assess the model quality to determine whether it is simulatable.
@@ -1389,7 +1387,7 @@ class Simulation(Object):
                 flux = np.array([float(rate)] * len(t))
             fluxes[reaction.id] = flux
 
-        flux_sol = _msol.Solution(model, _msol._FLUX_STR, fluxes, t)
+        flux_sol = Solution(model, _FLUX_STR, fluxes, t)
 
         return flux_sol
 

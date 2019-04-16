@@ -2,7 +2,6 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import, print_function
 
-
 import re
 import warnings
 
@@ -18,6 +17,8 @@ from six import iteritems, string_types
 
 import sympy as sym
 
+from cobra import DictList
+
 _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 
 
@@ -32,7 +33,7 @@ def Keq2k(sympy_expr, simplify=True):
 
     Parameters
     ----------
-    sympy_expr: sympy expression, dict, or list
+    sympy_expr: sympy.Basic dict, or list
         A sympy expression, a list of sympy expressions, or a dictionary with
         sympy expressions as the values.
     simplify: bool, optional
@@ -41,7 +42,7 @@ def Keq2k(sympy_expr, simplify=True):
 
     Returns
     -------
-    new_expr: sympy expression, dict, or list
+    new_expr: sympy.Basic, dict, or list
         The sympy expression(s) with the substitution made, returned as the
         same type as the original input.
 
@@ -80,13 +81,13 @@ def strip_time(sympy_expr):
 
     Parameters
     ----------
-    sympy_expr: sympy expression, dict, or list
+    sympy_expr: sympy.Basic, dict, or list
         A sympy expression, a list of sympy expressions, or a dictionary with
         sympy expressions as the values.
 
     Returns
     -------
-    stripped_expr: sympy expression, dict, or list
+    stripped_expr: sympy.Basic, dict, or list
         The sympy expression(s) without the time dependency, returned as the
         same type as the original input.
 
@@ -175,6 +176,15 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
 
 
 # Internal
+def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
+    """Return a new DictList with object references updated."""
+    items = ref_dictlist.get_by_any([i.id if hasattr(i, "id") else str(i)
+                                     for i in old_dictlist])
+    if ensure_unique:
+        items = set(items)
+    return DictList(items)
+
+
 def _apply_func_to_expressions(sympy_expr, function, args=None):
     """Apply the given function to alter each sympy expression provided.
 

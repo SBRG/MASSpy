@@ -22,9 +22,9 @@ def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
         The MassReaction object to generate the rate expression for.
     rate type: int {1, 2, 3}, optional
         The type of rate law to display. Must be 1, 2, or 3.
-        Type 1 will utilize kf and Keq.
-        Type 2 will utilize kf and kr.
-        Type 3 will utilize kr and Keq.
+            Type 1 will utilize the forward rate and equilibrium constants.
+            Type 2 will utilize the forward rate and reverse rate constants.
+            Type 3 will utilize the equilibrium and reverse rate constants.
     sympy_expr: bool, optional
         If True, output is a sympy expression. Otherwise output is a string.
     update_reaction: bool, optional
@@ -83,8 +83,8 @@ def generate_mass_action_ratio(reaction):
 
     Returns
     -------
-    ma_ratio: sympy expression
-        The mass action ratio as a sympy expression.
+    ma_ratio: sympy.Basic
+        The mass action ratio as a sympy expression (sympy.Basic).
 
     """
     reaction = _ignore_h_and_h2o(reaction)
@@ -109,8 +109,8 @@ def generate_disequilibrium_ratio(reaction):
 
     Returns
     -------
-    diseq_ratio: sympy expression
-        The disequilibrium ratio as a sympy expression.
+    diseq_ratio: sympy.Basic
+        The disequilibrium ratio as a sympy expression (sympy.Basic).
 
     """
     diseq_ratio = sym.Mul(generate_mass_action_ratio(reaction),
@@ -131,7 +131,7 @@ def generate_ode(metabolite):
 
     Returns
     -------
-    ode: sympy expression
+    ode: sympy.Basic
         The metabolite ODE as a sympy expression.
 
     """
@@ -166,7 +166,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
 
     Returns
     -------
-    custom_rate_expression: sympy expression, None
+    custom_rate_expression: sympy.Basic, None
         A sympy expression of the custom rate. If no metabolites are assoicated
         with the reaction, None will be returned.
 

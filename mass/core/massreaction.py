@@ -11,6 +11,8 @@ from warnings import warn
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
+from sympy import Symbol
+
 from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
 from cobra.util.context import get_context
@@ -86,13 +88,13 @@ class MassReaction(Object):
         if self._reversible:
             self._reverse_rate_constant = None
             self._equilibrium_constant = None
-            self.lower_bound = -1000.
-            self.upper_bound = 1000.
+            self._lower_bound = -1000.
+            self._upper_bound = 1000.
         else:
             self._reverse_rate_constant = 0.
             self._equilibrium_constant = _INF
-            self.lower_bound = 0.
-            self.upper_bound = 1000.
+            self._lower_bound = 0.
+            self._upper_bound = 1000.
 
         self.objective_coefficient = 0.
         self.variable_kind = 'continuous'
@@ -192,13 +194,14 @@ class MassReaction(Object):
 
     @property
     def parameters(self):
-        """Return a dictionary of all reaction parameters.
+        """Return a dictionary of rate and equilibrium constants.
 
         Notes
         -----
         Reverse rate constants are only included for reversible reactions.
-        Only standard parameters are accessed here. Custom parameters can only
-            be accessed through the model.
+        Only rate and equilibrium constantx are accessed here. Steady state
+            fluxes can be accessed through the steady_state_flux attribute, 
+            and custom parameters can only be accessed through the model.
 
         """
         keys = [self.kf_str, self.Keq_str]
@@ -450,6 +453,67 @@ class MassReaction(Object):
 
         return True
 
+    @property
+    def flux_symbol(self):
+        """Return the symbol representation for the reaction flux."""
+        if self.id is not None:
+            return Symbol("v_" + self.id)
+
+    @property
+    def all_parameter_ids(self):
+        """Return a list of strings representing all non-custom parameters."""
+        return [self.kf_str, self.Keq_str, self.kr_str, str(self.flux_symbol)]
+
+    @property
+    def lower_bound(self):
+        """Get the lower bound of the reaction."""
+        return getattr(self, "_lower_bound")
+
+    @lower_bound.setter
+    def lower_bound(self, value):
+        """Set the lower bound of the reaction.
+
+        Infeasible combinations, such as a upper bound lower than the current
+        lower bound will update the other bound.
+
+        Parameters
+        ----------
+        value: float
+            The new value for the lower bound.
+
+        """
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("value must be a float.")
+        if self.upper_bound < value:
+            self.upper_bound = value
+
+        setattr(self, "_lower_bound", value)
+
+    @property
+    def upper_bound(self):
+        """Get the lower bound of the reaction."""
+        return getattr(self, "_upper_bound")
+
+    @upper_bound.setter
+    def upper_bound(self, value):
+        """Set the upper bound of the reaction.
+
+        Infeasible combinations, such as a upper bound lower than the current
+        lower bound will update the other bound.
+
+        Parameters
+        ----------
+        value: float
+            The new value for the upper bound.
+
+        """
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("value must be a float.")
+        if self.lower_bound < value:
+            self.lower_bound = value
+
+        setattr(self, "_upper_bound", value)
+
     # TODO Add in when thermodynamics are finished
     # @property
     # def gibbs_reaction_energy(self):
@@ -590,7 +654,7 @@ class MassReaction(Object):
 
         Returns
         -------
-        The rate law expression as a str or sympy expression
+        The rate law expression as a str or sympy expression (sympy.Basic).
 
         """
         return expressions.generate_rate_law(self, rate_type, sympy_expr,
@@ -601,7 +665,7 @@ class MassReaction(Object):
 
         Returns
         -------
-        The mass action ratio as a sympy expression.
+        The mass action ratio as a sympy expression (sympy.Basic).
 
         """
         return expressions.generate_mass_action_ratio(self)
@@ -611,7 +675,7 @@ class MassReaction(Object):
 
         Returns
         -------
-        The disequilibrium ratio as a sympy expression.
+        The disequilibrium ratio as a sympy expression (sympy.Basic).
 
         """
         return expressions.generate_disequilibrium_ratio(self)
@@ -770,13 +834,16 @@ class MassReaction(Object):
                 # Make the metabolite aware of its involvement in the reaction.
                 metabolite._reaction.add(self)
 
+        model = self.model
+        if model is not None:
+            model.add_metabolites(new_metabolites)
+
         for metabolite, coefficient in list(iteritems(self._metabolites)):
             if coefficient == 0:
                 # Make the metabolite aware of it no longer in the reaction.
                 metabolite._reaction.remove(self)
                 self._metabolites.pop(metabolite)
 
-        model = self.model
         context = get_context(self)
         if context and reversibly:
             if combine:
@@ -1018,6 +1085,10 @@ class MassReaction(Object):
         cobra_gene: cobra.core.Gene.Gene
             Gene object to be assoicated with the reaction.
 
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         self._genes.add(cobra_gene)
         cobra_gene._reaction.add(self)
@@ -1031,20 +1102,36 @@ class MassReaction(Object):
         cobra_gene: cobra.core.Gene.Gene
             Gene object to be assoicated with the reaction.
 
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         self._genes.discard(cobra_gene)
         cobra_gene._reaction.discard(self)
 
     def _set_id_with_model(self, value):
-        """Set the id of the MassReaction to the assoicated MassModel."""
+        """Set the id of the MassReaction to the associated MassModel.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         if value in self.model.reactions:
             raise ValueError("The model already contains a reaction with "
-                             "the id:", value)
+                             "the id: ", value)
         self._id = value
         self.model.reactions._generate_index()
 
     def _update_awareness(self):
-        """Make species aware of their involvement with the reaction."""
+        """Make species aware of their involvement with the reaction.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         for metab in self._metabolites:
             metab._reaction.add(self)
         for gene in self._genes:
@@ -1092,24 +1179,38 @@ class MassReaction(Object):
         """Create a copy of the MassReaction."""
         return copy(super(MassReaction, self))
 
-    def __deepcopy(self, memo):
+    def __deepcopy__(self, memo):
         """Create a deepcopy of the MassReaction."""
         return deepcopy(super(MassReaction, self), memo)
 
     def __setstate__(self, state):
-        """Make metabolites and genes aware that they are in this reaction.
+        """Set state of MassReaction object upon unpickling.
 
-        Let metabolites and genes know that they are employed in this
-        reaction in order to increase performance speed. Probably not necessary
-        to set_model as the mass.MassModel that contains self sets the _model
-        attribute for all metabolites and genes in the reaction.
+        Probably not necessary to set _model as the mass.MassModel that
+        contains self sets the _model attribute for all metabolites and genes
+        in the reaction.
+
+        However, to increase performance speed, let the metabolite
+        and gene know that they are employed in this reaction
+
         """
+        # These are necessary for old pickles which store attributes
+        # which have since been superceded by properties.
+        if "reaction" in state:
+            state.pop("reaction")
+        if "gene_reaction_rule" in state:
+            state["_gene_reaction_rule"] = state.pop("gene_reaction_rule")
+        if "lower_bound" in state:
+            state['_lower_bound'] = state.pop('lower_bound')
+        if "upper_bound" in state:
+            state['_upper_bound'] = state.pop('upper_bound')
+
         self.__dict__.update(state)
-        for x in state["_metabolites"]:
-            setattr(x, "_model", self._model)
+        for x in state['_metabolites']:
+            setattr(x, '_model', self._model)
             x._reaction.add(self)
-        for x in state["_genes"]:
-            setattr(x, "model", self._model)
+        for x in state['_genes']:
+            setattr(x, '_model', self._model)
             x._reaction.add(self)
 
     def __add__(self, other):
