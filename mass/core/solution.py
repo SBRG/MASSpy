@@ -3,18 +3,18 @@
 from __future__ import absolute_import
 
 import re
-from copy import copy
-
-import pandas as pd
 
 import matplotlib.pyplot as plt
 
+import pandas as pd
+
 from scipy.interpolate import interp1d
 
-from six import iteritems, string_types
+from six import iteritems
 
 from mass.core.massmodel import MassModel
 from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
+from mass.util.DictWithID import DictWithID 
 from mass.util.util import ensure_iterable
 
 # Strings of valid solution types
@@ -30,58 +30,14 @@ _POOL_RE = re.compile(_POOL_STR)
 _NETFLUX_RE = re.compile(_NETFLUX_STR)
 
 
-class _DictWithID(dict):
-    """A standard python dictionary with an ID attribute.
-
-    Parameters
-    ----------
-    id: str, None
-        The identifier to associate with the object.
-    dictionary: dict, optional
-        If provided, the new _DictWithID will contain the key:value pairs from
-        "dictionary". Otherwise the new _DictWithID is initialized as empty.
-
-    Warnings
-    --------
-    This object is primarily intended for internal use only.
-
-    """
-
-    def __init__(self, id, dictionary=None):
-        super(_DictWithID, self).__init__(self)
-        self._id = id
-        if isinstance(dictionary, dict):
-            self.update(dictionary)
-        elif dictionary is None:
-            pass
-        else:
-            raise TypeError("dictionary must be a dict")
-
-    @property
-    def id(self):
-        """Return identifier of the dictionary."""
-        return getattr(self, "_id", None)
-
-    @id.setter
-    def id(self, value):
-        if value == self.id:
-            pass
-        elif not isinstance(value, string_types):
-            raise TypeError("ID must be a string")
-        elif getattr(self, "_model", None) is not None:
-            self._set_id_with_model(value)
-        else:
-            self._id = value
-
-    def _set_id_with_model(self, value):
-        self._id = value
-
-
-class Solution(_DictWithID):
+class Solution(DictWithID):
     """Container to store the solutions for the simulation of a MassModel.
 
     Solution containers are given an ID of the following form:
         Solution.id = Solution_{id_or_model}_{solution_type}
+
+    The Solution class is essentially a subclass of dict with some additional
+    attributes and properties.
 
     Parameters
     ----------
@@ -115,7 +71,7 @@ class Solution(_DictWithID):
 
     def __init__(self, id_or_model, solution_type, solution_dictionary=None,
                  time=None, interpolate=False):
-        """Container with an identifier for "solution_type" solutions."""
+        """Initialize Solution with id "solution_type" for solutions."""
         valid_check = [True if _re.match(solution_type) else False
                        for _re in [_CONC_RE, _FLUX_RE, _POOL_RE, _NETFLUX_RE]]
         if True not in valid_check:
@@ -132,7 +88,7 @@ class Solution(_DictWithID):
 
         id_or_model = "{0}_{1}Sol".format(id_or_model, solution_type)
 
-        _DictWithID.__init__(self, id_or_model, dictionary=solution_dictionary)
+        DictWithID.__init__(self, id_or_model, dictionary=solution_dictionary)
         self._solution_type = solution_type
         self._time = time
         self._interpolate = interpolate
@@ -281,17 +237,5 @@ class Solution(_DictWithID):
 
     @property
     def model(self):
-        """Return the model used in creating the Solution if one was used."""
+        """Return the MassModel associated with the Solution, if any."""
         return getattr(self, "_model", None)
-
-    def copy(self):
-        """Copy a Solution object."""
-        return copy(self)
-
-    def __copy__(self):
-        """Create a copy of the Solution object."""
-        return copy(super(Solution, self))
-
-    def __repr__(self):
-        """Representation of the Solution object."""
-        return "<%s %s at 0x%x>" % (self.__class__.__name__, self.id, id(self))
