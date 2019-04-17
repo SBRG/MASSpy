@@ -10,8 +10,8 @@ from warnings import warn
 from cycler import Cycler
 
 import matplotlib as mpl
-from matplotlib import cm
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from matplotlib.axes import Axes
 
 import numpy as np
