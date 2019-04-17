@@ -2,7 +2,6 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
 
@@ -18,7 +17,7 @@ from mass.core import MassMetabolite, MassModel, MassReaction
 _INF = float("inf")
 
 _REQUIRED_REACTION_ATTRIBUTES = [
-    "id", "name", "_reversible", "metabolites", "lower_bound", "upper_bound",
+    "id", "name", "_reversible", "metabolites", "_lower_bound", "_upper_bound",
     "gene_reaction_rule"]
 _ORDERED_OPTIONAL_REACTION_KEYS = [
     "subsystem", "steady_state_flux", "_forward_rate_constant",
