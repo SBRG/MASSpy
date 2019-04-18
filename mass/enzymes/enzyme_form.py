@@ -15,8 +15,11 @@ class EnzymeForm(MassMetabolite):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the EnzymeForm.
+    id: str, mass.MassMetabolite
+        The identifier associated with the EnzymeForm, or an exisitng
+        MassMetabolite object. If a MassMetabolite object is provided, an 
+        EnzymeForm will be instanstiated with stored values identicial to
+        the value of those stored in the MassMetabolite.
     name: str, optional
         A human readable name for the enzyme form.
 
@@ -46,10 +49,11 @@ class EnzymeForm(MassMetabolite):
     """
 
     def __init__(self, id=None, name="", enzyme_id="", enzyme_name="",
-                 bound_catalytic=None, bound_effectors=None, compartment=None):
+                 bound_catalytic=None, bound_effectors=None, 
+                 formula=None, charge=None, compartment=None):
         """Initialize the EnzymeForm Object."""
-        # Initialize MassMetabolite parent class and set compartment
-        MassMetabolite.__init__(self, id, name)
+        # Initialize MassMetabolite parent class
+        super(EnzymeForm, self).__init__(id, name, compartment=compartment)
         # Set the id of the enzyme represented by the EnzymeForm
         for attr, value in zip(["enzyme_id", "enzyme_name"], 
                                [enzyme_id, enzyme_name]):
@@ -67,8 +71,10 @@ class EnzymeForm(MassMetabolite):
         self.bound_effectors = bound_effectors
 
         # Set formula, charge, and compartment attributes
-        self.formula = self.get_species_formula()
-        self.charge = self.get_species_charge()
+        for attr, value in zip(["formula", "charge"], [formula, charge]):
+            if value is None:
+                value = self.__class__.__dict__["get_species_" + attr](self)
+            setattr(self, attr, value)
         self.compartment = compartment
 
     @property
@@ -155,7 +161,7 @@ class EnzymeForm(MassMetabolite):
         catalytic_str = "-".join([met._remove_compartment_from_id_str()
                                   for met in self.bound_catalytic])
         if catalytic_str:
-            catalytic_str = "-" + catalytic_str + " complex "
+            catalytic_str = "-" + catalytic_str + " complex"
         name += catalytic_str
 
         # Add the ligands bound to the effector site(s)
@@ -279,6 +285,29 @@ class EnzymeForm(MassMetabolite):
         """
         super(EnzymeForm, self)._set_id_with_model(value)
         self.model.enzyme_forms._generate_index()
+
+    def _repair_bound_pointers(self):
+        """Repair object pointer for metabolites in bound dict attributes.
+
+        Requires a model to be associated with the EnzymeForm.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        if self.model is not None:
+            for attr in ["_bound_catalytic", "_bound_effectors"]:
+                bound_dict = getattr(self, attr)
+                try:
+                    bound_dict = {
+                        self.model.metabolites.get_by_id(str(met)): num 
+                        for met, num in iteritems(bound_dict)}
+                except KeyError as e:
+                    raise KeyError("'{0}' does not exist in model metabolites."
+                                   .format(str(e)))
+                # Add the metabolites into the module that don't already exist
+                bound_dict = setattr(self, attr, bound_dict)
 
     def _repr_html_(self):
         """HTML representation of the overview for the EnzymeForm."""

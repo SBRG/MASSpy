@@ -2,23 +2,20 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
+from collections import OrderedDict
 from copy import copy, deepcopy
 
 import numpy as np
+
+import pandas as pd
 
 from six import iteritems, iterkeys, itervalues
 
 from cobra.core.dictlist import DictList
 
 from mass.util.DictWithID import OrderedDictWithID
-from mass.util.util import _mk_new_dictlist
-
-_REQUIRED_ENZYMEDICT_ATTRIBUTES = [
-    "id", "name", "subsystem", "ligands", "enzyme_forms", "enzyme_reactions",
-    "categorized_ligands", "categorized_enzyme_forms", 
-    "categorized_enzyme_reactions", "enzyme_concentration_total", 
-    "enzyme_concentration_total_equation", "enzyme_net_flux", 
-    "enzyme_net_flux_equation", "S", "model", "description"]
+from mass.util.util import (
+    _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
 
 
 class EnzymeDict(OrderedDictWithID):
@@ -50,41 +47,28 @@ class EnzymeDict(OrderedDictWithID):
     def __init__(self, id_or_enzyme=None):
         """Initialize EnzymeDict."""
         # Instiantiate a new EnzymeDict object if a EnzymeDict is given.
-        if isinstance(id_or_enzyme, EnzymeDict):
+        if isinstance(id_or_enzyme, (EnzymeDict, dict)):
             super(EnzymeDict, self).__init__(
-                id_or_enzyme.id, dictionary=dict(id_or_enzyme))
+                id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
         # Initialize an EnzymeDict using an EnzymeModel
         elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_dict"):
             super(EnzymeDict, self).__init__(id_or_enzyme.id)
             for key, value in iteritems(id_or_enzyme.__dict__):
                 new_key = key.lstrip("_")
-                if new_key not in _REQUIRED_ENZYMEDICT_ATTRIBUTES:
+                if new_key not in iterkeys(_ORDERED_ENZYMEDICT_DEFAULTS):
                     continue
                 elif new_key is "S":
                     self[new_key] = id_or_enzyme._mk_stoich_matrix(
                         matrix_type="DataFrame", update_model=False)
                 else:
                     self[new_key] = value
-            self["model"] = None
-        # Initialize EnzymeDict with just an id and None for everything else.
+        # Initialize EnzymeDict with an id and defaults for everything else.
         else:
-            # TODO See if refactor here to be more compatible with mass.io.dict
             self["id"] = id_or_enzyme
-            self["subsystem"] = ""
-            self["description"] = ""
-            self["S"] = np.array([[]])
-            for key in ["ligands", "enzyme_forms", "enzyme_reactions"]:
-                self[key] = DictList()
-                self["categorized_" + key] = {'Undefined': DictList()}
         # Ensure all required attributes make it into the EnzymeDict
-        self.update({key.lstrip("_"): None 
-                     for key in _REQUIRED_ENZYMEDICT_ATTRIBUTES 
-                     if key.lstrip("_") not in self})
-
-        # Move model, S matrix, and description to the end of the dict
-        for key in _REQUIRED_ENZYMEDICT_ATTRIBUTES:
-            if key in self:
-                self.move_to_end(key)
+        self._set_missing_to_defaults()
+        # Move entries to keep a consisent order for ordered EnzymeDicts.
+        self._fix_order()
 
     def copy(self):
         """Copy an EnzymeDict object."""
@@ -111,6 +95,19 @@ class EnzymeDict(OrderedDictWithID):
 
         return enzyme_dict_copy
 
+    # Internal
+    def _set_missing_to_defaults(self):
+        """Set all of the missing attributes to their default values.
+
+        Warnings
+        --------
+        This method is intended for internal use only. 
+
+        """
+        for key, value in iteritems(_ORDERED_ENZYMEDICT_DEFAULTS):
+            if key not in self:
+                self[key] = value
+
     def _update_object_pointers(self, model=None):
         """Update objects in the EnzymeDict to come from the associated model.
 
@@ -132,6 +129,55 @@ class EnzymeDict(OrderedDictWithID):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))}
 
+    def _make_enzyme_stoichiometric_matrix(self, update=False):
+        """Return the S matrix based on enzyme forms, reactions, and ligands.
+
+        Warnings
+        --------
+        This method is intended for internal use only. 
+
+        """
+        # Set up for matrix construction.
+        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
+            matrix_type="DataFrame", dtype=np.float_)
+
+        metabolites = DictList([
+            met for attr in ["ligands", "enzyme_forms"] for met in self[attr]])
+
+        stoich_mat = matrix_constructor((len(metabolites),
+                                         len(self.enzyme_reactions)))
+        # Get the indicies for the species and reactions
+        m_ind = metabolites.index
+        r_ind = self.enzyme_reactions.index
+
+        # Build the matrix
+        for rxn in self.enzyme_reactions:
+            for met, stoich in iteritems(rxn.metabolites):
+                stoich_mat[m_ind(met), r_ind(rxn)] = stoich
+
+        # Convert the matrix to the desired type
+        stoich_mat = convert_matrix(
+            stoich_mat, matrix_type=matrix_type, dtype=dtype, 
+            row_ids=[m.id for m in metabolites],
+            col_ids=[r.id for r in self.enzyme_reactions])
+
+        if update:
+            self["S"] = stoich_mat
+
+        return stoich_mat
+
+    def _fix_order(self):
+        """Fix the order of the items in the EnzymeDict.
+
+        Warnings
+        --------
+        This method is intended for internal use only. 
+
+        """
+        for key in iterkeys(_ORDERED_ENZYMEDICT_DEFAULTS):
+            if key in self:
+                self.move_to_end(key)
+
     def _repr_html_(self):
         """HTML representation of the overview for the EnzymeDict."""
         try:
@@ -140,14 +186,6 @@ class EnzymeDict(OrderedDictWithID):
         except np.linalg.LinAlgError:
             dim_S = "0x0"
             rank = 0
-
-        def get_len(x):
-            if x:
-                return len(x)
-            elif x is None:
-                return None
-            else:
-                return ""
 
         return """
             <table>
@@ -184,9 +222,9 @@ class EnzymeDict(OrderedDictWithID):
         """.format(name=self.id, address='0x0%x' % id(self),
                    dim_stoich_mat=dim_S, mat_rank=rank,
                    subsystem=self.subsystem,
-                   num_ligands=get_len(self.ligands),
-                   num_enz_forms=get_len(self.enzyme_forms),
-                   num_enz_reactions=get_len(self.enzyme_reactions),
+                   num_ligands=len(self.ligands),
+                   num_enz_forms=len(self.enzyme_forms),
+                   num_enz_reactions=len(self.enzyme_reactions),
                    enz_conc=self.enzyme_concentration_total, 
                    enz_flux=self.enzyme_net_flux)
 
@@ -225,3 +263,27 @@ class EnzymeDict(OrderedDictWithID):
     def __deepcopy__(self, memo):
         """Create a deepcopy of the EnzymeDict."""
         return deepcopy(super(EnzymeDict, self), memo)
+
+    def __repr__(self):
+        """Override of default repr() implementation."""
+        return "<%s %s at 0x%x>" % (
+            self.__class__.__name__[:-4], self.id, id(self))
+
+
+_ORDERED_ENZYMEDICT_DEFAULTS = OrderedDict({
+    "id": None,
+    "name": None,
+    "subsystem": "",
+    "ligands": DictList(),
+    "enzyme_forms": DictList(),
+    "enzyme_reactions": DictList(),
+    "categorized_ligands": {"Undefined": DictList()},
+    "categorized_enzyme_forms": {"Undefined": DictList()},
+    "categorized_enzyme_reactions": {"Undefined": DictList()},
+    "enzyme_concentration_total": None,
+    "enzyme_net_flux": None,
+    "enzyme_net_flux_equation": None,
+    "description": "",
+    "S": pd.DataFrame(),
+    "model": None,
+})
