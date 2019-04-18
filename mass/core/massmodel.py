@@ -129,14 +129,13 @@ class MassModel(Object):
                  dtype=np.float64):
         """Initialize the MassModel Object."""
         # Instiantiate a new MassModel object if a MassModel is given.
+        super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
-            Object.__init__(self, id_or_model, name=name)
             self.__setstate__(id_or_model.__dict__)
             if not hasattr(self, "name"):
                 self.name = None
             self.repair()
         else:
-            Object.__init__(self, id_or_model, name=name)
             self.description = ''
             # Initialize DictLists for storing 
             # reactions, metabolites, genes, and enzymes
@@ -1405,6 +1404,8 @@ class MassModel(Object):
             # Check whether reactions exist in the model.
             new_enzymes = self._existing_obj_filter("enzymes", new_enzymes)
             new_model.enzymes += new_enzymes
+            for enzyme in new_model.enzymes:
+                enzyme.model = new_model
 
         for attr in ["_compartments", "_units", "notes", "annotation"]:
             new_model._merge_attr_dicts(attr, right)
@@ -1755,10 +1756,10 @@ class MassModel(Object):
                 stoich_mat[m_ind(met), r_ind(rxn)] = stoich
 
         # Convert the matrix to the desired type
-        stoich_mat = convert_matrix(stoich_mat, matrix_type=matrix_type,
-                                    dtype=dtype,
-                                    row_ids=[m.id for m in self.metabolites],
-                                    col_ids=[r.id for r in self.reactions])
+        stoich_mat = convert_matrix(
+            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            row_ids=[m.id for m in self.metabolites],
+            col_ids=[r.id for r in self.reactions])
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
             self._update_model_s(stoich_mat, matrix_type, dtype)
