@@ -233,6 +233,21 @@ json_schema = {
                     },
                     "notes": {"type": "object"},
                     "annotation": {"type": "object"},
+                    "_bound_catalytic": {
+                        "type": "object",
+                        "patternProperties": {
+                            ".*": {"type": "number"},
+                        },
+                    },
+                    "_bound_effectors": {
+                        "type": "object",
+                        "patternProperties": {
+                            ".*": {"type": "number"},
+                        },
+                    },
+                    "enzyme_id": {"type": "string"},
+                    "enzyme_name": {"type": "string"},
+
                 },
                 "required": ["id", "name"],
                 "additionalProperties": False,
@@ -251,6 +266,59 @@ json_schema = {
                 "required": ["id", "name"],
                 "additionalProperties": False,
             },
+        },
+        "enzymes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "name": {"type": "string"},
+                    "subsystem": {"type": "string"},
+                    "ligands": {
+                        "type": "array", 
+                        "allOf": {"type": "string"}
+                    },
+                    "enzyme_forms": {
+                        "type": "array", 
+                        "allOf": {"type": "string"}
+                    },
+                    "enzyme_reactions": {
+                        "type": "array", 
+                        "allOf": {"type": "string"}
+                    },
+                    "categorized_ligands": {
+                        "type": "object", 
+                        "allOf": {
+                            "type": "array", 
+                            "allOf": {"type": "string"}
+                        },
+                    },
+                    "categorized_enzyme_forms": {
+                        "type": "object", 
+                        "allOf": {
+                            "type": "array", 
+                            "allOf": {"type": "string"}
+                        },
+                    },
+                    "categorized_enzyme_reactions": {
+                        "type": "object", 
+                        "allOf": {
+                            "type": "array", 
+                            "allOf": {"type": "string"}
+                        },
+                    },
+                    "enzyme_concentration_total": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": False,
+                    },
+                    "enzyme_net_flux": {"type": "number"},
+                    "enzyme_net_flux_equation": {"type": "string"},
+                },
+            },
+            "required": ["id", "name"],
+            "additionalProperties": False,
         },
         "initial_conditions": {
             "type": "object",
@@ -292,6 +360,46 @@ json_schema = {
         },
         "notes": {"type": "object"},
         "annotation": {"type": "object"},
+        "ligands": {
+            "type": "array", 
+            "allOf": {"type": "string"}
+        },
+        "enzyme_forms": {
+            "type": "array", 
+            "allOf": {"type": "string"}
+        },
+        "enzyme_reactions": {
+            "type": "array", 
+            "allOf": {"type": "string"}
+        },
+        "_categorized_ligands": {
+            "type": "object", 
+            "allOf": {
+                "type": "array", 
+                "allOf": {"type": "string"}
+            },
+        },
+        "_categorized_enzyme_forms": {
+            "type": "object", 
+            "allOf": {
+                "type": "array", 
+                "allOf": {"type": "string"}
+            },
+        },
+        "_categorized_enzyme_reactions": {
+            "type": "object", 
+            "allOf": {
+                "type": "array", 
+                "allOf": {"type": "string"}
+            },
+        },
+        "_enzyme_concentration_total": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": False,
+        },
+        "_enzyme_net_flux": {"type": "number"},
+        "_enzyme_net_flux_equation": {"type": "string"},
     },
     "required": ["id", "reactions", "metabolites", "genes"],
     "additionalProperties": False,
