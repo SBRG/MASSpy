@@ -129,14 +129,13 @@ class MassModel(Object):
                  dtype=np.float64):
         """Initialize the MassModel Object."""
         # Instiantiate a new MassModel object if a MassModel is given.
+        super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
-            Object.__init__(self, id_or_model, name=name)
             self.__setstate__(id_or_model.__dict__)
             if not hasattr(self, "name"):
                 self.name = None
             self.repair()
         else:
-            Object.__init__(self, id_or_model, name=name)
             self.description = ''
             # Initialize DictLists for storing 
             # reactions, metabolites, genes, and enzymes
@@ -291,7 +290,7 @@ class MassModel(Object):
         return self.stoichiometric_matrix
 
     @property
-    def ssfluxes(self):
+    def v(self):
         """Shorthand method to get all reactions' steady state fluxes."""
         return self.steady_state_fluxes
 
@@ -1345,7 +1344,6 @@ class MassModel(Object):
         # then add the module attribute of the right model into the left
         if not inplace:
             new_model = self.copy()
-            new_model.modules.add(self.id)
         else:
             new_model = self
         if new_model_id is None:
@@ -1405,6 +1403,8 @@ class MassModel(Object):
             # Check whether reactions exist in the model.
             new_enzymes = self._existing_obj_filter("enzymes", new_enzymes)
             new_model.enzymes += new_enzymes
+            for enzyme in new_model.enzymes:
+                enzyme.model = new_model
 
         for attr in ["_compartments", "_units", "notes", "annotation"]:
             new_model._merge_attr_dicts(attr, right)
@@ -1682,7 +1682,7 @@ class MassModel(Object):
         ----------
         parameters: dict
             A dictionary containing the parameter identifiers as strings and
-            their corresponding numerical values. 
+            their corresponding numerical values.  
 
         Notes
         -----
@@ -1694,8 +1694,35 @@ class MassModel(Object):
         will be considered a custom parameter.
 
         """
-        print(parameters)
-        pass
+        if not isinstance(parameters, dict):
+            raise TypeError("parameters must be a dict.")
+
+        for key, value in iteritems(parameters):
+            if not isinstance(key, string_types):
+                raise TypeError(
+                    "Keys must be strings. '{0}' not a string.".format(key))
+            if not isinstance(value, (integer_types, float)) \
+               and value is not None:
+                raise TypeError(
+                    "Values must be ints or floats. The value '{0}' for key "
+                    "'{1}' not a valid number.".format(str(value), str(key)))
+
+        for key, value in iteritems(parameters):
+            # Check the parameter type
+            if key in self.external_metabolites:
+                self.add_fixed_concentrations({key: value})
+            elif key.split("_", 1)[0] in ["kf", "Keq", "kr", "v"]:
+                # See if the reaction exists and if none found, assume
+                # parameter is a custom parameter
+                p_type, reaction = key.split("_", 1)
+                try:
+                    reaction = self.reactions.get_by_id(reaction)
+                    reaction.__class__.__dict__[p_type].fset(reaction, value)
+                except KeyError:
+                    self.custom_parameters.update({key: value})                    
+            # If parameter not found, assume parameter is a custom parameter
+            else:
+                self.custom_parameters.update({key: value})
 
     # Internal
     def _mk_stoich_matrix(self, matrix_type=None, dtype=None,
@@ -1755,10 +1782,10 @@ class MassModel(Object):
                 stoich_mat[m_ind(met), r_ind(rxn)] = stoich
 
         # Convert the matrix to the desired type
-        stoich_mat = convert_matrix(stoich_mat, matrix_type=matrix_type,
-                                    dtype=dtype,
-                                    row_ids=[m.id for m in self.metabolites],
-                                    col_ids=[r.id for r in self.reactions])
+        stoich_mat = convert_matrix(
+            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            row_ids=[m.id for m in self.metabolites],
+            col_ids=[r.id for r in self.reactions])
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
             self._update_model_s(stoich_mat, matrix_type, dtype)

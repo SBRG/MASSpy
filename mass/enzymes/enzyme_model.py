@@ -197,14 +197,17 @@ class EnzymeModel(MassModel):
 
         Parameters
         ----------
-        value: sympy.Basic
+        value: sympy.Basic, str
             A sympy expression representing the right hand side of the rate
-            equation.
+            equation, or a string to be turned into a symbolic expression via
+            sympy.sympify.
 
         """
         if value is not None:
-            if not isinstance(value, sym.Basic):
+            if not isinstance(value, (sym.Basic, string_types)):
                 raise TypeError("value must be a sympy expression.")
+            elif isinstance(value, string_types):
+                value = sym.sympify(value)
             elif value.lhs == self.enzyme_flux_symbol:
                 value = value.rhs
             elif value.rhs == self.enzyme_flux_symbol:
@@ -1156,7 +1159,6 @@ class EnzymeModel(MassModel):
         """
         # Repair using inherited method
         super(EnzymeModel, self).repair(rebuild_index, rebuild_relationships)
-
         # Repair enzyme_reactions DictList
         self._get_current_enzyme_reactions(update_enzyme=True)
         self._update_object_pointers()
@@ -1166,6 +1168,9 @@ class EnzymeModel(MassModel):
                 getattr(self, attr)._generate_index()
                 for value in itervalues(getattr(self, "categorized_" + attr)):
                     value._generate_index()
+
+        for enzyme_form in self.enzymes_forms:
+            enzyme_form._repair_bound_pointers()
 
     # Overridden methods
     def copy(self):
@@ -1468,9 +1473,9 @@ class EnzymeModel(MassModel):
         if enzyme_dict.id in model.enzymes:
             model.enzymes.remove(enzyme_dict.id)
         model.enzymes.append(enzyme_dict)
+        enzyme_dict.model = model
 
         return model
-
 
     def _repr_html_(self):
         """HTML representation of the overview for the EnzymeModel.
