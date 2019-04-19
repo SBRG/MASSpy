@@ -457,10 +457,9 @@
         }
     ],
     "modules": [
-        "Glycolysis",
+        "AMP-Salvage-Network",
         "Hemoglobin",
-        "Pentose-Phosphate-Pathway",
-        "AMP-Salvage-Network"
+        "Pentose-Phosphate-Pathway"
     ],
     "notes": {
         "Literature": [
