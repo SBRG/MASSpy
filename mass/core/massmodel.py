@@ -290,7 +290,7 @@ class MassModel(Object):
         return self.stoichiometric_matrix
 
     @property
-    def ssfluxes(self):
+    def v(self):
         """Shorthand method to get all reactions' steady state fluxes."""
         return self.steady_state_fluxes
 
@@ -1682,7 +1682,7 @@ class MassModel(Object):
         ----------
         parameters: dict
             A dictionary containing the parameter identifiers as strings and
-            their corresponding numerical values. 
+            their corresponding numerical values.  
 
         Notes
         -----
@@ -1694,8 +1694,35 @@ class MassModel(Object):
         will be considered a custom parameter.
 
         """
-        print(parameters)
-        pass
+        if not isinstance(parameters, dict):
+            raise TypeError("parameters must be a dict.")
+
+        for key, value in iteritems(parameters):
+            if not isinstance(key, string_types):
+                raise TypeError(
+                    "Keys must be strings. '{0}' not a string.".format(key))
+            if not isinstance(value, (integer_types, float)) \
+               and value is not None:
+                raise TypeError(
+                    "Values must be ints or floats. The value '{0}' for key "
+                    "'{1}' not a valid number.".format(str(value), str(key)))
+
+        for key, value in iteritems(parameters):
+            # Check the parameter type
+            if key in self.external_metabolites:
+                self.add_fixed_concentrations({key: value})
+            elif key.split("_", 1)[0] in ["kf", "Keq", "kr", "v"]:
+                # See if the reaction exists and if none found, assume
+                # parameter is a custom parameter
+                p_type, reaction = key.split("_", 1)
+                try:
+                    reaction = self.reactions.get_by_id(reaction)
+                    reaction.__class__.__dict__[p_type].fset(reaction, value)
+                except KeyError:
+                    self.custom_parameters.update({key: value})                    
+            # If parameter not found, assume parameter is a custom parameter
+            else:
+                self.custom_parameters.update({key: value})
 
     # Internal
     def _mk_stoich_matrix(self, matrix_type=None, dtype=None,

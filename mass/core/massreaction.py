@@ -591,12 +591,12 @@ class MassReaction(Object):
     #     self.gibbs_reaction_energy = value
 
     @property
-    def ssflux(self):
+    def v(self):
         """Shorthand method to get the reaction steady state flux."""
         return self.steady_state_flux
 
-    @ssflux.setter
-    def ssflux(self, value):
+    @v.setter
+    def v(self, value):
         """Shorthand method to set the reaction steady state flux."""
         self.steady_state_flux = value
 
