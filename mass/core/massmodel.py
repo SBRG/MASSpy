@@ -1344,7 +1344,6 @@ class MassModel(Object):
         # then add the module attribute of the right model into the left
         if not inplace:
             new_model = self.copy()
-            new_model.modules.add(self.id)
         else:
             new_model = self
         if new_model_id is None:
