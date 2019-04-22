@@ -357,9 +357,9 @@ def model_from_dict(obj):
     if "reactions" not in obj:
         raise ValueError("Object has no reactions attribute. Cannot load.")
     if all([k in obj for k in _REQUIRED_ENZYME_ATTRIBUTES[2:]]):
-        model = EnzymeModel()
+        model = EnzymeModel(obj["id"])
     else:
-        model = MassModel()
+        model = MassModel(obj["id"])
     # Add metabolites to the model
     model.add_metabolites([
         metabolite_from_dict(metabolite) for metabolite in obj["metabolites"]])
@@ -401,11 +401,12 @@ def model_from_dict(obj):
                                   custom_rate, custom_parameters)
     # Update with any opitonal attributes.
     for k, v in iteritems(obj):
-        if k == "id" or k in _ORDERED_OPTIONAL_MODEL_KEYS:
+        # Set MassModel attributes (and subsystem attribute for EnzymeModels)
+        if k in _ORDERED_OPTIONAL_MODEL_KEYS or k == "subsystem":
             setattr(model, k, v)
         # Update with EnzymeModel attributes if obj represents an EnzymeModel
-        elif k.lstrip("_") in _ORDERED_ENZYMEDICT_DEFAULTS:
-            setattr(model, k, v)
+        elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYME_KEYS:
+            model.__class__.__dict__[k.lstrip("_")].fset(model, v)
 
     model.modules = set(sorted(model.modules))
 
@@ -413,7 +414,7 @@ def model_from_dict(obj):
 
 
 # Internal
-def _add_enzyme_form_attributes_into_dict(enzyme_form, new_enzyme_form):
+def _add_enzyme_form_attributes_into_dict(enzyme, new_enzyme):
     """Add the EnzymeForm attributes to the dict representing the EnzymeForm.
 
     Warnings
@@ -423,13 +424,10 @@ def _add_enzyme_form_attributes_into_dict(enzyme_form, new_enzyme_form):
     """
     # Add bound_catalytic and bound_effectors attributes to enzyme
     for attr in _REQUIRED_ENZYMEFORM_ATTRIBUTES:
-        value = getattr(enzyme_form, attr)
-        bounded = {str(key): value[key] 
-                   for key in sorted(value, key=attrgetter("id"))}
-        new_enzyme_form[attr] = bounded
+        bound = {str(k): v for k, v in iteritems(getattr(enzyme, attr))}
+        new_enzyme[attr] = OrderedDict((k, bound[k]) for k in sorted(bound))
     # Update optional attributes
-    _update_optional(enzyme_form, new_enzyme_form, 
-                     _OPTIONAL_ENZYMEFORM_ATTRIBUTES, 
+    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEFORM_ATTRIBUTES, 
                      _ORDERED_OPTIONAL_ENZYMEFORM_KEYS)
 
 
@@ -469,7 +467,7 @@ def _fix_type(value):
     if isinstance(value, np.int_):
         return int(value)
     if isinstance(value, set):
-        return list(value)
+        return sorted(list(value))
     if isinstance(value, dict):
         return OrderedDict((key, value[key]) for key in sorted(value))
     if value is None:

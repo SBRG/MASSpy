@@ -1483,8 +1483,8 @@ class MassModel(Object):
 
         return steady_state_fluxes
 
-    def calculate_PERCs(self, steady_state_concentrations=None,
-                        steady_state_fluxes=None,
+    def calculate_PERCs(self, steady_state_fluxes=None,
+                        steady_state_concentrations=None,
                         at_equilibrium_default=100000, update_reactions=False):
         """Calculate pseudo-order rate constants for reactions in the model.
 
@@ -1493,15 +1493,17 @@ class MassModel(Object):
 
         Parameters
         ----------
+        steady_state_fluxes: dict, optional
+            A dictionary of steady state fluxes where MassReactions are keys
+            and fluxes are the values. All reactions provided will have their
+            PERCs calculated. If None, all of the reaction PERCs are calculated
+            using the current steady state fluxes for each reaction.
         steady_state_concentrations: dict, optional
             A dictionary of steady state concentrations where MassMetabolites
             are keys and concentrations are the values. If None, the
             initial conditions and fixed concentrations that exist in the
-            MassModel are used.
-        steady_state_fluxes: dict, optional
-            A dictionary of steady state fluxes where MassReactions are keys
-            and fluxes are the values. If None, the steady state flux values
-            stored in each of the reactions in the model are used.
+            MassModel are used. All concentrations used in calculations must be
+            provided if steady_state_concentrations is None.
         at_equilibrium_default: float, optional
             The value to set the pseudo-order rate constant if the reaction is
             at equilibrium. Default is 100,000.
@@ -1516,45 +1518,66 @@ class MassModel(Object):
             rate constants (kf_RID) and values are the calculated PERC value
 
         """
-        # TODO Add QCQA check to ensure calculating percs cannot occur if
-        # necessary values are not defined.
+        # Get the model steady state concentrations if None are provided.
         if steady_state_concentrations is None:
             steady_state_concentrations = self.fixed_concentrations.copy()
             steady_state_concentrations.update(
-                {m.id: ic for m, ic in iteritems(self.initial_conditions)})
+                {str(m): ic for m, ic in iteritems(self.initial_conditions)})
+        else:
+            steady_state_concentrations = {
+                str(m): v for m, v in iteritems(steady_state_concentrations)}
+        # Get the model reactions and fluxes if None are provided.
         if steady_state_fluxes is None:
-            steady_state_fluxes = self.steady_state_fluxes.copy()
+            steady_state_fluxes = self.steady_state_fluxes
 
-        def calculate_sol(flux, rate_equation, perc, default):
+        # Function to calculate the solution 
+        def calculate_sol(flux, rate_equation, perc):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
                                perc, domain=sym.S.Reals)
             if isinstance(sol, type(sym.S.Reals)) or sol.is_EmptySet \
                or next(iter(sol)) <= 0:
-                sol = float(default)
+                sol = float(at_equilibrium_default)
             else:
                 sol = float(next(iter(sol)))
 
             return sol
 
         percs_dict = {}
-        # Collect concentration and parameter values
-        for rxn, rate in iteritems(strip_time(self.rates)):
-            values = {}
-            for symbol in list(rate.atoms(sym.Symbol)):
-                if str(symbol) in steady_state_concentrations:
-                    values[symbol] = steady_state_concentrations[str(symbol)]
-                elif str(symbol) in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]:
-                    if str(symbol) == rxn.kf_str:
-                        perc = symbol
-                    else:
-                        values[symbol] = rxn.parameters[str(symbol)]
+        for reaction, flux in iteritems(steady_state_fluxes):
+            # Ensure inputs are correct
+            if not isinstance(reaction, MassReaction)\
+               or not isinstance(flux, (float, integer_types)):
+                raise TypeError(
+                    "steady_state_fluxes must be a dict containing the "
+                    "MassReactions and their steady state flux values.")
+            rate_eq = strip_time(reaction.rate)
+            arguments = list(rate_eq.atoms(sym.Symbol))
+            # Check for missing concentration values
+            missing_values = [
+                str(arg) for arg in arguments
+                if str(arg) not in reaction.all_parameter_ids
+                and str(arg) not in steady_state_concentrations]
+            
+            parameter, value = {1: [reaction.Keq_str, reaction.Keq],
+                                2: [reaction.kr_str, reaction.kr]}.get(
+                                    reaction._rtype)
+            missing_values += [parameter] if value is None else []
+            if missing_values:
+                raise ValueError("Cannot calculate the PERC for reaction '{0}'"
+                                 " because values for {1} not defined."
+                                 .format(reaction.id, str(missing_values)))
 
-            sol = calculate_sol(steady_state_fluxes[rxn], rate.subs(values),
-                                perc, at_equilibrium_default)
+            # Substitute values into rate equation
+            rate_eq = rate_eq.subs(steady_state_concentrations).subs({
+                sym.Symbol(parameter): value 
+                for parameter, value in iteritems(reaction.parameters)
+                if parameter != reaction.kf_str})
 
-            percs_dict.update({str(perc): sol})
+            # Calculate rate equation and update with soluton for PERC
+            sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))
+            percs_dict.update({reaction.kf_str: sol})
             if update_reactions:
-                rxn.kf = percs_dict[str(perc)]
+                reaction.kf = percs_dict[reaction.kf_str]
 
         return percs_dict
 

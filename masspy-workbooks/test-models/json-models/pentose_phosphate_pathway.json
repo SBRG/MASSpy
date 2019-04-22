@@ -13,7 +13,7 @@
         "r5p_e": 1
     },
     "genes": [],
-    "id": "Pentose-Phosphate-Pathway",
+    "id": "Pentose_Phosphate_Pathway",
     "initial_conditions": {
         "_6pgc_c": 0.0374753,
         "_6pgl_c": 0.00175424,

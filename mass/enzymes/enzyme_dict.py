@@ -60,6 +60,8 @@ class EnzymeDict(OrderedDictWithID):
                 elif new_key is "S":
                     self[new_key] = id_or_enzyme._mk_stoich_matrix(
                         matrix_type="DataFrame", update_model=False)
+                elif new_key == "enzyme_net_flux_equation":
+                    self[new_key] = id_or_enzyme.enzyme_net_flux_equation
                 else:
                     self[new_key] = value
         # Initialize EnzymeDict with an id and defaults for everything else.

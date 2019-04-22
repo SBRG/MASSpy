@@ -118,12 +118,16 @@ class EnzymeModel(MassModel):
         """Return the sympy symbol for the total enzyme concentration."""
         if self.id is not None:
             return sym.Symbol(self.id + "_Total")
+        else:
+            return sym.Symbol("Enzyme_Total")
 
     @property
     def enzyme_flux_symbol(self):
         """Return the sympy symbol for the net flux through the enzyme."""
         if self.id is not None:
             return sym.Symbol("v_" + self.id)
+        else:
+            return sym.Symbol("v")
 
     @property
     def enzyme_concentration_total(self):
@@ -186,7 +190,10 @@ class EnzymeModel(MassModel):
     @property
     def enzyme_net_flux_equation(self):
         """Return the net rate equation of the enzyme as a sympy.Equation."""
-        return getattr(self, "_enzyme_net_flux_equation", None)
+        value = getattr(self, "_enzyme_net_flux_equation", None)
+        if value is not None:
+            value = sym.Eq(self.enzyme_flux_symbol, value)
+        return value
 
     @enzyme_net_flux_equation.setter
     def enzyme_net_flux_equation(self, value):
@@ -208,13 +215,15 @@ class EnzymeModel(MassModel):
                 raise TypeError("value must be a sympy expression.")
             elif isinstance(value, string_types):
                 value = sym.sympify(value)
-            elif value.lhs == self.enzyme_flux_symbol:
-                value = value.rhs
-            elif value.rhs == self.enzyme_flux_symbol:
-                value = value.lhs
+            elif hasattr(value, "lhs") and hasattr(value, "rhs"):
+                if value.lhs == self.enzyme_flux_symbol:
+                    value = value.rhs
+                elif value.rhs == self.enzyme_flux_symbol:
+                    value = value.lhs
+                else:
+                    pass
             else:
                 pass
-            value = sym.Eq(self.enzyme_flux_symbol, value)
         setattr(self, "_enzyme_net_flux_equation", value)
 
     @property
@@ -688,12 +697,10 @@ class EnzymeModel(MassModel):
                     enz_rxn.flux_symbol: enz_rxn.rate 
                     for enz_rxn in enzyme_rxns}))
 
-        enzyme_net_flux_equation = sym.Eq(self.enzyme_flux_symbol, 
-                                          enzyme_net_flux_equation)
         if update_enzyme:
             self.enzyme_net_flux_equation = enzyme_net_flux_equation
 
-        return enzyme_net_flux_equation
+        return sym.Eq(self.enzyme_flux_symbol, enzyme_net_flux_equation)
 
     def sum_enzyme_form_concentrations(self, enzyme_forms, use_values=False):
         """Sum the enzyme form concentrations for a list of enzyme forms.

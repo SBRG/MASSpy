@@ -19,7 +19,7 @@
         "pyr_e": 0.06
     },
     "genes": [],
-    "id": "Core-RBC-Model",
+    "id": "Core_RBC_Model",
     "initial_conditions": {
         "_13dpg_c": 0.0003051,
         "_23dpg_c": 3.89225503,
@@ -457,10 +457,10 @@
         }
     ],
     "modules": [
+        "AMP_Salvage_Network",
         "Glycolysis",
         "Hemoglobin",
-        "Pentose-Phosphate-Pathway",
-        "AMP-Salvage-Network"
+        "Pentose_Phosphate_Pathway"
     ],
     "notes": {
         "Literature": [
