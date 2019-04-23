@@ -104,16 +104,16 @@
         "c": "Cytosol"
     },
     "custom_parameters": {
-        "Keq_PYK_A": 4.444444444444445,
+        "Keq_PYK_A": 2.109704641350211,
         "Keq_PYK_ACT": 200.0,
         "Keq_PYK_I": 0.2949852507374631,
         "Keq_PYK_L": 19,
-        "Keq_PYK_P": 2.109704641350211,
-        "kf_PYK": 161782200.0,
-        "kf_PYK_A": 17645388.0,
+        "Keq_PYK_P": 4.444444444444445,
+        "kf_PYK": 1556426.0,
+        "kf_PYK_A": 69999990.0,
         "kf_PYK_ACT": 1000000.0,
         "kf_PYK_I": 1000000.0,
-        "kf_PYK_P": 113275895.0
+        "kf_PYK_P": 69999991.0
     },
     "custom_rates": {
         "PYK_R01": "kf_PYK_P*(pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t)/Keq_PYK_P)",
@@ -222,31 +222,31 @@
         "fdp_c": 0.0146,
         "h_c": 8.99757e-05,
         "pep_c": 0.017,
-        "pyk_R0_AP_c": 5.9e-11,
-        "pyk_R0_A_c": 6.112e-09,
-        "pyk_R0_P_c": 2.14e-10,
-        "pyk_R0_c": 6.427e-09,
-        "pyk_R1_AP_c": 6.85e-10,
-        "pyk_R1_A_c": 7.1392e-08,
-        "pyk_R1_P_c": 2.504e-09,
-        "pyk_R1_c": 7.507e-08,
-        "pyk_R2_AP_c": 3e-09,
-        "pyk_R2_A_c": 3.12697e-07,
-        "pyk_R2_P_c": 1.0969e-08,
-        "pyk_R2_c": 3.28808e-07,
-        "pyk_R3_AP_c": 5.84e-09,
-        "pyk_R3_A_c": 6.08717e-07,
-        "pyk_R3_P_c": 2.1353e-08,
-        "pyk_R3_c": 6.4008e-07,
-        "pyk_R4_AP_c": 4.263e-09,
-        "pyk_R4_A_c": 4.44363e-07,
-        "pyk_R4_P_c": 1.5588e-08,
-        "pyk_R4_c": 4.67258e-07,
-        "pyk_T0_c": 1.22118e-07,
-        "pyk_T1_c": 2.30547e-07,
-        "pyk_T2_c": 1.63219e-07,
-        "pyk_T3_c": 5.1357e-08,
-        "pyk_T4_c": 6.06e-09,
+        "pyk_R0_AP_c": 6.095e-09,
+        "pyk_R0_A_c": 8.475e-08,
+        "pyk_R0_P_c": 1.019e-08,
+        "pyk_R0_c": 1.38762e-07,
+        "pyk_R1_AP_c": 7.119e-08,
+        "pyk_R1_A_c": 9.89885e-07,
+        "pyk_R1_P_c": 1.19023e-07,
+        "pyk_R1_c": 1.620744e-06,
+        "pyk_R2_AP_c": 3.11812e-07,
+        "pyk_R2_A_c": 4.335695e-06,
+        "pyk_R2_P_c": 5.21319e-07,
+        "pyk_R2_c": 7.098857e-06,
+        "pyk_R3_AP_c": 6.06993e-07,
+        "pyk_R3_A_c": 8.440153e-06,
+        "pyk_R3_P_c": 1.014834e-06,
+        "pyk_R3_c": 1.3819109e-05,
+        "pyk_R4_AP_c": 4.43105e-07,
+        "pyk_R4_A_c": 6.161312e-06,
+        "pyk_R4_P_c": 7.40829e-07,
+        "pyk_R4_c": 1.008795e-05,
+        "pyk_T0_c": 2.636484e-06,
+        "pyk_T1_c": 4.977432e-06,
+        "pyk_T2_c": 3.523846e-06,
+        "pyk_T3_c": 1.108781e-06,
+        "pyk_T4_c": 1.3083e-07,
         "pyr_c": 0.060301
     },
     "ligands": [
@@ -309,7 +309,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 6.427e-09,
+            "_initial_condition": 1.38762e-07,
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -323,7 +323,7 @@
                 "adp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 6.112e-09,
+            "_initial_condition": 8.475e-08,
             "charge": -3,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -337,7 +337,7 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 2.14e-10,
+            "_initial_condition": 1.019e-08,
             "charge": -3,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -352,7 +352,7 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 5.9e-11,
+            "_initial_condition": 6.095e-09,
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -364,7 +364,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.22118e-07,
+            "_initial_condition": 2.636484e-06,
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -378,7 +378,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 7.507e-08,
+            "_initial_condition": 1.620744e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -394,7 +394,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 7.1392e-08,
+            "_initial_condition": 9.89885e-07,
             "charge": -7,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -410,7 +410,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 2.504e-09,
+            "_initial_condition": 1.19023e-07,
             "charge": -7,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -427,7 +427,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 6.85e-10,
+            "_initial_condition": 7.119e-08,
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -441,7 +441,7 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 2.30547e-07,
+            "_initial_condition": 4.977432e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -455,7 +455,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 3.28808e-07,
+            "_initial_condition": 7.098857e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -471,7 +471,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 3.12697e-07,
+            "_initial_condition": 4.335695e-06,
             "charge": -11,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -487,7 +487,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 1.0969e-08,
+            "_initial_condition": 5.21319e-07,
             "charge": -11,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -504,7 +504,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 3e-09,
+            "_initial_condition": 3.11812e-07,
             "charge": -14,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -518,7 +518,7 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 1.63219e-07,
+            "_initial_condition": 3.523846e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -532,7 +532,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 6.4008e-07,
+            "_initial_condition": 1.3819109e-05,
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -548,7 +548,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 6.08717e-07,
+            "_initial_condition": 8.440153e-06,
             "charge": -15,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -564,7 +564,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 2.1353e-08,
+            "_initial_condition": 1.014834e-06,
             "charge": -15,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -581,7 +581,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 5.84e-09,
+            "_initial_condition": 6.06993e-07,
             "charge": -18,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -595,7 +595,7 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 5.1357e-08,
+            "_initial_condition": 1.108781e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -609,7 +609,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 4.67258e-07,
+            "_initial_condition": 1.008795e-05,
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -625,7 +625,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 4.44363e-07,
+            "_initial_condition": 6.161312e-06,
             "charge": -19,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -641,7 +641,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 1.5588e-08,
+            "_initial_condition": 7.40829e-07,
             "charge": -19,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -658,7 +658,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 4.263e-09,
+            "_initial_condition": 4.43105e-07,
             "charge": -22,
             "compartment": "c",
             "enzyme_id": "PYK",
@@ -672,7 +672,7 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 6.06e-09,
+            "_initial_condition": 1.3083e-07,
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PYK",
