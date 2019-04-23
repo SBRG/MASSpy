@@ -1263,14 +1263,16 @@ class MassModel(Object):
         # Define a new model
         new_model = self.__class__()
         # Define items that will not be copied by their references
-        do_not_copy_by_ref = {
+        do_not_copy_by_ref = [
             "metabolites", "reactions", "genes", "enzymes", 
-            "initial_conditions", "_S", "custom_rates", "notes", "annotation"}
+            "initial_conditions", "_S", "custom_rates", "fixed_concentrations",
+            "custom_parameters", "notes", "annotation", "modules"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
-        new_model.notes = deepcopy(self.notes)
-        new_model.annotation = deepcopy(self.annotation)
+
+        for attr in do_not_copy_by_ref[-5:]:
+            setattr(new_model, attr, deepcopy(getattr(self, attr)))
 
         # Copy the metabolites
         new_model = self._copy_model_metabolites(new_model)
@@ -1557,7 +1559,7 @@ class MassModel(Object):
                 str(arg) for arg in arguments
                 if str(arg) not in reaction.all_parameter_ids
                 and str(arg) not in steady_state_concentrations]
-            
+
             parameter, value = {1: [reaction.Keq_str, reaction.Keq],
                                 2: [reaction.kr_str, reaction.kr]}.get(
                                     reaction._rtype)
@@ -1970,7 +1972,7 @@ class MassModel(Object):
                     new_reaction: self.custom_rates[reaction]})
             # Copy custom parameters if there are custom rates
         if self.custom_parameters:
-            new_model.custom_parameters.update(copy(self.custom_parameters))
+            new_model.custom_parameters.update(self.custom_parameters)
 
         return new_model
 
