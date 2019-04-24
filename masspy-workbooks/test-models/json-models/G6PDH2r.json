@@ -64,6 +64,7 @@
         "g6pdh2r_N_PI_c",
         "g6pdh2r_A_CI_c"
     ],
+    "enzyme_modules": [],
     "enzyme_reactions": [
         "G6PDH2r_1",
         "G6PDH2r_2",
@@ -73,7 +74,6 @@
         "G6PDH2r_6",
         "G6PDH2r_7"
     ],
-    "enzymes": [],
     "genes": [],
     "id": "G6PDH2r",
     "initial_conditions": {

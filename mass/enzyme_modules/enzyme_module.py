@@ -20,8 +20,8 @@ from cobra.util.context import get_context
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massmodel import MassModel
 from mass.core.massreaction import MassReaction
-from mass.enzymes.enzyme_dict import EnzymeDict
-from mass.enzymes.enzyme_form import EnzymeForm
+from mass.enzyme_modules.enzyme_form import EnzymeForm
+from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict
 from mass.util.expressions import _mk_met_func
 from mass.util.util import _mk_new_dictlist, ensure_iterable, strip_time
 
@@ -30,21 +30,21 @@ _UNDEFINED_RE = re.compile("^Undefined$")
 _EQUATION_RE = re.compile("^Equation$")
 
 
-class EnzymeModel(MassModel):
-    """Class representation of an EnzymeModel.
+class EnzymeModule(MassModel):
+    """Class representation of an EnzymeModule.
 
     Parameters
     ----------
     id_or_model: str, mass.MassModel
-        Either an identifier to associate with the EnzymeModel given as a 
-        string, or an existing EnzymeModel object. If an existing EnzymeModel
-        is provided, a new EnzymeModel is instantiated with the same
-        properties as the original EnzymeModel.
+        Either an identifier to associate with the EnzymeModule given as a 
+        string, or an existing EnzymeModule object. If an existing EnzymeModule
+        is provided, a new EnzymeModule is instantiated with the same
+        properties as the original EnzymeModule.
     name: str, optional
-        A human readable name for the EnzymeModel.
+        A human readable name for the EnzymeModule.
     subsystem: str, optional
         The subsystem where the enzyme catalyzed net reaction that is
-        represented by this EnzymeModel is meant to occur.
+        represented by this EnzymeModule is meant to occur.
     matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
         A string identifiying the desired format for the stoichiometric matrix
         of the model. Types can include 'dense' for a standard numpy.array,
@@ -78,10 +78,10 @@ class EnzymeModel(MassModel):
         MassReactions.
     enzyme_concentration_total_equation: sympy.Basic
         A sympy expression representing the net reaction rate equation for the
-        enzyme represented by the EnzymeModel.
+        enzyme represented by the EnzymeModule.
     enzyme_net_flux_equation: sympy.Basic
         A sympy expression representing the net reaction rate equation for the
-        enzyme represented by the EnzymeModel.
+        enzyme represented by the EnzymeModule.
     enzyme_concentration_total: dict
         A dict containing the total enzyme concentration symbol as a sympy
         symbol and the total enzyme concentration value as a float.
@@ -93,7 +93,7 @@ class EnzymeModel(MassModel):
 
     def __init__(self, id_or_model=None, name=None, subsystem="",
                  matrix_type="dense", dtype=np.float64):
-        """Initialize the EnzymeModel Object."""
+        """Initialize the EnzymeModule Object."""
         MassModel.__init__(self, id_or_model, name, matrix_type, dtype)
         if not isinstance(subsystem, string_types):
             raise TypeError("subsystem must be a str")
@@ -108,7 +108,7 @@ class EnzymeModel(MassModel):
         self._categorized_enzyme_forms = {"Undefined": DictList()}
         self._categorized_enzyme_reactions = {"Undefined": DictList()}
 
-        # Initialize EnzymeModel attributes
+        # Initialize EnzymeModule attributes
         self._enzyme_concentration_total = None
         self._enzyme_net_flux = None
         self.enzyme_net_flux_equation = None
@@ -246,7 +246,7 @@ class EnzymeModel(MassModel):
 
         Notes
         -----
-        A metabolite must already exist in the EnzymeModel in order to set its
+        A metabolite must already exist in the EnzymeModule in order to set its
         category. Categories with empty lists are removed.
 
         See Also
@@ -282,7 +282,7 @@ class EnzymeModel(MassModel):
 
         Notes
         -----
-        An enzyme form must already exist in the EnzymeModel in order to set
+        An enzyme form must already exist in the EnzymeModule in order to set
         its category. Categories with empty lists are removed.
 
         See Also
@@ -318,7 +318,7 @@ class EnzymeModel(MassModel):
 
         Notes
         -----
-        A reaction must already exist in the EnzymeModel in order to set its
+        A reaction must already exist in the EnzymeModule in order to set its
         category. Categories with empty lists are removed.
 
         See Also
@@ -394,7 +394,7 @@ class EnzymeModel(MassModel):
     def make_enzyme_form(self, id=None, name="automatic", 
                          categories="Undefined", bound_catalytic=None, 
                          bound_effectors=None, compartment=None):
-        """Make an EnzymeForm object to add to the EnzymeModel.
+        """Make an EnzymeForm object to add to the EnzymeModule.
 
         Parameters
         ----------
@@ -425,7 +425,7 @@ class EnzymeModel(MassModel):
 
         Notes
         -----
-        If a metabolite does not exist in the EnzymeModel, it will be added to
+        If a metabolite does not exist in the EnzymeModule, it will be added to
             the module in addition to the EnzymeForm
 
         See Also
@@ -434,7 +434,7 @@ class EnzymeModel(MassModel):
             Automatic generation of name attribute for EnzymeForm
 
         """
-        # Ensure metabolites for EnzymeForms exist in the EnzymeModel.
+        # Ensure metabolites for EnzymeForms exist in the EnzymeModule.
         for bound_dict in [bound_catalytic, bound_effectors]:
             if bound_dict is None:
                 bound_dict = {}
@@ -466,10 +466,10 @@ class EnzymeModel(MassModel):
 
         return enzyme_form
 
-    def make_enzyme_reaction(self, id=None, name="", subsystem=None, 
-                             reversible=True, categories="Undefined", 
-                             metabolites_to_add=None):
-        """Make an MassReaction object to add to the EnzymeModel.
+    def make_enzyme_module_reaction(self, id=None, name="", subsystem=None, 
+                                    reversible=True, categories="Undefined", 
+                                    metabolites_to_add=None):
+        """Make an MassReaction object to add to the EnzymeModule.
 
         Parameters
         ----------
@@ -524,7 +524,7 @@ class EnzymeModel(MassModel):
                 raise KeyError(str(e) + "not found in model metabolites.")
             enzyme_reaction.add_metabolites(metabolites_to_add)
 
-        # Add reaction to EnzymeModel
+        # Add reaction to EnzymeModule
         self.add_reactions(enzyme_reaction)
         if enzyme_reaction not in self.enzyme_reactions:
             self.enzyme_reactions.add(enzyme_reaction)
@@ -615,7 +615,7 @@ class EnzymeModel(MassModel):
         ----------
         reaction_list: list of mass.MassReactions
             A list of MassReaction objects or their identifiers. MassReactions
-            must already exist in the EnzymeModel.
+            must already exist in the EnzymeModule.
         new_parameter_id: str
             The new parameter ID to use for the reaction parameters. The
             forward rate, reverse rate, and equilibrium constants in the
@@ -628,7 +628,7 @@ class EnzymeModel(MassModel):
                 Type 2 will utilize the forward and reverse rate constants.
                 Type 3 will utilize the equilibrium and reverse rate constants.
         enzyme_prefix: bool, optional
-            If True, add EnzymeModel identifier as a prefix to the 
+            If True, add EnzymeModule identifier as a prefix to the 
             new_parameter_id before using the new_parameter_id in the rate
             paramter unification. Default is False.
 
@@ -893,8 +893,8 @@ class EnzymeModel(MassModel):
         -----
         The string "Equation" can be passed to either the top or the bottom arg
             to utilize the equation in the corresponding attribute (i.e. 
-            EnzymeModel.enzyme_concentration_total_equation for 'forms'
-            and EnzymeModel.enzyme_net_flux_equation for 'reactions').
+            EnzymeModule.enzyme_concentration_total_equation for 'forms'
+            and EnzymeModule.enzyme_net_flux_equation for 'reactions').
 
         """
         # Check categorized_attr input, and get corresponding categorized dict
@@ -905,8 +905,8 @@ class EnzymeModel(MassModel):
                 categorized_attr = "reactions"
             else:
                 raise ValueError("Must be the dict accessible through '"
-                                 "EnzymeModel.categorized_enzyme_forms' or '"
-                                 "EnzymeModel.categorized_enzyme_reactions'.")
+                                 "EnzymeModule.categorized_enzyme_forms' or '"
+                                 "EnzymeModule.categorized_enzyme_reactions'.")
 
         if categorized_attr.lower() in {"forms", "reactions"}:
             categorized_attr = categorized_attr.lower()
@@ -955,18 +955,18 @@ class EnzymeModel(MassModel):
 
     # Extended Methods
     def add_metabolites(self, metabolite_list, add_initial_conditions=False):
-        """Add a list of metabolites and enzyme forms to the EnzymeModel.
+        """Add a list of metabolites and enzyme forms to the EnzymeModule.
 
         Metabolites are added under the ligand category as "Undefined".
 
-        The change is reverted upon exit when using the EnzymeModel as a 
+        The change is reverted upon exit when using the EnzymeModule as a 
         context.
 
         Parameters
         ----------
         metabolite_list: list of mass.MassMetabolites and mass.EnzymeForms
             A list of MassMetabolites and EnzymeForms to add to the
-            EnzymeModel.
+            EnzymeModule.
         add_initial_conditons: bool, optional
             If True, the initial conditions associated with each metabolite and 
             enzyme form are also added to the model. Otherwise, the 
@@ -982,11 +982,11 @@ class EnzymeModel(MassModel):
         metabolite_list = ensure_iterable(metabolite_list)
 
         # Add metabolites using inherited method
-        super(EnzymeModel, self).add_metabolites(
+        super(EnzymeModule, self).add_metabolites(
             metabolite_list, add_initial_conditions)
 
         # Check whether a ligand is not an EnzymeForm object, and check if the
-        # ligand already exists in the EnzymeModel, ignoring those that do.
+        # ligand already exists in the EnzymeModule, ignoring those that do.
         ligands = [met for met in metabolite_list 
                    if not isinstance(met, EnzymeForm)
                    and met in self.metabolites and met not in self.ligands]
@@ -997,7 +997,7 @@ class EnzymeModel(MassModel):
         self.add_categorized_ligands("Undefined", ligands)
 
         # Check whether an enzyme form is a EnzymeForm object, and check if the
-        # form already exists in the EnzymeModel, ignoring those that do.
+        # form already exists in the EnzymeModule, ignoring those that do.
         enzyme_forms = [enzyme_form for enzyme_form in metabolite_list 
                         if isinstance(enzyme_form, EnzymeForm)
                         and enzyme_form not in self.enzyme_forms]
@@ -1014,21 +1014,21 @@ class EnzymeModel(MassModel):
             context(partial(self.enzyme_forms.__isub__, enzyme_forms))
 
     def remove_metabolites(self, metabolite_list, destructive=False):
-        """Remove a list of metabolites and enzyme forms from the EnzymeModel.
+        """Remove a list of metabolites and enzyme forms from the EnzymeModule.
 
         The species' initial conditions will also be removed from the model.
 
-        The change is reverted upon exit when using the EnzymeModel as a 
+        The change is reverted upon exit when using the EnzymeModule as a 
         context.
 
         Parameters
         ----------
         metabolite_list: list of mass.MassMetabolites and mass.EnzymeForms
-            A list of species to add to the EnzymeModel.
+            A list of species to add to the EnzymeModule.
         destructive: bool, optional
             If False, the metabolites and enzyme forms are removed from all 
             associated MassReactions.If True, also remove associated 
-            MassReactions from the EnzymeModel.
+            MassReactions from the EnzymeModule.
 
         Notes
         -----
@@ -1045,7 +1045,7 @@ class EnzymeModel(MassModel):
         self.add_categorized_ligands("Undefined", ligands)
 
         # Remove metabolites from model using inherited method
-        super(EnzymeModel, self).remove_metabolites(
+        super(EnzymeModule, self).remove_metabolites(
             metabolite_list, destructive)
 
         # Remove ligands from the ligand DictList.
@@ -1056,7 +1056,7 @@ class EnzymeModel(MassModel):
             self._categorized_ligands["Undefined"].remove(met)
 
         # Check whether an enzyme form is a EnzymeForm object, and check if the
-        # form already exists in the EnzymeModel, ignoring those that do not.
+        # form already exists in the EnzymeModule, ignoring those that do not.
         enzyme_forms = [enzyme_form for enzyme_form in metabolite_list
                         if isinstance(enzyme_form, EnzymeForm)
                         and enzyme_form in self.enzyme_forms]
@@ -1075,7 +1075,7 @@ class EnzymeModel(MassModel):
             context(partial(self.enzyme_forms.__iadd__, enzyme_forms))
 
     def add_reactions(self, reaction_list):
-        """Add MassReactions to the EnzymeModel.
+        """Add MassReactions to the EnzymeModule.
 
         MassReaction objects with identifiers identical to an existing reaction
         are ignored.
@@ -1092,7 +1092,7 @@ class EnzymeModel(MassModel):
         reaction_list = ensure_iterable(reaction_list)
 
         # Add reactions using inherited method
-        super(EnzymeModel, self).add_reactions(reaction_list)
+        super(EnzymeModule, self).add_reactions(reaction_list)
 
         # Get the enzyme reactions by checking if an EnzymeForm is involved, 
         # and check whether reaction exists, ignoring those that do.  
@@ -1108,7 +1108,7 @@ class EnzymeModel(MassModel):
         self.add_categorized_enzyme_reactions("Undefined", enzyme_reactions)
 
     def remove_reactions(self, reaction_list, remove_orphans=False):
-        """Remove MassReactions from the EnzymeModel.
+        """Remove MassReactions from the EnzymeModule.
 
         The change is reverted upon exit when using the MassModel as a context.
 
@@ -1118,7 +1118,7 @@ class EnzymeModel(MassModel):
             A list of MassReaction objects to be removed from the model.
         remove_orphans: bool, optional
             If True, will also remove orphaned genes and MassMetabolites from
-            the EnzymeModel.
+            the EnzymeModule.
 
         """
         # Ensure list is iterable.
@@ -1133,7 +1133,7 @@ class EnzymeModel(MassModel):
         self.add_categorized_enzyme_reactions("Undefined", enzyme_reactions)
 
         # Remove reactions using inherited method
-        super(EnzymeModel, self).remove_reactions(reaction_list)
+        super(EnzymeModule, self).remove_reactions(reaction_list)
 
         # Remove enzyme reactions from DictList
         if self.enzyme_reactions:
@@ -1165,7 +1165,7 @@ class EnzymeModel(MassModel):
 
         """
         # Repair using inherited method
-        super(EnzymeModel, self).repair(rebuild_index, rebuild_relationships)
+        super(EnzymeModule, self).repair(rebuild_index, rebuild_relationships)
         # Repair enzyme_reactions DictList
         self._get_current_enzyme_reactions(update_enzyme=True)
         self._update_object_pointers()
@@ -1181,7 +1181,7 @@ class EnzymeModel(MassModel):
 
     # Overridden methods
     def copy(self):
-        """Create a partial "deepcopy" of the EnzymeModel.
+        """Create a partial "deepcopy" of the EnzymeModule.
 
         All of the MassMetabolite, MassReaction, EnzymeForm, and Gene objects,
         the initial conditions, fixed concentrations, custom_rates, and the 
@@ -1235,12 +1235,12 @@ class EnzymeModel(MassModel):
     def merge(self, right, prefix_existing=None, inplace=False,
               new_model_id=None):
         """TODO DOCSTRING."""
-        # Merge the two EnzymeModels together if right is an EnzymeModel
-        if isinstance(right, EnzymeModel):
+        # Merge the two EnzymeModules together if right is an EnzymeModule
+        if isinstance(right, EnzymeModule):
             print("TODO: FINISH ENZYMEMODULE MERGE")
             new_model = None
         else:
-            # Always merge the EnzymeModel into the MassModel
+            # Always merge the EnzymeModule into the MassModel
             new_model = right.merge(self, prefix_existing=prefix_existing, 
                                     inplace=inplace, new_model_id=new_model_id)
         return new_model
@@ -1272,7 +1272,7 @@ class EnzymeModel(MassModel):
         Parameters
         ----------
         update_enzyme: bool, optional
-            If True, update the enzyme_reactions attribute of the EnzymeModel.
+            If True, update the enzyme_reactions attribute of the EnzymeModule.
 
         Warnings
         --------
@@ -1447,18 +1447,18 @@ class EnzymeModel(MassModel):
         self._remove_empty_categories(attribute)
 
     def _convert_self_into_enzyme_dict(self):
-        """Convert self into an EnzymeDict.
+        """Convert self into an EnzymeModuleDict.
 
-        Primarily used for merging an EnzymeModel into a MassModel while 
-        retaining defined EnzymeModel attributes. Also used for checking if
-        subclass is an EnzymeModel to avoid circular imports
+        Primarily used for merging an EnzymeModule into a MassModel while 
+        retaining defined EnzymeModule attributes. Also used for checking if
+        subclass is an EnzymeModule to avoid circular imports
 
         Warnings
         --------
         This method is intended for internal use only. 
 
         """
-        return EnzymeDict(self)
+        return EnzymeModuleDict(self)
 
     def _add_self_to_model(self, model, prefix_existing=None, inplace=False,
                            new_model_id=None):
@@ -1472,20 +1472,21 @@ class EnzymeModel(MassModel):
         # Create a MassModel instance of self to merge normally
         model = model.merge(MassModel(self), prefix_existing=prefix_existing, 
                             inplace=inplace, new_model_id=new_model_id)
-        # Turn EnzymeModel into an EnzymeDict to store in MassModel.enzymes
+        # Turn EnzymeModule into an EnzymeModuleDict 
+        # to store in MassModel.enzyme_modules
         enzyme_dict = self._convert_self_into_enzyme_dict()
-        # Update EnzymeDict with attributes
+        # Update EnzymeModuleDict with attributes
         enzyme_dict._update_object_pointers(model)
 
-        if enzyme_dict.id in model.enzymes:
-            model.enzymes.remove(enzyme_dict.id)
-        model.enzymes.append(enzyme_dict)
+        if enzyme_dict.id in model.enzyme_modules:
+            model.enzyme_modules.remove(enzyme_dict.id)
+        model.enzyme_modules.append(enzyme_dict)
         enzyme_dict.model = model
 
         return model
 
     def _repr_html_(self):
-        """HTML representation of the overview for the EnzymeModel.
+        """HTML representation of the overview for the EnzymeModule.
 
         Overrides MassModel._repr_html method.
         """

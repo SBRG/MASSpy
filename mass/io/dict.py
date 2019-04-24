@@ -16,8 +16,9 @@ from sympy import Eq, Symbol, sympify
 from cobra.core import Gene
 
 from mass.core import MassMetabolite, MassModel, MassReaction
-from mass.enzymes import (
-    EnzymeDict, EnzymeForm, EnzymeModel, _ORDERED_ENZYMEDICT_DEFAULTS)
+from mass.enzyme_modules import (
+    EnzymeForm, EnzymeModule, EnzymeModuleDict,
+    _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
 
 # Global
 _INF = float("inf")
@@ -74,10 +75,10 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 _REQUIRED_ENZYME_ATTRIBUTES = [
     "id", "name", "ligands", "enzyme_forms", "enzyme_reactions"]
 _ORDERED_OPTIONAL_ENZYME_KEYS = [
-    key for key in iterkeys(_ORDERED_ENZYMEDICT_DEFAULTS) 
+    key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS) 
     if key not in _REQUIRED_ENZYME_ATTRIBUTES + ["S", "model"]]
 _OPTIONAL_ENZYME_ATTRIBUTES = OrderedDict({
-    key: _ORDERED_ENZYMEDICT_DEFAULTS[key] 
+    key: _ORDERED_ENZYMEMODULE_DICT_DEFAULTS[key] 
     for key in _ORDERED_OPTIONAL_ENZYME_KEYS
 })
 
@@ -232,11 +233,11 @@ def gene_from_dict(gene):
 
 
 def enzyme_to_dict(enzyme):
-    """Represent an EnzymeDict object as a dict.
+    """Represent an EnzymeModuleDict object as a dict.
 
     Parameters
     ----------
-    enzyme: enzyme.EnzymeDict
+    enzyme: enzyme.EnzymeModuleDict
         The enzyme to represent as a dict.
 
     """
@@ -267,7 +268,7 @@ def enzyme_to_dict(enzyme):
 
 
 def enzyme_from_dict(enzyme, model):
-    """Create an EnzymeDict from its dict representation.
+    """Create an EnzymeModuleDict from its dict representation.
 
     Parameters
     ----------
@@ -276,7 +277,7 @@ def enzyme_from_dict(enzyme, model):
 
     """
     # Set object attributes
-    new_enzyme = EnzymeDict(id_or_enzyme=enzyme)
+    new_enzyme = EnzymeModuleDict(id_or_enzyme=enzyme)
     # Update model and get objects from the model to populate the DictLists
     new_enzyme["model"] = model
     new_enzyme._update_object_pointers(model)
@@ -285,7 +286,7 @@ def enzyme_from_dict(enzyme, model):
     new_enzyme.enzyme_net_flux_equation = Eq(Symbol(
         "v_" + new_enzyme.id), sympify(new_enzyme.enzyme_net_flux_equation))
 
-    # Make the stoichiometric matrix and clean up the EnzymeDict
+    # Make the stoichiometric matrix and clean up the EnzymeModuleDict
     new_enzyme._make_enzyme_stoichiometric_matrix(update=True)
     new_enzyme._set_missing_to_defaults()
     new_enzyme._fix_order()
@@ -298,13 +299,13 @@ def model_to_dict(model, sort=False):
 
     Parameters
     ----------
-    model: mass.MassModel, mass.EnzymeModel
+    model: mass.MassModel, mass.EnzymeModule
         The model to represent as a dict.
     sort: bool, optional
-        Whether to sort the metabolites, reactions, genes, and enzymes 
+        Whether to sort the metabolites, reactions, genes, and enzyme_modules 
         or maintain the order defined in the model. If the model is an
-        EnzymeModel, the ligands, enzyme_forms, and enzyme_reactions attributes
-        are also included. Default is False. 
+        EnzymeModule, the ligands, enzyme_forms, and enzyme_reactions 
+        attributes are also included. Default is False. 
 
     """
     obj = OrderedDict()
@@ -312,14 +313,14 @@ def model_to_dict(model, sort=False):
     obj["metabolites"] = list(map(metabolite_to_dict, model.metabolites))
     obj["reactions"] = list(map(reaction_to_dict, model.reactions))
     obj["genes"] = list(map(gene_to_dict, model.genes))
-    obj["enzymes"] = list(map(enzyme_to_dict, model.enzymes))
+    obj["enzyme_modules"] = list(map(enzyme_to_dict, model.enzyme_modules))
 
     if sort:
         get_id = itemgetter("id")
         obj["metabolites"].sort(key=get_id)
         obj["reactions"].sort(key=get_id)
         obj["genes"].sort(key=get_id)
-        obj["enzymes"].sort(key=get_id)
+        obj["enzyme_modules"].sort(key=get_id)
 
     for key in ["initial_conditions", "fixed_concentrations",
                 "custom_rates", "custom_parameters"]:
@@ -334,9 +335,9 @@ def model_to_dict(model, sort=False):
 
     _update_optional(model, obj, _OPTIONAL_MODEL_ATTRIBUTES,
                      _ORDERED_OPTIONAL_MODEL_KEYS)
-    # Add EnzymeModel attributes if an EnzymeModel is being saved.
-    if isinstance(model, EnzymeModel):
-        _add_enzyme_model_attributes_into_dict(model, obj)
+    # Add EnzymeModule attributes if an EnzymeModule is being saved.
+    if isinstance(model, EnzymeModule):
+        _add_enzyme_module_attributes_into_dict(model, obj)
         if sort:
             obj["ligands"].sort(key=get_id)
             obj["enzyme_forms"].sort(key=get_id)
@@ -357,7 +358,7 @@ def model_from_dict(obj):
     if "reactions" not in obj:
         raise ValueError("Object has no reactions attribute. Cannot load.")
     if all([k in obj for k in _REQUIRED_ENZYME_ATTRIBUTES[2:]]):
-        model = EnzymeModel(obj["id"])
+        model = EnzymeModule(obj["id"])
     else:
         model = MassModel(obj["id"])
     # Add metabolites to the model
@@ -371,10 +372,10 @@ def model_from_dict(obj):
     model.add_reactions([
         reaction_from_dict(reaction, model) for reaction in obj["reactions"]])
 
-    # Add enzymes to the model
-    if "enzymes" in obj:
-        model.enzymes.extend([
-            enzyme_from_dict(enzyme, model) for enzyme in obj["enzymes"]])
+    # Add enzyme modules to the model
+    if "enzyme_modules" in obj:
+        model.enzyme_modules.extend([
+            enzyme_from_dict(enz, model) for enz in obj["enzyme_modules"]])
 
     # Add initial conditions to the model if they exist
     if "initial_conditions" in obj:
@@ -401,10 +402,10 @@ def model_from_dict(obj):
                                   custom_rate, custom_parameters)
     # Update with any opitonal attributes.
     for k, v in iteritems(obj):
-        # Set MassModel attributes (and subsystem attribute for EnzymeModels)
+        # Set MassModel attributes (and subsystem attribute for EnzymeModules)
         if k in _ORDERED_OPTIONAL_MODEL_KEYS or k == "subsystem":
             setattr(model, k, v)
-        # Update with EnzymeModel attributes if obj represents an EnzymeModel
+        # Update with EnzymeModule attributes if obj represents an EnzymeModule
         elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYME_KEYS:
             model.__class__.__dict__[k.lstrip("_")].fset(model, v)
 
@@ -415,7 +416,7 @@ def model_from_dict(obj):
 
 # Internal
 def _add_enzyme_form_attributes_into_dict(enzyme, new_enzyme):
-    """Add the EnzymeForm attributes to the dict representing the EnzymeForm.
+    """Add EnzymeForm attributes to its dict representation.
 
     Warnings
     --------
@@ -431,8 +432,8 @@ def _add_enzyme_form_attributes_into_dict(enzyme, new_enzyme):
                      _ORDERED_OPTIONAL_ENZYMEFORM_KEYS)
 
 
-def _add_enzyme_model_attributes_into_dict(model, obj):
-    """Add the EnzymeModel attributes to the dict representing the EnzymeModel.
+def _add_enzyme_module_attributes_into_dict(model, obj):
+    """Add EnzymeModule attributes to its dict representation.
 
     Warnings
     --------

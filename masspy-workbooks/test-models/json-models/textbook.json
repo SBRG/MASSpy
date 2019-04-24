@@ -2,7 +2,7 @@
     "compartments": {
         "c": "Cytosol"
     },
-    "enzymes": [],
+    "enzyme_modules": [],
     "fixed_concentrations": {
         "ade_e": 0.001,
         "adn_e": 0.0012,
@@ -48,7 +48,7 @@
         "hb_1o2_c": 0.05000439,
         "hb_2o2_c": 0.07350641,
         "hb_3o2_c": 0.2624172,
-        "hb_4o2_c": 6.79661749,
+        "hb_4o2_c": 6.79661748,
         "hb_c": 0.059529,
         "hxan_c": 0.00200097,
         "imp_c": 0.00775885,
@@ -759,7 +759,7 @@
         },
         {
             "_equilibrium_constant": 1.2,
-            "_forward_rate_constant": 2338.0696427213347,
+            "_forward_rate_constant": 2338.0696427213334,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1041,7 +1041,7 @@
                 "hb_c": -1
             },
             "name": "Hemoglobin-23dpg binding",
-            "steady_state_flux": 0.0,
+            "steady_state_flux": -0.0,
             "subsystem": "Hemoglobin"
         },
         {
@@ -1058,7 +1058,7 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (1)",
-            "steady_state_flux": 0.0,
+            "steady_state_flux": -0.0,
             "subsystem": "Hemoglobin"
         },
         {
@@ -1075,7 +1075,7 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (2)",
-            "steady_state_flux": 0.0,
+            "steady_state_flux": -0.0,
             "subsystem": "Hemoglobin"
         },
         {
@@ -1092,7 +1092,7 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (3)",
-            "steady_state_flux": 0.0,
+            "steady_state_flux": -0.0,
             "subsystem": "Hemoglobin"
         },
         {
@@ -1109,7 +1109,7 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (4)",
-            "steady_state_flux": 0.0,
+            "steady_state_flux": -0.0,
             "subsystem": "Hemoglobin"
         },
         {
@@ -1376,7 +1376,7 @@
                 "o2_c": -1
             },
             "name": "Oxygen exchange",
-            "steady_state_flux": -0.0,
+            "steady_state_flux": 0.0,
             "subsystem": "Transport/Exchange"
         }
     ],

@@ -177,6 +177,7 @@
         "pyk_R4_AP_c",
         "pyk_T4_c"
     ],
+    "enzyme_modules": [],
     "enzyme_reactions": [
         "PYK_R01",
         "PYK_R02",
@@ -213,7 +214,6 @@
         "PYK_R45",
         "PYK_L"
     ],
-    "enzymes": [],
     "genes": [],
     "id": "PYK",
     "initial_conditions": {
