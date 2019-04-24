@@ -184,8 +184,8 @@ def reaction_from_dict(reaction, model):
     # Set object attributes
     for k, v in iteritems(reaction):
         # Change infinity type from a string to a float
-        if isinstance(v, string_types) and "inf" in v:
-            v = float(v)
+        if isinstance(v, string_types) and v == "inf":
+            v = _INF
         if k in {"objective_coefficient", "reaction"}:
             continue
         elif k == "metabolites":
@@ -326,9 +326,9 @@ def model_to_dict(model, sort=False):
                 "custom_rates", "custom_parameters"]:
         values = getattr(model, key, {})
         if values:
-            values = OrderedDict((k.id, str(v))
-                                 if key is "custom_rates" else (str(k), v)
-                                 for k, v in iteritems(values))
+            values = OrderedDict(
+                (k.id, str(v)) if key == "custom_rates"
+                else (str(k), _fix_type(v)) for k, v in iteritems(values))
             if sort:
                 values = OrderedDict((k, values[k]) for k in sorted(values))
             obj[key] = values

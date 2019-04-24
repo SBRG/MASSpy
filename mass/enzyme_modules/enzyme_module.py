@@ -1060,7 +1060,7 @@ class EnzymeModule(MassModel):
         enzyme_forms = [enzyme_form for enzyme_form in metabolite_list
                         if isinstance(enzyme_form, EnzymeForm)
                         and enzyme_form in self.enzyme_forms]
-        self.add_categorize_enzyme_forms("Undefined", enzyme_forms)
+        self.add_categorized_enzyme_forms("Undefined", enzyme_forms)
         # Remove the enzyme forms to the model
         if enzyme_forms:
             self.enzyme_forms -= enzyme_forms
