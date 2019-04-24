@@ -147,6 +147,7 @@
         "pfk_R4_AF_c",
         "pfk_T4_c"
     ],
+    "enzyme_modules": [],
     "enzyme_reactions": [
         "PFK_R01",
         "PFK_R02",
@@ -173,7 +174,6 @@
         "PFK_R43",
         "PFK_L"
     ],
-    "enzymes": [],
     "genes": [],
     "id": "PFK",
     "initial_conditions": {

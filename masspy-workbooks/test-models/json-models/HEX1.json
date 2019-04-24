@@ -78,6 +78,7 @@
         "hex1_A_PI_c",
         "hex1_G_PI_c"
     ],
+    "enzyme_modules": [],
     "enzyme_reactions": [
         "HEX1_1",
         "HEX1_2",
@@ -88,7 +89,6 @@
         "HEX1_7",
         "HEX1_8"
     ],
-    "enzymes": [],
     "genes": [],
     "id": "HEX1",
     "initial_conditions": {

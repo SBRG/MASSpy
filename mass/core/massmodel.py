@@ -78,9 +78,9 @@ class MassModel(Object):
     genes: cobra.DictList
         A cobra.DictList where the keys are the gene identifiers and the
         values are the associated cobra.Gene objects.
-    enzymes: cobra.DictList
-        A cobra.DictList where the keys are the Enzyme identifiers and 
-        the values are the associated Enzyme objects.
+    enzyme_modules: cobra.DictList
+        A cobra.DictList where the keys are the EnzymeModuleDict identifiers 
+        and the values are the associated EnzymeModuleDict objects.
     initial_conditions: dict
         A dictionary to store the initial conditions of the metabolites,
         where keys are the MassMetabolites and values are initial conditions.
@@ -138,11 +138,11 @@ class MassModel(Object):
         else:
             self.description = ''
             # Initialize DictLists for storing 
-            # reactions, metabolites, genes, and enzymes
+            # reactions, metabolites, genes, and enzyme_modules
             self.reactions = DictList()
             self.metabolites = DictList()
             self.genes = DictList()
-            self.enzymes = DictList()
+            self.enzyme_modules = DictList()
             # Initialize dictionaries for initial conditions, custom rates,
             # custom parameters, fixed concentrations, compartments, and units.
             self.initial_conditions = {}
@@ -1248,7 +1248,7 @@ class MassModel(Object):
                     gene._reaction.add(rxn)
 
         # Make all objects point to the model.
-        for attr in ["reactions", "metabolites", "genes", "enzymes"]:
+        for attr in ["reactions", "metabolites", "genes", "enzyme_modules"]:
             for item in getattr(self, attr):
                 item._model = self
 
@@ -1264,7 +1264,7 @@ class MassModel(Object):
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzymes", 
+            "metabolites", "reactions", "genes", "enzyme_modules", 
             "initial_conditions", "_S", "custom_rates", "fixed_concentrations",
             "custom_parameters", "notes", "annotation", "modules"]
         for attr in self.__dict__:
@@ -1280,8 +1280,8 @@ class MassModel(Object):
         new_model = self._copy_model_genes(new_model)
         # Copy the reactions and rates
         new_model = self._copy_model_reactions(new_model)
-        # Copy any existing enzymes
-        new_model = self._copy_model_enzymes(new_model)
+        # Copy any existing enzyme_modules
+        new_model = self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
         new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                               dtype=self._dtype,
@@ -1325,10 +1325,10 @@ class MassModel(Object):
 
         Notes
         -----
-        When merging an EnzymeModel into a MassModel, the Enzyme Model is 
+        When merging an EnzymeModule into a MassModel, the EnzymeModule is 
             converted to an EnzymeDict and stored in a DictList accessible 
-            via MassModel.enzymes. 
-        If an EnzymeModel already exists in the model, it will be replaced.
+            via MassModel.enzyme_modules. 
+        If an EnzymeModule already exists in the model, it will be replaced.
 
         Returns
         -------
@@ -1394,18 +1394,20 @@ class MassModel(Object):
                 new_model.reactions.get_by_id(getattr(rxn, "_id", rxn)): rate
                 for rxn, rate in iteritems(rate_dict)})
 
-        # Add enzymes from right to left model
-        if right.enzymes:  
-            new_enzymes = deepcopy(right.enzymes)
-            # Prefix enzymes if necessary
+        # Add enzyme_modules from right to left model
+        if right.enzyme_modules:  
+            new_enzyme_modules = deepcopy(right.enzyme_modules)
+            # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
-                existing = new_enzymes.query(lambda r: r.id in self.enzymes)
+                existing = new_enzyme_modules.query(
+                    lambda r: r.id in self.enzyme_modules)
                 for enzyme in existing:
                     enzyme.__dict__["_id"] = prefix_existing + "_" + enzyme.id
             # Check whether reactions exist in the model.
-            new_enzymes = self._existing_obj_filter("enzymes", new_enzymes)
-            new_model.enzymes += new_enzymes
-            for enzyme in new_model.enzymes:
+            new_enzyme_modules = self._existing_obj_filter(
+                "enzyme_modules", new_enzyme_modules)
+            new_model.enzyme_modules += new_enzyme_modules
+            for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
         for attr in ["_compartments", "_units", "notes", "annotation"]:
@@ -1976,21 +1978,21 @@ class MassModel(Object):
 
         return new_model
 
-    def _copy_model_enzymes(self, new_model):
-        """Copy the enzymes in creating a partial "deepcopy" of model.
+    def _copy_model_enzyme_modules(self, new_model):
+        """Copy the enzyme_modules in creating a partial "deepcopy" of model.
 
         Warnings
         --------
         This method is intended for internal use only.
 
         """
-        new_model.enzymes = DictList()
+        new_model.enzyme_modules = DictList()
         do_not_copy_by_ref = {
             "ligands", "enzyme_forms", "enzyme_reactions", 
             "categorized_ligands", "categorized_enzyme_forms", 
             "categorized_enzyme_reactions", "model"}
-        # Copy the enzymes
-        for enzyme in self.enzymes:
+        # Copy the enzyme_modules
+        for enzyme in self.enzyme_modules:
             new_enzyme = enzyme.__class__()
             for attr, value in iteritems(enzyme):
                 if attr not in do_not_copy_by_ref:
@@ -1998,7 +2000,7 @@ class MassModel(Object):
             # Update associated model and object pointers for enzyme
             new_enzyme["model"] = new_model
             new_enzyme._update_object_pointers(new_model)
-            new_model.enzymes.append(new_enzyme)
+            new_model.enzyme_modules.append(new_enzyme)
 
         return new_model
 
@@ -2086,7 +2088,7 @@ class MassModel(Object):
                     <td>{num_genes}</td>
                 </tr><tr>
                     <td><strong>Number of Enzymes</strong></td>
-                    <td>{num_enzymes}</td>
+                    <td>{num_enzyme_modules}</td>
                 </tr><tr>
                     <td><strong>Modules</strong></td>
                     <td>{modules}</td>
@@ -2113,7 +2115,7 @@ class MassModel(Object):
                    num_fixed=len(self.fixed_concentrations),
                    num_custom_rates=len(self.custom_rates),
                    num_genes=len(self.genes),
-                   num_enzymes=len(self.enzymes),
+                   num_enzyme_modules=len(self.enzyme_modules),
                    modules="<br> ".join([str(m) for m in self.modules
                                          if m is not None]) + "</br>",
                    compartments=", ".join(v if v else k for k, v in
@@ -2142,7 +2144,7 @@ class MassModel(Object):
     def __setstate__(self, state):
         """Ensure all Objects in the MassModel point to the MassModel."""
         self.__dict__.update(state)
-        for attr in ['reactions', 'metabolites', 'genes', 'enzymes']:
+        for attr in ['reactions', 'metabolites', 'genes', 'enzyme_modules']:
             for x in getattr(self, attr):
                 x._model = self
         if not hasattr(self, "name"):

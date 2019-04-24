@@ -18,63 +18,63 @@ from mass.util.util import (
     _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
 
 
-class EnzymeDict(OrderedDictWithID):
-    """Container to store the attributes of an EnzymeModel.
+class EnzymeModuleDict(OrderedDictWithID):
+    """Container to store the attributes of an EnzymeModule.
 
-    This object is intended to represent the EnzymeModel once merged into
-    a MassModel in order to retain EnzymeModel specific attributes of the 
-    EnzymeModel without the need of storing the EnzymeModel object itself.
+    This object is intended to represent the EnzymeModule once merged into
+    a MassModel in order to retain EnzymeModule specific attributes of the 
+    EnzymeModule without the need of storing the EnzymeModule object itself.
 
-    The EnzymeDict class is essentially a subclass of an OrderedDict with an id
-    and attribute accessors. One can see which attributes are accessible using
-    the keys() method.
+    The EnzymeModuleDict class is essentially a subclass of an OrderedDict with
+    an id and attribute accessors. One can see which attributes are accessible
+    using the keys() method.
 
     Parameters
     ----------
-    enzyme: mass.EnzymeModel, mass.EnzymeDict
-        The EnzymeModel to be converted into the EnzymeDict, or an existing 
-        EnzymeDict object. If an existing EnzymeDict object is
-        provided, a new EnzymeDict object is instantiated with the same
-        properties as the original EnzymeDict.
+    enzyme: EnzymeModule, EnzymeModuleDict
+        The EnzymeModule to be converted into the EnzymeModuleDict, or an 
+        existing EnzymeModuleDict object. If an existing EnzymeModuleDict 
+        object is provided, a new EnzymeModuleDict object is instantiated with
+        the same properties as the original EnzymeModuleDict.
 
     Notes
     -----
-    EnzymeDict objects can behave as booleans, with empty EnzymeDict objects
-        returning as False.
+    EnzymeModuleDict objects can behave as booleans, with empty 
+        EnzymeModuleDict objects returning as False.
 
     """
 
     def __init__(self, id_or_enzyme=None):
-        """Initialize EnzymeDict."""
-        # Instiantiate a new EnzymeDict object if a EnzymeDict is given.
-        if isinstance(id_or_enzyme, (EnzymeDict, dict)):
-            super(EnzymeDict, self).__init__(
+        """Initialize EnzymeModuleDict."""
+        # Instiantiate new EnzymeModuleDict object if given an EnzymeModuleDict
+        if isinstance(id_or_enzyme, (EnzymeModuleDict, dict)):
+            super(EnzymeModuleDict, self).__init__(
                 id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
-        # Initialize an EnzymeDict using an EnzymeModel
+        # Initialize an EnzymeModuleDict using an EnzymeModule
         elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_dict"):
-            super(EnzymeDict, self).__init__(id_or_enzyme.id)
+            super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
             for key, value in iteritems(id_or_enzyme.__dict__):
-                new_key = key.lstrip("_")
-                if new_key not in iterkeys(_ORDERED_ENZYMEDICT_DEFAULTS):
+                nkey = key.lstrip("_")
+                if nkey not in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
                     continue
-                elif new_key is "S":
-                    self[new_key] = id_or_enzyme._mk_stoich_matrix(
+                elif nkey is "S":
+                    self[nkey] = id_or_enzyme._mk_stoich_matrix(
                         matrix_type="DataFrame", update_model=False)
-                elif new_key == "enzyme_net_flux_equation":
-                    self[new_key] = id_or_enzyme.enzyme_net_flux_equation
+                elif nkey == "enzyme_net_flux_equation":
+                    self[nkey] = id_or_enzyme.enzyme_net_flux_equation
                 else:
-                    self[new_key] = value
-        # Initialize EnzymeDict with an id and defaults for everything else.
+                    self[nkey] = value
+        # Initialize EnzymeModuleDict with an id and defaults for everything.
         else:
             self["id"] = id_or_enzyme
-        # Ensure all required attributes make it into the EnzymeDict
+        # Ensure all required attributes make it into the EnzymeModuleDict
         self._set_missing_to_defaults()
-        # Move entries to keep a consisent order for ordered EnzymeDicts.
+        # Move entries to keep a consisent order for ordered EnzymeModuleDicts.
         self._fix_order()
 
     def copy(self):
-        """Copy an EnzymeDict object."""
-        # No references to the MassModel when copying the EnzymeDict
+        """Copy an EnzymeModuleDict object."""
+        # No references to the MassModel when copying the EnzymeModuleDict
         model = self.model
         setattr(self, "model", None)
         for attr in ["ligands", "enzyme_forms", "enzyme_reactions"]:
@@ -84,9 +84,9 @@ class EnzymeDict(OrderedDictWithID):
                 for i in dictlist:
                     setattr(i, "_model", None)
 
-        # The EnzymeDict can now be copied
+        # The EnzymeModuleDict can now be copied
         enzyme_dict_copy = deepcopy(self)
-        # Restore references for the original EnzymeDict
+        # Restore references for the original EnzymeModuleDict
         setattr(self, "model", model)
         for attr in ["ligands", "enzyme_forms", "enzyme_reactions"]:
             for i in getattr(self, attr):
@@ -106,12 +106,12 @@ class EnzymeDict(OrderedDictWithID):
         This method is intended for internal use only. 
 
         """
-        for key, value in iteritems(_ORDERED_ENZYMEDICT_DEFAULTS):
+        for key, value in iteritems(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
             if key not in self:
                 self[key] = value
 
     def _update_object_pointers(self, model=None):
-        """Update objects in the EnzymeDict to come from the associated model.
+        """Update objects in the EnzymeModuleDict to point to the given model.
 
         Warnings
         --------
@@ -169,19 +169,19 @@ class EnzymeDict(OrderedDictWithID):
         return stoich_mat
 
     def _fix_order(self):
-        """Fix the order of the items in the EnzymeDict.
+        """Fix the order of the items in the EnzymeModuleDict.
 
         Warnings
         --------
         This method is intended for internal use only. 
 
         """
-        for key in iterkeys(_ORDERED_ENZYMEDICT_DEFAULTS):
+        for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
             if key in self:
                 self.move_to_end(key)
 
     def _repr_html_(self):
-        """HTML representation of the overview for the EnzymeDict."""
+        """HTML representation of the overview for the EnzymeModuleDict."""
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
@@ -256,15 +256,15 @@ class EnzymeDict(OrderedDictWithID):
     def __dir__(self):
         """Override of default dir() implementation to include the keys."""
         return sorted(set(
-            list(iterkeys(self)) + super(EnzymeDict, self).__dir__()))
+            list(iterkeys(self)) + super(EnzymeModuleDict, self).__dir__()))
 
     def __copy__(self):
-        """Create a copy of the EnzymeDict."""
-        return copy(super(EnzymeDict, self))
+        """Create a copy of the EnzymeModuleDict."""
+        return copy(super(EnzymeModuleDict, self))
 
     def __deepcopy__(self, memo):
-        """Create a deepcopy of the EnzymeDict."""
-        return deepcopy(super(EnzymeDict, self), memo)
+        """Create a deepcopy of the EnzymeModuleDict."""
+        return deepcopy(super(EnzymeModuleDict, self), memo)
 
     def __repr__(self):
         """Override of default repr() implementation."""
@@ -272,7 +272,7 @@ class EnzymeDict(OrderedDictWithID):
             self.__class__.__name__[:-4], self.id, id(self))
 
 
-_ORDERED_ENZYMEDICT_DEFAULTS = OrderedDict({
+_ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "id": None,
     "name": None,
     "subsystem": "",
