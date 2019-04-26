@@ -18,7 +18,7 @@ from mass.core import (
 from mass.util import (
     is_simulatable, qcqa_model, qcqa_simulation, show_versions, strip_time)
 
-__version__ = "0.1.0a35"
+__version__ = "0.1.0a36"
 
 # set the warning format to be prettier and fit on one line
 _mass_path = _dirname(_abspath(__file__))
