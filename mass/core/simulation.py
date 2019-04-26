@@ -43,6 +43,7 @@ from __future__ import absolute_import
 
 import re
 from collections import OrderedDict
+from copy import deepcopy
 from math import log10
 from warnings import filterwarnings, warn
 
@@ -63,7 +64,7 @@ from mass.core.massmodel import MassModel
 from mass.core.solution import (
     Solution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
 from mass.exceptions import MassSimulationError
-from mass.util.DictWithID import DictWithID 
+from mass.util.DictWithID import DictWithID
 from mass.util.expressions import _mk_met_func
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
 from mass.util.util import ensure_iterable, strip_time
@@ -80,16 +81,15 @@ _FUNC_RE = re.compile("func|function")
 _CUSTOM_RE = re.compile("custom")
 # Global symbol for time
 _T_SYM = sym.Symbol("t")
-_ACCEPTABLE_SOLVERS = ["scipy"]
 _LAMBDIFY_MODULE = ["numpy"]
 # Define default option dicts for solvers
-_scipy_default_options = DictWithID(
+
+_SCIPY_DEFAULT_OPTIONS = DictWithID(
     id="scipy", dictionary={
         "method": "LSODA",
         "dense_output": True,
         "t_eval": None,
         "events": None,
-        "vectorized": False,
         "max_step": np.inf,
         "rtol": 1e-6,
         "atol": 1e-9,
@@ -99,6 +99,17 @@ _scipy_default_options = DictWithID(
         "min_step": 0.,
         "first_step": None,
     })
+_ALL_DEFAULT_OPTIONS = DictList([_SCIPY_DEFAULT_OPTIONS])
+try:
+    from scikits.odes import ode as _sundials_wrapper
+    _SUNDIALS_DEFAULT_OPTIONS = DictWithID(
+        id="SUNDIALS", dictionary={
+            
+        })
+    _ALL_DEFAULT_OPTIONS.add(_SUNDIALS_DEFAULT_OPTIONS)
+except ImportError:
+    pass
+
 filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
 
 
@@ -113,9 +124,13 @@ class Simulation(Object):
 
     Parameters
     ----------
-    reference_model: mass.MassModel
+    models: mass.MassModel, iterable of mass.MassModels
+        A mass.MassModel or an iterable of mass.MassModels to load into
+        the simulation object. 
+    reference_model: mass.MassModel, optional
         The MassModel object to be considered as the main reference model for
-        the simulation.
+        the simulation. If None provided, the first model of the provided
+        iterable of models will be used.
     simulation_id: str, optional
         An identifier to associate with the Simulation given as a string. If
         None provided, will default to "(MassModel.id)_Simulation."
@@ -124,11 +139,17 @@ class Simulation(Object):
 
     Attributes
     ----------
-    reference_model: mass.MassModel
-        The MassModel to be the reference
+    solver: str
+        Return the solver that is currently set for the Simulation. Note that
+        "solver" refers to the solver package to use (e.g. SUNDIALS, scipy), 
+        and the "method" refers to the integration algorithm used. 
+        (e.g. CVODE, RK45) A full list of possible solvers can be viewed using
+        the Simulation,all_solvers property.
     models: cobra.DictList
         A cobra.DictList where the keys are the model identifiers and the
         values are the associated mass.MassModel objects.
+    reference_model: mass.MassModel
+        The MassModel to be the reference. Must exist in the Simulation models.
     units: dict
         A dictionary to store the units used in the simulation for referencing.
         Example: {'N': 'Millimoles', 'Vol': 'Liters', 'Time': 'Hours'}
@@ -142,23 +163,34 @@ class Simulation(Object):
 
     """
 
-    def __init__(self, reference_model, simulation_id=None, name=None):
+    def __init__(self, models, reference_model=None, simulation_id=None, 
+                 name=None, solver="scipy"):
         """Initialize the Simulation Object."""
+        models = ensure_iterable(models)
+        for model in models:
+            if not isinstance(model, MassModel):
+                raise TypeError("'{0}' not a valid MassModel or subclass of "
+                                "MassModel.".format(str(model)))
+        if reference_model is None:
+            reference_model = models[0]
         if not isinstance(reference_model, MassModel):
             raise TypeError("reference_model must be a mass.MassModel")
+
         if simulation_id is None:
             simulation_id = "{0}_Simulation".format(reference_model.id)
         Object.__init__(self, simulation_id, name)
         self._reference_model = reference_model
-        self._models = DictList([reference_model])
+        self._models = DictList(models)
 
         # Get initial condition and parameter values, and store.
-        param_vals = self._get_parameters_from_model(reference_model)
-        ic_vals = self._get_ics_from_model(reference_model)
-        self._values = DictList([param_vals, ic_vals])
+        all_param_vals = list(map(self._get_parameters_from_model, models))
+        all_ic_vals = list(map(self._get_ics_from_model, models))
+
+        self._values = DictList() + all_param_vals + all_ic_vals
+
         self._solutions = DictList()
-        self._solver_options = DictList([_scipy_default_options])
-        self._solver = "scipy"
+        self._all_solver_option_dicts = deepcopy(_ALL_DEFAULT_OPTIONS)
+        self._solver = solver
 
     # Public
     @property
@@ -192,12 +224,17 @@ class Simulation(Object):
     @solver.setter
     def solver(self, value):
         """Set the solver in Simulation to use in simulations."""
-        if value not in _ACCEPTABLE_SOLVERS:
+        if value not in self.all_solvers:
             raise ValueError("solver '{0}' not recognized. Acceptable solvers "
                              "include the following: {1!r}"
-                             .format(value, _ACCEPTABLE_SOLVERS))
+                             .format(value, self.all_solvers))
         else:
             setattr(self, "_solver", value)
+
+    @property
+    def all_solvers(self):
+        """Return a list of possible solvers that can be used."""
+        return sorted(set([sol_opts.id for sol_opts in _ALL_DEFAULT_OPTIONS]))
 
     @property
     def models(self):
@@ -439,12 +476,62 @@ class Simulation(Object):
         """
         if not solver:
             solver = self.solver
-        if solver not in _ACCEPTABLE_SOLVERS:
+        if solver not in self.all_solvers:
             raise ValueError("solver '{0}' not recognized. Acceptable solvers "
                              "include the following: {1!r}"
-                             .format(solver, _ACCEPTABLE_SOLVERS))
+                             .format(solver, self.all_solvers))
 
-        return self._solver_options.get_by_id(solver).copy()
+        return self._all_solver_option_dicts.get_by_id(solver).copy()
+
+    def set_solver_options(self, solver=None, **options):
+        """Set the current default solver options for a given solver.
+
+        Parameters
+        ----------
+        solver: str, optional:
+           The solver that will have its default use options updated. If None
+           provided, will update the current solver.
+        **options: 
+            The options that correspond to the solver. To view possible solver
+            options, use the Simulation.get_solver_options method.
+
+        """
+        if solver is None:
+            solver = self.solver
+        if solver not in self.all_solvers:
+            raise ValueError("solver '{0}' not recognized. Acceptable solvers "
+                             "include the following: {1!r}"
+                             .format(solver, self.all_solvers))
+        current_options = self._all_solver_option_dicts.get_by_id(solver)
+        for key, value in iteritems(options):
+            if key in current_options:
+                current_options[key] = value
+            else:
+                warn("Unrecognized solver option: '{0}'.".format(str(key)))
+
+    def reset_solver_options(self, solver=None):
+        """Reet the current solver options for a given solver.
+
+        Parameters
+        ----------
+        solvers: str:
+           The solver that will have its default options reset. If None 
+           provided, the current solver will have its default options reset.
+
+        """
+        if solver is None:
+            solver = self.solver
+        if solver not in self.all_solvers:
+            raise ValueError("solver '{0}' not recognized. Acceptable solvers "
+                             "include the following: {1!r}"
+                             .format(solver, self.all_solvers))
+
+        # Remove old solver dict and replace with a copy of the new one. 
+        self._all_solver_option_dicts.remove(solver)
+        new_options = deepcopy(_ALL_DEFAULT_OPTIONS.get_by_id(solver))
+        self._all_solver_option_dicts.add(new_options)
+
+        print("Default options for solver '{0}' reset".format(solver))
 
     def simulate_model(self, model, time=None, perturbations=None,
                        interpolate=True, verbose=True, return_obj=False,
@@ -629,7 +716,8 @@ class Simulation(Object):
 
         # Simulate models that are present.
         for model in models:
-            # TODO Add Simulation Error Catching
+            if verbose:
+                print("Simulating " + str(model) + "...")
             sols = self.simulate_model(model=model, time=time,
                                        perturbations=perturbations,
                                        interpolate=interpolate,
@@ -666,7 +754,7 @@ class Simulation(Object):
             A string representing the strategy to use to solve for the 
             steady state. The strategy string can be 'simulate' to simulate the 
             model to steady state or it can be 'roots' to calculate the roots. 
-            Default method for roots is Krylov.
+            Default method for roots is lm.
         perturbations: dict, optional
             A dict of events to incorporate into the simulation, where keys are
             the object and type of event to incorporate and values are the
@@ -773,6 +861,8 @@ class Simulation(Object):
 
         # Find the steady state for models that are present.
         for model in models:
+            if verbose:
+                print("Finding steady state for MassModel: " + str(model))
             sols = self.find_steady_state_model(
                 model, strategy=strategy, perturbations=perturbations,
                 verbose=verbose,
@@ -835,7 +925,7 @@ class Simulation(Object):
             where the key:value pairs are the parameter identifiers and its
             numerical value.
         verbose: bool, optional
-            If True, provide warnings when pools cannot be created using a 
+            If True, provide warnings when pools cannot be created using a
             particular Solution object. Default is True.
 
         Returns
@@ -1512,11 +1602,17 @@ class Simulation(Object):
         def root_func(ics):
             return lambda_eqs(*ics)
 
-        if "method" not in options:
-            options["method"] = "Krylov"
+        input_dict = {"args": (), "method": "lm", 
+                      "jac": None, "tol": None, "callback": None}
+        for key in iterkeys(input_dict):
+            if key in options:
+                input_dict[key] = options.pop(key)
 
         ics = list(itervalues(ordered_ics))
-        sol = root(root_func, ics, **options)
+        sol = root(fun=root_func, x0=ics, args=input_dict["args"],
+                   method=input_dict["method"], jac=input_dict["jac"], 
+                   tol=input_dict["callback"], callback=input_dict["callback"],
+                   options=options)
         # Warn if no steady state was reached and return empty sols.
         if not sol.success:
             if verbose:
