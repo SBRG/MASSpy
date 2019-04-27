@@ -34,4 +34,4 @@ for nb_name in ALL_CONSTRUCTION_NOTEBOOKS:
     with open(notebook_path, 'wt') as f:
         nbformat.write(nb, f)
 
-print("Finished executing construction workbooks.")
+print("Finished executing construction notebooks.")
