@@ -689,6 +689,9 @@ class MassModel(Object):
                             context(partial(self.genes.add, gene))
                     if context:
                         context(partial(gene._reaction.add, rxn))
+            if rxn in self.custom_rates:
+                self.remove_custom_rate(rxn)
+
             if context:
                 context(partial(setattr, rxn, "_model", self))
         # Remove reactions from the model
@@ -974,7 +977,7 @@ class MassModel(Object):
 
         # Save currently existing parameters for context management if needed.
         existing = {str(sym): self.custom_parameters[str(symbol)]
-                    for symbol in symbols}
+                    for symbol in symbols if symbol != sym.Symbol("t")}
 
         if remove_orphans and self.custom_rates:
             # Determine symbols still in use.
@@ -1751,6 +1754,61 @@ class MassModel(Object):
             else:
                 self.custom_parameters.update({key: value})
 
+    def has_equivalent_odes(self, right, verbose=False):
+        """Determine if ODEs between two MassModels are equivalent.
+
+        The ODEs between two MassModels are compared to determine whether
+        the models are equivalent, meaning that the models contain the same
+        metabolites, reactions, and rate laws such that they require the same
+        set of parameters and initial conditions for simulation.
+
+        Parameters
+        ----------
+        right: mass.MassModel
+            The MassModel to compare to the left model (self).
+        verbose: bool, optional
+            If True, display the reason(s) for the differences in the left and
+            right models. Default is False.
+
+        Returns
+        -------
+        equivalent: A bool indicating whether the ODEs are equivalent.
+
+        """
+        equivalent = True
+        # Determine whether ODE dicts have the same ODEs
+        l_odes = {met.id: ode for met, ode in iteritems(self.odes)} 
+        r_odes = {met.id: ode for met, ode in iteritems(right.odes)}
+        if l_odes != r_odes:
+            equivalent = False
+
+        if not equivalent and verbose:
+            l_rates = {r.id: rate for r, rate in iteritems(self.rates)}
+            r_rates = {r.id: rate for r, rate in iteritems(right.rates)}
+            for i, (l_dict, r_dict) in enumerate(zip([l_odes, l_rates], 
+                                                     [r_odes, r_rates])):
+                # Determine which metabolites do not exist in both models
+                missing = set(l_dict)
+                missing.symmetric_difference_update(set(r_dict))
+                print(i, missing)
+                # Determine which metabolites have different ODEs
+                diff_equations = set(
+                    l_key for l_key, l_value in iteritems(l_dict)
+                    if l_key in r_dict and l_value != r_dict[l_key])
+
+                if i == 0:
+                    msgs = ["Metabolites", "ODEs"]
+                else:
+                    msgs = ["Reactions", "rates"]
+
+                msgs = ["{0} in one model only:".format(msgs[0]),
+                        "{0} with different {1}: ".format(*msgs)]
+                for item, msg in zip([missing, diff_equations], msgs):
+                    if item:
+                        warn(msg + str(sorted(list(item))))
+
+        return equivalent
+
     # Internal
     def _mk_stoich_matrix(self, matrix_type=None, dtype=None,
                           update_model=True):
@@ -2159,3 +2217,4 @@ class MassModel(Object):
         odict = self.__dict__.copy()
         odict['_contexts'] = []
         return odict
+
