@@ -25,7 +25,7 @@ from cobra.manipulation.validate import check_metabolite_compartment_formula
 from cobra.io.sbml3 import annotate_cobra_from_sbml, annotate_sbml_from_cobra
 
 from mass.core import MassMetabolite, MassReaction, MassModel
-from mass.util.util import strip_time
+from mass.util import strip_time
 from mass.exceptions import MassSBMLError
 
 try:

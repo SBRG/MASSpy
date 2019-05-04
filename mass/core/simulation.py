@@ -65,9 +65,9 @@ from mass.core.solution import (
     Solution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
 from mass.exceptions import MassSimulationError
 from mass.util.DictWithID import DictWithID
-from mass.util.expressions import _mk_met_func
+from mass.util.expressions import _mk_met_func, strip_time
 from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
-from mass.util.util import ensure_iterable, strip_time
+from mass.util.util import ensure_iterable
 
 
 _ZERO_TOL = _config.ZERO_TOLERANCE

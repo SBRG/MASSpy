@@ -20,9 +20,9 @@ from cobra.util.context import HistoryManager, get_context
 
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
-from mass.util import expressions
+from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable, strip_time)
+    _get_matrix_constructor, convert_matrix, ensure_iterable)
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
@@ -937,8 +937,8 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
-        custom_rate = expressions.create_custom_rate(reaction, custom_rate,
-                                                     custom_parameter_list)
+        custom_rate = create_custom_rate(reaction, custom_rate, 
+                                         custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
         self.custom_parameters.update(custom_parameters)
 
