@@ -79,7 +79,7 @@ class MassModel(Object):
         A cobra.DictList where the keys are the gene identifiers and the
         values are the associated cobra.Gene objects.
     enzyme_modules: cobra.DictList
-        A cobra.DictList where the keys are the EnzymeModuleDict identifiers 
+        A cobra.DictList where the keys are the EnzymeModuleDict identifiers
         and the values are the associated EnzymeModuleDict objects.
     initial_conditions: dict
         A dictionary to store the initial conditions of the metabolites,
@@ -137,7 +137,7 @@ class MassModel(Object):
             self.repair()
         else:
             self.description = ''
-            # Initialize DictLists for storing 
+            # Initialize DictLists for storing
             # reactions, metabolites, genes, and enzyme_modules
             self.reactions = DictList()
             self.metabolites = DictList()
@@ -276,7 +276,7 @@ class MassModel(Object):
             parameters.update({p_type: p_type_dict})
         # Add fluxes, custom parameters, and fixed concentrations.
         parameters.update({"v": {
-            str(rxn.flux_symbol): flux 
+            str(rxn.flux_symbol): flux
             for rxn, flux in iteritems(self.steady_state_fluxes)}})
         parameters.update({"Custom": self.custom_parameters})
         parameters.update({"Fixed": self.fixed_concentrations})
@@ -787,7 +787,7 @@ class MassModel(Object):
             already exist in the model. If None, then return the rates for all
             reactions in the model.
         rate_type: int {0, 1, 2, 3}, optional
-            The type of rate law to display. Must be 0, 1, 2, or 3. 
+            The type of rate law to display. Must be 0, 1, 2, or 3.
                 If 0, the currrent default rate law type is used. Default is 0.
                 Type 1 will utilize the forward rate and equilibrium constants.
                 Type 2 will utilize the forward and reverse rate constants.
@@ -1062,7 +1062,7 @@ class MassModel(Object):
             # Get any additional moieties
             moieties.extend([
                 element for element in iterkeys(element_dict)
-                if "[" in element and "]" in element 
+                if "[" in element and "]" in element
                 and element not in moieties])
 
         row_ids = CHOPNSQ.copy()
@@ -1260,14 +1260,14 @@ class MassModel(Object):
 
         All of the MassMetabolite, MassReaction, and Gene objects, the initial
         conditions, fixed concentrations, custom_rates, and the stoichiometric
-        matrix are created anew, but in a faster fashion than deepcopy. 
+        matrix are created anew, but in a faster fashion than deepcopy.
 
         """
         # Define a new model
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules", 
+            "metabolites", "reactions", "genes", "enzyme_modules",
             "initial_conditions", "_S", "custom_rates", "fixed_concentrations",
             "custom_parameters", "notes", "annotation", "modules"]
         for attr in self.__dict__:
@@ -1303,8 +1303,8 @@ class MassModel(Object):
         concentrations, custom rate laws, rate parameters, compartments, units,
         notes, and annotations from right model are also copied to left model.
         However, note that in cases where identifiers for objects are identical
-        or a dict item has an identical key(s), priority will be given to what 
-        already exists in the left model. 
+        or a dict item has an identical key(s), priority will be given to what
+        already exists in the left model.
 
         Parameters
         ----------
@@ -1314,7 +1314,7 @@ class MassModel(Object):
             If provided, the string is used to prefix the reaction identifier
             of a reaction in the second model if that reaction already exists
             within the left model. Will also apply prefix to enzyme identifiers
-            of an enzyme in the second model. 
+            of an enzyme in the second model.
         inplace : bool
             Add reactions from right directly to left model object.
             Otherwise, create a new model leaving the left model untouched.
@@ -1328,9 +1328,9 @@ class MassModel(Object):
 
         Notes
         -----
-        When merging an EnzymeModule into a MassModel, the EnzymeModule is 
-            converted to an EnzymeDict and stored in a DictList accessible 
-            via MassModel.enzyme_modules. 
+        When merging an EnzymeModule into a MassModel, the EnzymeModule is
+            converted to an EnzymeDict and stored in a DictList accessible
+            via MassModel.enzyme_modules.
         If an EnzymeModule already exists in the model, it will be replaced.
 
         Returns
@@ -1339,20 +1339,20 @@ class MassModel(Object):
             A new MassModel object or self representing the merged model.
 
         """
-        # Check whether two MassModels are being merged, 
+        # Check whether two MassModels are being merged,
         # or if a MassModel and a MassModel subclass are being merged.
         if right.__class__ is not MassModel \
            and issubclass(right.__class__, MassModel):
-            return right._add_self_to_model(self, prefix_existing, 
+            return right._add_self_to_model(self, prefix_existing,
                                             inplace, new_model_id)
-        # Set the merged model object and its ID, 
+        # Set the merged model object and its ID,
         # then add the module attribute of the right model into the left
         if not inplace:
             new_model = self.copy()
         else:
             new_model = self
         if new_model_id is None:
-            new_model_id = {True: self.id, 
+            new_model_id = {True: self.id,
                             False: self.id + "_" + right.id}.get(inplace)
         new_model.id = new_model_id
         new_model.modules.add(right.id)
@@ -1370,8 +1370,8 @@ class MassModel(Object):
         # Add initial conditions from right to left model.
         existing = [met.id for met in iterkeys(new_model.initial_conditions)]
         new_model.update_initial_conditions({
-            new_model.metabolites.get_by_id(met.id): ic 
-            for met, ic in iteritems(right.initial_conditions) 
+            new_model.metabolites.get_by_id(met.id): ic
+            for met, ic in iteritems(right.initial_conditions)
             if met.id not in existing})
 
         # Add fixed concentrations from right to left model.
@@ -1387,7 +1387,7 @@ class MassModel(Object):
             cp: v for cp, v in iteritems(right.custom_parameters)
             if cp not in existing})
 
-        # Add custom rates from right to left model, 
+        # Add custom rates from right to left model,
         # prefixing any existing reactions if necessary
         existing = dict((prefix_existing + "_" + rxn.id, rate)
                         if prefix_existing is not None else (rxn.id, rate)
@@ -1398,7 +1398,7 @@ class MassModel(Object):
                 for rxn, rate in iteritems(rate_dict)})
 
         # Add enzyme_modules from right to left model
-        if right.enzyme_modules:  
+        if right.enzyme_modules:
             new_enzyme_modules = deepcopy(right.enzyme_modules)
             # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
@@ -1537,7 +1537,7 @@ class MassModel(Object):
         if steady_state_fluxes is None:
             steady_state_fluxes = self.steady_state_fluxes
 
-        # Function to calculate the solution 
+        # Function to calculate the solution
         def calculate_sol(flux, rate_equation, perc):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
                                perc, domain=sym.S.Reals)
@@ -1576,7 +1576,7 @@ class MassModel(Object):
 
             # Substitute values into rate equation
             rate_eq = rate_eq.subs(steady_state_concentrations).subs({
-                sym.Symbol(parameter): value 
+                sym.Symbol(parameter): value
                 for parameter, value in iteritems(reaction.parameters)
                 if parameter != reaction.kf_str})
 
@@ -1712,7 +1712,7 @@ class MassModel(Object):
         ----------
         parameters: dict
             A dictionary containing the parameter identifiers as strings and
-            their corresponding numerical values.  
+            their corresponding numerical values.
 
         Notes
         -----
@@ -1749,7 +1749,7 @@ class MassModel(Object):
                     reaction = self.reactions.get_by_id(reaction)
                     reaction.__class__.__dict__[p_type].fset(reaction, value)
                 except KeyError:
-                    self.custom_parameters.update({key: value})                    
+                    self.custom_parameters.update({key: value})
             # If parameter not found, assume parameter is a custom parameter
             else:
                 self.custom_parameters.update({key: value})
@@ -1777,7 +1777,7 @@ class MassModel(Object):
         """
         equivalent = True
         # Determine whether ODE dicts have the same ODEs
-        l_odes = {met.id: ode for met, ode in iteritems(self.odes)} 
+        l_odes = {met.id: ode for met, ode in iteritems(self.odes)}
         r_odes = {met.id: ode for met, ode in iteritems(right.odes)}
         if l_odes != r_odes:
             equivalent = False
@@ -1785,7 +1785,7 @@ class MassModel(Object):
         if not equivalent and verbose:
             l_rates = {r.id: rate for r, rate in iteritems(self.rates)}
             r_rates = {r.id: rate for r, rate in iteritems(right.rates)}
-            for i, (l_dict, r_dict) in enumerate(zip([l_odes, l_rates], 
+            for i, (l_dict, r_dict) in enumerate(zip([l_odes, l_rates],
                                                      [r_odes, r_rates])):
                 # Determine which metabolites do not exist in both models
                 missing = set(l_dict)
@@ -2046,8 +2046,8 @@ class MassModel(Object):
         """
         new_model.enzyme_modules = DictList()
         do_not_copy_by_ref = {
-            "ligands", "enzyme_forms", "enzyme_reactions", 
-            "categorized_ligands", "categorized_enzyme_forms", 
+            "ligands", "enzyme_forms", "enzyme_reactions",
+            "categorized_ligands", "categorized_enzyme_forms",
             "categorized_enzyme_reactions", "model"}
         # Copy the enzyme_modules
         for enzyme in self.enzyme_modules:
@@ -2217,4 +2217,3 @@ class MassModel(Object):
         odict = self.__dict__.copy()
         odict['_contexts'] = []
         return odict
-

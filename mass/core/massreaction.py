@@ -64,20 +64,7 @@ class MassReaction(Object):
     def __init__(self, id=None, name="", subsystem="", reversible=True,
                  steady_state_flux=None):
         """Initialize the MassReaction Object."""
-        # Check inputs to ensure they are the correct types.
-        if not isinstance(id, string_types) and id is not None:
-            raise TypeError("id must be a str")
-        if not isinstance(name, string_types):
-            raise TypeError("name must be a str")
-        if not isinstance(subsystem, string_types):
-            raise TypeError("subsystem must be a str")
-        if not isinstance(reversible, bool) and reversible is not None:
-            raise TypeError("reversible must be a bool")
-        if not isinstance(steady_state_flux, (integer_types, float)) and \
-           steady_state_flux is not None:
-            raise TypeError("steady_state_flux must be an int or float")
-
-        Object.__init__(self, id, name)
+        super(MassReaction, self).__init__(id, name)
         self.subsystem = subsystem
         self._reversible = reversible
         self.steady_state_flux = steady_state_flux
@@ -200,7 +187,7 @@ class MassReaction(Object):
         -----
         Reverse rate constants are only included for reversible reactions.
         Only rate and equilibrium constantx are accessed here. Steady state
-            fluxes can be accessed through the steady_state_flux attribute, 
+            fluxes can be accessed through the steady_state_flux attribute,
             and custom parameters can only be accessed through the model.
 
         """
@@ -514,20 +501,6 @@ class MassReaction(Object):
 
         setattr(self, "_upper_bound", value)
 
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gibbs_reaction_energy(self):
-    #     """Return the Gibbs reaction energy of the reaction."""
-    #     return self._gibbs_reaction_energy
-    #
-    # @gibbs_reaction_energy.setter
-    # def gibbs_reaction_energy(self, value):
-    #     """Set the Gibbs reaction energy for the reaction."""
-    #     if not isinstance(value, (integer_types, float)) and \
-    #        value is not None:
-    #         raise TypeError("Must be an int or float")
-    #     self._gibbs_reaction_energy = value
-
     @property
     def kf_str(self):
         """Return the string representation of the forward rate constant."""
@@ -578,17 +551,6 @@ class MassReaction(Object):
     def S(self):
         """Shorthand method to get the reaction stoichiometry."""
         return self.stoichiometry
-
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gre(self):
-    #     """Shorthand method to get the Gibbs reaction energy."""
-    #     return self.gibbs_reaction_energy
-    #
-    # @gre.setter
-    # def gre(self, value):
-    #     """Shorthand method to set the Gibbs reaction energy."""
-    #     self.gibbs_reaction_energy = value
 
     @property
     def v(self):

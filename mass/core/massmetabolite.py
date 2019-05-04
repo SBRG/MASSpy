@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import re
 from warnings import warn
 
-from six import integer_types, string_types
+from six import integer_types
 
 from cobra.core.species import Species
 
@@ -40,20 +40,7 @@ class MassMetabolite(Species):
                  compartment=None):
         """Initialize the MassMetabolite Object."""
         # Check inputs to ensure they are they correct types.
-        if not isinstance(id, string_types) and id is not None:
-            raise TypeError("id must be a str")
-        if not isinstance(name, string_types) and name is not None:
-            raise TypeError("name must be a str")
-        if not isinstance(formula, string_types) and formula is not None:
-            raise TypeError("formula must be a str")
-        if not isinstance(charge, (integer_types, float)) and \
-           charge is not None:
-            raise TypeError("charge must be an int or float")
-        if not isinstance(compartment, string_types) and \
-           compartment is not None:
-            raise TypeError("compartment must be a str")
-
-        Species.__init__(self, id, name)
+        super(MassMetabolite, self).__init__(id, name)
         # Chemical formula and charge number of the metabolite
         self.formula = formula
         self.charge = charge
@@ -159,20 +146,6 @@ class MassMetabolite(Species):
             raise ValueError("Must be a non-negative number")
         setattr(self, "_initial_condition", value)
 
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gibbs_formation_energy(self):
-    #     """Return the Gibbs formation energy of the metabolite."""
-    #     return getattr(self, "_gibbs_formation_energy")
-    #
-    # @gibbs_formation_energy.setter
-    # def gibbs_formation_energy(self, value):
-    #     """Set the Gibbs formation energy for the metabolite."""
-    #     if not isinstance(value, (integer_types, float)) and \
-    #        value is not None:
-    #         raise TypeError("Must be an int or float")
-    #     self._gibbs_formation_energy = value
-
     @property
     def ordinary_differential_equation(self):
         """Return a sympy expression of the metabolite's associated ODE.
@@ -204,17 +177,6 @@ class MassMetabolite(Species):
     def ic(self, value):
         """Shorthand setter for the initial condition."""
         self.initial_condition = value
-
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gfe(self):
-    #     """Shorthand getter for the Gibb's energy of formation."""
-    #     return self.gibbs_formation_energy
-    #
-    # @gfe.setter
-    # def gfe(self, value):
-    #     """Shorthand setter for the Gibb's energy of formation."""
-    #     self.gibbs_formation_energy = value
 
     @property
     def ode(self):
