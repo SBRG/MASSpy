@@ -22,8 +22,8 @@ from mass.core.massmodel import MassModel
 from mass.core.massreaction import MassReaction
 from mass.enzyme_modules.enzyme_form import EnzymeForm
 from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict
-from mass.util.expressions import _mk_met_func
-from mass.util.util import _mk_new_dictlist, ensure_iterable, strip_time
+from mass.util.expressions import _mk_met_func, strip_time
+from mass.util.util import _mk_new_dictlist, ensure_iterable
 
 _AUTOMATIC_RE = re.compile("^Automatic$")
 _UNDEFINED_RE = re.compile("^Undefined$")
