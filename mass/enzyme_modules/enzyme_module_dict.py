@@ -22,7 +22,7 @@ class EnzymeModuleDict(OrderedDictWithID):
     """Container to store the attributes of an EnzymeModule.
 
     This object is intended to represent the EnzymeModule once merged into
-    a MassModel in order to retain EnzymeModule specific attributes of the 
+    a MassModel in order to retain EnzymeModule specific attributes of the
     EnzymeModule without the need of storing the EnzymeModule object itself.
 
     The EnzymeModuleDict class is essentially a subclass of an OrderedDict with
@@ -32,14 +32,14 @@ class EnzymeModuleDict(OrderedDictWithID):
     Parameters
     ----------
     enzyme: EnzymeModule, EnzymeModuleDict
-        The EnzymeModule to be converted into the EnzymeModuleDict, or an 
-        existing EnzymeModuleDict object. If an existing EnzymeModuleDict 
+        The EnzymeModule to be converted into the EnzymeModuleDict, or an
+        existing EnzymeModuleDict object. If an existing EnzymeModuleDict
         object is provided, a new EnzymeModuleDict object is instantiated with
         the same properties as the original EnzymeModuleDict.
 
     Notes
     -----
-    EnzymeModuleDict objects can behave as booleans, with empty 
+    EnzymeModuleDict objects can behave as booleans, with empty
         EnzymeModuleDict objects returning as False.
 
     """
@@ -57,7 +57,7 @@ class EnzymeModuleDict(OrderedDictWithID):
                 nkey = key.lstrip("_")
                 if nkey not in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
                     continue
-                elif nkey is "S":
+                elif nkey == "S":
                     self[nkey] = id_or_enzyme._mk_stoich_matrix(
                         matrix_type="DataFrame", update_model=False)
                 elif nkey == "enzyme_net_flux_equation":
@@ -77,10 +77,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         # No references to the MassModel when copying the EnzymeModuleDict
         model = self.model
         setattr(self, "model", None)
-        for attr in ["ligands", "enzyme_forms", "enzyme_reactions"]:
+        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+                     "enzyme_module_reactions"]:
             for i in getattr(self, attr):
                 setattr(i, "_model", None)
-            for dictlist in itervalues(self["categorized_" + attr]):
+            for dictlist in itervalues(self[attr + "_categorized"]):
                 for i in dictlist:
                     setattr(i, "_model", None)
 
@@ -88,10 +89,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         enzyme_dict_copy = deepcopy(self)
         # Restore references for the original EnzymeModuleDict
         setattr(self, "model", model)
-        for attr in ["ligands", "enzyme_forms", "enzyme_reactions"]:
+        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+                     "enzyme_module_reactions"]:
             for i in getattr(self, attr):
                 setattr(i, "_model", model)
-            for dictlist in itervalues(self["categorized_" + attr]):
+            for dictlist in itervalues(self[attr + "_categorized"]):
                 for i in dictlist:
                     setattr(i, "_model", model)
 
@@ -103,7 +105,7 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         Warnings
         --------
-        This method is intended for internal use only. 
+        This method is intended for internal use only.
 
         """
         for key, value in iteritems(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
@@ -115,18 +117,19 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         Warnings
         --------
-        This method is intended for internal use only. 
+        This method is intended for internal use only.
 
         """
         if model is None:
             model = self.model
-        for attr in ["ligands", "enzyme_forms", "enzyme_reactions"]:
+        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+                     "enzyme_module_reactions"]:
             model_dictlist = {
-                "ligands": model.metabolites, 
-                "enzyme_forms": model.metabolites,
-                "enzyme_reactions": model.reactions}.get(attr)
+                "enzyme_module_ligands": model.metabolites,
+                "enzyme_module_forms": model.metabolites,
+                "enzyme_module_reactions": model.reactions}.get(attr)
             self[attr] = _mk_new_dictlist(model_dictlist, getattr(self, attr))
-            attr = "categorized_" + attr
+            attr += "_categorized"
             self[attr] = {
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))}
@@ -136,7 +139,7 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         Warnings
         --------
-        This method is intended for internal use only. 
+        This method is intended for internal use only.
 
         """
         # Set up for matrix construction.
@@ -144,24 +147,25 @@ class EnzymeModuleDict(OrderedDictWithID):
             matrix_type="DataFrame", dtype=np.float_)
 
         metabolites = DictList([
-            met for attr in ["ligands", "enzyme_forms"] for met in self[attr]])
+            met for attr in ["enzyme_module_ligands", "enzyme_module_forms"]
+            for met in self[attr]])
 
         stoich_mat = matrix_constructor((len(metabolites),
-                                         len(self.enzyme_reactions)))
+                                         len(self.enzyme_module_reactions)))
         # Get the indicies for the species and reactions
         m_ind = metabolites.index
-        r_ind = self.enzyme_reactions.index
+        r_ind = self.enzyme_module_reactions.index
 
         # Build the matrix
-        for rxn in self.enzyme_reactions:
+        for rxn in self.enzyme_module_reactions:
             for met, stoich in iteritems(rxn.metabolites):
                 stoich_mat[m_ind(met), r_ind(rxn)] = stoich
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, matrix_type=matrix_type, dtype=dtype, 
+            stoich_mat, matrix_type=matrix_type, dtype=dtype,
             row_ids=[m.id for m in metabolites],
-            col_ids=[r.id for r in self.enzyme_reactions])
+            col_ids=[r.id for r in self.enzyme_module_reactions])
 
         if update:
             self["S"] = stoich_mat
@@ -173,7 +177,7 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         Warnings
         --------
-        This method is intended for internal use only. 
+        This method is intended for internal use only.
 
         """
         for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
@@ -206,15 +210,15 @@ class EnzymeModuleDict(OrderedDictWithID):
                     <td>{subsystem}</td>
                 </tr><tr>
                     <td><strong>Number of Ligands</strong></td>
-                    <td>{num_ligands}</td>
+                    <td>{num_enzyme_module_ligands}</td>
                 </tr><tr>
                     <td><strong>Number of EnzymeForms</strong></td>
                     <td>{num_enz_forms}</td>
                 </tr><tr>
-                    <td><strong>Number of Enzyme Reactions</strong></td>
+                    <td><strong>Number of EnzymeModuleReactions</strong></td>
                     <td>{num_enz_reactions}</td>
                 </tr><tr>
-                    <td><strong>Total Enzyme Concentration</strong></td>
+                    <td><strong>Enzyme Concentration Total</strong></td>
                     <td>{enz_conc}</td>
                 </tr><tr>
                     <td><strong>Enzyme Net Flux</strong></td>
@@ -224,10 +228,10 @@ class EnzymeModuleDict(OrderedDictWithID):
         """.format(name=self.id, address='0x0%x' % id(self),
                    dim_stoich_mat=dim_S, mat_rank=rank,
                    subsystem=self.subsystem,
-                   num_ligands=len(self.ligands),
-                   num_enz_forms=len(self.enzyme_forms),
-                   num_enz_reactions=len(self.enzyme_reactions),
-                   enz_conc=self.enzyme_concentration_total, 
+                   num_enzyme_module_ligands=len(self.enzyme_module_ligands),
+                   num_enz_forms=len(self.enzyme_module_forms),
+                   num_enz_reactions=len(self.enzyme_module_reactions),
+                   enz_conc=self.enzyme_concentration_total,
                    enz_flux=self.enzyme_net_flux)
 
     # Dunders
@@ -276,12 +280,12 @@ _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "id": None,
     "name": None,
     "subsystem": "",
-    "ligands": DictList(),
-    "enzyme_forms": DictList(),
-    "enzyme_reactions": DictList(),
-    "categorized_ligands": {"Undefined": DictList()},
-    "categorized_enzyme_forms": {"Undefined": DictList()},
-    "categorized_enzyme_reactions": {"Undefined": DictList()},
+    "enzyme_module_ligands": DictList(),
+    "enzyme_module_forms": DictList(),
+    "enzyme_module_reactions": DictList(),
+    "enzyme_module_ligands_categorized": {"Undefined": DictList()},
+    "enzyme_module_forms_categorized": {"Undefined": DictList()},
+    "enzyme_module_reactions_categorized": {"Undefined": DictList()},
     "enzyme_concentration_total": None,
     "enzyme_net_flux": None,
     "enzyme_net_flux_equation": None,

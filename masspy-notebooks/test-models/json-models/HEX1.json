@@ -1,5 +1,6 @@
 {
-    "_categorized_enzyme_forms": {
+    "_enzyme_concentration_total": 2.4e-05,
+    "_enzyme_module_forms_categorized": {
         "Free": [
             "hex1_AG_c",
             "hex1_A_c",
@@ -12,7 +13,23 @@
             "hex1_G_PI_c"
         ]
     },
-    "_categorized_enzyme_reactions": {
+    "_enzyme_module_ligands_categorized": {
+        "Cofactors": [
+            "atp_c"
+        ],
+        "Inhibitors": [
+            "_23dpg_c"
+        ],
+        "Products": [
+            "adp_c",
+            "g6p_c",
+            "h_c"
+        ],
+        "Substrates": [
+            "glc__D_c"
+        ]
+    },
+    "_enzyme_module_reactions_categorized": {
         "atp_c binding": [
             "HEX1_4",
             "HEX1_6"
@@ -32,23 +49,6 @@
             "HEX1_2"
         ]
     },
-    "_categorized_ligands": {
-        "Cofactors": [
-            "atp_c"
-        ],
-        "Inhibitors": [
-            "_23dpg_c"
-        ],
-        "Products": [
-            "adp_c",
-            "g6p_c",
-            "h_c"
-        ],
-        "Substrates": [
-            "glc__D_c"
-        ]
-    },
-    "_enzyme_concentration_total": 2.4e-05,
     "_enzyme_net_flux": 1.12,
     "_enzyme_net_flux_equation": "kf_HEX1*(Keq_HEX1*hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t))/Keq_HEX1",
     "compartments": {
@@ -69,7 +69,7 @@
         "HEX1_7": "kf_HEX1_G*(glc__D_c(t)*hex1_A_c(t) - hex1_AG_c(t)/Keq_HEX1_G)",
         "HEX1_8": "kf_HEX1*(hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t)/Keq_HEX1)"
     },
-    "enzyme_forms": [
+    "enzyme_module_forms": [
         "hex1_c",
         "hex1_A_c",
         "hex1_G_c",
@@ -78,8 +78,15 @@
         "hex1_A_PI_c",
         "hex1_G_PI_c"
     ],
-    "enzyme_modules": [],
-    "enzyme_reactions": [
+    "enzyme_module_ligands": [
+        "glc__D_c",
+        "g6p_c",
+        "atp_c",
+        "adp_c",
+        "_23dpg_c",
+        "h_c"
+    ],
+    "enzyme_module_reactions": [
         "HEX1_1",
         "HEX1_2",
         "HEX1_3",
@@ -89,6 +96,7 @@
         "HEX1_7",
         "HEX1_8"
     ],
+    "enzyme_modules": [],
     "genes": [],
     "id": "HEX1",
     "initial_conditions": {
@@ -106,14 +114,6 @@
         "hex1_G_c": 7.13042e-06,
         "hex1_c": 4.351719e-06
     },
-    "ligands": [
-        "glc__D_c",
-        "g6p_c",
-        "atp_c",
-        "adp_c",
-        "_23dpg_c",
-        "h_c"
-    ],
     "metabolites": [
         {
             "_initial_condition": 1.0,
@@ -170,10 +170,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]",
             "id": "hex1_c",
-            "name": "Hexokinase (D-glucose:ATP)"
+            "name": "HEX1"
         },
         {
             "_bound_catalytic": {
@@ -184,10 +183,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C10H12N5O13P3",
             "id": "hex1_A_c",
-            "name": "Hexokinase (D-glucose:ATP)-atp complex"
+            "name": "HEX1-atp complex"
         },
         {
             "_bound_catalytic": {
@@ -198,10 +196,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C6H12O6",
             "id": "hex1_G_c",
-            "name": "Hexokinase (D-glucose:ATP)-glc__D complex"
+            "name": "HEX1-glc__D complex"
         },
         {
             "_bound_catalytic": {
@@ -213,10 +210,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C16H24O19N5P3",
             "id": "hex1_AG_c",
-            "name": "Hexokinase (D-glucose:ATP)-glc__D-atp complex"
+            "name": "HEX1-glc__D-atp complex"
         },
         {
             "_bound_catalytic": {
@@ -228,10 +224,9 @@
             "charge": -5,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C9H15O16P2",
             "id": "hex1_G_CI_c",
-            "name": "Hexokinase (D-glucose:ATP)-glc__D-_23dpg complex"
+            "name": "HEX1-glc__D-_23dpg complex"
         },
         {
             "_bound_catalytic": {
@@ -242,10 +237,9 @@
             "charge": -3,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C10H12N5O10P2",
             "id": "hex1_A_PI_c",
-            "name": "Hexokinase (D-glucose:ATP)-adp complex"
+            "name": "HEX1-adp complex"
         },
         {
             "_bound_catalytic": {
@@ -256,10 +250,9 @@
             "charge": -2,
             "compartment": "c",
             "enzyme_id": "HEX1",
-            "enzyme_name": "Hexokinase (D-glucose:ATP)",
             "formula": "[HEX1]-C6H11O9P1",
             "id": "hex1_G_PI_c",
-            "name": "Hexokinase (D-glucose:ATP)-g6p complex"
+            "name": "HEX1-g6p complex"
         }
     ],
     "name": "Hexokinase (D-glucose:ATP)",
@@ -270,6 +263,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_1",
             "metabolites": {
@@ -286,6 +280,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_2",
             "metabolites": {
@@ -300,6 +295,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_3",
             "metabolites": {
@@ -314,6 +310,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_4",
             "metabolites": {
@@ -330,6 +327,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_5",
             "metabolites": {
@@ -344,6 +342,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_6",
             "metabolites": {
@@ -358,6 +357,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_7",
             "metabolites": {
@@ -372,6 +372,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "HEX1",
             "gene_reaction_rule": "",
             "id": "HEX1_8",
             "metabolites": {
