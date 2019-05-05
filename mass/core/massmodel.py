@@ -46,7 +46,7 @@ class MassModel(Object):
 
     Parameters
     ----------
-    id_or_model: str, mass.MassModel
+    id_or_model: str, MassModel
         Either an identifier to associate with the MassModel given as a string,
         or an existing MassModel object. If an existing MassModel object is
         provided, a new MassModel object is instantiated with the same
@@ -305,7 +305,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction_list: list of mass.MassReactions, optional
+        reaction_list: list of MassReactions, optional
             A list of MassReactions to be add to the stoichiometric matrix.
             Reactions must already exist in the model in order to update.
             If None, the entire stoichiometric matrix is reconstructed.
@@ -370,7 +370,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        metabolite_list: list of mass.MassMetabolites
+        metabolite_list: list of MassMetabolites
             A list of MassMetabolites to add to the MassModel.
         add_initial_conditions: bool, optional
             If True, the initial conditions associated with each metabolite are
@@ -420,7 +420,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        metabolite_list: list of mass.MassMetabolites
+        metabolite_list: list of MassMetabolites
             A list of MassMetabolites to add to the MassModel.
         destructive: bool, optional
             If False, the MassMetabolite is removed from all associated
@@ -465,7 +465,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        metabolite_list: list of mass.MassMetabolites
+        metabolite_list: list of MassMetabolites
             A list of MassMetabolites to add to the MassModel. If None
 
         Notes
@@ -585,7 +585,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction_list: list of mass.MassReactions
+        reaction_list: list of MassReactions
             A list of MassReaction objects.
 
         """
@@ -650,7 +650,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction_list: list of mass.MassReactions
+        reaction_list: list of MassReactions
             A list of MassReaction objects to be removed from the model.
         remove_orphans: bool, optional
             If True, will also remove orphaned genes and MassMetabolites from
@@ -724,7 +724,7 @@ class MassModel(Object):
 
         Returns
         -------
-        exchange_rxn: mass.MassReaction
+        exchange_rxn: MassReaction
             The MassReaction object of the new exchange reaction. If the
             reaction already exists, the existing MassReaction object is
             returned.
@@ -903,7 +903,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction: mass.MassReaction
+        reaction: MassReaction
             The MassReaction associated with the custom rate.
         custom_rate: str
             The string representation of the custom rate expression. The string
@@ -937,7 +937,7 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
-        custom_rate = create_custom_rate(reaction, custom_rate, 
+        custom_rate = create_custom_rate(reaction, custom_rate,
                                          custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
         self.custom_parameters.update(custom_parameters)
@@ -957,7 +957,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction: mass.MassReaction
+        reaction: MassReaction
             The MassReaction assoicated with the custom rate to be removed.
         remove_orphans: bool, optional
             If True, then remove any orphaned custom parameters from the model.
@@ -1299,16 +1299,16 @@ class MassModel(Object):
               new_model_id=None):
         """Merge two MassModels into one MassModel with the objects from both.
 
-        The reactions, metabolites, genes, initial conditions, fixed
-        concentrations, custom rate laws, rate parameters, compartments, units,
-        notes, and annotations from right model are also copied to left model.
-        However, note that in cases where identifiers for objects are identical
-        or a dict item has an identical key(s), priority will be given to what
-        already exists in the left model.
+        The reactions, metabolites, genes, enzyme modules, initial conditions,
+        fixed concentrations, custom rate laws, rate parameters, compartments,
+        units, notes, and annotations from right model are also copied to left
+        model. However, note that in cases where identifiers for objects are
+        identical or a dict item has an identical key(s), priority will be
+        given to what already exists in the left model.
 
         Parameters
         ----------
-        right: mass.MassModel
+        right: MassModel
             The MassModel to merge into the left model.
         prefix_existing: str, optional
             If provided, the string is used to prefix the reaction identifier
@@ -1326,17 +1326,17 @@ class MassModel(Object):
             will be used. If None and inplace is False, a new combined ID
             will be used for the new MassModel object.
 
+        Returns
+        -------
+        new_model: MassModel
+            A new MassModel object or self representing the merged model.
+
         Notes
         -----
         When merging an EnzymeModule into a MassModel, the EnzymeModule is
             converted to an EnzymeDict and stored in a DictList accessible
             via MassModel.enzyme_modules.
         If an EnzymeModule already exists in the model, it will be replaced.
-
-        Returns
-        -------
-        new_model: mass.MassModel
-            A new MassModel object or self representing the merged model.
 
         """
         # Check whether two MassModels are being merged,
@@ -1764,7 +1764,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        right: mass.MassModel
+        right: MassModel
             The MassModel to compare to the left model (self).
         verbose: bool, optional
             If True, display the reason(s) for the differences in the left and
@@ -1888,7 +1888,7 @@ class MassModel(Object):
 
         Parameters
         ----------
-        reaction_list: list of mass.MassReactions, optional
+        reaction_list: list of MassReactions, optional
             A list of MassReactions to be added to the stoichiometric matrix.
         matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}
             The desired type after converting the matrix.

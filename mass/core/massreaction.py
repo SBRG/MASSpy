@@ -576,7 +576,7 @@ class MassReaction(Object):
 
         Returns
         -------
-        new_reaction: mass.MassReaction
+        new_reaction: MassReaction
             Returns the original MassReaction if inplace=True. Otherwise return
             a modified copy of the original MassReaction.
 
@@ -688,7 +688,7 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        metabolite_id: str, mass.MassMetabolite
+        metabolite_id: str, MassMetabolite
             The MassMetabolite or the string identifier of the MassMetabolite
             whose coefficient is desired.
 
@@ -705,7 +705,7 @@ class MassReaction(Object):
         Parameters
         ----------
         metabolite_ids: iterable
-            Iterable of the mass.MassMetabolites or their string identifiers.
+            Iterable of the MassMetabolites or their string identifiers.
 
         """
         return map(self.get_coefficient, metabolite_ids)
@@ -1148,7 +1148,7 @@ class MassReaction(Object):
     def __setstate__(self, state):
         """Set state of MassReaction object upon unpickling.
 
-        Probably not necessary to set _model as the mass.MassModel that
+        Probably not necessary to set _model as the MassModel that
         contains self sets the _model attribute for all metabolites and genes
         in the reaction.
 

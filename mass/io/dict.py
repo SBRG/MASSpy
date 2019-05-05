@@ -17,7 +17,7 @@ from cobra.core import Gene
 
 from mass.core import MassMetabolite, MassModel, MassReaction
 from mass.enzyme_modules import (
-    EnzymeForm, EnzymeModule, EnzymeModuleDict,
+    EnzymeModule, EnzymeModuleDict, EnzymeModuleForm,
     _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
 
 # Global
@@ -58,9 +58,10 @@ _OPTIONAL_METABOLITE_ATTRIBUTES = {
     "annotation": {}
 }
 
-_REQUIRED_ENZYMEFORM_ATTRIBUTES = ["_bound_catalytic", "_bound_effectors"]
-_ORDERED_OPTIONAL_ENZYMEFORM_KEYS = ["enzyme_id", "enzyme_name"]
-_OPTIONAL_ENZYMEFORM_ATTRIBUTES = {
+_REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES = [
+    "_bound_catalytic", "_bound_effectors"]
+_ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS = ["enzyme_id", "enzyme_name"]
+_OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES = {
     "enzyme_id": "",
     "enzyme_name": "",
 }
@@ -75,10 +76,10 @@ _OPTIONAL_GENE_ATTRIBUTES = {
 _REQUIRED_ENZYME_ATTRIBUTES = [
     "id", "name", "ligands", "enzyme_forms", "enzyme_reactions"]
 _ORDERED_OPTIONAL_ENZYME_KEYS = [
-    key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS) 
+    key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
     if key not in _REQUIRED_ENZYME_ATTRIBUTES + ["S", "model"]]
 _OPTIONAL_ENZYME_ATTRIBUTES = OrderedDict({
-    key: _ORDERED_ENZYMEMODULE_DICT_DEFAULTS[key] 
+    key: _ORDERED_ENZYMEMODULE_DICT_DEFAULTS[key]
     for key in _ORDERED_OPTIONAL_ENZYME_KEYS
 })
 
@@ -113,8 +114,8 @@ def metabolite_to_dict(metabolite):
     _update_optional(metabolite, new_met, _OPTIONAL_METABOLITE_ATTRIBUTES,
                      _ORDERED_OPTIONAL_METABOLITE_KEYS)
 
-    # Add EnzymeForm attributes if metabolite is an EnzymeForm
-    if isinstance(metabolite, EnzymeForm):
+    # Add EnzymeModuleForm attributes if metabolite is an EnzymeModuleForm
+    if isinstance(metabolite, EnzymeModuleForm):
         _add_enzyme_form_attributes_into_dict(metabolite, new_met)
 
     return new_met
@@ -131,7 +132,7 @@ def metabolite_from_dict(metabolite):
     """
     # Determine if saved object should be a MassMetabolite or a subclass
     if "_bound_catalytic" in metabolite or "_bound_effectors" in metabolite:
-        new_metabolite = EnzymeForm(id=metabolite["id"])
+        new_metabolite = EnzymeModuleForm(id=metabolite["id"])
     else:
         new_metabolite = MassMetabolite(id=metabolite["id"])
 
@@ -302,10 +303,10 @@ def model_to_dict(model, sort=False):
     model: mass.MassModel, mass.EnzymeModule
         The model to represent as a dict.
     sort: bool, optional
-        Whether to sort the metabolites, reactions, genes, and enzyme_modules 
+        Whether to sort the metabolites, reactions, genes, and enzyme_modules
         or maintain the order defined in the model. If the model is an
-        EnzymeModule, the ligands, enzyme_forms, and enzyme_reactions 
-        attributes are also included. Default is False. 
+        EnzymeModule, the ligands, enzyme_forms, and enzyme_reactions
+        attributes are also included. Default is False.
 
     """
     obj = OrderedDict()
@@ -416,7 +417,7 @@ def model_from_dict(obj):
 
 # Internal
 def _add_enzyme_form_attributes_into_dict(enzyme, new_enzyme):
-    """Add EnzymeForm attributes to its dict representation.
+    """Add EnzymeModuleForm attributes to its dict representation.
 
     Warnings
     --------
@@ -424,12 +425,12 @@ def _add_enzyme_form_attributes_into_dict(enzyme, new_enzyme):
 
     """
     # Add bound_catalytic and bound_effectors attributes to enzyme
-    for attr in _REQUIRED_ENZYMEFORM_ATTRIBUTES:
+    for attr in _REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES:
         bound = {str(k): v for k, v in iteritems(getattr(enzyme, attr))}
         new_enzyme[attr] = OrderedDict((k, bound[k]) for k in sorted(bound))
     # Update optional attributes
-    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEFORM_ATTRIBUTES, 
-                     _ORDERED_OPTIONAL_ENZYMEFORM_KEYS)
+    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES,
+                     _ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS)
 
 
 def _add_enzyme_module_attributes_into_dict(model, obj):
