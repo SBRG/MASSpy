@@ -26,7 +26,7 @@ for nb_name in ALL_CONSTRUCTION_NOTEBOOKS:
         "test-model-construction", construction_dir))
     notebook_path = path.abspath(path.join(notebook_dir, nb_name + ".ipynb"))
     # Load and execute
-    print("Executing construction of : " + nb_name)
+    print("Executing construction notebook " + nb_name)
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
     ep = ExecutePreprocessor(timeout=600, kernel_name='python3')

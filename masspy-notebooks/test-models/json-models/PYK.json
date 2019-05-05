@@ -1,5 +1,6 @@
 {
-    "_categorized_enzyme_forms": {
+    "_enzyme_concentration_total": 6.9e-05,
+    "_enzyme_module_forms_categorized": {
         "Relaxed": [
             "pyk_R0_AP_c",
             "pyk_R0_A_c",
@@ -30,7 +31,26 @@
             "pyk_T4_c"
         ]
     },
-    "_categorized_enzyme_reactions": {
+    "_enzyme_module_ligands_categorized": {
+        "Activators": [
+            "fdp_c"
+        ],
+        "Cofactors": [
+            "adp_c",
+            "h_c"
+        ],
+        "Inhibitors": [
+            "atp_c"
+        ],
+        "Products": [
+            "atp_c",
+            "pyr_c"
+        ],
+        "Substrates": [
+            "pep_c"
+        ]
+    },
+    "_enzyme_module_reactions_categorized": {
         "R/T transition": [
             "PYK_L"
         ],
@@ -78,26 +98,6 @@
             "PYK_R43"
         ]
     },
-    "_categorized_ligands": {
-        "Activators": [
-            "fdp_c"
-        ],
-        "Cofactors": [
-            "adp_c",
-            "h_c"
-        ],
-        "Inhibitors": [
-            "atp_c"
-        ],
-        "Products": [
-            "atp_c",
-            "pyr_c"
-        ],
-        "Substrates": [
-            "pep_c"
-        ]
-    },
-    "_enzyme_concentration_total": 6.9e-05,
     "_enzyme_net_flux": 2.24,
     "_enzyme_net_flux_equation": "kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))",
     "compartments": {
@@ -150,7 +150,7 @@
         "PYK_T3": "kf_PYK_I*(2*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t)/Keq_PYK_I)",
         "PYK_T4": "kf_PYK_I*(atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t)/Keq_PYK_I)"
     },
-    "enzyme_forms": [
+    "enzyme_module_forms": [
         "pyk_R0_c",
         "pyk_R0_A_c",
         "pyk_R0_P_c",
@@ -177,8 +177,15 @@
         "pyk_R4_AP_c",
         "pyk_T4_c"
     ],
-    "enzyme_modules": [],
-    "enzyme_reactions": [
+    "enzyme_module_ligands": [
+        "pep_c",
+        "adp_c",
+        "fdp_c",
+        "atp_c",
+        "pyr_c",
+        "h_c"
+    ],
+    "enzyme_module_reactions": [
         "PYK_R01",
         "PYK_R02",
         "PYK_R03",
@@ -214,6 +221,7 @@
         "PYK_R45",
         "PYK_L"
     ],
+    "enzyme_modules": [],
     "genes": [],
     "id": "PYK",
     "initial_conditions": {
@@ -249,14 +257,6 @@
         "pyk_T4_c": 1.3083e-07,
         "pyr_c": 0.060301
     },
-    "ligands": [
-        "pep_c",
-        "adp_c",
-        "fdp_c",
-        "atp_c",
-        "pyr_c",
-        "h_c"
-    ],
     "metabolites": [
         {
             "_initial_condition": 0.017,
@@ -313,10 +313,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]",
             "id": "pyk_R0_c",
-            "name": "Pyruvate Kinase"
+            "name": "PYK"
         },
         {
             "_bound_catalytic": {
@@ -327,10 +326,9 @@
             "charge": -3,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C10H12N5O10P2",
             "id": "pyk_R0_A_c",
-            "name": "Pyruvate Kinase-adp complex"
+            "name": "PYK-adp complex"
         },
         {
             "_bound_catalytic": {
@@ -341,10 +339,9 @@
             "charge": -3,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C3H2O6P1",
             "id": "pyk_R0_P_c",
-            "name": "Pyruvate Kinase-pep complex"
+            "name": "PYK-pep complex"
         },
         {
             "_bound_catalytic": {
@@ -356,10 +353,9 @@
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C13H14N5O16P3",
             "id": "pyk_R0_AP_c",
-            "name": "Pyruvate Kinase-adp-pep complex"
+            "name": "PYK-adp-pep complex"
         },
         {
             "_bound_catalytic": {},
@@ -368,10 +364,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]",
             "id": "pyk_T0_c",
-            "name": "Pyruvate Kinase"
+            "name": "PYK"
         },
         {
             "_bound_catalytic": {},
@@ -382,10 +377,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C6H10O12P2",
             "id": "pyk_R1_c",
-            "name": "Pyruvate Kinase; 1 fdp"
+            "name": "PYK; 1 fdp"
         },
         {
             "_bound_catalytic": {
@@ -398,10 +392,9 @@
             "charge": -7,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C16H22N5O22P4",
             "id": "pyk_R1_A_c",
-            "name": "Pyruvate Kinase-adp complex; 1 fdp"
+            "name": "PYK-adp complex; 1 fdp"
         },
         {
             "_bound_catalytic": {
@@ -414,10 +407,9 @@
             "charge": -7,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C9H12O18P3",
             "id": "pyk_R1_P_c",
-            "name": "Pyruvate Kinase-pep complex; 1 fdp"
+            "name": "PYK-pep complex; 1 fdp"
         },
         {
             "_bound_catalytic": {
@@ -431,10 +423,9 @@
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C19H24N5O28P5",
             "id": "pyk_R1_AP_c",
-            "name": "Pyruvate Kinase-adp-pep complex; 1 fdp"
+            "name": "PYK-adp-pep complex; 1 fdp"
         },
         {
             "_bound_catalytic": {},
@@ -445,10 +436,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C10H12N5O13P3",
             "id": "pyk_T1_c",
-            "name": "Pyruvate Kinase; 1 atp"
+            "name": "PYK; 1 atp"
         },
         {
             "_bound_catalytic": {},
@@ -459,10 +449,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C12H20O24P4",
             "id": "pyk_R2_c",
-            "name": "Pyruvate Kinase; 2 fdp"
+            "name": "PYK; 2 fdp"
         },
         {
             "_bound_catalytic": {
@@ -475,10 +464,9 @@
             "charge": -11,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C22H32N5O34P6",
             "id": "pyk_R2_A_c",
-            "name": "Pyruvate Kinase-adp complex; 2 fdp"
+            "name": "PYK-adp complex; 2 fdp"
         },
         {
             "_bound_catalytic": {
@@ -491,10 +479,9 @@
             "charge": -11,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C15H22O30P5",
             "id": "pyk_R2_P_c",
-            "name": "Pyruvate Kinase-pep complex; 2 fdp"
+            "name": "PYK-pep complex; 2 fdp"
         },
         {
             "_bound_catalytic": {
@@ -508,10 +495,9 @@
             "charge": -14,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C25H34N5O40P7",
             "id": "pyk_R2_AP_c",
-            "name": "Pyruvate Kinase-adp-pep complex; 2 fdp"
+            "name": "PYK-adp-pep complex; 2 fdp"
         },
         {
             "_bound_catalytic": {},
@@ -522,10 +508,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C20H24N10O26P6",
             "id": "pyk_T2_c",
-            "name": "Pyruvate Kinase; 2 atp"
+            "name": "PYK; 2 atp"
         },
         {
             "_bound_catalytic": {},
@@ -536,10 +521,9 @@
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C18H30O36P6",
             "id": "pyk_R3_c",
-            "name": "Pyruvate Kinase; 3 fdp"
+            "name": "PYK; 3 fdp"
         },
         {
             "_bound_catalytic": {
@@ -552,10 +536,9 @@
             "charge": -15,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C28H42N5O46P8",
             "id": "pyk_R3_A_c",
-            "name": "Pyruvate Kinase-adp complex; 3 fdp"
+            "name": "PYK-adp complex; 3 fdp"
         },
         {
             "_bound_catalytic": {
@@ -568,10 +551,9 @@
             "charge": -15,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C21H32O42P7",
             "id": "pyk_R3_P_c",
-            "name": "Pyruvate Kinase-pep complex; 3 fdp"
+            "name": "PYK-pep complex; 3 fdp"
         },
         {
             "_bound_catalytic": {
@@ -585,10 +567,9 @@
             "charge": -18,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C31H44N5O52P9",
             "id": "pyk_R3_AP_c",
-            "name": "Pyruvate Kinase-adp-pep complex; 3 fdp"
+            "name": "PYK-adp-pep complex; 3 fdp"
         },
         {
             "_bound_catalytic": {},
@@ -599,10 +580,9 @@
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C30H36N15O39P9",
             "id": "pyk_T3_c",
-            "name": "Pyruvate Kinase; 3 atp"
+            "name": "PYK; 3 atp"
         },
         {
             "_bound_catalytic": {},
@@ -613,10 +593,9 @@
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C24H40O48P8",
             "id": "pyk_R4_c",
-            "name": "Pyruvate Kinase; 4 fdp"
+            "name": "PYK; 4 fdp"
         },
         {
             "_bound_catalytic": {
@@ -629,10 +608,9 @@
             "charge": -19,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C34H52N5O58P10",
             "id": "pyk_R4_A_c",
-            "name": "Pyruvate Kinase-adp complex; 4 fdp"
+            "name": "PYK-adp complex; 4 fdp"
         },
         {
             "_bound_catalytic": {
@@ -645,10 +623,9 @@
             "charge": -19,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C27H42O54P9",
             "id": "pyk_R4_P_c",
-            "name": "Pyruvate Kinase-pep complex; 4 fdp"
+            "name": "PYK-pep complex; 4 fdp"
         },
         {
             "_bound_catalytic": {
@@ -662,10 +639,9 @@
             "charge": -22,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C37H54N5O64P11",
             "id": "pyk_R4_AP_c",
-            "name": "Pyruvate Kinase-adp-pep complex; 4 fdp"
+            "name": "PYK-adp-pep complex; 4 fdp"
         },
         {
             "_bound_catalytic": {},
@@ -676,10 +652,9 @@
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PYK",
-            "enzyme_name": "Pyruvate Kinase",
             "formula": "[PYK]-C40H48N20O52P12",
             "id": "pyk_T4_c",
-            "name": "Pyruvate Kinase; 4 atp"
+            "name": "PYK; 4 atp"
         }
     ],
     "name": "Pyruvate Kinase",
@@ -688,6 +663,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R01",
             "metabolites": {
@@ -702,6 +678,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R02",
             "metabolites": {
@@ -716,6 +693,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R03",
             "metabolites": {
@@ -730,6 +708,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R04",
             "metabolites": {
@@ -745,6 +724,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R05",
             "metabolites": {
@@ -761,6 +741,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R10",
             "metabolites": {
@@ -775,6 +756,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R11",
             "metabolites": {
@@ -789,6 +771,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R12",
             "metabolites": {
@@ -803,6 +786,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R13",
             "metabolites": {
@@ -817,6 +801,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R14",
             "metabolites": {
@@ -832,6 +817,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R15",
             "metabolites": {
@@ -848,6 +834,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R20",
             "metabolites": {
@@ -862,6 +849,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R21",
             "metabolites": {
@@ -876,6 +864,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R22",
             "metabolites": {
@@ -890,6 +879,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R23",
             "metabolites": {
@@ -904,6 +894,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R24",
             "metabolites": {
@@ -919,6 +910,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R25",
             "metabolites": {
@@ -935,6 +927,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R30",
             "metabolites": {
@@ -949,6 +942,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R31",
             "metabolites": {
@@ -963,6 +957,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R32",
             "metabolites": {
@@ -977,6 +972,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R33",
             "metabolites": {
@@ -991,6 +987,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R34",
             "metabolites": {
@@ -1006,6 +1003,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R35",
             "metabolites": {
@@ -1022,6 +1020,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R40",
             "metabolites": {
@@ -1036,6 +1035,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R41",
             "metabolites": {
@@ -1050,6 +1050,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R42",
             "metabolites": {
@@ -1064,6 +1065,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R43",
             "metabolites": {
@@ -1078,6 +1080,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R44",
             "metabolites": {
@@ -1093,6 +1096,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_R45",
             "metabolites": {
@@ -1111,6 +1115,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_L",
             "metabolites": {
@@ -1124,6 +1129,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_T1",
             "metabolites": {
@@ -1138,6 +1144,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_T2",
             "metabolites": {
@@ -1152,6 +1159,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_T3",
             "metabolites": {
@@ -1166,6 +1174,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PYK",
             "gene_reaction_rule": "",
             "id": "PYK_T4",
             "metabolites": {
