@@ -32,7 +32,7 @@ def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
     parameters: bool, optional
         If True, then check for undefined parameters in the model.
@@ -96,9 +96,9 @@ def qcqa_simulation(simulation, model, parameters=False, concentrations=False,
 
     Parameters
     ----------
-    simulation: mass.Simulation
+    simulation: Simulation
         The Simulation to inspect.
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
     parameters: bool, optional
         If True, then check for undefined parameters in the model.
@@ -152,10 +152,10 @@ def get_missing_reaction_parameters(model, simulation=None,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    reaction_list: list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list: list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -219,10 +219,10 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    reaction_list : list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list : list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -262,7 +262,7 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
         customs = []
         for parameter in symbols:
             if parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str] \
-               and parameter is not "t":
+               and parameter != "t":
                 try:
                     value = model.custom_parameters[parameter]
                     if value is None:
@@ -283,10 +283,10 @@ def get_missing_steady_state_fluxes(model, reaction_list=None):
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    reaction_list : list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list : list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -315,10 +315,10 @@ def get_missing_initial_conditions(model, simulation=None,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    metabolite_list : list of mass.MassMetabolites, optional
-        A list of mass.MassMetabolite objects in the model to be checked.
+    metabolite_list : list of MassMetabolites, optional
+        A list of MassMetabolite objects in the model to be checked.
         If None provided, will use all metabolites in the model.
 
     Returns
@@ -360,10 +360,10 @@ def get_missing_fixed_concentrations(model, simulation=None,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    metabolite_list : list of mass.MassMetabolites, optional
-        A list of mass.MassMetabolite objects in the model to be checked.
+    metabolite_list : list of MassMetabolites, optional
+        A list of MassMetabolite objects in the model to be checked.
         If None provided, will use all external metabolites in the model.
 
     Returns
@@ -410,14 +410,14 @@ def check_superfluous_consistency(model, simulation=None, tol=None,
 
     Parameters
     ----------
-    model: mass.massmodel
+    model: Massmodel
         The MassModel to inspect
     tol: float, optional
         The tolerance for parameter consistency. Parameters are considered
         consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol. If None provided, the
         global zero tolerance is used.
-    reaction_list: list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list: list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -466,10 +466,10 @@ def check_elemental_consistency(model, reaction_list=None):
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    reaction_list : list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list : list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -504,14 +504,14 @@ def check_thermodynamic_consistency(model, tol=None, reaction_list=None):
 
     Parameters
     ----------
-    model: mass.massmodel
+    model: Massmodel
         The MassModel to inspect
     tol: float, optional
         The tolerance for parameter consistency. Parameters are considered
         consistent if abs(rxn.kr - rxn.kf/rxn.Keq) <=tol. If None provided, the
         global zero tolerance is used.
-    reaction_list: list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list: list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     Returns
@@ -543,7 +543,7 @@ def check_reaction_parameters(model, simulation=None, tol=None,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
 
     Returns
@@ -555,8 +555,8 @@ def check_reaction_parameters(model, simulation=None, tol=None,
         A dictionary with MassReactions objects as keys and superfluous
         parameters as values. Returns as empty if there are no superfluous
         parameters.
-    reaction_list: list of mass.MassReaction, optional
-        A list of mass.MassReaction objects in the model to be checked.
+    reaction_list: list of MassReaction, optional
+        A list of MassReaction objects in the model to be checked.
         If None provided, will use all reactions in the model.
 
     See Also
@@ -621,9 +621,9 @@ def is_simulatable(model, simulation=None):
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel to inspect.
-    simulation: mass.Simulation, optional
+    simulation: Simulation, optional
         If provided, will check whether the model in the given Simulation
         object can be simulated.
 
@@ -647,7 +647,7 @@ def is_simulatable(model, simulation=None):
     consistency_check = True
     if superfluous:
         for consistency in itervalues(superfluous):
-            if consistency is "Inconsistent":
+            if consistency == "Inconsistent":
                 consistency_check = False
 
     if missing_params or missing_concs:
@@ -909,8 +909,8 @@ def _check_if_needed(model, missing):
         needed.update(rate.atoms(sym.Function))
         needed.update(rate.atoms(sym.Symbol))
 
-    missing = [met for met in missing 
-               if sym.Symbol(str(met)) in needed 
+    missing = [met for met in missing
+               if sym.Symbol(str(met)) in needed
                or _mk_met_func(str(met)) in needed]
 
     return missing
