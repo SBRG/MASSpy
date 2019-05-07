@@ -1588,114 +1588,77 @@ class MassModel(Object):
 
         return percs_dict
 
-    def string_to_mass(self, reaction_strings, term_split="+"):
-        """Create MassReaction and MassMetabolite objects from strings.
+    def build_model_from_string(self, model_str, verbose=True, fwd_arrow=None,
+                                rev_arrow=None, reversible_arrow=None,
+                                term_split="+", reaction_split=";",
+                                reaction_id_split=":"):
+        """Create a model from a string of reaction equations using parser.
 
-        To correctly parse a string, it must be in the following format:
-            "RID: s[ID, **kwargs] + s[ID, **kwargs] <=>  s[ID, **kwargs]
-        where kwargs can be the metabolite attributes 'name', 'formula',
-        'charge'. For example:
-            "v1: s[x1, name=xOne, charge=2] <=> s[x2, formula=X]"
+        Takes a string representation of the reactions and uses the
+        specifications supplied in the optional arguments to infer a set of
+        reactions and their identifiers, then to infer metabolites, metabolite
+        compartments, and stoichiometries for the reactions. It also infers the
+        refversibility of the reaction from the reaction arrow.
 
-        To add a compartment for a species, add "[c]" where c is a letter
-        representing the compartment for the species. For example:
-            "v1: s[x1][c] <=> s[x2][c]"
-
-        When creating bound enzyme forms, it is recommended to use '&' in the
-        species ID to represent the bound enzyme-metabolite. For example:
-            "E1: s[ENZYME][c] + s[metabolite][c] <=> s[ENZYME&metabolite][c]"
-
-        Note that a reaction ID and a metabolite ID are always required.
+        For example: '''
+            ReactionID_1: S + E <=> ES
+            ReactionID_2: ES -> E + P;
+            ReactionID_3: E + I <=> EI
+            '''
 
         Parameters
         ----------
-        reaction_strings: str, list of strs
-            String or list of strings representing the reaction. Reversibility
-            is inferred from the arrow, and metabolites in the model are used
-            if they exist or are created if they do not.
+        model: str
+            A string representing the reaction formulas (equation) for the
+            model.
+        verbose: bool, optional
+            Setting the verbosity of the function.
+        fwd_arrow: re.compile, optional
+            For forward irreversible reaction arrows.
+        rev_arrow: re.compile, optional
+            For backward irreversible reaction arrows.
+        reversible_arrow: re.compile, optional
+            For reversible reaction arrows.
         term_split: str, optional
-            Term dividing individual metabolite entries.
+            Dividing individual metabolite entries. Default is "+".
+        reaction_split: str, optional
+            Dividing individual reaction entries. Default is ";".
+        reaction_id_split: str, optional
+            Dividing individual reaction entries from their identifiers.
+            Default is ":".
+
+        See Also
+        --------
+        MassReaction.build_reaction_from_string: Method for building reactions.
 
         """
-        if not isinstance(reaction_strings, list):
-            reaction_strings = [reaction_strings]
-
-        for rxn_string in reaction_strings:
-            if not isinstance(rxn_string, string_types):
-                raise TypeError("reaction_strings must be a string or a list "
-                                "of strings")
-
-        _metab_args = [_NAME_ARG_RE, _FORMULA_ARG_RE, _CHARGE_ARG_RE]
-
-        for rxn_string in reaction_strings:
-            if not _RXN_ID_RE.search(rxn_string):
-                raise ValueError("Could not find an ID for "
-                                 "'{0}'".format(rxn_string))
-            result = _RXN_ID_RE.search(rxn_string)
-            rxn_id = result.group(1)
-            rxn_string = rxn_string[result.end():]
-            # Determine reaction reversibility
-            if _REVERSIBLE_ARROW_RE.search(rxn_string):
-                arrow_loc = _REVERSIBLE_ARROW_RE.search(rxn_string)
-                reversible = True
-                # Reactants left of the arrow, products on the right
-                reactant_str = rxn_string[:arrow_loc.start()].strip()
-                product_str = rxn_string[arrow_loc.end():].strip()
-            elif _FORWARD_ARROW_RE.search(rxn_string):
-                arrow_loc = _FORWARD_ARROW_RE.search(rxn_string)
-                reversible = False
-                # Reactants left of the arrow, products on the right
-                reactant_str = rxn_string[:arrow_loc.start()].strip()
-                product_str = rxn_string[arrow_loc.end():].strip()
-            elif _REVERSE_ARROW_RE.search(rxn_string):
-                arrow_loc = _REVERSE_ARROW_RE.search(rxn_string)
-                reversible = False
-                # Reactants right of the arrow, products on the left
-                reactant_str = rxn_string[:arrow_loc.end()].strip()
-                product_str = rxn_string[arrow_loc.start():].strip()
-            else:
-                raise ValueError("Unrecognized arrow for "
-                                 "'{0}'".format(rxn_string))
-            new_reaction = MassReaction(rxn_id, reversible=reversible)
-
-            d_re = re.compile("(\d) ")
-            for substr, factor in zip([reactant_str, product_str], [-1, 1]):
-                if not substr:
-                    continue
-                for term in substr.split(term_split):
-                    term = term.strip()
-                    if re.match("nothing", term.lower()):
-                        continue
-                    # Find the compartment if it exists
-                    if _COMPARTMENT_RE.search(term):
-                        compartment = _COMPARTMENT_RE.search(term)
-                        compartment = compartment.group(1).strip("[|]")
-                        term = _COMPARTMENT_RE.sub("]", term)
-                    else:
-                        compartment = None
-                    if d_re.search(term):
-                        num = float(d_re.search(term).group(1)) * factor
-                        metab_to_make = term[d_re.search(term).end():]
-                    else:
-                        num = factor
-                        metab_to_make = term
-                    # Find the metabolite's ID
-                    if not _MET_ID_RE.search(metab_to_make):
-                        raise ValueError("Could not locate the metabolite ID")
-                    met_id = _MET_ID_RE.search(metab_to_make).group(1)
-                    # Use the metabolite in the model if it exists
-                    try:
-                        metab = self.metabolites.get_by_id(met_id)
-                    except KeyError:
-                        metab = MassMetabolite(met_id)
-                    # Set attributes for the metabolite
-                    for arg in _metab_args:
-                        if arg.search(metab_to_make):
-                            attr = _EQUALS_RE.split(arg.pattern)[0]
-                            val = arg.search(metab_to_make).group(1)
-                            metab.__dict__[attr] = val
-                    new_reaction.add_metabolites({metab: num})
-            self.add_reactions(new_reaction)
+        # Use the reaction split arguments to get the reactions and strip them
+        reaction_list = [reaction_str.strip() 
+                         for reaction_str in model_str.split(reaction_split)]
+        
+        for orig_reaction_str in reaction_list:
+            reaction_id, reaction_str = (
+                s.strip() for s in orig_reaction_str.split(reaction_id_split))
+            try:
+                if not reaction_id:
+                    raise ValueError("No reaction ID found in '{0}'"
+                                    .format(orig_reaction_str))
+                try:
+                    reaction = self.reactions.get_by_id(reaction_id)
+                except KeyError:
+                    if verbose:
+                        print("New reaction {0} created".format(reaction_id))
+                    reaction = MassReaction(reaction_id)
+                self.add_reactions(reaction)
+                reaction.build_reaction_from_string(
+                    reaction_str, verbose=verbose, fwd_arrow=fwd_arrow,
+                    rev_arrow=rev_arrow, reversible_arrow=reversible_arrow,
+                    term_split=term_split)
+            except ValueError as e:
+                LOGGER.warn(
+                    "Failed to build reaction '%s' due to the "
+                    "following:\n%s".format(orig_reaction_str, str(e)))
+                continue
 
     def update_parameters(self, parameters):
         """Update the parameters associated with the MassModel.
@@ -1790,7 +1753,6 @@ class MassModel(Object):
                 # Determine which metabolites do not exist in both models
                 missing = set(l_dict)
                 missing.symmetric_difference_update(set(r_dict))
-                print(i, missing)
                 # Determine which metabolites have different ODEs
                 diff_equations = set(
                     l_key for l_key, l_value in iteritems(l_dict)
