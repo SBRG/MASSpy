@@ -9,13 +9,16 @@ from functools import partial
 from operator import attrgetter
 from warnings import warn
 
-from six import integer_types, iteritems, iterkeys, itervalues, string_types
+from six import iteritems, iterkeys, itervalues, string_types
 
 from sympy import Symbol
 
 from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
-from cobra.util.context import get_context
+from cobra.core.reaction import (
+    _forward_arrow_finder, _reverse_arrow_finder, _reversible_arrow_finder,
+    and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
+from cobra.util.context import get_context, resettable
 
 from mass.core.massmetabolite import MassMetabolite
 from mass.util import expressions
@@ -23,18 +26,6 @@ from mass.util import expressions
 
 # Global
 _INF = float("inf")
-# Precompiled regular expressions for gene reaction rules
-_AND_OR_SEARCH_RE = re.compile('\(| and| or|\+|\)', re.IGNORECASE)
-_UPPERCASE_AND_RE = re.compile('\bAND\b')
-_UPPERCASE_OR_RE = re.compile('\bOR\b')
-_GPR_CLEAN_RE = re.compile(' {2,}')
-# Precompiled regular expression to find any single letter compartment enclosed
-# in square brackets at the beginning of the string (e.g. [c] : foo --> bar").
-_COMPARTMENT_FINDER_RE = re.compile("^\s*(\[[A-Za-z]\])\s*:*")
-# Precompiled regular expressions to build reactions from strings.
-_REVERSIBLE_ARROW_FINDER_RE = re.compile("<(-+|=+)>")
-_FORWARD_ARROW_FINDER_RE = re.compile("(-+|=+)>")
-_REVERSE_ARROW_FINDER_RE = re.compile("<(-+|=+)")
 
 
 class MassReaction(Object):
@@ -64,20 +55,7 @@ class MassReaction(Object):
     def __init__(self, id=None, name="", subsystem="", reversible=True,
                  steady_state_flux=None):
         """Initialize the MassReaction Object."""
-        # Check inputs to ensure they are the correct types.
-        if not isinstance(id, string_types) and id is not None:
-            raise TypeError("id must be a str")
-        if not isinstance(name, string_types):
-            raise TypeError("name must be a str")
-        if not isinstance(subsystem, string_types):
-            raise TypeError("subsystem must be a str")
-        if not isinstance(reversible, bool) and reversible is not None:
-            raise TypeError("reversible must be a bool")
-        if not isinstance(steady_state_flux, (integer_types, float)) and \
-           steady_state_flux is not None:
-            raise TypeError("steady_state_flux must be an int or float")
-
-        Object.__init__(self, id, name)
+        super(MassReaction, self).__init__(id, name)
         self.subsystem = subsystem
         self._reversible = reversible
         self.steady_state_flux = steady_state_flux
@@ -130,8 +108,8 @@ class MassReaction(Object):
 
         Warnings
         --------
-        Changing the reversibility will reset the equilibrium constant, the
-            reverse rate constant, and the lower flux bound to the defaults.
+        Changing the reversibility will reset the equilibrium constant and the
+            reverse rate constant  to the defaults.
 
         """
         if not isinstance(value, bool):
@@ -142,11 +120,9 @@ class MassReaction(Object):
             if value:
                 setattr(self, "_reverse_rate_constant", None)
                 setattr(self, "_equilibrium_constant", None)
-                setattr(self, "lower_bound", 0)
             else:
                 setattr(self, "_reverse_rate_constant", 0)
                 setattr(self, "_equilibrium_constant", _INF)
-                setattr(self, "lower_bound", 0)
 
     @property
     def forward_rate_constant(self):
@@ -200,7 +176,7 @@ class MassReaction(Object):
         -----
         Reverse rate constants are only included for reversible reactions.
         Only rate and equilibrium constantx are accessed here. Steady state
-            fluxes can be accessed through the steady_state_flux attribute, 
+            fluxes can be accessed through the steady_state_flux attribute,
             and custom parameters can only be accessed through the model.
 
         """
@@ -262,16 +238,19 @@ class MassReaction(Object):
         return self.build_reaction_string()
 
     @reaction.setter
-    def reaction(self, reaction_string):
+    def reaction(self, value):
         """Set the reaction using a human readable string.
+
+         For example:
+            'A + B <=> C' for reversible reactions, A & B are reactants.
+            'A + B --> C' for irreversible reactions, A & B are reactants.
+            'A + B <-- C' for irreversible reactions, A & B are products.
+
 
         Parameters
         ----------
         reaction_string: str
-            String representation of the reaction. For example:
-                'A + B <=> C' for reversible reactions.
-                'A + B --> C' for irreversible reactions, A & B are reactants.
-                'A + B <-- C' for irreversible reactions, A & B are products.
+            String representation of the reaction.
 
         Notes
         -----
@@ -288,7 +267,7 @@ class MassReaction(Object):
             arrow while products are searched on the left side.
 
         """
-        return self.build_reaction_from_string(reaction_string)
+        return self.build_reaction_from_string(value)
 
     @property
     def compartments(self):
@@ -371,53 +350,53 @@ class MassReaction(Object):
 
         """
         if get_context(self):
-            warn("Context management not implemented for gene reaction rules")
+            warn("Context management not implemented for "
+                 "gene reaction rules")
+
         self._gene_reaction_rule = new_rule.strip()
         try:
             _, gene_names = parse_gpr(self._gene_reaction_rule)
         except (SyntaxError, TypeError):
             if "AND" in new_rule or "OR" in new_rule:
-                warn("uppercase AND/OR found in rule '{0}' for {1}"
-                     .format(new_rule, repr(self)))
-                new_rule = _UPPERCASE_AND_RE.sub("and", new_rule)
-                new_rule = _UPPERCASE_OR_RE.sub("or", new_rule)
+                warn("uppercase AND/OR found in rule '%s' for '%s'" %
+                     (new_rule, repr(self)))
+                new_rule = uppercase_AND.sub("and", new_rule)
+                new_rule = uppercase_OR.sub("or", new_rule)
                 self.gene_reaction_rule = new_rule
                 return
-            warn("malformed gene_reaction_rule '{0}' for {1}"
-                 .format(new_rule, repr(self)))
-            tmp_str = _AND_OR_SEARCH_RE.sub('', self._gene_reaction_rule)
-            gene_names = set((_GPR_CLEAN_RE.sub(' ', tmp_str).split(' ')))
+            warn("malformed gene_reaction_rule '%s' for %s" %
+                 (new_rule, repr(self)))
+            tmp_str = and_or_search.sub('', self._gene_reaction_rule)
+            gene_names = set((gpr_clean.sub(' ', tmp_str).split(' ')))
         if '' in gene_names:
             gene_names.remove('')
         old_genes = self._genes
         if self._model is None:
             self._genes = {Gene(i) for i in gene_names}
         else:
-            massmodel_genes = self._model.genes
+            model_genes = self._model.genes
             self._genes = set()
-            for g_id in gene_names:
-                if massmodel_genes.has_id(g_id):
-                    self._genes.add(massmodel_genes.get_by_id(g_id))
+            for id in gene_names:
+                if model_genes.has_id(id):
+                    self._genes.add(model_genes.get_by_id(id))
                 else:
-                    new_gene = Gene(g_id)
-                    # Must be new_gene._model due to inheritance
-                    # of cobra gene class
+                    new_gene = Gene(id)
                     new_gene._model = self._model
                     self._genes.add(new_gene)
-                    massmodel_genes.append(new_gene)
+                    model_genes.append(new_gene)
 
         # Make the genes aware that it is involved in this reaction
         for g in self._genes:
             g._reaction.add(self)
 
-        # Make the old genes aware that they are no longer involved.
+        # make the old genes aware they are no longer involved in this reaction
         for g in old_genes:
             if g not in self._genes:  # if an old gene is not a new gene
                 try:
                     g._reaction.remove(self)
-                except ValueError:
-                    warn("Could not remove old gene {0} from reaction {1}"
-                         .format(g.id, self.id))
+                except KeyError:
+                    warn("could not remove old gene %s from reaction %s" %
+                         (g.id, self.id))
 
     @property
     def gene_name_reaction_rule(self):
@@ -470,6 +449,7 @@ class MassReaction(Object):
         return getattr(self, "_lower_bound")
 
     @lower_bound.setter
+    @resettable
     def lower_bound(self, value):
         """Set the lower bound of the reaction.
 
@@ -482,8 +462,6 @@ class MassReaction(Object):
             The new value for the lower bound.
 
         """
-        if not isinstance(value, (integer_types, float)):
-            raise TypeError("value must be a float.")
         if self.upper_bound < value:
             self.upper_bound = value
 
@@ -495,38 +473,12 @@ class MassReaction(Object):
         return getattr(self, "_upper_bound")
 
     @upper_bound.setter
+    @resettable
     def upper_bound(self, value):
-        """Set the upper bound of the reaction.
-
-        Infeasible combinations, such as a upper bound lower than the current
-        lower bound will update the other bound.
-
-        Parameters
-        ----------
-        value: float
-            The new value for the upper bound.
-
-        """
-        if not isinstance(value, (integer_types, float)):
-            raise TypeError("value must be a float.")
-        if self.lower_bound < value:
+        if self.lower_bound > value:
             self.lower_bound = value
 
         setattr(self, "_upper_bound", value)
-
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gibbs_reaction_energy(self):
-    #     """Return the Gibbs reaction energy of the reaction."""
-    #     return self._gibbs_reaction_energy
-    #
-    # @gibbs_reaction_energy.setter
-    # def gibbs_reaction_energy(self, value):
-    #     """Set the Gibbs reaction energy for the reaction."""
-    #     if not isinstance(value, (integer_types, float)) and \
-    #        value is not None:
-    #         raise TypeError("Must be an int or float")
-    #     self._gibbs_reaction_energy = value
 
     @property
     def kf_str(self):
@@ -579,17 +531,6 @@ class MassReaction(Object):
         """Shorthand method to get the reaction stoichiometry."""
         return self.stoichiometry
 
-    # TODO Add in when thermodynamics are finished
-    # @property
-    # def gre(self):
-    #     """Shorthand method to get the Gibbs reaction energy."""
-    #     return self.gibbs_reaction_energy
-    #
-    # @gre.setter
-    # def gre(self, value):
-    #     """Shorthand method to set the Gibbs reaction energy."""
-    #     self.gibbs_reaction_energy = value
-
     @property
     def v(self):
         """Shorthand method to get the reaction steady state flux."""
@@ -614,7 +555,7 @@ class MassReaction(Object):
 
         Returns
         -------
-        new_reaction: mass.MassReaction
+        new_reaction: MassReaction
             Returns the original MassReaction if inplace=True. Otherwise return
             a modified copy of the original MassReaction.
 
@@ -726,7 +667,7 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        metabolite_id: str, mass.MassMetabolite
+        metabolite_id: str, MassMetabolite
             The MassMetabolite or the string identifier of the MassMetabolite
             whose coefficient is desired.
 
@@ -743,7 +684,7 @@ class MassReaction(Object):
         Parameters
         ----------
         metabolite_ids: iterable
-            Iterable of the mass.MassMetabolites or their string identifiers.
+            Iterable of the MassMetabolites or their string identifiers.
 
         """
         return map(self.get_coefficient, metabolite_ids)
@@ -965,10 +906,10 @@ class MassReaction(Object):
         # Filter out any 0 values.
         return {k: v for k, v in iteritems(reaction_element_dict) if v != 0}
 
-    def build_reaction_from_string(self, reaction_string, verbose=True,
+    def build_reaction_from_string(self, reaction_str, verbose=True,
                                    fwd_arrow=None, rev_arrow=None,
                                    reversible_arrow=None, term_split="+"):
-        """Build a reaction by parsing a string of the reaction equation.
+        """Build a reaction from reaction equation reaction_str using parser.
 
         Takes a string representation of the reaction and uses the
         specifications supplied in the optional arguments to infer a set of
@@ -976,11 +917,16 @@ class MassReaction(Object):
         reaction. It also infers the refversibility of the reaction from the
         reaction arrow.
 
+        For example:
+            'A + B <=> C' for reversible reactions, A & B are reactants.
+            'A + B --> C' for irreversible reactions, A & B are reactants.
+            'A + B <-- C' for irreversible reactions, A & B are products.
+
         The change is reverted upon exit when using the MassModel as a context.
 
         Parameters
         ----------
-        reaction_string: str
+        reaction_str: str
             A string containing the reaction formula (equation).
         verbose: bool, optional
             Setting the verbosity of the function.
@@ -995,60 +941,64 @@ class MassReaction(Object):
 
         """
         # Set the arrows
-        forward_arrow_finder = _FORWARD_ARROW_FINDER_RE if fwd_arrow is None \
+        forward_arrow_finder = _forward_arrow_finder if fwd_arrow is None \
             else re.compile(re.escape(fwd_arrow))
-        reverse_arrow_finder = _REVERSE_ARROW_FINDER_RE if rev_arrow is None \
+        reverse_arrow_finder = _reverse_arrow_finder if rev_arrow is None \
             else re.compile(re.escape(rev_arrow))
-        reversible_arrow_finder = _REVERSE_ARROW_FINDER_RE \
+        reversible_arrow_finder = _reversible_arrow_finder \
             if reversible_arrow is None \
             else re.compile(re.escape(reversible_arrow))
-
         if self._model is None:
-            warn("No MassModel found")
+            warn("no model found")
             model = None
         else:
             model = self._model
-        found_compartments = _COMPARTMENT_FINDER_RE.findall(reaction_string)
+        found_compartments = compartment_finder.findall(reaction_str)
         if len(found_compartments) == 1:
             compartment = found_compartments[0]
+            reaction_str = compartment_finder.sub("", reaction_str)
         else:
             compartment = ""
 
+        # Parse reaction string to seperate reactants and products
+        def split_reaction_str(arrow_match):
+            left_str = reaction_str[:arrow_match.start()].strip()
+            right_str = reaction_str[arrow_match.end():].strip()
+            return left_str, right_str
+
         # Check for a reversible reaction
-        arrow_match = reversible_arrow_finder.search(reaction_string)
+        arrow_match = reversible_arrow_finder.search(reaction_str)
         if arrow_match is not None:
             # Set reversibility, determine the reactants and products.
-            self._reversible = True
+            self.reversible = True
             # Reactants are on the left, products are on the right.
-            reactant_str = reaction_string[:arrow_match.start()].strip()
-            product_str = reaction_string[arrow_match.end():].strip()
+            reactant_str, product_str = split_reaction_str(arrow_match)
         else:  # Irreversible reaction
             # Try the forward arrow
-            arrow_match = forward_arrow_finder.search(reaction_string)
+            arrow_match = forward_arrow_finder.search(reaction_str)
             if arrow_match is not None:
                 # Set reversibility, determine the reactants and products.
-                self._reversible = False
+                self.reversible = False
                 # Reactants are on the left, products are on the right.
-                reactant_str = reaction_string[:arrow_match.start()].strip()
-                product_str = reaction_string[arrow_match.end():].strip()
+                reactant_str, product_str = split_reaction_str(arrow_match)
             else:
                 # Try the reverse arrow
-                arrow_match = reverse_arrow_finder.search(reaction_string)
+                arrow_match = reverse_arrow_finder.search(reaction_str)
                 if arrow_match is not None:
                     # Set reversibility, determine the reactants and products.
-                    self._reversible = False
+                    self.reversible = False
                     # Reactants are on the right, products are on the left.
-                    product_str = reaction_string[:arrow_match.start()].strip()
-                    reactant_str = reaction_string[arrow_match.end():].strip()
+                    product_str, reactant_str = split_reaction_str(arrow_match)
                 else:
                     raise ValueError("No suitable arrow found in '{0}'"
-                                     .format(reaction_string))
+                                     .format(reaction_str))
 
             self.subtract_metabolites(self.metabolites, combine=True)
 
             for substr, factor in ((reactant_str, -1), (product_str, 1)):
-                if substr:
+                if not substr:
                     continue
+
                 for term in substr.split(term_split):
                     term = term.strip()
                     if term.lower() == "nothing":
@@ -1070,11 +1020,8 @@ class MassReaction(Object):
                     self.add_metabolites({met: num})
 
     def knock_out(self):
-        """Knockout the reaction by setting its rate constants to 0."""
-        self.forward_rate_constant = 0.
-        if self._reversible:
-            self.reverse_rate_constant = 0.
-            self.equilibrium_constant = _INF
+        """Knockout reaction by setting its bounds to zero."""
+        self.lower_bound, self.upper_bound = (0, 0)
 
     # Internal
     def _associate_gene(self, cobra_gene):
@@ -1186,7 +1133,7 @@ class MassReaction(Object):
     def __setstate__(self, state):
         """Set state of MassReaction object upon unpickling.
 
-        Probably not necessary to set _model as the mass.MassModel that
+        Probably not necessary to set _model as the MassModel that
         contains self sets the _model attribute for all metabolites and genes
         in the reaction.
 

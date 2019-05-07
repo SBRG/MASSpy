@@ -22,7 +22,7 @@ def to_json(model, sort=False, **kwargs):
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel object to represent.
     sort: bool, optional
         Whether to sort the metabolites, reactions, and genes or maintain the
@@ -58,7 +58,7 @@ def from_json(document):
 
     Returns
     -------
-    mass.MassModel
+    MassModel:
         The MassModel as represented in the JSON documentation.
 
     See Also
@@ -79,7 +79,7 @@ def save_json_model(model, filename, sort=False, pretty=False,
 
     Parameters
     ----------
-    model: mass.MassModel
+    model: MassModel
         The MassModel object to represent.
     filename: str or file-like
         File path or descriptor the the JSON representation should be
@@ -132,7 +132,7 @@ def load_json_model(filename):
 
     Returns
     -------
-    mass.MassModel
+    MassModel:
         The MassModel as represented in the JSON documentation.
 
     See Also
@@ -198,6 +198,7 @@ json_schema = {
                     },
                     "notes": {"type": "object"},
                     "annotation": {"type": "object"},
+                    "enzyme_id": {"type": "string"},
                 },
             },
             "required": ["id", "name", "reversible", "metabolites",
@@ -246,7 +247,6 @@ json_schema = {
                         },
                     },
                     "enzyme_id": {"type": "string"},
-                    "enzyme_name": {"type": "string"},
 
                 },
                 "required": ["id", "name"],
@@ -267,7 +267,7 @@ json_schema = {
                 "additionalProperties": False,
             },
         },
-        "enzymes": {
+        "enzyme_modules": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -275,36 +275,36 @@ json_schema = {
                     "id": {"type": "string"},
                     "name": {"type": "string"},
                     "subsystem": {"type": "string"},
-                    "ligands": {
-                        "type": "array", 
+                    "enzyme_module_ligands": {
+                        "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    "enzyme_forms": {
-                        "type": "array", 
+                    " enzyme_module_forms": {
+                        "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    "enzyme_reactions": {
-                        "type": "array", 
+                    "enzyme_module_reactions": {
+                        "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    "categorized_ligands": {
-                        "type": "object", 
+                    "enzyme_module_ligands_categorized": {
+                        "type": "object",
                         "allOf": {
-                            "type": "array", 
+                            "type": "array",
                             "allOf": {"type": "string"}
                         },
                     },
-                    "categorized_enzyme_forms": {
-                        "type": "object", 
+                    "enzyme_module_form_categorizeds": {
+                        "type": "object",
                         "allOf": {
-                            "type": "array", 
+                            "type": "array",
                             "allOf": {"type": "string"}
                         },
                     },
-                    "categorized_enzyme_reactions": {
-                        "type": "object", 
+                    "enzyme_module_reactions_categorized": {
+                        "type": "object",
                         "allOf": {
-                            "type": "array", 
+                            "type": "array",
                             "allOf": {"type": "string"}
                         },
                     },
@@ -360,36 +360,36 @@ json_schema = {
         },
         "notes": {"type": "object"},
         "annotation": {"type": "object"},
-        "ligands": {
-            "type": "array", 
+        "enzyme_module_ligands": {
+            "type": "array",
             "allOf": {"type": "string"}
         },
-        "enzyme_forms": {
-            "type": "array", 
+        " enzyme_module_forms": {
+            "type": "array",
             "allOf": {"type": "string"}
         },
-        "enzyme_reactions": {
-            "type": "array", 
+        "enzyme_module_reactions": {
+            "type": "array",
             "allOf": {"type": "string"}
         },
-        "_categorized_ligands": {
-            "type": "object", 
+        "_enzyme_module_ligands_categorized": {
+            "type": "object",
             "allOf": {
-                "type": "array", 
+                "type": "array",
                 "allOf": {"type": "string"}
             },
         },
-        "_categorized_enzyme_forms": {
-            "type": "object", 
+        "_enzyme_module_form_categorizeds": {
+            "type": "object",
             "allOf": {
-                "type": "array", 
+                "type": "array",
                 "allOf": {"type": "string"}
             },
         },
-        "_categorized_enzyme_reactions": {
-            "type": "object", 
+        "_enzyme_module_reactions_categorized": {
+            "type": "object",
             "allOf": {
-                "type": "array", 
+                "type": "array",
                 "allOf": {"type": "string"}
             },
         },

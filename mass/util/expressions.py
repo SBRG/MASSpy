@@ -12,6 +12,83 @@ from sympy.physics.vector import dynamicsymbols
 
 
 # Public
+def Keq2k(sympy_expr, simplify=True):
+    """Replace all Keq symbols with kf/kr in in sympy expressions.
+
+    Parameters
+    ----------
+    sympy_expr: sympy.Basic dict, or list
+        A sympy expression, a list of sympy expressions, or a dictionary with
+        sympy expressions as the values.
+    simplify: bool, optional
+        If True, simplify the expression after making the substitution.
+        Otherwise leave the expression as is.
+
+    Returns
+    -------
+    new_expr: sympy.Basic, dict, or list
+        The sympy expression(s) with the substitution made, returned as the
+        same type as the original input.
+
+    """
+    new_expr = _apply_func_to_expressions(
+        sympy_expr, _replace_rate_symbol, args=["Keq", simplify])
+    return new_expr
+
+
+def k2Keq(sympy_expr, simplify=True):
+    """Replace all kr symbols with kf/Keq in in sympy expressions.
+
+    Parameters
+    ----------
+    sympy_expr: sympy expression, dict, or list
+        A sympy expression, a list of sympy expressions, or a dictionary with
+        sympy expressions as the values.
+    simplify: bool, optional
+        If True, simplify the expression after making the substitution.
+        Otherwise leave the expression as is.
+
+    Returns
+    -------
+    new_expr: sympy expression, dict, or list
+        The sympy expression(s) with the substitution made, returned as the
+        same type as the original input.
+
+    """
+    new_expr = _apply_func_to_expressions(
+        sympy_expr, _replace_rate_symbol, args=["kr", simplify])
+    return new_expr
+
+
+def strip_time(sympy_expr):
+    """Strip the time dependency in sympy expressions.
+
+    Parameters
+    ----------
+    sympy_expr: sympy.Basic, dict, or list
+        A sympy expression, a list of sympy expressions, or a dictionary with
+        sympy expressions as the values.
+
+    Returns
+    -------
+    stripped_expr: sympy.Basic, dict, or list
+        The sympy expression(s) without the time dependency, returned as the
+        same type as the original input.
+
+    """
+    # Helper function to strip a single expression
+    def _strip_single_expr(expr):
+        if not isinstance(expr, sym.Basic):
+            raise TypeError("{0} is not a sympy expression".format(str(expr)))
+        funcs = list(expr.atoms(sym.Function))
+        symbols = list(sym.Symbol(str(f)[:-3]) for f in funcs)
+        return expr.subs(dict(zip(funcs, symbols)))
+
+    stripped_expr = _apply_func_to_expressions(sympy_expr, _strip_single_expr)
+
+    return stripped_expr
+
+
 def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
                       update_reaction=False):
     """Generate the rate law for the reaction.
@@ -205,7 +282,7 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     custom_rate_expr = custom_rate.replace("(t)", "")
 
     # Get metabolites as symbols if they are in the custom rate law
-    obj_iter = (iterkeys(reaction.metabolites) 
+    obj_iter = (iterkeys(reaction.metabolites)
                 if model is None else model.metabolites)
     met_syms = {str(met): _mk_met_func(met)
                 for met in obj_iter if re.search(str(met), custom_rate_expr)}
@@ -236,6 +313,63 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
 
 
 # Internal
+def _apply_func_to_expressions(sympy_expr, function, args=None):
+    """Apply the given function to alter each sympy expression provided.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if args is None:
+        def func(expr):
+            return function(expr)
+    else:
+        def func(expr):
+            return function(expr, *args)
+
+    if isinstance(sympy_expr, dict):
+        new_expr = dict((k, func(expr)) for k, expr in iteritems(sympy_expr))
+    elif hasattr(sympy_expr, "__iter__"):
+        new_expr = list(func(expr) for expr in sympy_expr)
+    else:
+        new_expr = func(sympy_expr)
+
+    return new_expr
+
+
+def _replace_rate_symbol(sympy_expr, to_replace, simplify):
+    """Replace rate parameters with equivalents in terms of other parameters.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    identifiers = [str(symbol).split("_", 1)[1]
+                   for symbol in list(sympy_expr.atoms(sym.Symbol))
+                   if to_replace + "_" in str(symbol)]
+    # Return the expression if no Keq or kr found.
+    if not identifiers:
+        return sympy_expr
+
+    substituion_dict = {}
+    for param_id in identifiers:
+        kf, kr, Keq = (sym.Symbol(param_type + "_" + str(param_id))
+                       for param_type in ["kf", "kr", "Keq"])
+        key, value = {"Keq": (Keq, kf / kr), "kr": (kr, kf / Keq)}[to_replace]
+        substituion_dict[key] = value
+
+    new_expr = sympy_expr.subs(substituion_dict)
+    if simplify:
+        if to_replace != "Keq" and len(identifiers) == 1:
+            new_expr = sym.collect(new_expr, kf)
+        else:
+            new_expr = sym.simplify(new_expr)
+
+    return new_expr
+
+
 def _ignore_h_and_h2o(reaction):
     """Remove hydrogen and water from reactions.
 

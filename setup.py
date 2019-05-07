@@ -29,7 +29,7 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.0a34",
+        version="0.1.0a36",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 'test/data/*',
             ]
         },
-        author="masspy development team at SBRG",
+        author="Zachary B. Haiman",
         author_email="zhaiman@eng.ucsd.edu",
         maintainer="Zachary B. Haiman",
         maintainer_email="zhaiman@eng.ucsd.edu",
@@ -76,14 +76,13 @@ if __name__ == "__main__":
             'License :: OSI Approved :: GNU General Public License v2'
                 ' or later (GPLv2+)',
             'Operating System :: OS Independent',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: Implementation :: CPython',
             'Topic :: Scientific/Engineering',
             'Topic :: Scientific/Engineering :: Bio-Informatics'
         ],
-        python_requires='>=3.5',
+        python_requires='>=3.6',
         include_package_data=True,
         platforms="GNU/Linux, Mac OS X >= 10.7, Microsoft Windows >= 7",
         **setup_kwargs
