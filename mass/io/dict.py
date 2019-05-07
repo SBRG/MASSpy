@@ -74,15 +74,15 @@ _OPTIONAL_GENE_ATTRIBUTES = {
     "annotation": {}
 }
 
-_REQUIRED_ENZYME_ATTRIBUTES = [
+_REQUIRED_ENZYMEMODULE_ATTRIBUTES = [
     "id", "name", "enzyme_module_ligands", "enzyme_module_forms",
     "enzyme_module_reactions"]
-_ORDERED_OPTIONAL_ENZYME_KEYS = [
+_ORDERED_OPTIONAL_ENZYMEMODULE_KEYS = [
     key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
-    if key not in _REQUIRED_ENZYME_ATTRIBUTES + ["S", "model"]]
-_OPTIONAL_ENZYME_ATTRIBUTES = OrderedDict({
+    if key not in _REQUIRED_ENZYMEMODULE_ATTRIBUTES + ["S", "model"]]
+_OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
     key: _ORDERED_ENZYMEMODULE_DICT_DEFAULTS[key]
-    for key in _ORDERED_OPTIONAL_ENZYME_KEYS
+    for key in _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
@@ -257,19 +257,19 @@ def enzyme_to_dict(enzyme):
     """
     # Turn object into an OrderedDict with the required attributes
     new_enzyme = OrderedDict()
-    for key in _REQUIRED_ENZYME_ATTRIBUTES:
+    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES:
         new_enzyme[key] = _fix_type(getattr(enzyme, key))
 
     # Update with any opitonal attributes that are not their defaults.
-    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYME_ATTRIBUTES,
-                     _ORDERED_OPTIONAL_ENZYME_KEYS)
+    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEMODULE_ATTRIBUTES,
+                     _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS)
 
     # Store objects and expressions as string for the attributes
-    for key in _REQUIRED_ENZYME_ATTRIBUTES[2:]:
+    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]:
         new_enzyme[key] = [i.id for i in getattr(enzyme, key)]
         # Repeat for categorized attribute
         key += "_categorized"
-        if getattr(enzyme, key) != _OPTIONAL_ENZYME_ATTRIBUTES[key]:
+        if getattr(enzyme, key) != _OPTIONAL_ENZYMEMODULE_ATTRIBUTES[key]:
             new_enzyme[key] = {
                 category: [i.id for i in old_dictlist]
                 for category, old_dictlist in iteritems(getattr(enzyme, key))}
@@ -371,7 +371,7 @@ def model_from_dict(obj):
     """
     if "reactions" not in obj:
         raise ValueError("Object has no reactions attribute. Cannot load.")
-    if all([k in obj for k in _REQUIRED_ENZYME_ATTRIBUTES[2:]]):
+    if all([k in obj for k in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]]):
         model = EnzymeModule(obj["id"])
     else:
         model = MassModel(obj["id"])
@@ -420,7 +420,7 @@ def model_from_dict(obj):
         if k in _ORDERED_OPTIONAL_MODEL_KEYS or k == "subsystem":
             setattr(model, k, v)
         # Update with EnzymeModule attributes if obj represents an EnzymeModule
-        elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYME_KEYS:
+        elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS:
             model.__class__.__dict__[k.lstrip("_")].fset(model, v)
 
     model.modules = set(sorted(model.modules))

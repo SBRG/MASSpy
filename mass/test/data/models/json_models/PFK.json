@@ -1,5 +1,6 @@
 {
-    "_categorized_enzyme_forms": {
+    "_enzyme_concentration_total": 3.3e-05,
+    "_enzyme_module_forms_categorized": {
         "Relaxed": [
             "pfk_R0_AF_c",
             "pfk_R0_A_c",
@@ -25,7 +26,26 @@
             "pfk_T4_c"
         ]
     },
-    "_categorized_enzyme_reactions": {
+    "_enzyme_module_ligands_categorized": {
+        "Activators": [
+            "amp_c"
+        ],
+        "Cofactors": [
+            "atp_c"
+        ],
+        "Inhibitors": [
+            "atp_c"
+        ],
+        "Products": [
+            "adp_c",
+            "fdp_c",
+            "h_c"
+        ],
+        "Substrates": [
+            "f6p_c"
+        ]
+    },
+    "_enzyme_module_reactions_categorized": {
         "R/T transition": [
             "PFK_L"
         ],
@@ -63,26 +83,6 @@
             "PFK_R42"
         ]
     },
-    "_categorized_ligands": {
-        "Activators": [
-            "amp_c"
-        ],
-        "Cofactors": [
-            "atp_c"
-        ],
-        "Inhibitors": [
-            "atp_c"
-        ],
-        "Products": [
-            "adp_c",
-            "fdp_c",
-            "h_c"
-        ],
-        "Substrates": [
-            "f6p_c"
-        ]
-    },
-    "_enzyme_concentration_total": 3.3e-05,
     "_enzyme_net_flux": 1.12,
     "_enzyme_net_flux_equation": "kf_PFK*(pfk_R0_AF_c(t) + pfk_R1_AF_c(t) + pfk_R2_AF_c(t) + pfk_R3_AF_c(t) + pfk_R4_AF_c(t))",
     "compartments": {
@@ -125,7 +125,7 @@
         "PFK_T3": "kf_PFK_I*(2*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t)/Keq_PFK_I)",
         "PFK_T4": "kf_PFK_I*(atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t)/Keq_PFK_I)"
     },
-    "enzyme_forms": [
+    "enzyme_module_forms": [
         "pfk_R0_c",
         "pfk_R0_A_c",
         "pfk_R0_AF_c",
@@ -147,7 +147,15 @@
         "pfk_R4_AF_c",
         "pfk_T4_c"
     ],
-    "enzyme_reactions": [
+    "enzyme_module_ligands": [
+        "f6p_c",
+        "fdp_c",
+        "atp_c",
+        "adp_c",
+        "amp_c",
+        "h_c"
+    ],
+    "enzyme_module_reactions": [
         "PFK_R01",
         "PFK_R02",
         "PFK_R03",
@@ -173,7 +181,7 @@
         "PFK_R43",
         "PFK_L"
     ],
-    "enzymes": [],
+    "enzyme_modules": [],
     "genes": [],
     "id": "PFK",
     "initial_conditions": {
@@ -204,14 +212,6 @@
         "pfk_T3_c": 1.243797e-06,
         "pfk_T4_c": 4.975186e-06
     },
-    "ligands": [
-        "f6p_c",
-        "fdp_c",
-        "atp_c",
-        "adp_c",
-        "amp_c",
-        "h_c"
-    ],
     "metabolites": [
         {
             "_initial_condition": 0.0198,
@@ -268,10 +268,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]",
             "id": "pfk_R0_c",
-            "name": "Phosphofructokinase"
+            "name": "PFK"
         },
         {
             "_bound_catalytic": {
@@ -282,10 +281,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C10H12N5O13P3",
             "id": "pfk_R0_A_c",
-            "name": "Phosphofructokinase-atp complex"
+            "name": "PFK-atp complex"
         },
         {
             "_bound_catalytic": {
@@ -297,10 +295,9 @@
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C16H23N5O22P4",
             "id": "pfk_R0_AF_c",
-            "name": "Phosphofructokinase-atp-f6p complex"
+            "name": "PFK-atp-f6p complex"
         },
         {
             "_bound_catalytic": {},
@@ -311,10 +308,9 @@
             "charge": -2,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C10H12N5O7P1",
             "id": "pfk_R1_c",
-            "name": "Phosphofructokinase; 1 amp"
+            "name": "PFK; 1 amp"
         },
         {
             "_bound_catalytic": {
@@ -327,10 +323,9 @@
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C20H24N10O20P4",
             "id": "pfk_R1_A_c",
-            "name": "Phosphofructokinase-atp complex; 1 amp"
+            "name": "PFK-atp complex; 1 amp"
         },
         {
             "_bound_catalytic": {
@@ -344,10 +339,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C26H35N10O29P5",
             "id": "pfk_R1_AF_c",
-            "name": "Phosphofructokinase-atp-f6p complex; 1 amp"
+            "name": "PFK-atp-f6p complex; 1 amp"
         },
         {
             "_bound_catalytic": {},
@@ -358,10 +352,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C20H24N10O14P2",
             "id": "pfk_R2_c",
-            "name": "Phosphofructokinase; 2 amp"
+            "name": "PFK; 2 amp"
         },
         {
             "_bound_catalytic": {
@@ -374,10 +367,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C30H36N15O27P5",
             "id": "pfk_R2_A_c",
-            "name": "Phosphofructokinase-atp complex; 2 amp"
+            "name": "PFK-atp complex; 2 amp"
         },
         {
             "_bound_catalytic": {
@@ -391,10 +383,9 @@
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C36H47N15O36P6",
             "id": "pfk_R2_AF_c",
-            "name": "Phosphofructokinase-atp-f6p complex; 2 amp"
+            "name": "PFK-atp-f6p complex; 2 amp"
         },
         {
             "_bound_catalytic": {},
@@ -405,10 +396,9 @@
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C30H36N15O21P3",
             "id": "pfk_R3_c",
-            "name": "Phosphofructokinase; 3 amp"
+            "name": "PFK; 3 amp"
         },
         {
             "_bound_catalytic": {
@@ -421,10 +411,9 @@
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C40H48N20O34P6",
             "id": "pfk_R3_A_c",
-            "name": "Phosphofructokinase-atp complex; 3 amp"
+            "name": "PFK-atp complex; 3 amp"
         },
         {
             "_bound_catalytic": {
@@ -438,10 +427,9 @@
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C46H59N20O43P7",
             "id": "pfk_R3_AF_c",
-            "name": "Phosphofructokinase-atp-f6p complex; 3 amp"
+            "name": "PFK-atp-f6p complex; 3 amp"
         },
         {
             "_bound_catalytic": {},
@@ -452,10 +440,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C40H48N20O28P4",
             "id": "pfk_R4_c",
-            "name": "Phosphofructokinase; 4 amp"
+            "name": "PFK; 4 amp"
         },
         {
             "_bound_catalytic": {
@@ -468,10 +455,9 @@
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C50H60N25O41P7",
             "id": "pfk_R4_A_c",
-            "name": "Phosphofructokinase-atp complex; 4 amp"
+            "name": "PFK-atp complex; 4 amp"
         },
         {
             "_bound_catalytic": {
@@ -485,10 +471,9 @@
             "charge": -14,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C56H71N25O50P8",
             "id": "pfk_R4_AF_c",
-            "name": "Phosphofructokinase-atp-f6p complex; 4 amp"
+            "name": "PFK-atp-f6p complex; 4 amp"
         },
         {
             "_bound_catalytic": {},
@@ -497,10 +482,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]",
             "id": "pfk_T0_c",
-            "name": "Phosphofructokinase"
+            "name": "PFK"
         },
         {
             "_bound_catalytic": {},
@@ -511,10 +495,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C10H12N5O13P3",
             "id": "pfk_T1_c",
-            "name": "Phosphofructokinase; 1 atp"
+            "name": "PFK; 1 atp"
         },
         {
             "_bound_catalytic": {},
@@ -525,10 +508,9 @@
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C20H24N10O26P6",
             "id": "pfk_T2_c",
-            "name": "Phosphofructokinase; 2 atp"
+            "name": "PFK; 2 atp"
         },
         {
             "_bound_catalytic": {},
@@ -539,10 +521,9 @@
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C30H36N15O39P9",
             "id": "pfk_T3_c",
-            "name": "Phosphofructokinase; 3 atp"
+            "name": "PFK; 3 atp"
         },
         {
             "_bound_catalytic": {},
@@ -553,10 +534,9 @@
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PFK",
-            "enzyme_name": "Phosphofructokinase",
             "formula": "[PFK]-C40H48N20O52P12",
             "id": "pfk_T4_c",
-            "name": "Phosphofructokinase; 4 atp"
+            "name": "PFK; 4 atp"
         }
     ],
     "name": "Phosphofructokinase",
@@ -565,6 +545,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R01",
             "metabolites": {
@@ -579,6 +560,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R02",
             "metabolites": {
@@ -594,6 +576,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R03",
             "metabolites": {
@@ -610,6 +593,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R10",
             "metabolites": {
@@ -624,6 +608,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R11",
             "metabolites": {
@@ -638,6 +623,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R12",
             "metabolites": {
@@ -653,6 +639,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R13",
             "metabolites": {
@@ -669,6 +656,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R20",
             "metabolites": {
@@ -683,6 +671,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R21",
             "metabolites": {
@@ -697,6 +686,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R22",
             "metabolites": {
@@ -712,6 +702,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R23",
             "metabolites": {
@@ -728,6 +719,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R30",
             "metabolites": {
@@ -742,6 +734,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R31",
             "metabolites": {
@@ -756,6 +749,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R32",
             "metabolites": {
@@ -771,6 +765,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R33",
             "metabolites": {
@@ -787,6 +782,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R40",
             "metabolites": {
@@ -801,6 +797,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R41",
             "metabolites": {
@@ -815,6 +812,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R42",
             "metabolites": {
@@ -830,6 +828,7 @@
             "_lower_bound": 0.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_R43",
             "metabolites": {
@@ -848,6 +847,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_L",
             "metabolites": {
@@ -861,6 +861,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_T1",
             "metabolites": {
@@ -875,6 +876,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_T2",
             "metabolites": {
@@ -889,6 +891,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_T3",
             "metabolites": {
@@ -903,6 +906,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "PFK",
             "gene_reaction_rule": "",
             "id": "PFK_T4",
             "metabolites": {
