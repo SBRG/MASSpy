@@ -2,7 +2,7 @@
     "compartments": {
         "c": "Cytosol"
     },
-    "enzymes": [],
+    "enzyme_modules": [],
     "fixed_concentrations": {
         "ade_e": 0.001,
         "adn_e": 0.0012,

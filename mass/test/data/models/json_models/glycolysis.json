@@ -2,7 +2,7 @@
     "compartments": {
         "c": "Cytosol"
     },
-    "enzymes": [],
+    "enzyme_modules": [],
     "fixed_concentrations": {
         "amp_e": 1,
         "glc__D_e": 1,
@@ -565,7 +565,7 @@
         },
         {
             "_equilibrium_constant": 1,
-            "_forward_rate_constant": 828.0,
+            "_forward_rate_constant": 0.26,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,

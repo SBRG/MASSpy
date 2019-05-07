@@ -1,5 +1,6 @@
 {
-    "_categorized_enzyme_forms": {
+    "_enzyme_concentration_total": 0.001,
+    "_enzyme_module_forms_categorized": {
         "Free": [
             "g6pdh2r_GN_P_c",
             "g6pdh2r_GN_c",
@@ -12,7 +13,23 @@
             "g6pdh2r_N_PI_c"
         ]
     },
-    "_categorized_enzyme_reactions": {
+    "_enzyme_module_ligands_categorized": {
+        "Cofactors": [
+            "nadp_c"
+        ],
+        "Inhibitors": [
+            "atp_c"
+        ],
+        "Products": [
+            "_6pgl_c",
+            "h_c",
+            "nadph_c"
+        ],
+        "Substrates": [
+            "g6p_c"
+        ]
+    },
+    "_enzyme_module_reactions_categorized": {
         "_6pgl_c release": [
             "G6PDH2r_4"
         ],
@@ -33,29 +50,12 @@
             "G6PDH2r_2"
         ]
     },
-    "_categorized_ligands": {
-        "Cofactors": [
-            "nadp_c"
-        ],
-        "Inhibitors": [
-            "atp_c"
-        ],
-        "Products": [
-            "_6pgl_c",
-            "h_c",
-            "nadph_c"
-        ],
-        "Substrates": [
-            "g6p_c"
-        ]
-    },
-    "_enzyme_concentration_total": 0.001,
     "_enzyme_net_flux": 0.21,
     "_enzyme_net_flux_equation": "kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7",
     "compartments": {
         "c": "Cytosol"
     },
-    "enzyme_forms": [
+    "enzyme_module_forms": [
         "g6pdh2r_c",
         "g6pdh2r_G_c",
         "g6pdh2r_GN_c",
@@ -64,7 +64,15 @@
         "g6pdh2r_N_PI_c",
         "g6pdh2r_A_CI_c"
     ],
-    "enzyme_reactions": [
+    "enzyme_module_ligands": [
+        "g6p_c",
+        "_6pgl_c",
+        "nadp_c",
+        "nadph_c",
+        "atp_c",
+        "h_c"
+    ],
+    "enzyme_module_reactions": [
         "G6PDH2r_1",
         "G6PDH2r_2",
         "G6PDH2r_3",
@@ -73,7 +81,7 @@
         "G6PDH2r_6",
         "G6PDH2r_7"
     ],
-    "enzymes": [],
+    "enzyme_modules": [],
     "genes": [],
     "id": "G6PDH2r",
     "initial_conditions": {
@@ -91,14 +99,6 @@
         "nadp_c": 0.0002,
         "nadph_c": 0.0658
     },
-    "ligands": [
-        "g6p_c",
-        "_6pgl_c",
-        "nadp_c",
-        "nadph_c",
-        "atp_c",
-        "h_c"
-    ],
     "metabolites": [
         {
             "_initial_condition": 0.0486,
@@ -155,10 +155,9 @@
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]",
             "id": "g6pdh2r_c",
-            "name": "Glucose 6-phosphate dehydrogenase"
+            "name": "G6PDH2r"
         },
         {
             "_bound_catalytic": {
@@ -169,10 +168,9 @@
             "charge": -2,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C6H11O9P1",
             "id": "g6pdh2r_G_c",
-            "name": "Glucose 6-phosphate dehydrogenase-g6p complex"
+            "name": "G6PDH2r-g6p complex"
         },
         {
             "_bound_catalytic": {
@@ -184,10 +182,9 @@
             "charge": -5,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C27H36O26P4N7",
             "id": "g6pdh2r_GN_c",
-            "name": "Glucose 6-phosphate dehydrogenase-g6p-nadp complex"
+            "name": "G6PDH2r-g6p-nadp complex"
         },
         {
             "_bound_catalytic": {
@@ -199,10 +196,9 @@
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C27H35O26P4N7",
             "id": "g6pdh2r_GN_P_c",
-            "name": "Glucose 6-phosphate dehydrogenase-_6pgl-nadph complex"
+            "name": "G6PDH2r-_6pgl-nadph complex"
         },
         {
             "_bound_catalytic": {
@@ -213,10 +209,9 @@
             "charge": -2,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C6H9O9P1",
             "id": "g6pdh2r_G_P_c",
-            "name": "Glucose 6-phosphate dehydrogenase-_6pgl complex"
+            "name": "G6PDH2r-_6pgl complex"
         },
         {
             "_bound_catalytic": {
@@ -227,10 +222,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C10H12N5O13P3",
             "id": "g6pdh2r_A_CI_c",
-            "name": "Glucose 6-phosphate dehydrogenase-atp complex"
+            "name": "G6PDH2r-atp complex"
         },
         {
             "_bound_catalytic": {
@@ -241,10 +235,9 @@
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "G6PDH2r",
-            "enzyme_name": "Glucose 6-phosphate dehydrogenase",
             "formula": "[G6PDH2r]-C21H26N7O17P3",
             "id": "g6pdh2r_N_PI_c",
-            "name": "Glucose 6-phosphate dehydrogenase-nadph complex"
+            "name": "G6PDH2r-nadph complex"
         }
     ],
     "name": "Glucose 6-phosphate dehydrogenase",
@@ -255,6 +248,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_1",
             "metabolites": {
@@ -271,6 +265,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_2",
             "metabolites": {
@@ -287,6 +282,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_3",
             "metabolites": {
@@ -303,6 +299,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_4",
             "metabolites": {
@@ -319,6 +316,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_5",
             "metabolites": {
@@ -335,6 +333,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_6",
             "metabolites": {
@@ -351,6 +350,7 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "enzyme_id": "G6PDH2r",
             "gene_reaction_rule": "",
             "id": "G6PDH2r_7",
             "metabolites": {

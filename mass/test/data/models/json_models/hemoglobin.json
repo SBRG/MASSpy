@@ -2,7 +2,7 @@
     "compartments": {
         "c": "Cytosol"
     },
-    "enzymes": [],
+    "enzyme_modules": [],
     "fixed_concentrations": {
         "o2_e": 0.0200788
     },
