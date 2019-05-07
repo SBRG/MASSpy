@@ -1655,9 +1655,9 @@ class MassModel(Object):
                     rev_arrow=rev_arrow, reversible_arrow=reversible_arrow,
                     term_split=term_split)
             except ValueError as e:
-                LOGGER.warn(
+                LOGGER.warnings(
                     "Failed to build reaction '%s' due to the "
-                    "following:\n%s".format(orig_reaction_str, str(e)))
+                    "following:\n%s" % (orig_reaction_str, str(e)))
                 continue
 
     def update_parameters(self, parameters):
@@ -1667,7 +1667,7 @@ class MassModel(Object):
             Reaction forward rate constant (kf)
             Reaction reverse rate constant (kr)
             Reaction equilibrium constant (Keq)
-            Reaction steady state flux (v)
+            Reaction flux (v)
             External metabolite concentrations for boundary reactions
             Custom Parameters
 
