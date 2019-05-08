@@ -1014,8 +1014,7 @@ class MassReaction(Object):
                     met = model.metabolites.get_by_id(met_id)
                 except KeyError:
                     if verbose:
-                        print("Unknown metabolite {0} created"
-                                .format(met_id))
+                        print("Unknown metabolite {0} created".format(met_id))
                     met = MassMetabolite(met_id)
                 self.add_metabolites({met: num})
 
