@@ -993,31 +993,31 @@ class MassReaction(Object):
                     raise ValueError("No suitable arrow found in '{0}'"
                                      .format(reaction_str))
 
-            self.subtract_metabolites(self.metabolites, combine=True)
+        self.subtract_metabolites(self.metabolites, combine=True)
 
-            for substr, factor in ((reactant_str, -1), (product_str, 1)):
-                if not substr:
+        for substr, factor in ((reactant_str, -1), (product_str, 1)):
+            if not substr:
+                continue
+
+            for term in substr.split(term_split):
+                term = term.strip()
+                if term.lower() == "nothing":
                     continue
-
-                for term in substr.split(term_split):
-                    term = term.strip()
-                    if term.lower() == "nothing":
-                        continue
-                    if " " in term:
-                        num_str, met_id = term.split()
-                        num = float(num_str.lstrip("(").rstrip(")")) * factor
-                    else:
-                        met_id = term
-                        num = factor
-                    met_id += compartment
-                    try:
-                        met = model.metabolites.get_by_id(met_id)
-                    except KeyError:
-                        if verbose:
-                            print("Unknown metabolite {0} created"
-                                  .format(met_id))
-                        met = MassMetabolite(met_id)
-                    self.add_metabolites({met: num})
+                if " " in term:
+                    num_str, met_id = term.split()
+                    num = float(num_str.lstrip("(").rstrip(")")) * factor
+                else:
+                    met_id = term
+                    num = factor
+                met_id += compartment
+                try:
+                    met = model.metabolites.get_by_id(met_id)
+                except KeyError:
+                    if verbose:
+                        print("Unknown metabolite {0} created"
+                                .format(met_id))
+                    met = MassMetabolite(met_id)
+                self.add_metabolites({met: num})
 
     def knock_out(self):
         """Knockout reaction by setting its bounds to zero."""

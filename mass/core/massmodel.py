@@ -226,6 +226,7 @@ class MassModel(Object):
         else:
             setattr(self, "_compartments", {})
 
+
     @property
     def units(self):
         """Return a dictionary of stored model units."""
@@ -1634,15 +1635,20 @@ class MassModel(Object):
         """
         # Use the reaction split arguments to get the reactions and strip them
         reaction_list = [reaction_str.strip() 
-                         for reaction_str in model_str.split(reaction_split)]
+                         for reaction_str in model_str.split(reaction_split)
+                         if reaction_str.strip()]
         
+        # Iterate through reaction strings
         for orig_reaction_str in reaction_list:
+            # Split the reaction ID from the reaction equation
             reaction_id, reaction_str = (
                 s.strip() for s in orig_reaction_str.split(reaction_id_split))
             try:
+                # Cannot build reaction without an ID
                 if not reaction_id:
                     raise ValueError("No reaction ID found in '{0}'"
-                                    .format(orig_reaction_str))
+                                     .format(orig_reaction_str))
+                # Create a new reaction if one does not already exist.
                 try:
                     reaction = self.reactions.get_by_id(reaction_id)
                 except KeyError:
@@ -1650,15 +1656,19 @@ class MassModel(Object):
                         print("New reaction {0} created".format(reaction_id))
                     reaction = MassReaction(reaction_id)
                 self.add_reactions(reaction)
+                # Build the reaction from the reaction string
                 reaction.build_reaction_from_string(
                     reaction_str, verbose=verbose, fwd_arrow=fwd_arrow,
                     rev_arrow=rev_arrow, reversible_arrow=reversible_arrow,
                     term_split=term_split)
             except ValueError as e:
+                # Log reactions that could not be built.
                 LOGGER.warnings(
                     "Failed to build reaction '%s' due to the "
                     "following:\n%s" % (orig_reaction_str, str(e)))
                 continue
+        # Ensure all pointers are updated.
+        self.repair(rebuild_index=True, rebuild_relationships=True)
 
     def update_parameters(self, parameters):
         """Update the parameters associated with the MassModel.
