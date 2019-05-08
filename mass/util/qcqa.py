@@ -12,13 +12,12 @@ import sympy as sym
 
 from tabulate import tabulate
 
-from mass import config as _config
 from mass.util.expressions import _mk_met_func
 from mass.util.util import ensure_iterable
 
 # Global
 _T_SYM = sym.Symbol("t")
-_ZERO_TOL = _config.ZERO_TOLERANCE
+_ZERO_TOL = 1e-8
 
 
 def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,

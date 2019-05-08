@@ -18,11 +18,10 @@ import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-from mass import config as _config
 from mass.analysis import linear
 from mass.util.util import ensure_iterable
 
-_ZERO_TOL = _config.ZERO_TOLERANCE
+_ZERO_TOL = 1e-8
 _FONTSIZES = [
     'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large']
 _LEGEND_LOCS = [
