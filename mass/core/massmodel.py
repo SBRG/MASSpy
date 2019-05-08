@@ -226,7 +226,6 @@ class MassModel(Object):
         else:
             setattr(self, "_compartments", {})
 
-
     @property
     def units(self):
         """Return a dictionary of stored model units."""
@@ -1634,16 +1633,21 @@ class MassModel(Object):
 
         """
         # Use the reaction split arguments to get the reactions and strip them
-        reaction_list = [reaction_str.strip() 
+        reaction_list = [reaction_str.strip()
                          for reaction_str in model_str.split(reaction_split)
                          if reaction_str.strip()]
-        
+
         # Iterate through reaction strings
         for orig_reaction_str in reaction_list:
             # Split the reaction ID from the reaction equation
-            reaction_id, reaction_str = (
-                s.strip() for s in orig_reaction_str.split(reaction_id_split))
+            split = orig_reaction_str.split(reaction_id_split)
             try:
+                if len(split) != 2:
+                    raise ValueError("Could not parse '{0}' for the reaction "
+                                     "ID and formula (equation).".format(
+                                         orig_reaction_str))
+                else:
+                    reaction_id, reaction_str = (s.strip() for s in split)
                 # Cannot build reaction without an ID
                 if not reaction_id:
                     raise ValueError("No reaction ID found in '{0}'"
@@ -1663,9 +1667,8 @@ class MassModel(Object):
                     term_split=term_split)
             except ValueError as e:
                 # Log reactions that could not be built.
-                LOGGER.warnings(
-                    "Failed to build reaction '%s' due to the "
-                    "following:\n%s" % (orig_reaction_str, str(e)))
+                warn("Failed to build reaction '{0}' due to the following:\n"
+                     "{1}".format(orig_reaction_str, str(e)))
                 continue
         # Ensure all pointers are updated.
         self.repair(rebuild_index=True, rebuild_relationships=True)
