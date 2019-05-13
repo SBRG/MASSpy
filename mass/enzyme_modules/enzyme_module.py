@@ -1128,10 +1128,10 @@ class EnzymeModule(MassModel):
     def copy(self):
         """Create a partial "deepcopy" of the EnzymeModule.
 
-        All of the MassMetabolite, MassReaction, Gene, EnzymeModuleForm, and
-        EnzymeModuleReaction objects, the initial conditions, fixed
-        concentrations, custom_rates, and the stoichiometric matrix are created
-        anew, but in a faster fashion than deepcopy.
+        All of the MassMetabolite, MassReaction, Gene, EnzymeModuleForm,
+        EnzymeModuleReaction, and EnzymeModuleDict objects, the boundary
+        conditions, custom_rates, custom_parameters, and the stoichiometric
+        matrix are created anew, but in a faster fashion than deepcopy.
 
         Notes
         -----
@@ -1141,12 +1141,14 @@ class EnzymeModule(MassModel):
         # Define a new model
         new_model = self.__class__()
         # Define items that will not be copied by their references
-        do_not_copy_by_ref = {
-            "metabolites", "reactions", "genes", "initial_conditions", "_S",
-            "custom_rates", "enzyme_module_ligands", "enzyme_module_forms",
+        do_not_copy_by_ref = [
+            "metabolites", "reactions", "genes", "enzyme_modules", "_S",
+            "enzyme_module_ligands", "enzyme_module_forms",
             "enzyme_module_reactions", "_enzyme_module_ligands_categorized",
             "_enzyme_module_forms_categorized",
-            "_enzyme_module_reactions_categorized", "notes", "annotation"}
+            "_enzyme_module_reactions_categorized", "boundary_conditions",
+            "custom_rates", "custom_parameters", "notes", "annotation",
+            "modules"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
@@ -1159,6 +1161,8 @@ class EnzymeModule(MassModel):
         new_model = self._copy_model_genes(new_model)
         # Copy the reactions and rates
         new_model = self._copy_model_reactions(new_model)
+        # Copy any existing enzyme_modules
+        new_model = self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
         new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                               dtype=self._dtype,
