@@ -21,11 +21,14 @@ from cobra.core.reaction import (
 from cobra.util.context import get_context, resettable
 
 from mass.core.massmetabolite import MassMetabolite
-from mass.util import expressions
+from mass.util.expressions import (
+    generate_disequilibrium_ratio, generate_mass_action_ratio,
+    generate_rate_law)
 
 
 # Global
 _INF = float("inf")
+_BOUNDARY_PREFIX = "bc_"
 
 
 class MassReaction(Object):
@@ -278,8 +281,8 @@ class MassReaction(Object):
         return getattr(self, "_compartments")
 
     @property
-    def exchange(self):
-        """Determine whether or not the reaction is an exchange reaction.
+    def boundary(self):
+        """Determine whether or not the reaction is a boundary reaction.
 
         Will return True if the reaction has no products or no reactants.
 
@@ -288,43 +291,30 @@ class MassReaction(Object):
         These are reactions with a sink or a source term (e.g. 'A --> ')
 
         """
-        return (len(self.metabolites) == 1 and not
-                (self.reactants and self.products))
+        return (len(self.metabolites) == 1
+                and not (self.reactants and self.products))
 
     @property
-    def external_metabolite(self):
-        """Return an 'external' metabolite for exchange reactions.
+    def boundary_metabolite(self):
+        """Return an 'boundary' metabolite for bounary reactions.
 
         Returns
         -------
-        external_metabolite: str
-            String representation of the 'external' metabolite of the exchange,
-            or None if the reaction is not considered exchange.
-
-        Warnings
-        --------
-        When generating the string representation of the 'external' metabolite,
-            any recognized pre-existing compartment is replace with 'e'.
-            Therefore it is highly recommended to use 'e' only to define an
-            external or extracellular compartment as 'e' prevent confusion and
-            possible errors from occuring.
+        boundary_metabolite: str
+            String representation of the boundary metabolite of the reaction,
+            or None if the reaction is not considered a boundary reaction.
 
         See Also
         --------
-        MassReaction.exchange
+        MassReaction.boundary
 
         """
-        if self.exchange:
-            for met in self.metabolites:
-                _c = re.search("^\w*\S(?!<\_)(\_\S+)$", met.id)
-                if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-                    external_metabolite = met.id.replace(_c.group(1), "_e")
-                else:
-                    external_metabolite = met.id + "_e"
+        if self.boundary:
+            bc_metabolite = _BOUNDARY_PREFIX + str(list(self.metabolites)[0])
         else:
-            external_metabolite = None
+            bc_metabolite = None
 
-        return external_metabolite
+        return bc_metabolite
 
     @property
     def genes(self):
@@ -437,6 +427,8 @@ class MassReaction(Object):
         """Return the symbol representation for the reaction flux."""
         if self.id is not None:
             return Symbol("v_" + self.id)
+        else:
+            return None
 
     @property
     def all_parameter_ids(self):
@@ -598,8 +590,7 @@ class MassReaction(Object):
         The rate law expression as a str or sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_rate_law(self, rate_type, sympy_expr,
-                                             update_reaction)
+        return generate_rate_law(self, rate_type, sympy_expr, update_reaction)
 
     def get_mass_action_ratio(self):
         """Get the mass action ratio of the reaction as a sympy expression.
@@ -609,7 +600,7 @@ class MassReaction(Object):
         The mass action ratio as a sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_mass_action_ratio(self)
+        return generate_mass_action_ratio(self)
 
     def get_disequilibrium_ratio(self):
         """Get the disequilibrium ratio of the reaction as a sympy expression.
@@ -619,7 +610,7 @@ class MassReaction(Object):
         The disequilibrium ratio as a sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_disequilibrium_ratio(self)
+        return generate_disequilibrium_ratio(self)
 
     def remove_from_model(self, remove_orphans=False):
         """Remove the reaction from the MassModel.
