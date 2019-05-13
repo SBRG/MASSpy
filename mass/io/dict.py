@@ -49,12 +49,13 @@ _OPTIONAL_ENZYMEMODULEREACTION_ATTRIBUTES = {}
 
 _REQUIRED_METABOLITE_ATTRIBUTES = ["id", "name"]
 _ORDERED_OPTIONAL_METABOLITE_KEYS = [
-    "formula", "charge", "compartment", "_initial_condition",
+    "formula", "charge", "compartment", "fixed", "_initial_condition",
     "_constraint_sense", "_bound", "notes", "annotation"]
 _OPTIONAL_METABOLITE_ATTRIBUTES = {
     "charge": None,
     "formula": None,
     "compartment": None,
+    "fixed": False,
     "_initial_condition": None,
     "_bound": 0,
     "_constraint_sense": "E",
@@ -86,11 +87,12 @@ _OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "description", "compartments", "modules", "units", "notes",
-    "annotation"]
+    "name", "description", "boundary_conditions", "compartments", "modules",
+    "units", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
     "description": "",
+    "boundary_conditions": {},
     "compartments": {},
     "modules": set(),
     "units": {},
@@ -336,8 +338,7 @@ def model_to_dict(model, sort=False):
         obj["genes"].sort(key=get_id)
         obj["enzyme_modules"].sort(key=get_id)
 
-    for key in ["initial_conditions", "fixed_concentrations",
-                "custom_rates", "custom_parameters"]:
+    for key in ["boundary_conditions", "custom_rates", "custom_parameters"]:
         values = getattr(model, key, {})
         if values:
             values = OrderedDict(
@@ -391,18 +392,10 @@ def model_from_dict(obj):
         model.enzyme_modules.extend([
             enzyme_from_dict(enz, model) for enz in obj["enzyme_modules"]])
 
-    # Add initial conditions to the model if they exist
-    if "initial_conditions" in obj:
-        model.update_initial_conditions({
-            model.metabolites.get_by_id(met): ic
-            for met, ic in iteritems(obj["initial_conditions"])})
-
-    # Add fixed concentrations to the model if they exist
-    if "fixed_concentrations" in obj:
-        model.add_fixed_concentrations(
-            dict((model.metabolites.get_by_id(met), ic)
-                 if met in model.metabolites else (str(met), ic)
-                 for met, ic in iteritems(obj["fixed_concentrations"])))
+    # Add boundary conditions to the model if they exist
+    if "boundary_conditions" in obj:
+        model.add_boundary_conditions({
+            met: bc for met, bc in iteritems(obj["boundary_conditions"])})
 
     # Add custom rates and any custom parameters if they exist
     if "custom_rates" in obj:

@@ -36,8 +36,8 @@ def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
     parameters: bool, optional
         If True, then check for undefined parameters in the model.
     concentrations: bool, optional
-        If True, then check for undefined initial conditions and fixed
-        concentrations in the model.
+        If True, then check for undefined initial and boundary conditions in
+        the model.
     fluxes: bool, optional
         If True, then check for undefined steady state fluxes in the model.
     superfluous: bool, optional
@@ -46,10 +46,10 @@ def qcqa_model(model, parameters=False, concentrations=False, fluxes=False,
         parameters are present.
     elemental: bool, optional
         If True, then check for elemental consistency in the model.
-        Exchange reactions are ignored.
+        Boundary reactions are ignored.
     thermodynamic: bool, optional
         If True, then check for thermodynamic consistency in the model.
-        Exchange reactions are ignored.
+        Boundary reactions are ignored.
     tol: float, optional
         The tolerance used in consistency checking. If None provided, the
         global zero tolerance is used.
@@ -110,7 +110,7 @@ def qcqa_simulation(simulation, model, parameters=False, concentrations=False,
         parameters are present.
     thermodynamic: bool, optional
         If True, then check for thermodynamic consistency in the model.
-        Exchange reactions are ignored.
+        boundary reactions are ignored.
     tol: float, optional
         The tolerance used in consistency checking. If None provided, the
         global zero tolerance is used.
@@ -335,9 +335,9 @@ def get_missing_initial_conditions(model, simulation=None,
         metabolite_list = model.metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
-    # Filter out fixed concentration metabolites
+    # Filter out 'boundary metabolites'
     missing = [met for met in metabolite_list
-               if met not in model.fixed_concentrations]
+               if met not in model.boundary_conditions]
 
     missing = [met for met in missing if met not in model.initial_conditions
                or model.initial_conditions[met] is None]
@@ -353,9 +353,9 @@ def get_missing_initial_conditions(model, simulation=None,
     return missing
 
 
-def get_missing_fixed_concentrations(model, simulation=None,
-                                     metabolite_list=None):
-    """Identify the missing fixed concentrations for metabolites in a model.
+def get_missing_boundary_conditions(model, simulation=None,
+                                    metabolite_list=None):
+    """Identify the missing boundary conditions for metabolites in a model.
 
     Parameters
     ----------
@@ -363,12 +363,12 @@ def get_missing_fixed_concentrations(model, simulation=None,
         The MassModel to inspect.
     metabolite_list : list of MassMetabolites, optional
         A list of MassMetabolite objects in the model to be checked.
-        If None provided, will use all external metabolites in the model.
+        If None provided, will use all 'boundary metabolites' in the model.
 
     Returns
     -------
     missing: list
-        A list of metabolites with missing fixed concentrations. Returns as
+        A list of metabolites with missing boundary conditions. Returns as
         empty if there are no missing values.
 
     See Also
@@ -377,15 +377,15 @@ def get_missing_fixed_concentrations(model, simulation=None,
 
     """
     if metabolite_list is None:
-        metabolite_list = model.external_metabolites
+        metabolite_list = model.boundary_metabolites
     metabolite_list = ensure_iterable(metabolite_list)
 
     # Filter out initial concentrations
     missing = [met for met in metabolite_list
                if met not in model.initial_conditions]
 
-    missing = [met for met in missing if met not in model.fixed_concentrations
-               or model.fixed_concentrations[met] is None]
+    missing = [met for met in missing if met not in model.boundary_conditions
+               or model.boundary_conditions[met] is None]
 
     if simulation is not None:
         existing = simulation.view_parameter_values(model)
@@ -460,7 +460,7 @@ def check_elemental_consistency(model, reaction_list=None):
     """Check the reactions in the model to ensure elemental consistentency.
 
     Elemental consistency includes checking reactions to ensure they are mass
-    and charged balanced. Exchange reactions are ignored because they are
+    and charged balanced. Boundary reactions are ignored because they are
     typically unbalanced.
 
     Parameters
@@ -489,7 +489,7 @@ def check_elemental_consistency(model, reaction_list=None):
 
     inconsistent = {}
     for reaction in reaction_list:
-        if not reaction.exchange and reaction.check_mass_balance():
+        if not reaction.boundary and reaction.check_mass_balance():
             unbalanced = ""
             for elem, amount in iteritems(reaction.check_mass_balance()):
                 unbalanced += "{0}: {1:.1f}; ".format(elem, amount)
@@ -641,7 +641,7 @@ def is_simulatable(model, simulation=None):
     """
     missing_params, superfluous = check_reaction_parameters(model, simulation)
     missing_concs = get_missing_initial_conditions(model, simulation)
-    missing_concs += get_missing_fixed_concentrations(model, simulation)
+    missing_concs += get_missing_boundary_conditions(model, simulation)
     missing_params.update(get_missing_custom_parameters(model, simulation))
     consistency_check = True
     if superfluous:
@@ -703,7 +703,7 @@ def _mk_concentration_content(model, simulation=None):
     """
     missing = []
     for function in [get_missing_initial_conditions,
-                     get_missing_fixed_concentrations]:
+                     get_missing_boundary_conditions]:
         missing_conc = [str(m) for m in function(model, simulation)]
         missing.append("\n".join(missing_conc))
 
@@ -862,7 +862,7 @@ def _mk_simulation_param_counter(model, simulation, reaction_list):
             if param_split[0] in ["kf", "Keq", "kr"] and \
                param_split[1] in [r.id for r in reaction_list]:
                 count.append(param_split[1])
-            elif str(param) not in model.external_metabolites:
+            elif str(param) not in model.boundary_metabolites:
                 count.append(str(param))
         count = Counter(count)
     return count
