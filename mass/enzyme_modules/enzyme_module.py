@@ -887,7 +887,7 @@ class EnzymeModule(MassModel):
         return expr
 
     # Extended Methods
-    def add_metabolites(self, metabolite_list, add_initial_conditions=False):
+    def add_metabolites(self, metabolite_list):
         """Add a list of metabolites and enzyme forms to the EnzymeModule.
 
         Metabolites are added under the ligand category as "Undefined".
@@ -915,8 +915,7 @@ class EnzymeModule(MassModel):
         metabolite_list = ensure_iterable(metabolite_list)
 
         # Add metabolites using inherited method
-        super(EnzymeModule, self).add_metabolites(
-            metabolite_list, add_initial_conditions)
+        super(EnzymeModule, self).add_metabolites(metabolite_list)
 
         # Get items that are not EnzymeModuleForm objects, and check if the
         # ligands already exists in the EnzymeModule, ignoring those that do.
