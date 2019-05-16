@@ -93,6 +93,7 @@ class Solution(DictWithID):
         self._time = time
         self._interpolate = interpolate
         self._groups = None
+        self._simulation = None
 
     @property
     def t(self):
