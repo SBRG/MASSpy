@@ -1429,7 +1429,7 @@ class EnzymeModule(MassModel):
 
         self._remove_empty_categories(attribute)
 
-    def _convert_self_into_enzyme_dict(self):
+    def _convert_self_into_enzyme_module_dict(self):
         """Convert self into an EnzymeModuleDict.
 
         Primarily used for merging an EnzymeModule into a MassModel while
@@ -1457,7 +1457,7 @@ class EnzymeModule(MassModel):
                             inplace=inplace, new_model_id=new_model_id)
         # Turn EnzymeModule into an EnzymeModuleDict
         # to store in MassModel.enzyme_modules
-        enzyme_dict = self._convert_self_into_enzyme_dict()
+        enzyme_dict = self._convert_self_into_enzyme_module_dict()
         # Update EnzymeModuleDict with attributes
         enzyme_dict._update_object_pointers(model)
 

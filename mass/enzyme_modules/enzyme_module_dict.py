@@ -51,7 +51,7 @@ class EnzymeModuleDict(OrderedDictWithID):
             super(EnzymeModuleDict, self).__init__(
                 id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
         # Initialize an EnzymeModuleDict using an EnzymeModule
-        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_dict"):
+        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_module_dict"):
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
             for key, value in iteritems(id_or_enzyme.__dict__):
                 nkey = key.lstrip("_")
