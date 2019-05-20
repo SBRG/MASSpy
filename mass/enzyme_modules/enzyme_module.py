@@ -585,7 +585,7 @@ class EnzymeModule(MassModel):
             self.add_custom_rate(reaction, custom_rate)
 
     def make_enzyme_net_flux_equation(self, enzyme_module_reactions,
-                                      use_rates=False, update_enzyme=True):
+                                      use_rates=False, update_enzyme=False):
         """Create an equation representing the net flux through the enzyme.
 
         The left side of the rate equation will always be the flux symbol of
@@ -604,7 +604,7 @@ class EnzymeModule(MassModel):
             If True, update the enzyme_net_flux_equation attribute and, if
             needed, the enzyme_module_reactions attribute of the module in
             addition to returning the generated equation. Otherwise just return
-            the net flux equation without making any updates. Default is True.
+            the net flux equation without making any updates. Default is False.
 
         Returns
         -------
