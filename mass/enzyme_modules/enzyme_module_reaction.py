@@ -35,10 +35,11 @@ class EnzymeModuleReaction(MassReaction):
     """
 
     def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 enzyme_id="", steady_state_flux=None):
+                 steady_state_flux=None, enzyme_id=""):
         """Initialize the MassReaction Object."""
         super(EnzymeModuleReaction, self).__init__(
-            id, name, subsystem, reversible, steady_state_flux)
+            id=id, name=name, subsystem=subsystem, reversible=reversible,
+            steady_state_flux=steady_state_flux)
         self.enzyme_id = enzyme_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
