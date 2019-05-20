@@ -270,11 +270,6 @@ class EnzymeModuleDict(OrderedDictWithID):
         """Create a deepcopy of the EnzymeModuleDict."""
         return deepcopy(super(EnzymeModuleDict, self), memo)
 
-    def __repr__(self):
-        """Override of default repr() implementation."""
-        return "<%s %s at 0x%x>" % (
-            self.__class__.__name__[:-4], self.id, id(self))
-
 
 _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "id": None,
