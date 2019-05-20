@@ -1,868 +1,539 @@
 # -*- coding: utf-8 -*-
+"""TODO Module Docstrings.
 
+CLASS IS EXPERIMENTAL. Features defined in class are necessary for
+libRoadRunner compatibility, but not for full SBML. Support for full SBML will
+be forthcoming.
+"""
 from __future__ import absolute_import
 
+import datetime
+import logging
 import re
-from ast import And, BoolOp, Name, Or
-from bz2 import BZ2File
-from collections import defaultdict
-from decimal import Decimal
-from gzip import GzipFile
-from tempfile import NamedTemporaryFile
-from warnings import catch_warnings, simplefilter, warn
 
-from six import iterkeys, iteritems, string_types
+import libsbml
 
-import sympy
-from sympy import Basic, Symbol
-from sympy.printing.mathml import mathml
+from six import integer_types, iteritems, string_types
 
-from cobra.core import Gene
-from cobra.core.gene import parse_gpr
-from cobra.manipulation.modify import _renames
-from cobra.manipulation.validate import check_metabolite_compartment_formula
-# For Gene and GPR handling
-
-from mass.core import MassMetabolite, MassReaction, MassModel
-from mass.util import strip_time
 from mass.exceptions import MassSBMLError
 
-try:
-    from lxml.etree import (
-        parse, Element, SubElement, ElementTree, register_namespace,
-        ParseError, XPath, fromstring, tostring)
+LOGGER = logging.getLogger(__name__)
 
-    _with_lxml = True
-except ImportError:
-    _with_lxml = False
-    try:
-        from xml.etree.cElementTree import (
-            parse, Element, SubElement, ElementTree, register_namespace,
-            ParseError, fromstring, tostring)
-    except ImportError:
-        XPath = None
-        from xml.etree.ElementTree import (
-            parse, Element, SubElement, ElementTree, register_namespace,
-            ParseError, fromstring, tostring)
 
-try:
-    import libsbml
-except ImportError:
-    raise MassSBMLError("Need to install libsbml to proceed")
+# -----------------------------------------------------------------------------
+# Defaults and constants for writing SBML
+# -----------------------------------------------------------------------------
+# For SBML level and core version, and package extension versions
+SBML_LEVEL_VERSION = (3, 2)
+FBC_VERSION = 2
 
-## Set a float infinity (Compatibility with Python 2.7)
-inf = float('inf')
-# deal with namespaces
-namespaces = {"fbc": "http://www.sbml.org/sbml/level3/version1/fbc/version2",
-              "sbml": "http://www.sbml.org/sbml/level3/version1/core",
-              "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-              "bqbiol": "http://biomodels.net/biology-qualifiers/",
-              "mml": "http://www.w3.org/1998/Math/MathML"}
+DEFAULT_COMPARTMENT_STR = "default_compartment"  # Default compartment
+MASS_MOIETY_RE = re.compile("\[\S+\]")  # Precompiled regex for moieties
+SBML_MOIETY_RE = re.compile("Moiety\S+$")
+# For SBO terms
+SBO_MODELING_FRAMEWORK = "SBO:0000004"  # TODO Consider more specific term
 
-for key in namespaces:
-    register_namespace(key, namespaces[key])
-
-def ns(query):
-    """replace prefixes with namespace"""
-    for prefix, uri in iteritems(namespaces):
-        query = query.replace(prefix + ":", "{" + uri + "}")
-    return query
-
-# XPATH query wrappers
-fbc_prefix = "{" + namespaces["fbc"] + "}"
-sbml_prefix = "{" + namespaces["sbml"] + "}"
-
+# -----------------------------------------------------------------------------
+# Functions for replacements (import/export)
+# -----------------------------------------------------------------------------
 SBML_DOT = "__SBML_DOT__"
-# FBC TAGS
-OR_TAG = ns("fbc:or")
-AND_TAG = ns("fbc:and")
-GENEREF_TAG = ns("fbc:geneProductRef")
-GPR_TAG = ns("fbc:geneProductAssociation")
-GENELIST_TAG = ns("fbc:listOfGeneProducts")
-GENE_TAG = ns("fbc:geneProduct")
-# XPATHS
-COMPARTMENT_XPATH = ns("sbml:listOfCompartments/sbml:compartment")
-GENES_XPATH = GENELIST_TAG + "/" + GENE_TAG
-SPECIES_XPATH = ns("sbml:listOfSpecies/sbml:species[@boundaryCondition='%s']")
-OBJECTIVES_XPATH = ns("fbc:objective[@fbc:id='%s']/"
-                      "fbc:listOfFluxObjectives/"
-                      "fbc:fluxObjective")
 
-if _with_lxml:
-    RDF_ANNOTATION_XPATH = ("sbml:annotation/rdf:RDF/"
-                            "rdf:Description[@rdf:about=$metaid]/"
-                            "*[self::bqbiol:isEncodedBy or self::bqbiol:is]/"
-                            "rdf:Bag/rdf:li/@rdf:resource")
-    extract_rdf_annotation = XPath(RDF_ANNOTATION_XPATH, namespaces=namespaces,
-                                   smart_strings=False)
-else:
-    RDF_ANNOTATION_XPATH = ns("sbml:annotation/rdf:RDF/"
-                              "rdf:Description[@rdf:about='%s']/"
-                              "bqbiol:isEncodedBy/"
-                              "rdf:Bag/rdf:li[@rdf:resource]")
 
-    def extract_rdf_annotation(sbml_element, metaid):
-        search_xpath = RDF_ANNOTATION_XPATH % metaid
-        for i in sbml_element.iterfind(search_xpath):
-            yield _get_attr(i, "rdf:resource")
-        for i in sbml_element.iterfind(search_xpath.replace(
-                "isEncodedBy", "is")):
-            yield _get_attr(i, "rdf:resource")
+def _clip(sid, prefix):
+    """Clips a prefix from the beginning of a string if it exists."""
+    return sid[len(prefix):] if sid.startswith(prefix) else sid
 
 
-# Public Methods
-def parse_xml_into_model(xml, number=float):
-    """Load a mass model from an xml object.
+def _f_gene(sid, prefix="G_"):
+    """Clip gene prefix from id."""
+    sid = sid.replace(SBML_DOT, ".")
+    return _clip(sid, prefix)
 
-    Parameters
-    ----------
-    xml : xml object
-        The string-like representation of a mass model in xml format.
-    number : float or int
-        The typecasting to use for certain number parsing instances
 
-    Returns
-    -------
-    mass.MassModel
-        The mass model as represented in the SBML/XML document.
+def _f_gene_rev(sid, prefix="G_"):
+    """Add gene prefix to id."""
+    return prefix + sid.replace(".", SBML_DOT)
 
-    See Also
-    --------
-    read_sbml_model : Load directly from a file.
-    """
-    # add model
-    xml_model = xml.find(ns("sbml:model"))
-    if _get_attr(xml_model, "fbc:required") == "false":
-        warn('loading SBML model with fbc:required="false"')
 
-    model_id = _get_attr(xml_model, "id")
-    model = MassModel(model_id)
-    model.name = xml_model.get("name")
+def _f_specie(sid, prefix="M_"):
+    """Clip specie/metabolite prefix from id."""
+    return _clip(sid, prefix)
 
-    # add in units
-    unit_dict = {}
-    for unit_def in xml_model.findall(ns(
-        "sbml:listOfUnitDefinitions/sbml:unitDefinition")):
-        unit = _get_attr(unit_def, "id", require=True)
-        if unit is None:
-            continue
-        if "mole" in unit.lower():
-            unit_dict["N"] = unit
-        if ("liter" in unit.lower()) or ("litre" in unit.lower()):
-            unit_dict["Vol"] = unit
-        if ("hour" in unit.lower()) or ("sec" in unit.lower()):
-            unit_dict["Time"] = unit
 
-    model.units = unit_dict
+def _f_specie_rev(sid, prefix="M_"):
+    """Add specie/metabolite prefix to id."""
+    return prefix + sid
 
-    # add compartments
-    model.compartments = {c.get("id"): c.get("name") for c in
-                          xml_model.findall(COMPARTMENT_XPATH)}
-    # Detect fixed concentration metabolites (boundary metabolites)
-    boundary_metabolites = {_clip(i.get("id"), "M_")
-                            for i in xml_model.findall(SPECIES_XPATH % 'true')}
-    bound_dict = {}
-    # add metabolites (species)
-    for species in xml_model.findall(ns("sbml:listOfSpecies/sbml:species")):
-        met = _get_attr(species, "id", require=True)
-        met = MassMetabolite(_clip(met, "M_"))
-        met.name = species.get("name")
-        _annotate_mass_from_sbml(met, species)
-        met.compartment = species.get("compartment")
-        met.charge = _get_attr(species, "fbc:charge", float)
-        met.formula = _get_attr(species, "fbc:chemicalFormula")
-        model.add_metabolites([met])
-        model.update_initial_conditions(
-            {met: _get_attr(species, "initialConcentration", float)})
-        if met.id in boundary_metabolites:
-            bound_dict[met] = _get_attr(species, "initialConcentration",
-                                         float)
-    # add fixed concentration metabolites (boundary metabolites)
-    model.add_fixed_concentrations(bound_dict)
 
-    # add genes
-    for sbml_gene in xml_model.iterfind(GENES_XPATH):
-        gene_id = _get_attr(sbml_gene, "fbc:id").replace(SBML_DOT, ".")
-        gene = Gene(_clip(gene_id, "G_"))
-        gene.name = _get_attr(sbml_gene, "fbc:name")
-        if gene.name is None:
-            gene.name = _get_attr(sbml_gene, "fbc:label")
-        annotate_cobra_from_sbml(gene, sbml_gene)
-        model.genes.append(gene)
+def _f_reaction(sid, prefix="R_"):
+    """Clip reaction prefix from id."""
+    return _clip(sid, prefix)
 
-    def process_gpr(sub_xml):
-        """recursively convert gpr xml to a gpr string"""
-        if sub_xml.tag == OR_TAG:
-            return "( " + ' or '.join(process_gpr(i) for i in sub_xml) + " )"
-        elif sub_xml.tag == AND_TAG:
-            return "( " + ' and '.join(process_gpr(i) for i in sub_xml) + " )"
-        elif sub_xml.tag == GENEREF_TAG:
-            gene_id = _get_attr(sub_xml, "fbc:geneProduct", require=True)
-            return _clip(gene_id, "G_")
-        else:
-            raise Exception("unsupported tag " + sub_xml.tag)
 
-    # add reactions
-    custom_rate_dict = {}
-    custom_param_dict = {}
-    reactions = []
-    for sbml_reaction in xml_model.iterfind(
-            ns("sbml:listOfReactions/sbml:reaction")):
-        reaction = _get_attr(sbml_reaction, "id", require=True)
-        isReversible = _get_attr(sbml_reaction, "reversible")
-        if isReversible == "false":
-            isReversible = False
-        else:
-            isReversible = True
-        reaction = MassReaction(_clip(reaction, "R_"), reversible=isReversible)
-        reaction.name = sbml_reaction.get("name")
-        _annotate_mass_from_sbml(reaction, sbml_reaction)
-        reaction.subsystem = _get_attr(sbml_reaction, "compartment")
+def _f_reaction_rev(sid, prefix="R_"):
+    """Add reaction prefix to id."""
+    return prefix + sid
 
-        # add mathml rate law extraction here
-        result_from_mathml = ""
-        for local_rate in sbml_reaction.findall(
-            ns("sbml:kineticLaw/mml:math")):
-            ast = libsbml.readMathMLFromString(tostring(local_rate,
-                                        encoding="utf-8").decode("utf-8"))
-            result_from_mathml = libsbml.formulaToL3String(ast)
-            if result_from_mathml is None:
-                warn("%s has imparsible MathML" % reaction.id)
-                continue
-            else:
-                result_from_mathml = result_from_mathml.replace("^", "**")
 
-        # add rate constants, ssflux, custom paramaters (local parameters)
-        custom_param_ids = []
-        custom_param_vals = []
-        for local_param in sbml_reaction.findall(ns(
-            "sbml:kineticLaw/sbml:listOfLocalParameters/sbml:localParameter")):
-            pid = local_param.get("id")
-            lpval = local_param.get("value")
-            if pid == "steady_state_flux_"+reaction.id and lpval is not None:
-                reaction.ssflux = number(local_param.get("value"))
-            elif pid == "kf_"+reaction.id and lpval is not None:
-                reaction.kf = number(local_param.get("value"))
-            elif pid == "Keq_"+reaction.id and reaction.reversible is True:
-                if local_param.get("value") == "inf":
-                    reaction.Keq = inf
-                elif local_param.get("value") == "-inf":
-                    reaction.Keq = -inf
-                elif local_param.get("value") == None:
-                    pass
-                else:
-                    reaction.Keq = number(local_param.get("value"))
-            elif pid == "kr_"+reaction.id and reaction.reversible is True:
-                reaction.kr = local_param.get("value")
-            else:
-                if lpval is None:
-                    pass
-                else:
-                    custom_param_ids.append(pid)
-                    custom_param_vals.append(number(local_param.get("value")))
-        custom_param_dict[reaction] = dict(zip(custom_param_ids,
-                                                custom_param_vals))
+F_GENE = "F_GENE"
+F_GENE_REV = "F_GENE_REV"
+F_SPECIE = "F_SPECIE"
+F_SPECIE_REV = "F_SPECIE_REV"
+F_REACTION = "F_REACTION"
+F_REACTION_REV = "F_REACTION_REV"
 
-        reactions.append(reaction)
-        # add stoichiometry (reactants, products, modifiers)
-        stoichiometry = defaultdict(lambda: 0)
-        for species_reference in sbml_reaction.findall(
-                ns("sbml:listOfReactants/sbml:speciesReference")):
-            met_name = _clip(species_reference.get("species"), "M_")
-            stoichiometry[met_name] -= \
-                float(species_reference.get("stoichiometry"))
-        for species_reference in sbml_reaction.findall(
-                ns("sbml:listOfProducts/sbml:speciesReference")):
-            met_name = _clip(species_reference.get("species"), "M_")
-            stoichiometry[met_name] += \
-                _get_attr(species_reference, "stoichiometry",
-                           type=float, require=True)
-        # needs to have keys of metabolite objects, not ids
-        object_stoichiometry = {}
-        for met_id in stoichiometry:
-            try:
-                metabolite = model.metabolites.get_by_id(met_id)
-            except KeyError:
-                warn("ignoring unknown metabolite '%s' in reaction %s" %
-                     (met_id, reaction.id))
-                continue
-            object_stoichiometry[metabolite] = stoichiometry[met_id]
-        reaction.add_metabolites(object_stoichiometry)
-        # set gene reaction rule (gene product association)
-        gpr_xml = sbml_reaction.find(GPR_TAG)
-        if gpr_xml is not None and len(gpr_xml) != 1:
-            warn("ignoring invalid geneAssociation for " + repr(reaction))
-            gpr_xml = None
-        gpr = process_gpr(gpr_xml[0]) if gpr_xml is not None else ''
-        # remove outside parenthesis, if any
-        if gpr.startswith("(") and gpr.endswith(")"):
-            gpr = gpr[1:-1].strip()
-        gpr = gpr.replace(SBML_DOT, ".")
-        reaction.gene_reaction_rule = gpr
-
-        # Test to see mathml rate matches standard massreaction rate
-        # if no match, add mathml rate as custom rate law for reaction
-        for rxn_rate_type in [1, 2, 3]:
-            reaction._rtype = rxn_rate_type
-            curr_string = strip_time(reaction.rate)
-            curr_string = _remove_trailing_zeroes(str(curr_string))
-            if result_from_mathml is None:
-                pass
-            elif curr_string == _remove_trailing_zeroes(result_from_mathml):
-                break
-
-        curr_string = strip_time(reaction.rate)
-        curr_string = _remove_trailing_zeroes(str(curr_string))
-        if result_from_mathml is None:
-            pass
-        elif curr_string != _remove_trailing_zeroes(result_from_mathml):
-            custom_rate_dict[reaction] = result_from_mathml
-    try:
-        model.add_reactions(reactions)
-    except ValueError as e:
-        warn(str(e))
-    for custom_rxn, custom_rate in iteritems(custom_rate_dict):
-        rxn = model.reactions.get_by_id(custom_rxn.id)
-        model.add_custom_rate(custom_rxn, custom_rate,
-                    custom_param_dict[custom_rxn])
-
-    # add external metabolites (parameters)
-    ext_dict = {}
-    for param in xml_model.findall(ns("sbml:listOfParameters/sbml:parameter")):
-        ext_dict[_get_attr(param, "id", require=True)] = _get_attr(
-                                                        param, "value", float)
-
-    # add fixed concentration metabolites (external metabolites)
-    model.add_fixed_concentrations(ext_dict)
-
-    return model
-
-def model_to_xml(model):
-
-    """Return the model as an xml object.
-
-    Parameters
-    ----------
-    model : mass.MassModel
-        The mass model to represent.
-
-    Returns
-    -------
-    ElementTree.Element
-        string-like representation of the mass model as an xml object.
-
-    See Also
-    --------
-    write_sbml_model : Write directly to a file.
-    """
-
-    # add in model
-    xml = Element("sbml", xmlns=namespaces["sbml"], level="3", version="1",
-                  sboTerm="SBO:0000624")
-    _set_attrib(xml, "fbc:required", "true")
-    xml_model = SubElement(xml, "model")
-    _set_attrib(xml_model, "fbc:strict", "true")
-    if model.id is not None:
-        xml_model.set("id", model.id)
-    if model.name is not None:
-        xml_model.set("name", model.name)
-
-     # add in units
-    if len(model.units) != 0:
-        units_list = SubElement(xml_model, "listOfUnitDefinitions")
-        for key, unit in iteritems(model.units):
-            unit_def = SubElement(units_list, "unitDefinition", id=unit)
-            scale = _get_scale(unit.lower())
-
-            unit_str = ""
-            special = ""
-            for i in range(len(_SBML_base_units)):
-                if _SBML_base_units[i] in unit.lower():
-                    unit_str = _SBML_base_units[i]
-                elif "liter" in unit.lower():
-                    unit_str = "litre"
-                elif "meter" in unit.lower():
-                    unit_str = "metre"
-                elif "hour" in unit.lower():
-                    unit_str = "second"
-                    special = "hour"
-                elif "minute" in unit.lower():
-                    unit_str = "minute"
-                    special = "minute"
-
-            if (unit_str == "") or (unit_str is None):
-                warn("Units are not SBML-compliant")
-                unit_str = unit
-
-            list_units = SubElement(unit_def, "listOfUnits")
-            unit_elem = SubElement(list_units, "unit", kind=unit_str)
-            if "minute" in special:
-                _set_attrib(unit_elem, "multiplier", 60)
-            elif "hour" in special:
-                _set_attrib(unit_elem, "multiplier", 3600)
-            else:
-                _set_attrib(unit_elem, "multiplier", 1)
-
-            _set_attrib(unit_elem, "exponent", 1)
-            _set_attrib(unit_elem, "scale", scale)
-
-
-    # add in compartments
-    if len(model.compartments) != 0:
-        compartments_list = SubElement(xml_model, "listOfCompartments")
-        for compartment, name in iteritems(model.compartments):
-            SubElement(compartments_list, "compartment", id=compartment,
-                        name=name, constant="true")
-
-    # add in species (metabolites)
-    for met in model.metabolites:
-        species = SubElement(SubElement(xml_model, "listOfSpecies"), "species",
-                             id="M_" + met.id,
-                             # Required SBML parameter
-                             hasOnlySubstanceUnits="false")
-        _set_attrib(species, "name", met.name)
-        _annotate_sbml_from_mass(species, met)
-        _set_attrib(species, "compartment", met.compartment)
-        _set_attrib(species, "fbc:charge", met.charge)
-        _set_attrib(species, "fbc:chemicalFormula", met.formula)
-        _set_attrib(species, "initialConcentration",
-                   model.initial_conditions[met])
-        # differentiate fixed concentration metabolites
-        if met in model.fixed_concentrations:
-            _set_attrib(species, "constant", "true")
-            _set_attrib(species, "boundaryCondition", "true")
-        else:
-            _set_attrib(species, "constant", "false")
-            _set_attrib(species, "boundaryCondition", "false")
-
-    # add in parameters (external metabolites)
-
-    for ext in model.external_metabolites:
-        if ext in iterkeys(model.fixed_concentrations):
-            param = SubElement(SubElement(xml_model, "listOfParameters"),
-                                            "parameter", id=ext)
-            _set_attrib(param, "value", model.fixed_concentrations[ext])
-            _set_attrib(param, "constant", "true")
-
-    # add in genes
-    if len(model.genes) != 0:
-        for gene in model.genes:
-            gene_id = gene.id.replace(".", SBML_DOT)
-            sbml_gene = SubElement(SubElement(xml_model, GENELIST_TAG),
-                        GENE_TAG)
-            _set_attrib(sbml_gene, "fbc:id", "G_" + gene_id)
-            if gene.name is None or len(gene.name) == 0:
-                gene.name = gene.id
-            _set_attrib(sbml_gene, "fbc:label", gene_id)
-            _set_attrib(sbml_gene, "fbc:name", gene.name)
-            annotate_sbml_from_cobra(sbml_gene, gene)
-
-    # add in reactions
-    rxns_list = SubElement(xml_model, "listOfReactions")
-    for rxn, rate in iteritems(strip_time(model.rates)):
-        rxn_id = "R_%s" % rxn.id
-        sbml_rxn = SubElement(rxns_list, "reaction", id=rxn_id,
-                                   reversible=str(rxn.reversible).lower(),
-                                   # Required SBML parameter
-                                   fast="false")
-        _set_attrib(sbml_rxn, "name", rxn.name)
-        _set_attrib(sbml_rxn, "compartment", rxn.subsystem)
-        _annotate_sbml_from_mass(sbml_rxn, rxn)
-        # add in kinetic law (rate law + associated constants)
-        sbml_kinetic_law = SubElement(sbml_rxn, "kineticLaw")
-        # add in math (rate law in mathml)
-        rate_str = str(rate)
-        if "**" in rate_str:
-            rate_str = rate_str.replace("**", "^")
-        new_str = libsbml.writeMathMLToString(libsbml.parseL3Formula(rate_str))
-        if new_str is None:
-            raise MassSBMLError("Error: Can't parse rate law expression "
-                            "for %s with rate law:" % (rxn.name, str(rate)))
-        else:
-            new_str = new_str.replace(
-                '<?xml version="1.0" encoding="UTF-8"?>\n', "")
-            sbml_kinetic_law.append(fromstring(new_str))
-
-        # add in local parameters (kf, Keq, kr, ssflux)
-        sbml_param_list = SubElement(sbml_kinetic_law, "listOfLocalParameters")
-        sbml_kf = SubElement(sbml_param_list, "localParameter",
-                        id="kf_%s" % rxn.id, name="kf_%s" % rxn.id)
-        sbml_Keq = SubElement(sbml_param_list, "localParameter",
-                        id="Keq_%s" % rxn.id, name="Keq_%s" % rxn.id)
-        sbml_kr = SubElement(sbml_param_list, "localParameter",
-                        id="kr_%s" % rxn.id, name="kr_%s" % rxn.id)
-        sbml_ssflux = SubElement(sbml_param_list, "localParameter",
-                        id="steady_state_flux_%s" % rxn.id, name="steady_state_flux_%s" % rxn.id)
-        _set_attrib(sbml_kf, "value", rxn.kf)
-        _set_attrib(sbml_Keq, "value", rxn.Keq)
-        _set_attrib(sbml_kr, "value", rxn.kr)
-        _set_attrib(sbml_ssflux, "value", rxn.ssflux)
-
-        # add in local parameters (custom parameters)
-        c_param_list = list(iterkeys(model.custom_parameters))
-        try:
-            c_rate = model.custom_rates[rxn]
-        except KeyError:
-            pass
-        else:
-            for sym in c_rate.atoms(Symbol):
-                if sym is Symbol("t"):
-                    continue
-                elif str(sym) in c_param_list:
-                    v = model.custom_parameters[str(sym)]
-                    sbml_cparam = SubElement(sbml_param_list, "localParameter",
-                                             id=str(sym), name=str(sym))
-                    _set_attrib(sbml_cparam, "value", v)
-
-        # add in reactants, products, modifiers (stoichiometry)
-        reactants = {}
-        products = {}
-        for metabolite, stoichiomety in iteritems(rxn._metabolites):
-            met_id = "M_" + metabolite.id
-            if stoichiomety > 0:
-                products[met_id] = _strnum(stoichiomety)
-            else:
-                reactants[met_id] = _strnum(-stoichiomety)
-        if len(reactants) > 0:
-            reactant_list = SubElement(sbml_rxn, "listOfReactants")
-            for met_id, stoichiomety in sorted(iteritems(reactants)):
-                SubElement(reactant_list, "speciesReference", species=met_id,
-                           stoichiometry=stoichiomety, constant="true")
-        if len(products) > 0:
-            product_list = SubElement(sbml_rxn, "listOfProducts")
-            for met_id, stoichiomety in sorted(iteritems(products)):
-                SubElement(product_list, "speciesReference", species=met_id,
-                           stoichiometry=stoichiomety, constant="true")
-
-        # add in gene product association (gene reaction rule)
-        gpr = rxn.gene_reaction_rule
-        if gpr is not None and len(gpr) > 0:
-            gpr = gpr.replace(".", SBML_DOT)
-            gpr_xml = SubElement(sbml_rxn, GPR_TAG)
-            try:
-                parsed, _ = parse_gpr(gpr)
-                _construct_gpr_xml(gpr_xml, parsed.body)
-            except Exception as e:
-                print("failed on '%s' in %s" %
-                      (rxn.gene_reaction_rule, repr(rxn)))
-                raise e
-
-    return xml
-
-def write_sbml_model(model, filename, use_fbc_package=True, **kwargs):
-    """Write the mass model to a file in SBML/XML format.
-
-    ``kwargs`` are passed on to ``ElementTree.write``.
-
-    Parameters
-    ----------
-    model : mass.MassModel
-        The mass model to represent.
-    filename : str or file-like
-        File path or descriptor that the SBML/XML representation should be
-        written to.
-    use_fbc_package: bool
-        Option to use fbc package for generating SBML/XML document
-
-    See Also
-    --------
-    model_to_xml : Return an xml object.
-    """
-    if not _with_lxml:
-        warn("Install lxml for faster SBML I/O", ImportWarning)
-    if not use_fbc_package:
-        if libsbml is None:
-            raise ImportError("libSBML required to write non-fbc models")
-        return
-
-    # create xml
-    xml = model_to_xml(model, **kwargs)
-    write_args = {"encoding": "UTF-8", "xml_declaration": True}
-    if _with_lxml:
-        write_args["pretty_print"] = True
-        write_args["pretty_print"] = True
-    else:
-        _indent_xml(xml)
-
-    # write xml to file
-    xmlfile = filename
-    should_close = True
-    if hasattr(filename, "write"):
-        should_close = False
-    elif filename.endswith(".gz"):
-        xmlfile = GzipFile(filename, "wb")
-    elif filename.endswith(".bz2"):
-        xmlfile = BZ2File(filename, "wb")
-    elif isinstance(filename, str):
-        if not filename.endswith(".xml") and not filename.endswith(".sbml"):
-                filename += ".xml"
-                xmlfile = filename
-        xmlfile = open(filename, "wb")
-
-    ElementTree(xml).write(xmlfile, **write_args)
-    if should_close:
-        xmlfile.close()
-
-def read_sbml_model(filename):
-    """Load a mass model from a file in SBML/XML format.
-
-    Parameters
-    ----------
-    filename : str or file-like
-        File path or descriptor that contains the SBML/XML document describing
-        the mass model.
-
-    Returns
-    -------
-    mass.MassModel
-        The mass model as represented in the SBML/XML document.
-
-    See Also
-    --------
-    parse_xml_into_model : Load from an xml object.
-    """
-    return parse_xml_into_model(_parse_stream(filename))
-
-# Internal Methods
-def _parse_stream(filename):
-    """Parses filename or compressed stream to xml"""
-    try:
-        if hasattr(filename, "read"):
-            return parse(filename)
-        elif filename.endswith(".gz"):
-            with GzipFile(filename) as infile:
-                return parse(infile)
-        elif filename.endswith(".bz2"):
-            with BZ2File(filename) as infile:
-                return parse(infile)
-        else:
-            return parse(filename)
-    except ParseError as e:
-        raise MassSBMLError("Malformed XML file: " + str(e))
-
-def _get_attr(tag, attribute, type=lambda x: x, require=False):
-    value = tag.get(ns(attribute))
-    if require and value is None:
-        msg = "required attribute '%s' not found in tag '%s'" % \
-              (attribute, tag.tag)
-        if tag.get("id") is not None:
-            msg += " with id '%s'" % tag.get("id")
-        elif tag.get("name") is not None:
-            msg += " with name '%s'" % tag.get("name")
-        raise MassSBMLError(msg)
-    return type(value) if value is not None else None
-
-def _set_attrib(xml, attribute_name, value):
-    if value is None or value == "":
-        return
-    xml.set(ns(attribute_name), str(value))
-
-def _construct_gpr_xml(parent, expression):
-    """create gpr xml under parent node"""
-    if isinstance(expression, BoolOp):
-        op = expression.op
-        if isinstance(op, And):
-            new_parent = SubElement(parent, AND_TAG)
-        elif isinstance(op, Or):
-            new_parent = SubElement(parent, OR_TAG)
-        else:
-            raise Exception("unsupported operation " + op.__class__)
-        for arg in expression.values:
-            _construct_gpr_xml(new_parent, arg)
-    elif isinstance(expression, Name):
-        gene_elem = SubElement(parent, GENEREF_TAG)
-        _set_attrib(gene_elem, "fbc:geneProduct", "G_" + expression.id)
-    else:
-        raise Exception("unsupported operation  " + repr(expression))
-
-def _annotate_mass_from_sbml(mass_element, sbml_element):
-    sbo_term = sbml_element.get("sboTerm")
-    if sbo_term is not None:
-        mass_element.annotation["SBO"] = sbo_term
-    meta_id = _get_attr(sbml_element, "metaid")
-    if meta_id is None:
-        return
-    annotation = mass_element.annotation
-    for uri in extract_rdf_annotation(sbml_element, metaid="#" + meta_id):
-        if not uri.startswith("http://identifiers.org/"):
-            warn("%s does not start with http://identifiers.org/" % uri)
-            continue
-        try:
-            provider, identifier = uri[23:].split("/", 1)
-        except ValueError:
-            warn("%s does not conform to http://identifiers.org/provider/id"
-                 % uri)
-            continue
-        # handle multiple id's in the same database
-        if provider in annotation:
-            # make into a list if necessary
-            if isinstance(annotation[provider], string_types):
-                annotation[provider] = [annotation[provider]]
-            annotation[provider].append(identifier)
-        else:
-            mass_element.annotation[provider] = identifier
-
-def _annotate_sbml_from_mass(sbml_element, mass_element):
-    if len(mass_element.annotation) == 0:
-        return
-    # get the id so we can set the metaid
-    tag = sbml_element.tag
-    if tag.startswith(sbml_prefix) or tag[0] != "{":
-        prefix = ""
-    elif tag.startswith(fbc_prefix):
-        prefix = fbc_prefix
-    else:
-        raise ValueError("Can not annotate " + repr(sbml_element))
-    _id = sbml_element.get(prefix + "id")
-    if len(_id) == 0:
-        raise ValueError("%s does not have id set" % repr(sbml_element))
-    _set_attrib(sbml_element, "metaid", _id)
-    annotation = SubElement(sbml_element, ns("sbml:annotation"))
-    rdf_desc = SubElement(SubElement(annotation, ns("rdf:RDF")),
-                          ns("rdf:Description"))
-    _set_attrib(rdf_desc, "rdf:about", "#" + _id)
-    bag = SubElement(SubElement(rdf_desc, ns("bqbiol:is")),
-                     ns("rdf:Bag"))
-    for provider, identifiers in sorted(iteritems(mass_element.annotation)):
-        if provider == "SBO":
-            _set_attrib(sbml_element, "sboTerm", identifiers)
-            continue
-        if isinstance(identifiers, string_types):
-            identifiers = (identifiers,)
-        for identifier in identifiers:
-            li = SubElement(bag, ns("rdf:li"))
-            _set_attrib(li, "rdf:resource", "http://identifiers.org/%s/%s" %
-                       (provider, identifier))
-
-# inspired by http://effbot.org/zone/element-lib.htm#prettyprint
-def _indent_xml(elem, level=0):
-    """indent xml for pretty printing"""
-    i = "\n" + level * "  "
-    if len(elem):
-        if not elem.text or not elem.text.strip():
-            elem.text = i + "  "
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-        for elem in elem:
-            _indent_xml(elem, level + 1)
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-    else:
-        if level and (not elem.tail or not elem.tail.strip()):
-            elem.tail = i
-
-def _get_scale(string):
-
-    scale = None
-
-    for key in iterkeys(_SI_prefix_dict):
-        if key in string:
-            scale = _SI_prefix_dict[key]
-
-    if scale is None:
-        scale = 0
-
-    return scale
-
-# string utility methods
-def _clip(string, prefix):
-    """_clips a prefix from the beginning of a string if it exists
-
-    >>> _clip("R_pgi", "R_")
-    "pgi"
-
-    """
-    return string[len(prefix):] if string.startswith(prefix) else string
-
-def _strnum(number):
-    """Utility function to convert a number to a string"""
-    if isinstance(number, (Decimal, Basic, str)):
-        return str(number)
-    s = "%.15g" % number
-    return s.rstrip(".")
-
-def _remove_trailing_zeroes(string):
-    # Remove whitespace
-    string = string.replace(" ", "")
-    original = string
-
-    # Split by decimal
-    str_list = string.split(".")
-
-    #if len of 1, return original
-    if len(str_list) == 1:
-        return original
-
-    # Remove leading zeroes
-    str_list = [s.lstrip("0") for s in str_list]
-
-    # If any string starts with a number, return original
-    for s in str_list:
-        if s[0].isdigit():
-            return original
-
-    # Else, join strings and return them
-    result = ""
-    for s in str_list:
-        result += s
-    #remove any whitespace
-    result = result.replace(" ", "")
-    return result
-
-# Internal Variables
-_SI_prefix_dict = {
-    "atto": -18,
-    "femto": -15,
-    "pico": -12,
-    "nano": -9,
-    "micro": -6,
-    "milli": -3,
-    "centi": -2,
-    "deci": -1,
-    "deca": 1,
-    "hecto": 2,
-    "kilo": 3,
-    "mega": 6,
-    "giga": 9,
-    "tera": 12,
-    "peta": 15,
-    "exa": 18
+F_REPLACE = {
+    F_GENE: _f_gene,
+    F_GENE_REV: _f_gene_rev,
+    F_SPECIE: _f_specie,
+    F_SPECIE_REV: _f_specie_rev,
+    F_REACTION: _f_reaction,
+    F_REACTION_REV: _f_reaction_rev,
 }
 
-# litre <-> liter, metre <-> meter
-_SBML_base_units = [
-    "ampere",
-    "avogadro",
-    "becquerel",
-    "candela",
-    "coulomb",
-    "dimensionless",
-    "farad",
-    "gram",
-    "gray",
-    "henry",
-    "hertz",
-    "item",
-    "joule",
-    "katal",
-    "kelvin",
-    "kilogram",
-    "litre",
-    "lumen",
-    "lux",
-    "metre",
-    "mole",
-    "newton",
-    "ohm",
-    "pascal",
-    "radian",
-    "second",
-    "siemens",
-    "sievert",
-    "steradian",
-    "tesla",
-    "volt",
-    "watt",
-    "weber"
 
-]
+def _f_moiety_formula(metabolite):
+    """Fix moieties in formula from SBML compatible to be masspy compatible."""
+    return
+
+
+def _f_moiety_formula_rev(metabolite):
+    """Fix moieties in formula to be SBML compatible from masspy compatible."""
+    sbml_formula = metabolite.formula
+    moieties = list(filter(MASS_MOIETY_RE.match, metabolite.elements))
+    if moieties:
+        for moiety in moieties:
+            replacement = "Moiety" + moiety.lstrip("[").rstrip("]").lower()
+            # Add to end of formula prevents issues if moiety ends with number
+            sbml_formula = sbml_formula.replace(moiety, "")
+            sbml_formula += replacement
+        # Replace any dashes
+        sbml_formula = sbml_formula.replace("-", "")
+
+    return sbml_formula
+
+
+def _for_id(sid):
+    """Return a string specifying the object id for logger messages."""
+    return " for '{0}'".format(sid)
+
+
+# -----------------------------------------------------------------------------
+# Read SBML
+# -----------------------------------------------------------------------------
+def read_sbml_model(filename):
+    """TODO DOCSTRING."""
+    print(filename)
+
+
+# -----------------------------------------------------------------------------
+# Write SBML
+# -----------------------------------------------------------------------------
+def write_sbml_model(mass_model, filename, f_replace=F_REPLACE, **kwargs):
+    """Write MassModel to filename in SBML format.
+
+    The created model is SBML level 3 version 2 core (L3V2).
+
+    If the given filename ends with the suffix ".gz" (for example,
+    "myfile.xml.gz"), libSBML assumes the caller wants the file to be
+    written compressed in gzip format. Similarly, if the given filename
+    ends with ".zip" or ".bz2", libSBML assumes the caller wants the
+    file to be compressed in zip or bzip2 format (respectively). Files
+    whose names lack these suffixes will be written uncompressed. Special
+    considerations for the zip format: If the given filename ends with
+    ".zip", the file placed in the zip archive will have the suffix
+    ".xml" or ".sbml".  For example, the file in the zip archive will
+    be named "test.xml" if the given filename is "test.xml.zip" or
+    "test.zip". Similarly, the filename in the archive will be
+    "test.sbml" if the given filename is "test.sbml.zip".
+
+    Parameters
+    ----------
+    mass_model : mass.core.MassModel
+        MassModel instance which is written to SBML
+    filename : string
+        path to which the model is written
+    f_replace: dict of replacement functions for id replacement
+        A dict of replacement functions to apply on identifiers.
+
+    """
+    doc = _model_to_sbml(mass_model, f_replace=f_replace, **kwargs)
+    print()
+    print(libsbml.writeSBMLToString(doc))
+    if isinstance(filename, string_types):
+        # Write to path
+        libsbml.writeSBMLToFile(doc, filename)
+
+    elif hasattr(filename, "write"):
+        # Write to file handle
+        sbml_str = libsbml.writeSBMLToString(doc)
+        filename.write(sbml_str)
+
+
+def _model_to_sbml(mass_model, f_replace=None, units=True):
+    """Convert MassModel to SBMLDocument.
+
+    Parameters
+    ----------
+    mass_model : mass.core.MassModel
+        MassModel instance which is written to SBML
+    f_replace : dict of replacement functions
+        Replacement to apply on identifiers.
+    units : boolean
+        Should the units be written in the SBMLDocument. All units will be in
+        terms of: {'Millimoles', 'Litre', 'Hours'}.
+
+    Returns
+    -------
+    doc: libsbml.SBMLDocument
+
+    """
+    if f_replace is None:
+        f_replace = {}
+
+    doc, models = _create_SBMLDocument_and_model_objects(mass_model)
+    model, model_fbc = models
+
+    # TODO annotations for model
+    # TODO notes for model
+
+    # Write the model Meta Information (ModelHistory) to the SBMLDocument
+    if hasattr(mass_model, "_sbml"):
+        _write_model_meta_info_to_sbml(model, mass_model._sbml)
+    # Write the model unit definitions to the SBMLDocument
+    if units:
+        _write_model_units_to_sbml()
+
+    # TODO flux bounds for model
+
+    # Write the compartment information
+    _write_model_compartments_to_sbml(model, mass_model)
+
+    # TODO enzyme module information
+
+    # Write the species information
+    _write_model_species_to_sbml(model, mass_model, f_replace)
+
+    # Write the gene information
+    _write_model_genes_to_sbml(model_fbc, mass_model, f_replace)
+
+    # Write the reaction information
+    _write_model_reactions_to_sbml(model, mass_model, f_replace)
+
+    return doc
+
+
+def _create_SBMLDocument_and_model_objects(mass_model):
+    """Create and return the SBMLDocument and model objects.
+
+    Will also set package extensions, model ID, meta ID, and name
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Try creating the SBMLDocument object
+    sbml_ns = libsbml.SBMLNamespaces(*SBML_LEVEL_VERSION)  # SBML L3V2 Core
+    _check(sbml_ns.addPackageNamespace("fbc", FBC_VERSION),  # SBML L3 fbc-V2
+           "adding fbc-V{0} package extension".format(FBC_VERSION))
+    try:
+        doc = libsbml.SBMLDocument(sbml_ns)
+    except ValueError as e:
+        MassSBMLError("Could not create SBMLDocument due to:\n" + str(e))
+
+    # Set package extensions
+    _check(doc.setPackageRequired("fbc", False),
+           "set fbc package extension required to false")
+    _check(doc.setSBOTerm(SBO_MODELING_FRAMEWORK),
+           "set SBO term for modeling framework")
+
+    # Create model
+    model = doc.createModel()
+    _check(model, "create model")
+
+    # Set plugins
+    model_fbc = model.getPlugin("fbc")
+    _check(model_fbc, "get fbc plugin for model")
+    _check(model_fbc.setStrict(True), "set fbc plugin strictness to true")
+
+    # Set  ID, meta ID, and name
+    if mass_model.id is not None:
+        _check(model.setId(mass_model.id), "set model id")
+        _check(model.setMetaId("meta_" + mass_model.id), "set model meta id")
+    else:
+        _check(model.setMetaId("meta_model"), "set model meta id")
+    if mass_model.name is not None:
+        _check(model.setName(mass_model.name), "set model name")
+
+    return doc, (model, model_fbc)
+
+
+def _write_model_meta_info_to_sbml(model, meta):
+    """Write MassModel Meta Information (ModelHistory) into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # TODO annotations for meta
+    # TODO annotations for meta
+
+    # Make ModelHistory object and populate
+    history = libsbml.ModelHistory()
+    _check(history, "create ModelHistory")
+    if meta.get("created", None):
+        # Use previous creation date
+        _check(history.setCreatedDate(meta["created"]), "set created date")
+    else:
+        # Get the current time and date and set for the model.
+        time = datetime.datetime.now()
+        timestr = time.strftime('%Y-%m-%dT%H:%M:%S')
+        date = libsbml.Date(timestr)
+        _check(date, "create the date")
+        _check(history.setCreatedDate(date), "set created date")
+        _check(history.setModifiedDate(date), "set modified date")
+
+    # Make Creator objects and add to ModelHistory
+    if meta.get("creators", None):
+        for mass_creator in meta["creators"]:
+            # Make creator object
+            creator = libsbml.ModelCreator()
+            _check(creator, "create model creator")
+            # Add family name, given name, organisation, and email attributes
+            for k in ["familyName", "givenName", "organisation", "email"]:
+                if mass_creator.get(k, None):
+                    # Make logger message
+                    msg = k.replace("Name", " name") if "Name" in k else k
+                    # Set creator attribute
+                    _check(creator.__class__.__dict__[k].fset(
+                        creator, mass_creator[k]), "set creator " + msg)
+            # Add creator to the ModelHistory
+            _check(history.addCreator(creator),
+                   "adding creator to ModelHistory")
+    # Set the ModelHistory
+    _check(model.setModelHistory(history), 'set ModelHistory')
+
+
+def _write_model_units_to_sbml():
+    """Write MassModel unit information into SBMLDocument.
+
+    Currently, all units will be in terms of Millimole, Litres, and Hours.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # TODO Enable other units and/or use of units from MassModel
+    print("TODO: Units need to be implemented")
+
+
+def _write_model_compartments_to_sbml(model, mass_model):
+    """Write MassModel compartment information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # TODO Revisit based on new cobra compartment implementation
+    if not mass_model.compartments:
+        LOGGER.warning("No compartments found in MassModel. Therefore creating"
+                       " compartment 'default_compartment' for entire model")
+        compartment_dict = {DEFAULT_COMPARTMENT_STR: ""}
+    else:
+        compartment_dict = mass_model.compartments
+
+    for cid, name in iteritems(compartment_dict):
+        compartment = model.createCompartment()
+        _check(compartment, "create model compartment" + _for_id(cid))
+        _check(compartment.setId(cid), "set compartment id" + _for_id(cid))
+        _check(compartment.setName(name),
+               "set compartment name" + _for_id(cid))
+        _check(compartment.setConstant(True),
+               "set compartment constant" + _for_id(cid))
+
+
+def _write_model_species_to_sbml(model, mass_model, f_replace):
+    """Write MassModel species information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    for metabolite in mass_model.metabolites:
+        # Create specie and set ID, name, and compartment
+        mid = metabolite.id
+        if f_replace and F_SPECIE_REV in f_replace:
+            mid = f_replace[F_SPECIE_REV](mid)
+        specie = model.createSpecies()
+        _check(specie, "create model specie" + _for_id(mid))
+        _check(specie.setId(mid), "set specie id" + _for_id(mid))
+        _check(specie.setName(metabolite.name),
+               "set specie name" + _for_id(mid))
+        # Use a generic compartment if no species have set compartments
+        if not mass_model.compartments:
+            cid = DEFAULT_COMPARTMENT_STR
+        else:
+            cid = metabolite.compartment
+        _check(specie.setCompartment(cid),
+               "set specie compartment" + _for_id(mid))
+
+        # TODO Set initial/fixed concentration, Clean up after IC/FC changes
+        # Four possible cases
+        # Metabolite varies, metabolite is on boundary
+        # Metabolite varies, metabolite is not on boundary
+        # Metabolite constant, metabolite is on boundary
+        # Metabolite constant, metabolite is not on boundary
+        boundary_condition = False
+        constant = False
+
+        # Set species constant, boundary condition, and unit restrictions
+        _check(specie.setConstant(constant),
+               "set specie constant" + _for_id(mid))
+        _check(specie.setBoundaryCondition(boundary_condition),
+               "set specie boundary condition" + _for_id(mid))
+        _check(specie.setHasOnlySubstanceUnits(False),
+               "set specie unit substance restrictions" + _for_id(mid))
+
+        # Set metabolite charge via fbc package
+        specie_fbc = specie.getPlugin("fbc")
+        _check(specie_fbc, "get fbc plugin for specie" + _for_id(mid))
+        if metabolite.charge is not None:
+            _check(specie_fbc.setCharge(metabolite.charge),
+                   "set specie charge" + _for_id(mid))
+        # Set metabolite formula via fbc package
+        if metabolite.formula is not None:
+            sbml_formula = _f_moiety_formula_rev(metabolite)
+            _check(specie_fbc.setChemicalFormula(sbml_formula),
+                   "set specie formula" + _for_id(mid))
+        # TODO annotations for specie
+        # TODO notes for specie
+
+
+def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
+    """Write MassModel gene information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    for mass_gene in mass_model.genes:
+        # Create gene product and set ID
+        gid = mass_gene.id
+        if f_replace and F_GENE_REV in f_replace:
+            gid = f_replace[F_GENE_REV](gid)
+        gp = model_fbc.createGeneProduct()
+        _check(gp, "create model gene product" + _for_id(gid))
+        _check(gp.setId(gid), "set gene id " + _for_id(gid))
+        # Set gene name and label
+        gname = mass_gene.name if mass_gene.name else gid
+        _check(gp.setName(gname), "set gene name" + _for_id(gid))
+        _check(gp.setLabel(gname), "set gene label" + _for_id(gid))
+
+        # TODO annotations for gene
+        # TODO notes for gene
+
+
+def _write_model_reactions_to_sbml(model, mass_model, f_replace):
+    """Write MassModel reaction information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # TODO Break into smaller functions
+    for mass_reaction in mass_model.reactions:
+        # Create reaction and set ID, name, and reversible
+        rid = mass_reaction.id
+        if f_replace and F_REACTION_REV in f_replace:
+            rid = f_replace[F_REACTION_REV](rid)
+        reaction = model.createReaction()
+        _check(reaction, "create reaction" + _for_id(rid))
+        _check(reaction.setId(rid), "set reaction id" + _for_id(rid))
+        _check(reaction.setName(mass_reaction.name),
+               "set reaction name" + _for_id(rid))
+        _check(reaction.setReversible(mass_reaction.reversible),
+               "set reaction reversible" + _for_id(rid))
+        # TODO annotations for reaction
+        # TODO notes for reaction
+
+        # Set reaction species references and stoichiometry
+        for metabolite, stoichiometry in iteritems(mass_reaction.metabolites):
+            # Get specie id
+            sid = metabolite.id
+            if f_replace and F_SPECIE_REV in f_replace:
+                sid = f_replace[F_SPECIE_REV](sid)
+            # Create specie reference as reactant or product
+            # based on the reaction stoichiometry
+            if stoichiometry < 0:
+                sref = reaction.createReactant()
+            else:
+                sref = reaction.createProduct()
+            _check(sref, "create specie reference " + sid + _for_id(rid))
+            # Set ID, stoichiometry, and whether species is constant
+            _check(sref.setSpecies(sid),
+                   "set specie reference id" + _for_id(sid))
+            _check(sref.setStoichiometry(abs(stoichiometry)),
+                   "set specie reference stoichiometry" + _for_id(sid))
+            _check(sref.setConstant(True),
+                   "set specie reference constant" + _for_id(sid))
+
+        reaction_fbc = reaction.getPlugin("fbc")
+        _check(reaction_fbc, "get fbc plugin for reaction" + _for_id(rid))
+        # TODO Flux bounds
+
+        # Set the reaction GPR if it exists
+        gpr = mass_reaction.gene_reaction_rule
+        if gpr:
+            # Replace IDs in string
+            if f_replace and F_GENE_REV in f_replace:
+                gpr = gpr.replace("(", "( ")
+                gpr = gpr.replace(")", " )")
+                tokens = gpr.split(" ")
+                for i, token in enumerate(tokens):
+                    if token not in [" ", "and", "or", "(", ")"]:
+                        tokens[i] = f_replace[F_GENE_REV](token)
+                gpr = " ".join(tokens)
+            # Create assoication
+            gpa = reaction_fbc.createGeneProductAssociation()
+            _check(gpa, "create gene product association" + _for_id(rid))
+            _check(gpa.setAssociation(gpr),
+                   "set gene product association" + _for_id(rid))
+
+        # Set the reaction kinetic law
+        
+
+
+def _check(value, message):
+    """Check the libsbml return value and log error messages.
+
+    If value is None, logs an error messaage constructed using 'message' and
+    then exists with status code 1. If 'value' is an integer, it assumes it is
+    an libSBML return status code. If the code value is
+    LIBSBML_OPERATION_SUCCESS, returns without further action; if it is not,
+    logs an error message constructed using 'message' along with text from
+    libSBML explaining the meaning of the code, and exits with status code 1.
+    """
+    print(message)
+    if value is None:
+        LOGGER.error("Error: LibSBML returned a null value trying to "
+                     "<%s>.", message)
+    if isinstance(value, integer_types)\
+       and value != libsbml.LIBSBML_OPERATION_SUCCESS:
+        LOGGER.error("Error encountered trying to  <%s>.", message)
+        LOGGER.error("LibSBML error code %s: %s", str(value),
+                     libsbml.OperationReturnValue_toString(value).strip())
+
+
+# -----------------------------------------------------------------------------
+# Validation
+# -----------------------------------------------------------------------------
+def validate_sbml_model(filename):
+    """TODO DOCSTRING."""
+    print(filename)

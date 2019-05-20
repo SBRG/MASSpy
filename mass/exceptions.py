@@ -4,12 +4,12 @@ from __future__ import absolute_import
 
 
 class MassSBMLError(Exception):
-    """Class to reclassify any masspy errors specific to SBML issues."""
+    """SBML error class."""
 
     pass
 
 
 class MassSimulationError(Exception):
-    """Class to reclassify any masspy errors specific to Simulation issues."""
+    """Simulation error class."""
 
     pass
