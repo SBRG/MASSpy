@@ -214,9 +214,10 @@ def generate_ode(metabolite):
     """
     if metabolite._reaction:
         ode = sym.S.Zero
-        for rxn in metabolite._reaction:
-            ode = sym.Add(ode, sym.Mul(rxn.get_coefficient(metabolite.id),
-                                       rxn.rate))
+        if not metabolite.fixed:
+            for rxn in metabolite._reaction:
+                ode = sym.Add(
+                    ode, sym.Mul(rxn.get_coefficient(metabolite.id), rxn.rate))
     else:
         ode = None
 
@@ -288,13 +289,12 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
                 for met in obj_iter if re.search(str(met), custom_rate_expr)}
 
     # Get fixed concentrations as symbols if they are in the custom rate law
+    fix_syms = {}
     if reaction._model is not None:
-        fix_syms = {str(met): sym.Symbol(str(met))
-                    for met in reaction._model.fixed_concentrations
-                    if re.search("[" + str(met) + "]", custom_rate_expr)}
-
-    else:
-        fix_syms = {}
+        for attr in ["fixed", "boundary_metabolites"]:
+            fix_syms = {str(met): sym.Symbol(str(met))
+                        for met in getattr(reaction._model, attr)
+                        if re.search("[" + str(met) + "]", custom_rate_expr)}
 
     # Get rate parameters as symbols if they are in the custom rate law
     rate_syms = {getattr(reaction, p): sym.Symbol(getattr(reaction, p))
@@ -375,14 +375,14 @@ def _ignore_h_and_h2o(reaction):
 
     Designed for internal use. Remove hydrogen and water from reactions to
     prevent their inclusion in simulation. Does not effect water and hydrogen
-    exchange reactions.
+    boundary reactions.
     """
     reaction = reaction.copy()
     for met, coeff in iteritems(reaction.metabolites):
         # Must be water or hydrogen.
         if met.elements == {"H": 2, "O": 1} or met.elements == {"H": 1}:
-            # Must not be an exchange reaction.
-            if not reaction.exchange:
+            # Must not be an boundary reaction.
+            if not reaction.boundary:
                 reaction.subtract_metabolites({met: coeff})
 
     return reaction
@@ -395,8 +395,8 @@ def _format_metabs_str(expr, rxn, mets, left_sign):
     else:
         l, r = "", "*"
     # For exchange reactions
-    if rxn.exchange and not mets:
-        expr += l + rxn.external_metabolite + "(t)" + r
+    if rxn.boundary and not mets:
+        expr += l + rxn.boundary_metabolite + "(t)" + r
     # For all other reactions
     else:
         for met in mets:
@@ -410,9 +410,9 @@ def _format_metabs_str(expr, rxn, mets, left_sign):
 
 def _format_metabs_sym(expr, rxn, mets):
     """Format the metabolites for a rate law or ratio sympy expression."""
-    # For exchange reactions, generate an "external" metabolite for exchange
-    if rxn.exchange and not mets:
-        expr = sym.Mul(expr, sym.Symbol(rxn.external_metabolite))
+    # For boundary reactions, generate an "boundary" metabolite for boundary
+    if rxn.boundary and not mets:
+        expr = sym.Mul(expr, sym.Symbol(rxn.boundary_metabolite))
     # For all other reactions
     else:
         for met in mets:
@@ -602,7 +602,7 @@ def _strip_time_for_fixed_mets(reaction, rate_expr):
     This method is intended for internal use only.
     """
     mets_to_strip = [met for met in reaction._metabolites
-                     if met in reaction.model.fixed_concentrations]
+                     if met in reaction.model.fixed]
     if mets_to_strip:
         sub_mets_stripped = {_mk_met_func(m): sym.Symbol(str(m))
                              for m in mets_to_strip}

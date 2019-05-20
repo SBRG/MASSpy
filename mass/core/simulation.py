@@ -14,8 +14,8 @@ Valid keys for perturbation dictionary can include the following:
     "RxnID.equilibrium_constant" or "RxnID.Keq"
     "RxnID.reverse_rate_constant" or "RxnID.kr"
     "MetID.initial_condition" or "MetID.ic"
-    "MetID.fixed_concentration" or "MetID.fixed"
-    "MetID.function" (Only valid for exchange "external" metabolites)
+    "MetID.fixed" or "MetID.fix"
+    "MetID.function" (Only valid for exchange "boundary" metabolites)
 
 where RxnID represents the reaction identifier and MetID represents the
 metabolite identifier. To perform a perturbation where the current value is

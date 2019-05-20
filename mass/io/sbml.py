@@ -22,7 +22,6 @@ from cobra.core.gene import parse_gpr
 from cobra.manipulation.modify import _renames
 from cobra.manipulation.validate import check_metabolite_compartment_formula
 # For Gene and GPR handling
-from cobra.io.sbml3 import annotate_cobra_from_sbml, annotate_sbml_from_cobra
 
 from mass.core import MassMetabolite, MassReaction, MassModel
 from mass.util import strip_time

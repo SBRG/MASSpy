@@ -24,20 +24,20 @@ class MassMetabolite(Species):
         The identifier associated with the MassMetabolite.
     name: str, optional
         A human readable name for the metabolite.
-
-    Attributes
-    ----------
     formula: str, optional
         Chemical formula associated with the metabolite.
     charge: float, optional
         The charge number associated with the metabolite.
     compartment: str, optional
         The compartment where the metabolite is located.
+    fixed: bool, optional
+        Whether the metabolite concentration should remain at a fixed value.
+        Default is False.
 
     """
 
-    def __init__(self, id=None, name="", formula=None, charge=None,
-                 compartment=None):
+    def __init__(self, id=None, name="", formula=None,
+                 charge=None, compartment=None, fixed=False):
         """Initialize the MassMetabolite Object."""
         # Check inputs to ensure they are they correct types.
         super(MassMetabolite, self).__init__(id, name)
@@ -46,11 +46,12 @@ class MassMetabolite(Species):
         self.charge = charge
         # Compartment where the metabolite is located
         self.compartment = compartment
-        # Inital concentration of the metabolite
+        # Whether the concentration of the metabolite is fixed.
+        self.fixed = fixed
+        # The initial condition of the metabolite.
         self._initial_condition = None
         # Gibbs energy of formation of the metabolite
         self._gibbs_formation_energy = None
-
         # For cobra compatibility
         self._constraint_sense = "E"
         self._bound = 0.
@@ -140,7 +141,7 @@ class MassMetabolite(Species):
         if not isinstance(value, (integer_types, float)) and \
            value is not None:
             raise TypeError("Must be an int or float")
-        elif value is None:
+        if value is None:
             pass
         elif value < 0.:
             raise ValueError("Must be a non-negative number")
@@ -150,7 +151,8 @@ class MassMetabolite(Species):
     def ordinary_differential_equation(self):
         """Return a sympy expression of the metabolite's associated ODE.
 
-        Will return None if metabolite is not associated with a MassReaction.
+        Will return None if metabolite is not associated with a MassReaction,
+            and a 0. if the fixed attribute is set to True.
         """
         return expressions.generate_ode(self)
 
@@ -211,8 +213,11 @@ class MassMetabolite(Species):
         This method is intended for internal use only.
 
         """
-        _c_str = "_" + self.compartment if self.compartment else ""
-        return str(self).replace(_c_str, "")
+        met_id_str = str(self)
+        if self.compartment:
+            met_id_str = met_id_str.replace("_" + self.compartment, "")
+
+        return met_id_str
 
     def _set_id_with_model(self, value):
         """Set the id of the MassMetabolite to the associated MassModel.

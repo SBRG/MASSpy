@@ -51,7 +51,7 @@ class EnzymeModuleDict(OrderedDictWithID):
             super(EnzymeModuleDict, self).__init__(
                 id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
         # Initialize an EnzymeModuleDict using an EnzymeModule
-        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_dict"):
+        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_module_dict"):
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
             for key, value in iteritems(id_or_enzyme.__dict__):
                 nkey = key.lstrip("_")
@@ -269,11 +269,6 @@ class EnzymeModuleDict(OrderedDictWithID):
     def __deepcopy__(self, memo):
         """Create a deepcopy of the EnzymeModuleDict."""
         return deepcopy(super(EnzymeModuleDict, self), memo)
-
-    def __repr__(self):
-        """Override of default repr() implementation."""
-        return "<%s %s at 0x%x>" % (
-            self.__class__.__name__[:-4], self.id, id(self))
 
 
 _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({

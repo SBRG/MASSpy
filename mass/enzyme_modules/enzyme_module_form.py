@@ -21,7 +21,16 @@ class EnzymeModuleForm(MassMetabolite):
         EnzymeModuleForm will be instanstiated with stored values identicial to
         the value of those stored in the MassMetabolite.
     name: str, optional
-        A human readable name for the enzyme form.
+        A human readable name for the metabolite.
+    formula: str, optional
+        Chemical formula associated with the metabolite.
+    charge: float, optional
+        The charge number associated with the metabolite.
+    compartment: str, optional
+        The compartment where the metabolite is located.
+    fixed: bool, optional
+        Whether the metabolite concentration should remain at a fixed value.
+        Default is False.
 
     Attributes
     ----------
@@ -35,24 +44,17 @@ class EnzymeModuleForm(MassMetabolite):
         A dict representing the metabolites bound to the enzyme's regulatory
         site(s), with MassMetabolites as keys and the number bound as values.
         If the final coefficient for a metabolite is 0 then it is removed.
-    formula: str, optional
-        Chemical formula associated with the EnzymeModuleForm, accounting for
-        bound metabolites.
-    charge: float, optional
-        The charge number associated with the EnzymeModuleForm, accounting for
-        bound metabolites.
-    compartment: str, optional
-        The compartment where the EnzymeModuleForm is located.
 
     """
 
-    def __init__(self, id=None, name="", enzyme_id="", bound_catalytic=None,
-                 bound_effectors=None, formula=None, charge=None,
-                 compartment=None):
+    def __init__(self, id=None, name="", formula=None, charge=None,
+                 compartment=None, fixed=False, enzyme_id="",
+                 bound_catalytic=None, bound_effectors=None):
         """Initialize the EnzymeModuleForm Object."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
-            id, name, formula=formula, charge=charge, compartment=compartment)
+            id=id, name=name, formula=formula, charge=charge,
+            compartment=compartment, fixed=fixed)
         # Set the id of the enzyme represented by the EnzymeModuleForm
         self.enzyme_id = enzyme_id
 

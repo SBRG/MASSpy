@@ -70,8 +70,7 @@ def from_json(document):
     return model_from_dict(json.loads(document))
 
 
-def save_json_model(model, filename, sort=False, pretty=False,
-                    extension=True, **kwargs):
+def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
     """Write the MassModel to a file in JSON format.
 
     `kwargs`` are passed on to ``json.dumps``
@@ -86,14 +85,11 @@ def save_json_model(model, filename, sort=False, pretty=False,
         written to.
     sort: bool, optional
         Whether to sort the metabolites, reactions, and genes or maintain the
-        order defined in the model. Default is false.
+        order defined in the model. Default is False.
     pretty: bool, optional
         Whether to format the JSON more compactly (default), or in a more
         verbose but easier to read fashion. Default is False. Can be partially
         overwritten by the ``kwargs``.
-    extension: bool, optional
-        Whether to include the file type extension (*.json) at the end of the
-        filename if a string is provided. Default is True.
 
     See Also
     --------
@@ -113,8 +109,6 @@ def save_json_model(model, filename, sort=False, pretty=False,
     dump_opts.update(**kwargs)
 
     if isinstance(filename, string_types):
-        if extension and ".json" not in filename[-5:]:
-            filename += ".json"
         with open(filename, "w") as file_handle:
             json.dump(obj, file_handle, **dump_opts)
     else:
@@ -148,7 +142,7 @@ def load_json_model(filename):
         return model_from_dict(json.load(filename))
 
 
-json_schema = {
+JSON_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "MASS",
     "description": "JSON representation of MASS model",
@@ -218,6 +212,7 @@ json_schema = {
                         "type": "string",
                         "pattern": "[a-z]{1,2}",
                     },
+                    "fixed": {"type": "boolean"},
                     "_initial_condition": {
                         "type": "number",
                         "minimum": 0,
@@ -320,14 +315,7 @@ json_schema = {
             "required": ["id", "name"],
             "additionalProperties": False,
         },
-        "initial_conditions": {
-            "type": "object",
-            "allOf": {
-                "type": "number",
-                "minimum": 0,
-            },
-        },
-        "fixed_concentrations": {
+        "boundary_conditions": {
             "type": "object",
             "allOf": {
                 "type": "number",
