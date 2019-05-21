@@ -28,7 +28,7 @@ from mass.util.expressions import (
 
 # Global
 _INF = float("inf")
-_BOUNDARY_PREFIX = "bc_"
+_BOUNDARY_COMPARTMENT = "_b"
 
 
 class MassReaction(Object):
@@ -310,7 +310,9 @@ class MassReaction(Object):
 
         """
         if self.boundary:
-            bc_metabolite = _BOUNDARY_PREFIX + str(list(self.metabolites)[0])
+            for metabolite in list(self.metabolites):
+                bc_metabolite = metabolite._remove_compartment_from_id_str()
+                bc_metabolite += _BOUNDARY_COMPARTMENT
         else:
             bc_metabolite = None
 

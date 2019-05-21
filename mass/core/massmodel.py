@@ -1686,8 +1686,20 @@ class MassModel(Object):
         """
         if not isinstance(initial_conditions, dict):
             raise TypeError("initial_conditions must be a dictionary.")
-        # TODO Fix when changes finished
-        print("TODO Finish method")
+        for metabolite, ic_value in iteritems(initial_conditions):
+            # Try getting metabolite object from model
+            try:
+                metabolite = self.metabolites.get_by_id(str(metabolite))
+            except KeyError as e:
+                warn("No metabolite found for {0}".format(str(e)))
+                continue
+            # Try setting the initial condition
+            try:
+                metabolite.initial_condition = ic_value
+            except (TypeError, ValueError) as e:
+                warn("Cannot set initial condition for {0} due to the "
+                     "following: {1}".format(metabolite.id, str(e)))
+                continue
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.
