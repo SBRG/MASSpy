@@ -1,27 +1,6 @@
 {
     "_enzyme_concentration_total": 3.3e-05,
     "_enzyme_module_forms_categorized": {
-        "Complexed ATP": [
-            "pfk_R0_A_c",
-            "pfk_R1_A_c",
-            "pfk_R2_A_c",
-            "pfk_R3_A_c",
-            "pfk_R4_A_c"
-        ],
-        "Complexed ATP & F6P": [
-            "pfk_R0_AF_c",
-            "pfk_R1_AF_c",
-            "pfk_R2_AF_c",
-            "pfk_R3_AF_c",
-            "pfk_R4_AF_c"
-        ],
-        "Free Catalytic": [
-            "pfk_R0_c",
-            "pfk_R1_c",
-            "pfk_R2_c",
-            "pfk_R3_c",
-            "pfk_R4_c"
-        ],
         "Relaxed": [
             "pfk_R0_AF_c",
             "pfk_R0_A_c",
@@ -115,10 +94,10 @@
         "Keq_PFK_F": 10.0,
         "Keq_PFK_I": 10.0,
         "Keq_PFK_L": 0.0011,
-        "kf_PFK": 18867444.0,
-        "kf_PFK_A": 4239459.0,
+        "kf_PFK": 2000064.0,
+        "kf_PFK_A": 61635.0,
         "kf_PFK_ACT": 1000000.0,
-        "kf_PFK_F": 5324529.0,
+        "kf_PFK_F": 5000028.0,
         "kf_PFK_I": 1000000.0
     },
     "custom_rates": {
@@ -257,7 +236,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.65e-09,
+            "_initial_condition": 6.9014e-08,
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -270,7 +249,7 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 2.944e-09,
+            "_initial_condition": 8.1613e-08,
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -284,7 +263,7 @@
                 "f6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.43e-10,
+            "_initial_condition": 3.232e-09,
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -297,7 +276,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 1.7344e-08,
+            "_initial_condition": 7.25509e-07,
             "charge": -2,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -312,7 +291,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 3.0951e-08,
+            "_initial_condition": 8.57957e-07,
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -328,7 +307,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 3.601e-09,
+            "_initial_condition": 3.3974e-08,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -341,7 +320,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 6.8372e-08,
+            "_initial_condition": 2.86009e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -356,7 +335,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 1.22015e-07,
+            "_initial_condition": 3.382225e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -372,7 +351,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 1.4198e-08,
+            "_initial_condition": 1.33933e-07,
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -385,7 +364,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 1.19793e-07,
+            "_initial_condition": 5.011115e-06,
             "charge": -6,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -400,7 +379,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 2.13781e-07,
+            "_initial_condition": 5.925939e-06,
             "charge": -10,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -416,7 +395,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 2.4876e-08,
+            "_initial_condition": 2.34662e-07,
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -429,7 +408,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 7.8708e-08,
+            "_initial_condition": 3.292458e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -444,7 +423,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 1.40461e-07,
+            "_initial_condition": 3.893526e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -460,7 +439,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 1.6344e-08,
+            "_initial_condition": 1.5418e-07,
             "charge": -14,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -471,7 +450,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 2e-12,
+            "_initial_condition": 7.6e-11,
             "charge": 0,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -484,7 +463,7 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 1.16e-10,
+            "_initial_condition": 4.859e-09,
             "charge": -4,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -497,7 +476,7 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 2.788e-09,
+            "_initial_condition": 1.16606e-07,
             "charge": -8,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -510,7 +489,7 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 2.9734e-08,
+            "_initial_condition": 1.243797e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -523,7 +502,7 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 1.18934e-07,
+            "_initial_condition": 4.975186e-06,
             "charge": -16,
             "compartment": "c",
             "enzyme_id": "PFK",
@@ -533,11 +512,6 @@
         }
     ],
     "name": "Phosphofructokinase",
-    "notes": {
-        "SB2-textbook": [
-            "Palsson, Bernhard \u00d8.. Systems Biology: Simulation of Dynamic Network States. N.p., Cambridge University Press, 2011."
-        ]
-    },
     "reactions": [
         {
             "_lower_bound": -1000.0,

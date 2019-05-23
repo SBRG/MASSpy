@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" sboTerm="SBO:0000062" level="3" version="2" fbc:required="false">
+  <model metaid="meta_AMPSalvageNetwork" id="AMPSalvageNetwork" fbc:strict="false">
+    <listOfCompartments>
+      <compartment id="c" name="Cytosol" constant="true"/>
+      <compartment id="b" name="boundary" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="M_adn_c" name="Adenosine" compartment="c" initialConcentration="0.0012" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H13N5O4"/>
+      <species id="M_ade_c" name="Adenine" compartment="c" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H5N5"/>
+      <species id="M_imp_c" name="Inosine monophosphate" compartment="c" initialConcentration="0.01" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H11N4O8P"/>
+      <species id="M_ins_c" name="Inosine" compartment="c" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H12N4O5"/>
+      <species id="M_hxan_c" name="Hypoxanthine" compartment="c" initialConcentration="0.002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H4N4O"/>
+      <species id="M_r1p_c" name="Alpha-D-Ribose 1-phosphate" compartment="c" initialConcentration="0.06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" initialConcentration="0.00494" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_prpp_c" name="5-Phospho-alpha-D-ribose 1-diphosphate" compartment="c" initialConcentration="0.005" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C5H8O14P3"/>
+      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.29" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867281" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
+      <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
+      <species id="M_nh3_c" name="Ammonia" compartment="c" initialConcentration="0.091002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H3N"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="6.30957e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
+      <species id="M_adn_b" compartment="b" initialConcentration="0.0012" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_ade_b" compartment="b" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_ins_b" compartment="b" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_hxan_b" compartment="b" initialConcentration="0.002" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_amp_b" compartment="b" initialConcentration="0.0867281" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_h_b" compartment="b" initialConcentration="6.30957e-05" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_h2o_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_pi_b" compartment="b" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_nh3_b" compartment="b" initialConcentration="0.091002" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kf_R_ADNK1" value="62.5" constant="true"/>
+      <parameter id="kf_R_NTD7" value="1.38363460055046" constant="true"/>
+      <parameter id="kf_R_AMPDA" value="0.161424036730887" constant="true"/>
+      <parameter id="kf_R_NTD11" value="1.4" constant="true"/>
+      <parameter id="kf_R_ADA" value="8.33333333333333" constant="true"/>
+      <parameter id="kf_R_PUNP5" value="12" constant="true"/>
+      <parameter id="kf_R_PPM" value="0.234786775275515" constant="true"/>
+      <parameter id="kf_R_PRPPS" value="1.10703441295547" constant="true"/>
+      <parameter id="kf_R_ADPT" value="2800" constant="true"/>
+      <parameter id="kf_R_ATPM" value="0.204137931034483" constant="true"/>
+      <parameter id="kf_R_SK_adn_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_ade_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_ins_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_hxan_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_nh3_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_pi_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_amp_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_h_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_h2o_c" value="100000" constant="true"/>
+      <parameter id="Keq_R_ADNK1" value="INF" constant="true"/>
+      <parameter id="Keq_R_NTD7" value="INF" constant="true"/>
+      <parameter id="Keq_R_AMPDA" value="INF" constant="true"/>
+      <parameter id="Keq_R_NTD11" value="INF" constant="true"/>
+      <parameter id="Keq_R_ADA" value="INF" constant="true"/>
+      <parameter id="Keq_R_PUNP5" value="0.09" constant="true"/>
+      <parameter id="Keq_R_PPM" value="13.3" constant="true"/>
+      <parameter id="Keq_R_PRPPS" value="INF" constant="true"/>
+      <parameter id="Keq_R_ADPT" value="INF" constant="true"/>
+      <parameter id="Keq_R_ATPM" value="INF" constant="true"/>
+      <parameter id="Keq_R_SK_adn_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_ade_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_ins_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_hxan_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_nh3_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_pi_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_amp_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_h_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_h2o_c" value="1" constant="true"/>
+      <parameter id="v_R_ADNK1" value="0.11999106" constant="false"/>
+      <parameter id="v_R_NTD7" value="0.12" constant="false"/>
+      <parameter id="v_R_AMPDA" value="0.014" constant="false"/>
+      <parameter id="v_R_NTD11" value="0.014" constant="false"/>
+      <parameter id="v_R_ADA" value="0.00999917" constant="false"/>
+      <parameter id="v_R_PUNP5" value="0.01400088" constant="false"/>
+      <parameter id="v_R_PPM" value="0.01400088" constant="false"/>
+      <parameter id="v_R_PRPPS" value="0.01400088" constant="false"/>
+      <parameter id="v_R_ADPT" value="0.01400088" constant="false"/>
+      <parameter id="v_R_ATPM" value="0.14799282" constant="false"/>
+      <parameter id="v_R_SK_adn_c" value="-0.00999023" constant="false"/>
+      <parameter id="v_R_SK_ade_c" value="-0.01400088" constant="false"/>
+      <parameter id="v_R_SK_ins_c" value="0.00999829" constant="false"/>
+      <parameter id="v_R_SK_hxan_c" value="0.01400088" constant="false"/>
+      <parameter id="v_R_SK_nh3_c" value="0.02399917" constant="false"/>
+      <parameter id="v_R_SK_pi_c" value="8.06e-06" constant="false"/>
+      <parameter id="v_R_SK_amp_c" value="-8.06e-06" constant="false"/>
+      <parameter id="v_R_SK_h_c" value="0" constant="false"/>
+      <parameter id="v_R_SK_h2o_c" value="-0.02400722" constant="false"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="R_ADNK1" name="Adenosine kinase" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_adn_c </ci>
+              <ci> M_atp_c </ci>
+              <ci> kf_R_ADNK1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_NTD7" name="5&apos;-nucleotidase (AMP)" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_amp_c </ci>
+              <ci> kf_R_NTD7 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_AMPDA" name="Adenosine monophosphate deaminase" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_imp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_amp_c </ci>
+              <ci> kf_R_AMPDA </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_NTD11" name="5&apos;-nucleotidase (IMP)" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_imp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_imp_c </ci>
+              <ci> kf_R_NTD11 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_ADA" name="Adenosine deaminase" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_adn_c </ci>
+              <ci> kf_R_ADA </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_PUNP5" name="Purine-nucleoside phosphorylase (Inosine)" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hxan_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_r1p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_PUNP5 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_ins_c </ci>
+                  <ci> M_pi_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_hxan_c </ci>
+                    <ci> M_r1p_c </ci>
+                  </apply>
+                  <ci> Keq_R_PUNP5 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_PPM" name="Phosphopentomutase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_r1p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_PPM </ci>
+              <apply>
+                <minus/>
+                <ci> M_r1p_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_r5p_c </ci>
+                  <ci> Keq_R_PPM </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_PRPPS" name="Phosphoribosylpyrophosphate synthetase" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_atp_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_prpp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <apply>
+                <power/>
+                <ci> M_atp_c </ci>
+                <cn> 2 </cn>
+              </apply>
+              <ci> M_r5p_c </ci>
+              <ci> kf_R_PRPPS </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_ADPT" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_ade_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_prpp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="2" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_ade_c </ci>
+              <ci> M_prpp_c </ci>
+              <ci> kf_R_ADPT </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_ATPM" name="ATP maintenance requirement" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_adp_c </ci>
+              <ci> M_pi_c </ci>
+              <ci> kf_R_ATPM </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_adn_c" sboTerm="SBO:0000632" id="R_SK_adn_c" name="Adenosine_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_adn_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_adn_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_adn_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_adn_b </ci>
+                  <ci> Keq_R_SK_adn_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_ade_c" sboTerm="SBO:0000632" id="R_SK_ade_c" name="Adenine_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_ade_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_ade_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_ade_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_ade_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_ade_b </ci>
+                  <ci> Keq_R_SK_ade_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_ins_c" sboTerm="SBO:0000632" id="R_SK_ins_c" name="Inosine_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_ins_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_ins_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_ins_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_ins_b </ci>
+                  <ci> Keq_R_SK_ins_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_hxan_c" sboTerm="SBO:0000632" id="R_SK_hxan_c" name="Hypoxanthine_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hxan_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hxan_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_hxan_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_hxan_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_hxan_b </ci>
+                  <ci> Keq_R_SK_hxan_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_nh3_c" sboTerm="SBO:0000632" id="R_SK_nh3_c" name="Ammonia_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_nh3_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_nh3_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_nh3_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_nh3_b </ci>
+                  <ci> Keq_R_SK_nh3_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_pi_c" sboTerm="SBO:0000632" id="R_SK_pi_c" name="Phosphate_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_pi_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_pi_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_pi_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_pi_b </ci>
+                  <ci> Keq_R_SK_pi_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_amp_c" sboTerm="SBO:0000632" id="R_SK_amp_c" name="AMP_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_amp_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_amp_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_amp_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_amp_b </ci>
+                  <ci> Keq_R_SK_amp_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_h_c" sboTerm="SBO:0000632" id="R_SK_h_c" name="H+_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_h_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_h_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_h_b </ci>
+                  <ci> Keq_R_SK_h_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_h2o_c" sboTerm="SBO:0000632" id="R_SK_h2o_c" name="H2O_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_h2o_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_h2o_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_h2o_b </ci>
+                  <ci> Keq_R_SK_h2o_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

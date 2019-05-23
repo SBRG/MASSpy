@@ -139,9 +139,7 @@
         }
     ],
     "notes": {
-        "SB2-textbook": [
-            "Palsson, Bernhard \u00d8.. Systems Biology: Simulation of Dynamic Network States. N.p., Cambridge University Press, 2011."
-        ]
+        "Literature": "\n        1.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part I\u2014A comprehensive kinetic model. Journal of Theoretical Biology 141, 515\u2013528 (1989).\n        2.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part II\u2014Interactions with the environment. Journal of Theoretical Biology 141, 529\u2013545 (1989).\n        3.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part III\u2014Metabolic reaction rates. Journal of Theoretical Biology 142, 41\u201368 (1990).\n        4.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part IV\u2014Data prediction and some model computations. Journal of Theoretical Biology 142, 69\u201385 (1990).\n        "
     },
     "reactions": [
         {

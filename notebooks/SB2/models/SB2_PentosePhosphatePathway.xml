@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" sboTerm="SBO:0000062" level="3" version="2" fbc:required="false">
+  <model metaid="meta_PentosePhosphatePathway" id="PentosePhosphatePathway" fbc:strict="false">
+    <listOfCompartments>
+      <compartment id="c" name="Cytosol" constant="true"/>
+      <compartment id="b" name="boundary" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.0486" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" initialConcentration="0.00728" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
+      <species id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" initialConcentration="0.00175424" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P"/>
+      <species id="M__6pgc_c" name="6-Phospho-D-gluconate" compartment="c" initialConcentration="0.0374753" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C6H10O10P"/>
+      <species id="M_ru5p__D_c" name="D-Ribulose 5-phosphate" compartment="c" initialConcentration="0.00493679" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_xu5p__D_c" name="D-Xylulose 5-phosphate" compartment="c" initialConcentration="0.0147842" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" initialConcentration="0.0126689" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_s7p_c" name="Sedoheptulose 7-phosphate" compartment="c" initialConcentration="0.023988" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C7H13O10P"/>
+      <species id="M_e4p_c" name="D-Erythrose 4-phosphate" compartment="c" initialConcentration="0.00507507" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C4H7O7P"/>
+      <species id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" initialConcentration="0.0002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3"/>
+      <species id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" initialConcentration="0.0658" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3"/>
+      <species id="M_gthrd_c" name="Reduced glutathione" compartment="c" initialConcentration="3.2" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C10H16N3O6S"/>
+      <species id="M_gthox_c" name="Oxidized glutathione" compartment="c" initialConcentration="0.12" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C20H30N6O12S2"/>
+      <species id="M_co2_c" name="CO2" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="CO2"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="7.14957e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
+      <species id="M_f6p_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_r5p_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_g3p_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_g6p_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_h_b" compartment="b" initialConcentration="6.30957e-05" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_h2o_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+      <species id="M_co2_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kf_R_G6PDH2r" value="21864.5892487112" constant="true"/>
+      <parameter id="kf_R_PGL" value="122.323111606384" constant="true"/>
+      <parameter id="kf_R_GND" value="29287.8074735594" constant="true"/>
+      <parameter id="kf_R_RPE" value="15284.6771111956" constant="true"/>
+      <parameter id="kf_R_RPI" value="10564.6200507944" constant="true"/>
+      <parameter id="kf_R_TKT1" value="1595.95197455381" constant="true"/>
+      <parameter id="kf_R_TKT2" value="1092.24643529008" constant="true"/>
+      <parameter id="kf_R_TALA" value="844.61613801298" constant="true"/>
+      <parameter id="kf_R_GTHOr" value="53.3298118727398" constant="true"/>
+      <parameter id="kf_R_GSHR" value="0.0412573673870334" constant="true"/>
+      <parameter id="kf_R_SK_g6p_c" value="0.220727349169645" constant="true"/>
+      <parameter id="kf_R_DM_f6p_c" value="6.73400673400673" constant="true"/>
+      <parameter id="kf_R_DM_g3p_c" value="9.15750915750916" constant="true"/>
+      <parameter id="kf_R_DM_r5p_c" value="0.789334512072871" constant="true"/>
+      <parameter id="kf_R_SK_co2_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_h_c" value="100000" constant="true"/>
+      <parameter id="kf_R_SK_h2o_c" value="100000" constant="true"/>
+      <parameter id="Keq_R_G6PDH2r" value="1000" constant="true"/>
+      <parameter id="Keq_R_PGL" value="1000" constant="true"/>
+      <parameter id="Keq_R_GND" value="1000" constant="true"/>
+      <parameter id="Keq_R_RPE" value="3" constant="true"/>
+      <parameter id="Keq_R_RPI" value="2.57" constant="true"/>
+      <parameter id="Keq_R_TKT1" value="1.2" constant="true"/>
+      <parameter id="Keq_R_TKT2" value="10.3" constant="true"/>
+      <parameter id="Keq_R_TALA" value="1.05" constant="true"/>
+      <parameter id="Keq_R_GTHOr" value="100" constant="true"/>
+      <parameter id="Keq_R_GSHR" value="2" constant="true"/>
+      <parameter id="Keq_R_SK_g6p_c" value="1" constant="true"/>
+      <parameter id="Keq_R_DM_f6p_c" value="INF" constant="true"/>
+      <parameter id="Keq_R_DM_g3p_c" value="INF" constant="true"/>
+      <parameter id="Keq_R_DM_r5p_c" value="INF" constant="true"/>
+      <parameter id="Keq_R_SK_co2_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_h_c" value="1" constant="true"/>
+      <parameter id="Keq_R_SK_h2o_c" value="1" constant="true"/>
+      <parameter id="v_R_G6PDH2r" value="0.21" constant="false"/>
+      <parameter id="v_R_PGL" value="0.21" constant="false"/>
+      <parameter id="v_R_GND" value="0.21" constant="false"/>
+      <parameter id="v_R_RPE" value="0.13333333" constant="false"/>
+      <parameter id="v_R_RPI" value="0.07666667" constant="false"/>
+      <parameter id="v_R_TKT1" value="0.06666667" constant="false"/>
+      <parameter id="v_R_TKT2" value="0.06666667" constant="false"/>
+      <parameter id="v_R_TALA" value="0.06666667" constant="false"/>
+      <parameter id="v_R_GTHOr" value="0.42" constant="false"/>
+      <parameter id="v_R_GSHR" value="0.42" constant="false"/>
+      <parameter id="v_R_SK_g6p_c" value="0.21" constant="false"/>
+      <parameter id="v_R_DM_f6p_c" value="0.13333333" constant="false"/>
+      <parameter id="v_R_DM_g3p_c" value="0.06666667" constant="false"/>
+      <parameter id="v_R_DM_r5p_c" value="0.01" constant="false"/>
+      <parameter id="v_R_SK_co2_c" value="0.21" constant="false"/>
+      <parameter id="v_R_SK_h_c" value="0.84" constant="false"/>
+      <parameter id="v_R_SK_h2o_c" value="-0.21" constant="false"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="R_G6PDH2r" name="Glucose 6-phosphate dehydrogenase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_G6PDH2r </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_g6p_c </ci>
+                  <ci> M_nadp_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M__6pgl_c </ci>
+                    <ci> M_nadph_c </ci>
+                  </apply>
+                  <ci> Keq_R_G6PDH2r </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_PGL" name="6-phosphogluconolactonase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_PGL </ci>
+              <apply>
+                <minus/>
+                <ci> M__6pgl_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M__6pgc_c </ci>
+                  <ci> Keq_R_PGL </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_GND" name="Phosphogluconate dehydrogenase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_co2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_GND </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M__6pgc_c </ci>
+                  <ci> M_nadp_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_co2_c </ci>
+                    <ci> M_nadph_c </ci>
+                    <ci> M_ru5p__D_c </ci>
+                  </apply>
+                  <ci> Keq_R_GND </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_RPE" name="Ribulose 5-phosphate 3-epimerase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_RPE </ci>
+              <apply>
+                <minus/>
+                <ci> M_ru5p__D_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_xu5p__D_c </ci>
+                  <ci> Keq_R_RPE </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_RPI" name="Ribulose 5-Phosphate Isomerase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_RPI </ci>
+              <apply>
+                <minus/>
+                <ci> M_ru5p__D_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_r5p_c </ci>
+                  <ci> Keq_R_RPI </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_TKT1" name="Transketolase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_s7p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_TKT1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_r5p_c </ci>
+                  <ci> M_xu5p__D_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_g3p_c </ci>
+                    <ci> M_s7p_c </ci>
+                  </apply>
+                  <ci> Keq_R_TKT1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_TKT2" name="Transketolase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_e4p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_TKT2 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_e4p_c </ci>
+                  <ci> M_xu5p__D_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_g3p_c </ci>
+                  </apply>
+                  <ci> Keq_R_TKT2 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_TALA" name="Transaldolase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_s7p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_e4p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_TALA </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_g3p_c </ci>
+                  <ci> M_s7p_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_e4p_c </ci>
+                    <ci> M_f6p_c </ci>
+                  </apply>
+                  <ci> Keq_R_TALA </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_GTHOr" name="Glutathione oxidoreductase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_gthox_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_GTHOr </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_gthox_c </ci>
+                  <ci> M_nadph_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <power/>
+                      <ci> M_gthrd_c </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <ci> M_nadp_c </ci>
+                  </apply>
+                  <ci> Keq_R_GTHOr </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_GSHR" name="Glutathione-disulfide reductase" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_gthox_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="2" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_GSHR </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <power/>
+                  <ci> M_gthrd_c </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_gthox_c </ci>
+                  <ci> Keq_R_GSHR </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_g6p_c" sboTerm="SBO:0000632" id="R_SK_g6p_c" name="D-Glucose 6-phosphate_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_g6p_b" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_g6p_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_g6p_b </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_g6p_c </ci>
+                  <ci> Keq_R_SK_g6p_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_DM_f6p_c" sboTerm="SBO:0000628" id="R_DM_f6p_c" name="D-Fructose 6-phosphate_demand" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_f6p_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_f6p_c </ci>
+              <ci> kf_R_DM_f6p_c </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_DM_g3p_c" sboTerm="SBO:0000628" id="R_DM_g3p_c" name="Glyceraldehyde 3-phosphate_demand" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_g3p_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_g3p_c </ci>
+              <ci> kf_R_DM_g3p_c </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_DM_r5p_c" sboTerm="SBO:0000628" id="R_DM_r5p_c" name="Alpha-D-Ribose 5-phosphate_demand" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_r5p_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> M_r5p_c </ci>
+              <ci> kf_R_DM_r5p_c </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_co2_c" sboTerm="SBO:0000632" id="R_SK_co2_c" name="CO2_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_co2_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_co2_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_co2_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_co2_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_co2_b </ci>
+                  <ci> Keq_R_SK_co2_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_h_c" sboTerm="SBO:0000632" id="R_SK_h_c" name="H+_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_h_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_h_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_h_b </ci>
+                  <ci> Keq_R_SK_h_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction metaid="meta_R_SK_h2o_c" sboTerm="SBO:0000632" id="R_SK_h2o_c" name="H2O_sink" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_SK_h2o_c </ci>
+              <apply>
+                <minus/>
+                <ci> M_h2o_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_h2o_b </ci>
+                  <ci> Keq_R_SK_h2o_c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
