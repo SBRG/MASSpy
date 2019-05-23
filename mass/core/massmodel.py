@@ -98,9 +98,6 @@ class MassModel(Object):
         A dictionary to store boundary conditions, where keys are string
         identifiers for 'boundary metabolites' of boundary reactions, and
         values are the boundary conditions.
-    modules: set
-        A set containing the identifiers of the MassModels (model.id)
-        merged together to create the MassModel (self).
     compartments: dict
         A dictionary to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
@@ -138,8 +135,6 @@ class MassModel(Object):
             self.custom_parameters = {}
             self._compartments = {}
             self._units = {}
-            # Initialize a set to store the modules
-            self.modules = set()
             # Store the stoichiometric matrix, its matrix type, and data type
             self._matrix_type = matrix_type
             self._dtype = dtype
@@ -1212,7 +1207,7 @@ class MassModel(Object):
         do_not_copy_by_ref = [
             "metabolites", "reactions", "genes", "enzyme_modules", "_S",
             "boundary_conditions", "custom_rates", "custom_parameters",
-            "notes", "annotation", "modules"]
+            "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
@@ -1298,8 +1293,6 @@ class MassModel(Object):
             new_model_id = {True: self.id,
                             False: self.id + "_" + right.id}.get(inplace)
         new_model.id = new_model_id
-        new_model.modules.add(right.id)
-        new_model.modules.update(right.modules)
 
         # Add the reactions from right to left model.
         new_reactions = deepcopy(right.reactions)
@@ -2095,9 +2088,6 @@ class MassModel(Object):
                     <td><strong>Number of Enzymes</strong></td>
                     <td>{num_enzyme_modules}</td>
                 </tr><tr>
-                    <td><strong>Modules</strong></td>
-                    <td>{modules}</td>
-                </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
                 </tr><tr>
@@ -2122,8 +2112,6 @@ class MassModel(Object):
                    num_custom_rates=len(self.custom_rates),
                    num_genes=len(self.genes),
                    num_enzyme_modules=len(self.enzyme_modules),
-                   modules="<br> ".join([str(m) for m in self.modules
-                                         if m is not None]) + "</br>",
                    compartments=", ".join(v if v else k for k, v in
                                           iteritems(self.compartments)),
                    units=", ".join(v if v else k for

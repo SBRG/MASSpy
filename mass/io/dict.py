@@ -87,14 +87,13 @@ _OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "description", "boundary_conditions", "compartments", "modules",
-    "units", "notes", "annotation"]
+    "name", "description", "boundary_conditions", "compartments", "units",
+    "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
     "description": "",
     "boundary_conditions": {},
     "compartments": {},
-    "modules": set(),
     "units": {},
     "notes": {},
     "annotation": {}
@@ -415,8 +414,6 @@ def model_from_dict(obj):
         # Update with EnzymeModule attributes if obj represents an EnzymeModule
         elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS:
             model.__class__.__dict__[k.lstrip("_")].fset(model, v)
-
-    model.modules = set(sorted(model.modules))
 
     return model
 
