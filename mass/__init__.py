@@ -32,4 +32,3 @@ def _warn_format(message, category, filename, lineno, file=None, line=None):
     shortname = filename.replace(_mass_path, "mass", 1)
     return _warning_base % (shortname, lineno, category.__name__, message)
 _warnings.formatwarning = _warn_format
-
