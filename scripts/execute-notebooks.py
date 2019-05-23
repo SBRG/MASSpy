@@ -14,7 +14,8 @@ import nbformat
 from six import iterkeys
 
 
-MAIN_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+NOTEBOOKS_DIR = os.path.abspath(os.path.join(SCRIPTS_DIR, "..", "notebooks"))
 # Map acceptable category arguments to the corresponding notebook directories
 CATEGORIES_DICT = OrderedDict({
     "SB2": "SB2",
@@ -25,32 +26,35 @@ CATEGORIES_DICT = OrderedDict({
 TEST_MODEL_SUFFIXES = ["MassModel", "EnzymeModule"]
 
 
-def make_dir_path(category_to_get):
-    return os.path.join(MAIN_DIR, CATEGORIES_DICT[category_to_get])
+def _make_dir_path(category_to_get):
+    """Return the path to the desired directory."""
+    return os.path.join(NOTEBOOKS_DIR, CATEGORIES_DICT[category_to_get])
 
 
-def filter_notebooks(category, dir_path):
+def _filter_notebooks(category, dir_path):
+    """Return a list of desired notebooks in the directory."""
     return sorted(list(filter(
         lambda x: category in x, os.listdir(dir_path))))
 
 
-def get_notebook_paths(category_to_get):
+def _get_notebook_paths(category_to_get):
+    """Get notebook filepaths."""
     # Initialize Notebook container
     notebook_paths = []
 
     # Create iterable for notebook categories.
     if category_to_get == "all":
         category_list = [k for k in iterkeys(CATEGORIES_DICT)
-                         if k != "test" and k != "all"]
+                         if k not in ["test", "all"]]
     elif category_to_get == "test":
         category_list = TEST_MODEL_SUFFIXES
     else:
         category_list = [category_to_get]
 
-    dir_list = [make_dir_path(c) for c in category_list]
+    dir_list = [_make_dir_path(c) for c in category_list]
     for category, dir_path in zip(category_list, dir_list):
         # Get names of notebooks
-        notebooks = filter_notebooks(category, dir_path)
+        notebooks = _filter_notebooks(category, dir_path)
         # Make notebook paths and add to list
         notebook_paths += list(map(
             lambda x: os.path.join(dir_path, x), notebooks))
@@ -58,7 +62,8 @@ def get_notebook_paths(category_to_get):
     return notebook_paths
 
 
-def execute_notebooks(notebook_paths, verbose):
+def _execute_notebooks(notebook_paths, verbose):
+    """Execute the notebooks and save the results."""
     for nb_path in notebook_paths:
         nb_dir = os.path.realpath(os.path.join(nb_path, ".."))
         nb_name = nb_path.replace(nb_dir + "/", "")
@@ -84,12 +89,13 @@ def execute_notebooks(notebook_paths, verbose):
 
 
 def main(args):
+    """Create notebooks filepaths and executes the desired notebooks."""
     # Determine notebook category
     category_to_get = args.category
     # Get relevant notebooks to execute
-    notebook_paths = get_notebook_paths(category_to_get)
+    notebook_paths = _get_notebook_paths(category_to_get)
     # Execute and save notebooks
-    execute_notebooks(notebook_paths, args.verbose)
+    _execute_notebooks(notebook_paths, args.verbose)
 
     return 0
 
