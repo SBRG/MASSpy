@@ -10,7 +10,7 @@ from os import listdir, path
 
 SCRIPTS_DIR = path.dirname(path.abspath(__file__))
 NOTEBOOK_MODELS_DIR = path.abspath(path.join(
-    SCRIPTS_DIR, "..", "notebooks", "test-models", "models"))
+    SCRIPTS_DIR, "..", "notebooks", "test_data", "models"))
 MASS_TEST_MODELS_DIR = path.abspath(path.join(
     SCRIPTS_DIR, "..", "mass", "test", "data", "models", ""))
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(
         description="Replace models in /mass/test/data/models directory with "
-                    "models stored in /mass/notebooks/test-models/models.")
+                    "models stored in /mass/notebooks/test_data/models.")
     parser.add_argument(
         "-n", "--name",
         help="The name of models to copy and move. Default is 'all' for all "

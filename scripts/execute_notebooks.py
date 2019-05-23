@@ -19,9 +19,9 @@ NOTEBOOKS_DIR = os.path.abspath(os.path.join(SCRIPTS_DIR, "..", "notebooks"))
 # Map acceptable category arguments to the corresponding notebook directories
 CATEGORIES_DICT = OrderedDict({
     "SB2": "SB2",
-    "MassModel": "test-models",
-    "EnzymeModule": "test-models",
-    "test": "test-models",
+    "MassModel": "test_data",
+    "EnzymeModule": "test_data",
+    "test": "test_data",
     "all": "."})
 TEST_MODEL_SUFFIXES = ["MassModel", "EnzymeModule"]
 
