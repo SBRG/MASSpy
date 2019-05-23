@@ -33,10 +33,12 @@ LOGGER = logging.getLogger(__name__)
 SBML_LEVEL_VERSION = (3, 2)
 FBC_VERSION = 2
 
-DEFAULT_COMPARTMENT_STR = "default_compartment"  # Default compartment
-BOUNDARY_COMPARTMENT_DICT = {"b": "boundary"}  # Boundary compartment
+# Default compartment and boundary compartment definitions
+DEFAULT_COMPARTMENT_DICT = {"default": "default_compartment"}
+BOUNDARY_COMPARTMENT_DICT = {"b": "boundary"}
 
-MASS_MOIETY_RE = re.compile("\[\S+\]")  # Precompiled regex for moieties
+# Precompiled regex for mass and SBML moieties
+MASS_MOIETY_RE = re.compile("\[\S+\]")
 SBML_MOIETY_RE = re.compile("Moiety\S+$")
 
 # For SBO terms
@@ -45,6 +47,19 @@ SBO_MODELING_FRAMEWORK = "SBO:0000062"
 # For MathML representation of kinetic laws
 MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
 MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
+
+# Units
+_SI_PREFIX_DICT = {
+    "atto": -18, "femto": -15, "pico": -12, "nano": -9, "micro": -6,
+    "milli": -3, "centi": -2, "deci": -1, "deca": 1, "hecto": 2, "kilo": 3,
+    "mega": 6, "giga": 9, "tera": 12, "peta": 15, "exa": 18}
+
+_SBML_BASE_UNITS_DICT = [
+    "ampere", "avogadro", "becquerel", "candela", "coulomb", "dimensionless",
+    "farad", "gram", "gray", "henry", "hertz", "item", "joule", "katal",
+    "kelvin", "kilogram", "liter", "litre", "lumen", "lux", "meter", "metre",
+    "mole", "newton", "ohm", "pascal", "radian", "second", "siemens",
+    "sievert", "steradian", "tesla", "volt", "watt", "weber"]
 # -----------------------------------------------------------------------------
 # Functions for replacements (import/export)
 # -----------------------------------------------------------------------------
@@ -442,8 +457,8 @@ def _write_model_compartments_to_sbml(model, mass_model):
     if not mass_model.compartments:
         LOGGER.warning(
             "No compartments found in model. Therefore creating compartment "
-            "'%s' for entire model.", DEFAULT_COMPARTMENT_STR)
-        compartment_dict = {DEFAULT_COMPARTMENT_STR: ""}
+            "'%s' for entire model.", list(DEFAULT_COMPARTMENT_DICT)[0])
+        compartment_dict = DEFAULT_COMPARTMENT_DICT
     else:
         compartment_dict = mass_model.compartments
 
@@ -480,7 +495,7 @@ def _write_model_species_to_sbml(model, mass_model, f_replace):
                "set specie name" + _for_id(mid))
         # Use a generic compartment if no species have set compartments
         if not mass_model.compartments:
-            cid = DEFAULT_COMPARTMENT_STR
+            cid = list(DEFAULT_COMPARTMENT_DICT)[0]
         else:
             cid = metabolite.compartment
         _check(specie.setCompartment(cid),

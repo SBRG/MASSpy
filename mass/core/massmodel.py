@@ -30,7 +30,7 @@ from mass.util.util import (
 LOGGER = logging.getLogger(__name__)
 # Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
-SBML_UNIT_IDENTIFIERS = ["substance", "volume", "time"]
+SBML_UNIT_IDS = ["substance", "volume", "area", "length", "time"]
 # Pre-compiled regular expressions for building reactions from strings
 _RXN_ID_RE = re.compile("^(\w+):")
 _MET_ID_RE = re.compile("^s\[(\S+)[,|\]]")
@@ -313,6 +313,8 @@ class MassModel(Object):
             substance:	{mole, item, gram, kilogram, dimensionless}
             volume:	    {litre, cubic metre, dimensionless}
             time:	    {second, dimensionless}
+            area:	    {square metre, dimensionless}
+            length:     {metre, dimensionless}
 
         Parameters
         ----------
@@ -332,11 +334,11 @@ class MassModel(Object):
         if value:
             # Ensure units are SBML compliant
             for k, v in iteritems(value):
-                if k not in SBML_UNIT_IDENTIFIERS:
+                if k not in SBML_UNIT_IDS:
                     raise TypeError(
                         "'{0}' not a recognized SBML unit identifier. The unit"
                         "identifier must be one of the following {1}".format(
-                            str(k), str(SBML_UNIT_IDENTIFIERS)))
+                            str(k), str(SBML_UNIT_IDS)))
                 self._units.update({k: v})
         else:
             setattr(self, "_units", {})
