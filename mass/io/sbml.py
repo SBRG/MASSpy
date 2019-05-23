@@ -9,13 +9,19 @@ from __future__ import absolute_import
 
 import datetime
 import logging
+import operator
 import re
 
 import libsbml
 
 from six import integer_types, iteritems, string_types
 
+from sympy import Symbol, mathml
+
+from cobra.io.sbml import (_sbase_annotations, _sbase_notes_dict)
+
 from mass.exceptions import MassSBMLError
+from mass.util import strip_time
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,11 +34,17 @@ SBML_LEVEL_VERSION = (3, 2)
 FBC_VERSION = 2
 
 DEFAULT_COMPARTMENT_STR = "default_compartment"  # Default compartment
+BOUNDARY_COMPARTMENT_DICT = {"b": "boundary"}  # Boundary compartment
+
 MASS_MOIETY_RE = re.compile("\[\S+\]")  # Precompiled regex for moieties
 SBML_MOIETY_RE = re.compile("Moiety\S+$")
-# For SBO terms
-SBO_MODELING_FRAMEWORK = "SBO:0000004"  # TODO Consider more specific term
 
+# For SBO terms
+SBO_MODELING_FRAMEWORK = "SBO:0000062"
+
+# For MathML representation of kinetic laws
+MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
+MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
 # -----------------------------------------------------------------------------
 # Functions for replacements (import/export)
 # -----------------------------------------------------------------------------
@@ -94,6 +106,7 @@ F_REPLACE = {
 
 def _f_moiety_formula(metabolite):
     """Fix moieties in formula from SBML compatible to be masspy compatible."""
+    print("TODO _f_moiety_formula ", metabolite)
     return
 
 
@@ -116,6 +129,26 @@ def _f_moiety_formula_rev(metabolite):
 def _for_id(sid):
     """Return a string specifying the object id for logger messages."""
     return " for '{0}'".format(sid)
+
+
+def _create_math_xml_from_expr(equation):
+    """Remove 'mml' tags from XML representation of mathemtical equations.
+
+    Sympy expressions can be converted into their equivalent MathML string
+    through the `sympy.printing.mathml` module. However, the mathml module will
+    interpret '_' as a subscript and '__' as a superscript. In order to prevent
+    the module from misinterpreting underscores in identifiers, the underscores
+    are converted into ampsersands. Additionally, all MathML presentation
+    markup must be removed for similar reasons. After the XML string is made,
+    the identifiers are returned to their original state.
+    """
+    underscore_replace = {str(arg): str(arg).replace("_", "&")
+                          for arg in equation.atoms(Symbol)}
+    math_xml_str = mathml(equation.subs(underscore_replace))
+    math_xml_str = MATH_XML_FMT.format(math_xml_str.replace("&", "_"))
+    math_xml_str = MATHML_MML_TAG_RE.sub("", math_xml_str)
+
+    return math_xml_str
 
 
 # -----------------------------------------------------------------------------
@@ -194,31 +227,42 @@ def _model_to_sbml(mass_model, f_replace=None, units=True):
     doc, models = _create_SBMLDocument_and_model_objects(mass_model)
     model, model_fbc = models
 
-    # TODO annotations for model
-    # TODO notes for model
-
-    # Write the model Meta Information (ModelHistory) to the SBMLDocument
+    # Write model annotations into the SBMLDocument
+    _sbase_annotations(model, mass_model.annotation)
+    # Write the model Meta Information (ModelHistory) into the SBMLDocument
     if hasattr(mass_model, "_sbml"):
-        _write_model_meta_info_to_sbml(model, mass_model._sbml)
-    # Write the model unit definitions to the SBMLDocument
+        meta = mass_model._sbml
+        _write_model_meta_info_to_sbml(model, meta)
+        # Set meta annotation and notes
+        if "annotation" in meta:
+            _sbase_annotations(doc, meta["annotation"])
+        if "notes" in meta:
+            _sbase_notes_dict(doc, meta["notes"])
+
+    # TODO Write the units information into the SBMLDocument
     if units:
-        _write_model_units_to_sbml()
+        _write_model_units_to_sbml(model, mass_model)
 
-    # TODO flux bounds for model
+    # TODO Write the flux upper/lower bound parameters into the SBMLDocument
+    # _write_flux_bounds_to_sbml()
 
-    # Write the compartment information
+    # TODO Write the rate law parameters into the SBMLDocument
+    _write_model_parameters_to_sbml(model, mass_model, f_replace, units=units)
+
+    # Write the compartment information into the SBMLDocument
     _write_model_compartments_to_sbml(model, mass_model)
 
-    # TODO enzyme module information
-
-    # Write the species information
+    # Write the species information into the SBMLDocument
+    # Includes MassMetabolites, EnzymeModuleForms, and their concentrations
     _write_model_species_to_sbml(model, mass_model, f_replace)
-
-    # Write the gene information
+    # Write the boundary conditions into the SBMLDocument
+    _write_model_boundary_conditions_to_sbml(model, mass_model, f_replace)
+    # Write the gene information into the SBMLDocument
     _write_model_genes_to_sbml(model_fbc, mass_model, f_replace)
-
-    # Write the reaction information
+    # Write the reaction information into the SBMLDocument
     _write_model_reactions_to_sbml(model, mass_model, f_replace)
+
+    # TODO Write the EnzymeModuleDict information to the SBMLDocument
 
     return doc
 
@@ -255,9 +299,9 @@ def _create_SBMLDocument_and_model_objects(mass_model):
     # Set plugins
     model_fbc = model.getPlugin("fbc")
     _check(model_fbc, "get fbc plugin for model")
-    _check(model_fbc.setStrict(True), "set fbc plugin strictness to true")
+    _check(model_fbc.setStrict(False), "set fbc plugin strictness to true")
 
-    # Set  ID, meta ID, and name
+    # Set ID, meta ID, and name
     if mass_model.id is not None:
         _check(model.setId(mass_model.id), "set model id")
         _check(model.setMetaId("meta_" + mass_model.id), "set model meta id")
@@ -277,9 +321,6 @@ def _write_model_meta_info_to_sbml(model, meta):
     This method is intended for internal use only.
 
     """
-    # TODO annotations for meta
-    # TODO annotations for meta
-
     # Make ModelHistory object and populate
     history = libsbml.ModelHistory()
     _check(history, "create ModelHistory")
@@ -316,7 +357,7 @@ def _write_model_meta_info_to_sbml(model, meta):
     _check(model.setModelHistory(history), 'set ModelHistory')
 
 
-def _write_model_units_to_sbml():
+def _write_model_units_to_sbml(model, mass_model):
     """Write MassModel unit information into SBMLDocument.
 
     Currently, all units will be in terms of Millimole, Litres, and Hours.
@@ -326,8 +367,67 @@ def _write_model_units_to_sbml():
     This method is intended for internal use only.
 
     """
-    # TODO Enable other units and/or use of units from MassModel
-    print("TODO: Units need to be implemented")
+
+
+def _write_model_parameters_to_sbml(model, mass_model, f_replace, units=None):
+    """Write MassModel kinetic parameter information into SBMLDocument.
+
+    The kinetic parameters include the reaction parameters kf, Keq, and kr, and
+    any custom parameters in the model.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    for parameter_type, parameter_dict in iteritems(mass_model.parameters):
+        # Boundary metabolites addressed later with metabolites
+        if parameter_type == "Boundary":
+            continue
+        if parameter_type == "v":
+            constant = False
+        else:
+            constant = True
+        # Create kf, Keq, kr, and custom parameters, handling ID corrections
+        # for recognized reaction IDs in the parameters
+        for parameter_id, value in iteritems(parameter_dict):
+            try:
+                pid, rid = parameter_id.split("_", 1)
+                rid = mass_model.reactions.get_by_id(rid).id
+            except (ValueError, KeyError):
+                pid = parameter_id
+            else:
+                if f_replace and F_REACTION_REV in f_replace:
+                    rid = f_replace[F_REACTION_REV](rid)
+                pid = "_".join((pid, rid))
+            finally:
+                _create_parameter(model, pid=pid, value=value, sbo=None,
+                                  constant=constant, units=units, udef=None)
+
+
+def _create_parameter(model, pid, value, sbo=None, constant=True, units=None,
+                      udef=None):
+    """Create a global model parameter to be written into the SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Create parameter and set its ID, value, and whether it is constant
+    parameter = model.createParameter()
+    _check(parameter, "create model parameter" + _for_id(pid))
+    _check(parameter.setId(pid), "set parameter id" + _for_id(pid))
+    _check(parameter.setValue(value), "set parameter value" + _for_id(pid))
+    _check(parameter.setConstant(constant),
+           "set parameter constant" + _for_id(pid))
+    # Set SBO term and units if desired.
+    if sbo:
+        _check(parameter.setSBOterm(sbo),
+               "set parameter sbo term" + _for_id(pid))
+    if units and udef is not None:
+        _check(parameter.setUnits(udef.getId()),
+               "set parameter units" + _for_id(pid))
 
 
 def _write_model_compartments_to_sbml(model, mass_model):
@@ -340,11 +440,15 @@ def _write_model_compartments_to_sbml(model, mass_model):
     """
     # TODO Revisit based on new cobra compartment implementation
     if not mass_model.compartments:
-        LOGGER.warning("No compartments found in MassModel. Therefore creating"
-                       " compartment 'default_compartment' for entire model")
+        LOGGER.warning(
+            "No compartments found in model. Therefore creating compartment "
+            "'%s' for entire model.", DEFAULT_COMPARTMENT_STR)
         compartment_dict = {DEFAULT_COMPARTMENT_STR: ""}
     else:
         compartment_dict = mass_model.compartments
+
+    if mass_model.boundary_conditions:
+        compartment_dict.update(BOUNDARY_COMPARTMENT_DICT)
 
     for cid, name in iteritems(compartment_dict):
         compartment = model.createCompartment()
@@ -381,20 +485,16 @@ def _write_model_species_to_sbml(model, mass_model, f_replace):
             cid = metabolite.compartment
         _check(specie.setCompartment(cid),
                "set specie compartment" + _for_id(mid))
-
-        # TODO Set initial/fixed concentration, Clean up after IC/FC changes
-        # Four possible cases
-        # Metabolite varies, metabolite is on boundary
-        # Metabolite varies, metabolite is not on boundary
-        # Metabolite constant, metabolite is on boundary
-        # Metabolite constant, metabolite is not on boundary
-        boundary_condition = False
-        constant = False
+        # Set metabolite initial condition value
+        if metabolite.initial_condition is not None:
+            _check(
+                specie.setInitialConcentration(metabolite.initial_condition),
+                "set specie initial concentration" + _for_id(mid))
 
         # Set species constant, boundary condition, and unit restrictions
-        _check(specie.setConstant(constant),
+        _check(specie.setConstant(metabolite.fixed),
                "set specie constant" + _for_id(mid))
-        _check(specie.setBoundaryCondition(boundary_condition),
+        _check(specie.setBoundaryCondition(False),
                "set specie boundary condition" + _for_id(mid))
         _check(specie.setHasOnlySubstanceUnits(False),
                "set specie unit substance restrictions" + _for_id(mid))
@@ -410,8 +510,46 @@ def _write_model_species_to_sbml(model, mass_model, f_replace):
             sbml_formula = _f_moiety_formula_rev(metabolite)
             _check(specie_fbc.setChemicalFormula(sbml_formula),
                    "set specie formula" + _for_id(mid))
-        # TODO annotations for specie
-        # TODO notes for specie
+        # Set metabolite annotation and notes
+        _sbase_annotations(specie, metabolite.annotation)
+        _sbase_notes_dict(specie, metabolite.notes)
+
+
+def _write_model_boundary_conditions_to_sbml(model, mass_model, f_replace):
+    """Write MassModel boundary condition information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    cid = str(list(BOUNDARY_COMPARTMENT_DICT)[0])
+    for bmid, bc_value in iteritems(mass_model.boundary_conditions):
+        # Create boundary specie and set ID, name, and compartment
+        if f_replace and F_SPECIE_REV in f_replace:
+            bmid = f_replace[F_SPECIE_REV](bmid)
+        specie = model.createSpecies()
+        _check(specie, "create model boundary specie" + _for_id(bmid))
+        _check(specie.setId(bmid), "set boundary specie id" + _for_id(bmid))
+        _check(specie.setCompartment(cid),
+               "set boundary specie compartment" + _for_id(bmid))
+        # Set boundary specie value and constant
+        if isinstance(bc_value, (integer_types, float)):
+            _check(specie.setInitialConcentration(bc_value),
+                   "set boundary specie concentration" + _for_id(bmid))
+            _check(specie.setConstant(True),
+                   "set specie constant" + _for_id(bmid))
+        else:
+            # TODO handle functions of time for boundary conditions
+            print("TODO handle functions of time for boundary conditions")
+            _check(specie.setConstant(False),
+                   "set specie constant" + _for_id(bmid))
+
+        # Set species as boundary condition, and set unit restrictions
+        _check(specie.setBoundaryCondition(True),
+               "set specie boundary condition" + _for_id(bmid))
+        _check(specie.setHasOnlySubstanceUnits(False),
+               "set specie unit substance restrictions" + _for_id(bmid))
 
 
 def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
@@ -435,8 +573,9 @@ def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
         _check(gp.setName(gname), "set gene name" + _for_id(gid))
         _check(gp.setLabel(gname), "set gene label" + _for_id(gid))
 
-        # TODO annotations for gene
-        # TODO notes for gene
+        # Set gene annotation and notes
+        _sbase_annotations(gp, mass_gene.annotation)
+        _sbase_notes_dict(gp, mass_gene.notes)
 
 
 def _write_model_reactions_to_sbml(model, mass_model, f_replace):
@@ -447,7 +586,6 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace):
     This method is intended for internal use only.
 
     """
-    # TODO Break into smaller functions
     for mass_reaction in mass_model.reactions:
         # Create reaction and set ID, name, and reversible
         rid = mass_reaction.id
@@ -460,30 +598,15 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace):
                "set reaction name" + _for_id(rid))
         _check(reaction.setReversible(mass_reaction.reversible),
                "set reaction reversible" + _for_id(rid))
-        # TODO annotations for reaction
-        # TODO notes for reaction
 
-        # Set reaction species references and stoichiometry
-        for metabolite, stoichiometry in iteritems(mass_reaction.metabolites):
-            # Get specie id
-            sid = metabolite.id
-            if f_replace and F_SPECIE_REV in f_replace:
-                sid = f_replace[F_SPECIE_REV](sid)
-            # Create specie reference as reactant or product
-            # based on the reaction stoichiometry
-            if stoichiometry < 0:
-                sref = reaction.createReactant()
-            else:
-                sref = reaction.createProduct()
-            _check(sref, "create specie reference " + sid + _for_id(rid))
-            # Set ID, stoichiometry, and whether species is constant
-            _check(sref.setSpecies(sid),
-                   "set specie reference id" + _for_id(sid))
-            _check(sref.setStoichiometry(abs(stoichiometry)),
-                   "set specie reference stoichiometry" + _for_id(sid))
-            _check(sref.setConstant(True),
-                   "set specie reference constant" + _for_id(sid))
+        # Set reaction annotation and notes
+        _sbase_annotations(reaction, mass_reaction.annotation)
+        _sbase_notes_dict(reaction, mass_reaction.notes)
 
+        # Write specie references into reaction
+        reaction = _write_reaction_specie_ref_to_sbml(
+            reaction, mass_reaction=mass_reaction, f_replace=f_replace)
+        # Get plugin for reaction
         reaction_fbc = reaction.getPlugin("fbc")
         _check(reaction_fbc, "get fbc plugin for reaction" + _for_id(rid))
         # TODO Flux bounds
@@ -507,7 +630,128 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace):
                    "set gene product association" + _for_id(rid))
 
         # Set the reaction kinetic law
-        
+        _write_reaction_kinetic_law_to_sbml(
+            reaction, mass_reaction=mass_reaction, f_replace=f_replace)
+
+
+def _write_reaction_specie_ref_to_sbml(reaction, mass_reaction, f_replace):
+    """Write MassReaction species reference information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Helper function for creating specie references
+    def _write_specie_ref_into_reaction(reaction, metabolite, stoich,
+                                        comparison_op, constant, f_replace):
+        """Write specie references into reactions."""
+        # Get specie id
+        sid = str(metabolite)
+        if f_replace and F_SPECIE_REV in f_replace:
+            sid = f_replace[F_SPECIE_REV](sid)
+        # Comparison to determine whether metabolite is reactant or product
+        if comparison_op(stoich, 0):
+            sref = reaction.createReactant()
+        else:
+            sref = reaction.createProduct()
+        _check(sref,
+               "create specie reference " + sid + _for_id(reaction.getId()))
+        # Set ID, stoichiometry, and whether species is constant
+        _check(sref.setSpecies(sid), "set specie reference id" + _for_id(sid))
+        _check(sref.setStoichiometry(abs(stoich)),
+               "set specie reference stoichiometry" + _for_id(sid))
+        _check(sref.setConstant(constant),
+               "set specie reference constant" + _for_id(sid))
+
+        return reaction
+
+    # Set reaction species references and stoichiometry
+    for metabolite, stoichiometry in iteritems(mass_reaction.metabolites):
+        # Write metabolite into reaction
+        reaction = _write_specie_ref_into_reaction(
+            reaction=reaction, metabolite=metabolite, stoich=stoichiometry,
+            comparison_op=operator.lt, constant=metabolite.fixed,
+            f_replace=f_replace)
+
+        # Set boundary specie reference if reaction on boundary
+        bc_met = mass_reaction.boundary_metabolite
+        if bc_met is not None \
+           and bc_met in mass_reaction.model.boundary_conditions:
+            # Boundary value is constant
+            bc_value = mass_reaction.model.boundary_conditions.get(bc_met)
+            if isinstance(bc_value, (integer_types, float)):
+                constant = True
+            # Boundary value is a function
+            else:
+                constant = False
+            # Write boundary metabolite into reaction
+            reaction = _write_specie_ref_into_reaction(
+                reaction=reaction, metabolite=bc_met, stoich=stoichiometry,
+                comparison_op=operator.gt, constant=constant,
+                f_replace=f_replace)
+
+    return reaction
+
+
+def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace):
+    """Write MassReaction kinetic law information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    rid = reaction.getId()
+    rate_equation = strip_time(mass_reaction.rate)
+    # If ID replacements were performed earlier then apply the ID
+    # replacements for metabolite and parameter arguments in rate law also.
+    met_id_subs = {}
+    metabolite_ids_to_correct = []
+    for arg in list(rate_equation.atoms(Symbol)):
+        # Fix reaction ID in rate law arguments
+        if mass_reaction.id in str(arg):
+            met_id_subs.update({
+                str(arg): str(arg).replace(mass_reaction.id, rid)})
+        # Correct any boundary metabolite IDs in rate law
+        elif str(arg) in mass_reaction.model.boundary_metabolites:
+            metabolite_ids_to_correct.append(str(arg))
+        # Correct any metabolite IDs in rate law
+        else:
+            # Ensure metabolite exists in model before replacing its ID
+            try:
+                met = mass_reaction.model.metabolites.get_by_id(str(arg))
+            except KeyError:
+                pass
+            else:
+                # Account for metabolites in the rate law that
+                # are not considered reactants or products.
+                if met not in mass_reaction.metabolites:
+                    # Get specie id
+                    msid = str(met)
+                    if f_replace and F_SPECIE_REV in f_replace:
+                        msid = f_replace[F_SPECIE_REV](msid)
+                    # Create modifier specie reference and set the specie
+                    msref = reaction.createModifier()
+                    _check(msref,
+                           "create modifier specie " + msid + _for_id(rid))
+                    _check(msref.setSpecies(msid),
+                           "set modifier specie species" + _for_id(msid))
+                metabolite_ids_to_correct.append(str(met))
+
+    # Match metabplite IDs in the rate equation to those in SBMLDocument
+    met_id_subs.update(
+        dict((sid, f_replace[F_SPECIE_REV](sid))
+             if f_replace and F_SPECIE_REV in f_replace
+             else (sid, sid) for sid in metabolite_ids_to_correct))
+
+    # Make xml string of rate equation via sympy conversion to Math ML
+    math_xml_str = _create_math_xml_from_expr(rate_equation.subs(met_id_subs))
+    # Create kinetic law as AST math and write into the SBMLDocument
+    kinetic_law = reaction.createKineticLaw()
+    _check(kinetic_law, "create kinetic law" + _for_id(rid))
+    _check(kinetic_law.setMath(libsbml.readMathMLFromString(math_xml_str)),
+           "set math on kinetic law" + _for_id(rid))
 
 
 def _check(value, message):
