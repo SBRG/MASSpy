@@ -30,6 +30,7 @@ from mass.util.util import (
 LOGGER = logging.getLogger(__name__)
 # Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
+SBML_UNIT_IDENTIFIERS = ["substance", "volume", "time"]
 # Pre-compiled regular expressions for building reactions from strings
 _RXN_ID_RE = re.compile("^(\w+):")
 _MET_ID_RE = re.compile("^s\[(\S+)[,|\]]")
@@ -106,18 +107,9 @@ class MassModel(Object):
         Example: {'c': 'cytosol'}
     units: dict
         A dictionary to store the units used in the model for referencing.
-        Example: {'N': 'Millimoles', 'Vol': 'Liters', 'Time': 'Hours'}
-
-    Warnings
-    --------
-    MassModels can have different initial conditions from the ones stored in
-        the MassMetabolites for various purposes. However, simulations will
-        always utilize the initial conditions stored in the model, which
-        can be accessed by the MassModel.initial_conditions attribute.
-    The MassModel will not automatically track or convert units. Therefore, it
-        is up to the user to ensure unit consistency in the model. The
-        MassModel.units attribute is provided as a way to inform the user or
-        others what units the model is currently using.
+        SBML recognized unit identifiers must be used as the keys in order to
+        properly interpret units definitions and for SBML compatibility.
+        Does NOT track units automatically.
 
     """
 
@@ -321,15 +313,36 @@ class MassModel(Object):
         Assigning a dictionary to this property updates the model's
         dictionary of unit descriptions with the new values.
 
+        Currently only supports the following unit types:
+            Unit ID:    Scalable Units:
+            substance:	{mole, item, gram, kilogram, dimensionless}
+            volume:	    {litre, cubic metre, dimensionless}
+            time:	    {second, dimensionless}
+
         Parameters
         ----------
         value : dict
-            Dictionary mapping unit abbreviations to full names.
+            Dictionary mapping SBML unit identifers to the unit definition.
+            Dict keys must be strings of SBML recognized unit identifiers.
             An empty dictionary will reset the unit.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model. The
+            MassModel.units attribute is provided as a way to inform the user
+            or others what units the model is currently using.
 
         """
         if value:
-            self._units.update(value)
+            # Ensure units are SBML compliant
+            for k, v in iteritems(value):
+                if k not in SBML_UNIT_IDENTIFIERS:
+                    raise TypeError(
+                        "'{0}' not a recognized SBML unit identifier. The unit"
+                        "identifier must be one of the following {1}".format(
+                            str(k), str(SBML_UNIT_IDENTIFIERS)))
+                self._units.update({k: v})
         else:
             setattr(self, "_units", {})
 
