@@ -20,15 +20,14 @@ from cobra.core.reaction import (
     and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
 from cobra.util.context import get_context, resettable
 
+from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
     generate_disequilibrium_ratio, generate_mass_action_ratio,
     generate_rate_law)
+from mass.util.util import ensure_non_negative_value
 
-
-# Global
-_INF = float("inf")
-BOUNDARY_COMPARTMENT_DICT = {"b": "boundary"}  # Boundary compartment
+MASSCONFIGURATION = MassConfiguration()
 
 
 class MassReaction(Object):
@@ -73,7 +72,7 @@ class MassReaction(Object):
             self._upper_bound = 1000.
         else:
             self._reverse_rate_constant = 0.
-            self._equilibrium_constant = _INF
+            self._equilibrium_constant = MASSCONFIGURATION.irreversible_Keq
             self._lower_bound = 0.
             self._upper_bound = 1000.
 
@@ -124,8 +123,10 @@ class MassReaction(Object):
                 setattr(self, "_reverse_rate_constant", None)
                 setattr(self, "_equilibrium_constant", None)
             else:
-                setattr(self, "_reverse_rate_constant", 0)
-                setattr(self, "_equilibrium_constant", _INF)
+                setattr(self, "_reverse_rate_constant",
+                        MASSCONFIGURATION.irreversible_kr)
+                setattr(self, "_equilibrium_constant",
+                        MASSCONFIGURATION.irreversible_Keq)
 
     @property
     def forward_rate_constant(self):
@@ -134,7 +135,20 @@ class MassReaction(Object):
 
     @forward_rate_constant.setter
     def forward_rate_constant(self, value):
-        """Set the forward rate constant (kf) of the reaction."""
+        """Set the forward rate constant (kf) of the reaction.
+
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the forward rate constant (kf) of the
+            reaction.
+
+        Warnings
+        --------
+        Forward rate constants cannot be negative.
+
+        """
+        ensure_non_negative_value(value)
         setattr(self, "_forward_rate_constant", value)
 
     @property
@@ -146,9 +160,20 @@ class MassReaction(Object):
     def reverse_rate_constant(self, value):
         """Set the reverse rate constant (kr) of the reaction.
 
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the reverse rate constant (kr) of the
+            reaction.
+
+        Warnings
+        --------
+        Reverse rate constants cannot be negative.
         If reaction is not reversible, will warn the user instead.
+
         """
         if self.reversible:
+            ensure_non_negative_value(value)
             setattr(self, "_reverse_rate_constant", value)
         else:
             warn("Cannot set the reverse rate constant for an irreversible "
@@ -163,9 +188,20 @@ class MassReaction(Object):
     def equilibrium_constant(self, value):
         """Set the equilibrium constant (Keq) of the reaction.
 
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the equilibrium constant (Keq)
+            of the reaction.
+
+        Warnings
+        --------
+        Equilibrium constants cannot be negative.
         If reaction is not reversible, will warn the user instead.
+
         """
         if self._reversible:
+            ensure_non_negative_value(value)
             setattr(self, "_equilibrium_constant", value)
         else:
             warn("Cannot set the equilibrium constant for an irreversible "
@@ -227,7 +263,6 @@ class MassReaction(Object):
         else:
             rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
                                      update_reaction=True)
-
         return rate
 
     @property
@@ -252,7 +287,7 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        reaction_string: str
+        value: str
             String representation of the reaction.
 
         Notes
@@ -312,7 +347,8 @@ class MassReaction(Object):
         if self.boundary:
             for metabolite in list(self.metabolites):
                 bc_metabolite = metabolite._remove_compartment_from_id_str()
-                bc_metabolite += "_" + str(list(BOUNDARY_COMPARTMENT_DICT)[0])
+                bc_metabolite += "_" + str(list(
+                    MASSCONFIGURATION.boundary_compartment)[0])
         else:
             bc_metabolite = None
 

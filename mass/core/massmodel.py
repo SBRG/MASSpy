@@ -738,8 +738,10 @@ class MassModel(Object):
             `MassModel.boundary` or specifically `MassModel.exchanges` etc.
         subsystem: str, optional
             The subsystem where the reaction is meant to occur.
-        boundary_condition: float, optional
-            The boubdary condition value to set. Default is 0.
+        boundary_condition: float, sympy.Basic, optional
+            The boundary condition value to set. Must be an int, float, or a 
+            or a sympy expression dependent only on time.
+            Default value is 0.
         sbo_term : str, optional
             A correct SBO term is set for the available types. If a custom
             type is chosen, a suitable SBO term should also be set.
@@ -798,6 +800,10 @@ class MassModel(Object):
         if sbo_term:
             rxn.annotation["sbo"] = sbo_term
         self.add_reactions(rxn)
+        # TODO handle boundary condition functions.
+        if not isinstance(boundary_condition, (integer_types, float)):
+            pass
+
         self.add_boundary_conditions({
             rxn.boundary_metabolite: boundary_condition})
 

@@ -13,7 +13,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import string_types
+from six import integer_types, string_types
 
 import sympy as sym
 
@@ -46,6 +46,25 @@ def ensure_iterable(list_to_check):
 
     list_to_check = list(list_to_check)
     return list_to_check
+
+
+def ensure_non_negative_value(value):
+    """Ensure provided value is a non-negative value, or None.
+
+    Will raise a ValueError if the provided value is negative.
+
+    Parameters
+    ----------
+    value: float
+        The value to ensure is non-negative
+
+    """
+    if value is None:
+        pass
+    elif not isinstance(value, (integer_types, float)):
+        raise TypeError("Must be an int or float")
+    elif value < 0.:
+        raise ValueError("Must be a non-negative number")
 
 
 def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
