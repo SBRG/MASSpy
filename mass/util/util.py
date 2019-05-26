@@ -2,6 +2,8 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import, print_function
 
+import inspect
+import logging
 import re
 import warnings
 
@@ -26,6 +28,23 @@ _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 def show_versions():
     """Print dependency information."""
     print_dependencies("masspy")
+
+
+def get_object_attributes(obj):
+    """Get the public attributes for an object. Includes properties."""
+    def filter_function(item):
+        """Filter for non-routine and non-class methods."""
+        return not inspect.isroutine(item) and not inspect.ismethod(item)
+
+    # Sometimes raises logger warnings, therefore temporary disabled
+    logging.disable(logging.WARNING)
+    attributes = sorted([
+        k for k, _ in inspect.getmembers(obj, filter_function)
+        if not k.startswith("_")], key=str.lower)
+
+    # Reenable logger warnings
+    logging.disable(logging.NOTSET)
+    return attributes
 
 
 def ensure_iterable(list_to_check):

@@ -24,7 +24,8 @@ from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable)
+    _get_matrix_constructor, convert_matrix, ensure_iterable,
+    get_object_attributes)
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
@@ -342,6 +343,22 @@ class MassModel(Object):
                 self._units.update({k: v})
         else:
             setattr(self, "_units", {})
+
+    def print_attributes(self, sep="\n"):
+        r"""Print the attributes and properties of the MassModel.
+
+        Parameters
+        ----------
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+
+        """
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        attributes = get_object_attributes(self)
+        print(sep.join(attributes))
 
     def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
                  update_model=True):
@@ -739,7 +756,7 @@ class MassModel(Object):
         subsystem: str, optional
             The subsystem where the reaction is meant to occur.
         boundary_condition: float, sympy.Basic, optional
-            The boundary condition value to set. Must be an int, float, or a 
+            The boundary condition value to set. Must be an int, float, or a
             or a sympy expression dependent only on time.
             Default value is 0.
         sbo_term : str, optional

@@ -25,7 +25,7 @@ from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
     generate_disequilibrium_ratio, generate_mass_action_ratio,
     generate_rate_law)
-from mass.util.util import ensure_non_negative_value
+from mass.util.util import ensure_non_negative_value, get_object_attributes
 
 MASSCONFIGURATION = MassConfiguration()
 
@@ -465,8 +465,8 @@ class MassReaction(Object):
         """Return the symbol representation for the reaction flux."""
         if self.id is not None:
             return Symbol("v_" + self.id)
-        else:
-            return None
+
+        return None
 
     @property
     def all_parameter_ids(self):
@@ -513,17 +513,26 @@ class MassReaction(Object):
     @property
     def kf_str(self):
         """Return the string representation of the forward rate constant."""
-        return "kf_" + self.id
+        if self.id is not None:
+            return "kf_" + self.id
+
+        return None
 
     @property
     def Keq_str(self):
         """Return the string representation of the equilibrium constant."""
-        return "Keq_" + self.id
+        if self.id is not None:
+            return "Keq_" + self.id
+
+        return None
 
     @property
     def kr_str(self):
         """Return the string representation of the reverse rate constant."""
-        return "kr_" + self.id
+        if self.id is not None:
+            return "kr_" + self.id
+
+        return None
 
     # Shorthands
     @property
@@ -570,6 +579,22 @@ class MassReaction(Object):
     def v(self, value):
         """Shorthand method to set the reaction steady state flux."""
         self.steady_state_flux = value
+
+    def print_attributes(self, sep="\n"):
+        r"""Print the attributes and properties of the MassReaction.
+
+        Parameters
+        ----------
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+
+        """
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        attributes = get_object_attributes(self)
+        print(sep.join(attributes))
 
     def reverse_stoichiometry(self, inplace=False):
         """Reverse the stoichiometry of the reaction.
