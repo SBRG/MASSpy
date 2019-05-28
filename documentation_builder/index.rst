@@ -16,12 +16,11 @@ Topics
 .. toctree::
    :maxdepth: 2
    
-   Getting Started
-   Building Models
-   Loading via JSON
-   Simulation
-   COBRA vs. MASS
-   SPHINX API AutoIndex
+   Getting_Started_with_MassPy
+   Building_a_Model
+   Import_Export_JSON
+   Simulations_and_Visualizations
+   COBRAPY_vs_MASSPY
 
 
 :caption: Contents:
