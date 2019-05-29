@@ -1,29 +1,14 @@
-..
-Introduction to Masspy Documentation
-================================================
+.. masspy documentation master file, created by
+   sphinx-quickstart on Tue May 28 16:49:59 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-
-Introduction and Installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The Mass Action Stoichiometric Simulation for Python (masspy) is a modeling software package for the construction and analysis of kinetic models of biochemical reaction systems.
-
-One of the main goals of masspy is to integrate seamlessly with cobrapy, a widely used constraint-based reconstruction and analysis python package in order to provide a wide range of modeling techniques that can be utilized seperately or together. For further information about cobrapy, please visit their github page.
-
-Topics
-^^^^^^
+Welcome to masspy's documentation!
+==================================
 
 .. toctree::
    :maxdepth: 2
-   
-   Getting_Started_with_MassPy
-   Building_a_Model
-   Import_Export_JSON
-   Simulations_and_Visualizations
-   COBRAPY_vs_MASSPY
-
-
-:caption: Contents:
+   :caption: Contents:
 
 
 
