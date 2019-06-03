@@ -315,6 +315,18 @@ JSON_SCHEMA = {
             "required": ["id", "name"],
             "additionalProperties": False,
         },
+        "units": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "kind": {"type": "string"},
+                    "exponent": {"type": "number"},
+                    "scale": {"type": "number"},
+                    "multiplier": {"type": "number"},
+                },
+            },
+        },
         "boundary_conditions": {
             "type": "object",
             "allOf": {
@@ -338,12 +350,6 @@ JSON_SCHEMA = {
             "type": "object",
             "patternProperties": {
                 "[a-z]{1,2}": {"type": "string"},
-            },
-        },
-        "units": {
-            "type": "object",
-            "patternProperties": {
-                ".*": {"type": "string"},
             },
         },
         "notes": {"type": "object"},
