@@ -11,9 +11,9 @@ from os.path import dirname as _dirname
 from mass import (analysis, io)
 from mass.core import (
     convert_cobra_to_mass, convert_mass_to_cobra, MassMetabolite, MassModel,
-    MassReaction, Simulation, Solution, get_defaults, make_display_data,
-    plot_phase_portrait, plot_simulation, plot_tiled_phase_portrait,
-    set_defaults)
+    MassReaction, Simulation, Solution, UnitDefinition, get_defaults,
+    make_display_data, plot_phase_portrait, plot_simulation,
+    plot_tiled_phase_portrait, set_defaults)
 
 from mass.util import (
     is_simulatable, qcqa_model, qcqa_simulation, show_versions, strip_time)
@@ -32,4 +32,3 @@ def _warn_format(message, category, filename, lineno, file=None, line=None):
     shortname = filename.replace(_mass_path, "mass", 1)
     return _warning_base % (shortname, lineno, category.__name__, message)
 _warnings.formatwarning = _warn_format
-

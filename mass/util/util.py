@@ -2,6 +2,8 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import, print_function
 
+import inspect
+import logging
 import re
 import warnings
 
@@ -13,7 +15,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import string_types
+from six import integer_types, string_types
 
 import sympy as sym
 
@@ -28,6 +30,23 @@ def show_versions():
     print_dependencies("masspy")
 
 
+def get_object_attributes(obj):
+    """Get the public attributes for an object. Includes properties."""
+    def filter_function(item):
+        """Filter for non-routine and non-class methods."""
+        return not inspect.isroutine(item) and not inspect.ismethod(item)
+
+    # Sometimes raises logger warnings, therefore temporary disabled
+    logging.disable(logging.WARNING)
+    attributes = sorted([
+        k for k, _ in inspect.getmembers(obj, filter_function)
+        if not k.startswith("_")], key=str.lower)
+
+    # Reenable logger warnings
+    logging.disable(logging.NOTSET)
+    return attributes
+
+
 def ensure_iterable(list_to_check):
     """Ensure the given list is an iterable.
 
@@ -37,7 +56,7 @@ def ensure_iterable(list_to_check):
         The list to ensure is iterable.
 
     """
-    # Make metabolite_list iterable if necessary
+    # Make list iterable if necessary
     if list_to_check is None:
         list_to_check = list()
     if not hasattr(list_to_check, "__iter__") or \
@@ -46,6 +65,25 @@ def ensure_iterable(list_to_check):
 
     list_to_check = list(list_to_check)
     return list_to_check
+
+
+def ensure_non_negative_value(value):
+    """Ensure provided value is a non-negative value, or None.
+
+    Will raise a ValueError if the provided value is negative.
+
+    Parameters
+    ----------
+    value: float
+        The value to ensure is non-negative
+
+    """
+    if value is None:
+        pass
+    elif not isinstance(value, (integer_types, float)):
+        raise TypeError("Must be an int or float")
+    elif value < 0.:
+        raise ValueError("Must be a non-negative number")
 
 
 def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):

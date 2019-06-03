@@ -1,12 +1,12 @@
 {
     "boundary_conditions": {
-        "bc_amp_c": 1,
-        "bc_glc__D_c": 1,
-        "bc_h2o_c": 1,
-        "bc_h_c": 6.30957e-05,
-        "bc_lac__L_c": 1,
-        "bc_pi_c": 2.5,
-        "bc_pyr_c": 0.06
+        "amp_b": 1,
+        "glc__D_b": 1,
+        "h2o_b": 1,
+        "h_b": 6.30957e-05,
+        "lac__L_b": 1,
+        "pi_b": 2.5,
+        "pyr_b": 0.06
     },
     "compartments": {
         "c": "Cytosol"
@@ -576,10 +576,37 @@
             "subsystem": "Pseudoreaction"
         }
     ],
-    "units": {
-        "N": "Millimole",
-        "Time": "Hour",
-        "Vol": "Litre"
-    },
+    "units": [
+        {
+            "_id": "mM",
+            "list_of_units": [
+                {
+                    "_exponent": -1,
+                    "_kind": "litre",
+                    "_multiplier": 1,
+                    "_scale": 0
+                },
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Millimolar"
+        },
+        {
+            "_id": "hr",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 3600,
+                    "_scale": 0
+                }
+            ],
+            "name": "Hour"
+        }
+    ],
     "version": "1"
 }

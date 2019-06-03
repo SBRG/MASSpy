@@ -5,11 +5,11 @@ from __future__ import absolute_import
 import re
 from warnings import warn
 
-from six import integer_types
-
 from cobra.core.species import Species
 
-from mass.util import expressions
+from mass.util.expressions import generate_ode
+from mass.util.util import ensure_non_negative_value, get_object_attributes
+
 
 # Precompiled regular expression for element parsing
 ELEMENT_RE = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
@@ -138,13 +138,7 @@ class MassMetabolite(Species):
         Initial conditions of metabolites cannot be negative.
 
         """
-        if not isinstance(value, (integer_types, float)) and \
-           value is not None:
-            raise TypeError("Must be an int or float")
-        if value is None:
-            pass
-        elif value < 0.:
-            raise ValueError("Must be a non-negative number")
+        ensure_non_negative_value(value)
         setattr(self, "_initial_condition", value)
 
     @property
@@ -154,7 +148,7 @@ class MassMetabolite(Species):
         Will return None if metabolite is not associated with a MassReaction,
             and a 0. if the fixed attribute is set to True.
         """
-        return expressions.generate_ode(self)
+        return generate_ode(self)
 
     @property
     def formula_weight(self):
@@ -173,7 +167,7 @@ class MassMetabolite(Species):
     @property
     def ic(self):
         """Shorthand getter for the initial condition."""
-        return getattr(self, "_initial_condition")
+        return self.initial_condition
 
     @ic.setter
     def ic(self, value):
@@ -189,6 +183,22 @@ class MassMetabolite(Species):
     def model(self):
         """Return the MassModel associated with the metabolite."""
         return getattr(self, "_model")
+
+    def print_attributes(self, sep="\n"):
+        r"""Print the attributes and properties of the MassMetabolite.
+
+        Parameters
+        ----------
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+
+        """
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        attributes = get_object_attributes(self)
+        print(sep.join(attributes))
 
     def remove_from_model(self, destructive=False):
         """Remove the metabolite's association from its MassModel.

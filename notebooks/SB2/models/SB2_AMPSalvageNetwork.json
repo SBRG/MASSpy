@@ -1,14 +1,14 @@
 {
     "boundary_conditions": {
-        "bc_ade_c": 0.001,
-        "bc_adn_c": 0.0012,
-        "bc_amp_c": 0.0867281,
-        "bc_h2o_c": 1,
-        "bc_h_c": 6.30957e-05,
-        "bc_hxan_c": 0.002,
-        "bc_ins_c": 0.001,
-        "bc_nh3_c": 0.091002,
-        "bc_pi_c": 2.5
+        "ade_b": 0.001,
+        "adn_b": 0.0012,
+        "amp_b": 0.0867281,
+        "h2o_b": 1,
+        "h_b": 6.30957e-05,
+        "hxan_b": 0.002,
+        "ins_b": 0.001,
+        "nh3_b": 0.091002,
+        "pi_b": 2.5
     },
     "compartments": {
         "c": "Cytosol"
@@ -490,10 +490,37 @@
             "subsystem": "Pseudoreaction"
         }
     ],
-    "units": {
-        "N": "Millimole",
-        "Time": "Hour",
-        "Vol": "Litre"
-    },
+    "units": [
+        {
+            "_id": "mM",
+            "list_of_units": [
+                {
+                    "_exponent": -1,
+                    "_kind": "litre",
+                    "_multiplier": 1,
+                    "_scale": 0
+                },
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Millimolar"
+        },
+        {
+            "_id": "hr",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 3600,
+                    "_scale": 0
+                }
+            ],
+            "name": "Hour"
+        }
+    ],
     "version": "1"
 }

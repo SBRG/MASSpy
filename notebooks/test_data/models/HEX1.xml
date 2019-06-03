@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" sboTerm="SBO:0000062" level="3" version="2" fbc:required="false">
+  <model metaid="meta_HEX1" id="HEX1" name="Hexokinase (D-glucose:ATP)" fbc:strict="false">
+    <listOfCompartments>
+      <compartment id="c" name="Cytosol" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
+      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.0486" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M__23dpg_c" name="2,3-Disphospho-D-glycerate" compartment="c" initialConcentration="3.1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C3H3O10P2"/>
+      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.29" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_hex1_c" name="HEX1" compartment="c" initialConcentration="4.351719e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietyhex1"/>
+      <species id="M_hex1_A_c" name="HEX1-atp complex" compartment="c" initialConcentration="2.730695e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietyhex1"/>
+      <species id="M_hex1_G_c" name="HEX1-glc__D complex" compartment="c" initialConcentration="7.13042e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6Moietyhex1"/>
+      <species id="M_hex1_AG_c" name="HEX1-glc__D-atp complex" compartment="c" initialConcentration="4.503034e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C16H24O19N5P3Moietyhex1"/>
+      <species id="M_hex1_G_CI_c" name="HEX1-glc__D-_23dpg complex" compartment="c" initialConcentration="4.018964e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C9H15O16P2Moietyhex1"/>
+      <species id="M_hex1_A_PI_c" name="HEX1-adp complex" compartment="c" initialConcentration="1.261999e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2Moietyhex1"/>
+      <species id="M_hex1_G_PI_c" name="HEX1-g6p complex" compartment="c" initialConcentration="3.172e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P1Moietyhex1"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kf_R_HEX1_1" value="1000000" constant="true"/>
+      <parameter id="kf_R_HEX1_2" value="1000000" constant="true"/>
+      <parameter id="kf_R_HEX1_5" value="1000000" constant="true"/>
+      <parameter id="Keq_R_HEX1_1" value="1" constant="true"/>
+      <parameter id="Keq_R_HEX1_2" value="0.015" constant="true"/>
+      <parameter id="Keq_R_HEX1_5" value="0.181818181818182" constant="true"/>
+      <parameter id="Keq_HEX1_A" value="0.485436893203884" constant="true"/>
+      <parameter id="Keq_HEX1_G" value="26.3157894736842" constant="true"/>
+      <parameter id="Keq_HEX1" value="313.12" constant="true"/>
+      <parameter id="kf_HEX1" value="248732" constant="true"/>
+      <parameter id="kf_HEX1_A" value="322772" constant="true"/>
+      <parameter id="kf_HEX1_G" value="168666" constant="true"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="R_HEX1_1" name="hex1-adp binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_A_PI_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_HEX1_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_adp_c </ci>
+                  <ci> M_hex1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_A_PI_c </ci>
+                  <ci> Keq_R_HEX1_1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_2" name="hex1-g6p binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_G_PI_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_HEX1_2 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_g6p_c </ci>
+                  <ci> M_hex1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_G_PI_c </ci>
+                  <ci> Keq_R_HEX1_2 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_3" name="hex1-glc__D binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_HEX1_G </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_glc__D_c </ci>
+                  <ci> M_hex1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_G_c </ci>
+                  <ci> Keq_HEX1_G </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_4" name="hex1-atp binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_HEX1_A </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_hex1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_A_c </ci>
+                  <ci> Keq_HEX1_A </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_5" name="hex1_G-_23dpg binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_G_CI_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_R_HEX1_5 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M__23dpg_c </ci>
+                  <ci> M_hex1_G_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_G_CI_c </ci>
+                  <ci> Keq_R_HEX1_5 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_6" name="hex1_G-atp binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_HEX1_A </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_hex1_G_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_AG_c </ci>
+                  <ci> Keq_HEX1_A </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_7" name="hex1_A-glc__D binding" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_HEX1_G </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_glc__D_c </ci>
+                  <ci> M_hex1_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_hex1_AG_c </ci>
+                  <ci> Keq_HEX1_G </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_HEX1_8" name="hex1_AG catalyzation" reversible="true">
+        <listOfReactants>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> kf_HEX1 </ci>
+              <apply>
+                <minus/>
+                <ci> M_hex1_AG_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_adp_c </ci>
+                    <ci> M_g6p_c </ci>
+                    <ci> M_hex1_c </ci>
+                  </apply>
+                  <ci> Keq_HEX1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

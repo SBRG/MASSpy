@@ -14,7 +14,7 @@ from mass.io.dict import model_from_dict, model_to_dict
 JSON_SPEC = "1"
 
 
-def to_json(model, sort=False, **kwargs):
+def to_json(mass_model, sort=False, **kwargs):
     """Return the model as a JSON document.
 
     `kwargs`` are passed on to ``json.dumps``
@@ -22,11 +22,11 @@ def to_json(model, sort=False, **kwargs):
 
     Parameters
     ----------
-    model: MassModel
+    mass_model: MassModel
         The MassModel object to represent.
     sort: bool, optional
         Whether to sort the metabolites, reactions, and genes or maintain the
-        order defined in the model. Default is false.
+        order defined in the model. Default is False.
 
     Returns
     -------
@@ -40,7 +40,7 @@ def to_json(model, sort=False, **kwargs):
     json.dumps: Base Function.
 
     """
-    obj = model_to_dict(model, sort=sort)
+    obj = model_to_dict(mass_model, sort=sort)
     obj[u'version'] = JSON_SPEC
     return json.dumps(obj, allow_nan=False, **kwargs)
 
@@ -70,7 +70,7 @@ def from_json(document):
     return model_from_dict(json.loads(document))
 
 
-def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
+def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
     """Write the MassModel to a file in JSON format.
 
     `kwargs`` are passed on to ``json.dumps``
@@ -78,7 +78,7 @@ def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
 
     Parameters
     ----------
-    model: MassModel
+    mass_model: MassModel
         The MassModel object to represent.
     filename: str or file-like
         File path or descriptor the the JSON representation should be
@@ -97,7 +97,7 @@ def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
     json.dump: Base function.
 
     """
-    obj = model_to_dict(model, sort=sort)
+    obj = model_to_dict(mass_model, sort=sort)
     obj[u'version'] = JSON_SPEC
 
     if pretty:
@@ -315,6 +315,18 @@ JSON_SCHEMA = {
             "required": ["id", "name"],
             "additionalProperties": False,
         },
+        "units": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "kind": {"type": "string"},
+                    "exponent": {"type": "number"},
+                    "scale": {"type": "number"},
+                    "multiplier": {"type": "number"},
+                },
+            },
+        },
         "boundary_conditions": {
             "type": "object",
             "allOf": {
@@ -338,12 +350,6 @@ JSON_SCHEMA = {
             "type": "object",
             "patternProperties": {
                 "[a-z]{1,2}": {"type": "string"},
-            },
-        },
-        "units": {
-            "type": "object",
-            "patternProperties": {
-                ".*": {"type": "string"},
             },
         },
         "notes": {"type": "object"},

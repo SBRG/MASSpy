@@ -15,7 +15,7 @@ from sympy import Eq, Symbol, sympify
 
 from cobra.core import Gene
 
-from mass.core import MassMetabolite, MassModel, MassReaction
+from mass.core import MassMetabolite, MassModel, MassReaction, UnitDefinition
 from mass.enzyme_modules import (
     EnzymeModule, EnzymeModuleDict, EnzymeModuleForm, EnzymeModuleReaction,
     _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
@@ -87,15 +87,13 @@ _OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "description", "boundary_conditions", "compartments", "modules",
-    "units", "notes", "annotation"]
+    "name", "description", "boundary_conditions", "compartments", "notes",
+    "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
     "description": "",
     "boundary_conditions": {},
     "compartments": {},
-    "modules": set(),
-    "units": {},
     "notes": {},
     "annotation": {}
 }
@@ -253,7 +251,7 @@ def enzyme_to_dict(enzyme):
 
     Parameters
     ----------
-    enzyme: enzyme.EnzymeModuleDict
+    enzyme: EnzymeModuleDict
         The enzyme to represent as a dict.
 
     """
@@ -288,7 +286,7 @@ def enzyme_from_dict(enzyme, model):
 
     Parameters
     ----------
-    gene: dict
+    enzyme: dict
         The dict representation of the gene to create.
 
     """
@@ -308,6 +306,58 @@ def enzyme_from_dict(enzyme, model):
     new_enzyme._fix_order()
 
     return new_enzyme
+
+
+def unit_to_dict(unit_definition):
+    """Represent a UnitDefinition object as a dict.
+
+    Parameters
+    ----------
+    unit: UnitDefintion
+        The UnitDefinition to represent as a dict.
+
+    """
+    # Turn object into an OrderedDict
+    new_unit_definition = OrderedDict()
+    for key, value in iteritems(unit_definition.__dict__):
+        if value and key != "list_of_units":
+            new_unit_definition[key] = _fix_type(value)
+        if value and key == "list_of_units":
+            new_unit_definition[key] = []
+            value = sorted(value, key=attrgetter("kind"))
+            # Iterate through list of units and write to dict.
+            for unit in value:
+                new_unit = OrderedDict(
+                    (k, _fix_type(v)) if k != "_kind" else (k, list(v)[0])
+                    for k, v in iteritems(unit.__dict__))
+                new_unit_definition[key] += [new_unit]
+
+    return new_unit_definition
+
+
+def unit_from_dict(unit_definition):
+    """Create a UnitDefinition object from its dict representation.
+
+    Parameters
+    ----------
+    unit: dict
+        The dict representation of the UnitDefinition to create.
+
+    """
+    # Create the new unit definition
+    new_unit_definition = UnitDefinition()
+    for key, value in iteritems(unit_definition):
+        if key == "list_of_units":
+            # Create Unit objects for units in the list_of_units attribute
+            for unit in value:
+                new_unit_definition.create_unit(
+                    kind=unit["_kind"], exponent=unit["_exponent"],
+                    scale=unit["_scale"], multiplier=unit["_multiplier"])
+        else:
+            # Set attribute if not list of units
+            new_unit_definition.__dict__[key] = value
+
+    return new_unit_definition
 
 
 def model_to_dict(model, sort=False):
@@ -330,6 +380,7 @@ def model_to_dict(model, sort=False):
     obj["reactions"] = list(map(reaction_to_dict, model.reactions))
     obj["genes"] = list(map(gene_to_dict, model.genes))
     obj["enzyme_modules"] = list(map(enzyme_to_dict, model.enzyme_modules))
+    obj["units"] = list(map(unit_to_dict, model.units))
 
     if sort:
         get_id = itemgetter("id")
@@ -337,6 +388,7 @@ def model_to_dict(model, sort=False):
         obj["reactions"].sort(key=get_id)
         obj["genes"].sort(key=get_id)
         obj["enzyme_modules"].sort(key=get_id)
+        obj["units"].sort(key=get_id)
 
     for key in ["boundary_conditions", "custom_rates", "custom_parameters"]:
         values = getattr(model, key, {})
@@ -387,6 +439,9 @@ def model_from_dict(obj):
     model.add_reactions([
         reaction_from_dict(reaction, model) for reaction in obj["reactions"]])
 
+    # Add units to the model
+    model.add_units([unit_from_dict(unit_def) for unit_def in obj["units"]])
+
     # Add enzyme modules to the model
     if "enzyme_modules" in obj:
         model.enzyme_modules.extend([
@@ -415,8 +470,6 @@ def model_from_dict(obj):
         # Update with EnzymeModule attributes if obj represents an EnzymeModule
         elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS:
             model.__class__.__dict__[k.lstrip("_")].fset(model, v)
-
-    model.modules = set(sorted(model.modules))
 
     return model
 

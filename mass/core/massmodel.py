@@ -22,9 +22,11 @@ from cobra.util.context import HistoryManager, get_context
 
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
+from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable)
+    _get_matrix_constructor, convert_matrix, ensure_iterable,
+    get_object_attributes)
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
@@ -97,27 +99,14 @@ class MassModel(Object):
         A dictionary to store boundary conditions, where keys are string
         identifiers for 'boundary metabolites' of boundary reactions, and
         values are the boundary conditions.
-    modules: set
-        A set containing the identifiers of the MassModels (model.id)
-        merged together to create the MassModel (self).
     compartments: dict
         A dictionary to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
         Example: {'c': 'cytosol'}
-    units: dict
-        A dictionary to store the units used in the model for referencing.
-        Example: {'N': 'Millimoles', 'Vol': 'Liters', 'Time': 'Hours'}
-
-    Warnings
-    --------
-    MassModels can have different initial conditions from the ones stored in
-        the MassMetabolites for various purposes. However, simulations will
-        always utilize the initial conditions stored in the model, which
-        can be accessed by the MassModel.initial_conditions attribute.
-    The MassModel will not automatically track or convert units. Therefore, it
-        is up to the user to ensure unit consistency in the model. The
-        MassModel.units attribute is provided as a way to inform the user or
-        others what units the model is currently using.
+    units: cobra.DictList
+        A DictList of UnitDefinitions to store in the model for referencing.
+        Note that the MassModel does NOT track units, and it is up to the user
+        to maintain unit consistency the model.
 
     """
 
@@ -145,9 +134,7 @@ class MassModel(Object):
             self.custom_rates = {}
             self.custom_parameters = {}
             self._compartments = {}
-            self._units = {}
-            # Initialize a set to store the modules
-            self.modules = set()
+            self.units = DictList()
             # Store the stoichiometric matrix, its matrix type, and data type
             self._matrix_type = matrix_type
             self._dtype = dtype
@@ -309,29 +296,21 @@ class MassModel(Object):
         else:
             setattr(self, "_compartments", {})
 
-    @property
-    def units(self):
-        """Return a dictionary of stored model units."""
-        return getattr(self, "_units")
-
-    @units.setter
-    def units(self, value):
-        """Set the dictionary of current unit descriptions.
-
-        Assigning a dictionary to this property updates the model's
-        dictionary of unit descriptions with the new values.
+    def print_attributes(self, sep="\n"):
+        r"""Print the attributes and properties of the MassModel.
 
         Parameters
         ----------
-        value : dict
-            Dictionary mapping unit abbreviations to full names.
-            An empty dictionary will reset the unit.
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
 
         """
-        if value:
-            self._units.update(value)
-        else:
-            setattr(self, "_units", {})
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        attributes = get_object_attributes(self)
+        print(sep.join(attributes))
 
     def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
                  update_model=True):
@@ -728,8 +707,10 @@ class MassModel(Object):
             `MassModel.boundary` or specifically `MassModel.exchanges` etc.
         subsystem: str, optional
             The subsystem where the reaction is meant to occur.
-        boundary_condition: float, optional
-            The boubdary condition value to set. Default is 0.
+        boundary_condition: float, sympy.Basic, optional
+            The boundary condition value to set. Must be an int, float, or a
+            or a sympy expression dependent only on time.
+            Default value is 0.
         sbo_term : str, optional
             A correct SBO term is set for the available types. If a custom
             type is chosen, a suitable SBO term should also be set.
@@ -788,6 +769,10 @@ class MassModel(Object):
         if sbo_term:
             rxn.annotation["sbo"] = sbo_term
         self.add_reactions(rxn)
+        # TODO handle boundary condition functions.
+        if not isinstance(boundary_condition, (integer_types, float)):
+            pass
+
         self.add_boundary_conditions({
             rxn.boundary_metabolite: boundary_condition})
 
@@ -1031,6 +1016,73 @@ class MassModel(Object):
         self.custom_parameters = {}
         print("All custom rate expressions and parameters have been reset")
 
+    def add_units(self, new_unit_defs):
+        """Add a UnitDefinition to the MassModel units attribute.
+
+        Parameters
+        ----------
+        new_unit_defs: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to add to the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        # Ensure iterable input and units are valid Unit objects.
+        new_unit_defs = DictList(ensure_iterable(new_unit_defs))
+        for unit in list(new_unit_defs):
+            if not isinstance(unit, UnitDefinition):
+                raise ValueError(
+                    "'{0}' is not a valid UnitDefinition.".format(str(unit)))
+            # Skip existing units.
+            if unit.id in self.units.list_attr("id"):
+                warn("Skipping '{0}' for it already exists in the model."
+                     .format(unit))
+                new_unit_defs.remove(unit)
+        # Add new unit definitions to the units attribute
+        self.units += new_unit_defs
+
+    def remove_units(self, unit_defs_to_remove):
+        """Remove a UnitDefinition from the MassModel units attribute.
+
+        Parameters
+        ----------
+        unit_defs_to_remove: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to remove from the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        unit_defs_to_remove = ensure_iterable(unit_defs_to_remove)
+        # Iteratre through units, raise ValueError if unit does not exist.
+        for unit in unit_defs_to_remove:
+            try:
+                unit = self.units.get_by_id(unit)
+            except KeyError as e:
+                raise ValueError(
+                    "'{0}' does not exist in the model.".format(str(e)))
+        # Remove unit definitions to the units attribute
+        self.units -= unit_defs_to_remove
+
+    def reset_units(self):
+        """Reset all unit definitions in the units in a model.
+
+        Warnings
+        --------
+        Using this method will remove all UnitDefinitions from the units
+            attribute in the MassModel object. To remove a UnitDefinition
+            without affecting the others in the units attribute, use
+            the MassModel.remove_units method instead.
+
+        """
+        self.units = DictList()
+        print("All unit definitions have been reset")
+
     def get_elemental_matrix(self, matrix_type=None, dtype=None):
         """Get the elemental matrix for a model.
 
@@ -1198,20 +1250,20 @@ class MassModel(Object):
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
             "metabolites", "reactions", "genes", "enzyme_modules", "_S",
-            "boundary_conditions", "custom_rates", "custom_parameters",
-            "notes", "annotation", "modules"]
+            "custom_rates", "units", "boundary_conditions",
+            "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
 
-        for attr in do_not_copy_by_ref[-6:]:
+        for attr in do_not_copy_by_ref[-5:]:
             setattr(new_model, attr, deepcopy(getattr(self, attr)))
 
         # Copy the metabolites
         new_model = self._copy_model_metabolites(new_model)
         # Copy the genes
         new_model = self._copy_model_genes(new_model)
-        # Copy the reactions and rates
+        # Copy the reactions and rates (including custom rates)
         new_model = self._copy_model_reactions(new_model)
         # Copy any existing enzyme_modules
         new_model = self._copy_model_enzyme_modules(new_model)
@@ -1285,8 +1337,6 @@ class MassModel(Object):
             new_model_id = {True: self.id,
                             False: self.id + "_" + right.id}.get(inplace)
         new_model.id = new_model_id
-        new_model.modules.add(right.id)
-        new_model.modules.update(right.modules)
 
         # Add the reactions from right to left model.
         new_reactions = deepcopy(right.reactions)
@@ -1335,7 +1385,10 @@ class MassModel(Object):
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        for attr in ["_compartments", "_units", "notes", "annotation"]:
+        if right.units:
+            new_model.add_units(right.units)
+
+        for attr in ["_compartments", "notes", "annotation"]:
             existing = getattr(new_model, attr).copy()
             setattr(new_model, attr, getattr(right, attr).copy())
             getattr(new_model, attr).update(existing)
@@ -1686,8 +1739,20 @@ class MassModel(Object):
         """
         if not isinstance(initial_conditions, dict):
             raise TypeError("initial_conditions must be a dictionary.")
-        # TODO Fix when changes finished
-        print("TODO Finish method")
+        for metabolite, ic_value in iteritems(initial_conditions):
+            # Try getting metabolite object from model
+            try:
+                metabolite = self.metabolites.get_by_id(str(metabolite))
+            except KeyError as e:
+                warn("No metabolite found for {0}".format(str(e)))
+                continue
+            # Try setting the initial condition
+            try:
+                metabolite.initial_condition = ic_value
+            except (TypeError, ValueError) as e:
+                warn("Cannot set initial condition for {0} due to the "
+                     "following: {1}".format(metabolite.id, str(e)))
+                continue
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.
@@ -2070,9 +2135,6 @@ class MassModel(Object):
                     <td><strong>Number of Enzymes</strong></td>
                     <td>{num_enzyme_modules}</td>
                 </tr><tr>
-                    <td><strong>Modules</strong></td>
-                    <td>{modules}</td>
-                </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
                 </tr><tr>
@@ -2097,12 +2159,9 @@ class MassModel(Object):
                    num_custom_rates=len(self.custom_rates),
                    num_genes=len(self.genes),
                    num_enzyme_modules=len(self.enzyme_modules),
-                   modules="<br> ".join([str(m) for m in self.modules
-                                         if m is not None]) + "</br>",
                    compartments=", ".join(v if v else k for k, v in
                                           iteritems(self.compartments)),
-                   units=", ".join(v if v else k for
-                                   k, v in iteritems(self.units)))
+                   units=", ".join([u.id for u in self.units]))
 
     # Dunders
     def __enter__(self):
