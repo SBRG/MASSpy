@@ -56,7 +56,7 @@ def ensure_iterable(list_to_check):
         The list to ensure is iterable.
 
     """
-    # Make metabolite_list iterable if necessary
+    # Make list iterable if necessary
     if list_to_check is None:
         list_to_check = list()
     if not hasattr(list_to_check, "__iter__") or \
