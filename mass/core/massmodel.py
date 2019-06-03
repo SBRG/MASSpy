@@ -22,6 +22,7 @@ from cobra.util.context import HistoryManager, get_context
 
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
+from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
     _get_matrix_constructor, convert_matrix, ensure_iterable,
@@ -31,7 +32,6 @@ from mass.util.util import (
 LOGGER = logging.getLogger(__name__)
 # Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
-SBML_UNIT_IDS = ["substance", "volume", "area", "length", "time"]
 # Pre-compiled regular expressions for building reactions from strings
 _RXN_ID_RE = re.compile("^(\w+):")
 _MET_ID_RE = re.compile("^s\[(\S+)[,|\]]")
@@ -103,11 +103,10 @@ class MassModel(Object):
         A dictionary to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
         Example: {'c': 'cytosol'}
-    units: dict
-        A dictionary to store the units used in the model for referencing.
-        SBML recognized unit identifiers must be used as the keys in order to
-        properly interpret units definitions and for SBML compatibility.
-        Does NOT track units automatically.
+    units: cobra.DictList
+        A DictList of UnitDefinitions to store in the model for referencing.
+        Note that the MassModel does NOT track units, and it is up to the user
+        to maintain unit consistency the model.
 
     """
 
@@ -135,7 +134,7 @@ class MassModel(Object):
             self.custom_rates = {}
             self.custom_parameters = {}
             self._compartments = {}
-            self._units = {}
+            self.units = DictList()
             # Store the stoichiometric matrix, its matrix type, and data type
             self._matrix_type = matrix_type
             self._dtype = dtype
@@ -296,53 +295,6 @@ class MassModel(Object):
             self._compartments.update(value)
         else:
             setattr(self, "_compartments", {})
-
-    @property
-    def units(self):
-        """Return a dictionary of stored model units."""
-        return getattr(self, "_units")
-
-    @units.setter
-    def units(self, value):
-        """Set the dictionary of current unit descriptions.
-
-        Assigning a dictionary to this property updates the model's
-        dictionary of unit descriptions with the new values.
-
-        Currently only supports the following unit types:
-            Unit ID:    Scalable Units:
-            substance:	{mole, item, gram, kilogram, dimensionless}
-            volume:	    {litre, cubic metre, dimensionless}
-            time:	    {second, dimensionless}
-            area:	    {square metre, dimensionless}
-            length:     {metre, dimensionless}
-
-        Parameters
-        ----------
-        value : dict
-            Dictionary mapping SBML unit identifers to the unit definition.
-            Dict keys must be strings of SBML recognized unit identifiers.
-            An empty dictionary will reset the unit.
-
-        Warnings
-        --------
-        The MassModel will not automatically track or convert units. Therefore,
-            it is up to the user to ensure unit consistency in the model. The
-            MassModel.units attribute is provided as a way to inform the user
-            or others what units the model is currently using.
-
-        """
-        if value:
-            # Ensure units are SBML compliant
-            for k, v in iteritems(value):
-                if k not in SBML_UNIT_IDS:
-                    raise TypeError(
-                        "'{0}' not a recognized SBML unit identifier. The unit"
-                        "identifier must be one of the following {1}".format(
-                            str(k), str(SBML_UNIT_IDS)))
-                self._units.update({k: v})
-        else:
-            setattr(self, "_units", {})
 
     def print_attributes(self, sep="\n"):
         r"""Print the attributes and properties of the MassModel.
@@ -1064,6 +1016,73 @@ class MassModel(Object):
         self.custom_parameters = {}
         print("All custom rate expressions and parameters have been reset")
 
+    def add_units(self, new_unit_defs):
+        """Add a UnitDefinition to the MassModel units attribute.
+
+        Parameters
+        ----------
+        new_unit_defs: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to add to the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        # Ensure iterable input and units are valid Unit objects.
+        new_unit_defs = DictList(ensure_iterable(new_unit_defs))
+        for unit in list(new_unit_defs):
+            if not isinstance(unit, UnitDefinition):
+                raise ValueError(
+                    "'{0}' is not a valid UnitDefinition.".format(str(unit)))
+            # Skip existing units.
+            if unit.id in self.units.list_attr("id"):
+                warn("Skipping '{0}' for it already exists in the model."
+                     .format(unit))
+                new_unit_defs.remove(unit)
+        # Add new unit definitions to the units attribute
+        self.units += new_unit_defs
+
+    def remove_units(self, unit_defs_to_remove):
+        """Remove a UnitDefinition from the MassModel units attribute.
+
+        Parameters
+        ----------
+        unit_defs_to_remove: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to remove from the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        unit_defs_to_remove = ensure_iterable(unit_defs_to_remove)
+        # Iteratre through units, raise ValueError if unit does not exist.
+        for unit in unit_defs_to_remove:
+            try:
+                unit = self.units.get_by_id(unit)
+            except KeyError as e:
+                raise ValueError(
+                    "'{0}' does not exist in the model.".format(str(e)))
+        # Remove unit definitions to the units attribute
+        self.units -= unit_defs_to_remove
+
+    def reset_units(self):
+        """Reset all unit definitions in the units in a model.
+
+        Warnings
+        --------
+        Using this method will remove all UnitDefinitions from the units
+            attribute in the MassModel object. To remove a UnitDefinition
+            without affecting the others in the units attribute, use
+            the MassModel.remove_units method instead.
+
+        """
+        self.units = DictList()
+        print("All unit definitions have been reset")
+
     def get_elemental_matrix(self, matrix_type=None, dtype=None):
         """Get the elemental matrix for a model.
 
@@ -1231,20 +1250,20 @@ class MassModel(Object):
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
             "metabolites", "reactions", "genes", "enzyme_modules", "_S",
-            "boundary_conditions", "custom_rates", "custom_parameters",
-            "notes", "annotation"]
+            "custom_rates", "units", "boundary_conditions",
+            "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
 
-        for attr in do_not_copy_by_ref[-6:]:
+        for attr in do_not_copy_by_ref[-5:]:
             setattr(new_model, attr, deepcopy(getattr(self, attr)))
 
         # Copy the metabolites
         new_model = self._copy_model_metabolites(new_model)
         # Copy the genes
         new_model = self._copy_model_genes(new_model)
-        # Copy the reactions and rates
+        # Copy the reactions and rates (including custom rates)
         new_model = self._copy_model_reactions(new_model)
         # Copy any existing enzyme_modules
         new_model = self._copy_model_enzyme_modules(new_model)
@@ -1366,7 +1385,10 @@ class MassModel(Object):
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        for attr in ["_compartments", "_units", "notes", "annotation"]:
+        if right.units:
+            new_model.add_units(right.units)
+
+        for attr in ["_compartments", "notes", "annotation"]:
             existing = getattr(new_model, attr).copy()
             setattr(new_model, attr, getattr(right, attr).copy())
             getattr(new_model, attr).update(existing)
@@ -2139,8 +2161,7 @@ class MassModel(Object):
                    num_enzyme_modules=len(self.enzyme_modules),
                    compartments=", ".join(v if v else k for k, v in
                                           iteritems(self.compartments)),
-                   units=", ".join(v if v else k for
-                                   k, v in iteritems(self.units)))
+                   units=", ".join([u.id for u in self.units]))
 
     # Dunders
     def __enter__(self):
