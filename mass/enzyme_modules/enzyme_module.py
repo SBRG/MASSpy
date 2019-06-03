@@ -1549,5 +1549,4 @@ class EnzymeModule(MassModel):
                    num_custom_rates=len(self.custom_rates),
                    compartments=", ".join(v if v else k for k, v in
                                           iteritems(self.compartments)),
-                   units=", ".join(v if v else k for
-                                   k, v in iteritems(self.units)))
+                   units=", ".join([u.id for u in self.units]))
