@@ -4,9 +4,9 @@ from __future__ import absolute_import
 
 import logging
 
-from six import with_metaclass
+from six import iteritems, with_metaclass
 
-from cobra.core.configuration import BaseConfiguration
+from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
 
@@ -15,9 +15,10 @@ from mass.util.util import ensure_non_negative_value
 __all__ = ("MassConfiguration",)
 
 LOGGER = logging.getLogger(__name__)
+COBRA_CONFIGURATION = Configuration()
 
 
-class MassBaseConfiguration(BaseConfiguration):
+class MassBaseConfiguration(object):
     """Define global configuration values that to be honored by mass functions.
 
     Attributes
@@ -77,11 +78,22 @@ class MassBaseConfiguration(BaseConfiguration):
 
     def __init__(self):
         """Initialize MassBaseConfiguration object."""
-        super(MassBaseConfiguration, self).__init__()
         self._boundary_compartment = {"b": "boundary"}
         self._default_compartment = {"default": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
+        self._shared_state = COBRA_CONFIGURATION.__dict__
+
+    @property
+    def shared_state(self):
+        """Return a read-only dict for shared configuration attributes."""
+        shared_state = {}
+        for k, v in iteritems(self._shared_state):
+            if k in ["_solver", "tolerance"]:
+                k = "optimization_" + k.strip("_")
+            shared_state[k] = v
+
+        return shared_state
 
     @property
     def boundary_compartment(self):
@@ -168,31 +180,106 @@ class MassBaseConfiguration(BaseConfiguration):
     @property
     def optimization_solver(self):
         """Return the solver utilized for optimization."""
-        return self.solver
+        return COBRA_CONFIGURATION.solver
 
     @optimization_solver.setter
     def optimization_solver(self, value):
-        """Set the solver utilized for optimization."""
-        self.solver = value
+        """Set the solver utilized for optimization.
+
+        Parameters
+        ----------
+        value: {"glpk", "cplex", "gurobi"}
+            The solver to utilize in optimizations.
+
+        """
+        COBRA_CONFIGURATION.solver = value
 
     @property
     def optimization_tolerance(self):
         """Return the tolerance value utilized by the optimization solver."""
-        return self.tolerance
+        return COBRA_CONFIGURATION.tolerance
 
     @optimization_tolerance.setter
     def optimization_tolerance(self, value):
-        """Set the tolerance value utilized by the optimization solver."""
-        self.tolerance = value
+        """Set the tolerance value utilized by the optimization solver.
+
+        Parameters
+        ----------
+        value: float
+            The tolerance value to set.
+
+        """
+        COBRA_CONFIGURATION.tolerance = value
+
+    @property
+    def lower_bound(self):
+        """Return the default value of the lower bound for reactions."""
+        return COBRA_CONFIGURATION.lower_bound
+
+    @lower_bound.setter
+    def lower_bound(self, value):
+        """Set the default value of the lower bound for reactions.
+
+        Parameters
+        ----------
+        value: float
+            The default bound value to set.
+
+        """
+        COBRA_CONFIGURATION.lower_bound = value
+
+    @property
+    def upper_bound(self):
+        """Return the default value of the lower bound for reactions."""
+        return COBRA_CONFIGURATION.upper_bound
+
+    @upper_bound.setter
+    def upper_bound(self, value):
+        """Set the default value of the lower bound for reactions.
+
+        Parameters
+        ----------
+        value: float
+            The default bound value to set.
+
+        """
+        COBRA_CONFIGURATION.upper_bound = value
+
+    @property
+    def bounds(self):
+        """Return the default lower and upper bounds for reactions."""
+        return COBRA_CONFIGURATION.bounds
+
+    @bounds.setter
+    def bounds(self, bounds):
+        """Set the default lower and upper bounds for reactions."""
+        COBRA_CONFIGURATION.bounds = bounds
+
+    @property
+    def processes(self):
+        """Return the default number of processes to use when possible."""
+        return COBRA_CONFIGURATION.processes
 
     def __repr__(self):
         """Return the representation of the MassConfiguration."""
-        return """
+        return """MassConfiguration:
+        boundary compartment: {boundary_compartment}
+        default compartment: {default_compartment}
+        irreversible reaction Keq: {irreversible_Keq}
+        irreversible reaction kr: {irreversible_kr}
         optimization solver: {optimization_solver}
         optimization solver tolerance: {optimization_tolerance}
         lower_bound: {lower_bound}
         upper_bound: {upper_bound}
         processes: {processes}""".format(
+            boundary_compartment=[
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
+                    self.boundary_compartment)][0],
+            default_compartment=[
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
+                    self.default_compartment)][0],
+            irreversible_Keq=self.irreversible_Keq,
+            irreversible_kr=self.irreversible_kr,
             optimization_solver=interface_to_str(self.optimization_solver),
             optimization_tolerance=self.optimization_tolerance,
             lower_bound=self.lower_bound,
@@ -202,27 +289,43 @@ class MassBaseConfiguration(BaseConfiguration):
     def _repr_html_(self):
         return """
         <table>
-            <tr>
+            <tr><tr>
+                <td><strong>Boundary Compartment</strong></td>
+                <td>{boundary_compartment}</td>
+            </tr><tr>
+                <td><strong>Default Compartment</strong></td>
+                <td>{default_compartment}</td>
+            </tr><tr>
+                <td><strong>Irreversible Reaction Keq</strong></td>
+                <td>{irreversible_Keq}</td>
+            </tr><tr>
+                <td><strong>Irreversible Reaction kr</strong></td>
+                <td>{irreversible_kr}</td>
+            </tr>
                 <td><strong>Optimization solver</strong></td>
                 <td>{optimization_solver}</td>
-            </tr>
-            <tr>
+            </tr><tr>
                 <td><strong>Optimization solver tolerance</strong></td>
                 <td>{optimization_tolerance}</td>
-            </tr>
-            <tr>
+            </tr><tr>
                 <td><strong>Lower bound</strong></td>
                 <td>{lower_bound}</td>
-            </tr>
-            <tr>
+            </tr><tr>
                 <td><strong>Upper bound</strong></td>
                 <td>{upper_bound}</td>
-            </tr>
-            <tr>
+            </tr><tr>
                 <td><strong>Processes</strong></td>
                 <td>{processes}</td>
             </tr>
         </table>""".format(
+            boundary_compartment=[
+                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                    self.boundary_compartment)][0],
+            default_compartment=[
+                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                    self.default_compartment)][0],
+            irreversible_Keq=self.irreversible_Keq,
+            irreversible_kr=self.irreversible_kr,
             optimization_solver=interface_to_str(self.optimization_solver),
             optimization_tolerance=self.optimization_tolerance,
             lower_bound=self.lower_bound,
