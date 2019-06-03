@@ -47,19 +47,6 @@ SBO_MODELING_FRAMEWORK = "SBO:0000062"
 # For MathML representation of kinetic laws
 MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
 MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
-
-# Units
-_SI_PREFIX_DICT = {
-    "atto": -18, "femto": -15, "pico": -12, "nano": -9, "micro": -6,
-    "milli": -3, "centi": -2, "deci": -1, "deca": 1, "hecto": 2, "kilo": 3,
-    "mega": 6, "giga": 9, "tera": 12, "peta": 15, "exa": 18}
-
-_SBML_BASE_UNITS_DICT = [
-    "ampere", "avogadro", "becquerel", "candela", "coulomb", "dimensionless",
-    "farad", "gram", "gray", "henry", "hertz", "item", "joule", "katal",
-    "kelvin", "kilogram", "liter", "litre", "lumen", "lux", "meter", "metre",
-    "mole", "newton", "ohm", "pascal", "radian", "second", "siemens",
-    "sievert", "steradian", "tesla", "volt", "watt", "weber"]
 # -----------------------------------------------------------------------------
 # Functions for replacements (import/export)
 # -----------------------------------------------------------------------------
