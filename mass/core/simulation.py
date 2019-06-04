@@ -59,7 +59,6 @@ import sympy as sym
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
-from mass import config as _config
 from mass.core.massmodel import MassModel
 from mass.core.solution import (
     Solution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
@@ -70,7 +69,7 @@ from mass.util.qcqa import is_simulatable, qcqa_model, qcqa_simulation
 from mass.util.util import ensure_iterable
 
 
-_ZERO_TOL = _config.ZERO_TOLERANCE
+_ZERO_TOL = 1e-8
 # Pre-compiled regular expressions for perturbations
 _KF_RE = re.compile("forward_rate_constant|kf")
 _KEQ_RE = re.compile("equilibrium_constant|Keq")

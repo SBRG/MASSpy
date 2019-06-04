@@ -70,7 +70,7 @@ class MassMetabolite(Species):
         -----
         Enzyme and macromolecule moieties can be recognized by enclosing them
             in brackets (e.g. [ENZYME]) when defining  the chemical formula.
-            They are treated as one entity and therefore are counted once.
+            They are treated as one entity and therefore are only counted once.
 
         """
         tmp_formula = self.formula
