@@ -31,7 +31,28 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'nbsphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.inheritance_diagram',
+    'autoapi.sphinx'
 ]
+exclude_patterns = ['_build', '.ipynb_checkpoints']
+
+# Document Python Code
+autoapi_type = 'python'
+autoapi_dirs = ['..']
+autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
+
+# Napoleon settings
+napoleon_numpy_docstring = True
+
+# The master toctree document.
+master_doc = 'index'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
