@@ -30,7 +30,9 @@ class Mock(object):
         else:
             return Mock()
 # Modules should correspond to the importable Python packages.
-MOCK_MODULES = [
+
+
+= [
     'depinfo',
     'numpy',
     'scipy', 'scipy.optimize', 'scipy.sparse', 'scipy.io', 'scipy.stats',
@@ -75,6 +77,7 @@ exclude_patterns = ['_build', '.ipynb_checkpoints']
 
 #Configuration of Root AutoAPI modules
 autoapi_modules = {'mymodule': None}
+
 
 # Document Python Code
 autoapi_type = 'python'
