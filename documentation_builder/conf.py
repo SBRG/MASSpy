@@ -9,12 +9,44 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+import os
+from os.path import dirname
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
+# Documentation building  requires libraries to import
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        return
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        else:
+            return Mock()
+# Modules should correspond to the importable Python packages.
 
 
+= [
+    'depinfo',
+    'numpy',
+    'scipy', 'scipy.optimize', 'scipy.sparse', 'scipy.io', 'scipy.stats',
+    'pp',
+    'libsbml',
+    'pandas',
+    'tabulate',
+    'optlang', 'optlang.interface', 'optlang.symbolics',
+    'optlang.symbolics.core',
+    'future', 'future.utils',
+    'ruamel', 'ruamel.yaml'
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
@@ -42,6 +74,10 @@ extensions = [
     'autoapi.sphinx'
 ]
 exclude_patterns = ['_build', '.ipynb_checkpoints']
+
+#Configuration of Root AutoAPI modules
+autoapi_modules = {'mymodule': None}
+
 
 # Document Python Code
 autoapi_type = 'python'
