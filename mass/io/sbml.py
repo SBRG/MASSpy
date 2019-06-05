@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings.
-
-CLASS IS EXPERIMENTAL. Features defined in class are necessary for
-libRoadRunner compatibility, but not for full SBML. Support for full SBML will
-be forthcoming.
-"""
+"""TODO Module Docstrings."""
 from __future__ import absolute_import
 
 import datetime
@@ -16,12 +11,21 @@ import libsbml
 
 from six import integer_types, iteritems, string_types
 
-from sympy import Symbol, mathml
+from sympy import Basic, Symbol, mathml
 
-from cobra.io.sbml import (_sbase_annotations, _sbase_notes_dict)
+from cobra.io.sbml import (
+    BOUND_MINUS_INF, BOUND_PLUS_INF, LOWER_BOUND_ID, SBO_DEFAULT_FLUX_BOUND,
+    SBO_FLUX_BOUND, UPPER_BOUND_ID, ZERO_BOUND_ID, _create_bound,
+    _sbase_annotations, _sbase_notes_dict)
 
+from mass.core import (
+    MassConfiguration, MassMetabolite, MassModel, MassReaction, Unit,
+    UnitDefinition, _SBML_BASE_UNIT_KINDS_DICT)
+from mass.enzyme_modules import (
+    EnzymeModule, EnzymeModuleDict, EnzymeModuleForm, EnzymeModuleReaction,
+    _ORDERED_ENZYMEMODULE_DICT_DEFAULTS, _make_bound_attr_str_repr)
 from mass.exceptions import MassSBMLError
-from mass.util import strip_time
+from mass.util import get_subclass_specific_attributes, strip_time
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,13 +33,15 @@ LOGGER = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
 # Defaults and constants for writing SBML
 # -----------------------------------------------------------------------------
+MASSCONFIGURATION = MassConfiguration()
 # For SBML level and core version, and package extension versions
 SBML_LEVEL_VERSION = (3, 2)
 FBC_VERSION = 2
+GROUPS_VERSION = 1
 
 # Default compartment and boundary compartment definitions
-DEFAULT_COMPARTMENT_DICT = {"default": "default_compartment"}
-BOUNDARY_COMPARTMENT_DICT = {"b": "boundary"}
+DEFAULT_COMPARTMENT_DICT = MASSCONFIGURATION.default_compartment
+BOUNDARY_COMPARTMENT_DICT = MASSCONFIGURATION.boundary_compartment
 
 # Precompiled regex for mass and SBML moieties
 MASS_MOIETY_RE = re.compile("\[\S+\]")
@@ -44,9 +50,14 @@ SBML_MOIETY_RE = re.compile("Moiety\S+$")
 # For SBO terms
 SBO_MODELING_FRAMEWORK = "SBO:0000062"
 
-# For MathML representation of kinetic laws
-MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
-MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
+# COBRA Flux units
+COBRA_UNIT_FLUX = UnitDefinition(
+    id="mmol_per_gDW_per_hr", name="cobra_flux_unit", list_of_units=[
+        Unit(kind="mole", exponent=1, scale=-3, multiplier=1),
+        Unit(kind="gram", exponent=-1, scale=0, multiplier=1),
+        Unit(kind="second", exponent=-1, scale=0, multiplier=3600),
+    ]
+)
 # -----------------------------------------------------------------------------
 # Functions for replacements (import/export)
 # -----------------------------------------------------------------------------
@@ -133,8 +144,19 @@ def _for_id(sid):
     return " for '{0}'".format(sid)
 
 
-def _create_math_xml_from_expr(equation):
-    """Remove 'mml' tags from XML representation of mathemtical equations.
+# -----------------------------------------------------------------------------
+# MathML
+# -----------------------------------------------------------------------------
+# For MathML representation of kinetic laws and other sympy equations
+MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
+MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
+
+
+def _create_math_xml_str_from_sympy_expr(sympy_equation):
+    """Create a MathML string from a sympy expression to be parsed by libsbml.
+
+    This also requires removing 'mml' tags from XML representation of
+        mathemtical equations.
 
     Sympy expressions can be converted into their equivalent MathML string
     through the `sympy.printing.mathml` module. However, the mathml module will
@@ -145,20 +167,49 @@ def _create_math_xml_from_expr(equation):
     the identifiers are returned to their original state.
     """
     underscore_replace = {str(arg): str(arg).replace("_", "&")
-                          for arg in equation.atoms(Symbol)}
-    math_xml_str = mathml(equation.subs(underscore_replace))
+                          for arg in sympy_equation.atoms(Symbol)}
+    math_xml_str = mathml(sympy_equation.subs(underscore_replace))
     math_xml_str = MATH_XML_FMT.format(math_xml_str.replace("&", "_"))
     math_xml_str = MATHML_MML_TAG_RE.sub("", math_xml_str)
 
     return math_xml_str
 
-
+def _create_sympy_expr_from_math_xml_str(mathml_xml_str):
+    """Create a sympy expression from a MathML string to be parsed by libsbml.
+    """
 # -----------------------------------------------------------------------------
 # Read SBML
 # -----------------------------------------------------------------------------
 def read_sbml_model(filename):
     """TODO DOCSTRING."""
     print(filename)
+
+
+def _parse_notes_dict(sbase):
+    """ Create dictionary of MASS notes.
+
+    Parameters
+    ----------
+    sbase : libsbml.SBase
+
+    Returns
+    -------
+    dict of notes
+
+    """
+    mass_notes = {}
+    notes = sbase.getNotesString()
+    if notes:
+        start_pos_list = (match.end() for match in re.finditer(r"<p>", notes))
+        end_pos_list = (match.start() for match in re.finditer(r"</p>", notes))
+
+        for start, end in zip(start_pos_list, end_pos_list):
+            match = re.search(
+                "\s*(\w+\s*\w*)\s*:\s*(...+)", notes[start:end], re.DOTALL)
+            k, v = match.groups()
+            mass_notes.update({k.strip(): v.strip()})
+
+    return mass_notes
 
 
 # -----------------------------------------------------------------------------
@@ -190,6 +241,13 @@ def write_sbml_model(mass_model, filename, f_replace=F_REPLACE, **kwargs):
         path to which the model is written
     f_replace: dict of replacement functions for id replacement
         A dict of replacement functions to apply on identifiers.
+    units: bool
+        Should the units be written into the SBMLDocument.
+        Default is True.
+    include_all: bool
+        If True, all information in the model be written into the SBMLDocument,
+        otherwise only the information required to simulate the model ODEs.
+        Default is True.
 
     """
     doc = _model_to_sbml(mass_model, f_replace=f_replace, **kwargs)
@@ -205,18 +263,20 @@ def write_sbml_model(mass_model, filename, f_replace=F_REPLACE, **kwargs):
         filename.write(sbml_str)
 
 
-def _model_to_sbml(mass_model, f_replace=None, units=True):
+def _model_to_sbml(mass_model, f_replace=None, units=True, include_all=True):
     """Convert MassModel to SBMLDocument.
 
     Parameters
     ----------
-    mass_model : mass.core.MassModel
+    mass_model: mass.MassModel
         MassModel instance which is written to SBML
-    f_replace : dict of replacement functions
+    f_replace: dict of replacement functions
         Replacement to apply on identifiers.
-    units : boolean
-        Should the units be written in the SBMLDocument. All units will be in
-        terms of: {'Millimoles', 'Litre', 'Hours'}.
+    units: bool
+        Should the units be written into the SBMLDocument.
+    include_all: bool
+        Should all information in the model be written into the SBMLDocument,
+        or only the information required to simulate the model ODEs.
 
     Returns
     -------
@@ -226,50 +286,66 @@ def _model_to_sbml(mass_model, f_replace=None, units=True):
     if f_replace is None:
         f_replace = {}
 
-    doc, models = _create_SBMLDocument_and_model_objects(mass_model)
-    model, model_fbc = models
+    doc, models = _create_SBMLDocument_and_model_objects(mass_model,
+                                                         include_all)
+    model, model_fbc, model_group = models
 
-    # Write model annotations into the SBMLDocument
-    _sbase_annotations(model, mass_model.annotation)
-    # Write the model Meta Information (ModelHistory) into the SBMLDocument
-    if hasattr(mass_model, "_sbml"):
-        meta = mass_model._sbml
-        _write_model_meta_info_to_sbml(model, meta)
-        # Set meta annotation and notes
-        if "annotation" in meta:
-            _sbase_annotations(doc, meta["annotation"])
-        if "notes" in meta:
-            _sbase_notes_dict(doc, meta["notes"])
+    if include_all:
+        # Write the model Meta Information (ModelHistory) into the SBMLDocument
+        if hasattr(mass_model, "_sbml"):
+            meta = mass_model._sbml
+            _write_model_meta_info_to_sbml(model, meta)
+            # Set meta annotation and notes
+            if "annotation" in meta:
+                _sbase_annotations(doc, meta["annotation"])
+            if "notes" in meta:
+                _sbase_notes_dict(doc, meta["notes"])
 
-    # TODO Write the units information into the SBMLDocument
-    if units:
-        _write_model_units_to_sbml(model, mass_model)
+        # Write the units information into the SBMLDocument
+        if units:
+            _write_model_units_to_sbml(model, mass_model)
 
-    # TODO Write the flux upper/lower bound parameters into the SBMLDocument
-    # _write_flux_bounds_to_sbml()
+        # Write model notes and annotations into the SBMLDocument
+        _sbase_notes_dict(model, mass_model.notes)
+        _sbase_annotations(model, mass_model.annotation)
 
-    # TODO Write the rate law parameters into the SBMLDocument
-    _write_model_parameters_to_sbml(model, mass_model, f_replace, units=units)
+        # Write the flux upper/lower bound parameters into the SBMLDocument
+        _write_model_flux_parameters_to_sbml(model, mass_model, units=units)
+
+    # Write the rate law parameters into the SBMLDocument
+    _write_model_parameters_to_sbml(
+        model, mass_model, f_replace, units=units, include_all=include_all)
 
     # Write the compartment information into the SBMLDocument
     _write_model_compartments_to_sbml(model, mass_model)
 
     # Write the species information into the SBMLDocument
     # Includes MassMetabolites, EnzymeModuleForms, and their concentrations
-    _write_model_species_to_sbml(model, mass_model, f_replace)
+    _write_model_species_to_sbml(
+        model, mass_model, f_replace, include_all=include_all)
     # Write the boundary conditions into the SBMLDocument
     _write_model_boundary_conditions_to_sbml(model, mass_model, f_replace)
     # Write the gene information into the SBMLDocument
-    _write_model_genes_to_sbml(model_fbc, mass_model, f_replace)
+    if include_all:
+        _write_model_genes_to_sbml(model_fbc, mass_model, f_replace)
     # Write the reaction information into the SBMLDocument
-    _write_model_reactions_to_sbml(model, mass_model, f_replace)
+    # Includes MassReactions and EnzymeModuleReactions
+    _write_model_reactions_to_sbml(
+        model, mass_model, f_replace, units=units, include_all=include_all)
 
-    # TODO Write the EnzymeModuleDict information to the SBMLDocument
+    if include_all:
+        # Write the EnzymeModule specific information into the SBMLDocument
+        if isinstance(mass_model, EnzymeModule):
+            _write_enzyme_modules_to_sbml(model_group, mass_model, f_replace)
+        # Write the EnzymeModuleDict specific information into the SBMLDocument
+        if mass_model.enzyme_modules:
+            for enzyme in mass_model.enzyme_modules:
+                _write_enzyme_modules_to_sbml(model_group, enzyme, f_replace)
 
     return doc
 
 
-def _create_SBMLDocument_and_model_objects(mass_model):
+def _create_SBMLDocument_and_model_objects(mass_model, include_all=None):
     """Create and return the SBMLDocument and model objects.
 
     Will also set package extensions, model ID, meta ID, and name
@@ -281,27 +357,44 @@ def _create_SBMLDocument_and_model_objects(mass_model):
     """
     # Try creating the SBMLDocument object
     sbml_ns = libsbml.SBMLNamespaces(*SBML_LEVEL_VERSION)  # SBML L3V2 Core
-    _check(sbml_ns.addPackageNamespace("fbc", FBC_VERSION),  # SBML L3 fbc-V2
-           "adding fbc-V{0} package extension".format(FBC_VERSION))
     try:
         doc = libsbml.SBMLDocument(sbml_ns)
     except ValueError as e:
         MassSBMLError("Could not create SBMLDocument due to:\n" + str(e))
 
-    # Set package extensions
-    _check(doc.setPackageRequired("fbc", False),
-           "set fbc package extension required to false")
-    _check(doc.setSBOTerm(SBO_MODELING_FRAMEWORK),
-           "set SBO term for modeling framework")
-
     # Create model
     model = doc.createModel()
     _check(model, "create model")
+    _check(doc.setSBOTerm(SBO_MODELING_FRAMEWORK),
+           "set SBO term for modeling framework")
 
-    # Set plugins
-    model_fbc = model.getPlugin("fbc")
-    _check(model_fbc, "get fbc plugin for model")
-    _check(model_fbc.setStrict(False), "set fbc plugin strictness to true")
+    sbml_plugin_dict = {"fbc": FBC_VERSION}
+    if (isinstance(mass_model, EnzymeModule) or mass_model.enzyme_modules)\
+       and include_all:
+        sbml_plugin_dict.update({"groups": GROUPS_VERSION})
+
+    plugin_models = []
+    for plugin, version_info in iteritems(sbml_plugin_dict):
+        # Enable package extension
+        _check(
+            doc.enablePackage(
+                "http://www.sbml.org/sbml/level{0}/version1/{1}/version{2}"
+                .format(SBML_LEVEL_VERSION[0], plugin, version_info),
+                plugin, True),
+            "enable package extension {0}-v{1}".format(plugin, version_info))
+        # Set required to false
+        _check(doc.setPackageRequired(plugin, False),
+               "set {0} extension required to false".format(plugin))
+        # Get plugin and return
+        plugin_models += [model.getPlugin(plugin)]
+        _check(plugin_models[-1], "get {0} plugin for model".format(plugin))
+
+    if len(plugin_models) < 2:
+        plugin_models += [None for i in range(2 - len(plugin_models))]
+    model_fbc, model_group = plugin_models
+
+    # Set strictness of fbc package
+    _check(model_fbc.setStrict(False), "set fbc plugin strictness to false")
 
     # Set ID, meta ID, and name
     if mass_model.id is not None:
@@ -312,7 +405,7 @@ def _create_SBMLDocument_and_model_objects(mass_model):
     if mass_model.name is not None:
         _check(model.setName(mass_model.name), "set model name")
 
-    return doc, (model, model_fbc)
+    return doc, (model, model_fbc, model_group)
 
 
 def _write_model_meta_info_to_sbml(model, meta):
@@ -369,9 +462,79 @@ def _write_model_units_to_sbml(model, mass_model):
     This method is intended for internal use only.
 
     """
+    # Create nested function for making new SBML unit definitions
+    def _write_unit_definition(id_str, name="", unit_def=None):
+        """Create unit definition."""
+        udef = model.createUnitDefinition()
+        _check(udef, "create UnitDefinition" + _for_id(id_str))
+        _check(udef.setId(id_str), "set UnitDefinition id" + _for_id(id_str))
+        if name:
+            _check(udef.setName(name),
+                   "set UnitDefinition name" + _for_id(id_str))
+        for u in unit_def:
+            unit = udef.createUnit()
+            _check(unit, "create Unit" + _for_id(id_str))
+            _check(unit.setKind(_SBML_BASE_UNIT_KINDS_DICT[u.kind]),
+                   "set Unit kind" + _for_id(id_str))
+            _check(unit.setExponent(u.exponent),
+                   "set Unit exponent" + _for_id(id_str))
+            _check(unit.setScale(u.scale), "set Unit scale" + _for_id(id_str))
+            _check(unit.setMultiplier(u.multiplier),
+                   "set Unit multiplier" + _for_id(id_str))
+
+    # Write MassModel units
+    if mass_model.units:
+        to_write = list(mass_model.units) + [COBRA_UNIT_FLUX]
+    else:
+        to_write = [COBRA_UNIT_FLUX]
+
+    # Write flux bound units
+    for unit_def in to_write:
+        _write_unit_definition(
+            id_str=unit_def.id, name=unit_def.name, unit_def=unit_def)
 
 
-def _write_model_parameters_to_sbml(model, mass_model, f_replace, units=None):
+def _write_model_flux_parameters_to_sbml(model, mass_model, units=None):
+    """Write MassModel flux bound information into SBMLDocument.
+
+    This includes the default upper and lower bounds, positive and negative
+    infinity values, and a flux bound of value 0.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Determine the minimum and maximum flux bound values
+    if mass_model.reactions:
+        min_value = min(mass_model.reactions.list_attr("lower_bound"))
+        max_value = max(mass_model.reactions.list_attr("upper_bound"))
+    else:
+        # Use default values if no reactions in model.
+        min_value = MASSCONFIGURATION.lower_bound
+        max_value = MASSCONFIGURATION.upper_bound
+
+    # Create the model flux parameters
+    flux_udef = model.getUnitDefinition(COBRA_UNIT_FLUX.id)
+    _create_parameter(
+        model, pid=LOWER_BOUND_ID, value=min_value, sbo=SBO_DEFAULT_FLUX_BOUND,
+        units=units, udef=flux_udef)
+    _create_parameter(
+        model, pid=UPPER_BOUND_ID, value=max_value, sbo=SBO_DEFAULT_FLUX_BOUND,
+        units=units, udef=flux_udef)
+    _create_parameter(
+        model, pid=ZERO_BOUND_ID, value=0, sbo=SBO_DEFAULT_FLUX_BOUND,
+        units=units, udef=flux_udef)
+    _create_parameter(
+        model, pid=BOUND_MINUS_INF, value=-float("Inf"), sbo=SBO_FLUX_BOUND,
+        units=units, udef=flux_udef)
+    _create_parameter(
+        model, pid=BOUND_PLUS_INF, value=float("Inf"), sbo=SBO_FLUX_BOUND,
+        units=units, udef=flux_udef)
+
+
+def _write_model_parameters_to_sbml(model, mass_model, f_replace, units=None,
+                                    include_all=None):
     """Write MassModel kinetic parameter information into SBMLDocument.
 
     The kinetic parameters include the reaction parameters kf, Keq, and kr, and
@@ -403,12 +566,13 @@ def _write_model_parameters_to_sbml(model, mass_model, f_replace, units=None):
                     rid = f_replace[F_REACTION_REV](rid)
                 pid = "_".join((pid, rid))
             finally:
-                _create_parameter(model, pid=pid, value=value, sbo=None,
-                                  constant=constant, units=units, udef=None)
+                _create_parameter(
+                    model, pid=pid, value=value, sbo=None, constant=constant,
+                    units=units, udef=None, include_all=include_all)
 
 
 def _create_parameter(model, pid, value, sbo=None, constant=True, units=None,
-                      udef=None):
+                      udef=None, include_all=True):
     """Create a global model parameter to be written into the SBMLDocument.
 
     Warnings
@@ -423,13 +587,14 @@ def _create_parameter(model, pid, value, sbo=None, constant=True, units=None,
     _check(parameter.setValue(value), "set parameter value" + _for_id(pid))
     _check(parameter.setConstant(constant),
            "set parameter constant" + _for_id(pid))
-    # Set SBO term and units if desired.
-    if sbo:
-        _check(parameter.setSBOterm(sbo),
-               "set parameter sbo term" + _for_id(pid))
-    if units and udef is not None:
-        _check(parameter.setUnits(udef.getId()),
-               "set parameter units" + _for_id(pid))
+    if include_all:
+        # Set SBO term and units if desired.
+        if sbo:
+            _check(parameter.setSBOTerm(sbo),
+                   "set parameter sbo term" + _for_id(pid))
+        if units and udef is not None:
+            _check(parameter.setUnits(udef.getId()),
+                   "set parameter units" + _for_id(pid))
 
 
 def _write_model_compartments_to_sbml(model, mass_model):
@@ -462,7 +627,8 @@ def _write_model_compartments_to_sbml(model, mass_model):
                "set compartment constant" + _for_id(cid))
 
 
-def _write_model_species_to_sbml(model, mass_model, f_replace):
+def _write_model_species_to_sbml(model, mass_model, f_replace,
+                                 include_all=None):
     """Write MassModel species information into SBMLDocument.
 
     Warnings
@@ -470,51 +636,60 @@ def _write_model_species_to_sbml(model, mass_model, f_replace):
     This method is intended for internal use only.
 
     """
-    for metabolite in mass_model.metabolites:
+    for mass_metabolite in mass_model.metabolites:
         # Create specie and set ID, name, and compartment
-        mid = metabolite.id
+        mid = mass_metabolite.id
         if f_replace and F_SPECIE_REV in f_replace:
             mid = f_replace[F_SPECIE_REV](mid)
         specie = model.createSpecies()
         _check(specie, "create model specie" + _for_id(mid))
         _check(specie.setId(mid), "set specie id" + _for_id(mid))
-        _check(specie.setName(metabolite.name),
+        _check(specie.setName(mass_metabolite.name),
                "set specie name" + _for_id(mid))
         # Use a generic compartment if no species have set compartments
         if not mass_model.compartments:
             cid = list(DEFAULT_COMPARTMENT_DICT)[0]
         else:
-            cid = metabolite.compartment
+            cid = mass_metabolite.compartment
         _check(specie.setCompartment(cid),
                "set specie compartment" + _for_id(mid))
         # Set metabolite initial condition value
-        if metabolite.initial_condition is not None:
+        if mass_metabolite.initial_condition is not None:
             _check(
-                specie.setInitialConcentration(metabolite.initial_condition),
+                specie.setInitialConcentration(
+                    mass_metabolite.initial_condition),
                 "set specie initial concentration" + _for_id(mid))
 
         # Set species constant, boundary condition, and unit restrictions
-        _check(specie.setConstant(metabolite.fixed),
+        _check(specie.setConstant(mass_metabolite.fixed),
                "set specie constant" + _for_id(mid))
         _check(specie.setBoundaryCondition(False),
                "set specie boundary condition" + _for_id(mid))
         _check(specie.setHasOnlySubstanceUnits(False),
                "set specie unit substance restrictions" + _for_id(mid))
 
-        # Set metabolite charge via fbc package
-        specie_fbc = specie.getPlugin("fbc")
-        _check(specie_fbc, "get fbc plugin for specie" + _for_id(mid))
-        if metabolite.charge is not None:
-            _check(specie_fbc.setCharge(metabolite.charge),
-                   "set specie charge" + _for_id(mid))
-        # Set metabolite formula via fbc package
-        if metabolite.formula is not None:
-            sbml_formula = _f_moiety_formula_rev(metabolite)
-            _check(specie_fbc.setChemicalFormula(sbml_formula),
-                   "set specie formula" + _for_id(mid))
-        # Set metabolite annotation and notes
-        _sbase_annotations(specie, metabolite.annotation)
-        _sbase_notes_dict(specie, metabolite.notes)
+        if include_all:
+            # Set metabolite charge via fbc package
+            specie_fbc = specie.getPlugin("fbc")
+            _check(specie_fbc, "get fbc plugin for specie" + _for_id(mid))
+            if mass_metabolite.charge is not None:
+                _check(specie_fbc.setCharge(mass_metabolite.charge),
+                       "set specie charge" + _for_id(mid))
+            # Set metabolite formula via fbc package
+            if mass_metabolite.formula is not None:
+                sbml_formula = _f_moiety_formula_rev(mass_metabolite)
+                _check(specie_fbc.setChemicalFormula(sbml_formula),
+                       "set specie formula" + _for_id(mid))
+            # Set metabolite annotation and notes
+            if isinstance(mass_metabolite, EnzymeModuleForm):
+                # Set enzyme information if EnzymeModuleForm
+                _write_enzyme_attr_info_to_notes(
+                    specie, mass_metabolite, f_replace=f_replace)
+            else:
+                # Otherwise just set the MassMetabolite notes regularly
+                _sbase_notes_dict(specie, mass_metabolite.notes)
+            # Set metabolite annotation
+            _sbase_annotations(specie, mass_metabolite.annotation)
 
 
 def _write_model_boundary_conditions_to_sbml(model, mass_model, f_replace):
@@ -580,7 +755,8 @@ def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
         _sbase_notes_dict(gp, mass_gene.notes)
 
 
-def _write_model_reactions_to_sbml(model, mass_model, f_replace):
+def _write_model_reactions_to_sbml(model, mass_model, f_replace, units=None,
+                                   include_all=None):
     """Write MassModel reaction information into SBMLDocument.
 
     Warnings
@@ -601,39 +777,42 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace):
         _check(reaction.setReversible(mass_reaction.reversible),
                "set reaction reversible" + _for_id(rid))
 
-        # Set reaction annotation and notes
-        _sbase_annotations(reaction, mass_reaction.annotation)
-        _sbase_notes_dict(reaction, mass_reaction.notes)
-
         # Write specie references into reaction
         reaction = _write_reaction_specie_ref_to_sbml(
             reaction, mass_reaction=mass_reaction, f_replace=f_replace)
-        # Get plugin for reaction
-        reaction_fbc = reaction.getPlugin("fbc")
-        _check(reaction_fbc, "get fbc plugin for reaction" + _for_id(rid))
-        # TODO Flux bounds
-
-        # Set the reaction GPR if it exists
-        gpr = mass_reaction.gene_reaction_rule
-        if gpr:
-            # Replace IDs in string
-            if f_replace and F_GENE_REV in f_replace:
-                gpr = gpr.replace("(", "( ")
-                gpr = gpr.replace(")", " )")
-                tokens = gpr.split(" ")
-                for i, token in enumerate(tokens):
-                    if token not in [" ", "and", "or", "(", ")"]:
-                        tokens[i] = f_replace[F_GENE_REV](token)
-                gpr = " ".join(tokens)
-            # Create assoication
-            gpa = reaction_fbc.createGeneProductAssociation()
-            _check(gpa, "create gene product association" + _for_id(rid))
-            _check(gpa.setAssociation(gpr),
-                   "set gene product association" + _for_id(rid))
 
         # Set the reaction kinetic law
         _write_reaction_kinetic_law_to_sbml(
             reaction, mass_reaction=mass_reaction, f_replace=f_replace)
+
+        if include_all:
+            # Get plugin for reaction
+            reaction_fbc = reaction.getPlugin("fbc")
+            _check(reaction_fbc, "get fbc plugin for reaction" + _for_id(rid))
+
+            # Set reaction flux bounds
+            flux_udef = model.getUnitDefinition(COBRA_UNIT_FLUX.id)
+            reaction_fbc.setLowerFluxBound(
+                _create_bound(
+                    model, reaction=mass_reaction, bound_type="lower_bound",
+                    f_replace=f_replace, units=units, flux_udef=flux_udef))
+            reaction_fbc.setUpperFluxBound(
+                _create_bound(
+                    model, reaction=mass_reaction, bound_type="upper_bound",
+                    f_replace=f_replace, units=units, flux_udef=flux_udef))
+
+            # Set the reaction GPR if it exists
+            _write_reaction_gpr_to_sbml(reaction_fbc, mass_reaction, f_replace)
+
+            if isinstance(mass_reaction, EnzymeModuleReaction):
+                # Set enzyme information if EnzymeModuleReaction
+                _write_enzyme_attr_info_to_notes(
+                    reaction, mass_reaction, f_replace=f_replace)
+            else:
+                # Otherwise just set the MassReaction notes regularly
+                _sbase_notes_dict(reaction, mass_reaction.notes)
+            # Set reaction annotation
+            _sbase_annotations(reaction, mass_reaction.annotation)
 
 
 def _write_reaction_specie_ref_to_sbml(reaction, mass_reaction, f_replace):
@@ -748,12 +927,198 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace):
              else (sid, sid) for sid in metabolite_ids_to_correct))
 
     # Make xml string of rate equation via sympy conversion to Math ML
-    math_xml_str = _create_math_xml_from_expr(rate_equation.subs(met_id_subs))
+    math_xml_str = _create_math_xml_str_from_sympy_expr(
+        rate_equation.subs(met_id_subs))
     # Create kinetic law as AST math and write into the SBMLDocument
     kinetic_law = reaction.createKineticLaw()
     _check(kinetic_law, "create kinetic law" + _for_id(rid))
     _check(kinetic_law.setMath(libsbml.readMathMLFromString(math_xml_str)),
            "set math on kinetic law" + _for_id(rid))
+
+
+def _write_reaction_gpr_to_sbml(reaction_fbc, mass_reaction, f_replace):
+    """Write MassReaction gene reaction rule information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Set the reaction GPR if it exists
+    gpr = mass_reaction.gene_reaction_rule
+    if gpr:
+        rid = mass_reaction.id
+        if f_replace and F_REACTION_REV in f_replace:
+            rid = f_replace[F_REACTION_REV](rid)
+        # Replace IDs in string
+        if f_replace and F_GENE_REV in f_replace:
+            gpr = gpr.replace("(", "( ")
+            gpr = gpr.replace(")", " )")
+            tokens = gpr.split(" ")
+            for i, token in enumerate(tokens):
+                if token not in [" ", "and", "or", "(", ")"]:
+                    tokens[i] = f_replace[F_GENE_REV](token)
+            gpr = " ".join(tokens)
+        # Create assoication
+        gpa = reaction_fbc.createGeneProductAssociation()
+        _check(gpa, "create gene product association" + _for_id(rid))
+        _check(gpa.setAssociation(gpr),
+               "set gene product association" + _for_id(rid))
+
+
+def _write_enzyme_modules_to_sbml(model_group, mass_obj, f_replace):
+    """Write EnzymeModule and EnzymeModuleDict information into SBMLDocument.
+
+    Utilizes the groups package extension.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Create group to represent EnzymeModule/EnzymeModuleDict information
+    mass_notes = {}
+    # Create groups for attributes, add them to enzyme group members list
+    enzyme_group_members = []
+    for attr_name, default in iteritems(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
+        attr_value = getattr(mass_obj, attr_name, None)
+        # Ignore attributes set at default and the id, name, and S matrix.
+        if attr_name in["id", "name", "S"] or attr_value in [default, None]:
+            continue
+        elif isinstance(attr_value, list):
+            # Write attribute with list value as a group.
+            enzyme_group_members += [
+                _create_group(
+                    model_group, gid=attr_name, members=attr_value,
+                    f_replace=f_replace)]
+        elif isinstance(attr_value, dict):
+            # Write attribute with dict containing lists as a group of groups.
+            members = []
+            # Create enzyme group members (as groups) and add to list
+            for i, (category, values) in enumerate(iteritems(attr_value)):
+                members += [
+                    _create_group(
+                        model_group, gid="Category" + str(i), gname=category,
+                        members=values, f_replace=f_replace)]
+            enzyme_group_members += [
+                _create_group(
+                    model_group, gid=attr_name, members=members,
+                    f_replace=f_replace)]
+        elif isinstance(attr_value, Basic):
+            # Write attribute with sympy equation to the group notes.
+            mass_notes.update({
+                attr_name: _create_math_xml_str_from_sympy_expr(attr_value.rhs)
+            })
+        else:
+            # Add attribute to the group notes.
+            mass_notes.update({attr_name: attr_value})
+
+    # Create enzyme group
+    enzyme_group = _create_group(
+        model_group, gid=mass_obj.id, gname=mass_obj.name, kind="collection",
+        members=enzyme_group_members, f_replace=f_replace)
+    _sbase_notes_dict(enzyme_group, mass_notes)
+
+
+def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace=None):
+    """Write the enzyme object attribute into SBMLDocument in the notes.
+
+    Applies to the EnzymeModuleForms and EnzymeModuleReaction
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Get original notes from mass object.
+    mass_notes = mass_obj.notes.copy()
+    # Get the subclass specific attributes to write into the notes.
+    attributes = get_subclass_specific_attributes(mass_obj)
+    default_values = [{} if "bound" in attr_name else ""
+                      for attr_name in attributes]
+    for attr_name, default_value in zip(attributes, default_values):
+        attr_value = getattr(mass_obj, attr_name)
+        # Skip attributes equal to their defaults
+        if attr_value == default_value:
+            continue
+        elif "bound" in attr_name:
+            # Create a string representation of the bound dict attr.
+            bound_dict = {}
+            for key, value in iteritems(attr_value):
+                key = str(key)
+                if f_replace and F_SPECIE_REV in f_replace:
+                    key = f_replace[F_SPECIE_REV](key)
+                bound_dict.update({key: value})
+            # Add to notes to write
+            mass_notes.update({
+                attr_name: _make_bound_attr_str_repr(bound_dict)})
+        else:
+            # Add to notes to write
+            mass_notes.update({attr_name: attr_value})
+    # Write the notes to the SBML object.
+    _sbase_notes_dict(sbml_obj, mass_notes)
+
+
+def _create_group(model_group, gid, gname="", kind="collection", members=None,
+                  f_replace=None):
+    """Write an SBML group into SBMLDocument, and return the group.
+
+    Additional group information is written into the notes attribute of the
+    SBML object.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    group = model_group.createGroup()
+    _check(group, "create group" + _for_id(gid))
+    _check(group.setId(gid), "set group id" + _for_id(gid))
+    _check(group.setName(gname), "set group name" + _for_id(gid))
+    _check(group.setKind(kind), "set group kind" + _for_id(gid))
+
+    if members:
+        for mass_member in members:
+            # Get member ID and name
+            if not isinstance(mass_member, libsbml.SBase):
+                mid = mass_member.id
+                mname = mass_member.name
+            else:
+                mid = mass_member.getId()
+                mname = ""
+                if mass_member.isSetName():
+                    mname = mass_member.getName()
+
+            # ID replacements
+            m_type = str(type(mass_member))
+            if "Reaction" in m_type:
+                if f_replace and F_REACTION_REV in f_replace:
+                    mid = f_replace[F_REACTION_REV](mid)
+            if "Metabolite" in m_type:
+                if f_replace and F_SPECIE_REV in f_replace:
+                    mid = f_replace[F_SPECIE_REV](mid)
+            if "Gene" in m_type:
+                if f_replace and F_GENE_REV in f_replace:
+                    mid = f_replace[F_GENE_REV](mid)
+
+            # Create member
+            member = group.createMember()
+            _check(member, "create group member " + mid + _for_id(gid))
+            _check(member.setIdRef(mid),
+                   "set group member id ref" + _for_id(mid))
+            if mname:
+                _check(member.setName(mname),
+                       "set group member name" + _for_id(mid))
+
+    return group
+
+
+# -----------------------------------------------------------------------------
+# Validation
+# -----------------------------------------------------------------------------
+def validate_sbml_model(filename):
+    """TODO DOCSTRING."""
+    print(filename)
 
 
 def _check(value, message):
@@ -775,11 +1140,3 @@ def _check(value, message):
         LOGGER.error("Error encountered trying to  <%s>.", message)
         LOGGER.error("LibSBML error code %s: %s", str(value),
                      libsbml.OperationReturnValue_toString(value).strip())
-
-
-# -----------------------------------------------------------------------------
-# Validation
-# -----------------------------------------------------------------------------
-def validate_sbml_model(filename):
-    """TODO DOCSTRING."""
-    print(filename)
