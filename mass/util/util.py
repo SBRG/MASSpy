@@ -38,12 +38,24 @@ def get_object_attributes(obj):
 
     # Sometimes raises logger warnings, therefore temporary disabled
     logging.disable(logging.WARNING)
-    attributes = sorted([
-        k for k, _ in inspect.getmembers(obj, filter_function)
-        if not k.startswith("_")], key=str.lower)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        attributes = sorted([
+            k for k, _ in inspect.getmembers(obj, filter_function)
+            if not k.startswith("_")], key=str.lower)
 
     # Reenable logger warnings
     logging.disable(logging.NOTSET)
+    return attributes
+
+
+def get_subclass_specific_attributes(obj):
+    """Get the public attributes for an object. Includes properties."""
+    attributes = get_object_attributes(obj)
+    attributes = [
+        attr for attr in attributes
+        if attr not in get_object_attributes(obj.__class__.__base__())]
+
     return attributes
 
 
