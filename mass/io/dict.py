@@ -42,10 +42,9 @@ _OPTIONAL_REACTION_ATTRIBUTES = {
     "notes": {},
     "annotation": {}
 }
-_REQUIRED_ENZYMEMODULEREACTION_ATTRIBUTES = ["enzyme_id"]
+_REQUIRED_ENZYMEMODULEREACTION_ATTRIBUTES = ["enzyme_module_id"]
 _ORDERED_OPTIONAL_ENZYMEMODULEREACTION_KEYS = []
 _OPTIONAL_ENZYMEMODULEREACTION_ATTRIBUTES = {}
-
 
 _REQUIRED_METABOLITE_ATTRIBUTES = ["id", "name"]
 _ORDERED_OPTIONAL_METABOLITE_KEYS = [
@@ -64,7 +63,7 @@ _OPTIONAL_METABOLITE_ATTRIBUTES = {
 }
 
 _REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES = [
-    "_bound_catalytic", "_bound_effectors", "enzyme_id"]
+    "_bound_catalytic", "_bound_effectors", "enzyme_module_id"]
 _ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS = []
 _OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES = {}
 
@@ -133,7 +132,7 @@ def metabolite_from_dict(metabolite):
 
     """
     # Determine if saved object should be a MassMetabolite or a subclass
-    if "enzyme_id" in metabolite:
+    if "enzyme_module_id" in metabolite:
         new_metabolite = EnzymeModuleForm(id=metabolite["id"])
     else:
         new_metabolite = MassMetabolite(id=metabolite["id"])
@@ -189,7 +188,7 @@ def reaction_from_dict(reaction, model):
 
     """
     # Determine if saved object should be a MassReaction or a subclass
-    if "enzyme_id" in reaction:
+    if "enzyme_module_id" in reaction:
         new_reaction = EnzymeModuleReaction(id=reaction["id"])
     else:
         new_reaction = MassReaction(id=reaction["id"])
@@ -328,8 +327,7 @@ def unit_to_dict(unit_definition):
             # Iterate through list of units and write to dict.
             for unit in value:
                 new_unit = OrderedDict(
-                    (k, _fix_type(v)) if k != "_kind" else (k, list(v)[0])
-                    for k, v in iteritems(unit.__dict__))
+                    (k, _fix_type(v)) for k, v in iteritems(unit.__dict__))
                 new_unit_definition[key] += [new_unit]
 
     return new_unit_definition
@@ -441,12 +439,12 @@ def model_from_dict(obj):
 
     # Add units to the model
     model.add_units([unit_from_dict(unit_def) for unit_def in obj["units"]])
-
     # Add enzyme modules to the model
     if "enzyme_modules" in obj:
         model.enzyme_modules.extend([
             enzyme_from_dict(enz, model) for enz in obj["enzyme_modules"]])
-
+    # Repair model once all objects are in model.
+    model.repair(rebuild_index=True, rebuild_relationships=True)
     # Add boundary conditions to the model if they exist
     if "boundary_conditions" in obj:
         model.add_boundary_conditions({
@@ -485,7 +483,7 @@ def _add_enzyme_module_form_attributes_into_dict(enzyme, new_enzyme):
     """
     # Add attributes to enzyme
     for attr in _REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES:
-        if attr == "enzyme_id":
+        if attr == "enzyme_module_id":
             new_enzyme[attr] = getattr(enzyme, attr)
         else:
             bound = {str(k): v for k, v in iteritems(getattr(enzyme, attr))}

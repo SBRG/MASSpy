@@ -26,7 +26,7 @@ class EnzymeModuleReaction(MassReaction):
 
     Attributes
     ----------
-    enzyme_id: str, optional
+    enzyme_module_id: str, optional
         The identifier of the EnzymeModule represented by the EnzymeModuleForm.
     steady_state_flux: float, optional
         The stored (typically steady state) flux for the reaction. Stored flux
@@ -35,12 +35,12 @@ class EnzymeModuleReaction(MassReaction):
     """
 
     def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 steady_state_flux=None, enzyme_id=""):
+                 steady_state_flux=None, enzyme_module_id=""):
         """Initialize the MassReaction Object."""
         super(EnzymeModuleReaction, self).__init__(
             id=id, name=name, subsystem=subsystem, reversible=reversible,
             steady_state_flux=steady_state_flux)
-        self.enzyme_id = enzyme_id
+        self.enzyme_module_id = enzyme_module_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
         """Generate a name for the EnzymeModuleReaction based on bound ligands.

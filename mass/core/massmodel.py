@@ -1218,6 +1218,8 @@ class MassModel(Object):
             self.reactions._generate_index()
             self.metabolites._generate_index()
             self.genes._generate_index()
+            self.enzyme_modules._generate_index()
+            self.units._generate_index()
         # Rebuild the relationships between reactions and their associated
         # genes and metabolites
         if rebuild_relationships:

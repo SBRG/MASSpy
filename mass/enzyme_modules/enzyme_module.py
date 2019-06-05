@@ -442,7 +442,7 @@ class EnzymeModule(MassModel):
                               for met, num in iteritems(bound_dict)}
         # Make EnzymeModuleForm object
         enzyme_module_form = EnzymeModuleForm(
-            id=id, name=name, enzyme_id=self.id,
+            id=id, name=name, enzyme_module_id=self.id,
             bound_catalytic=bound_catalytic, bound_effectors=bound_effectors,
             compartment=compartment)
         # Generate a name for the EnzymeModuleForm if name set to "Automatic"
@@ -504,7 +504,7 @@ class EnzymeModule(MassModel):
         # Make EnzymeModuleReaction object
         new_reaction = EnzymeModuleReaction(
             id=id, name=name, subsystem=subsystem, reversible=reversible,
-            enzyme_id=self.id)
+            enzyme_module_id=self.id)
 
         # Add metabolites
         if metabolites_to_add:
@@ -1117,7 +1117,7 @@ class EnzymeModule(MassModel):
             for attr in ["enzyme_module_ligands", "enzyme_module_forms",
                          "enzyme_module_reactions"]:
                 getattr(self, attr)._generate_index()
-                for value in itervalues(getattr(self, "categorized_" + attr)):
+                for value in itervalues(getattr(self, attr + "_categorized")):
                     value._generate_index()
 
         for enzyme_module_form in self.enzyme_module_forms:
@@ -1255,7 +1255,7 @@ class EnzymeModule(MassModel):
                 "enzyme_module_reactions": self.reactions}.get(attr)
             setattr(self, attr,
                     _mk_new_dictlist(model_dictlist, getattr(self, attr)))
-            attr = "_categorized_" + attr
+            attr += "_categorized"
             setattr(self, attr, {
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))})

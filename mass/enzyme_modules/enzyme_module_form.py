@@ -34,7 +34,7 @@ class EnzymeModuleForm(MassMetabolite):
 
     Attributes
     ----------
-    enzyme_id: str, optional
+    enzyme_module_id: str, optional
         The identifier of the EnzymeModule represented by the EnzymeModuleForm.
     bound_catalytic: dict, optional
         A dict representing the metabolites bound to the enzyme's active
@@ -48,7 +48,7 @@ class EnzymeModuleForm(MassMetabolite):
     """
 
     def __init__(self, id=None, name="", formula=None, charge=None,
-                 compartment=None, fixed=False, enzyme_id="",
+                 compartment=None, fixed=False, enzyme_module_id="",
                  bound_catalytic=None, bound_effectors=None):
         """Initialize the EnzymeModuleForm Object."""
         # Initialize MassMetabolite parent class
@@ -56,7 +56,7 @@ class EnzymeModuleForm(MassMetabolite):
             id=id, name=name, formula=formula, charge=charge,
             compartment=compartment, fixed=fixed)
         # Set the id of the enzyme represented by the EnzymeModuleForm
-        self.enzyme_id = enzyme_id
+        self.enzyme_module_id = enzyme_module_id
 
         # Set metabolites bound to the active site(s) of the enzyme form
         self._bound_catalytic = {}
@@ -119,8 +119,8 @@ class EnzymeModuleForm(MassMetabolite):
     def generate_enzyme_module_form_name(self, update_enzyme=False):
         """Generate a name for the EnzymeModuleForm based on bound ligands.
 
-        The enzyme_id, bound_catalytic, and bound_effector attributes are used
-        in generating the name of the EnzymeModuleForm.
+        The enzyme_module_id, bound_catalytic, and bound_effector attributes
+        are used in generating the name of the EnzymeModuleForm.
 
         Parameters
         ----------
@@ -135,12 +135,12 @@ class EnzymeModuleForm(MassMetabolite):
 
         Notes
         -----
-        If the enzyme_id attributes are not set, the string "Enzyme" will be
-            used in its place.
+        If the enzyme_module_id attributes are not set, the string "Enzyme"
+            will be used in its place.
 
         """
-        if self.enzyme_id:
-            name = self.enzyme_id
+        if self.enzyme_module_id:
+            name = self.enzyme_module_id
         else:
             name = "Enzyme"
 
@@ -152,7 +152,7 @@ class EnzymeModuleForm(MassMetabolite):
         name += catalytic_str
 
         # Add the ligands bound to the effector site(s)
-        effector_str = _make_bound_ligand_str_repr(self.bound_effectors)
+        effector_str = _make_bound_attr_str_repr(self.bound_effectors)
         if effector_str:
             name += "; " + effector_str
 
@@ -173,8 +173,8 @@ class EnzymeModuleForm(MassMetabolite):
 
         """
         formula = ""
-        if self.enzyme_id:
-            formula += "[" + str(self.enzyme_id) + "]"
+        if self.enzyme_module_id:
+            formula += "[" + str(self.enzyme_module_id) + "]"
 
         total_elements = defaultdict(list)
         for dictionary in [self.bound_catalytic, self.bound_effectors]:
@@ -318,14 +318,14 @@ class EnzymeModuleForm(MassMetabolite):
             </tr>
         <table>""".format(
             id=self.id, name=self.name, address='0x0%x' % id(self),
-            enzyme=str(self.enzyme_id), compartment=self.compartment,
-            catalytic=_make_bound_ligand_str_repr(self.bound_catalytic),
-            effectors=_make_bound_ligand_str_repr(self.bound_effectors),
+            enzyme=str(self.enzyme_module_id), compartment=self.compartment,
+            catalytic=_make_bound_attr_str_repr(self.bound_catalytic),
+            effectors=_make_bound_attr_str_repr(self.bound_effectors),
             ic=self._initial_condition, n_reactions=len(self.reactions),
             reactions=', '.join(r.id for r in self.reactions))
 
 
-def _make_bound_ligand_str_repr(attribute_dict):
+def _make_bound_attr_str_repr(attribute_dict):
     """Make the string representation for bound ligands.
 
     Warnings
@@ -334,5 +334,5 @@ def _make_bound_ligand_str_repr(attribute_dict):
 
     """
     return "; ".join([
-        "{0:d} {1}".format(v, k._remove_compartment_from_id_str())
+        "{0:d} {1}".format(v, k)
         for k, v in iteritems(attribute_dict) if v != 0])
