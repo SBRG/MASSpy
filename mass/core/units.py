@@ -117,7 +117,7 @@ class Unit(object):
     @property
     def kind(self):
         """Return the unit kind of the Unit."""
-        return list(getattr(self, "_kind"))[0]
+        return getattr(self, "_kind")
 
     @kind.setter
     def kind(self, kind):
@@ -136,7 +136,7 @@ class Unit(object):
                 "'print_defined_unit_values' from the mass.core.units "
                 "submodule.".format(kind))
 
-        setattr(self, "_kind", {kind: _SBML_BASE_UNIT_KINDS_DICT[kind]})
+        setattr(self, "_kind", kind)
 
     @property
     def exponent(self):
@@ -349,6 +349,11 @@ class UnitDefinition(Object):
         else:
             name = self.id
         return "<%s %s at 0x%x>" % (self.__class__.__name__, name, id(self))
+
+    def __iter__(self):
+        """Override of default iter() implementation."""
+        for unit in self.list_of_units:
+            yield unit
 
 
 def _units_to_alter(units):
