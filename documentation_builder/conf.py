@@ -9,42 +9,11 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-
 import os
 from os.path import dirname
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 
-# Documentation building  requires libraries to import
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        return
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
-        else:
-            return Mock()
-# Modules should correspond to the importable Python packages.
-MOCK_MODULES = [
-    'depinfo',
-    'numpy',
-    'scipy', 'scipy.optimize', 'scipy.sparse', 'scipy.io', 'scipy.stats',
-    'pp',
-    'libsbml',
-    'pandas',
-    'tabulate',
-    'optlang', 'optlang.interface', 'optlang.symbolics',
-    'optlang.symbolics.core',
-    'future', 'future.utils',
-    'ruamel', 'ruamel.yaml'
-]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
@@ -54,27 +23,26 @@ author = 'ZHaiman'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    'nbsphinx',
     'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'sphinx.ext.inheritance_diagram',
-    'autoapi.sphinx'
+    'autoapi.sphinx',
+    'nbsphinx'
 ]
+#Exclusion Patterns
 exclude_patterns = ['_build', '.ipynb_checkpoints']
 
 #Configuration of Root AutoAPI modules
-autoapi_modules = {'mymodule': None}
+#autoapi_modules = {'mymodule': None} 
 
 # Document Python Code
 autoapi_type = 'python'
