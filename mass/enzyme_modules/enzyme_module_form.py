@@ -15,11 +15,12 @@ class EnzymeModuleForm(MassMetabolite):
 
     Parameters
     ----------
-    id: str, MassMetabolite
+    id_or_specie: str, MassMetabolite, EnzymeModuleForm
         The identifier associated with the EnzymeModuleForm, or an exisitng
-        MassMetabolite object. If a MassMetabolite object is provided, an
-        EnzymeModuleForm will be instanstiated with stored values identicial to
-        the value of those stored in the MassMetabolite.
+        MassMetabolite object. If a MassMetabolite or EnzymeModuleForm object
+        is provided, an EnzymeModuleForm will be instanstiated with stored
+        values identicial to the value of those stored in the MassMetabolite
+        or EnzymeModuleForm object.
     name: str, optional
         A human readable name for the metabolite.
     formula: str, optional
@@ -47,30 +48,36 @@ class EnzymeModuleForm(MassMetabolite):
 
     """
 
-    def __init__(self, id=None, name="", formula=None, charge=None,
+    def __init__(self, id_or_specie=None, name="", formula=None, charge=None,
                  compartment=None, fixed=False, enzyme_module_id="",
                  bound_catalytic=None, bound_effectors=None):
         """Initialize the EnzymeModuleForm Object."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
-            id=id, name=name, formula=formula, charge=charge,
-            compartment=compartment, fixed=fixed)
-        # Set the id of the enzyme represented by the EnzymeModuleForm
-        self.enzyme_module_id = enzyme_module_id
+            id_or_specie=str(id_or_specie), name=name, formula=formula,
+            charge=charge, compartment=compartment, fixed=fixed)
+        if isinstance(id_or_specie, (MassMetabolite, EnzymeModuleForm)):
+            # Instiantiate a new EnzymeModuleForm with state identical to 
+            # the provided EnzymeModuleForm object.
+            self.__dict__.update(id_or_specie.__dict__)
+        else:
+            # Set the id of the enzyme represented by the EnzymeModuleForm
+            self.enzyme_module_id = enzyme_module_id
 
-        # Set metabolites bound to the active site(s) of the enzyme form
-        self._bound_catalytic = {}
-        self.bound_catalytic = bound_catalytic
+            # Set metabolites bound to active site(s) of the enzyme form
+            self._bound_catalytic = {}
+            self.bound_catalytic = bound_catalytic
 
-        # Set metabolites bound to the regulatory site(s) of the enzyme form
-        self._bound_effectors = {}
-        self.bound_effectors = bound_effectors
+            # Set metabolites bound to regulatory site(s) of the enzyme form
+            self._bound_effectors = {}
+            self.bound_effectors = bound_effectors
 
-        # Set formula, charge, and compartment attributes
-        for attr, value in zip(["formula", "charge"], [formula, charge]):
-            if value is None:
-                value = self.__class__.__dict__["get_species_" + attr](self)
-            setattr(self, attr, value)
+            # Set formula, charge, and compartment attributes
+            for attr, value in zip(["formula", "charge"], [formula, charge]):
+                if value is None:
+                    value = self.__class__.__dict__.get(
+                        "get_species_" + attr)(self)
+                setattr(self, attr, value)
 
     @property
     def bound_catalytic(self):

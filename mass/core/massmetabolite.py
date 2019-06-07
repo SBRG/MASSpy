@@ -8,7 +8,9 @@ from warnings import warn
 from cobra.core.species import Species
 
 from mass.util.expressions import generate_ode
-from mass.util.util import ensure_non_negative_value, get_object_attributes
+from mass.util.util import (
+    ensure_non_negative_value, get_object_attributes, 
+    get_subclass_specific_attributes)
 
 
 # Precompiled regular expression for element parsing
@@ -36,25 +38,29 @@ class MassMetabolite(Species):
 
     """
 
-    def __init__(self, id=None, name="", formula=None,
+    def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
         """Initialize the MassMetabolite Object."""
-        # Check inputs to ensure they are they correct types.
-        super(MassMetabolite, self).__init__(id, name)
-        # Chemical formula and charge number of the metabolite
-        self.formula = formula
-        self.charge = charge
-        # Compartment where the metabolite is located
-        self.compartment = compartment
-        # Whether the concentration of the metabolite is fixed.
-        self.fixed = fixed
-        # The initial condition of the metabolite.
-        self._initial_condition = None
-        # Gibbs energy of formation of the metabolite
-        self._gibbs_formation_energy = None
-        # For cobra compatibility
-        self._constraint_sense = "E"
-        self._bound = 0.
+        super(MassMetabolite, self).__init__(str(id_or_specie), name)
+        if isinstance(id_or_specie, MassMetabolite):
+            # Instiantiate a new MassMetabolite with state identical to 
+            # the provided MassMetabolite object.
+            self.__dict__.update(id_or_specie.__dict__)
+        else:
+            # Chemical formula and charge number of the metabolite
+            self.formula = formula
+            self.charge = charge
+            # Compartment where the metabolite is located
+            self.compartment = compartment
+            # Whether the concentration of the metabolite is fixed.
+            self.fixed = fixed
+            # The initial condition of the metabolite.
+            self._initial_condition = None
+            # Gibbs energy of formation of the metabolite
+            self._gibbs_formation_energy = None
+            # For cobra compatibility
+            self._constraint_sense = "E"
+            self._bound = 0.
 
     # Public
     @property
@@ -184,7 +190,7 @@ class MassMetabolite(Species):
         """Return the MassModel associated with the metabolite."""
         return getattr(self, "_model")
 
-    def print_attributes(self, sep="\n"):
+    def print_attributes(self, sep="\n", exclude_parent=False):
         r"""Print the attributes and properties of the MassMetabolite.
 
         Parameters
@@ -192,12 +198,19 @@ class MassMetabolite(Species):
         sep: str, optional
             The string used to seperate different attrubutes. Affects how the
             final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
 
         """
         if not isinstance(sep, str):
             raise TypeError("sep must be a string")
 
-        attributes = get_object_attributes(self)
+        if exclude_parent:
+            attributes = get_object_attributes(self)
+        else:
+            attributes = get_subclass_specific_attributes(self)
+
         print(sep.join(attributes))
 
     def remove_from_model(self, destructive=False):

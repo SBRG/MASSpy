@@ -25,7 +25,9 @@ from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
     generate_disequilibrium_ratio, generate_mass_action_ratio,
     generate_rate_law)
-from mass.util.util import ensure_non_negative_value, get_object_attributes
+from mass.util.util import (
+    ensure_non_negative_value, get_object_attributes,
+    get_subclass_specific_attributes)
 
 MASSCONFIGURATION = MassConfiguration()
 
@@ -54,49 +56,53 @@ class MassReaction(Object):
 
     """
 
-    def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 steady_state_flux=None):
+    def __init__(self, id_or_reaction=None, name="", subsystem="",
+                 reversible=True, steady_state_flux=None):
         """Initialize the MassReaction Object."""
-        super(MassReaction, self).__init__(id, name)
-        self.subsystem = subsystem
-        self._reversible = reversible
-        self.steady_state_flux = steady_state_flux
-        # Rate and equilibrium constant parameters for reactions. The reverse
-        # and equilibrium constants for irreversible reactions are set here.
-        # For cobra compatibility, lower and upper bounds are also set.
-        self._forward_rate_constant = None
-        if self._reversible:
-            self._reverse_rate_constant = None
-            self._equilibrium_constant = None
-            self._lower_bound = -1000.
-            self._upper_bound = 1000.
+        # Get the identifer and initialize
+        if hasattr(id_or_reaction, "id"):
+            id_str = id_or_reaction.id
         else:
-            self._reverse_rate_constant = 0.
-            self._equilibrium_constant = MASSCONFIGURATION.irreversible_Keq
-            self._lower_bound = 0.
-            self._upper_bound = 1000.
+            id_str = id_or_reaction
+        super(MassReaction, self).__init__(id_str, name)
+        if isinstance(id_or_reaction, MassReaction):
+            # Instiantiate a new MassReaction with state identical to 
+            # the provided MassReaction object.
+            self.__dict__.update(id_or_reaction.__dict__)
+        else:
+            self.subsystem = subsystem
+            self._reversible = reversible
+            self.steady_state_flux = steady_state_flux
+            # Rate and equilibrium constant parameters for reactions. The
+            # reverse and equilibrium constants for irreversible reactions are
+            # set here.  Upper and lower bounds are also set.
+            self._forward_rate_constant = None
+            if self._reversible:
+                self._reverse_rate_constant = None
+                self._equilibrium_constant = None
+                self._lower_bound = MASSCONFIGURATION.lower_bound
+            else:
+                self._reverse_rate_constant = MASSCONFIGURATION.irreversible_kr
+                self._equilibrium_constant = MASSCONFIGURATION.irreversible_Keq
+                self._lower_bound = 0.
+            self._upper_bound = MASSCONFIGURATION.upper_bound
+            # Set objective coefficient and variable kind
+            self.objective_coefficient = 0.
+            self.variable_kind = 'continuous'
+            # Rate type and law and as a sympy expression for simulation.
+            self._rtype = 1
+            # A dict of metabolites and their stoichiometric coefficients.
+            self._metabolites = {}
+            # The compartments where partaking metabolites are located.
+            self._compartments = None
+            # The associated MassModel.
+            self._model = None
+            # The genes associated with the reaction.
+            self._genes = set()
+            self._gene_reaction_rule = ""
 
-        self.objective_coefficient = 0.
-        self.variable_kind = 'continuous'
-
-        # Rate type and law and as a sympy expression for simulation.
-        self._rtype = 1
-
-        # A dictionary of metabolites and their stoichiometric coefficients.
-        self._metabolites = {}
-
-        # The compartments where partaking metabolites are located.
-        self._compartments = None
-
-        # The associated MassModel.
-        self._model = None
-
-        # The genes associated with the reaction.
-        self._genes = set()
-        self._gene_reaction_rule = ""
-
-        # The Gibbs reaction energy associated with the reaction.
-        self._gibbs_reaction_energy = None
+            # The Gibbs reaction energy associated with the reaction.
+            self._gibbs_reaction_energy = None
 
     # Public
     @property
@@ -580,7 +586,7 @@ class MassReaction(Object):
         """Shorthand method to set the reaction steady state flux."""
         self.steady_state_flux = value
 
-    def print_attributes(self, sep="\n"):
+    def print_attributes(self, sep="\n", exclude_parent=False):
         r"""Print the attributes and properties of the MassReaction.
 
         Parameters
@@ -588,12 +594,19 @@ class MassReaction(Object):
         sep: str, optional
             The string used to seperate different attrubutes. Affects how the
             final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
 
         """
         if not isinstance(sep, str):
             raise TypeError("sep must be a string")
 
-        attributes = get_object_attributes(self)
+        if exclude_parent:
+            attributes = get_object_attributes(self)
+        else:
+            attributes = get_subclass_specific_attributes(self)
+
         print(sep.join(attributes))
 
     def reverse_stoichiometry(self, inplace=False):

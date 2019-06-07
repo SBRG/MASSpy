@@ -34,13 +34,17 @@ class EnzymeModuleReaction(MassReaction):
 
     """
 
-    def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 steady_state_flux=None, enzyme_module_id=""):
+    def __init__(self, id_or_reaction=None, name="", subsystem="",
+                 reversible=True, steady_state_flux=None, enzyme_module_id=""):
         """Initialize the MassReaction Object."""
         super(EnzymeModuleReaction, self).__init__(
-            id=id, name=name, subsystem=subsystem, reversible=reversible,
-            steady_state_flux=steady_state_flux)
-        self.enzyme_module_id = enzyme_module_id
+            id_or_reaction=id_or_reaction, name=name, subsystem=subsystem,
+            reversible=reversible, steady_state_flux=steady_state_flux)
+        if isinstance(id_or_reaction, (MassReaction, EnzymeModuleReaction)):
+            self.__dict__.update(id_or_reaction.__dict__)
+        else:
+            # Set the id of the enzyme represented by the EnzymeModuleReaction
+            self.enzyme_module_id = enzyme_module_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
         """Generate a name for the EnzymeModuleReaction based on bound ligands.

@@ -26,7 +26,7 @@ from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
     _get_matrix_constructor, convert_matrix, ensure_iterable,
-    get_object_attributes)
+    get_object_attributes, get_subclass_specific_attributes)
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
@@ -113,13 +113,13 @@ class MassModel(Object):
     def __init__(self, id_or_model=None, name=None, matrix_type="dense",
                  dtype=np.float64):
         """Initialize the MassModel Object."""
-        # Instiantiate a new MassModel object if a MassModel is given.
         super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
+            # Instiantiate a new MassModel with state identical to 
+            # the provided MassModel object.
             self.__setstate__(id_or_model.__dict__)
             if not hasattr(self, "name"):
                 self.name = None
-            self.repair()
         else:
             self.description = ''
             # Initialize DictLists for storing
@@ -296,7 +296,7 @@ class MassModel(Object):
         else:
             setattr(self, "_compartments", {})
 
-    def print_attributes(self, sep="\n"):
+    def print_attributes(self, sep="\n", exclude_parent=False):
         r"""Print the attributes and properties of the MassModel.
 
         Parameters
@@ -304,12 +304,19 @@ class MassModel(Object):
         sep: str, optional
             The string used to seperate different attrubutes. Affects how the
             final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
 
         """
         if not isinstance(sep, str):
             raise TypeError("sep must be a string")
 
-        attributes = get_object_attributes(self)
+        if exclude_parent:
+            attributes = get_object_attributes(self)
+        else:
+            attributes = get_subclass_specific_attributes(self)
+
         print(sep.join(attributes))
 
     def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
@@ -470,7 +477,7 @@ class MassModel(Object):
             A dict of boundary conditions containing the 'boundary metabolites'
             and their corresponding value. The string representing the
             'boundary_metabolite' must exist the list returned by
-            MassModel.boundary_metabolites.
+            `MassModel.boundary_metabolites`.
 
         See Also
         --------
@@ -2082,7 +2089,7 @@ class MassModel(Object):
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
         return """

@@ -1260,6 +1260,33 @@ class EnzymeModule(MassModel):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))})
 
+    def _get_current_enzyme_module_forms(self, update_enzyme=False):
+        """Get the enzyme module reactions that currently exist in the model.
+
+        Parameters
+        ----------
+        update_enzyme: bool, optional
+            If True, update the enzyme_module_reactions attribute of the
+            EnzymeModule.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        enzyme_module_forms = list(filter(
+            lambda x: isinstance(x, EnzymeModuleForm), self.metabolites))        
+
+        enzyme_module_forms = DictList(enzyme_module_forms)
+        enzyme_module_forms.sort()
+
+        # Update enzyme_module_reaction attribute if necessary
+        if set(enzyme_module_forms) ^ set(self.enzyme_module_forms) \
+           and update_enzyme:
+            self.enzyme_module_forms = enzyme_module_forms
+
+        return enzyme_module_forms
+
     def _get_current_enzyme_module_reactions(self, update_enzyme=False):
         """Get the enzyme module reactions that currently exist in the model.
 
