@@ -13,11 +13,48 @@ import os
 import sys
 from os.path import dirname, abspath, realpath
 
-os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" ))
 
 # TODO Allow to find the 'documented.py' example
-# sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" )))
 
+
+import os
+from os.path import dirname
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
+# Documentation building  requires libraries to import
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        return
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        else:
+            return Mock()
+# Modules should correspond to the importable Python packages.
+
+
+= [
+    'depinfo',
+    'numpy',
+    'scipy', 'scipy.optimize', 'scipy.sparse', 'scipy.io', 'scipy.stats',
+    'pp',
+    'libsbml',
+    'pandas',
+    'tabulate',
+    'optlang', 'optlang.interface', 'optlang.symbolics',
+    'optlang.symbolics.core',
+    'future', 'future.utils',
+    'ruamel', 'ruamel.yaml'
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
