@@ -11,11 +11,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
 import sys
-from sys import path
-from os.path import dirname, abspath
+from os.path import dirname, abspath, realpath
+
+os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" ))
 
 #Allow to find the 'documented.py' example
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
