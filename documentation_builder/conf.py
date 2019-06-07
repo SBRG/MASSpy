@@ -37,7 +37,7 @@ extensions = [
     #'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    #'sphinx.ext.autosummary',
+    'sphinx.ext.autosummary',
     #'sphinx.ext.inheritance_diagram',
     #'autoapi.extension',
     'nbsphinx'
