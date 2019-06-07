@@ -15,7 +15,7 @@ from sys import path
 from os.path import dirname, abspath
 
 #Allow to find the 'documented.py' example
-sys.path.insert(0, os.path.abspath('.'))
+#sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
@@ -45,7 +45,7 @@ extensions = [
 exclude_patterns = ['_build', '.ipynb_checkpoints']
 
 #Configuration of Root AutoAPI modules
-autoapi_modules = {'mymodule': None} 
+#autoapi_modules = {'mymodule': None} 
 
 
 # Document Python Code
@@ -79,6 +79,3 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-# Output file base name for HTML help builder.
-htmlhelp_basename = 'autoapidoc'
