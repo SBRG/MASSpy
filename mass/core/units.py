@@ -6,7 +6,7 @@ from warnings import warn
 
 import libsbml
 
-from six import integer_types, iteritems, string_types
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 from tabulate import tabulate
 
@@ -82,8 +82,9 @@ class Unit(object):
 
     Parameters
     ----------
-    kind: str
-        A string representing the SBML L3 recognized base unit.
+    kind: str, int
+        A string representing the SBML L3 recognized base unit, or its 
+            corresponding SBML integer value.
     exponent: int
         The exponent on the Unit.
     scale: int, str
@@ -129,13 +130,22 @@ class Unit(object):
             An SBML recognized unit kind identifier as a string.
 
         """
-        if kind not in _SBML_BASE_UNIT_KINDS_DICT:
+        # Ensure input is SBML compliant
+        valid_keys = list(iterkeys(_SBML_BASE_UNIT_KINDS_DICT))
+        valid_values = list(itervalues(_SBML_BASE_UNIT_KINDS_DICT))
+
+        if isinstance(kind, string_types) and kind in valid_keys:
+            pass
+        elif isinstance(kind, integer_types) and kind in valid_values:
+            # Get corresponding base unit kind string for the value
+            kind = valid_keys[valid_values.index(kind)]
+        else:
+            # Raise an error if not SBML compliant
             raise ValueError(
                 "Invalid SBML Base Unit Kind '{0}'. Allowable values can be "
                 "viewed by passing the string 'BaseUnitKinds' to the function "
                 "'print_defined_unit_values' from the mass.core.units "
                 "submodule.".format(kind))
-
         setattr(self, "_kind", kind)
 
     @property
@@ -345,7 +355,7 @@ class UnitDefinition(Object):
     def __repr__(self):
         """Override of default repr() implementation."""
         if self.name:
-            name = self.name
+            name = self.name + ' "' + self.id + '"'
         else:
             name = self.id
         return "<%s %s at 0x%x>" % (self.__class__.__name__, name, id(self))
