@@ -13,11 +13,8 @@ import os
 import sys
 from os.path import dirname, abspath, realpath
 
-os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" ))
-
 # TODO Allow to find the 'documented.py' example
-# sys.path.insert(0, os.path.abspath('.'))
-
+# sys.path.insert(0, os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" )))
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
