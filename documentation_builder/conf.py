@@ -9,6 +9,14 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+import os
+import sys
+from os.path import dirname, abspath, realpath
+
+
+# TODO Allow to find the 'documented.py' example
+# sys.path.insert(0, os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" )))
+
 
 import os
 from os.path import dirname
@@ -56,33 +64,32 @@ author = 'ZHaiman'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    'nbsphinx',
     'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    #'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
-    'sphinx.ext.inheritance_diagram',
-    'autoapi.sphinx'
+    #'sphinx.ext.inheritance_diagram',
+    #'autoapi.extension',
+    'nbsphinx'
 ]
+#Exclusion Patterns
 exclude_patterns = ['_build', '.ipynb_checkpoints']
 
 #Configuration of Root AutoAPI modules
-autoapi_modules = {'mymodule': None}
+#autoapi_modules = {'mymodule': None} 
 
 
-# Document Python Code
-autoapi_type = 'python'
-autoapi_dirs = ['..']
-autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
+# TODO Document Python Code
+#autoapi_type = 'python'
+#autoapi_dirs = ['..']
+#autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
 
 # Napoleon settings
 napoleon_numpy_docstring = True
