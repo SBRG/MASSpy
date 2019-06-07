@@ -6,11 +6,6 @@ Welcome to masspy's documentation!
     :maxdepth: 2
     :caption: Contents:
 
-    Getting_Started_with_MassPy
-    Building_a_Model
-    Simulations_and_Visualizations
-    Import_Export_JSON
-    COBRAPY_VS_MASSPY
 
 
 Indices and tables
