@@ -38,7 +38,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'sphinx.ext.inheritance_diagram',
-    'autoapi.sphinx',
+    'autoapi.extension',
     'nbsphinx'
 ]
 #Exclusion Patterns
