@@ -133,9 +133,9 @@ def metabolite_from_dict(metabolite):
     """
     # Determine if saved object should be a MassMetabolite or a subclass
     if "enzyme_module_id" in metabolite:
-        new_metabolite = EnzymeModuleForm(id=metabolite["id"])
+        new_metabolite = EnzymeModuleForm(metabolite["id"])
     else:
-        new_metabolite = MassMetabolite(id=metabolite["id"])
+        new_metabolite = MassMetabolite(metabolite["id"])
 
     # Set object attributes
     for k, v in iteritems(metabolite):
@@ -189,9 +189,9 @@ def reaction_from_dict(reaction, model):
     """
     # Determine if saved object should be a MassReaction or a subclass
     if "enzyme_module_id" in reaction:
-        new_reaction = EnzymeModuleReaction(id=reaction["id"])
+        new_reaction = EnzymeModuleReaction(reaction["id"])
     else:
-        new_reaction = MassReaction(id=reaction["id"])
+        new_reaction = MassReaction(reaction["id"])
 
     # Set object attributes
     for k, v in iteritems(reaction):
@@ -238,7 +238,7 @@ def gene_from_dict(gene):
         The dict representation of the gene to create.
 
     """
-    new_gene = Gene(id=gene["id"])
+    new_gene = Gene(gene["id"])
     # Set object attributes
     for k, v in iteritems(gene):
         setattr(new_gene, k, v)
