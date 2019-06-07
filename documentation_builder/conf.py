@@ -50,7 +50,7 @@ autoapi_modules = {'mymodule': None}
 
 # Document Python Code
 autoapi_type = 'python'
-autoapi_dirs = ['../autoapi']
+autoapi_dirs = ['../masspy']
 autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
 
 # Napoleon settings
