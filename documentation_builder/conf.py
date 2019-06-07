@@ -15,8 +15,8 @@ from os.path import dirname, abspath, realpath
 
 os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" ))
 
-#Allow to find the 'documented.py' example
-sys.path.insert(0, os.path.abspath('.'))
+# TODO Allow to find the 'documented.py' example
+# sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
@@ -34,12 +34,12 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc',
+    #'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.inheritance_diagram',
-    'autoapi.extension',
+    #'sphinx.ext.autosummary',
+    #'sphinx.ext.inheritance_diagram',
+    #'autoapi.extension',
     'nbsphinx'
 ]
 #Exclusion Patterns
@@ -49,10 +49,10 @@ exclude_patterns = ['_build', '.ipynb_checkpoints']
 #autoapi_modules = {'mymodule': None} 
 
 
-# Document Python Code
-autoapi_type = 'python'
-autoapi_dirs = ['..']
-autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
+# TODO Document Python Code
+#autoapi_type = 'python'
+#autoapi_dirs = ['..']
+#autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
 
 # Napoleon settings
 napoleon_numpy_docstring = True
