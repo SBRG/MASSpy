@@ -15,6 +15,7 @@ from os.path import dirname, abspath, realpath
 
 # TODO Allow to find the 'documented.py' example
 # sys.path.insert(0, os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" )))
+
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
@@ -31,25 +32,13 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
-    #'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
-    #'sphinx.ext.inheritance_diagram',
-    #'autoapi.extension',
     'nbsphinx'
 ]
 #Exclusion Patterns
 exclude_patterns = ['_build', '.ipynb_checkpoints']
-
-#Configuration of Root AutoAPI modules
-#autoapi_modules = {'mymodule': None} 
-
-
-# TODO Document Python Code
-#autoapi_type = 'python'
-#autoapi_dirs = ['..']
-#autoapi_ignore = ['.tox', '.pytest_cache', 'scripts', 'benchmarks']
 
 # Napoleon settings
 napoleon_numpy_docstring = True
@@ -58,7 +47,7 @@ napoleon_numpy_docstring = True
 master_doc = 'index'
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = []
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -76,4 +65,4 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
