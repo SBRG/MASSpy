@@ -4,6 +4,18 @@
 # list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+# -- Path setup --------------------------------------------------------------
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+import os
+import sys
+from os.path import dirname, abspath, realpath
+
+# TODO Allow to find the 'documented.py' example
+# sys.path.insert(0, os.path.realpath(os.path.join(os.path.abspath(__file__), "../../mass/" )))
+
 # -- Project information -----------------------------------------------------
 
 project = 'masspy'
