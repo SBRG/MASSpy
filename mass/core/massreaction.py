@@ -183,7 +183,7 @@ class MassReaction(Object):
             setattr(self, "_reverse_rate_constant", value)
         else:
             warn("Cannot set the reverse rate constant for an irreversible "
-                 "reaction")
+                 "reaction '{0}'".format(self.id))
 
     @property
     def equilibrium_constant(self):
@@ -211,7 +211,7 @@ class MassReaction(Object):
             setattr(self, "_equilibrium_constant", value)
         else:
             warn("Cannot set the equilibrium constant for an irreversible "
-                 "reaction")
+                 "reaction '{0}'".format(self.id))
 
     @property
     def parameters(self):

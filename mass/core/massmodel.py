@@ -115,7 +115,7 @@ class MassModel(Object):
         """Initialize the MassModel Object."""
         super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
-            # Instiantiate a new MassModel with state identical to 
+            # Instiantiate a new MassModel with state identical to
             # the provided MassModel object.
             self.__setstate__(id_or_model.__dict__)
             if not hasattr(self, "name"):
@@ -923,7 +923,7 @@ class MassModel(Object):
             and their numerical values. The string representation of the custom
             parametes will be used to create the symbols needed for the sympy
             expression of the custom rate. If None, then parameters are assumed
-            to be a one of the MassReaction.
+            to already exist in the MassModel.
 
         Notes
         -----
@@ -938,6 +938,11 @@ class MassModel(Object):
         else:
             custom_parameters = {}
             custom_parameter_list = []
+
+        # Ensure custom rate is a string
+        if not isinstance(custom_rate, string_types):
+            custom_rate = str(custom_rate)
+
         # Use any existing custom parameters if they are in the rate law.
         existing_customs = self.custom_parameters
         if existing_customs:
@@ -945,6 +950,7 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
+        # Create the custom rate expression
         custom_rate = create_custom_rate(reaction, custom_rate,
                                          custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
@@ -1719,7 +1725,7 @@ class MassModel(Object):
                 p_type, reaction = key.split("_", 1)
                 try:
                     reaction = self.reactions.get_by_id(reaction)
-                    reaction.__class__.__dict__[p_type].fset(reaction, value)
+                    setattr(reaction, p_type, value)
                 except KeyError:
                     self.custom_parameters.update({key: value})
             # If parameter not found, assume parameter is a custom parameter
@@ -1762,6 +1768,45 @@ class MassModel(Object):
                 warn("Cannot set initial condition for {0} due to the "
                      "following: {1}".format(metabolite.id, str(e)))
                 continue
+
+    def update_custom_rates(self, custom_rates, custom_parameters=None):
+        """Update the custom rates of the MassModel.
+
+        Parameters
+        ----------
+        custom_rates: dict
+            A dictionary where MassReactions or their string identifiers are
+            the keys and the rates are the string representations of the
+            custom rate expression.
+        custom_parameters: dict, optional
+            A dictionary of custom parameters for the custom rate where the
+            key:value pairs are the strings representing the custom parameters
+            and their numerical values. If a custom parameter already exists in
+            the model, it will be updated.
+
+        Notes
+        -----
+        The reaction(s) must already exist in the model to set the custom rate.
+
+        See Also
+        --------
+        MassModel.add_custom_rate
+
+        """
+        if custom_parameters is not None:
+            if not isinstance(custom_parameters, dict):
+                raise TypeError("custom_parameters must be a dict.")
+            self.custom_parameters.update(custom_parameters)
+
+        for reaction, custom_rate in iteritems(custom_rates):
+            if not isinstance(reaction, MassReaction):
+                try:
+                    reaction = self.reactions.get_by_id(reaction)
+                except KeyError as e:
+                    warn("No reaction found for {0}".format(str(e)))
+                    continue
+
+            self.add_custom_rate(reaction, custom_rate=custom_rate)
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.
