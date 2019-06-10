@@ -155,7 +155,7 @@ class EnzymeModule(MassModel):
         if not isinstance(value, (integer_types, float)) and \
            value is not None:
             raise TypeError("Must be an int or float")
-        elif value is None:
+        if value is None:
             pass
         elif value < 0.:
             raise ValueError("Must be a non-negative number")
@@ -179,17 +179,33 @@ class EnzymeModule(MassModel):
         if not isinstance(value, (integer_types, float)) and \
            value is not None:
             raise TypeError("Must be an int or float")
-        else:
-            setattr(self, "_enzyme_net_flux", value)
+
+        setattr(self, "_enzyme_net_flux", value)
 
     @property
     def enzyme_concentration_total_equation(self):
-        """Return the total concentration equation as a sympy.Equation."""
+        """Return the total concentration equation as a sympy.Equation.
+
+        Will first try to sum forms based on the enzyme module forms that have
+        enzyme_module_id attributes that match the EnzymeModule id attribute.
+
+        If no enzyme modules forms with matching enzyme_module_id attributes
+        are found, then try to sum all enzyme module forms in the the model.
+        """
         if not self.enzyme_module_forms:
             return None
+
+        # First try only using enzyme module forms that reference this module
+        enzyme_module_forms = [
+            form for form in self.enzyme_module_forms
+            if form.enzyme_module_id == self.id]
+        # If None found, use all enzyme module forms in the EnzymeModule.
+        if not enzyme_module_forms:
+            enzyme_module_forms = self.enzyme_module_forms
+
         return sym.Eq(self.enzyme_total_symbol,
                       self.sum_enzyme_module_form_concentrations(
-                          self.enzyme_module_forms, use_values=False))
+                          enzyme_module_forms, use_values=False))
 
     @property
     def enzyme_net_flux_equation(self):
@@ -217,15 +233,13 @@ class EnzymeModule(MassModel):
         if value is not None:
             if not isinstance(value, (sym.Basic, string_types)):
                 raise TypeError("value must be a sympy expression.")
-            elif isinstance(value, string_types):
+            if isinstance(value, string_types):
                 value = sym.sympify(value)
             elif hasattr(value, "lhs") and hasattr(value, "rhs"):
                 if value.lhs == self.enzyme_flux_symbol:
                     value = value.rhs
-                elif value.rhs == self.enzyme_flux_symbol:
+                if value.rhs == self.enzyme_flux_symbol:
                     value = value.lhs
-                else:
-                    pass
             else:
                 pass
         setattr(self, "_enzyme_net_flux_equation", value)
@@ -613,9 +627,10 @@ class EnzymeModule(MassModel):
         """
         # Ensure enzyme_module_reactions are iterable and exist in model
         enzyme_rxns = ensure_iterable(enzyme_module_reactions)
-        enzyme_rxns = [enz_rxn for enz_rxn in enzyme_rxns
-                       if enz_rxn in self._get_current_enzyme_module_reactions(
-                           update_enzyme=update_enzyme)]
+        enzyme_rxns = [
+            enz_rxn for enz_rxn in enzyme_rxns
+            if enz_rxn in self._get_current_enzyme_module_objs(
+                "reactions", update_enzyme=update_enzyme)]
 
         enzyme_net_flux_equation = self.sum_enzyme_module_reaction_fluxes(
             enzyme_rxns)
@@ -1110,7 +1125,7 @@ class EnzymeModule(MassModel):
         # Repair using inherited method
         super(EnzymeModule, self).repair(rebuild_index, rebuild_relationships)
         # Repair enzyme_module_reactions DictList
-        self._get_current_enzyme_module_reactions(update_enzyme=True)
+        self._get_current_enzyme_module_objs("reactions", update_enzyme=True)
         self._update_object_pointers()
         # Rebuild DictList indices
         if rebuild_index:
@@ -1174,7 +1189,8 @@ class EnzymeModule(MassModel):
                 new_model.enzyme_module_forms.append(metabolite)
             else:
                 new_model.enzyme_module_ligands.append(metabolite)
-        new_model._get_current_enzyme_module_reactions(update_enzyme=True)
+        new_model._get_current_enzyme_module_objs(attr="reactions",
+                                                  update_enzyme=True)
         new_model._update_object_pointers()
 
         # Doesn't make sense to retain the context of a copied model so
@@ -1205,8 +1221,6 @@ class EnzymeModule(MassModel):
         inplace : bool
             Add reactions from right directly to left model object.
             Otherwise, create a new model leaving the left model untouched.
-            When done within the model as context, changes to the models are
-            reverted upon exit.
         new_model_id: str, optional
             If provided, the string is used as the identifier for the merged
             model. If None and inplace is True, the model ID of the first model
@@ -1224,23 +1238,57 @@ class EnzymeModule(MassModel):
             converted to an EnzymeDict and stored in a DictList accessible
             via MassModel.enzyme_modules.
         If an EnzymeModule already exists in the model, it will be replaced.
+        When merging an EnzymeModule with another EnzymeModule, a new
+            EnzymeModule object will be returned, where the EnzymeModule is
+            a copy of the 'left' model (self)  and the 'right' model is
+            contained within.
 
         Extends from MassModel.merge
 
         """
-        # Merge the two EnzymeModules together if right is an EnzymeModule
-        if isinstance(right, EnzymeModule):
-            new_model = self.merge(right, prefix_existing=prefix_existing,
-                                   inplace=inplace, new_model_id=new_model_id)
-        else:
+        if not isinstance(right, EnzymeModule):
             # Always merge the EnzymeModule into the MassModel
             new_model = right.merge(self, prefix_existing=prefix_existing,
                                     inplace=inplace, new_model_id=new_model_id)
+        else:
+            # Merge the two EnzymeModules together if right is an EnzymeModule
+            new_model = MassModel(self).merge(
+                right, prefix_existing=prefix_existing, inplace=inplace,
+                new_model_id=new_model_id)
+            if inplace:
+                new_model = self
+                enzyme_modules_attrs_to_add = [right]
+            else:
+                # Reclassify as an EnzymeModule
+                new_model = EnzymeModule(new_model)
+                enzyme_modules_attrs_to_add = [self, right]
+                # Set EnzymeModule attributes in the new model
+                for attr in ["subsystem", "_enzyme_concentration_total",
+                             "_enzyme_net_flux", "enzyme_net_flux_equation"]:
+                    setattr(new_model, attr, getattr(self, attr))
+
+            # Fix enzyme module ligands, forms, and reactions
+            for attr in ["ligands", "forms", "reactions"]:
+                # Update DictList attributes
+                new_model._get_current_enzyme_module_objs(attr=attr,
+                                                          update_enzyme=True)
+                # Update categorized dict attributes
+                attr = "enzyme_module_" + attr + "_categorized"
+                new_categorized_dict = {}
+                for enzyme_module in enzyme_modules_attrs_to_add:
+                    old_categorized_dict = getattr(enzyme_module, attr)
+                    # Add the old categorized dict to the new one to set
+                    new_categorized_dict.update({
+                        enzyme_module.id + " " + cat: values
+                        for cat, values in iteritems(old_categorized_dict)})
+                # Add new categorized dict attributes
+                setattr(new_model, attr, new_categorized_dict)
+
         return new_model
 
     # Internal
     def _update_object_pointers(self):
-        """Update objects in the attributes to point to the model.
+        """Update objects in the attributes to be the objects from the model.
 
         Warnings
         --------
@@ -1260,11 +1308,13 @@ class EnzymeModule(MassModel):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))})
 
-    def _get_current_enzyme_module_forms(self, update_enzyme=False):
-        """Get the enzyme module reactions that currently exist in the model.
+    def _get_current_enzyme_module_objs(self, attr, update_enzyme=True):
+        """Get the enzyme module objects for 'attr' that exist in the model.
 
         Parameters
         ----------
+        attr: str {'ligands', 'forms', 'reactions'}
+            A string representing which attribute to update.
         update_enzyme: bool, optional
             If True, update the enzyme_module_reactions attribute of the
             EnzymeModule.
@@ -1274,48 +1324,29 @@ class EnzymeModule(MassModel):
         This method is intended for internal use only.
 
         """
-        enzyme_module_forms = list(filter(
-            lambda x: isinstance(x, EnzymeModuleForm), self.metabolites))
+        if attr not in {"ligands", "forms", "reactions"}:
+            raise ValueError("Unrecognized attribute: '{0}'.".format(attr))
+        item_list = []
+        if attr == "ligands":
+            item_list += list(filter(
+                lambda x: not isinstance(x, EnzymeModuleForm),
+                self.metabolites))
+        if attr == "forms":
+            item_list += list(filter(
+                lambda x: isinstance(x, EnzymeModuleForm), self.metabolites))
+        if attr == "reactions":
+            for enzyme_module_form in self.enzyme_module_forms:
+                item_list += [
+                    rxn for rxn in list(enzyme_module_form.reactions)
+                    if rxn not in item_list]
 
-        enzyme_module_forms = DictList(enzyme_module_forms)
-        enzyme_module_forms.sort()
-
-        # Update enzyme_module_reaction attribute if necessary
-        if set(enzyme_module_forms) ^ set(self.enzyme_module_forms) \
+        item_list = DictList(item_list)
+        item_list.sort()
+        if set(item_list) ^ set(getattr(self, "enzyme_module_" + attr)) \
            and update_enzyme:
-            self.enzyme_module_forms = enzyme_module_forms
+            setattr(self, "enzyme_module_" + attr, item_list)
 
-        return enzyme_module_forms
-
-    def _get_current_enzyme_module_reactions(self, update_enzyme=False):
-        """Get the enzyme module reactions that currently exist in the model.
-
-        Parameters
-        ----------
-        update_enzyme: bool, optional
-            If True, update the enzyme_module_reactions attribute of the
-            EnzymeModule.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        enzyme_module_reactions = []
-        for enzyme_module_form in self.enzyme_module_forms:
-            enzyme_module_reactions.extend([
-                rxn for rxn in list(enzyme_module_form._reaction)
-                if rxn not in enzyme_module_reactions])
-
-        enzyme_module_reactions = DictList(enzyme_module_reactions)
-        enzyme_module_reactions.sort()
-
-        # Update enzyme_module_reaction attribute if necessary
-        if set(enzyme_module_reactions) ^ set(self.enzyme_module_reactions) \
-           and update_enzyme:
-            self.enzyme_module_reactions = enzyme_module_reactions
-
-        return enzyme_module_reactions
+        return item_list
 
     def _make_summation_expr(self, items, object_type):
         """Create a sympy expression of the summation of the given items.
