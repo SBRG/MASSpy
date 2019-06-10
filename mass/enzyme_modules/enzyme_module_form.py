@@ -54,10 +54,10 @@ class EnzymeModuleForm(MassMetabolite):
         """Initialize the EnzymeModuleForm Object."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
-            id_or_specie=str(id_or_specie), name=name, formula=formula,
+            id_or_specie=id_or_specie, name=name, formula=formula,
             charge=charge, compartment=compartment, fixed=fixed)
-        if isinstance(id_or_specie, (MassMetabolite, EnzymeModuleForm)):
-            # Instiantiate a new EnzymeModuleForm with state identical to 
+        if isinstance(id_or_specie, EnzymeModuleForm):
+            # Instiantiate a new EnzymeModuleForm with state identical to
             # the provided EnzymeModuleForm object.
             self.__dict__.update(id_or_specie.__dict__)
         else:

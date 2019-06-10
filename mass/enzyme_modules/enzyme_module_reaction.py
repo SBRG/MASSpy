@@ -40,7 +40,7 @@ class EnzymeModuleReaction(MassReaction):
         super(EnzymeModuleReaction, self).__init__(
             id_or_reaction=id_or_reaction, name=name, subsystem=subsystem,
             reversible=reversible, steady_state_flux=steady_state_flux)
-        if isinstance(id_or_reaction, (MassReaction, EnzymeModuleReaction)):
+        if isinstance(id_or_reaction, EnzymeModuleReaction):
             self.__dict__.update(id_or_reaction.__dict__)
         else:
             # Set the id of the enzyme represented by the EnzymeModuleReaction

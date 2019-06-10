@@ -98,11 +98,11 @@ class EnzymeModule(MassModel):
                  matrix_type="dense", dtype=np.float64):
         """Initialize the EnzymeModule Object."""
         super(EnzymeModule, self).__init__(
-            id_or_model, name, matrix_type, dtype)
-        if not isinstance(subsystem, string_types):
-            raise TypeError("subsystem must be a str")
+            id_or_model=id_or_model, name=name, matrix_type=matrix_type,
+            dtype=dtype)
+
         self.subsystem = subsystem
-        # Initialize DictLists for enzyme ligands, forms, and reaction objects
+        # Initialize DictLists for enzyme ligands, forms, and reactions
         self.enzyme_module_ligands = DictList()
         self.enzyme_module_forms = DictList()
         self.enzyme_module_reactions = DictList()
@@ -1275,7 +1275,7 @@ class EnzymeModule(MassModel):
 
         """
         enzyme_module_forms = list(filter(
-            lambda x: isinstance(x, EnzymeModuleForm), self.metabolites))        
+            lambda x: isinstance(x, EnzymeModuleForm), self.metabolites))
 
         enzyme_module_forms = DictList(enzyme_module_forms)
         enzyme_module_forms.sort()
