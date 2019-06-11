@@ -16,11 +16,10 @@ class EnzymeModuleForm(MassMetabolite):
     Parameters
     ----------
     id_or_specie: str, MassMetabolite, EnzymeModuleForm
-        The identifier associated with the EnzymeModuleForm, or an exisitng
-        MassMetabolite object. If a MassMetabolite or EnzymeModuleForm object
-        is provided, an EnzymeModuleForm will be instanstiated with stored
-        values identicial to the value of those stored in the MassMetabolite
-        or EnzymeModuleForm object.
+        Either a string identifier to associate with the EnzymeModuleForm,
+        or an existing EnzymeModuleForm object. If an existing EnzymeModuleForm
+        or MassMetabolite object is provided, a new EnzymeModuleForm object is
+        instantiated with the same properties as the original object.
     name: str, optional
         A human readable name for the metabolite.
     formula: str, optional
@@ -72,12 +71,14 @@ class EnzymeModuleForm(MassMetabolite):
             self._bound_effectors = {}
             self.bound_effectors = bound_effectors
 
-            # Set formula, charge, and compartment attributes
-            for attr, value in zip(["formula", "charge"], [formula, charge]):
-                if value is None:
-                    value = self.__class__.__dict__.get(
-                        "get_species_" + attr)(self)
-                setattr(self, attr, value)
+            if not isinstance(id_or_specie, MassMetabolite):
+                # Set formula, charge, and compartment attributes if
+                # if a MassMetabolite was not used to initialize object.
+                for attr, val in zip(["formula", "charge"], [formula, charge]):
+                    if val is None:
+                        val = self.__class__.__dict__[
+                            "get_species_" + attr](self)
+                    setattr(self, attr, val)
 
     @property
     def bound_catalytic(self):

@@ -51,7 +51,7 @@ class MassModel(Object):
     Parameters
     ----------
     id_or_model: str, MassModel
-        Either an identifier to associate with the MassModel given as a string,
+        Either a string identifier to associate with the MassModel,
         or an existing MassModel object. If an existing MassModel object is
         provided, a new MassModel object is instantiated with the same
         properties as the original MassModel.
@@ -768,7 +768,7 @@ class MassModel(Object):
                 "Boundary reaction '{0}' already exists.".format(reaction_id))
         # Set reaction name, subsystem, and reversible attributes
         name = "{0}_{1}".format(metabolite.name, boundary_type)
-        rxn = MassReaction(id=reaction_id, name=name, subsystem=subsystem,
+        rxn = MassReaction(reaction_id, name=name, subsystem=subsystem,
                            reversible=reversible)
         # Always add metabolite as a reactant
         rxn.add_metabolites({metabolite: -1})

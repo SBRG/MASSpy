@@ -37,8 +37,11 @@ class MassReaction(Object):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassReaction.
+    id_or_reaction: str, MassReaction
+        Either a string identifier to associate with the MassReaction,
+        or an existing MassReaction object. If an existing MassReaction
+        object is provided, a new MassReaction object is instantiated with
+        the same properties as the original MassReaction.
     name: str, optional
         A human readable name for the reaction.
     subsystem: str, optional

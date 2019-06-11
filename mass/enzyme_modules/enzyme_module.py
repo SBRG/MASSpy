@@ -34,11 +34,11 @@ class EnzymeModule(MassModel):
 
     Parameters
     ----------
-    id_or_model: str, MassModel
+    id_or_model: str, MassModel, EnzymeModule
         Either an identifier to associate with the EnzymeModule given as a
         string, or an existing EnzymeModule object. If an existing EnzymeModule
-        is provided, a new EnzymeModule is instantiated with the same
-        properties as the original EnzymeModule.
+        or MassModel is provided, a new EnzymeModule is instantiated with the
+        same properties as the original object.
     name: str, optional
         A human readable name for the EnzymeModule.
     subsystem: str, optional
@@ -456,7 +456,7 @@ class EnzymeModule(MassModel):
                               for met, num in iteritems(bound_dict)}
         # Make EnzymeModuleForm object
         enzyme_module_form = EnzymeModuleForm(
-            id=id, name=name, enzyme_module_id=self.id,
+            id_or_specie=id, name=name, enzyme_module_id=self.id,
             bound_catalytic=bound_catalytic, bound_effectors=bound_effectors,
             compartment=compartment)
         # Generate a name for the EnzymeModuleForm if name set to "Automatic"
@@ -517,8 +517,8 @@ class EnzymeModule(MassModel):
         """
         # Make EnzymeModuleReaction object
         new_reaction = EnzymeModuleReaction(
-            id=id, name=name, subsystem=subsystem, reversible=reversible,
-            enzyme_module_id=self.id)
+            id_or_reaction=id, name=name, subsystem=subsystem,
+            reversible=reversible, enzyme_module_id=self.id)
 
         # Add metabolites
         if metabolites_to_add:

@@ -13,8 +13,12 @@ class EnzymeModuleReaction(MassReaction):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassReaction.
+    id_or_reaction: str, MassReaction, EnzymeModuleReaction
+        Either a string identifier to associate with the EnzymeModuleReaction,
+        or an existing EnzymeModuleReaction object. If an existing
+        EnzymeModuleReaction or MassReaction object is provided, a new
+        EnzymeModuleReaction object is instantiated with the same properties as
+        the original object.
     name: str, optional
         A human readable name for the reaction.
     subsystem: str, optional

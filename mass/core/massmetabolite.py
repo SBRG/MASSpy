@@ -9,7 +9,7 @@ from cobra.core.species import Species
 
 from mass.util.expressions import generate_ode
 from mass.util.util import (
-    ensure_non_negative_value, get_object_attributes, 
+    ensure_non_negative_value, get_object_attributes,
     get_subclass_specific_attributes)
 
 
@@ -22,8 +22,11 @@ class MassMetabolite(Species):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassMetabolite.
+    id_or_specie: str, MassMetabolite
+        Either a string identifier to associate with the MassMetabolite,
+        or an existing MassMetabolite object. If an existing MassMetabolite
+        object is provided, a new MassMetabolite object is instantiated with
+        the same properties as the original MassMetabolite.
     name: str, optional
         A human readable name for the metabolite.
     formula: str, optional
@@ -43,7 +46,7 @@ class MassMetabolite(Species):
         """Initialize the MassMetabolite Object."""
         super(MassMetabolite, self).__init__(str(id_or_specie), name)
         if isinstance(id_or_specie, MassMetabolite):
-            # Instiantiate a new MassMetabolite with state identical to 
+            # Instiantiate a new MassMetabolite with state identical to
             # the provided MassMetabolite object.
             self.__dict__.update(id_or_specie.__dict__)
         else:
@@ -238,7 +241,7 @@ class MassMetabolite(Species):
         """
         met_id_str = str(self)
         if self.compartment:
-            met_id_str = met_id_str.replace("_" + self.compartment, "")
+            met_id_str = re.sub("_" + self.compartment + "$", "", met_id_str)
 
         return met_id_str
 
