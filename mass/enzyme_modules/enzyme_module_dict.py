@@ -134,6 +134,9 @@ class EnzymeModuleDict(OrderedDictWithID):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))}
 
+        for enzyme_module_form in self.enzyme_module_forms:
+            enzyme_module_form._repair_bound_obj_pointers()
+
     def _make_enzyme_stoichiometric_matrix(self, update=False):
         """Return the S matrix based on enzyme forms, reactions, and ligands.
 
@@ -189,10 +192,9 @@ class EnzymeModuleDict(OrderedDictWithID):
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
-
         return """
             <table>
                 <tr>

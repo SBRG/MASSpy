@@ -313,9 +313,9 @@ class MassModel(Object):
             raise TypeError("sep must be a string")
 
         if exclude_parent:
-            attributes = get_object_attributes(self)
-        else:
             attributes = get_subclass_specific_attributes(self)
+        else:
+            attributes = get_object_attributes(self)
 
         print(sep.join(attributes))
 
