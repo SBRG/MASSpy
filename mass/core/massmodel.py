@@ -1805,8 +1805,11 @@ class MassModel(Object):
                 except KeyError as e:
                     warn("No reaction found for {0}".format(str(e)))
                     continue
-
-            self.add_custom_rate(reaction, custom_rate=custom_rate)
+            try:
+                self.add_custom_rate(reaction, custom_rate=custom_rate)
+            except sym.SympifyError:
+                warn("Unable to sympify rate equation for '{0}'.".format(
+                    reaction.id))
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.

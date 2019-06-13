@@ -73,6 +73,7 @@ _SBML_BASE_UNIT_KINDS_DICT = DictWithID(
         "volt": libsbml.UNIT_KIND_VOLT,
         "watt": libsbml.UNIT_KIND_WATT,
         "weber": libsbml.UNIT_KIND_WEBER,
+        "invalid": libsbml.UNIT_KIND_INVALID,
     }
 )
 
@@ -130,10 +131,13 @@ class Unit(object):
             An SBML recognized unit kind identifier as a string.
 
         """
-        # Ensure input is SBML compliant
+        # Ensure input is SBML compliant, remove invalid kinds.
         valid_keys = list(iterkeys(_SBML_BASE_UNIT_KINDS_DICT))
-        valid_values = list(itervalues(_SBML_BASE_UNIT_KINDS_DICT))
+        valid_keys.remove("invalid")
 
+        valid_values = list(itervalues(_SBML_BASE_UNIT_KINDS_DICT))
+        valid_values.remove(36)
+            
         if isinstance(kind, string_types) and kind in valid_keys:
             pass
         elif isinstance(kind, integer_types) and kind in valid_values:
