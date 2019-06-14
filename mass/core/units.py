@@ -84,7 +84,7 @@ class Unit(object):
     Parameters
     ----------
     kind: str, int
-        A string representing the SBML L3 recognized base unit, or its 
+        A string representing the SBML L3 recognized base unit, or its
             corresponding SBML integer value.
     exponent: int
         The exponent on the Unit.
@@ -137,7 +137,7 @@ class Unit(object):
 
         valid_values = list(itervalues(_SBML_BASE_UNIT_KINDS_DICT))
         valid_values.remove(36)
-            
+
         if isinstance(kind, string_types) and kind in valid_keys:
             pass
         elif isinstance(kind, integer_types) and kind in valid_values:
