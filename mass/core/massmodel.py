@@ -16,13 +16,17 @@ import sympy as sym
 
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
+from cobra.medium import (
+    find_boundary_types, find_external_compartment, sbo_terms)
 from cobra.util.context import HistoryManager, get_context
 
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massreaction import MassReaction
+from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable)
+    _get_matrix_constructor, convert_matrix, ensure_iterable,
+    get_object_attributes, get_subclass_specific_attributes)
 
 # Set the logger
 LOGGER = logging.getLogger(__name__)
@@ -47,7 +51,7 @@ class MassModel(Object):
     Parameters
     ----------
     id_or_model: str, MassModel
-        Either an identifier to associate with the MassModel given as a string,
+        Either a string identifier to associate with the MassModel,
         or an existing MassModel object. If an existing MassModel object is
         provided, a new MassModel object is instantiated with the same
         properties as the original MassModel.
@@ -81,9 +85,6 @@ class MassModel(Object):
     enzyme_modules: cobra.DictList
         A cobra.DictList where the keys are the EnzymeModuleDict identifiers
         and the values are the associated EnzymeModuleDict objects.
-    initial_conditions: dict
-        A dictionary to store the initial conditions of the metabolites,
-        where keys are the MassMetabolites and values are initial conditions.
     custom_rates: dict
         A dictionary to store custom rate expressions for specific reactions,
         where keys are the MassReaction objects and values are the custom rate
@@ -94,47 +95,31 @@ class MassModel(Object):
         where key:value pairs are the string identifiers of the parameters and
         their numerical value. Custom rate expressions will always be
         prioritized over automatically generated mass action rate laws.
-    fixed_concentrations: dict
-        A dictionary to store fixed metabolite concentrations, where keys can
-        be MassMetabolite objects and/or string identifiers for 'external
-        metabolites' of exchange reactions, and values are the fixed
-        concentrations. Fixed concentrations will always be prioritized over
-        time dependent metabolite concentrations and are treated as constants
-        in other expressions.
-    modules: set
-        A set containing the identifiers of the MassModels (model.id)
-        merged together to create the MassModel (self).
+    boundary_conditions: dict
+        A dictionary to store boundary conditions, where keys are string
+        identifiers for 'boundary metabolites' of boundary reactions, and
+        values are the boundary conditions.
     compartments: dict
         A dictionary to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
         Example: {'c': 'cytosol'}
-    units: dict
-        A dictionary to store the units used in the model for referencing.
-        Example: {'N': 'Millimoles', 'Vol': 'Liters', 'Time': 'Hours'}
-
-    Warnings
-    --------
-    MassModels can have different initial conditions from the ones stored in
-        the MassMetabolites for various purposes. However, simulations will
-        always utilize the initial conditions stored in the model, which
-        can be accessed by the MassModel.initial_conditions attribute.
-    The MassModel will not automatically track or convert units. Therefore, it
-        is up to the user to ensure unit consistency in the model. The
-        MassModel.units attribute is provided as a way to inform the user or
-        others what units the model is currently using.
+    units: cobra.DictList
+        A DictList of UnitDefinitions to store in the model for referencing.
+        Note that the MassModel does NOT track units, and it is up to the user
+        to maintain unit consistency the model.
 
     """
 
     def __init__(self, id_or_model=None, name=None, matrix_type="dense",
                  dtype=np.float64):
         """Initialize the MassModel Object."""
-        # Instiantiate a new MassModel object if a MassModel is given.
         super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
+            # Instiantiate a new MassModel with state identical to
+            # the provided MassModel object.
             self.__setstate__(id_or_model.__dict__)
             if not hasattr(self, "name"):
                 self.name = None
-            self.repair()
         else:
             self.description = ''
             # Initialize DictLists for storing
@@ -143,16 +128,13 @@ class MassModel(Object):
             self.metabolites = DictList()
             self.genes = DictList()
             self.enzyme_modules = DictList()
-            # Initialize dictionaries for initial conditions, custom rates,
-            # custom parameters, fixed concentrations, compartments, and units.
-            self.initial_conditions = {}
-            self.fixed_concentrations = {}
+            # Initialize dictionaries for custom rates, custom parameters,
+            # boundary conditions, compartments, and units.
+            self.boundary_conditions = {}
             self.custom_rates = {}
             self.custom_parameters = {}
             self._compartments = {}
-            self._units = {}
-            # Initialize a set to store the modules
-            self.modules = set()
+            self.units = DictList()
             # Store the stoichiometric matrix, its matrix type, and data type
             self._matrix_type = matrix_type
             self._dtype = dtype
@@ -170,6 +152,38 @@ class MassModel(Object):
                              update_model=False)
 
     @property
+    def S(self):
+        """Shorthand method to get the stoichiometric matrix."""
+        return self.stoichiometric_matrix
+
+    @property
+    def ordinary_differential_equations(self):
+        """Return a dict of ODEs for the metabolites as sympy expressions."""
+        return {met: met.ode for met in self.metabolites}
+
+    @property
+    def odes(self):
+        """Shorthand method to get ODEs for the metabolites."""
+        return self.ordinary_differential_equations
+
+    @property
+    def initial_conditions(self):
+        """Return a dict of all metabolites' initial conditions."""
+        return {met: met.initial_condition for met in self.metabolites
+                if met.initial_condition is not None}
+
+    @property
+    def ics(self):
+        """Shorthand method to get all metabolites' initial conditions."""
+        return self.initial_conditions
+
+    @property
+    def fixed(self):
+        """Return a dict of all metabolites' with their fixed conditions."""
+        return {met: ic for met, ic in iteritems(self.initial_conditions)
+                if met.fixed}
+
+    @property
     def rates(self):
         """Return a dict of reaction rate laws as sympy expressions.
 
@@ -181,25 +195,81 @@ class MassModel(Object):
                                   update_reactions=True)
 
     @property
-    def ordinary_differential_equations(self):
-        """Return a dict of ODEs for the metabolites as sympy expressions.
+    def steady_state_fluxes(self):
+        """Return a dict of all reactions' steady state fluxes."""
+        return {rxn: rxn.steady_state_flux for rxn in self.reactions
+                if rxn.steady_state_flux is not None}
 
-        MassMetabolites with fixed concentrations are considered constant and
-        therefore not included in the returned dictionary.
-        """
-        return {met: met.ode for met in self.metabolites
-                if met not in self.fixed_concentrations}
+    @property
+    def v(self):
+        """Shorthand method to get all reactions' steady state fluxes."""
+        return self.steady_state_fluxes
+
+    @property
+    def boundary(self):
+        """Return a list of boundary reactions in the model."""
+        return [rxn for rxn in self.reactions if rxn.boundary]
+
+    @property
+    def boundary_metabolites(self):
+        """Return a sorted list of all 'boundary' metabolites in the model."""
+        return sorted(list(set(rxn.boundary_metabolite
+                               for rxn in self.reactions if rxn.boundary)))
 
     @property
     def exchanges(self):
-        """Return a list of exchange reactions in the model."""
-        return [rxn for rxn in self.reactions if rxn.exchange]
+        """Return exchange reactions in the MassModel.
+
+        Reactions that exchange mass with the exterior. Uses annotations
+        and heuristics to exclude non-exchanges such as sink and demand
+        reactions.
+        """
+        return find_boundary_types(self, "exchange", None)
 
     @property
-    def external_metabolites(self):
-        """Return a sorted list of all 'external' metabolites in the model."""
-        return sorted(list(set(rxn.external_metabolite
-                               for rxn in self.reactions if rxn.exchange)))
+    def demands(self):
+        """Return demand reactions in the MassModel.
+
+        Irreversible reactions that accumulate or consume a metabolite in
+        the inside of the model.
+        """
+        return find_boundary_types(self, "demand", None)
+
+    @property
+    def sinks(self):
+        """Return sink reactions in the MassModel.
+
+        Reversible reactions that accumulate or consume a metabolite in
+        the inside of the model.
+        """
+        return find_boundary_types(self, "sink", None)
+
+    @property
+    def irreversible_reactions(self):
+        """Return a list of all irreversible reactions in the model."""
+        return [rxn for rxn in self.reactions if not rxn.reversible]
+
+    @property
+    def parameters(self):
+        """Return all parameters associateed with the MassModel."""
+        parameters = {}
+        # Sort rate and equilibrium constants into seperate dictionaries,
+        # then add dictionaries to returned parameter dictionary.
+        for p_type in ["kf", "Keq", "kr"]:
+            p_type_dict = {}
+            for rxn in self.reactions:
+                p_sym = getattr(rxn, p_type + "_str")
+                if p_sym in rxn.parameters:
+                    p_type_dict.update({p_sym: rxn.parameters[p_sym]})
+            parameters.update({p_type: p_type_dict})
+        # Add fluxes, custom parameters, and fixed concentrations.
+        parameters.update({"v": {
+            str(rxn.flux_symbol): flux
+            for rxn, flux in iteritems(self.steady_state_fluxes)}})
+        parameters.update({"Custom": self.custom_parameters})
+        parameters.update({"Boundary": self.boundary_conditions})
+
+        return parameters
 
     @property
     def compartments(self):
@@ -226,78 +296,28 @@ class MassModel(Object):
         else:
             setattr(self, "_compartments", {})
 
-    @property
-    def units(self):
-        """Return a dictionary of stored model units."""
-        return getattr(self, "_units")
-
-    @units.setter
-    def units(self, value):
-        """Set the dictionary of current unit descriptions.
-
-        Assigning a dictionary to this property updates the model's
-        dictionary of unit descriptions with the new values.
+    def print_attributes(self, sep="\n", exclude_parent=False):
+        r"""Print the attributes and properties of the MassModel.
 
         Parameters
         ----------
-        value : dict
-            Dictionary mapping unit abbreviations to full names.
-            An empty dictionary will reset the unit.
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
 
         """
-        if value:
-            self._units.update(value)
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        if exclude_parent:
+            attributes = get_subclass_specific_attributes(self)
         else:
-            setattr(self, "_units", {})
+            attributes = get_object_attributes(self)
 
-    @property
-    def irreversible_reactions(self):
-        """Return a list of all irreversible reactions in the model."""
-        return [rxn for rxn in self.reactions if not rxn.reversible]
-
-    @property
-    def steady_state_fluxes(self):
-        """Return a dict of all reactions' steady state fluxes."""
-        return {rxn: rxn.steady_state_flux for rxn in self.reactions
-                if rxn.steady_state_flux is not None}
-
-    @property
-    def parameters(self):
-        """Return all parameters associateed with the MassModel."""
-        parameters = {}
-        # Sort rate and equilibrium constants into seperate dictionaries,
-        # then add dictionaries to returned parameter dictionary.
-        for p_type in ["kf", "Keq", "kr"]:
-            p_type_dict = {}
-            for rxn in self.reactions:
-                p_sym = getattr(rxn, p_type + "_str")
-                if p_sym in rxn.parameters:
-                    p_type_dict.update({p_sym: rxn.parameters[p_sym]})
-            parameters.update({p_type: p_type_dict})
-        # Add fluxes, custom parameters, and fixed concentrations.
-        parameters.update({"v": {
-            str(rxn.flux_symbol): flux
-            for rxn, flux in iteritems(self.steady_state_fluxes)}})
-        parameters.update({"Custom": self.custom_parameters})
-        parameters.update({"Fixed": self.fixed_concentrations})
-
-        return parameters
-
-    # Shorthands
-    @property
-    def S(self):
-        """Shorthand method to get the stoichiometric matrix."""
-        return self.stoichiometric_matrix
-
-    @property
-    def v(self):
-        """Shorthand method to get all reactions' steady state fluxes."""
-        return self.steady_state_fluxes
-
-    @property
-    def odes(self):
-        """Shorthand method to get ODEs for the metabolites."""
-        return self.ordinary_differential_equations
+        print(sep.join(attributes))
 
     def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
                  update_model=True):
@@ -363,7 +383,7 @@ class MassModel(Object):
                                  dtype=dtype)
         return stoich_mat
 
-    def add_metabolites(self, metabolite_list, add_initial_conditions=False):
+    def add_metabolites(self, metabolite_list):
         """Add a list of metabolites to the MassModel.
 
         The change is reverted upon exit when using the MassModel as a context.
@@ -372,10 +392,6 @@ class MassModel(Object):
         ----------
         metabolite_list: list of MassMetabolites
             A list of MassMetabolites to add to the MassModel.
-        add_initial_conditions: bool, optional
-            If True, the initial conditions associated with each metabolite are
-            also added to the model. Otherwise, only the metabolites are added
-            without their initial conditions.
 
         """
         # Ensure list is iterable.
@@ -401,9 +417,6 @@ class MassModel(Object):
             met._model = self
         # Add metabolites to the model
         self.metabolites += metabolite_list
-        # Add the initial conditions if desired.
-        if add_initial_conditions:
-            self.set_initial_conditions(metabolite_list)
 
         context = get_context(self)
         if context:
@@ -413,8 +426,6 @@ class MassModel(Object):
 
     def remove_metabolites(self, metabolite_list, destructive=False):
         """Remove a list of metabolites from the MassModel.
-
-        The metabolite's initial condition will also be removed from the model.
 
         The change is reverted upon exit when using the MassModel as a context.
 
@@ -448,8 +459,7 @@ class MassModel(Object):
                 # Remove associated reactions if destructive
                 for rxn in list(met._reaction):
                     rxn.remove_from_model()
-        # Remove initial conditions and then the metabolites
-        self.remove_initial_conditions(metabolite_list)
+        # Remove the metabolites
         self.metabolites -= metabolite_list
 
         context = get_context(self)
@@ -458,122 +468,86 @@ class MassModel(Object):
             context(partial(setattr, met, "_model", self)
                     for met in metabolite_list)
 
-    def set_initial_conditions(self, metabolite_list=None):
-        """Set the initial conditions for a list of metabolites in the model.
-
-        The change is reverted upon exit when using the MassModel as a context.
+    def add_boundary_conditions(self, boundary_conditions):
+        """Add boundary conditions values for the given boundary metabolites.
 
         Parameters
         ----------
-        metabolite_list: list of MassMetabolites
-            A list of MassMetabolites to add to the MassModel. If None
+        boundary_conditions: dict
+            A dict of boundary conditions containing the 'boundary metabolites'
+            and their corresponding value. The string representing the
+            'boundary_metabolite' must exist the list returned by
+            `MassModel.boundary_metabolites`.
 
-        Notes
-        -----
-        The metabolite(s) must already exist in the model to set the initial
-        conditions. Initial conditions for the metabolites are accessed through
-        MassMetabolite.initial_condition. If an initial condition for a
-        metabolite already exists in the model, it will be replaced.
+        See Also
+        --------
+        MassModel.boundary_metabolites
 
         """
-        # Select all metabolites if None provided.
-        if metabolite_list is None:
-            metabolite_list = self.metabolites
-        metabolite_list = ensure_iterable(metabolite_list)
+        if not isinstance(boundary_conditions, dict):
+            raise TypeError("boundary_conditions must be a dict.")
 
-        # Check whether a metabolite already exists in the model,
-        # ignoring those that do not.
-        metabolite_list = [met for met in metabolite_list
-                           if met in self.metabolites]
-        # Add the initial conditions
-        self.update_initial_conditions({met: met.ic
-                                        for met in metabolite_list})
+        for bound_met, bound_cond in iteritems(boundary_conditions):
+            if bound_met not in self.boundary_metabolites and \
+               bound_met not in self.metabolites:
+                raise ValueError("Did not find {0} in model metabolites or in "
+                                 "boundary reactions.".format(bound_met))
 
-    def remove_initial_conditions(self, metabolite_list):
-        """Remove initial conditions for a list of metabolites in the model.
+            # TODO handle functions of time for boundary conditions
+            if not isinstance(bound_cond, (integer_types, float)):
+                raise TypeError("Boundary conditions must be ints or floats.")
+            bound_cond = float(bound_cond)
+            if bound_cond < 0.:
+                raise ValueError("Boundary conditions must be non-negative.")
+        # Keep track of existing concentrations for context management.
+        context = get_context(self)
+        if context:
+            existing_concs = {bound_met: self.boundary_conditions[bound_met]
+                              for bound_met in boundary_conditions
+                              if bound_met in self.boundary_conditions}
 
-        The change is reverted upon exit when using the MassModel as a context.
+        self.boundary_conditions.update(boundary_conditions)
+
+        if context:
+            context(partial(self.boundary_conditions.pop, key)
+                    for key in iterkeys(boundary_conditions)
+                    if key not in existing_concs)
+            context(partial(self.boundary_conditions.update, existing_concs))
+
+    def remove_boundary_conditions(self, boundary_metabolite_list):
+        """Remove the boundary condition for a list of boundary metabolites.
 
         Parameters
         ----------
         metabolite_list: list
-            A list of MassMetabolite objects.
+            A list of metabolites to remove the boundary conditions for.
+            Boundary metabolites must already exist in the model in order
+            for them to be removed.
+
+        See Also
+        --------
+        MassModel.boundary_metabolites
 
         """
-        # Ensure list is iterable.
-        metabolite_list = ensure_iterable(metabolite_list)
-
+        boundary_metabolite_list = ensure_iterable(boundary_metabolite_list)
         # Check whether a metabolite already exists in the model,
         # ignoring those that do not.
-        metabolite_list = [met for met in metabolite_list
-                           if met in self.metabolites]
-        # Keep track of existing initial conditions for context if needed.
+        boundary_metabolite_list = [
+            bound_met for bound_met in boundary_metabolite_list
+            if bound_met in self.boundary_conditions]
+
+        # Keep track of existing concentrations for context management.
         context = get_context(self)
         if context:
-            existing_ics = {met: self.initial_conditions[met]
-                            for met in metabolite_list
-                            if met in self.initial_conditions}
+            existing_concs = {bound_met: self.boundary_conditions[bound_met]
+                              for bound_met in boundary_metabolite_list
+                              if bound_met in self.boundary_conditions}
         # Remove the initial conditions
-        for met in metabolite_list:
-            if met in self.initial_conditions:
-                del self.initial_conditions[met]
+        for bound_met in boundary_metabolite_list:
+            del self.boundary_conditions[bound_met]
 
         if context:
-            context(partial(self.initial_conditions.update, existing_ics))
-
-    def update_initial_conditions(self, initial_conditions,
-                                  update_metabolites=False):
-        """Update the initial conditions of the MassModel.
-
-        The change is reverted upon exit when using the MassModel as a context.
-
-        Parameters
-        ----------
-        initial_conditions: dict
-            A dictionary where MassMetabolites are the keys and the initial
-            conditions are the values.
-        update_metabolites: bool, optional
-            If True, will update the initial conditions in the MassMetabolite
-            objects as well. Otherwise, only update the model.
-
-        Notes
-        -----
-        The metabolite(s) must already exist in the model to set the initial
-        conditions. Initial conditions for the metabolites are accessed through
-        MassMetabolite.initial_condition. If an initial condition for a
-        metabolite already exists in the model, it will be replaced.
-
-        """
-        if not isinstance(initial_conditions, dict):
-            raise TypeError("initial_conditions must be a dictionary.")
-
-        # Check whether a metabolite already exists in the model,
-        # ignoring those that do not.
-        initial_conditions = {met: ic
-                              for met, ic in iteritems(initial_conditions)
-                              if met in self.metabolites and ic is not None}
-        # Keep track of existing initial conditions for context if needed.
-        context = get_context(self)
-        if context:
-            existing_ics = {met: self.initial_conditions[met]
-                            for met in initial_conditions
-                            if met in self.initial_conditions}
-        # Update initial conditions
-        self.initial_conditions.update(initial_conditions)
-        if update_metabolites:
-            # Update the initial condition stored in the MassMetabolite.
-            for met, ic in iteritems(initial_conditions):
-                met.initial_condition = ic
-
-        if context:
-            context(partial(self.initial_conditions.pop, met)
-                    for met in iterkeys(initial_conditions)
-                    if met not in iterkeys(existing_ics))
-            context(partial(self.initial_conditions.update, existing_ics))
-            if update_metabolites:
-                context(partial(setattr(met, "_initial_condition",
-                                        existing_ics[met]))
-                        for met in iterkeys(initial_conditions))
+            context(partial(self.boundary_conditions.update, existing_concs))
 
     def add_reactions(self, reaction_list):
         """Add MassReactions to the MassModel.
@@ -610,7 +584,7 @@ class MassModel(Object):
                 # If a metabolite doesn't exist in the model,
                 # add it with its associated initial condition.
                 if met not in self.metabolites:
-                    self.add_metabolites(met, add_initial_conditions=True)
+                    self.add_metabolites(met)
                 # Otherwise have reactions point to the metabolite in the model
                 else:
                     coeff = rxn._metabolites.pop(met)
@@ -702,32 +676,56 @@ class MassModel(Object):
             context(partial(setattr, rxn, "_model", self)
                     for rxn in reaction_list)
 
-    def add_exchange(self, metabolite, exchange_type="exchange",
-                     external_concentration=0.):
-        """Add a pre-defined exchange reaction for a given metabolite.
+    def add_boundary(self, metabolite, boundary_type="exchange",
+                     reaction_id=None, subsystem="", boundary_condition=0.,
+                     sbo_term=None):
+        """Add a boundary reaction for a given metabolite.
 
-        Pre-defined exchange types can be "exchange" for reversibly entering or
-        exiting the compartment, "source" for irreversibly entering the
-        compartment, and "demand" for irreversibly exiting the compartment.
+        There are three different types of pre-defined boundary reactions:
+        exchange, demand, and sink reactions.
+        An exchange reaction is a reversible, unbalanced reaction that adds
+        to or removes an extracellular metabolite from the extracellular
+        compartment.
+        A demand reaction is an irreversible reaction that consumes an
+        intracellular metabolite.
+        A sink is similar to an exchange but specifically for intracellular
+        metabolites.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        If you set the reaction `boundary_type` to something else, you must
+        specify the desired identifier of the created reaction. The name will
+        be given by the metabolite name and the given `boundary_type`, and the
+        reaction will be set its reversible attribute to True.
 
         Parameters
         ----------
-        metabolite: MassMetabolite
-            The metabolite involved in the exchange reaction.
-        exchange_type: str {"demand", "exchange", "source"}, optional
-            The type of exchange reaction to create.
-        external_concentration: float, optional
-            The fixed concentration value to set for the the external species.
-            Default is 0.
+        metabolite : MassMetabolite
+            Any MassMetabolite object, or an identifier of a metabolite that
+            already exists in the model. The metabolite compartment is not
+            checked but you are encouraged to stick to the definition of
+            exchanges, demands, and sinks.
+        boundary_type : str, {"exchange", "demand", "sink"}
+            Using one of the pre-defined reaction types is easiest. If you
+            want to create your own kind of boundary reaction choose
+            any other string, e.g., 'my-boundary'.
+        reaction_id : str, optional
+            The ID of the resulting reaction. This takes precedence over the
+            auto-generated identifiers but beware that it might make boundary
+            reactions harder to identify afterwards when using
+            `MassModel.boundary` or specifically `MassModel.exchanges` etc.
+        subsystem: str, optional
+            The subsystem where the reaction is meant to occur.
+        boundary_condition: float, sympy.Basic, optional
+            The boundary condition value to set. Must be an int, float, or a
+            or a sympy expression dependent only on time.
+            Default value is 0.
+        sbo_term : str, optional
+            A correct SBO term is set for the available types. If a custom
+            type is chosen, a suitable SBO term should also be set.
 
         Returns
         -------
-        exchange_rxn: MassReaction
-            The MassReaction object of the new exchange reaction. If the
-            reaction already exists, the existing MassReaction object is
-            returned.
+        boundary_reaction: MassReaction
+            The MassReaction object of the new boundary reaction.
 
         """
         # Check whether a metabolite is a MassMetabolite object:
@@ -736,45 +734,56 @@ class MassModel(Object):
                 metabolite = self.metabolites.get_by_id(metabolite)
             except KeyError:
                 raise ValueError("metabolite must exist in the model")
-
-        if not isinstance(metabolite, MassMetabolite):
+        elif not isinstance(metabolite, MassMetabolite):
             raise TypeError("metabolite must be a MassMetabolite object")
 
-        type_dict = {"demand": ["DM", -1, False],
-                     "source": ["S", 1, False],
-                     "exchange": ["EX", -1, True]}
-        # Set the type of exchange
-        if exchange_type not in type_dict:
-            raise ValueError("Exchange type must be either "
-                             "'exchange', 'source',  or 'demand'")
+        boundary_types = {
+            "exchange": ("EX", True, sbo_terms["exchange"]),
+            "demand": ("DM", False, sbo_terms["demand"]),
+            "sink": ("SK", True, sbo_terms["sink"])}
 
-        else:
-            values = type_dict[exchange_type]
-            rxn_id = metabolite.id
-            # Remove leading underscore if necessary
-            if re.match("\_", rxn_id[0]):
-                rxn_id = rxn_id[1:]
-            # Find compartment and replace with "_e" for external/extracellular
-            _c = re.search("^\w*\S(?!<\_)(\_\S+)$", metabolite.id)
-            if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-                rxn_id = re.sub(_c.group(1), "_e", rxn_id, count=1)
-            rxn_id = "{}_{}".format(values[0], rxn_id)
-            if rxn_id in self.reactions:
-                warn("Reaction {0} already exists in model".format(rxn_id))
-                return self.reactions.get_by_id(rxn_id)
-            c = values[1]
-            reversible = values[2]
+        if boundary_type == "exchange":
+            external = find_external_compartment(self)
+            if metabolite.compartment != external:
+                raise ValueError("The metabolite is not an external metabolite"
+                                 " (compartment is `{0}` but should be `{1}`)."
+                                 " Did you mean to add a demand or sink? "
+                                 "If not, either change its compartment or "
+                                 "rename the model compartments to fix this."
+                                 .format(metabolite.compartment, external))
 
-        rxn_name = "{} {}".format(metabolite.name, exchange_type)
-        exchange_rxn = MassReaction(id=rxn_id, name=rxn_name,
-                                    subsystem="Transport/Exchange",
-                                    reversible=reversible)
-        exchange_rxn.add_metabolites({metabolite: c})
-        self.add_reactions([exchange_rxn])
-        self.add_fixed_concentrations({exchange_rxn.external_metabolite:
-                                       external_concentration})
+        if boundary_type in boundary_types:
+            prefix, reversible, default_term = boundary_types[boundary_type]
+            if reaction_id is None:
+                reaction_id = "{0}_{1}".format(prefix, metabolite.id)
+            if sbo_term is None:
+                sbo_term = default_term
+        if reaction_id is None:
+            raise ValueError(
+                "Custom types of boundary reactions require a custom "
+                "identifier. Please set the `reaction_id`.")
+        # Return the existing reaction if the reaction already exists
+        if reaction_id in self.reactions:
+            raise ValueError(
+                "Boundary reaction '{0}' already exists.".format(reaction_id))
+        # Set reaction name, subsystem, and reversible attributes
+        name = "{0}_{1}".format(metabolite.name, boundary_type)
+        rxn = MassReaction(reaction_id, name=name, subsystem=subsystem,
+                           reversible=reversible)
+        # Always add metabolite as a reactant
+        rxn.add_metabolites({metabolite: -1})
+        # Add SBO annotation
+        if sbo_term:
+            rxn.annotation["sbo"] = sbo_term
+        self.add_reactions(rxn)
+        # TODO handle boundary condition functions.
+        if not isinstance(boundary_condition, (integer_types, float)):
+            pass
 
-        return exchange_rxn
+        self.add_boundary_conditions({
+            rxn.boundary_metabolite: boundary_condition})
+
+        return rxn
 
     def get_rate_laws(self, reaction_list=None, rate_type=0, sympy_expr=True,
                       update_reactions=False):
@@ -808,12 +817,11 @@ class MassModel(Object):
         # Check the inputs
         if not isinstance(rate_type, (integer_types, float)):
             raise TypeError("rate_type must be an int or float")
-        elif not isinstance(sympy_expr, bool):
+        if not isinstance(sympy_expr, bool):
             raise TypeError("sympy_expr must be a bool")
-        else:
-            rate_type = int(rate_type)
-            if rate_type not in {0, 1, 2, 3}:
-                raise ValueError("rate_type must be 0, 1, 2, or 3")
+        rate_type = int(rate_type)
+        if rate_type not in {0, 1, 2, 3}:
+            raise ValueError("rate_type must be 0, 1, 2, or 3")
 
         # Use the MassModel reactions if no reaction list is given
         if reaction_list is None:
@@ -915,7 +923,7 @@ class MassModel(Object):
             and their numerical values. The string representation of the custom
             parametes will be used to create the symbols needed for the sympy
             expression of the custom rate. If None, then parameters are assumed
-            to be a one of the MassReaction.
+            to already exist in the MassModel.
 
         Notes
         -----
@@ -930,6 +938,11 @@ class MassModel(Object):
         else:
             custom_parameters = {}
             custom_parameter_list = []
+
+        # Ensure custom rate is a string
+        if not isinstance(custom_rate, string_types):
+            custom_rate = str(custom_rate)
+
         # Use any existing custom parameters if they are in the rate law.
         existing_customs = self.custom_parameters
         if existing_customs:
@@ -937,6 +950,7 @@ class MassModel(Object):
                 if re.search(custom_parameter, custom_rate) and \
                    custom_parameter not in custom_parameter_list:
                     custom_parameter_list.append(custom_parameter)
+        # Create the custom rate expression
         custom_rate = create_custom_rate(reaction, custom_rate,
                                          custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
@@ -973,25 +987,28 @@ class MassModel(Object):
         del self.custom_rates[reaction]
 
         # Remove orphaned custom parameters if desired.
-        symbols = rate_to_remove.atoms(sym.Symbol)
-
+        args = rate_to_remove.atoms(sym.Symbol)
+        standards = [
+            sym.Symbol(arg) for arg in reaction.all_parameter_ids + ["t"]]
         # Save currently existing parameters for context management if needed.
-        existing = {str(sym): self.custom_parameters[str(symbol)]
-                    for symbol in symbols if symbol != sym.Symbol("t")}
+        existing = {str(arg): self.custom_parameters[str(arg)]
+                    for arg in args if arg in self.custom_parameters and
+                    arg not in standards}
 
         if remove_orphans and self.custom_rates:
             # Determine symbols still in use.
-            other_symbols = set()
+            other_args = set()
             for custom_rate in itervalues(self.custom_rates):
-                other_symbols.update(custom_rate.atoms(sym.Symbol))
+                other_args.update(custom_rate.atoms(sym.Symbol))
 
             # Remove those that are not being used in any custom rate.
-            for symbol in other_symbols:
-                if symbol in symbols.copy():
-                    symbols.remove(symbol)
+            for arg in other_args:
+                if arg in args.copy():
+                    args.remove(arg)
 
-            for symbol in symbols:
-                del self.custom_parameters[str(sym)]
+            for arg in args:
+                if arg not in standards and arg in self.custom_parameters:
+                    del self.custom_parameters[str(arg)]
 
         context = get_context(self)
         if context:
@@ -1014,6 +1031,73 @@ class MassModel(Object):
         self.custom_rates = {}
         self.custom_parameters = {}
         print("All custom rate expressions and parameters have been reset")
+
+    def add_units(self, new_unit_defs):
+        """Add a UnitDefinition to the MassModel units attribute.
+
+        Parameters
+        ----------
+        new_unit_defs: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to add to the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        # Ensure iterable input and units are valid Unit objects.
+        new_unit_defs = DictList(ensure_iterable(new_unit_defs))
+        for unit in list(new_unit_defs):
+            if not isinstance(unit, UnitDefinition):
+                raise ValueError(
+                    "'{0}' is not a valid UnitDefinition.".format(str(unit)))
+            # Skip existing units.
+            if unit.id in self.units.list_attr("id"):
+                warn("Skipping '{0}' for it already exists in the model."
+                     .format(unit))
+                new_unit_defs.remove(unit)
+        # Add new unit definitions to the units attribute
+        self.units += new_unit_defs
+
+    def remove_units(self, unit_defs_to_remove):
+        """Remove a UnitDefinition from the MassModel units attribute.
+
+        Parameters
+        ----------
+        unit_defs_to_remove: list of mass.UnitDefinition objects
+            A list of mass.UnitDefinition objects to remove from the model.
+
+        Warnings
+        --------
+        The MassModel will not automatically track or convert units. Therefore,
+            it is up to the user to ensure unit consistency in the model.
+
+        """
+        unit_defs_to_remove = ensure_iterable(unit_defs_to_remove)
+        # Iteratre through units, raise ValueError if unit does not exist.
+        for unit in unit_defs_to_remove:
+            try:
+                unit = self.units.get_by_id(unit)
+            except KeyError as e:
+                raise ValueError(
+                    "'{0}' does not exist in the model.".format(str(e)))
+        # Remove unit definitions to the units attribute
+        self.units -= unit_defs_to_remove
+
+    def reset_units(self):
+        """Reset all unit definitions in the units in a model.
+
+        Warnings
+        --------
+        Using this method will remove all UnitDefinitions from the units
+            attribute in the MassModel object. To remove a UnitDefinition
+            without affecting the others in the units attribute, use
+            the MassModel.remove_units method instead.
+
+        """
+        self.units = DictList()
+        print("All unit definitions have been reset")
 
     def get_elemental_matrix(self, matrix_type=None, dtype=None):
         """Get the elemental matrix for a model.
@@ -1128,93 +1212,6 @@ class MassModel(Object):
                                     col_ids=[r.id for r in self.reactions])
         return charge_mat
 
-    def add_fixed_concentrations(self, fixed_concentrations):
-        """Add fixed concentrations values for the given metabolites.
-
-        A fixed metabolite concentration will remain at a constant value when
-        simulating the MassModel.
-
-        Parameters
-        ----------
-        fixed_concentrations: dict
-            A dictionary of fixed concentrations where metabolites are the keys
-            and fixed concentration value. The metabolite must already exist
-            in the model, or it must be the string representation of the
-            "external" metabolite in an exchange reaction. (e.g. 'MetabID_e')
-
-        Notes
-        -----
-        Fixed concentrations always have priority over initial conditions.
-
-        See Also
-        --------
-        MassModel.external_metabolites
-
-        """
-        if not isinstance(fixed_concentrations, dict):
-            raise TypeError("fixed_concentrations must be a dict.")
-        for met, fixed_conc in iteritems(fixed_concentrations):
-            if met not in self.external_metabolites and \
-               met not in self.metabolites:
-                raise ValueError("Did not find {0} in model metabolites or in "
-                                 "exchange reactions.".format(met))
-
-            if not isinstance(fixed_conc, (integer_types, float)):
-                raise TypeError("Fixed concentrations must be ints or floats.")
-            elif fixed_conc < 0.:
-                raise ValueError("Fixed concentrations must be non-negative.")
-            else:
-                fixed_conc = float(fixed_conc)
-        # Keep track of existing concentrations for context management.
-        context = get_context(self)
-        if context:
-            existing_concs = {met: self.fixed_concentrations[met]
-                              for met in fixed_concentrations
-                              if met in self.fixed_concentrations}
-
-        self.fixed_concentrations.update(fixed_concentrations)
-
-        if context:
-            context(partial(self.fixed_concentrations.pop, key)
-                    for key in iterkeys(fixed_concentrations)
-                    if key not in existing_concs)
-            context(partial(self.fixed_concentrations.update, existing_concs))
-
-    def remove_fixed_concentrations(self, metabolite_list):
-        """Remove a fixed concentration for a list of metabolites.
-
-        Parameters
-        ----------
-        metabolite_list: list
-            A list of metabolites to remove the fixed concentrations for.
-            Metabolites must already exist in the model, or it must be the
-            string representation of the "external" metabolite in an exchange
-            reaction. (e.g. 'MetabID_Xt').
-
-        See Also
-        --------
-        MassModel.external_metabolites
-
-        """
-        metabolite_list = ensure_iterable(metabolite_list)
-        # Check whether a metabolite already exists in the model,
-        # ignoring those that do not.
-        metabolite_list = [met for met in metabolite_list
-                           if met in self.fixed_concentrations]
-
-        # Keep track of existing concentrations for context management.
-        context = get_context(self)
-        if context:
-            existing_concs = {met: self.fixed_concentrations[met]
-                              for met in metabolite_list
-                              if met in self.fixed_concentrations}
-        # Remove the initial conditions
-        for met in metabolite_list:
-            del self.fixed_concentrations[met]
-
-        if context:
-            context(partial(self.fixed_concentrations.update, existing_concs))
-
     def repair(self, rebuild_index=True, rebuild_relationships=True):
         """Update all indicies and pointers in the model.
 
@@ -1237,6 +1234,8 @@ class MassModel(Object):
             self.reactions._generate_index()
             self.metabolites._generate_index()
             self.genes._generate_index()
+            self.enzyme_modules._generate_index()
+            self.units._generate_index()
         # Rebuild the relationships between reactions and their associated
         # genes and metabolites
         if rebuild_relationships:
@@ -1258,18 +1257,19 @@ class MassModel(Object):
     def copy(self):
         """Create a partial "deepcopy" of the MassModel.
 
-        All of the MassMetabolite, MassReaction, and Gene objects, the initial
-        conditions, fixed concentrations, custom_rates, and the stoichiometric
-        matrix are created anew, but in a faster fashion than deepcopy.
+        All of the MassMetabolite, MassReaction, Gene and EnzymeModuleDict
+        objects, the boundary conditions, custom_rates, custom_parameters,
+        and the stoichiometric matrix are created anew, but in a faster fashion
+        than deepcopy.
 
         """
         # Define a new model
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules",
-            "initial_conditions", "_S", "custom_rates", "fixed_concentrations",
-            "custom_parameters", "notes", "annotation", "modules"]
+            "metabolites", "reactions", "genes", "enzyme_modules", "_S",
+            "custom_rates", "units", "boundary_conditions",
+            "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
@@ -1281,7 +1281,7 @@ class MassModel(Object):
         new_model = self._copy_model_metabolites(new_model)
         # Copy the genes
         new_model = self._copy_model_genes(new_model)
-        # Copy the reactions and rates
+        # Copy the reactions and rates (including custom rates)
         new_model = self._copy_model_reactions(new_model)
         # Copy any existing enzyme_modules
         new_model = self._copy_model_enzyme_modules(new_model)
@@ -1299,12 +1299,12 @@ class MassModel(Object):
               new_model_id=None):
         """Merge two MassModels into one MassModel with the objects from both.
 
-        The reactions, metabolites, genes, enzyme modules, initial conditions,
-        fixed concentrations, custom rate laws, rate parameters, compartments,
-        units, notes, and annotations from right model are also copied to left
-        model. However, note that in cases where identifiers for objects are
-        identical or a dict item has an identical key(s), priority will be
-        given to what already exists in the left model.
+        The reactions, metabolites, genes, enzyme modules, boundary conditions,
+        custom rate laws, rate parameters, compartments, units, notes, and
+        annotations from right model are also copied to left model. However,
+        note that in cases where identifiers for objects are identical or a
+        dict item has an identical key(s), priority will be given to what
+        already exists in the left model.
 
         Parameters
         ----------
@@ -1355,8 +1355,6 @@ class MassModel(Object):
             new_model_id = {True: self.id,
                             False: self.id + "_" + right.id}.get(inplace)
         new_model.id = new_model_id
-        new_model.modules.add(right.id)
-        new_model.modules.update(right.modules)
 
         # Add the reactions from right to left model.
         new_reactions = deepcopy(right.reactions)
@@ -1367,19 +1365,11 @@ class MassModel(Object):
         new_model.add_reactions(new_reactions)
         new_model.repair()
 
-        # Add initial conditions from right to left model.
-        existing = [met.id for met in iterkeys(new_model.initial_conditions)]
-        new_model.update_initial_conditions({
-            new_model.metabolites.get_by_id(met.id): ic
-            for met, ic in iteritems(right.initial_conditions)
-            if met.id not in existing})
-
-        # Add fixed concentrations from right to left model.
-        existing = [met.id if isinstance(met, MassMetabolite) else met
-                    for met in iterkeys(new_model.fixed_concentrations)]
-        new_model.add_fixed_concentrations({
-            met: fc for met, fc in iteritems(right.fixed_concentrations)
-            if str(met) not in existing})
+        # Add boundary conditions from right to left model.
+        existing = [bc for bc in iterkeys(new_model.boundary_conditions)]
+        new_model.add_boundary_conditions({
+            met: bc for met, bc in iteritems(right.boundary_conditions)
+            if bc not in existing})
 
         # Add custom parameters from right to left model.
         existing = [cp for cp in iterkeys(new_model.custom_parameters)]
@@ -1403,7 +1393,7 @@ class MassModel(Object):
             # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
                 existing = new_enzyme_modules.query(
-                    lambda r: r.id in self.enzyme_modules)
+                    lambda e: e.id in self.enzyme_modules)
                 for enzyme in existing:
                     enzyme.__dict__["_id"] = prefix_existing + "_" + enzyme.id
             # Check whether reactions exist in the model.
@@ -1413,8 +1403,13 @@ class MassModel(Object):
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        for attr in ["_compartments", "_units", "notes", "annotation"]:
-            new_model._merge_attr_dicts(attr, right)
+        if right.units:
+            new_model.add_units(right.units)
+
+        for attr in ["_compartments", "notes", "annotation"]:
+            existing = getattr(new_model, attr).copy()
+            setattr(new_model, attr, getattr(right, attr).copy())
+            getattr(new_model, attr).update(existing)
 
         return new_model
 
@@ -1424,7 +1419,9 @@ class MassModel(Object):
 
         The unique steady state flux for each reaction in the MassModel is
         calculated using defined pathways, independently defined fluxes, and
-        steady state concentrations.
+        steady state concentrations, where index of values in the pathways
+        corresponds to the index of the reaction in the MassModel.reactions
+        attribute.
 
         Parameters
         ----------
@@ -1445,10 +1442,14 @@ class MassModel(Object):
 
         Return
         ------
-        steady_state_fluxes: np.ndarray
-            A numpy array of the calculated steady state fluxes. The indicies
-            of the values in the pathway vector correspond to the indicies
-            of the reactions in the MassModel.reactions attribute.
+        steady_state_fluxes: dict
+            A numpy array of the calculated steady state fluxes.
+
+        Warnings
+        --------
+        The indicies of the values in the pathway vector must correspond to the
+            indicies of the reactions in the MassModel.reactions attribute in
+            order for the method to work as intended.
 
         Notes
         -----
@@ -1482,11 +1483,14 @@ class MassModel(Object):
 
         # Obtain the inner product of values and coefficients,
         # then obtain the inner product of the pathways and first inner product
-        steady_state_fluxes = np.inner(pathways.T, np.inner(coeffs, values))
+        flux_vector = np.inner(pathways.T, np.inner(coeffs, values))
         # Update the reactions if desired
-        if update_reactions:
-            for i, rxn in enumerate(self.reactions):
-                rxn.steady_state_flux = steady_state_fluxes[i]
+        steady_state_fluxes = {}
+        for i, rxn in enumerate(self.reactions):
+            steady_state_flux = flux_vector[i]
+            steady_state_fluxes.update({rxn: steady_state_flux})
+            if update_reactions:
+                rxn.steady_state_flux = steady_state_flux
 
         return steady_state_fluxes
 
@@ -1501,16 +1505,17 @@ class MassModel(Object):
         Parameters
         ----------
         steady_state_fluxes: dict, optional
-            A dictionary of steady state fluxes where MassReactions are keys
+            A dict of steady state fluxes where MassReactions are keys
             and fluxes are the values. All reactions provided will have their
             PERCs calculated. If None, all of the reaction PERCs are calculated
-            using the current steady state fluxes for each reaction.
+            using the current steady state fluxes for all reactions that exist
+            in the model.
         steady_state_concentrations: dict, optional
-            A dictionary of steady state concentrations where MassMetabolites
-            are keys and concentrations are the values. If None, the
-            initial conditions and fixed concentrations that exist in the
+            A dict of all steady state concentrations necessary for the PERC
+            calculations, where MassMetabolites are keys and concentrations are
+            the values. If None, the relevant concentrations that exist in the
             MassModel are used. All concentrations used in calculations must be
-            provided if steady_state_concentrations is None.
+            provided, including relevant boundary conditions.
         at_equilibrium_default: float, optional
             The value to set the pseudo-order rate constant if the reaction is
             at equilibrium. Default is 100,000.
@@ -1521,15 +1526,15 @@ class MassModel(Object):
         Returns
         -------
         percs_dict: dict
-            A dictionary where keys are strings identifers of the pseudo-order
-            rate constants (kf_RID) and values are the calculated PERC value
+            A dict where keys are strings identifers of the pseudo-order rate
+            constants and values are the calculated PERC values.
 
         """
         # Get the model steady state concentrations if None are provided.
         if steady_state_concentrations is None:
-            steady_state_concentrations = self.fixed_concentrations.copy()
-            steady_state_concentrations.update(
-                {str(m): ic for m, ic in iteritems(self.initial_conditions)})
+            steady_state_concentrations = self.boundary_conditions.copy()
+            steady_state_concentrations.update({
+                str(m): ic for m, ic in iteritems(self.initial_conditions)})
         else:
             steady_state_concentrations = {
                 str(m): v for m, v in iteritems(steady_state_concentrations)}
@@ -1681,7 +1686,7 @@ class MassModel(Object):
             Reaction reverse rate constant (kr)
             Reaction equilibrium constant (Keq)
             Reaction flux (v)
-            External metabolite concentrations for boundary reactions
+            Boundary conditions of boundary reactions (boundary_metabolites)
             Custom Parameters
 
         Parameters
@@ -1695,8 +1700,8 @@ class MassModel(Object):
         The MassReaction object(s) must already exist in the model in order to
         change associated parameters. Any identifiers that are not
         the identifiers of a standard reaction parameter (does not appear in
-        MassReaction.all_parameter_ids) and is not an external metabolite of a
-        boundary reaction (does not appear in MassModel.external_metabolites)
+        MassReaction.all_parameter_ids) and is not an boundary metabolite of a
+        boundary reaction (does not appear in MassModel.boundary_metabolites)
         will be considered a custom parameter.
 
         """
@@ -1715,20 +1720,99 @@ class MassModel(Object):
 
         for key, value in iteritems(parameters):
             # Check the parameter type
-            if key in self.external_metabolites:
-                self.add_fixed_concentrations({key: value})
+            if key in self.boundary_metabolites:
+                self.add_boundary_conditions({key: value})
             elif key.split("_", 1)[0] in ["kf", "Keq", "kr", "v"]:
                 # See if the reaction exists and if none found, assume
                 # parameter is a custom parameter
                 p_type, reaction = key.split("_", 1)
                 try:
                     reaction = self.reactions.get_by_id(reaction)
-                    reaction.__class__.__dict__[p_type].fset(reaction, value)
+                    setattr(reaction, p_type, value)
                 except KeyError:
                     self.custom_parameters.update({key: value})
             # If parameter not found, assume parameter is a custom parameter
             else:
                 self.custom_parameters.update({key: value})
+
+    def update_initial_conditions(self, initial_conditions):
+        """Update the initial conditions of the MassModel.
+
+        Can be used to update initial conditions of fixed metabolites to change
+        the concentration value at which the metabolite concentration is fixed.
+
+        Parameters
+        ----------
+        initial_conditions: dict
+            A dictionary where MassMetabolites are the keys and the initial
+            conditions are the values.
+
+        Notes
+        -----
+        The metabolite(s) must already exist in the model to set the initial
+        conditions. Initial conditions for the metabolites are accessed through
+        MassMetabolite.initial_condition. If an initial condition for a
+        metabolite already exists in the model, it will be replaced.
+
+        """
+        if not isinstance(initial_conditions, dict):
+            raise TypeError("initial_conditions must be a dictionary.")
+        for metabolite, ic_value in iteritems(initial_conditions):
+            # Try getting metabolite object from model
+            try:
+                metabolite = self.metabolites.get_by_id(str(metabolite))
+            except KeyError as e:
+                warn("No metabolite found for {0}".format(str(e)))
+                continue
+            # Try setting the initial condition
+            try:
+                metabolite.initial_condition = ic_value
+            except (TypeError, ValueError) as e:
+                warn("Cannot set initial condition for {0} due to the "
+                     "following: {1}".format(metabolite.id, str(e)))
+                continue
+
+    def update_custom_rates(self, custom_rates, custom_parameters=None):
+        """Update the custom rates of the MassModel.
+
+        Parameters
+        ----------
+        custom_rates: dict
+            A dictionary where MassReactions or their string identifiers are
+            the keys and the rates are the string representations of the
+            custom rate expression.
+        custom_parameters: dict, optional
+            A dictionary of custom parameters for the custom rate where the
+            key:value pairs are the strings representing the custom parameters
+            and their numerical values. If a custom parameter already exists in
+            the model, it will be updated.
+
+        Notes
+        -----
+        The reaction(s) must already exist in the model to set the custom rate.
+
+        See Also
+        --------
+        MassModel.add_custom_rate
+
+        """
+        if custom_parameters is not None:
+            if not isinstance(custom_parameters, dict):
+                raise TypeError("custom_parameters must be a dict.")
+            self.custom_parameters.update(custom_parameters)
+
+        for reaction, custom_rate in iteritems(custom_rates):
+            if not isinstance(reaction, MassReaction):
+                try:
+                    reaction = self.reactions.get_by_id(reaction)
+                except KeyError as e:
+                    warn("No reaction found for {0}".format(str(e)))
+                    continue
+            try:
+                self.add_custom_rate(reaction, custom_rate=custom_rate)
+            except sym.SympifyError:
+                warn("Unable to sympify rate equation for '{0}'.".format(
+                    reaction.id))
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.
@@ -1943,10 +2027,6 @@ class MassModel(Object):
                         value) if attr == "formula" else value
             new_metabolite._model = new_model
             new_model.metabolites.append(new_metabolite)
-            # Set the initial condition for the metabolite in the new model
-            if metabolite in iterkeys(self.initial_conditions):
-                new_model.initial_conditions.update({
-                    new_metabolite: self.initial_conditions[metabolite]})
 
         return new_model
 
@@ -2054,24 +2134,13 @@ class MassModel(Object):
 
         return DictList(filter(existing_filter, item_list))
 
-    def _merge_attr_dicts(self, attr, right):
-        """Merge notes and annotations attributes for two models.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        existing = getattr(self, attr).copy()
-        setattr(self, attr, getattr(right, attr).copy())
-        getattr(self, attr).update(existing)
-
+    # TODO Fix when changes finished
     def _repr_html_(self):
         """HTML representation of the overview for the MassModel."""
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
         return """
@@ -2093,11 +2162,14 @@ class MassModel(Object):
                     <td><strong>Number of Metabolites</strong></td>
                     <td>{num_metabolites}</td>
                 </tr><tr>
-                    <td><strong>Number of Reactions</strong></td>
-                    <td>{num_reactions}</td>
-                </tr><tr>
                     <td><strong>Number of Initial Conditions</strong></td>
                     <td>{num_ic}</td>
+                </tr><tr>
+                    <td><strong>Number of Fixed Metabolites</strong></td>
+                    <td>{num_fixed}</td>
+                </tr><tr>
+                    <td><strong>Number of Reactions</strong></td>
+                    <td>{num_reactions}</td>
                 </tr><tr>
                     <td><strong>Number of Forward Rate Constants</strong></td>
                     <td>{num_kfs}</td>
@@ -2108,11 +2180,11 @@ class MassModel(Object):
                     <td><strong>Number of Irreversible Reactions</strong></td>
                     <td>{num_irreversible}</td>
                 </tr><tr>
-                    <td><strong>Number of Exchanges</strong></td>
-                    <td>{num_exchanges}</td>
+                    <td><strong>Number of Boundary Reactions</strong></td>
+                    <td>{num_boundary}</td>
                 </tr><tr>
-                    <td><strong>Number of Fixed Concentrations</strong></td>
-                    <td>{num_fixed}</td>
+                    <td><strong>Number of Boundary Conditions</strong></td>
+                    <td>{num_boundary_conditions}</td>
                 </tr><tr>
                     <td><strong>Number of Custom Rates</strong></td>
                     <td>{num_custom_rates}</td>
@@ -2122,9 +2194,6 @@ class MassModel(Object):
                 </tr><tr>
                     <td><strong>Number of Enzymes</strong></td>
                     <td>{num_enzyme_modules}</td>
-                </tr><tr>
-                    <td><strong>Modules</strong></td>
-                    <td>{modules}</td>
                 </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
@@ -2136,25 +2205,23 @@ class MassModel(Object):
         """.format(name=self.id, address='0x0%x' % id(self),
                    dim_stoich_mat=dim_S,
                    mat_rank=rank,
-                   S_type="{}, {}".format(self._matrix_type,
-                                          self._dtype.__name__),
+                   S_type="{0}, {1}".format(self._matrix_type,
+                                            self._dtype.__name__),
                    num_metabolites=len(self.metabolites),
-                   num_reactions=len(self.reactions),
                    num_ic=len(self.initial_conditions),
+                   num_fixed=len(self.fixed),
+                   num_reactions=len(self.reactions),
                    num_kfs=len(self.parameters["kf"]),
                    num_Keqs=len(self.parameters["Keq"]),
                    num_irreversible=len(self.irreversible_reactions),
-                   num_exchanges=len(self.exchanges),
-                   num_fixed=len(self.fixed_concentrations),
+                   num_boundary=len(self.boundary),
+                   num_boundary_conditions=len(self.boundary_conditions),
                    num_custom_rates=len(self.custom_rates),
                    num_genes=len(self.genes),
                    num_enzyme_modules=len(self.enzyme_modules),
-                   modules="<br> ".join([str(m) for m in self.modules
-                                         if m is not None]) + "</br>",
                    compartments=", ".join(v if v else k for k, v in
                                           iteritems(self.compartments)),
-                   units=", ".join(v if v else k for
-                                   k, v in iteritems(self.units)))
+                   units=", ".join([u.id for u in self.units]))
 
     # Dunders
     def __enter__(self):

@@ -51,7 +51,7 @@ class EnzymeModuleDict(OrderedDictWithID):
             super(EnzymeModuleDict, self).__init__(
                 id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
         # Initialize an EnzymeModuleDict using an EnzymeModule
-        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_dict"):
+        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_module_dict"):
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
             for key, value in iteritems(id_or_enzyme.__dict__):
                 nkey = key.lstrip("_")
@@ -134,6 +134,9 @@ class EnzymeModuleDict(OrderedDictWithID):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))}
 
+        for enzyme_module_form in self.enzyme_module_forms:
+            enzyme_module_form._repair_bound_obj_pointers()
+
     def _make_enzyme_stoichiometric_matrix(self, update=False):
         """Return the S matrix based on enzyme forms, reactions, and ligands.
 
@@ -189,10 +192,9 @@ class EnzymeModuleDict(OrderedDictWithID):
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
-
         return """
             <table>
                 <tr>
@@ -269,11 +271,6 @@ class EnzymeModuleDict(OrderedDictWithID):
     def __deepcopy__(self, memo):
         """Create a deepcopy of the EnzymeModuleDict."""
         return deepcopy(super(EnzymeModuleDict, self), memo)
-
-    def __repr__(self):
-        """Override of default repr() implementation."""
-        return "<%s %s at 0x%x>" % (
-            self.__class__.__name__[:-4], self.id, id(self))
 
 
 _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({

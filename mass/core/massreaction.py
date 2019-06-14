@@ -20,12 +20,16 @@ from cobra.core.reaction import (
     and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
 from cobra.util.context import get_context, resettable
 
+from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
-from mass.util import expressions
+from mass.util.expressions import (
+    generate_disequilibrium_ratio, generate_mass_action_ratio,
+    generate_rate_law)
+from mass.util.util import (
+    ensure_non_negative_value, get_object_attributes,
+    get_subclass_specific_attributes)
 
-
-# Global
-_INF = float("inf")
+MASSCONFIGURATION = MassConfiguration()
 
 
 class MassReaction(Object):
@@ -33,8 +37,11 @@ class MassReaction(Object):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassReaction.
+    id_or_reaction: str, MassReaction
+        Either a string identifier to associate with the MassReaction,
+        or an existing MassReaction object. If an existing MassReaction
+        object is provided, a new MassReaction object is instantiated with
+        the same properties as the original MassReaction.
     name: str, optional
         A human readable name for the reaction.
     subsystem: str, optional
@@ -52,49 +59,53 @@ class MassReaction(Object):
 
     """
 
-    def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 steady_state_flux=None):
+    def __init__(self, id_or_reaction=None, name="", subsystem="",
+                 reversible=True, steady_state_flux=None):
         """Initialize the MassReaction Object."""
-        super(MassReaction, self).__init__(id, name)
-        self.subsystem = subsystem
-        self._reversible = reversible
-        self.steady_state_flux = steady_state_flux
-        # Rate and equilibrium constant parameters for reactions. The reverse
-        # and equilibrium constants for irreversible reactions are set here.
-        # For cobra compatibility, lower and upper bounds are also set.
-        self._forward_rate_constant = None
-        if self._reversible:
-            self._reverse_rate_constant = None
-            self._equilibrium_constant = None
-            self._lower_bound = -1000.
-            self._upper_bound = 1000.
+        # Get the identifer and initialize
+        if hasattr(id_or_reaction, "id"):
+            id_str = id_or_reaction.id
         else:
-            self._reverse_rate_constant = 0.
-            self._equilibrium_constant = _INF
-            self._lower_bound = 0.
-            self._upper_bound = 1000.
+            id_str = id_or_reaction
+        super(MassReaction, self).__init__(id_str, name)
+        if isinstance(id_or_reaction, MassReaction):
+            # Instiantiate a new MassReaction with state identical to 
+            # the provided MassReaction object.
+            self.__dict__.update(id_or_reaction.__dict__)
+        else:
+            self.subsystem = subsystem
+            self._reversible = reversible
+            self.steady_state_flux = steady_state_flux
+            # Rate and equilibrium constant parameters for reactions. The
+            # reverse and equilibrium constants for irreversible reactions are
+            # set here.  Upper and lower bounds are also set.
+            self._forward_rate_constant = None
+            if self._reversible:
+                self._reverse_rate_constant = None
+                self._equilibrium_constant = None
+                self._lower_bound = MASSCONFIGURATION.lower_bound
+            else:
+                self._reverse_rate_constant = MASSCONFIGURATION.irreversible_kr
+                self._equilibrium_constant = MASSCONFIGURATION.irreversible_Keq
+                self._lower_bound = 0.
+            self._upper_bound = MASSCONFIGURATION.upper_bound
+            # Set objective coefficient and variable kind
+            self.objective_coefficient = 0.
+            self.variable_kind = 'continuous'
+            # Rate type and law and as a sympy expression for simulation.
+            self._rtype = 1
+            # A dict of metabolites and their stoichiometric coefficients.
+            self._metabolites = {}
+            # The compartments where partaking metabolites are located.
+            self._compartments = None
+            # The associated MassModel.
+            self._model = None
+            # The genes associated with the reaction.
+            self._genes = set()
+            self._gene_reaction_rule = ""
 
-        self.objective_coefficient = 0.
-        self.variable_kind = 'continuous'
-
-        # Rate type and law and as a sympy expression for simulation.
-        self._rtype = 1
-
-        # A dictionary of metabolites and their stoichiometric coefficients.
-        self._metabolites = {}
-
-        # The compartments where partaking metabolites are located.
-        self._compartments = None
-
-        # The associated MassModel.
-        self._model = None
-
-        # The genes associated with the reaction.
-        self._genes = set()
-        self._gene_reaction_rule = ""
-
-        # The Gibbs reaction energy associated with the reaction.
-        self._gibbs_reaction_energy = None
+            # The Gibbs reaction energy associated with the reaction.
+            self._gibbs_reaction_energy = None
 
     # Public
     @property
@@ -121,8 +132,10 @@ class MassReaction(Object):
                 setattr(self, "_reverse_rate_constant", None)
                 setattr(self, "_equilibrium_constant", None)
             else:
-                setattr(self, "_reverse_rate_constant", 0)
-                setattr(self, "_equilibrium_constant", _INF)
+                setattr(self, "_reverse_rate_constant",
+                        MASSCONFIGURATION.irreversible_kr)
+                setattr(self, "_equilibrium_constant",
+                        MASSCONFIGURATION.irreversible_Keq)
 
     @property
     def forward_rate_constant(self):
@@ -131,7 +144,20 @@ class MassReaction(Object):
 
     @forward_rate_constant.setter
     def forward_rate_constant(self, value):
-        """Set the forward rate constant (kf) of the reaction."""
+        """Set the forward rate constant (kf) of the reaction.
+
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the forward rate constant (kf) of the
+            reaction.
+
+        Warnings
+        --------
+        Forward rate constants cannot be negative.
+
+        """
+        ensure_non_negative_value(value)
         setattr(self, "_forward_rate_constant", value)
 
     @property
@@ -143,13 +169,24 @@ class MassReaction(Object):
     def reverse_rate_constant(self, value):
         """Set the reverse rate constant (kr) of the reaction.
 
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the reverse rate constant (kr) of the
+            reaction.
+
+        Warnings
+        --------
+        Reverse rate constants cannot be negative.
         If reaction is not reversible, will warn the user instead.
+
         """
         if self.reversible:
+            ensure_non_negative_value(value)
             setattr(self, "_reverse_rate_constant", value)
         else:
             warn("Cannot set the reverse rate constant for an irreversible "
-                 "reaction")
+                 "reaction '{0}'".format(self.id))
 
     @property
     def equilibrium_constant(self):
@@ -160,13 +197,24 @@ class MassReaction(Object):
     def equilibrium_constant(self, value):
         """Set the equilibrium constant (Keq) of the reaction.
 
+        Parameters
+        ----------
+        value: float
+            A non-negative number for the equilibrium constant (Keq)
+            of the reaction.
+
+        Warnings
+        --------
+        Equilibrium constants cannot be negative.
         If reaction is not reversible, will warn the user instead.
+
         """
         if self._reversible:
+            ensure_non_negative_value(value)
             setattr(self, "_equilibrium_constant", value)
         else:
             warn("Cannot set the equilibrium constant for an irreversible "
-                 "reaction")
+                 "reaction '{0}'".format(self.id))
 
     @property
     def parameters(self):
@@ -224,7 +272,6 @@ class MassReaction(Object):
         else:
             rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
                                      update_reaction=True)
-
         return rate
 
     @property
@@ -249,7 +296,7 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        reaction_string: str
+        value: str
             String representation of the reaction.
 
         Notes
@@ -278,8 +325,8 @@ class MassReaction(Object):
         return getattr(self, "_compartments")
 
     @property
-    def exchange(self):
-        """Determine whether or not the reaction is an exchange reaction.
+    def boundary(self):
+        """Determine whether or not the reaction is a boundary reaction.
 
         Will return True if the reaction has no products or no reactants.
 
@@ -288,43 +335,33 @@ class MassReaction(Object):
         These are reactions with a sink or a source term (e.g. 'A --> ')
 
         """
-        return (len(self.metabolites) == 1 and not
-                (self.reactants and self.products))
+        return (len(self.metabolites) == 1
+                and not (self.reactants and self.products))
 
     @property
-    def external_metabolite(self):
-        """Return an 'external' metabolite for exchange reactions.
+    def boundary_metabolite(self):
+        """Return an 'boundary' metabolite for bounary reactions.
 
         Returns
         -------
-        external_metabolite: str
-            String representation of the 'external' metabolite of the exchange,
-            or None if the reaction is not considered exchange.
-
-        Warnings
-        --------
-        When generating the string representation of the 'external' metabolite,
-            any recognized pre-existing compartment is replace with 'e'.
-            Therefore it is highly recommended to use 'e' only to define an
-            external or extracellular compartment as 'e' prevent confusion and
-            possible errors from occuring.
+        boundary_metabolite: str
+            String representation of the boundary metabolite of the reaction,
+            or None if the reaction is not considered a boundary reaction.
 
         See Also
         --------
-        MassReaction.exchange
+        MassReaction.boundary
 
         """
-        if self.exchange:
-            for met in self.metabolites:
-                _c = re.search("^\w*\S(?!<\_)(\_\S+)$", met.id)
-                if _c is not None and not re.search("\_L$|\_D$", _c.group(1)):
-                    external_metabolite = met.id.replace(_c.group(1), "_e")
-                else:
-                    external_metabolite = met.id + "_e"
+        if self.boundary:
+            for metabolite in list(self.metabolites):
+                bc_metabolite = metabolite._remove_compartment_from_id_str()
+                bc_metabolite += "_" + str(list(
+                    MASSCONFIGURATION.boundary_compartment)[0])
         else:
-            external_metabolite = None
+            bc_metabolite = None
 
-        return external_metabolite
+        return bc_metabolite
 
     @property
     def genes(self):
@@ -438,6 +475,8 @@ class MassReaction(Object):
         if self.id is not None:
             return Symbol("v_" + self.id)
 
+        return None
+
     @property
     def all_parameter_ids(self):
         """Return a list of strings representing all non-custom parameters."""
@@ -483,17 +522,26 @@ class MassReaction(Object):
     @property
     def kf_str(self):
         """Return the string representation of the forward rate constant."""
-        return "kf_" + self.id
+        if self.id is not None:
+            return "kf_" + self.id
+
+        return None
 
     @property
     def Keq_str(self):
         """Return the string representation of the equilibrium constant."""
-        return "Keq_" + self.id
+        if self.id is not None:
+            return "Keq_" + self.id
+
+        return None
 
     @property
     def kr_str(self):
         """Return the string representation of the reverse rate constant."""
-        return "kr_" + self.id
+        if self.id is not None:
+            return "kr_" + self.id
+
+        return None
 
     # Shorthands
     @property
@@ -540,6 +588,29 @@ class MassReaction(Object):
     def v(self, value):
         """Shorthand method to set the reaction steady state flux."""
         self.steady_state_flux = value
+
+    def print_attributes(self, sep="\n", exclude_parent=False):
+        r"""Print the attributes and properties of the MassReaction.
+
+        Parameters
+        ----------
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
+
+        """
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        if exclude_parent:
+            attributes = get_subclass_specific_attributes(self)
+        else:
+            attributes = get_object_attributes(self)
+
+        print(sep.join(attributes))
 
     def reverse_stoichiometry(self, inplace=False):
         """Reverse the stoichiometry of the reaction.
@@ -598,8 +669,7 @@ class MassReaction(Object):
         The rate law expression as a str or sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_rate_law(self, rate_type, sympy_expr,
-                                             update_reaction)
+        return generate_rate_law(self, rate_type, sympy_expr, update_reaction)
 
     def get_mass_action_ratio(self):
         """Get the mass action ratio of the reaction as a sympy expression.
@@ -609,7 +679,7 @@ class MassReaction(Object):
         The mass action ratio as a sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_mass_action_ratio(self)
+        return generate_mass_action_ratio(self)
 
     def get_disequilibrium_ratio(self):
         """Get the disequilibrium ratio of the reaction as a sympy expression.
@@ -619,7 +689,7 @@ class MassReaction(Object):
         The disequilibrium ratio as a sympy expression (sympy.Basic).
 
         """
-        return expressions.generate_disequilibrium_ratio(self)
+        return generate_disequilibrium_ratio(self)
 
     def remove_from_model(self, remove_orphans=False):
         """Remove the reaction from the MassModel.

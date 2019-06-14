@@ -5,11 +5,13 @@ from __future__ import absolute_import
 import re
 from warnings import warn
 
-from six import integer_types
-
 from cobra.core.species import Species
 
-from mass.util import expressions
+from mass.util.expressions import generate_ode
+from mass.util.util import (
+    ensure_non_negative_value, get_object_attributes,
+    get_subclass_specific_attributes)
+
 
 # Precompiled regular expression for element parsing
 ELEMENT_RE = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
@@ -20,40 +22,48 @@ class MassMetabolite(Species):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassMetabolite.
+    id_or_specie: str, MassMetabolite
+        Either a string identifier to associate with the MassMetabolite,
+        or an existing MassMetabolite object. If an existing MassMetabolite
+        object is provided, a new MassMetabolite object is instantiated with
+        the same properties as the original MassMetabolite.
     name: str, optional
         A human readable name for the metabolite.
-
-    Attributes
-    ----------
     formula: str, optional
         Chemical formula associated with the metabolite.
     charge: float, optional
         The charge number associated with the metabolite.
     compartment: str, optional
         The compartment where the metabolite is located.
+    fixed: bool, optional
+        Whether the metabolite concentration should remain at a fixed value.
+        Default is False.
 
     """
 
-    def __init__(self, id=None, name="", formula=None, charge=None,
-                 compartment=None):
+    def __init__(self, id_or_specie=None, name="", formula=None,
+                 charge=None, compartment=None, fixed=False):
         """Initialize the MassMetabolite Object."""
-        # Check inputs to ensure they are they correct types.
-        super(MassMetabolite, self).__init__(id, name)
-        # Chemical formula and charge number of the metabolite
-        self.formula = formula
-        self.charge = charge
-        # Compartment where the metabolite is located
-        self.compartment = compartment
-        # Inital concentration of the metabolite
-        self._initial_condition = None
-        # Gibbs energy of formation of the metabolite
-        self._gibbs_formation_energy = None
-
-        # For cobra compatibility
-        self._constraint_sense = "E"
-        self._bound = 0.
+        super(MassMetabolite, self).__init__(str(id_or_specie), name)
+        if isinstance(id_or_specie, MassMetabolite):
+            # Instiantiate a new MassMetabolite with state identical to
+            # the provided MassMetabolite object.
+            self.__dict__.update(id_or_specie.__dict__)
+        else:
+            # Chemical formula and charge number of the metabolite
+            self.formula = formula
+            self.charge = charge
+            # Compartment where the metabolite is located
+            self.compartment = compartment
+            # Whether the concentration of the metabolite is fixed.
+            self.fixed = fixed
+            # The initial condition of the metabolite.
+            self._initial_condition = None
+            # Gibbs energy of formation of the metabolite
+            self._gibbs_formation_energy = None
+            # For cobra compatibility
+            self._constraint_sense = "E"
+            self._bound = 0.
 
     # Public
     @property
@@ -137,22 +147,17 @@ class MassMetabolite(Species):
         Initial conditions of metabolites cannot be negative.
 
         """
-        if not isinstance(value, (integer_types, float)) and \
-           value is not None:
-            raise TypeError("Must be an int or float")
-        elif value is None:
-            pass
-        elif value < 0.:
-            raise ValueError("Must be a non-negative number")
+        ensure_non_negative_value(value)
         setattr(self, "_initial_condition", value)
 
     @property
     def ordinary_differential_equation(self):
         """Return a sympy expression of the metabolite's associated ODE.
 
-        Will return None if metabolite is not associated with a MassReaction.
+        Will return None if metabolite is not associated with a MassReaction,
+            and a 0. if the fixed attribute is set to True.
         """
-        return expressions.generate_ode(self)
+        return generate_ode(self)
 
     @property
     def formula_weight(self):
@@ -171,7 +176,7 @@ class MassMetabolite(Species):
     @property
     def ic(self):
         """Shorthand getter for the initial condition."""
-        return getattr(self, "_initial_condition")
+        return self.initial_condition
 
     @ic.setter
     def ic(self, value):
@@ -187,6 +192,29 @@ class MassMetabolite(Species):
     def model(self):
         """Return the MassModel associated with the metabolite."""
         return getattr(self, "_model")
+
+    def print_attributes(self, sep="\n", exclude_parent=False):
+        r"""Print the attributes and properties of the MassMetabolite.
+
+        Parameters
+        ----------
+        sep: str, optional
+            The string used to seperate different attrubutes. Affects how the
+            final string is printed. Default is '\n'.
+        exclude_parent: bool, optional
+            If True, only display attributes specific to the current class,
+            excluding attributes from the parent class.
+
+        """
+        if not isinstance(sep, str):
+            raise TypeError("sep must be a string")
+
+        if exclude_parent:
+            attributes = get_subclass_specific_attributes(self)
+        else:
+            attributes = get_object_attributes(self)
+
+        print(sep.join(attributes))
 
     def remove_from_model(self, destructive=False):
         """Remove the metabolite's association from its MassModel.
@@ -211,8 +239,11 @@ class MassMetabolite(Species):
         This method is intended for internal use only.
 
         """
-        _c_str = "_" + self.compartment if self.compartment else ""
-        return str(self).replace(_c_str, "")
+        met_id_str = str(self)
+        if self.compartment:
+            met_id_str = re.sub("_" + self.compartment + "$", "", met_id_str)
+
+        return met_id_str
 
     def _set_id_with_model(self, value):
         """Set the id of the MassMetabolite to the associated MassModel.

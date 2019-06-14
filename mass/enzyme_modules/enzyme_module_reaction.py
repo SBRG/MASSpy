@@ -13,8 +13,12 @@ class EnzymeModuleReaction(MassReaction):
 
     Parameters
     ----------
-    id: str
-        The identifier associated with the MassReaction.
+    id_or_reaction: str, MassReaction, EnzymeModuleReaction
+        Either a string identifier to associate with the EnzymeModuleReaction,
+        or an existing EnzymeModuleReaction object. If an existing
+        EnzymeModuleReaction or MassReaction object is provided, a new
+        EnzymeModuleReaction object is instantiated with the same properties as
+        the original object.
     name: str, optional
         A human readable name for the reaction.
     subsystem: str, optional
@@ -26,7 +30,7 @@ class EnzymeModuleReaction(MassReaction):
 
     Attributes
     ----------
-    enzyme_id: str, optional
+    enzyme_module_id: str, optional
         The identifier of the EnzymeModule represented by the EnzymeModuleForm.
     steady_state_flux: float, optional
         The stored (typically steady state) flux for the reaction. Stored flux
@@ -34,12 +38,17 @@ class EnzymeModuleReaction(MassReaction):
 
     """
 
-    def __init__(self, id=None, name="", subsystem="", reversible=True,
-                 enzyme_id="", steady_state_flux=None):
+    def __init__(self, id_or_reaction=None, name="", subsystem="",
+                 reversible=True, steady_state_flux=None, enzyme_module_id=""):
         """Initialize the MassReaction Object."""
         super(EnzymeModuleReaction, self).__init__(
-            id, name, subsystem, reversible, steady_state_flux)
-        self.enzyme_id = enzyme_id
+            id_or_reaction=id_or_reaction, name=name, subsystem=subsystem,
+            reversible=reversible, steady_state_flux=steady_state_flux)
+        if isinstance(id_or_reaction, EnzymeModuleReaction):
+            self.__dict__.update(id_or_reaction.__dict__)
+        else:
+            # Set the id of the enzyme represented by the EnzymeModuleReaction
+            self.enzyme_module_id = enzyme_module_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
         """Generate a name for the EnzymeModuleReaction based on bound ligands.
