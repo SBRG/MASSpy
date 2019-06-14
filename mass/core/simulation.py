@@ -1635,6 +1635,7 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
+        
         conc_sol = {}
         flux_sol = {}
         update_initial_conditions, update_reactions = update
@@ -1642,7 +1643,7 @@ class Simulation(Object):
             conc_sol[met] = round(sol[-1], chop)
             if update_initial_conditions:
                 met = model.metabolites.get_by_id(met)
-                model.initial_conditions[met] = round(sol[-1], chop)
+                met.initial_condition = round(sol[-1], chop)
 
         for rxn, sol in iteritems(solutions[1]):
             flux_sol[rxn] = round(sol[-1], chop)
