@@ -987,25 +987,28 @@ class MassModel(Object):
         del self.custom_rates[reaction]
 
         # Remove orphaned custom parameters if desired.
-        symbols = rate_to_remove.atoms(sym.Symbol)
-
+        args = rate_to_remove.atoms(sym.Symbol)
+        standards = [
+            sym.Symbol(arg) for arg in reaction.all_parameter_ids + ["t"]]
         # Save currently existing parameters for context management if needed.
-        existing = {str(sym): self.custom_parameters[str(symbol)]
-                    for symbol in symbols if symbol != sym.Symbol("t")}
+        existing = {str(arg): self.custom_parameters[str(arg)]
+                    for arg in args if arg in self.custom_parameters and
+                    arg not in standards}
 
         if remove_orphans and self.custom_rates:
             # Determine symbols still in use.
-            other_symbols = set()
+            other_args = set()
             for custom_rate in itervalues(self.custom_rates):
-                other_symbols.update(custom_rate.atoms(sym.Symbol))
+                other_args.update(custom_rate.atoms(sym.Symbol))
 
             # Remove those that are not being used in any custom rate.
-            for symbol in other_symbols:
-                if symbol in symbols.copy():
-                    symbols.remove(symbol)
+            for arg in other_args:
+                if arg in args.copy():
+                    args.remove(arg)
 
-            for symbol in symbols:
-                del self.custom_parameters[str(sym)]
+            for arg in args:
+                if arg not in standards and arg in self.custom_parameters:
+                    del self.custom_parameters[str(arg)]
 
         context = get_context(self)
         if context:
