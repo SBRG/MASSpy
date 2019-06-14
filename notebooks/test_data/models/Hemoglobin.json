@@ -74,7 +74,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.0773,
+            "_initial_condition": 0.07730001,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -98,7 +98,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 8.99757e-05,
+            "_initial_condition": 8.998e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -114,9 +114,6 @@
             "name": "H2O"
         }
     ],
-    "notes": {
-        "Literature": "\n        1.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part I\u2014A comprehensive kinetic model. Journal of Theoretical Biology 141, 515\u2013528 (1989).\n        2.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part II\u2014Interactions with the environment. Journal of Theoretical Biology 141, 529\u2013545 (1989).\n        3.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part III\u2014Metabolic reaction rates. Journal of Theoretical Biology 142, 41\u201368 (1990).\n        4.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part IV\u2014Data prediction and some model computations. Journal of Theoretical Biology 142, 69\u201385 (1990).\n        "
-    },
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
@@ -286,7 +283,7 @@
                     "_scale": 0
                 }
             ],
-            "name": "Hour"
+            "name": "hour"
         }
     ],
     "version": "1"

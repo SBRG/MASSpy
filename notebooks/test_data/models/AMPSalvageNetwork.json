@@ -18,7 +18,7 @@
     "id": "AMPSalvageNetwork",
     "metabolites": [
         {
-            "_initial_condition": 0.0012,
+            "_initial_condition": 0.0011999,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H13N5O4",
@@ -26,7 +26,7 @@
             "name": "Adenosine"
         },
         {
-            "_initial_condition": 0.001,
+            "_initial_condition": 0.00099986,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H5N5",
@@ -42,7 +42,7 @@
             "name": "Inosine monophosphate"
         },
         {
-            "_initial_condition": 0.001,
+            "_initial_condition": 0.0010001,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H12N4O5",
@@ -50,7 +50,7 @@
             "name": "Inosine"
         },
         {
-            "_initial_condition": 0.002,
+            "_initial_condition": 0.00200014,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H4N4O",
@@ -58,7 +58,7 @@
             "name": "Hypoxanthine"
         },
         {
-            "_initial_condition": 0.06,
+            "_initial_condition": 0.06000376,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -66,7 +66,7 @@
             "name": "Alpha-D-Ribose 1-phosphate"
         },
         {
-            "_initial_condition": 0.00494,
+            "_initial_condition": 0.00494022,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -74,7 +74,7 @@
             "name": "Alpha-D-Ribose 5-phosphate"
         },
         {
-            "_initial_condition": 0.005,
+            "_initial_condition": 0.00500101,
             "charge": -5,
             "compartment": "c",
             "formula": "C5H8O14P3",
@@ -82,7 +82,7 @@
             "name": "5-Phospho-alpha-D-ribose 1-diphosphate"
         },
         {
-            "_initial_condition": 1.6,
+            "_initial_condition": 1.60001407,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -90,7 +90,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.29,
+            "_initial_condition": 0.28998593,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -114,7 +114,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 0.091002,
+            "_initial_condition": 0.09100224,
             "charge": 0,
             "compartment": "c",
             "formula": "H3N",
@@ -122,7 +122,7 @@
             "name": "Ammonia"
         },
         {
-            "_initial_condition": 6.30957e-05,
+            "_initial_condition": 6.31e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -130,7 +130,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 1,
+            "_initial_condition": 0.99999976,
             "charge": 0,
             "compartment": "c",
             "formula": "H2O",
@@ -138,9 +138,6 @@
             "name": "H2O"
         }
     ],
-    "notes": {
-        "Literature": "\n        1.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part I\u2014A comprehensive kinetic model. Journal of Theoretical Biology 141, 515\u2013528 (1989).\n        2.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell: Part II\u2014Interactions with the environment. Journal of Theoretical Biology 141, 529\u2013545 (1989).\n        3.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part III\u2014Metabolic reaction rates. Journal of Theoretical Biology 142, 41\u201368 (1990).\n        4.Joshi, A. & Palsson, B. O. Metabolic dynamics in the human red cell. Part IV\u2014Data prediction and some model computations. Journal of Theoretical Biology 142, 69\u201385 (1990).\n        "
-    },
     "reactions": [
         {
             "_equilibrium_constant": "inf",

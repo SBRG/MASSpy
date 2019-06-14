@@ -74,7 +74,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.0773,
+            "_initial_condition": 0.07730001,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -98,7 +98,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 8.99757e-05,
+            "_initial_condition": 8.998e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -114,11 +114,6 @@
             "name": "H2O"
         }
     ],
-    "notes": {
-        "SB2-textbook": [
-            "Palsson, Bernhard \u00d8.. Systems Biology: Simulation of Dynamic Network States. N.p., Cambridge University Press, 2011."
-        ]
-    },
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
@@ -288,7 +283,7 @@
                     "_scale": 0
                 }
             ],
-            "name": "Hour"
+            "name": "hour"
         }
     ],
     "version": "1"

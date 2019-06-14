@@ -233,6 +233,13 @@ def _f_moiety_formula_rev(metabolite):
         for moiety in moieties:
             replacement = SBML_MOIETY_RE.pattern
             replacement += moiety.lstrip("[").rstrip("]").lower()
+            if not re.match('^[A-Z]+[a-z]+$', replacement):
+                LOGGER.warning(
+                    "SBML user defined compounds must be in the form of a "
+                    "single capital letter followed by zero or more lowercase "
+                    "letters. Therefore removing all non-lowercase letters "
+                    "from the Moiety.")
+                replacement = re.sub("[0-9]", "", replacement)
             # Add to end of formula prevents issues if moiety ends with number
             sbml_formula = sbml_formula.replace(moiety, "")
             sbml_formula += replacement

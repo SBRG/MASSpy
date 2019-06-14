@@ -42,6 +42,7 @@ if __name__ == "__main__":
             "six>=1.11.0",
             "sympy>=1.3",
             "tabulate>=0.8.2",
+            "libroadrunner>=1.5.3",
         ],
         tests_require=[
             "pytest",

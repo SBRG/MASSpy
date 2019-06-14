@@ -48,7 +48,7 @@
             "name": "D-Fructose 1,6-bisphosphate"
         },
         {
-            "_initial_condition": 0.16,
+            "_initial_condition": 0.16000001,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -72,7 +72,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.0773,
+            "_initial_condition": 0.07730001,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -136,7 +136,7 @@
             "name": "AMP"
         },
         {
-            "_initial_condition": 0.29,
+            "_initial_condition": 0.28999996,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -160,7 +160,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 8.99757e-05,
+            "_initial_condition": 8.998e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -176,11 +176,6 @@
             "name": "H2O"
         }
     ],
-    "notes": {
-        "SB2-textbook": [
-            "Palsson, Bernhard \u00d8.. Systems Biology: Simulation of Dynamic Network States. N.p., Cambridge University Press, 2011."
-        ]
-    },
     "reactions": [
         {
             "_equilibrium_constant": 850,
@@ -605,7 +600,7 @@
                     "_scale": 0
                 }
             ],
-            "name": "Hour"
+            "name": "hour"
         }
     ],
     "version": "1"

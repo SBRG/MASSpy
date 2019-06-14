@@ -128,7 +128,7 @@
             "name": "Oxidized glutathione"
         },
         {
-            "_initial_condition": 1,
+            "_initial_condition": 1.0000021,
             "charge": 0,
             "compartment": "c",
             "formula": "CO2",
@@ -136,7 +136,7 @@
             "name": "CO2"
         },
         {
-            "_initial_condition": 7.14957e-05,
+            "_initial_condition": 7.15e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -144,7 +144,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 1,
+            "_initial_condition": 0.9999979,
             "charge": 0,
             "compartment": "c",
             "formula": "H2O",
@@ -152,11 +152,6 @@
             "name": "H2O"
         }
     ],
-    "notes": {
-        "SB2-textbook": [
-            "Palsson, Bernhard \u00d8.. Systems Biology: Simulation of Dynamic Network States. N.p., Cambridge University Press, 2011."
-        ]
-    },
     "reactions": [
         {
             "_equilibrium_constant": 1000,
@@ -492,7 +487,7 @@
                     "_scale": 0
                 }
             ],
-            "name": "Hour"
+            "name": "hour"
         }
     ],
     "version": "1"

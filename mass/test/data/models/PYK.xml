@@ -1,63 +1,271 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" sboTerm="SBO:0000062" level="3" version="2" fbc:required="false">
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" xmlns:groups="http://www.sbml.org/sbml/level3/version1/groups/version1" sboTerm="SBO:0000062" level="3" version="1" fbc:required="false" groups:required="false">
   <model metaid="meta_PYK" id="PYK" name="Pyruvate Kinase" fbc:strict="false">
+    <listOfUnitDefinitions>
+      <unitDefinition id="mM" name="Millimolar">
+        <listOfUnits>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="hr" name="hour">
+        <listOfUnits>
+          <unit kind="second" exponent="1" scale="0" multiplier="3600"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
+        <listOfUnits>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
     <listOfCompartments>
       <compartment id="c" name="Cytosol" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
       <species id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" initialConcentration="0.017" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P"/>
-      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.29" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.28999996" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
       <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
       <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
       <species id="M_pyr_c" name="Pyruvate" compartment="c" initialConcentration="0.060301" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H3O3"/>
-      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
-      <species id="M_pyk_R0_c" name="PYK" compartment="c" initialConcentration="1.40899e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypyk"/>
-      <species id="M_pyk_R0_A_c" name="PYK-adp complex" compartment="c" initialConcentration="8.5189e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2Moietypyk"/>
-      <species id="M_pyk_R0_P_c" name="PYK-pep complex" compartment="c" initialConcentration="8.606e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P1Moietypyk"/>
-      <species id="M_pyk_R0_AP_c" name="PYK-adp-pep complex" compartment="c" initialConcentration="4.297e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C13H14N5O16P3Moietypyk"/>
-      <species id="M_pyk_T0_c" name="PYK" compartment="c" initialConcentration="2.677077e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypyk"/>
-      <species id="M_pyk_R1_c" name="PYK; 1 fdp" compartment="c" initialConcentration="1.645698e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2Moietypyk"/>
-      <species id="M_pyk_R1_A_c" name="PYK-adp complex; 1 fdp" compartment="c" initialConcentration="9.95003e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-7" fbc:chemicalFormula="C16H22N5O22P4Moietypyk"/>
-      <species id="M_pyk_R1_P_c" name="PYK-pep complex; 1 fdp" compartment="c" initialConcentration="1.00521e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-7" fbc:chemicalFormula="C9H12O18P3Moietypyk"/>
-      <species id="M_pyk_R1_AP_c" name="PYK-adp-pep complex; 1 fdp" compartment="c" initialConcentration="5.0194e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C19H24N5O28P5Moietypyk"/>
-      <species id="M_pyk_T1_c" name="PYK; 1 atp" compartment="c" initialConcentration="5.054068e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypyk"/>
-      <species id="M_pyk_R2_c" name="PYK; 2 fdp" compartment="c" initialConcentration="7.208156e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C12H20O24P4Moietypyk"/>
-      <species id="M_pyk_R2_A_c" name="PYK-adp complex; 2 fdp" compartment="c" initialConcentration="4.358114e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-11" fbc:chemicalFormula="C22H32N5O34P6Moietypyk"/>
-      <species id="M_pyk_R2_P_c" name="PYK-pep complex; 2 fdp" compartment="c" initialConcentration="4.4028e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-11" fbc:chemicalFormula="C15H22O30P5Moietypyk"/>
-      <species id="M_pyk_R2_AP_c" name="PYK-adp-pep complex; 2 fdp" compartment="c" initialConcentration="2.19849e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C25H34N5O40P7Moietypyk"/>
-      <species id="M_pyk_T2_c" name="PYK; 2 atp" compartment="c" initialConcentration="3.578101e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypyk"/>
-      <species id="M_pyk_R3_c" name="PYK; 3 fdp" compartment="c" initialConcentration="1.4031877e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C18H30O36P6Moietypyk"/>
-      <species id="M_pyk_R3_A_c" name="PYK-adp complex; 3 fdp" compartment="c" initialConcentration="8.483795e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-15" fbc:chemicalFormula="C28H42N5O46P8Moietypyk"/>
-      <species id="M_pyk_R3_P_c" name="PYK-pep complex; 3 fdp" compartment="c" initialConcentration="8.57079e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-15" fbc:chemicalFormula="C21H32O42P7Moietypyk"/>
-      <species id="M_pyk_R3_AP_c" name="PYK-adp-pep complex; 3 fdp" compartment="c" initialConcentration="4.27972e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-18" fbc:chemicalFormula="C31H44N5O52P9Moietypyk"/>
-      <species id="M_pyk_T3_c" name="PYK; 3 atp" compartment="c" initialConcentration="1.125853e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypyk"/>
-      <species id="M_pyk_R4_c" name="PYK; 4 fdp" compartment="c" initialConcentration="1.024327e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C24H40O48P8Moietypyk"/>
-      <species id="M_pyk_R4_A_c" name="PYK-adp complex; 4 fdp" compartment="c" initialConcentration="6.19317e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-19" fbc:chemicalFormula="C34H52N5O58P10Moietypyk"/>
-      <species id="M_pyk_R4_P_c" name="PYK-pep complex; 4 fdp" compartment="c" initialConcentration="6.25668e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-19" fbc:chemicalFormula="C27H42O54P9Moietypyk"/>
-      <species id="M_pyk_R4_AP_c" name="PYK-adp-pep complex; 4 fdp" compartment="c" initialConcentration="3.1242e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-22" fbc:chemicalFormula="C37H54N5O64P11Moietypyk"/>
-      <species id="M_pyk_T4_c" name="PYK; 4 atp" compartment="c" initialConcentration="1.32844e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypyk"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.998e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_pyk_R0_c" name="PYK" compartment="c" initialConcentration="1.40856e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R0_A_c" name="PYK-adp complex" compartment="c" initialConcentration="8.518e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R0_P_c" name="PYK-pep complex" compartment="c" initialConcentration="8.638e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P1Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_pep_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R0_AP_c" name="PYK-adp-pep complex" compartment="c" initialConcentration="4.333e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C13H14N5O16P3Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c; 1 M_pep_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_T0_c" name="PYK" compartment="c" initialConcentration="2.676267e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R1_c" name="PYK; 1 fdp_c" compartment="c" initialConcentration="1.6452e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 1 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R1_A_c" name="PYK-adp complex; 1 fdp_c" compartment="c" initialConcentration="9.94903e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-7" fbc:chemicalFormula="C16H22N5O22P4Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c</p>
+            <p>bound_effectors: 1 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R1_P_c" name="PYK-pep complex; 1 fdp_c" compartment="c" initialConcentration="1.00888e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-7" fbc:chemicalFormula="C9H12O18P3Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_pep_c</p>
+            <p>bound_effectors: 1 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R1_AP_c" name="PYK-adp-pep complex; 1 fdp_c" compartment="c" initialConcentration="5.0613e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C19H24N5O28P5Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c; 1 M_pep_c</p>
+            <p>bound_effectors: 1 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_T1_c" name="PYK; 1 atp_c" compartment="c" initialConcentration="5.052539e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 1 M_atp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R2_c" name="PYK; 2 fdp_c" compartment="c" initialConcentration="7.205975e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C12H20O24P4Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 2 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R2_A_c" name="PYK-adp complex; 2 fdp_c" compartment="c" initialConcentration="4.357676e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-11" fbc:chemicalFormula="C22H32N5O34P6Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c</p>
+            <p>bound_effectors: 2 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R2_P_c" name="PYK-pep complex; 2 fdp_c" compartment="c" initialConcentration="4.41889e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-11" fbc:chemicalFormula="C15H22O30P5Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_pep_c</p>
+            <p>bound_effectors: 2 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R2_AP_c" name="PYK-adp-pep complex; 2 fdp_c" compartment="c" initialConcentration="2.21685e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C25H34N5O40P7Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c; 1 M_pep_c</p>
+            <p>bound_effectors: 2 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_T2_c" name="PYK; 2 atp_c" compartment="c" initialConcentration="3.577019e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 2 M_atp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R3_c" name="PYK; 3 fdp_c" compartment="c" initialConcentration="1.4027631e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C18H30O36P6Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 3 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R3_A_c" name="PYK-adp complex; 3 fdp_c" compartment="c" initialConcentration="8.482944e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-15" fbc:chemicalFormula="C28H42N5O46P8Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c</p>
+            <p>bound_effectors: 3 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R3_P_c" name="PYK-pep complex; 3 fdp_c" compartment="c" initialConcentration="8.60211e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-15" fbc:chemicalFormula="C21H32O42P7Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_pep_c</p>
+            <p>bound_effectors: 3 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R3_AP_c" name="PYK-adp-pep complex; 3 fdp_c" compartment="c" initialConcentration="4.31546e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-18" fbc:chemicalFormula="C31H44N5O52P9Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c; 1 M_pep_c</p>
+            <p>bound_effectors: 3 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_T3_c" name="PYK; 3 atp_c" compartment="c" initialConcentration="1.125512e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 3 M_atp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R4_c" name="PYK; 4 fdp_c" compartment="c" initialConcentration="1.0240171e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C24H40O48P8Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 4 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R4_A_c" name="PYK-adp complex; 4 fdp_c" compartment="c" initialConcentration="6.192549e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-19" fbc:chemicalFormula="C34H52N5O58P10Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c</p>
+            <p>bound_effectors: 4 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R4_P_c" name="PYK-pep complex; 4 fdp_c" compartment="c" initialConcentration="6.27954e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-19" fbc:chemicalFormula="C27H42O54P9Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_pep_c</p>
+            <p>bound_effectors: 4 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_R4_AP_c" name="PYK-adp-pep complex; 4 fdp_c" compartment="c" initialConcentration="3.15029e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-22" fbc:chemicalFormula="C37H54N5O64P11Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_catalytic: 1 M_adp_c; 1 M_pep_c</p>
+            <p>bound_effectors: 4 M_fdp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
+      <species id="M_pyk_T4_c" name="PYK; 4 atp_c" compartment="c" initialConcentration="1.32804e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypyk">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>bound_effectors: 4 M_atp_c</p>
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
+      </species>
     </listOfSpecies>
     <listOfParameters>
-      <parameter id="kf_R_PYK_L" value="1000000000000" constant="true"/>
-      <parameter id="Keq_R_PYK_R05" value="INF" constant="true"/>
-      <parameter id="Keq_R_PYK_R15" value="INF" constant="true"/>
-      <parameter id="Keq_R_PYK_R25" value="INF" constant="true"/>
-      <parameter id="Keq_R_PYK_R35" value="INF" constant="true"/>
-      <parameter id="Keq_R_PYK_R45" value="INF" constant="true"/>
-      <parameter id="Keq_R_PYK_L" value="19" constant="true"/>
+      <parameter sboTerm="SBO:0000626" id="cobra_default_lb" value="-1000" units="mmol_per_gDW_per_hr" constant="true"/>
+      <parameter sboTerm="SBO:0000626" id="cobra_default_ub" value="1000" units="mmol_per_gDW_per_hr" constant="true"/>
+      <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
+      <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
+      <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter id="Keq_PYK_P" value="4.44444444444444" constant="true"/>
       <parameter id="Keq_PYK_A" value="2.10970464135021" constant="true"/>
       <parameter id="Keq_PYK_I" value="0.294985250737463" constant="true"/>
       <parameter id="Keq_PYK_ACT" value="200" constant="true"/>
-      <parameter id="Keq_R_PYK_L" value="19" constant="true"/>
-      <parameter id="kf_PYK" value="2207479" constant="true"/>
-      <parameter id="kf_PYK_A" value="10091263" constant="true"/>
-      <parameter id="kf_PYK_P" value="10090163" constant="true"/>
+      <parameter id="Keq_PYK_L" value="19" constant="true"/>
+      <parameter id="kf_PYK" value="2189198" constant="true"/>
+      <parameter id="kf_PYK_A" value="10268302" constant="true"/>
+      <parameter id="kf_PYK_P" value="10265064" constant="true"/>
       <parameter id="kf_PYK_I" value="1000000" constant="true"/>
       <parameter id="kf_PYK_ACT" value="1000000" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_PYK_R01" name="pyk_R0-pep binding" reversible="true">
+      <reaction id="R_PYK_R01" name="pyk_R0-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -87,7 +295,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R02" name="pyk_R0-adp binding" reversible="true">
+      <reaction id="R_PYK_R02" name="pyk_R0-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -117,7 +330,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R03" name="pyk_R0_A-pep binding" reversible="true">
+      <reaction id="R_PYK_R03" name="pyk_R0_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_A_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -147,7 +365,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R04" name="pyk_R0_P-adp binding" reversible="true">
+      <reaction id="R_PYK_R04" name="pyk_R0_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_P_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -177,7 +400,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R05" name="pyk_R0_AP catalyzation" reversible="false">
+      <reaction id="R_PYK_R05" name="pyk_R0_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_AP_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
@@ -195,9 +423,17 @@
               <ci> kf_PYK </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PYK_R05" value="INF"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R10" name="pyk_R0-fdp binding" reversible="true">
+      <reaction id="R_PYK_R10" name="pyk_R0-fdp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
@@ -228,7 +464,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R11" name="pyk_R1-pep binding" reversible="true">
+      <reaction id="R_PYK_R11" name="pyk_R1-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -258,7 +499,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R12" name="pyk_R1-adp binding" reversible="true">
+      <reaction id="R_PYK_R12" name="pyk_R1-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -288,7 +534,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R13" name="pyk_R1_A-pep binding" reversible="true">
+      <reaction id="R_PYK_R13" name="pyk_R1_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_A_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -318,7 +569,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R14" name="pyk_R1_P-adp binding" reversible="true">
+      <reaction id="R_PYK_R14" name="pyk_R1_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_P_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -348,7 +604,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R15" name="pyk_R1_AP catalyzation" reversible="false">
+      <reaction id="R_PYK_R15" name="pyk_R1_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_AP_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
@@ -366,9 +627,17 @@
               <ci> kf_PYK </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PYK_R15" value="INF"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R20" name="pyk_R1-fdp binding" reversible="true">
+      <reaction id="R_PYK_R20" name="pyk_R1-fdp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R1_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
@@ -403,7 +672,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R21" name="pyk_R2-pep binding" reversible="true">
+      <reaction id="R_PYK_R21" name="pyk_R2-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -433,7 +707,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R22" name="pyk_R2-adp binding" reversible="true">
+      <reaction id="R_PYK_R22" name="pyk_R2-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -463,7 +742,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R23" name="pyk_R2_A-pep binding" reversible="true">
+      <reaction id="R_PYK_R23" name="pyk_R2_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_A_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -493,7 +777,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R24" name="pyk_R2_P-adp binding" reversible="true">
+      <reaction id="R_PYK_R24" name="pyk_R2_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_P_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -523,7 +812,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R25" name="pyk_R2_AP catalyzation" reversible="false">
+      <reaction id="R_PYK_R25" name="pyk_R2_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_AP_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
@@ -541,9 +835,17 @@
               <ci> kf_PYK </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PYK_R25" value="INF"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R30" name="pyk_R2-fdp binding" reversible="true">
+      <reaction id="R_PYK_R30" name="pyk_R2-fdp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R2_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
@@ -578,7 +880,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R31" name="pyk_R3-pep binding" reversible="true">
+      <reaction id="R_PYK_R31" name="pyk_R3-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -608,7 +915,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R32" name="pyk_R3-adp binding" reversible="true">
+      <reaction id="R_PYK_R32" name="pyk_R3-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -638,7 +950,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R33" name="pyk_R3_A-pep binding" reversible="true">
+      <reaction id="R_PYK_R33" name="pyk_R3_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_A_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -668,7 +985,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R34" name="pyk_R3_P-adp binding" reversible="true">
+      <reaction id="R_PYK_R34" name="pyk_R3_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_P_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -698,7 +1020,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R35" name="pyk_R3_AP catalyzation" reversible="false">
+      <reaction id="R_PYK_R35" name="pyk_R3_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_AP_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
@@ -716,9 +1043,17 @@
               <ci> kf_PYK </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PYK_R35" value="INF"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R40" name="pyk_R3-fdp binding" reversible="true">
+      <reaction id="R_PYK_R40" name="pyk_R3-fdp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R3_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
@@ -752,7 +1087,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R41" name="pyk_R4-pep binding" reversible="true">
+      <reaction id="R_PYK_R41" name="pyk_R4-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R4_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -782,7 +1122,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R42" name="pyk_R4-adp binding" reversible="true">
+      <reaction id="R_PYK_R42" name="pyk_R4-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R4_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -812,7 +1157,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R43" name="pyk_R4_A-pep binding" reversible="true">
+      <reaction id="R_PYK_R43" name="pyk_R4_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R4_A_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
@@ -842,7 +1192,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R44" name="pyk_R4_P-adp binding" reversible="true">
+      <reaction id="R_PYK_R44" name="pyk_R4_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R4_P_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
@@ -872,7 +1227,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R45" name="pyk_R4_AP catalyzation" reversible="false">
+      <reaction id="R_PYK_R45" name="pyk_R4_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R4_AP_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
@@ -890,9 +1250,17 @@
               <ci> kf_PYK </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PYK_R45" value="INF"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_L" name="pyk_R0-pyk_T0 transition" reversible="true">
+      <reaction id="R_PYK_L" name="pyk_R0-pyk_T0 transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_R0_c" stoichiometry="1" constant="false"/>
         </listOfReactants>
@@ -903,21 +1271,30 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_R_PYK_L </ci>
+              <ci> kf_PYK_L </ci>
               <apply>
                 <minus/>
                 <ci> M_pyk_R0_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pyk_T0_c </ci>
-                  <ci> Keq_R_PYK_L </ci>
+                  <ci> Keq_PYK_L </ci>
                 </apply>
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PYK_L" value="1000000000000"/>
+            <localParameter id="Keq_PYK_L" value="19"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_T1" name="pyk_T0-atp binding" reversible="true">
+      <reaction id="R_PYK_T1" name="pyk_T0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_T0_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
@@ -948,7 +1325,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_T2" name="pyk_T1-atp binding" reversible="true">
+      <reaction id="R_PYK_T2" name="pyk_T1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_T1_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
@@ -983,7 +1365,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_T3" name="pyk_T2-atp binding" reversible="true">
+      <reaction id="R_PYK_T3" name="pyk_T2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_T2_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
@@ -1018,7 +1405,12 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_T4" name="pyk_T3-atp binding" reversible="true">
+      <reaction id="R_PYK_T4" name="pyk_T3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: PYK</p>
+          </html>
+        </notes>
         <listOfReactants>
           <speciesReference species="M_pyk_T3_c" stoichiometry="1" constant="false"/>
           <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
@@ -1053,5 +1445,245 @@
         </kineticLaw>
       </reaction>
     </listOfReactions>
+    <groups:listOfGroups>
+      <groups:group groups:id="PYK_enzyme_module_ligands" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Phosphoenolpyruvate" groups:idRef="M_pep_c"/>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+          <groups:member groups:name="Pyruvate" groups:idRef="M_pyr_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_forms" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PYK" groups:idRef="M_pyk_R0_c"/>
+          <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
+          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
+          <groups:member groups:name="PYK" groups:idRef="M_pyk_T0_c"/>
+          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
+          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_AP_c"/>
+          <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
+          <groups:member groups:name="PYK; 2 fdp_c" groups:idRef="M_pyk_R2_c"/>
+          <groups:member groups:name="PYK-adp complex; 2 fdp_c" groups:idRef="M_pyk_R2_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_AP_c"/>
+          <groups:member groups:name="PYK; 2 atp_c" groups:idRef="M_pyk_T2_c"/>
+          <groups:member groups:name="PYK; 3 fdp_c" groups:idRef="M_pyk_R3_c"/>
+          <groups:member groups:name="PYK-adp complex; 3 fdp_c" groups:idRef="M_pyk_R3_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_AP_c"/>
+          <groups:member groups:name="PYK; 3 atp_c" groups:idRef="M_pyk_T3_c"/>
+          <groups:member groups:name="PYK; 4 fdp_c" groups:idRef="M_pyk_R4_c"/>
+          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_AP_c"/>
+          <groups:member groups:name="PYK; 4 atp_c" groups:idRef="M_pyk_T4_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
+          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
+          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
+          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
+          <groups:member groups:name="pyk_R0-fdp binding" groups:idRef="R_PYK_R10"/>
+          <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
+          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
+          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
+          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
+          <groups:member groups:name="pyk_T1-atp binding" groups:idRef="R_PYK_T2"/>
+          <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
+          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
+          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
+          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
+          <groups:member groups:name="pyk_R2-fdp binding" groups:idRef="R_PYK_R30"/>
+          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
+          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
+          <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R3-fdp binding" groups:idRef="R_PYK_R40"/>
+          <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
+          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
+          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
+          <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
+          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
+          <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
+          <groups:member groups:name="pyk_R0-pyk_T0 transition" groups:idRef="R_PYK_L"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized_Category0" groups:name="Substrates" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Phosphoenolpyruvate" groups:idRef="M_pep_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized_Category1" groups:name="Cofactors" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized_Category2" groups:name="Activators" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized_Category3" groups:name="Inhibitors" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized_Category4" groups:name="Products" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+          <groups:member groups:name="Pyruvate" groups:idRef="M_pyr_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_ligands_categorized" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Substrates" groups:idRef="PYK_enzyme_module_ligands_categorized_Category0"/>
+          <groups:member groups:name="Cofactors" groups:idRef="PYK_enzyme_module_ligands_categorized_Category1"/>
+          <groups:member groups:name="Activators" groups:idRef="PYK_enzyme_module_ligands_categorized_Category2"/>
+          <groups:member groups:name="Inhibitors" groups:idRef="PYK_enzyme_module_ligands_categorized_Category3"/>
+          <groups:member groups:name="Products" groups:idRef="PYK_enzyme_module_ligands_categorized_Category4"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_forms_categorized_Category0" groups:name="Relaxed" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
+          <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
+          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
+          <groups:member groups:name="PYK" groups:idRef="M_pyk_R0_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_AP_c"/>
+          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_P_c"/>
+          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_AP_c"/>
+          <groups:member groups:name="PYK-adp complex; 2 fdp_c" groups:idRef="M_pyk_R2_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_P_c"/>
+          <groups:member groups:name="PYK; 2 fdp_c" groups:idRef="M_pyk_R2_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_AP_c"/>
+          <groups:member groups:name="PYK-adp complex; 3 fdp_c" groups:idRef="M_pyk_R3_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_P_c"/>
+          <groups:member groups:name="PYK; 3 fdp_c" groups:idRef="M_pyk_R3_c"/>
+          <groups:member groups:name="PYK-adp-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_AP_c"/>
+          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
+          <groups:member groups:name="PYK; 4 fdp_c" groups:idRef="M_pyk_R4_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_forms_categorized_Category1" groups:name="Tense" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PYK" groups:idRef="M_pyk_T0_c"/>
+          <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
+          <groups:member groups:name="PYK; 2 atp_c" groups:idRef="M_pyk_T2_c"/>
+          <groups:member groups:name="PYK; 3 atp_c" groups:idRef="M_pyk_T3_c"/>
+          <groups:member groups:name="PYK; 4 atp_c" groups:idRef="M_pyk_T4_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_forms_categorized" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Relaxed" groups:idRef="PYK_enzyme_module_forms_categorized_Category0"/>
+          <groups:member groups:name="Tense" groups:idRef="PYK_enzyme_module_forms_categorized_Category1"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category0" groups:name="pep_c binding" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
+          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
+          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
+          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
+          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
+          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
+          <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category1" groups:name="adp_c binding" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
+          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
+          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
+          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
+          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category2" groups:name="catalyzation" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
+          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
+          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
+          <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category3" groups:name="fdp_c activation" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0-fdp binding" groups:idRef="R_PYK_R10"/>
+          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
+          <groups:member groups:name="pyk_R2-fdp binding" groups:idRef="R_PYK_R30"/>
+          <groups:member groups:name="pyk_R3-fdp binding" groups:idRef="R_PYK_R40"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category4" groups:name="atp_c inhibition" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
+          <groups:member groups:name="pyk_T1-atp binding" groups:idRef="R_PYK_T2"/>
+          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
+          <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category5" groups:name="R/T transition" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pyk_R0-pyk_T0 transition" groups:idRef="R_PYK_L"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_enzyme_module_reactions_categorized" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="pep_c binding" groups:idRef="PYK_enzyme_module_reactions_categorized_Category0"/>
+          <groups:member groups:name="adp_c binding" groups:idRef="PYK_enzyme_module_reactions_categorized_Category1"/>
+          <groups:member groups:name="catalyzation" groups:idRef="PYK_enzyme_module_reactions_categorized_Category2"/>
+          <groups:member groups:name="fdp_c activation" groups:idRef="PYK_enzyme_module_reactions_categorized_Category3"/>
+          <groups:member groups:name="atp_c inhibition" groups:idRef="PYK_enzyme_module_reactions_categorized_Category4"/>
+          <groups:member groups:name="R/T transition" groups:idRef="PYK_enzyme_module_reactions_categorized_Category5"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PYK_EnzymeModule" groups:name="Pyruvate Kinase" groups:kind="collection">
+        <notes>
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>subsystem: Glycolysis</p>
+            <p>enzyme_concentration_total: 6.9e-05</p>
+            <p>enzyme_net_flux: 2.24</p>
+            <p>enzyme_net_flux_equation: kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))</p>
+          </html>
+        </notes>
+        <groups:listOfMembers>
+          <groups:member groups:idRef="PYK_enzyme_module_ligands"/>
+          <groups:member groups:idRef="PYK_enzyme_module_forms"/>
+          <groups:member groups:idRef="PYK_enzyme_module_reactions"/>
+          <groups:member groups:idRef="PYK_enzyme_module_ligands_categorized"/>
+          <groups:member groups:idRef="PYK_enzyme_module_forms_categorized"/>
+          <groups:member groups:idRef="PYK_enzyme_module_reactions_categorized"/>
+        </groups:listOfMembers>
+      </groups:group>
+    </groups:listOfGroups>
   </model>
 </sbml>
