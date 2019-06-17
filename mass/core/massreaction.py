@@ -354,10 +354,7 @@ class MassReaction(Object):
 
         """
         if self.boundary:
-            for metabolite in list(self.metabolites):
-                bc_metabolite = metabolite._remove_compartment_from_id_str()
-                bc_metabolite += "_" + str(list(
-                    MASSCONFIGURATION.boundary_compartment)[0])
+            bc_metabolite = self._make_boundary_metabolites()[0]
         else:
             bc_metabolite = None
 
@@ -1152,6 +1149,17 @@ class MassReaction(Object):
             metab._reaction.add(self)
         for gene in self._genes:
             gene._reaction.add(self)
+    
+    def _make_boundary_metabolites(self):
+        """Make the boundary metabolite."""
+        bc_metabolites = []
+        for metabolite in list(self.metabolites):
+            bc_metabolite = metabolite._remove_compartment_from_id_str()
+            bc_metabolite += "_" + str(list(
+                MASSCONFIGURATION.boundary_compartment)[0])
+            bc_metabolites += [bc_metabolite]
+
+        return bc_metabolites
 
     def _repr_html_(self):
         """HTML representation of the overview for the MassReaction."""

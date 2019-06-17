@@ -257,8 +257,6 @@ def _fix_parameter_id(pid, rid=None, **kwargs):
     """
     promote_local_parameters = kwargs["promote_local_parameters"]
     remove_char = kwargs["remove_char"]
-    if remove_char:
-        pid = _remove_char_from_id(pid)
 
     if promote_local_parameters and rid:
         if isinstance(rid, list):
@@ -270,6 +268,9 @@ def _fix_parameter_id(pid, rid=None, **kwargs):
         rid, p_type = rate_constant_fix.groups()
         p_type = {"fwd": "kf_", "rev": "kr_"}[p_type]
         pid = pid[:rate_constant_fix.start()] + p_type + rid
+    
+    if remove_char:
+        pid = _remove_char_from_id(pid)
 
     return pid
 
@@ -1065,8 +1066,13 @@ def _read_reaction_kinetic_law_from_sbml(reaction, mass_reaction, metabolites,
                and mass_reaction.boundary_metabolite == str(e).strip("'"):
                 new_arg = mass_reaction.boundary_metabolite
             elif not mass_reaction.reactants or not mass_reaction.products:
-                # TODO raise warning
-                pass
+                msg = "({0}.boundary: {1}, {0}.boundary_metabolite: {2}!={3})"
+                msg = msg.format(
+                    mass_reaction.id, mass_reaction.boundary, str(new_arg),
+                    mass_reaction._make_boundary_metabolites())
+                LOGGER.warning(
+                    "Reaction '%s' appears to be on the boundary, but %s.",
+                    mass_reaction, msg)
         else:
             new_arg = str(new_arg)
         finally:
@@ -2374,9 +2380,9 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
     except MassSBMLError as e:
         errors["MASS_ERROR"].append(str(e))
         return None, errors
-    # except Exception as e:
-    #     errors["MASS_FATAL"].append(str(e))
-    #     return None, errors
+    except Exception as e:
+        errors["MASS_FATAL"].append(str(e))
+        return None, errors
 
     mass_errors = log_stream.getvalue().split("\n")
     for mass_error in mass_errors:

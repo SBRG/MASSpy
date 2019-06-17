@@ -254,7 +254,6 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
     # Filter out reactions without custom rates
     reaction_list = [reaction for reaction in reaction_list
                      if reaction in model.custom_rates]
-
     for rxn in reaction_list:
         rate = model.custom_rates[rxn]
         symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))]
@@ -267,7 +266,8 @@ def get_missing_custom_parameters(model, simulation=None, reaction_list=None):
                     if value is None:
                         customs.append(parameter)
                 except KeyError:
-                    customs.append(parameter)
+                    if parameter not in model.boundary_conditions:
+                        customs.append(parameter)
         if existing_customs:
             customs = [custom for custom in customs
                        if sym.Symbol(custom) not in existing_customs
