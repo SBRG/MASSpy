@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -208,7 +208,6 @@
       <parameter id="Keq_PFK_A" value="14.7058823529412" constant="true"/>
       <parameter id="Keq_PFK_I" value="10" constant="true"/>
       <parameter id="Keq_PFK_ACT" value="30.3030303030303" constant="true"/>
-      <parameter id="Keq_PFK_L" value="0.0011" constant="true"/>
       <parameter id="kf_PFK" value="2000064" constant="true"/>
       <parameter id="kf_PFK_A" value="61635" constant="true"/>
       <parameter id="kf_PFK_F" value="5000028" constant="true"/>

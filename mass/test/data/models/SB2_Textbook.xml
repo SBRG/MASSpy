@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -340,7 +340,6 @@
       <parameter id="Keq_PFK_ACT" value="30.3030303030303" constant="true"/>
       <parameter id="Keq_PFK_F" value="10" constant="true"/>
       <parameter id="Keq_PFK_I" value="10" constant="true"/>
-      <parameter id="Keq_PFK_L" value="0.0011" constant="true"/>
       <parameter id="kf_PFK" value="18867444" constant="true"/>
       <parameter id="kf_PFK_A" value="4239459" constant="true"/>
       <parameter id="kf_PFK_ACT" value="1000000" constant="true"/>
