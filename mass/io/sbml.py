@@ -17,7 +17,8 @@ from six import integer_types, iteritems, itervalues, string_types
 
 from sympy import Basic, Symbol, SympifyError, mathml, sympify
 
-from cobra.core import DictList, Gene
+from cobra.core.dictlist import DictList
+from cobra.core.gene import Gene
 from cobra.io.sbml import (
     BOUND_MINUS_INF, BOUND_PLUS_INF, CobraSBMLError, LOWER_BOUND_ID,
     SBO_DEFAULT_FLUX_BOUND, SBO_FLUX_BOUND, UPPER_BOUND_ID, ZERO_BOUND_ID,
@@ -25,14 +26,20 @@ from cobra.io.sbml import (
     _get_doc_from_filename as _cobra_get_doc_from_filename, _parse_annotations,
     _sbase_annotations as _cobra_sbase_annotations, _sbase_notes_dict)
 
-from mass.core import (
-    MassConfiguration, MassMetabolite, MassModel, MassReaction, Unit,
-    UnitDefinition, _SBML_BASE_UNIT_KINDS_DICT)
-from mass.enzyme_modules import (
-    EnzymeModule, EnzymeModuleDict, EnzymeModuleForm, EnzymeModuleReaction,
-    _ORDERED_ENZYMEMODULE_DICT_DEFAULTS, _make_bound_attr_str_repr)
+from mass.core.massconfiguration import MassConfiguration
+from mass.core.massmetabolite import MassMetabolite
+from mass.core.massmodel import MassModel
+from mass.core.massreaction import MassReaction
+from mass.core.units import (Unit, UnitDefinition, _SBML_BASE_UNIT_KINDS_DICT)
+from mass.enzyme_modules.enzyme_module import EnzymeModule
+from mass.enzyme_modules.enzyme_module_dict import (
+    EnzymeModuleDict, _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
+from mass.enzyme_modules.enzyme_module_form import (
+    EnzymeModuleForm, _make_bound_attr_str_repr)
+from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.exceptions import MassSBMLError
-from mass.util import get_subclass_specific_attributes, strip_time
+from mass.util.expressions import strip_time
+from mass.util.util import get_subclass_specific_attributes
 
 LOGGER = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
@@ -268,7 +275,7 @@ def _fix_parameter_id(pid, rid=None, **kwargs):
         rid, p_type = rate_constant_fix.groups()
         p_type = {"fwd": "kf_", "rev": "kr_"}[p_type]
         pid = pid[:rate_constant_fix.start()] + p_type + rid
-    
+
     if remove_char:
         pid = _remove_char_from_id(pid)
 

@@ -60,8 +60,8 @@ from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
 from mass.core.massmodel import MassModel
-from mass.core.solution import (
-    Solution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
+from mass.core.masssolution import (
+    MassSolution, _CONC_STR, _FLUX_STR, _NETFLUX_STR, _POOL_STR)
 from mass.exceptions import MassSimulationError
 from mass.util.DictWithID import DictWithID
 from mass.util.expressions import _mk_met_func, strip_time
@@ -622,7 +622,7 @@ class Simulation(Object):
             t, conc_sol, sol_obj = self._integrate_odes(time, odes, jacb,
                                                         ics, options)
             # Create Solution object for concentrations
-            conc_sol = Solution(model, _CONC_STR, conc_sol, t)
+            conc_sol = MassSolution(model, _CONC_STR, conc_sol, t)
 
             # Calculate flux solutions using the concentration solutions
             flux_sol = self._calculate_flux_solutions(model, parameters,
@@ -637,8 +637,8 @@ class Simulation(Object):
         except MassSimulationError as e:
             warn(str(e))
             # Create empty solution objects
-            conc_sol = Solution(model, _CONC_STR)
-            flux_sol = Solution(model, _FLUX_STR)
+            conc_sol = MassSolution(model, _CONC_STR)
+            flux_sol = MassSolution(model, _FLUX_STR)
             sol_obj = None
 
         return _update_and_return(conc_sol, flux_sol, sol_obj,
@@ -796,12 +796,14 @@ class Simulation(Object):
             self._assess_quality(model, verbose)
             conc_sol, flux_sol = strategy_dict[strategy](
                 model, perturbations, verbose, chop, update, **options)
-            conc_sol = Solution(model, _CONC_STR, solution_dictionary=conc_sol)
-            flux_sol = Solution(model, _FLUX_STR, solution_dictionary=flux_sol)
+            conc_sol = MassSolution(
+                model, _CONC_STR, solution_dictionary=conc_sol)
+            flux_sol = MassSolution(
+                model, _FLUX_STR, solution_dictionary=flux_sol)
         except MassSimulationError as e:
             warn(str(e))
-            conc_sol = Solution(model, _CONC_STR)
-            flux_sol = Solution(model, _FLUX_STR)
+            conc_sol = MassSolution(model, _CONC_STR)
+            flux_sol = MassSolution(model, _FLUX_STR)
 
         if update_initial_conditions:
             self.update_values(model)
@@ -1100,7 +1102,8 @@ class Simulation(Object):
                                     expr=expr, modules=_LAMBDIFY_MODULE)
                 values = np.array([sol[arg] for arg in args])
                 groups_sol_dict.update({g_id: func(*values)})
-            group_sol = Solution(sol.model, sol_type, groups_sol_dict, sol.t)
+            group_sol = MassSolution(
+                sol.model, sol_type, groups_sol_dict, sol.t)
             group_sol._groups = groups_id_dict
             if interpolate:
                 sol.interpolate = interpolate
@@ -1476,7 +1479,7 @@ class Simulation(Object):
                 flux = np.array([float(rate)] * len(t))
             fluxes[reaction.id] = flux
 
-        flux_sol = Solution(model, _FLUX_STR, fluxes, t)
+        flux_sol = MassSolution(model, _FLUX_STR, fluxes, t)
 
         return flux_sol
 
