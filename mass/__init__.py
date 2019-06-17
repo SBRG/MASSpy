@@ -11,7 +11,7 @@ from os.path import dirname as _dirname
 from mass import (analysis, io)
 from mass.core import (
     convert_cobra_to_mass, convert_mass_to_cobra, MassMetabolite, MassModel,
-    MassReaction, Simulation, Solution, UnitDefinition, get_defaults,
+    MassReaction, Simulation, MassSolution, UnitDefinition, get_defaults,
     make_display_data, plot_phase_portrait, plot_simulation,
     plot_tiled_phase_portrait, set_defaults)
 

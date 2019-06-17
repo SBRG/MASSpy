@@ -14,7 +14,7 @@ from six import iteritems
 
 from mass.core.massmodel import MassModel
 from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
-from mass.util.DictWithID import DictWithID 
+from mass.util.DictWithID import DictWithID
 from mass.util.util import ensure_iterable
 
 # Strings of valid solution types
@@ -30,13 +30,13 @@ _POOL_RE = re.compile(_POOL_STR)
 _NETFLUX_RE = re.compile(_NETFLUX_STR)
 
 
-class Solution(DictWithID):
+class MassSolution(DictWithID):
     """Container to store the solutions for the simulation of a MassModel.
 
-    Solution containers are given an ID of the following form:
-        Solution.id = Solution_{id_or_model}_{solution_type}
+    MassSolution containers are given an ID of the following form:
+        MassSolution.id = MassSolution_{id_or_model}_{solution_type}
 
-    The Solution class is essentially a subclass of dict with some additional
+    The MassSolution class is essentially a subclass of a dict with additional
     attributes and properties.
 
     Parameters
@@ -64,14 +64,14 @@ class Solution(DictWithID):
 
     Notes
     -----
-    Solution objects can behave as booleans, with empty Solution objects
-        returning as False, and those with solutions returning as True.
+    MassSolution objects can behave as booleans, with empty MassSolution
+        objects returning as False, and those with solutions returning as True.
 
     """
 
     def __init__(self, id_or_model, solution_type, solution_dictionary=None,
                  time=None, interpolate=False):
-        """Initialize Solution with id "solution_type" for solutions."""
+        """Initialize MassSolution with id "solution_type" for solutions."""
         valid_check = [True if _re.match(solution_type) else False
                        for _re in [_CONC_RE, _FLUX_RE, _POOL_RE, _NETFLUX_RE]]
         if True not in valid_check:
@@ -97,12 +97,12 @@ class Solution(DictWithID):
 
     @property
     def t(self):
-        """Return time points stored in the Solution."""
+        """Return time points stored in the MassSolution."""
         return getattr(self, "_time", None)
 
     @t.setter
     def t(self, value):
-        """Set the time points that are stored in the Solution.
+        """Set the time points that are stored in the MassSolution.
 
         Parameters
         ----------
@@ -112,9 +112,9 @@ class Solution(DictWithID):
 
         Notes
         -----
-        If the Solution is stored as numerical arrays and not as interpolating
-            functions, the numerical arrays of the solutions will be recomputed
-            to correspond to the new time points.
+        If the MassSolution is stored as numerical arrays and not as
+            interpolating functions, the numerical arrays of the solutions will
+            be recomputed to correspond to the new time points.
 
         """
         value = ensure_iterable(value)
@@ -130,7 +130,7 @@ class Solution(DictWithID):
 
     @property
     def df(self):
-        """Return the Solution object as a pandas.DataFrame."""
+        """Return the MassSolution object as a pandas.DataFrame."""
         if self.interpolate:
             sols = {k: v(self.t) for k, v in iteritems(self.solutions)}
         else:
@@ -141,7 +141,7 @@ class Solution(DictWithID):
 
     @property
     def solutions(self):
-        """Return a normal dict containing solutions of the Solution object."""
+        """Return a dict containing solutions of the MassSolutionobject."""
         return dict(self)
 
     @property
@@ -183,7 +183,7 @@ class Solution(DictWithID):
         Parameters
         ----------
         value: bool
-            If True, solutions are stored in the Solution object as
+            If True, solutions are stored in the MassSolution object as
             scipy interpolating functions. Otherwise store solutions as arrays.
 
         """
@@ -238,5 +238,5 @@ class Solution(DictWithID):
 
     @property
     def model(self):
-        """Return the MassModel associated with the Solution, if any."""
+        """Return the MassModel associated with the MassSolution, if any."""
         return getattr(self, "_model", None)
