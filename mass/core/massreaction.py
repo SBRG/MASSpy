@@ -157,7 +157,7 @@ class MassReaction(Object):
         Forward rate constants cannot be negative.
 
         """
-        ensure_non_negative_value(value)
+        value = ensure_non_negative_value(value)
         setattr(self, "_forward_rate_constant", value)
 
     @property
@@ -182,7 +182,7 @@ class MassReaction(Object):
 
         """
         if self.reversible:
-            ensure_non_negative_value(value)
+            value = ensure_non_negative_value(value)
             setattr(self, "_reverse_rate_constant", value)
         else:
             warn("Cannot set the reverse rate constant for an irreversible "
@@ -210,7 +210,7 @@ class MassReaction(Object):
 
         """
         if self._reversible:
-            ensure_non_negative_value(value)
+            value = ensure_non_negative_value(value)
             setattr(self, "_equilibrium_constant", value)
         else:
             warn("Cannot set the equilibrium constant for an irreversible "
@@ -1149,7 +1149,7 @@ class MassReaction(Object):
             metab._reaction.add(self)
         for gene in self._genes:
             gene._reaction.add(self)
-    
+
     def _make_boundary_metabolites(self):
         """Make the boundary metabolite."""
         bc_metabolites = []

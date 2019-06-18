@@ -147,7 +147,7 @@ class MassMetabolite(Species):
         Initial conditions of metabolites cannot be negative.
 
         """
-        ensure_non_negative_value(value)
+        value = ensure_non_negative_value(value)
         setattr(self, "_initial_condition", value)
 
     @property

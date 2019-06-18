@@ -21,6 +21,14 @@ COBRA_CONFIGURATION = Configuration()
 class MassBaseConfiguration(object):
     """Define global configuration values that to be honored by mass functions.
 
+    Attributes for model construction:
+        ['boundary_compartment', 'default_compartment'. 'irreversible_Keq',
+         'irreversible_kr',]
+
+    Attributes for flux balance analysis (FBA):
+        ['optimization_solver', 'optimization_tolerance', 'lower_bound',
+         'upper_bound', 'bounds', 'processes']
+
     Attributes
     ----------
     irreversible_Keq: float
@@ -78,22 +86,14 @@ class MassBaseConfiguration(object):
 
     def __init__(self):
         """Initialize MassBaseConfiguration object."""
+        # Model construction configuration options
         self._boundary_compartment = {"b": "boundary"}
         self._default_compartment = {"default": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
+
+        # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
-
-    @property
-    def shared_state(self):
-        """Return a read-only dict for shared configuration attributes."""
-        shared_state = {}
-        for k, v in iteritems(self._shared_state):
-            if k in ["_solver", "tolerance"]:
-                k = "optimization_" + k.strip("_")
-            shared_state[k] = v
-
-        return shared_state
 
     @property
     def boundary_compartment(self):
@@ -151,7 +151,7 @@ class MassBaseConfiguration(object):
         Equilibrium constants cannot be negative.
 
         """
-        ensure_non_negative_value(value)
+        value = ensure_non_negative_value(value)
         setattr(self, "_irreversible_Keq", value)
 
     @property
@@ -174,8 +174,8 @@ class MassBaseConfiguration(object):
         Reverse rate constants cannot be negative.
 
         """
-        ensure_non_negative_value(value)
-        setattr(self, "irreversible_kr", value)
+        value = ensure_non_negative_value(value)
+        setattr(self, "_irreversible_kr", value)
 
     @property
     def optimization_solver(self):
@@ -259,6 +259,17 @@ class MassBaseConfiguration(object):
     def processes(self):
         """Return the default number of processes to use when possible."""
         return COBRA_CONFIGURATION.processes
+
+    @property
+    def shared_state(self):
+        """Return a read-only dict for shared configuration attributes."""
+        shared_state = {}
+        for k, v in iteritems(self._shared_state):
+            if k in ["_solver", "tolerance"]:
+                k = "optimization_" + k.strip("_")
+            shared_state[k] = v
+
+        return shared_state
 
     def __repr__(self):
         """Return the representation of the MassConfiguration."""

@@ -96,6 +96,7 @@ def ensure_non_negative_value(value):
         raise TypeError("Must be an int or float")
     elif value < 0.:
         raise ValueError("Must be a non-negative number")
+    return value
 
 
 def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
