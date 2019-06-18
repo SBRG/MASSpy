@@ -49,7 +49,7 @@ class EnzymeModuleDict(OrderedDictWithID):
         # Instiantiate new EnzymeModuleDict object if given an EnzymeModuleDict
         if isinstance(id_or_enzyme, (EnzymeModuleDict, dict)):
             super(EnzymeModuleDict, self).__init__(
-                id_or_enzyme["id"], dictionary=dict(id_or_enzyme))
+                id_or_enzyme["id"], data_dict=dict(id_or_enzyme))
         # Initialize an EnzymeModuleDict using an EnzymeModule
         elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_module_dict"):
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)

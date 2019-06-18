@@ -16,7 +16,7 @@ from mass.util.DictWithID import DictWithID
 
 # Units
 _SI_PREFIXES_DICT = DictWithID(
-    id="SI Unit Scale Prefixes", dictionary={
+    id="SI Unit Scale Prefixes", data_dict={
         "atto": -18,
         "femto": -15,
         "pico": -12,
@@ -37,7 +37,7 @@ _SI_PREFIXES_DICT = DictWithID(
 )
 
 _SBML_BASE_UNIT_KINDS_DICT = DictWithID(
-    id="SBML Base Unit Kinds", dictionary={
+    id="SBML Base Unit Kinds", data_dict={
         "ampere": libsbml.UNIT_KIND_AMPERE,
         "avogadro": libsbml.UNIT_KIND_AVOGADRO,
         "becquerel": libsbml.UNIT_KIND_BECQUEREL,
@@ -236,7 +236,7 @@ class Unit(object):
 
 
 _PREDEFINED_UNITS_DICT = DictWithID(
-    id="Pre-defined Units", dictionary={
+    id="Pre-defined Units", data_dict={
         "mole": Unit(
             kind="mole", exponent=1, scale=0, multiplier=1),
         "millimole": Unit(
