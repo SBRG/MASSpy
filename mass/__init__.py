@@ -10,10 +10,9 @@ from os.path import dirname as _dirname
 
 from mass import (analysis, io)
 from mass.core import (
-    convert_cobra_to_mass, convert_mass_to_cobra, MassMetabolite, MassModel,
-    MassReaction, Simulation, MassSolution, UnitDefinition, get_defaults,
-    make_display_data, plot_phase_portrait, plot_simulation,
-    plot_tiled_phase_portrait, set_defaults)
+    MassMetabolite, MassModel, MassReaction, Simulation, MassSolution,
+    UnitDefinition, get_defaults, make_display_data, plot_phase_portrait,
+    plot_simulation, plot_tiled_phase_portrait, set_defaults)
 
 from mass.util import (
     is_simulatable, qcqa_model, qcqa_simulation, show_versions, strip_time)
