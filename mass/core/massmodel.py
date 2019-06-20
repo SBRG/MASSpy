@@ -1534,6 +1534,13 @@ class MassModel(Object):
         if steady_state_fluxes is None:
             steady_state_fluxes = self.steady_state_fluxes
 
+        # Get defined numerical values
+        numerical_values = {
+            str(param): value
+            for p_type, subdict in iteritems(self.parameters)
+            for param, value in iteritems(subdict) if p_type != "kf"}
+        numerical_values.update(steady_state_concentrations)
+
         # Function to calculate the solution
         def calculate_sol(flux, rate_equation, perc):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
@@ -1545,6 +1552,7 @@ class MassModel(Object):
                 sol = float(next(iter(sol)))
 
             return sol
+            
 
         percs_dict = {}
         for reaction, flux in iteritems(steady_state_fluxes):
@@ -1556,26 +1564,20 @@ class MassModel(Object):
                     "MassReactions and their steady state flux values.")
             rate_eq = strip_time(reaction.rate)
             arguments = list(rate_eq.atoms(sym.Symbol))
-            # Check for missing concentration values
+            # Check for missing numerical values
             missing_values = [
                 str(arg) for arg in arguments
-                if str(arg) not in reaction.all_parameter_ids
-                and str(arg) not in steady_state_concentrations]
+                if str(arg) not in numerical_values
+                and str(arg) != reaction.kf_str]
 
-            parameter, value = {1: [reaction.Keq_str, reaction.Keq],
-                                2: [reaction.kr_str, reaction.kr]}.get(
-                                    reaction._rtype)
-            missing_values += [parameter] if value is None else []
             if missing_values:
-                raise ValueError("Cannot calculate the PERC for reaction '{0}'"
-                                 " because values for {1} not defined."
-                                 .format(reaction.id, str(missing_values)))
+                raise ValueError(
+                    "Cannot calculate the PERC for reaction '{0}' because "
+                    "values for {1} not defined.".format(
+                        reaction.id, str(missing_values)))
 
             # Substitute values into rate equation
-            rate_eq = rate_eq.subs(steady_state_concentrations).subs({
-                sym.Symbol(parameter): value
-                for parameter, value in iteritems(reaction.parameters)
-                if parameter != reaction.kf_str})
+            rate_eq = rate_eq.subs(numerical_values)
 
             # Calculate rate equation and update with soluton for PERC
             sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))

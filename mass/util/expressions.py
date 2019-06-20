@@ -176,17 +176,25 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
         warn("No metabolites exist in reaction.")
         return None
 
+    # Generate forward and reverse rate expressions
     fwd_rate = generate_foward_mass_action_rate_expression(reaction, rtype)
     rev_rate = generate_reverse_mass_action_rate_expression(reaction, rtype)
 
+    # Ignore reverse rate if it is mathematically equal to 0.
     if reaction.Keq != float("inf") or reaction.kr != 0.:
         rate_expression = sym.Add(fwd_rate, -rev_rate)
     else:
         rate_expression = fwd_rate
 
-    rate_expression = sym.simplify(rate_expression)
+    # Try to group the forward rate constants
     if rtype == 1:
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
+
+    # Try to group compartments in the rate
+    if MASSCONFIGURATION.include_compartments_in_rates\
+       and len(reaction.compartments) == 1:
+        c = list(reaction.compartments)[0]
+        rate_expression = sym.collect(rate_expression, c)
 
     if update_reaction:
         reaction._rtype = rtype
