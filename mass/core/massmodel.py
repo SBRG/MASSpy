@@ -89,12 +89,12 @@ class MassModel(Object):
         A dictionary to store custom rate expressions for specific reactions,
         where keys are the MassReaction objects and values are the custom rate
         expressions given as sympy objects. Custom rate expressions will always
-        be prioritized over automatically generated mass action rate laws.
+        be prioritized over automatically generated mass action rates.
     custom_parameters: dict
         A dictionary to store the custom parameters for the custom rates,
         where key:value pairs are the string identifiers of the parameters and
         their numerical value. Custom rate expressions will always be
-        prioritized over automatically generated mass action rate laws.
+        prioritized over automatically generated mass action rate.
     boundary_conditions: dict
         A dictionary to store boundary conditions, where keys are string
         identifiers for 'boundary metabolites' of boundary reactions, and
@@ -185,14 +185,14 @@ class MassModel(Object):
 
     @property
     def rates(self):
-        """Return a dict of reaction rate laws as sympy expressions.
+        """Return a dict of reaction rate expressions as sympy expressions.
 
         If a reaction has an associated custom rate expression, the custom rate
         will be prioritized and returned in the dictionary instead of the
         automatically generated mass action rate law expression.
         """
-        return self.get_rate_laws(self.reactions, rate_type=0, sympy_expr=True,
-                                  update_reactions=True)
+        return self.get_rate_expressions(
+            self.reactions, rtype=0, update_reactions=True)
 
     @property
     def steady_state_fluxes(self):
@@ -785,28 +785,25 @@ class MassModel(Object):
 
         return rxn
 
-    def get_rate_laws(self, reaction_list=None, rate_type=0, sympy_expr=True,
-                      update_reactions=False):
-        """Get the rate laws for a list of reactions in the model.
+    def get_rate_expressions(self, reaction_list=None, rtype=0,
+                             update_reactions=False):
+        """Get the rate expressions for a list of reactions in the model.
 
         Parameters
         ----------
         reaction_list: list, optional
-            A list of MassReactions to get the rate laws for. Reactions must
-            already exist in the model. If None, then return the rates for all
-            reactions in the model.
-        rate_type: int {0, 1, 2, 3}, optional
+            A list of MassReactions to get the rate expressions for. Reactions
+            must already exist in the model. If None, then return the rates for
+            all reactions in the model.
+        rtype: int {0, 1, 2, 3}, optional
             The type of rate law to display. Must be 0, 1, 2, or 3.
                 If 0, the currrent default rate law type is used. Default is 0.
                 Type 1 will utilize the forward rate and equilibrium constants.
                 Type 2 will utilize the forward and reverse rate constants.
                 Type 3 will utilize the equilibrium and reverse rate constants.
-        symp_expr: bool, optional
-            If True, then return the rate law as a sympy expression, otherwise
-            return the rate law as a human readable string.
         update_reactions: bool, optional
             If True, update the MassReaction default rate type in addition to
-            returning the rate laws.
+            returning the rate expressions.
 
         Returns
         -------
@@ -815,12 +812,7 @@ class MassModel(Object):
 
         """
         # Check the inputs
-        if not isinstance(rate_type, (integer_types, float)):
-            raise TypeError("rate_type must be an int or float")
-        if not isinstance(sympy_expr, bool):
-            raise TypeError("sympy_expr must be a bool")
-        rate_type = int(rate_type)
-        if rate_type not in {0, 1, 2, 3}:
+        if rtype not in {0, 1, 2, 3}:
             raise ValueError("rate_type must be 0, 1, 2, or 3")
 
         # Use the MassModel reactions if no reaction list is given
@@ -829,15 +821,15 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        if rate_type == 0:
-            rate_dict = {rxn: rxn.get_rate_law(rxn._rtype, sympy_expr,
-                                               update_reactions)
-                         for rxn in reaction_list}
+        if rtype == 0:
+            rate_dict = {
+                rxn: rxn.get_mass_action_rate_law(rxn._rtype, update_reactions)
+                for rxn in reaction_list}
 
         else:
-            rate_dict = {rxn: rxn.get_rate_law(rate_type, sympy_expr,
-                                               update_reactions)
-                         for rxn in reaction_list}
+            rate_dict = {
+                rxn: rxn.get_mass_action_rate_law(rtype, update_reactions)
+                for rxn in reaction_list}
 
         if self.custom_rates:
             rate_dict.update(self.custom_rates)
@@ -1300,10 +1292,10 @@ class MassModel(Object):
         """Merge two MassModels into one MassModel with the objects from both.
 
         The reactions, metabolites, genes, enzyme modules, boundary conditions,
-        custom rate laws, rate parameters, compartments, units, notes, and
-        annotations from right model are also copied to left model. However,
-        note that in cases where identifiers for objects are identical or a
-        dict item has an identical key(s), priority will be given to what
+        custom rate expressions, rate parameters, compartments, units, notes,
+        and annotations from the right model are also copied to left model.
+        However, note that in cases where identifiers for objects are identical
+        or a dict item has an identical key(s), priority will be given to what
         already exists in the left model.
 
         Parameters
@@ -1819,8 +1811,8 @@ class MassModel(Object):
 
         The ODEs between two MassModels are compared to determine whether
         the models are equivalent, meaning that the models contain the same
-        metabolites, reactions, and rate laws such that they require the same
-        set of parameters and initial conditions for simulation.
+        metabolites, reactions, and rate expressions such that they require the
+        same set of parameters and initial conditions for simulation.
 
         Parameters
         ----------

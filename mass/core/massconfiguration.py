@@ -4,13 +4,11 @@ from __future__ import absolute_import
 
 import logging
 
-from six import iteritems, with_metaclass
+from six import integer_types, iteritems, with_metaclass
 
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
-
-from mass.util.util import ensure_non_negative_value
 
 __all__ = ("MassConfiguration",)
 
@@ -23,7 +21,10 @@ class MassBaseConfiguration(object):
 
     Attributes for model construction:
         ['boundary_compartment', 'default_compartment'. 'irreversible_Keq',
-         'irreversible_kr',]
+         'irreversible_kr', 'exclude_from_rates']
+
+    Attributes for model simulation:
+        ['decimal_precision',]
 
     Attributes for flux balance analysis (FBA):
         ['optimization_solver', 'optimization_tolerance', 'lower_bound',
@@ -31,14 +32,6 @@ class MassBaseConfiguration(object):
 
     Attributes
     ----------
-    irreversible_Keq: float
-        The default value to assign to equilibrium constants (Keq) for
-        irreversible reactions. Must be a non-negative value.
-        Default value is the infinity (=float("inf")).
-    irreversible_kr: float
-        The default value to assign to equilibrium constants (Keq) for
-        irreversible reactions. Must be a non-negative value.
-        Default value is the 0.
     boundary_compartment: dict
         A dictionary containing the identifier of the boundary compartment
         mapped to the name of the boundary compartment.
@@ -48,6 +41,29 @@ class MassBaseConfiguration(object):
         mapped to the name of the desired name of default compartment. Used for
         writing models to SBML when there are no set compartments in the model.
         Default value is {"default": "default_compartment"}.
+    irreversible_Keq: float
+        The default value to assign to equilibrium constants (Keq) for
+        irreversible reactions. Must be a non-negative value.
+        Default value is the infinity (=float("inf")).
+    irreversible_kr: float
+        The default value to assign to equilibrium constants (Keq) for
+        irreversible reactions. Must be a non-negative value.
+        Default value is the 0.
+    exclude_from_rates: dict
+        A dict where keys should correspond to a metabolite attrubute to
+        utilize for filtering, and values are lists that contain the items to
+        exclude that would be returned by the metabolite attribute. Does not
+        apply to boundary reactions (MassReaction.boundary==True).
+        Default is dict("elements", [{"H": 2, "O": 1}, {"H": 1}]) to remove
+        the hydrogen and water metabolites using the 'elements' attribute
+        to filter out the hydrogen and water in all rates except the hydrogen
+        and water exchange reactions on the boundary.
+    decimal_precision: int, None
+        An integer indicating the decimal precision to use for rounding
+        numerical values. Positive numbers indicated digits to the right of the
+        decimal place, negative numbers indicate digits to the left of the
+        decimal place. If None provided, no solutions will be rounded.
+        Default is None.
     optimization_solver: {"glpk", "cplex", "gurobi"}
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
@@ -91,6 +107,10 @@ class MassBaseConfiguration(object):
         self._default_compartment = {"default": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
+        self.exclude_from_rates = {"elements": [{"H": 2, "O": 1}, {"H": 1}]}
+
+        # Model simulation options
+        self._decimal_precision = None
 
         # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
@@ -151,7 +171,12 @@ class MassBaseConfiguration(object):
         Equilibrium constants cannot be negative.
 
         """
-        value = ensure_non_negative_value(value)
+        if value is None:
+            pass
+        elif not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        elif value < 0.:
+            raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_Keq", value)
 
     @property
@@ -174,8 +199,34 @@ class MassBaseConfiguration(object):
         Reverse rate constants cannot be negative.
 
         """
-        value = ensure_non_negative_value(value)
+        if value is None:
+            pass
+        elif not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        elif value < 0.:
+            raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_kr", value)
+
+    @property
+    def decimal_precision(self):
+        """Return the default decimal precision when rounding."""
+        return getattr(self, "_decimal_precision")
+
+    @decimal_precision.setter
+    def decimal_precision(self, value):
+        """Set the default decimal precision when rounding.
+
+        Parameters
+        ----------
+        value: int, None
+            An integer indicating how many digits from the decimal should
+            rounding occur. If None, no rounding will occur.
+
+        """
+        if value is not None and not isinstance(value, integer_types):
+            raise TypeError("value must be an int.")
+
+        setattr(self, "_decimal_precision", value)
 
     @property
     def optimization_solver(self):
@@ -346,5 +397,3 @@ class MassBaseConfiguration(object):
 
 class MassConfiguration(with_metaclass(Singleton, MassBaseConfiguration)):
     """Define the configuration to be singleton based."""
-
-    pass

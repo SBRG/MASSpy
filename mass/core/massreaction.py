@@ -23,8 +23,8 @@ from cobra.util.context import get_context, resettable
 from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, generate_mass_action_ratio,
-    generate_rate_law)
+    generate_disequilibrium_ratio, generate_mass_action_rate_expression,
+    generate_mass_action_ratio)
 from mass.util.util import (
     ensure_non_negative_value, get_object_attributes,
     get_subclass_specific_attributes)
@@ -270,8 +270,8 @@ class MassReaction(Object):
         if self.model is not None and self in self.model.custom_rates:
             rate = self._model.custom_rates[self]
         else:
-            rate = self.get_rate_law(rate_type=self._rtype, sympy_expr=True,
-                                     update_reaction=True)
+            rate = self.get_mass_action_rate_law(rtype=self._rtype,
+                                                 update_reaction=True)
         return rate
 
     @property
@@ -643,20 +643,16 @@ class MassReaction(Object):
 
         return new_reaction
 
-    def get_rate_law(self, rate_type=1, sympy_expr=True,
-                     update_reaction=False):
-        """Get the rate law for the reaction.
+    def get_mass_action_rate_law(self, rtype=1, update_reaction=False):
+        """Get the mass action rate law for the reaction.
 
         Parameters
         ----------
-        rate type: int {1, 2, 3}, optional
+        rtype: int {1, 2, 3}, optional
             The type of rate law to display. Must be 1, 2, or 3.
             Type 1 will utilize kf and Keq.
             Type 2 will utilize kf and kr.
             Type 3 will utilize kr and Keq.
-        sympy_expr: bool, optional
-            If True, output is a sympy expression. Otherwise the output is a
-            string.
         update_reaction: bool, optional
             If True, update the MassReaction in addition to returning the rate
             law.
@@ -666,7 +662,8 @@ class MassReaction(Object):
         The rate law expression as a str or sympy expression (sympy.Basic).
 
         """
-        return generate_rate_law(self, rate_type, sympy_expr, update_reaction)
+        return generate_mass_action_rate_expression(self, rtype,
+                                                    update_reaction)
 
     def get_mass_action_ratio(self):
         """Get the mass action ratio of the reaction as a sympy expression.
