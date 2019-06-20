@@ -949,8 +949,9 @@ def _read_model_reactions_from_sbml(model, f_replace=None, metabolites=None,
                 **kwargs)
             # Get the rate equation, check if it is a mass action rate law.
             # If not a mass action rate law, assume it is a custom rate law
-            mass_action_rates = [strip_time(mass_reaction.get_rate_law(x))
-                                 for x in range(1, 4)]
+            mass_action_rates = [
+                strip_time(mass_reaction.get_mass_action_rate_law(x))
+                for x in range(1, 4)]
             local_parameters_dict.update(local_parameters)
             if rate_eq in mass_action_rates:
                 # Rate law is a mass action rate law identical to the one

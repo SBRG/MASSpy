@@ -58,7 +58,7 @@ def Keq2k(sympy_expr, simplify=True):
 
         return new_expr
 
-    new_expr = _apply_func_to_expressions(sympy_expr, _replace_Keq, (simplify))
+    new_expr = _apply_func_to_expressions(sympy_expr, _replace_Keq, [simplify])
 
     return new_expr
 
@@ -109,7 +109,7 @@ def k2Keq(sympy_expr, simplify=True):
 
         return new_expr
 
-    new_expr = _apply_func_to_expressions(sympy_expr, _replace_kr, (simplify))
+    new_expr = _apply_func_to_expressions(sympy_expr, _replace_kr, [simplify])
 
     return new_expr
 
@@ -184,6 +184,7 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
     else:
         rate_expression = fwd_rate
 
+    rate_expression = sym.simplify(rate_expression)
     if rtype == 1:
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
 
@@ -212,7 +213,8 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
         The forward rate as a sympy expression.
 
     """
-    if MASSCONFIGURATION.exclude_from_rates and not reaction.boundary:
+    if MASSCONFIGURATION.exclude_metabolites_from_rates\
+       and not reaction.boundary:
         reaction = _remove_metabolites_from_rate(reaction)
 
     fwd_rate = _format_metabs_sym(sym.S.One, reaction, reaction.reactants)
@@ -224,6 +226,11 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
         fwd_rate = sym.Mul(sym.var(reaction.kf_str), fwd_rate)
 
     fwd_rate = _set_fixed_metabolites_in_rate(reaction, fwd_rate)
+    if MASSCONFIGURATION.include_compartments_in_rates:
+        compartments = set(
+            met.compartment for met in reaction.reactants if met is not None)
+        for c in list(compartments):
+            fwd_rate = sym.Mul(fwd_rate, sym.Symbol(c))
 
     return fwd_rate
 
@@ -247,7 +254,8 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
         The reverse rate as a sympy expression.
 
     """
-    if MASSCONFIGURATION.exclude_from_rates and not reaction.boundary:
+    if MASSCONFIGURATION.exclude_metabolites_from_rates\
+       and not reaction.boundary:
         reaction = _remove_metabolites_from_rate(reaction)
 
     rev_rate = _format_metabs_sym(sym.S.One, reaction, reaction.products)
@@ -260,7 +268,12 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
         rev_rate = sym.Mul(sym.var(reaction.kr_str), rev_rate)
 
     rev_rate = _set_fixed_metabolites_in_rate(reaction, rev_rate)
-    
+    if MASSCONFIGURATION.include_compartments_in_rates:
+        compartments = set(
+            met.compartment for met in reaction.products if met is not None)
+        for c in list(compartments):
+            rev_rate = sym.Mul(rev_rate, sym.Symbol(c))
+
     return rev_rate
 
 
@@ -273,7 +286,7 @@ def _remove_metabolites_from_rate(reaction):
     """
     reaction = reaction.copy()
     # Get exclusion criteria and reaction metabolites
-    exclusion_criteria_dict = MASSCONFIGURATION.exclude_from_rates
+    exclusion_criteria_dict = MASSCONFIGURATION.exclude_metabolites_from_rates
     metabolites_to_exclude = []
     # Iterate through attributes and exclusion values
     for attr, exclusion_values in iteritems(exclusion_criteria_dict):

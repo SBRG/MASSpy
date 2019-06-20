@@ -49,7 +49,7 @@ class MassBaseConfiguration(object):
         The default value to assign to equilibrium constants (Keq) for
         irreversible reactions. Must be a non-negative value.
         Default value is the 0.
-    exclude_from_rates: dict
+    exclude_metabolites_from_rates: dict
         A dict where keys should correspond to a metabolite attrubute to
         utilize for filtering, and values are lists that contain the items to
         exclude that would be returned by the metabolite attribute. Does not
@@ -58,6 +58,10 @@ class MassBaseConfiguration(object):
         the hydrogen and water metabolites using the 'elements' attribute
         to filter out the hydrogen and water in all rates except the hydrogen
         and water exchange reactions on the boundary.
+    include_compartments_in_rates: bool
+        Whether to include the compartment volumes in rate expressions.
+        The boundary compartment will always excluded.
+        Default is False.
     decimal_precision: int, None
         An integer indicating the decimal precision to use for rounding
         numerical values. Positive numbers indicated digits to the right of the
@@ -107,7 +111,9 @@ class MassBaseConfiguration(object):
         self._default_compartment = {"default": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
-        self.exclude_from_rates = {"elements": [{"H": 2, "O": 1}, {"H": 1}]}
+        self.exclude_metabolites_from_rates = {
+            "elements": [{"H": 2, "O": 1}, {"H": 1}]}
+        self.include_compartments_in_rates = False
 
         # Model simulation options
         self._decimal_precision = None
