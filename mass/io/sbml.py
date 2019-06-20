@@ -601,6 +601,7 @@ def _get_sbml_models_from_doc(doc, **kwargs):
         # Return exception if conversion fails
         result = doc.setLevelAndVersion(*SBML_LEVEL_VERSION)
         if result != libsbml.LIBSBML_OPERATION_SUCCESS:
+            # TODO Allow for model loading to continue even if conversion fails
             raise Exception("Conversion " + conversion_msg + " failed")
 
     def _convert_legacy_package_extensions(doc, plugin_str, desired_vers):
@@ -1072,14 +1073,6 @@ def _read_reaction_kinetic_law_from_sbml(reaction, mass_reaction, metabolites,
             if mass_reaction.boundary \
                and mass_reaction.boundary_metabolite == str(e).strip("'"):
                 new_arg = mass_reaction.boundary_metabolite
-            elif not mass_reaction.reactants or not mass_reaction.products:
-                msg = "({0}.boundary: {1}, {0}.boundary_metabolite: {2}!={3})"
-                msg = msg.format(
-                    mass_reaction.id, mass_reaction.boundary, str(new_arg),
-                    mass_reaction._make_boundary_metabolites())
-                LOGGER.warning(
-                    "Reaction '%s' appears to be on the boundary, but %s.",
-                    mass_reaction, msg)
         else:
             new_arg = str(new_arg)
         finally:

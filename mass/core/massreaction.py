@@ -69,7 +69,7 @@ class MassReaction(Object):
             id_str = id_or_reaction
         super(MassReaction, self).__init__(id_str, name)
         if isinstance(id_or_reaction, MassReaction):
-            # Instiantiate a new MassReaction with state identical to 
+            # Instiantiate a new MassReaction with state identical to
             # the provided MassReaction object.
             self.__dict__.update(id_or_reaction.__dict__)
         else:

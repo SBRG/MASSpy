@@ -1725,11 +1725,11 @@ class MassModel(Object):
             elif key.split("_", 1)[0] in ["kf", "Keq", "kr", "v"]:
                 # See if the reaction exists and if none found, assume
                 # parameter is a custom parameter
-                p_type, reaction = key.split("_", 1)
                 try:
+                    p_type, reaction = key.split("_", 1)
                     reaction = self.reactions.get_by_id(reaction)
                     setattr(reaction, p_type, value)
-                except KeyError:
+                except (KeyError, ValueError):
                     self.custom_parameters.update({key: value})
             # If parameter not found, assume parameter is a custom parameter
             else:
