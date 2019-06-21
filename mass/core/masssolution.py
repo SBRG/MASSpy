@@ -81,8 +81,9 @@ class MassSolution(DictWithID):
         self.solution_type = solution_type
         self._simulation = None
         self._time = time
-        self._interpolate = None
-        self.interpolate = interpolate
+        self._interpolate = interpolate
+        if time is not None:
+            self.interpolate = interpolate
 
     @property
     def simulation(self):
@@ -175,13 +176,12 @@ class MassSolution(DictWithID):
                  "between numerical arrays and interpolating functions.")
             return
 
-        if value != self.interpolate:
-            for key, sol in iteritems(self):
-                if value and not isinstance(sol, interp1d):
-                    self[key] = interp1d(self.time, sol, kind='cubic',
-                                         fill_value='extrapolate')
-                if not value and isinstance(sol, interp1d):
-                    self[key] = sol(self.time)
+        for key, sol in iteritems(self):
+            if value and not isinstance(sol, interp1d):
+                self[key] = interp1d(self.time, sol, kind='cubic',
+                                     fill_value='extrapolate')
+            if not value and isinstance(sol, interp1d):
+                self[key] = sol(self.time)
 
         setattr(self, "_interpolate", value)
 
