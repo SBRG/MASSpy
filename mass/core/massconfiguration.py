@@ -24,7 +24,7 @@ class MassBaseConfiguration(object):
          'irreversible_kr', 'exclude_from_rates']
 
     Attributes for model simulation:
-        ['decimal_precision',]
+        ['decimal_precision', 'steady_state_threshold']
 
     Attributes for flux balance analysis (FBA):
         ['optimization_solver', 'optimization_tolerance', 'lower_bound',
@@ -68,6 +68,12 @@ class MassBaseConfiguration(object):
         decimal place, negative numbers indicate digits to the left of the
         decimal place. If None provided, no solutions will be rounded.
         Default is None.
+    steady_state_threshold: float
+        A threshold for determining whether the RoadRunner steady state solver
+        is at steady state. The steady state solver returns a value indicating
+        how close the solution is to the steady state, where smaller values
+        are better. Values less than the threshold indicate steady state.
+        Default is 1e-6.
     optimization_solver: {"glpk", "cplex", "gurobi"}
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
@@ -117,6 +123,7 @@ class MassBaseConfiguration(object):
 
         # Model simulation options
         self._decimal_precision = None
+        self._steady_state_threshold = 1e-6
 
         # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
@@ -233,6 +240,28 @@ class MassBaseConfiguration(object):
             raise TypeError("value must be an int.")
 
         setattr(self, "_decimal_precision", value)
+
+    @property
+    def steady_state_threshold(self):
+        """Return the steady state threshold when using roadrunner solvers."""
+        return getattr(self, "_steady_state_threshold")
+
+    @steady_state_threshold.setter
+    def steady_state_threshold(self, value):
+        """Set the default decimal precision when rounding.
+
+        Parameters
+        ----------
+        value: int, None
+            An integer indicating how many digits from the decimal should
+            rounding occur. If None, no rounding will occur.
+
+        """
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        elif value < 0.:
+            raise ValueError("Must be a non-negative number")
+        setattr(self, "_steady_state_threshold", value)
 
     @property
     def optimization_solver(self):
