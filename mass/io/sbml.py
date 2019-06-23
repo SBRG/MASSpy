@@ -601,6 +601,7 @@ def _get_sbml_models_from_doc(doc, **kwargs):
         # Return exception if conversion fails
         result = doc.setLevelAndVersion(*SBML_LEVEL_VERSION)
         if result != libsbml.LIBSBML_OPERATION_SUCCESS:
+            # TODO Allow for model loading to continue even if conversion fails
             raise Exception("Conversion " + conversion_msg + " failed")
 
     def _convert_legacy_package_extensions(doc, plugin_str, desired_vers):
@@ -948,8 +949,9 @@ def _read_model_reactions_from_sbml(model, f_replace=None, metabolites=None,
                 **kwargs)
             # Get the rate equation, check if it is a mass action rate law.
             # If not a mass action rate law, assume it is a custom rate law
-            mass_action_rates = [strip_time(mass_reaction.get_rate_law(x))
-                                 for x in range(1, 4)]
+            mass_action_rates = [
+                strip_time(mass_reaction.get_mass_action_rate_law(x))
+                for x in range(1, 4)]
             local_parameters_dict.update(local_parameters)
             if rate_eq in mass_action_rates:
                 # Rate law is a mass action rate law identical to the one
@@ -1072,14 +1074,6 @@ def _read_reaction_kinetic_law_from_sbml(reaction, mass_reaction, metabolites,
             if mass_reaction.boundary \
                and mass_reaction.boundary_metabolite == str(e).strip("'"):
                 new_arg = mass_reaction.boundary_metabolite
-            elif not mass_reaction.reactants or not mass_reaction.products:
-                msg = "({0}.boundary: {1}, {0}.boundary_metabolite: {2}!={3})"
-                msg = msg.format(
-                    mass_reaction.id, mass_reaction.boundary, str(new_arg),
-                    mass_reaction._make_boundary_metabolites())
-                LOGGER.warning(
-                    "Reaction '%s' appears to be on the boundary, but %s.",
-                    mass_reaction, msg)
         else:
             new_arg = str(new_arg)
         finally:
@@ -2319,10 +2313,10 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
     Returns
     -------
     (model, errors)
-    model : :class:`~mass.core.massmodel.MassModel` object
+    model: :class:`~mass.core.massmodel.MassModel` object
         The mass model if the file could be read successfully or None
         otherwise.
-    errors : dict
+    errors: dict
         Warnings and errors grouped by their respective types.
 
     Raises
@@ -2433,6 +2427,95 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
             break
 
     return model, errors
+
+
+def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
+    """Validate export of model to SBML, returning a list of errors.
+
+    If no SBML errors or MASS fatal errors occur, the model will be written to
+    the 'filename'.
+
+    Parameters:
+    -----------
+    mass_model : mass.core.MassModel
+        MassModel instance which is written to SBML
+    filename: path to SBML file, or SBML string, or SBML file handle
+        SBML which is read into a MassModel.
+    f_replace: dict of replacement functions for id replacement
+        A dict of replacement functions to apply on identifiers.
+        If no replacements should be performed, set f_replace={}.
+
+    Returns
+    -------
+    (success, errors)
+    success: bool
+        A bool indicating whether the model was successfully exported to
+        'filename'.
+    errors: dict
+        Warnings and errors grouped by their respective types.
+
+    Raises
+    ------
+    MassSBMLError
+
+    """
+    default_kwargs = {
+        "units": True,
+        "local_parameters": True,
+        "number": float,
+        "set_missing_bounds": False,
+        "remove_char": False,
+        "promote_local_parameters": False,
+        "check_model": True,
+        "internal_consistency": True,
+        "check_units_consistency": False,
+        "check_modeling_practice": False}
+    # Use default kwargs or get missing kwargs with their default values
+    if kwargs is None:
+        kwargs = default_kwargs
+    else:
+        for key, value in iteritems(default_kwargs):
+            if key not in kwargs:
+                kwargs[key] = value
+    errors = {
+        "SBML_FATAL": [],
+        "SBML_ERROR": [],
+        "SBML_SCHEMA_ERROR": [],
+        "SBML_WARNING": [],
+        "MASS_FATAL": [],
+        "MASS_ERROR": [],
+        "MASS_WARNING": [],
+        "MASS_CHECK": [],
+    }
+    try:
+        doc = _model_to_sbml(mass_model, f_replace=f_replace, **kwargs)
+        sbml_str = libsbml.writeSBMLToString(doc)
+        model, errors = validate_sbml_model(sbml_str, **kwargs)
+
+    except Exception as e:
+        success = False
+        model = None
+        errors["MASS_FATAL"].append(str(e))
+        return success, errors
+
+    if model is not None:
+        success = True
+        for key in ["SBML_FATAL", "SBML_ERROR", "SBML_SCHEMA_ERROR",
+                    "MASS_FATAL"]:
+            if errors[key]:
+                success = False
+    else:
+        success = False
+
+    if success and isinstance(filename, string_types):
+        # Write to path
+        libsbml.writeSBMLToFile(doc, filename)
+        success = True
+    elif success and hasattr(filename, "write"):
+        # Write to file handle
+        filename.write(sbml_str)
+
+    return success, errors
 
 
 def _check_required(sbase, value, attribute):

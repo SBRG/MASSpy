@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -1000,9 +1000,24 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_adn_c </ci>
-              <ci> M_atp_c </ci>
               <ci> kf_ADNK1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_adn_c </ci>
+                  <ci> M_atp_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_adp_c </ci>
+                    <ci> M_amp_c </ci>
+                  </apply>
+                  <ci> Keq_ADNK1 </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1024,8 +1039,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_amp_c </ci>
               <ci> kf_NTD7 </ci>
+              <apply>
+                <minus/>
+                <ci> M_amp_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_adn_c </ci>
+                    <ci> M_pi_c </ci>
+                  </apply>
+                  <ci> Keq_NTD7 </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1047,8 +1074,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_adn_c </ci>
               <ci> kf_ADA </ci>
+              <apply>
+                <minus/>
+                <ci> M_adn_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_ins_c </ci>
+                    <ci> M_nh3_c </ci>
+                  </apply>
+                  <ci> Keq_ADA </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1070,8 +1109,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_amp_c </ci>
               <ci> kf_AMPDA </ci>
+              <apply>
+                <minus/>
+                <ci> M_amp_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_imp_c </ci>
+                    <ci> M_nh3_c </ci>
+                  </apply>
+                  <ci> Keq_AMPDA </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1093,8 +1144,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_imp_c </ci>
               <ci> kf_NTD11 </ci>
+              <apply>
+                <minus/>
+                <ci> M_imp_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_ins_c </ci>
+                    <ci> M_pi_c </ci>
+                  </apply>
+                  <ci> Keq_NTD11 </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1185,9 +1248,24 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_atp_c </ci>
-              <ci> M_r5p_c </ci>
               <ci> kf_PRPPS </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_r5p_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_amp_c </ci>
+                    <ci> M_prpp_c </ci>
+                  </apply>
+                  <ci> Keq_PRPPS </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1211,9 +1289,28 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_ade_c </ci>
-              <ci> M_prpp_c </ci>
               <ci> kf_ADPT </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> M_ade_c </ci>
+                  <ci> M_prpp_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_amp_c </ci>
+                    <apply>
+                      <power/>
+                      <ci> M_pi_c </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                  <ci> Keq_ADPT </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1303,8 +1400,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M__23dpg_c </ci>
               <ci> kf_DPGase </ci>
+              <apply>
+                <minus/>
+                <ci> M__23dpg_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M__3pg_c </ci>
+                    <ci> M_pi_c </ci>
+                  </apply>
+                  <ci> Keq_DPGase </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1497,8 +1606,20 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_atp_c </ci>
               <ci> kf_ATPM </ci>
+              <apply>
+                <minus/>
+                <ci> M_atp_c </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> M_adp_c </ci>
+                    <ci> M_pi_c </ci>
+                  </apply>
+                  <ci> Keq_ATPM </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1519,8 +1640,16 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> M_nadh_c </ci>
               <ci> kf_DM_nadh </ci>
+              <apply>
+                <minus/>
+                <ci> M_nadh_c </ci>
+                <apply>
+                  <divide/>
+                  <ci> M_nad_c </ci>
+                  <ci> Keq_DM_nadh </ci>
+                </apply>
+              </apply>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -2000,21 +2129,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_A </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_A </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_R0_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_A </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_R0_c </ci>
+                  </apply>
                   <ci> M_pfk_R0_A_c </ci>
-                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2035,21 +2165,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_F </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_F </ci>
                 <apply>
-                  <times/>
-                  <ci> M_f6p_c </ci>
-                  <ci> M_pfk_R0_A_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_F </ci>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_pfk_R0_A_c </ci>
+                  </apply>
                   <ci> M_pfk_R0_AF_c </ci>
-                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2098,22 +2229,23 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_ACT </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_ACT </ci>
                 <apply>
-                  <times/>
-                  <cn> 4 </cn>
-                  <ci> M_amp_c </ci>
-                  <ci> M_pfk_R0_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 4 </cn>
+                    <ci> Keq_PFK_ACT </ci>
+                    <ci> M_amp_c </ci>
+                    <ci> M_pfk_R0_c </ci>
+                  </apply>
                   <ci> M_pfk_R1_c </ci>
-                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2134,22 +2266,23 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_I </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_I </ci>
                 <apply>
-                  <times/>
-                  <cn> 4 </cn>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_T0_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 4 </cn>
+                    <ci> Keq_PFK_I </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_T0_c </ci>
+                  </apply>
                   <ci> M_pfk_T1_c </ci>
-                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2170,21 +2303,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_A </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_A </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_R1_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_A </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_R1_c </ci>
+                  </apply>
                   <ci> M_pfk_R1_A_c </ci>
-                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2205,21 +2339,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_F </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_F </ci>
                 <apply>
-                  <times/>
-                  <ci> M_f6p_c </ci>
-                  <ci> M_pfk_R1_A_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_F </ci>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_pfk_R1_A_c </ci>
+                  </apply>
                   <ci> M_pfk_R1_AF_c </ci>
-                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2268,26 +2403,27 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_ACT </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_ACT </ci>
                 <apply>
-                  <times/>
-                  <cn> 3 </cn>
-                  <ci> M_amp_c </ci>
-                  <ci> M_pfk_R1_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 3 </cn>
+                    <ci> Keq_PFK_ACT </ci>
+                    <ci> M_amp_c </ci>
+                    <ci> M_pfk_R1_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 2 </cn>
                     <ci> M_pfk_R2_c </ci>
                   </apply>
-                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2308,26 +2444,27 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_I </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_I </ci>
                 <apply>
-                  <times/>
-                  <cn> 3 </cn>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_T1_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 3 </cn>
+                    <ci> Keq_PFK_I </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_T1_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 2 </cn>
                     <ci> M_pfk_T2_c </ci>
                   </apply>
-                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2348,21 +2485,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_A </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_A </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_R2_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_A </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_R2_c </ci>
+                  </apply>
                   <ci> M_pfk_R2_A_c </ci>
-                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2383,21 +2521,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_F </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_F </ci>
                 <apply>
-                  <times/>
-                  <ci> M_f6p_c </ci>
-                  <ci> M_pfk_R2_A_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_F </ci>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_pfk_R2_A_c </ci>
+                  </apply>
                   <ci> M_pfk_R2_AF_c </ci>
-                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2446,26 +2585,27 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_ACT </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_ACT </ci>
                 <apply>
-                  <times/>
-                  <cn> 2 </cn>
-                  <ci> M_amp_c </ci>
-                  <ci> M_pfk_R2_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 2 </cn>
+                    <ci> Keq_PFK_ACT </ci>
+                    <ci> M_amp_c </ci>
+                    <ci> M_pfk_R2_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 3 </cn>
                     <ci> M_pfk_R3_c </ci>
                   </apply>
-                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2486,26 +2626,27 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_I </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_I </ci>
                 <apply>
-                  <times/>
-                  <cn> 2 </cn>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_T2_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 2 </cn>
+                    <ci> Keq_PFK_I </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_T2_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 3 </cn>
                     <ci> M_pfk_T3_c </ci>
                   </apply>
-                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2526,21 +2667,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_A </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_A </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_R3_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_A </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_R3_c </ci>
+                  </apply>
                   <ci> M_pfk_R3_A_c </ci>
-                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2561,21 +2703,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_F </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_F </ci>
                 <apply>
-                  <times/>
-                  <ci> M_f6p_c </ci>
-                  <ci> M_pfk_R3_A_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_F </ci>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_pfk_R3_A_c </ci>
+                  </apply>
                   <ci> M_pfk_R3_AF_c </ci>
-                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2624,25 +2767,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_ACT </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_ACT </ci>
                 <apply>
-                  <times/>
-                  <ci> M_amp_c </ci>
-                  <ci> M_pfk_R3_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_ACT </ci>
+                    <ci> M_amp_c </ci>
+                    <ci> M_pfk_R3_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 4 </cn>
                     <ci> M_pfk_R4_c </ci>
                   </apply>
-                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2663,25 +2807,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_I </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_I </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_T3_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_I </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_T3_c </ci>
+                  </apply>
                   <apply>
                     <times/>
                     <cn> 4 </cn>
                     <ci> M_pfk_T4_c </ci>
                   </apply>
-                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2702,21 +2847,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_A </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_A </ci>
                 <apply>
-                  <times/>
-                  <ci> M_atp_c </ci>
-                  <ci> M_pfk_R4_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_A </ci>
+                    <ci> M_atp_c </ci>
+                    <ci> M_pfk_R4_c </ci>
+                  </apply>
                   <ci> M_pfk_R4_A_c </ci>
-                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
         </kineticLaw>
@@ -2737,21 +2883,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <times/>
-              <ci> kf_PFK_F </ci>
+              <divide/>
               <apply>
-                <minus/>
+                <times/>
+                <ci> kf_PFK_F </ci>
                 <apply>
-                  <times/>
-                  <ci> M_f6p_c </ci>
-                  <ci> M_pfk_R4_A_c </ci>
-                </apply>
-                <apply>
-                  <divide/>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Keq_PFK_F </ci>
+                    <ci> M_f6p_c </ci>
+                    <ci> M_pfk_R4_A_c </ci>
+                  </apply>
                   <ci> M_pfk_R4_AF_c </ci>
-                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
+              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
         </kineticLaw>

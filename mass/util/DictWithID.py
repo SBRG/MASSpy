@@ -7,16 +7,16 @@ from copy import copy
 from six import string_types
 
 
-def __constructor(self, id=None, dictionary=None):
+def __constructor(self, id=None, data_dict=None):
     """Initialize a DictWithID instance.
 
     Parameters
     ----------
     id: str, None
         The identifier to associate with the object.
-    dictionary: dict, optional
-        If provided, the new _DictWithID will contain the key:value pairs from
-        "dictionary". Otherwise the new _DictWithID is initialized as empty.
+    data_dict: dict, optional
+        If provided, the new DictWithID will contain the key:value pairs from
+        "data_dict". Otherwise the new DictWithID is initialized as empty.
 
     Warnings
     --------
@@ -24,13 +24,13 @@ def __constructor(self, id=None, dictionary=None):
 
     """
     super(type(self), self).__setattr__("_id", id)
-    if isinstance(dictionary, dict):
-        self.update(dictionary)
-    elif dictionary is None:
+    if isinstance(data_dict, dict):
+        self.update(data_dict)
+    elif data_dict is None:
         pass
     else:
-        raise TypeError("dictionary must be a dict")
-    
+        raise TypeError("data_dict must be a dict")
+
 
 @property
 def __id(self):
@@ -86,7 +86,7 @@ def __doc__(self):
     """Return the docstring for the class."""
     cls_name = self.__class__.__name__
     supercls_str, all_subclasses = {
-        "DictWithID": ["dict", ["Solution"]],
+        "DictWithID": ["dict", ["MassSolution"]],
         "OrderedDictWithID": ["OrderedDict", ["EnzymeDict"]],
     }[cls_name]
 
@@ -99,9 +99,9 @@ def __doc__(self):
     ----------
     id: str, None
         The identifier to associate with the {0}.
-    dictionary: dict, optional
+    data_dict: dict, optional
         If provided, the new {0} will contain the key:value pairs from
-        "dictionary". Otherwise the new {0} is initialized as empty.
+        "data_dict". Otherwise the new {0} is initialized as empty.
 
     """.format(cls_name, supercls_str, str(tuple(all_subclasses)))
 
@@ -131,10 +131,10 @@ def __make_class_constructor(ordered=False):
         cls_name, obj = ("DictWithID", dict)
 
     constructor = type(cls_name, (obj,), {
-        "__init__": __constructor, 
-        "id": __id, 
+        "__init__": __constructor,
+        "id": __id,
         "copy": __copy,
-        "_set_id_with_model": __set_id_with_model, 
+        "_set_id_with_model": __set_id_with_model,
         "__copy__": __copy__,
         "__repr__": __repr__,
         "__str__": __str__,

@@ -701,7 +701,7 @@ def _set_plot_observables(solution, time, observable):
     """
     # Return all items in the solution if no observables are provided.
     if observable is None:
-        observable = solution.solutions
+        observable = dict(solution)
 
     # If a single observable is provided, make it iterable.
     if not hasattr(observable, '__iter__') or \

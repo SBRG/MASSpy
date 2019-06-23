@@ -594,7 +594,8 @@ class EnzymeModule(MassModel):
                 rate_type = reaction._rtype
             # Create a string representation of the rate and replace the
             # reaction id portions of the parameters with new_parameter_id
-            custom_rate = str(strip_time(reaction.get_rate_law(rate_type)))
+            custom_rate = str(strip_time(
+                reaction.get_mass_action_rate_law(rate_type)))
             custom_rate = custom_rate.replace(reaction.id, new_parameter_id)
             self.add_custom_rate(reaction, custom_rate)
 

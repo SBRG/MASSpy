@@ -2,7 +2,7 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-import re
+from warnings import warn
 
 import matplotlib.pyplot as plt
 
@@ -10,7 +10,7 @@ import pandas as pd
 
 from scipy.interpolate import interp1d
 
-from six import iteritems
+from six import iteritems, iterkeys, string_types
 
 from mass.core.massmodel import MassModel
 from mass.core.visualization import plot_simulation, plot_tiled_phase_portrait
@@ -20,14 +20,6 @@ from mass.util.util import ensure_iterable
 # Strings of valid solution types
 _CONC_STR = "Conc"
 _FLUX_STR = "Flux"
-_POOL_STR = "Pool"
-_NETFLUX_STR = "NetFlux"
-
-# Pre-compiled regular expressions for valid solution types
-_CONC_RE = re.compile(_CONC_STR)
-_FLUX_RE = re.compile(_FLUX_STR)
-_POOL_RE = re.compile(_POOL_STR)
-_NETFLUX_RE = re.compile(_NETFLUX_STR)
 
 
 class MassSolution(DictWithID):
@@ -35,6 +27,9 @@ class MassSolution(DictWithID):
 
     MassSolution containers are given an ID of the following form:
         MassSolution.id = MassSolution_{id_or_model}_{solution_type}
+
+    All solution MassSolutuion can be accessed via attribute accessors
+    in addition to accessing via standard dict class methods.
 
     The MassSolution class is essentially a subclass of a dict with additional
     attributes and properties.
@@ -69,44 +64,53 @@ class MassSolution(DictWithID):
 
     """
 
-    def __init__(self, id_or_model, solution_type, solution_dictionary=None,
+    def __init__(self, id_or_model, data_dict=None, solution_type=None,
                  time=None, interpolate=False):
-        """Initialize MassSolution with id "solution_type" for solutions."""
-        valid_check = [True if _re.match(solution_type) else False
-                       for _re in [_CONC_RE, _FLUX_RE, _POOL_RE, _NETFLUX_RE]]
-        if True not in valid_check:
-            raise ValueError("'{0}' is not a valid solution type."
-                             .format(solution_type))
-        if not isinstance(interpolate, bool):
-            raise TypeError("interpolate must be a bool")
+        """Initialize MassSolution."""
+        if solution_type not in {_CONC_STR, _FLUX_STR}:
+            raise ValueError(
+                "'{0}' is not a valid solution type.".format(solution_type))
 
         if isinstance(id_or_model, MassModel):
-            self._model = id_or_model
-            id_or_model = id_or_model.id
-        else:
-            self._model = None
+            id_or_model = "{0}_{1}Sol".format(str(id_or_model), solution_type)
+        if not isinstance(id_or_model, string_types):
+            raise TypeError(
+                "'id_or_model' must be a MassModel instance or a string")
 
-        id_or_model = "{0}_{1}Sol".format(id_or_model, solution_type)
-
-        DictWithID.__init__(self, id_or_model, dictionary=solution_dictionary)
-        self._solution_type = solution_type
+        super(MassSolution, self).__init__(id=id_or_model, data_dict=data_dict)
+        self.solution_type = solution_type
+        self._simulation = None
         self._time = time
         self._interpolate = interpolate
-        self._groups = None
-        self._simulation = None
+        if time is not None:
+            self.interpolate = interpolate
 
     @property
-    def t(self):
+    def simulation(self):
+        """Return the Simulation associated with the MassSolution."""
+        return getattr(self, "_simulation")
+
+    @property
+    def df(self):
+        """Return the MassSolution object as a pandas.DataFrame."""
+        sols = dict((k, v(self.time)) if self.interpolate
+                    else (k, v) for k, v in iteritems(self))
+        df = pd.DataFrame.from_dict(sols)
+        df.index = pd.Series(self.time, name="Time")
+        return df
+
+    @property
+    def time(self):
         """Return time points stored in the MassSolution."""
         return getattr(self, "_time", None)
 
-    @t.setter
-    def t(self, value):
+    @time.setter
+    def time(self, value):
         """Set the time points that are stored in the MassSolution.
 
         Parameters
         ----------
-        value: array-like, optional
+        value: array-like
             An array-like object containing the time points used in calculating
             the solutions to be stored.
 
@@ -118,58 +122,36 @@ class MassSolution(DictWithID):
 
         """
         value = ensure_iterable(value)
-        if not self.interpolate:
-            intepolate = False
-            self.interpolate = True
+        if self.interpolate:
+            setattr(self, "_time", value)
         else:
-            intepolate = True
-        self._time = value
-
-        if not intepolate:
+            self.interpolate = True
+            setattr(self, "_time", value)
             self.interpolate = False
 
     @property
-    def df(self):
-        """Return the MassSolution object as a pandas.DataFrame."""
-        if self.interpolate:
-            sols = {k: v(self.t) for k, v in iteritems(self.solutions)}
-        else:
-            sols = self.solutions
-        df = pd.DataFrame.from_dict(sols)
-        df.index = pd.Series(self.t, name="Time")
-        return df
+    def t(self):
+        """Shorthand to return the time points stored in the MassSolution."""
+        return self.time
 
-    @property
-    def solutions(self):
-        """Return a dict containing solutions of the MassSolutionobject."""
-        return dict(self)
+    @t.setter
+    def t(self, value):
+        """Shorthand to set the time points stored in the MassSolution.
 
-    @property
-    def solution_type(self):
-        """Return the solution type of the Solution object."""
-        return getattr(self, "_solution_type", None)
+        Parameters
+        ----------
+        value: array-like
+            An array-like object containing the time points used in calculating
+            the solutions to be stored.
 
-    @property
-    def t0(self):
-        """Return the initial time point used in computing the solution."""
-        if self._time is not None and (len(self._time) >= 2):
-            return self._time[0]
+        Notes
+        -----
+        If the MassSolution is stored as numerical arrays and not as
+            interpolating functions, the numerical arrays of the solutions will
+            be recomputed to correspond to the new time points.
 
-    @property
-    def tf(self):
-        """Return the final time point used in computing the solution."""
-        if self._time is not None and (len(self._time) >= 2):
-            return self._time[-1]
-
-    @property
-    def numpoints(self):
-        """Return the number of time points used to compute the solutions."""
-        return int(len(self.t))
-
-    @property
-    def groups(self):
-        """Return the groups used to create grouped solutions if they exist."""
-        return getattr(self, "_groups", None)
+        """
+        self.time = value
 
     @property
     def interpolate(self):
@@ -189,16 +171,19 @@ class MassSolution(DictWithID):
         """
         if not isinstance(value, bool):
             raise ValueError("value must be a bool")
-        if value != self.interpolate:
-            for key, sol in iteritems(self):
-                if value:
-                    if not isinstance(sol, interp1d):
-                        self[key] = interp1d(self.t, sol, kind='cubic',
-                                             fill_value='extrapolate')
-                else:
-                    self[key] = sol(self.t)
+        if self.time is None:
+            warn("No time points associated with MassSolution. Cannot convert "
+                 "between numerical arrays and interpolating functions.")
+            return
 
-        self._interpolate = value
+        for key, sol in iteritems(self):
+            if value and not isinstance(sol, interp1d):
+                self[key] = interp1d(self.time, sol, kind='cubic',
+                                     fill_value='extrapolate')
+            if not value and isinstance(sol, interp1d):
+                self[key] = sol(self.time)
+
+        setattr(self, "_interpolate", value)
 
     @property
     def preview_time_profile(self):
@@ -236,7 +221,13 @@ class MassSolution(DictWithID):
                                        title="Phase portraits for " + self.id)
         ax.get_figure().set_size_inches((7, 7))
 
-    @property
-    def model(self):
-        """Return the MassModel associated with the MassSolution, if any."""
-        return getattr(self, "_model", None)
+    def __getattribute__(self, name):
+        """Override of default __getattr__."""
+        if name in self:
+            return self[name]
+        else:
+            return super(MassSolution, self).__getattribute__(name)
+
+    def __dir__(self):
+        """Override of default __dir__."""
+        return list(iterkeys(self)) + super(MassSolution, self).__dir__()

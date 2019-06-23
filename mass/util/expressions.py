@@ -5,10 +5,14 @@ from __future__ import absolute_import
 import re
 from warnings import warn
 
-from six import integer_types, iteritems, iterkeys, string_types
+from six import iteritems, iterkeys, string_types
 
 import sympy as sym
 from sympy.physics.vector import dynamicsymbols
+
+from mass.core.massconfiguration import MassConfiguration
+
+MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
@@ -31,8 +35,31 @@ def Keq2k(sympy_expr, simplify=True):
         same type as the original input.
 
     """
-    new_expr = _apply_func_to_expressions(
-        sympy_expr, _replace_rate_symbol, args=["Keq", simplify])
+    def _replace_Keq(expr, simplify):
+        """Replace the Keq symbol with kf/kr."""
+        identifiers = [str(symbol).split("_", 1)[1]
+                       for symbol in list(expr.atoms(sym.Symbol))
+                       if str(symbol).startswith("Keq_")]
+        # Return the expression if no Keq found.
+        if not identifiers:
+            return expr
+
+        substituion_dict = {}
+        # Create substitution dict
+        for pid in identifiers:
+            kf, kr, Keq = (sym.Symbol(param_type + "_" + str(pid))
+                           for param_type in ["kf", "kr", "Keq"])
+            substituion_dict[Keq] = kf / kr
+        # Substitute Keq for kf/kr
+        new_expr = expr.subs(substituion_dict)
+        # Simplify if desired
+        if simplify:
+            new_expr = sym.simplify(new_expr)
+
+        return new_expr
+
+    new_expr = _apply_func_to_expressions(sympy_expr, _replace_Keq, [simplify])
+
     return new_expr
 
 
@@ -55,8 +82,35 @@ def k2Keq(sympy_expr, simplify=True):
         same type as the original input.
 
     """
-    new_expr = _apply_func_to_expressions(
-        sympy_expr, _replace_rate_symbol, args=["kr", simplify])
+    def _replace_kr(expr, simplify):
+        """Replace the Keq symbol with kf/kr."""
+        if not isinstance(expr, sym.Basic):
+            raise TypeError("{0} is not a sympy expression".format(str(expr)))
+        identifiers = [str(symbol).split("_", 1)[1]
+                       for symbol in list(expr.atoms(sym.Symbol))
+                       if str(symbol).startswith("kr_")]
+        # Return the expression if no kr found.
+        if not identifiers:
+            return expr
+
+        substituion_dict = {}
+        # Create substitution dict
+        for pid in identifiers:
+            kf, kr, Keq = (sym.Symbol(param_type + "_" + str(pid))
+                           for param_type in ["kf", "kr", "Keq"])
+            substituion_dict[kr] = kf / Keq
+        # Substitute kr for kf/Keq
+        new_expr = expr.subs(substituion_dict)
+        # Simplify if desired
+        if simplify:
+            new_expr = sym.simplify(new_expr)
+            if len(identifiers) == 1:
+                new_expr = sym.collect(new_expr, kf)
+
+        return new_expr
+
+    new_expr = _apply_func_to_expressions(sympy_expr, _replace_kr, [simplify])
+
     return new_expr
 
 
@@ -71,7 +125,7 @@ def strip_time(sympy_expr):
 
     Returns
     -------
-    stripped_expr: sympy.Basic, dict, or list
+    new_expr: sympy.Basic, dict, or list
         The sympy expression(s) without the time dependency, returned as the
         same type as the original input.
 
@@ -80,74 +134,186 @@ def strip_time(sympy_expr):
     def _strip_single_expr(expr):
         if not isinstance(expr, sym.Basic):
             raise TypeError("{0} is not a sympy expression".format(str(expr)))
+        # Get the functions of time.
         funcs = list(expr.atoms(sym.Function))
+        # Get the symbols to replace the functions
         symbols = list(sym.Symbol(str(f)[:-3]) for f in funcs)
-        return expr.subs(dict(zip(funcs, symbols)))
+        # Substitute functions for symbols
+        new_expr = expr.subs(dict(zip(funcs, symbols)))
 
-    stripped_expr = _apply_func_to_expressions(sympy_expr, _strip_single_expr)
+        return new_expr
 
-    return stripped_expr
+    new_expr = _apply_func_to_expressions(sympy_expr, _strip_single_expr)
+
+    return new_expr
 
 
-def generate_rate_law(reaction, rate_type=1, sympy_expr=True,
-                      update_reaction=False):
-    """Generate the rate law for the reaction.
+def generate_mass_action_rate_expression(reaction, rtype=1,
+                                         update_reaction=False):
+    """Generate the mass action rate law for the reaction.
 
     Parameters
     ----------
     reaction: mass.MassReaction
         The MassReaction object to generate the rate expression for.
-    rate type: int {1, 2, 3}, optional
+    rate type: int {1, 2, 3}
         The type of rate law to display. Must be 1, 2, or 3.
             Type 1 will utilize the forward rate and equilibrium constants.
             Type 2 will utilize the forward rate and reverse rate constants.
             Type 3 will utilize the equilibrium and reverse rate constants.
-    sympy_expr: bool, optional
-        If True, output is a sympy expression. Otherwise output is a string.
+        Default is 1.
     update_reaction: bool, optional
         If True, update the MassReaction in addition to returning the rate law.
 
     Returns
     -------
-    rate_law: str or sympy expression
-        The rate law expression. Will return a blank string if no metabolites
-        are associated with the reaction.
+    rate_expression: sympy.Basic
+        The rate law as a sympy expression. If the reaction has no metabolites
+        associated, None will be returned
 
     """
-    # Check inputs
-    if not isinstance(rate_type, (integer_types, float)):
-        raise TypeError("rate_type must be an int or float")
-    elif not isinstance(sympy_expr, bool):
-        raise TypeError("sympy_expr must be a bool")
-    elif not isinstance(update_reaction, bool):
-        raise TypeError("update_reaction must be a bool")
-    else:
-        rate_type = int(rate_type)
-
     if not reaction.metabolites:
-        return ""
+        warn("No metabolites exist in reaction.")
+        return None
 
-    # Remove H+ and H2O from the reaction if necessary
-    rxn = _ignore_h_and_h2o(reaction)
+    # Generate forward and reverse rate expressions
+    fwd_rate = generate_foward_mass_action_rate_expression(reaction, rtype)
+    rev_rate = generate_reverse_mass_action_rate_expression(reaction, rtype)
 
-    # Construct the rate law
-    rate_constructor = {
-        1: [_generate_rate_sym_1, _generate_rate_str_1],
-        2: [_generate_rate_sym_2, _generate_rate_str_2],
-        3: [_generate_rate_sym_3, _generate_rate_str_3]}
+    # Ignore reverse rate if it is mathematically equal to 0.
+    if reaction.Keq != float("inf") or reaction.kr != 0.:
+        rate_expression = sym.Add(fwd_rate, -rev_rate)
+    else:
+        rate_expression = fwd_rate
 
-    try:
-        rate_expr = rate_constructor[rate_type][0 if sympy_expr else 1](rxn)
-    except KeyError:
-        raise ValueError("rate_type must be 1, 2, or 3")
+    # Try to group the forward rate constants
+    if rtype == 1:
+        rate_expression = sym.collect(rate_expression, reaction.kf_str)
+
+    # Try to group compartments in the rate
+    if MASSCONFIGURATION.include_compartments_in_rates\
+       and len(reaction.compartments) == 1:
+        c = list(reaction.compartments)[0]
+        rate_expression = sym.collect(rate_expression, c)
 
     if update_reaction:
-        reaction._rtype = rate_type
+        reaction._rtype = rtype
 
-    if reaction.model is not None:
-        rate_expr = _strip_time_for_fixed_mets(reaction, rate_expr)
+    return rate_expression
 
-    return rate_expr
+
+def generate_foward_mass_action_rate_expression(reaction, rtype=1):
+    """Generate the foward mass action rate expression for the reaction.
+
+    Parameters
+    ----------
+    reaction: mass.MassReaction
+        The MassReaction object to generate the rate expression for.
+    rate type: int {1, 2, 3}
+        The type of foward rate law to return. Must be 1, 2, or 3.
+            Type 1 and 2 will utilize the forward rate constant.
+            Type 3 will utilize the equilibrium and reverse rate constants.
+        Default is 1.
+
+    Returns
+    -------
+    fwd_rate: sympy.Basic
+        The forward rate as a sympy expression.
+
+    """
+    if MASSCONFIGURATION.exclude_metabolites_from_rates\
+       and not reaction.boundary:
+        reaction = _remove_metabolites_from_rate(reaction)
+
+    fwd_rate = _format_metabs_sym(sym.S.One, reaction, reaction.reactants)
+    if rtype == 3:
+        fwd_rate = sym.Mul(
+            sym.Mul(sym.var(reaction.kr_str), sym.var(reaction.Keq_str)),
+            fwd_rate)
+    else:
+        fwd_rate = sym.Mul(sym.var(reaction.kf_str), fwd_rate)
+
+    fwd_rate = _set_fixed_metabolites_in_rate(reaction, fwd_rate)
+    if MASSCONFIGURATION.include_compartments_in_rates:
+        compartments = set(
+            met.compartment for met in reaction.reactants if met is not None)
+        for c in list(compartments):
+            fwd_rate = sym.Mul(fwd_rate, sym.Symbol(c))
+
+    return fwd_rate
+
+
+def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
+    """Generate the reverse mass action rate expression for the reaction.
+
+    Parameters
+    ----------
+    reaction: mass.MassReaction
+        The MassReaction object to generate the rate expression for.
+    rate type: int {1, 2, 3}
+        The type of foward rate law to return. Must be 1, 2, or 3.
+            Type 1 will utilize the foward rate and equilibrium constant.
+            Type 2 and 3 will utilize the reverse rate constant.
+        Default is 1.
+
+    Returns
+    -------
+    rev_rate: sympy.Basic
+        The reverse rate as a sympy expression.
+
+    """
+    if MASSCONFIGURATION.exclude_metabolites_from_rates\
+       and not reaction.boundary:
+        reaction = _remove_metabolites_from_rate(reaction)
+
+    rev_rate = _format_metabs_sym(sym.S.One, reaction, reaction.products)
+    if rtype == 1:
+        rev_rate = sym.Mul(
+            sym.Mul(sym.var(reaction.kf_str),
+                    sym.Pow(sym.var(reaction.Keq_str), -1)),
+            rev_rate)
+    else:
+        rev_rate = sym.Mul(sym.var(reaction.kr_str), rev_rate)
+
+    rev_rate = _set_fixed_metabolites_in_rate(reaction, rev_rate)
+    if MASSCONFIGURATION.include_compartments_in_rates:
+        compartments = set(
+            met.compartment for met in reaction.products if met is not None)
+        for c in list(compartments):
+            rev_rate = sym.Mul(rev_rate, sym.Symbol(c))
+
+    return rev_rate
+
+
+def _remove_metabolites_from_rate(reaction):
+    """Remove metabolites from a copy of the reaction before creating the rate.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
+    reaction = reaction.copy()
+    # Get exclusion criteria and reaction metabolites
+    exclusion_criteria_dict = MASSCONFIGURATION.exclude_metabolites_from_rates
+    metabolites_to_exclude = []
+    # Iterate through attributes and exclusion values
+    for attr, exclusion_values in iteritems(exclusion_criteria_dict):
+        exclusion_values = [
+            getattr(value, attr) if hasattr(value, attr) else value
+            for value in exclusion_values]
+        # Iterate through reaction metabolites
+        for met in list(reaction.metabolites):
+            met_value = getattr(met, attr)
+            # Add metabolite to be excluded if it matches the criteria
+            if met_value in exclusion_values:
+                metabolites_to_exclude += [str(met)]
+
+    # Remove metabolites from reaction copy
+    reaction.subtract_metabolites({
+        met: coeff for met, coeff in iteritems(reaction.metabolites)
+        if str(met) in metabolites_to_exclude})
+
+    return reaction
 
 
 def generate_mass_action_ratio(reaction):
@@ -194,34 +360,6 @@ def generate_disequilibrium_ratio(reaction):
                           sym.Pow(sym.var(reaction.Keq_str), -1))
 
     return diseq_ratio
-
-
-def generate_ode(metabolite):
-    """Generate the ODE for a given metabolite as a sympy expression.
-
-    Parameters
-    ----------
-    metabolite: mass.MassMetabolite
-        The MassMetabolite object to generate the ODE for.
-    update_metabolite: bool, optional
-        If True, update the MassMetabolite in addition to returning the ODE.
-
-    Returns
-    -------
-    ode: sympy.Basic
-        The metabolite ODE as a sympy expression.
-
-    """
-    if metabolite._reaction:
-        ode = sym.S.Zero
-        if not metabolite.fixed:
-            for rxn in metabolite._reaction:
-                ode = sym.Add(
-                    ode, sym.Mul(rxn.get_coefficient(metabolite.id), rxn.rate))
-    else:
-        ode = None
-
-    return ode
 
 
 def create_custom_rate(reaction, custom_rate, custom_parameters=None):
@@ -312,7 +450,107 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     return custom_rate_expr
 
 
+def generate_ode(metabolite):
+    """Generate the ODE for a given metabolite as a sympy expression.
+
+    Parameters
+    ----------
+    metabolite: mass.MassMetabolite
+        The MassMetabolite object to generate the ODE for.
+    update_metabolite: bool, optional
+        If True, update the MassMetabolite in addition to returning the ODE.
+
+    Returns
+    -------
+    ode: sympy.Basic
+        The metabolite ODE as a sympy expression.
+
+    """
+    if metabolite._reaction:
+        ode = sym.S.Zero
+        if not metabolite.fixed:
+            for rxn in metabolite._reaction:
+                ode = sym.Add(
+                    ode, sym.Mul(rxn.get_coefficient(metabolite.id), rxn.rate))
+    else:
+        ode = None
+
+    return ode
+
+
+def _ignore_h_and_h2o(reaction):
+    """Remove hydrogen and water from reactions.
+
+    Designed for internal use. Remove hydrogen and water from reactions to
+    prevent their inclusion in simulation. Does not effect water and hydrogen
+    boundary reactions.
+    """
+    reaction = reaction.copy()
+    for met, coeff in iteritems(reaction.metabolites):
+        # Must be water or hydrogen.
+        if met.elements == {"H": 2, "O": 1} or met.elements == {"H": 1}:
+            # Must not be an boundary reaction.
+            if not reaction.boundary:
+                reaction.subtract_metabolites({met: coeff})
+
+    return reaction
+
+# def _remove_h_from_rate(reaction, rate)
+
+
+# def _remove_h2o_from_rate(reaction, rate)
+
+
 # Internal
+def _mk_met_func(met):
+    """Make an undefined sympy.Function of time.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
+    return dynamicsymbols(str(met))
+
+
+def _set_fixed_metabolites_in_rate(reaction, rate):
+    """Strip time dependency of fixed metabolites in the rate expression.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+    """
+    to_strip = [str(metabolite) for metabolite in list(reaction.metabolites)
+                if metabolite.fixed]
+
+    if reaction.model is not None and reaction.model.boundary_conditions:
+        to_strip += [
+            met for met, value in iteritems(reaction.model.boundary_conditions)
+            if not isinstance(value, sym.Basic)]
+    if to_strip:
+        to_sub = {_mk_met_func(met): sym.Symbol(met) for met in to_strip
+                  if _mk_met_func(met) in list(rate.atoms(sym.Function))}
+        rate = rate.subs(to_sub)
+
+    return rate
+
+
+def _format_metabs_sym(expr, rxn, mets):
+    """Format the metabolites for a rate law or ratio sympy expression."""
+    # For boundary reactions, generate an "boundary" metabolite for boundary
+    if rxn.boundary and not mets:
+        expr = sym.Mul(expr, sym.Symbol(rxn.boundary_metabolite))
+    # For all other reactions
+    else:
+        for met in mets:
+            met_ode = _mk_met_func(met)
+            coeff = abs(rxn.get_coefficient(met.id))
+            if coeff == 1:
+                expr = sym.Mul(expr, met_ode)
+            else:
+                expr = sym.Mul(expr, sym.Pow(met_ode, coeff))
+    return expr
+
+
 def _apply_func_to_expressions(sympy_expr, function, args=None):
     """Apply the given function to alter each sympy expression provided.
 
@@ -336,285 +574,3 @@ def _apply_func_to_expressions(sympy_expr, function, args=None):
         new_expr = func(sympy_expr)
 
     return new_expr
-
-
-def _replace_rate_symbol(sympy_expr, to_replace, simplify):
-    """Replace rate parameters with equivalents in terms of other parameters.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    identifiers = [str(symbol).split("_", 1)[1]
-                   for symbol in list(sympy_expr.atoms(sym.Symbol))
-                   if to_replace + "_" in str(symbol)]
-    # Return the expression if no Keq or kr found.
-    if not identifiers:
-        return sympy_expr
-
-    substituion_dict = {}
-    for param_id in identifiers:
-        kf, kr, Keq = (sym.Symbol(param_type + "_" + str(param_id))
-                       for param_type in ["kf", "kr", "Keq"])
-        key, value = {"Keq": (Keq, kf / kr), "kr": (kr, kf / Keq)}[to_replace]
-        substituion_dict[key] = value
-
-    new_expr = sympy_expr.subs(substituion_dict)
-    if simplify:
-        if to_replace != "Keq" and len(identifiers) == 1:
-            new_expr = sym.collect(new_expr, kf)
-        else:
-            new_expr = sym.simplify(new_expr)
-
-    return new_expr
-
-
-def _ignore_h_and_h2o(reaction):
-    """Remove hydrogen and water from reactions.
-
-    Designed for internal use. Remove hydrogen and water from reactions to
-    prevent their inclusion in simulation. Does not effect water and hydrogen
-    boundary reactions.
-    """
-    reaction = reaction.copy()
-    for met, coeff in iteritems(reaction.metabolites):
-        # Must be water or hydrogen.
-        if met.elements == {"H": 2, "O": 1} or met.elements == {"H": 1}:
-            # Must not be an boundary reaction.
-            if not reaction.boundary:
-                reaction.subtract_metabolites({met: coeff})
-
-    return reaction
-
-
-def _format_metabs_str(expr, rxn, mets, left_sign):
-    """Format the metabolites for a rate law string."""
-    if left_sign:
-        l, r = "*", ""
-    else:
-        l, r = "", "*"
-    # For exchange reactions
-    if rxn.boundary and not mets:
-        expr += l + rxn.boundary_metabolite + "(t)" + r
-    # For all other reactions
-    else:
-        for met in mets:
-            coeff = abs(rxn.get_coefficient(met.id))
-            if coeff == 1:
-                expr += l + met.id + "(t)" + r
-            else:
-                expr += l + met.id + "(t)**" + coeff + r
-    return expr
-
-
-def _format_metabs_sym(expr, rxn, mets):
-    """Format the metabolites for a rate law or ratio sympy expression."""
-    # For boundary reactions, generate an "boundary" metabolite for boundary
-    if rxn.boundary and not mets:
-        expr = sym.Mul(expr, sym.Symbol(rxn.boundary_metabolite))
-    # For all other reactions
-    else:
-        for met in mets:
-            met_ode = _mk_met_func(met)
-            coeff = abs(rxn.get_coefficient(met.id))
-            if coeff == 1:
-                expr = sym.Mul(expr, met_ode)
-            else:
-                expr = sym.Mul(expr, sym.Pow(met_ode, coeff))
-    return expr
-
-
-def _generate_rate_str_1(reaction):
-    """Generate the type 1 rate law as a human readable string.
-
-    Designed for internal use. Generate the rate law for reaction as a human
-    readable string. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law = _format_metabs_str("", reaction, reaction.reactants, True)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        return reaction.kf_str + rate_law
-
-    # Generate reverse rate
-    rate_law = reaction.kf_str + "*(" + rate_law.lstrip("*")
-    rate_law = _format_metabs_str(rate_law, reaction, reaction.products, False)
-    rate_law = rate_law.rstrip("*") + "/" + reaction.Keq_str + ")"
-
-    return rate_law
-
-
-def _generate_rate_str_2(reaction):
-    """Generate the type 2 rate law as a human readable string.
-
-    Designed for internal use. Generate the rate law for reaction as a human
-    readable string. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law = _format_metabs_str("", reaction, reaction.reactants, True)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        return reaction.kf_str + rate_law
-
-    # Generate reverse rate
-    rate_law = reaction.kf_str + rate_law + " - " + reaction.kr_str
-    rate_law = _format_metabs_str(rate_law, reaction, reaction.products, True)
-
-    return rate_law
-
-
-def _generate_rate_str_3(reaction):
-    """Generate the type 3 rate law as a human readable string.
-
-    Designed for internal use. Generate the rate law for reaction as a human
-    readable string. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law = _format_metabs_str("", reaction, reaction.reactants, True)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        rate_law = reaction.kr_str + "*" + reaction.Keq_str + rate_law
-        return rate_law
-
-    # Generate reverse rate
-    rate_law = '{0}*({1}{2} - '.format(reaction.kr_str, reaction.Keq_str,
-                                       rate_law)
-
-    rate_law = reaction.kr_str + "*(" + reaction.Keq_str + rate_law + " - "
-    rate_law = _format_metabs_str(rate_law, reaction, reaction.products, False)
-    rate_law = rate_law.rstrip("*") + ')'
-
-    return rate_law
-
-
-def _generate_rate_sym_1(reaction):
-    """Generate the type 1 rate law as a sympy expression.
-
-    Designed for internal use. Generate the rate law for reaction as a sympy
-    expression. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law_f = sym.S.One
-    rate_law_f = _format_metabs_sym(rate_law_f, reaction, reaction.reactants)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        return sym.Mul(sym.var(reaction.kf_str), rate_law_f)
-
-    # Generate reverse rate
-    rate_law_r = sym.Pow(sym.var(reaction.Keq_str), -1)
-    rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
-
-    # Combine forward and reverse rates
-    rate_law = sym.Mul(sym.var(reaction.kf_str),
-                       sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
-    return rate_law
-
-
-def _generate_rate_sym_2(reaction):
-    """Generate the type 2 rate law as a sympy expression.
-
-    Designed for internal use. Generate the rate law for reaction as a sympy
-    expression. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law_f = sym.var(reaction.kf_str)
-    rate_law_f = _format_metabs_sym(rate_law_f, reaction, reaction.reactants)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        return rate_law_f
-
-    # Generate reverse rate
-    rate_law_r = sym.var(reaction.kr_str)
-    rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
-
-    # Combine forward and reverse rates
-    rate_law = sym.Add(rate_law_f, sym.Mul(-1, rate_law_r))
-
-    return rate_law
-
-
-def _generate_rate_sym_3(reaction):
-    """Generate the type 3 rate law as a sympy expression.
-
-    Designed for internal use. Generate the rate law for reaction as a sympy
-    expression. To safely generate a rate law, use generate_rate_law.
-    """
-    # Generate forward rate
-    rate_law_f = sym.var(reaction.Keq_str)
-    rate_law_f = _format_metabs_sym(rate_law_f, reaction, reaction.reactants)
-
-    # Return rate if reaction is irreversible
-    if not reaction.reversible:
-        return sym.Mul(sym.var(reaction.kr_str), rate_law_f)
-
-    # Generate reverse rate
-    rate_law_r = sym.S.One
-    rate_law_r = _format_metabs_sym(rate_law_r, reaction, reaction.products)
-
-    # Combine forward and reverse rates
-    rate_law = sym.Mul(sym.var(reaction.kr_str),
-                       sym.Add(rate_law_f, sym.Mul(-1, rate_law_r)))
-
-    return rate_law
-
-
-def _determine_reaction_rtype(reaction):
-    """Determine rate to use based on a reaction's available parameters.
-
-    Will return the rate law type based on
-    numerically defined parameters, with priority given to rate type 1.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-    """
-    # Get available parameters for a reaction.
-    p_types = [param[:3] for param in iterkeys(reaction.parameters)]
-    # Ensure reversible reactions have at least two parameters, and define
-    # rate type accordingly. Defaults to type 1.
-    if reaction.reversible:
-        if "kf_" in p_types and "Keq" in p_types:
-            rt = 1
-        elif "kf_" in p_types and "kr_" in p_types:
-            rt = 2
-        elif "Keq" in p_types and "kr_" in p_types:
-            rt = 3
-        else:
-            rt = 1
-    # Irreversible reactions only require a kf and default to type 1
-    else:
-        rt = 1
-
-    return rt
-
-
-def _strip_time_for_fixed_mets(reaction, rate_expr):
-    """Strip the time dependency of a sympy Function for fixed metabolites.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-    """
-    mets_to_strip = [met for met in reaction._metabolites
-                     if met in reaction.model.fixed]
-    if mets_to_strip:
-        sub_mets_stripped = {_mk_met_func(m): sym.Symbol(str(m))
-                             for m in mets_to_strip}
-        rate_expr = rate_expr.subs(sub_mets_stripped)
-    return rate_expr
-
-
-def _mk_met_func(met):
-    """Make an undefined sympy.Function of time.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-    """
-    return dynamicsymbols(str(met))
