@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -25,12 +25,12 @@
       <compartment id="c" name="Cytosol" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
+      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198000000002944" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146000026077805" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
       <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867281" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
-      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.28999996" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289999958202714" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
       <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
-      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.998e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
       <species id="M_pfk_R0_c" name="PFK" compartment="c" initialConcentration="6.9014e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">

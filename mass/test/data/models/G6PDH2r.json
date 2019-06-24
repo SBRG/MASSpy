@@ -50,7 +50,7 @@
             "G6PDH2r_2"
         ]
     },
-    "_enzyme_net_flux": 0.21,
+    "_enzyme_net_flux": 0.20999999999999638,
     "_enzyme_net_flux_equation": "kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7",
     "compartments": {
         "c": "Cytosol"
@@ -86,7 +86,7 @@
     "id": "G6PDH2r",
     "metabolites": [
         {
-            "_initial_condition": 0.0486,
+            "_initial_condition": 0.048600000000718034,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -94,7 +94,7 @@
             "name": "D-Glucose 6-phosphate"
         },
         {
-            "_initial_condition": 0.00175424,
+            "_initial_condition": 0.0017542400034099464,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H9O9P",
@@ -102,7 +102,7 @@
             "name": "6-Phospho-D-gluco-1,5-lactone"
         },
         {
-            "_initial_condition": 1.6,
+            "_initial_condition": 1.5999999999999996,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -110,7 +110,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.0002,
+            "_initial_condition": 0.0002000000000045456,
             "charge": -3,
             "compartment": "c",
             "formula": "C21H25N7O17P3",
@@ -118,7 +118,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate"
         },
         {
-            "_initial_condition": 0.0658,
+            "_initial_condition": 0.06579999999999545,
             "charge": -4,
             "compartment": "c",
             "formula": "C21H26N7O17P3",
@@ -126,7 +126,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate - reduced"
         },
         {
-            "_initial_condition": 8.998e-05,
+            "_initial_condition": 8.99757e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -136,11 +136,11 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 2.3680761e-05,
+            "_initial_condition": 2.3718133e-05,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]",
+            "formula": "[gpdhr]",
             "id": "g6pdh2r_c",
             "name": "G6PDH2r"
         },
@@ -149,11 +149,11 @@
                 "g6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.9638138e-05,
+            "_initial_condition": 3.9230714e-05,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C6H11O9P1",
+            "formula": "[gpdhr]-C6H11O9P1",
             "id": "g6pdh2r_G_c",
             "name": "G6PDH2r-g6p complex"
         },
@@ -163,11 +163,11 @@
                 "nadp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 6.8376e-08,
+            "_initial_condition": 7.0064e-08,
             "charge": -5,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C27H36O26P4N7",
+            "formula": "[gpdhr]-C27H36O26P4N7",
             "id": "g6pdh2r_GN_c",
             "name": "G6PDH2r-g6p-nadp complex"
         },
@@ -177,11 +177,11 @@
                 "nadph_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 9.292824e-06,
+            "_initial_condition": 8.331401e-06,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C27H35O26P4N7",
+            "formula": "[gpdhr]-C27H35O26P4N7",
             "id": "g6pdh2r_GN_P_c",
             "name": "G6PDH2r-_6pgl-nadph complex"
         },
@@ -190,11 +190,11 @@
                 "_6pgl_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 1.276587e-06,
+            "_initial_condition": 1.144911e-06,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C6H9O9P1",
+            "formula": "[gpdhr]-C6H9O9P1",
             "id": "g6pdh2r_G_P_c",
             "name": "G6PDH2r-_6pgl complex"
         },
@@ -203,11 +203,11 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 0.000861118567,
+            "_initial_condition": 0.000862477572,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C10H12N5O13P3",
+            "formula": "[gpdhr]-C10H12N5O13P3",
             "id": "g6pdh2r_A_CI_c",
             "name": "G6PDH2r-atp complex"
         },
@@ -216,11 +216,11 @@
                 "nadph_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 6.4924752e-05,
+            "_initial_condition": 6.5027215e-05,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
-            "formula": "[G6PDH2r]-C21H26N7O17P3",
+            "formula": "[gpdhr]-C21H26N7O17P3",
             "id": "g6pdh2r_N_PI_c",
             "name": "G6PDH2r-nadph complex"
         }
@@ -263,7 +263,7 @@
         },
         {
             "_equilibrium_constant": 37.03703703703704,
-            "_forward_rate_constant": 2603675.0,
+            "_forward_rate_constant": 2246662.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -280,7 +280,7 @@
         },
         {
             "_equilibrium_constant": 0.05,
-            "_forward_rate_constant": 471114.0,
+            "_forward_rate_constant": 671430.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -297,7 +297,7 @@
         },
         {
             "_equilibrium_constant": 52.631578947368425,
-            "_forward_rate_constant": 31681489.0,
+            "_forward_rate_constant": 32233627.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -314,7 +314,7 @@
         },
         {
             "_equilibrium_constant": 0.0105,
-            "_forward_rate_constant": 162428.0,
+            "_forward_rate_constant": 181563.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -331,7 +331,7 @@
         },
         {
             "_equilibrium_constant": 977.1428571428569,
-            "_forward_rate_constant": 3567413.0,
+            "_forward_rate_constant": 3412567.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
