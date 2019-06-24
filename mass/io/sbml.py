@@ -7,7 +7,6 @@ import logging
 import operator
 import re
 import traceback
-import warnings
 from collections import defaultdict
 from io import StringIO
 
@@ -297,9 +296,6 @@ def _remove_char_from_id(sid):
 # -----------------------------------------------------------------------------
 # MathML
 # -----------------------------------------------------------------------------
-# For MathML representation of kinetic laws and other sympy equations
-MATHML_MML_TAG_RE = re.compile("\<mml:.*?\>|\<\/mml:.*?\>")
-MATH_XML_FMT = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
 SBML_MATH_PACKAGE_NAME = "l{0}v{1}extendedmath".format(*SBML_LEVEL_VERSION)
 
 
@@ -322,12 +318,20 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
     This method is intended for internal use only.
 
     """
+    replace_time_re = re.compile(r"\>\<ci\>t\<\/ci\>\<")
+    remove_mml_tag_re = re.compile(r"\<mml:.*?\>|\<\/mml:.*?\>")
+    math_xml_ns = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
+
     underscore_replace = {str(arg): str(arg).replace("_", "&")
                           for arg in sympy_equation.atoms(Symbol)}
     math_xml_str = mathml(sympy_equation.subs(underscore_replace))
-    math_xml_str = MATH_XML_FMT.format(math_xml_str.replace("&", "_"))
-    math_xml_str = MATHML_MML_TAG_RE.sub("", math_xml_str)
-
+    math_xml_str = math_xml_ns.format(math_xml_str.replace("&", "_"))
+    math_xml_str = remove_mml_tag_re.sub("", math_xml_str)
+    if replace_time_re.search(math_xml_str):
+        time_symbol = '><csymbol encoding="text" definitionURL=' +\
+                      '"http://www.sbml.org/sbml/symbols/time">' +\
+                      't</csymbol><'
+        math_xml_str = replace_time_re.sub(time_symbol, math_xml_str)
     return math_xml_str
 
 
@@ -541,9 +545,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     # Add the parameters and boundary conditions to the model
     parameters.update(local_params)
     parameters.update(bc_values)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        mass_model.update_parameters(parameters)
+    mass_model.update_parameters(parameters, verbose=False)
 
     # Add custom rates
     mass_model.update_custom_rates(custom_rates)
@@ -1802,18 +1804,28 @@ def _write_model_boundary_conditions_to_sbml(model, mass_model,
                "set boundary specie id" + _for_id(bmid))
         _check(specie.setCompartment(str(list(BOUNDARY_COMPARTMENT_DICT)[0])),
                "set boundary specie compartment" + _for_id(bmid))
-        # Set boundary specie value and constant
+        # Set boundary specie value
         if isinstance(bc_value, (integer_types, float)):
             _check(specie.setInitialConcentration(bc_value),
                    "set boundary specie concentration" + _for_id(bmid))
-            _check(specie.setConstant(True),
-                   "set specie constant" + _for_id(bmid))
+            constant = True
         else:
-            # TODO handle functions of time for boundary conditions
-            print("TODO handle functions of time for boundary conditions")
-            _check(specie.setConstant(False),
-                   "set specie constant" + _for_id(bmid))
-
+            constant = False
+            assignment_rule = model.createAssignmentRule()
+            _check(assignment_rule,
+                   "create model assignment rule" + _for_id(bmid))
+            _check(assignment_rule.setVariable(bmid),
+                   "set assignment rule variable" + _for_id(bmid))
+            # Create MathML string from the sympy expression
+            math_xml_str = _create_math_xml_str_from_sympy_expr(bc_value)
+            # Set the math for the AssignmentRule
+            _check(
+                assignment_rule.setMath(
+                    libsbml.readMathMLFromString(math_xml_str)),
+                "set math on assignment rule" + _for_id(bmid))
+        # Set specie constant
+        _check(specie.setConstant(constant),
+               "set specie constant" + _for_id(bmid))
         # Set species as boundary condition, and set unit restrictions
         _check(specie.setBoundaryCondition(True),
                "set specie boundary condition" + _for_id(bmid))
