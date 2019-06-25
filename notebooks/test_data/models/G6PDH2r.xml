@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -25,20 +25,20 @@
       <compartment id="c" name="Cytosol" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.0486" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" initialConcentration="0.00175424" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P"/>
+      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.048600000000718" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M__6pgl_c" name="6-Phospho-D-gluco-1,5-lactone" compartment="c" initialConcentration="0.00175424000340995" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P"/>
       <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
-      <species id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" initialConcentration="0.0002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3"/>
-      <species id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" initialConcentration="0.0658" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3"/>
-      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.998e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
-      <species id="M_g6pdh2r_c" name="G6PDH2r" compartment="c" initialConcentration="2.3680761e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietygpdhr">
+      <species id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" initialConcentration="0.000200000000004546" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3"/>
+      <species id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" initialConcentration="0.0657999999999954" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_g6pdh2r_c" name="G6PDH2r" compartment="c" initialConcentration="2.3718133e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_G_c" name="G6PDH2r-g6p complex" compartment="c" initialConcentration="3.9638138e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P1Moietygpdhr">
+      <species id="M_g6pdh2r_G_c" name="G6PDH2r-g6p complex" compartment="c" initialConcentration="3.9230714e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P1Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_g6p_c</p>
@@ -46,7 +46,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_GN_c" name="G6PDH2r-g6p-nadp complex" compartment="c" initialConcentration="6.8376e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C27H36O26P4N7Moietygpdhr">
+      <species id="M_g6pdh2r_GN_c" name="G6PDH2r-g6p-nadp complex" compartment="c" initialConcentration="7.0064e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C27H36O26P4N7Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_g6p_c; 1 M_nadp_c</p>
@@ -54,7 +54,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_GN_P_c" name="G6PDH2r-_6pgl-nadph complex" compartment="c" initialConcentration="9.292824e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C27H35O26P4N7Moietygpdhr">
+      <species id="M_g6pdh2r_GN_P_c" name="G6PDH2r-_6pgl-nadph complex" compartment="c" initialConcentration="8.331401e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C27H35O26P4N7Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M__6pgl_c; 1 M_nadph_c</p>
@@ -62,7 +62,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_G_P_c" name="G6PDH2r-_6pgl complex" compartment="c" initialConcentration="1.276587e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P1Moietygpdhr">
+      <species id="M_g6pdh2r_G_P_c" name="G6PDH2r-_6pgl complex" compartment="c" initialConcentration="1.144911e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P1Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M__6pgl_c</p>
@@ -70,7 +70,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_A_CI_c" name="G6PDH2r-atp complex" compartment="c" initialConcentration="0.000861118567" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietygpdhr">
+      <species id="M_g6pdh2r_A_CI_c" name="G6PDH2r-atp complex" compartment="c" initialConcentration="0.000862477572" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -78,7 +78,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_N_PI_c" name="G6PDH2r-nadph complex" compartment="c" initialConcentration="6.4924752e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3Moietygpdhr">
+      <species id="M_g6pdh2r_N_PI_c" name="G6PDH2r-nadph complex" compartment="c" initialConcentration="6.5027215e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_nadph_c</p>
@@ -207,7 +207,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_3" value="2603675"/>
+            <localParameter id="kf_G6PDH2r_3" value="2246662"/>
             <localParameter id="Keq_G6PDH2r_3" value="37.037037037037"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -246,7 +246,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_4" value="471114"/>
+            <localParameter id="kf_G6PDH2r_4" value="671430"/>
             <localParameter id="Keq_G6PDH2r_4" value="0.05"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -285,7 +285,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_5" value="31681489"/>
+            <localParameter id="kf_G6PDH2r_5" value="32233627"/>
             <localParameter id="Keq_G6PDH2r_5" value="52.6315789473684"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -324,7 +324,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_6" value="162428"/>
+            <localParameter id="kf_G6PDH2r_6" value="181563"/>
             <localParameter id="Keq_G6PDH2r_6" value="0.0105"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -359,7 +359,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_7" value="3567413"/>
+            <localParameter id="kf_G6PDH2r_7" value="3412567"/>
             <localParameter id="Keq_G6PDH2r_7" value="977.142857142857"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -495,7 +495,7 @@
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>subsystem: PentosePhosphatePathway</p>
             <p>enzyme_concentration_total: 0.001</p>
-            <p>enzyme_net_flux: 0.21</p>
+            <p>enzyme_net_flux: 0.20999999999999638</p>
             <p>enzyme_net_flux_equation: kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7</p>
           </html>
         </notes>

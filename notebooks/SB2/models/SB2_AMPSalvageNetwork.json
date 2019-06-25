@@ -3,7 +3,7 @@
         "ade_b": 0.001,
         "adn_b": 0.0012,
         "amp_b": 0.0867281,
-        "h2o_b": 1,
+        "h2o_b": 1.0,
         "h_b": 6.30957e-05,
         "hxan_b": 0.002,
         "ins_b": 0.001,
@@ -18,7 +18,7 @@
     "id": "AMPSalvageNetwork",
     "metabolites": [
         {
-            "_initial_condition": 0.0011999,
+            "_initial_condition": 0.0011999000976762673,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H13N5O4",
@@ -26,7 +26,7 @@
             "name": "Adenosine"
         },
         {
-            "_initial_condition": 0.00099986,
+            "_initial_condition": 0.000999859991221583,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H5N5",
@@ -34,7 +34,7 @@
             "name": "Adenine"
         },
         {
-            "_initial_condition": 0.01,
+            "_initial_condition": 0.009999999990709758,
             "charge": -2,
             "compartment": "c",
             "formula": "C10H11N4O8P",
@@ -42,7 +42,7 @@
             "name": "Inosine monophosphate"
         },
         {
-            "_initial_condition": 0.0010001,
+            "_initial_condition": 0.0010000999828962593,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H12N4O5",
@@ -50,7 +50,7 @@
             "name": "Inosine"
         },
         {
-            "_initial_condition": 0.00200014,
+            "_initial_condition": 0.002000140008778417,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H4N4O",
@@ -58,7 +58,7 @@
             "name": "Hypoxanthine"
         },
         {
-            "_initial_condition": 0.06000376,
+            "_initial_condition": 0.06000375564681372,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -66,7 +66,7 @@
             "name": "Alpha-D-Ribose 1-phosphate"
         },
         {
-            "_initial_condition": 0.00494022,
+            "_initial_condition": 0.0049402228784018645,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -74,7 +74,7 @@
             "name": "Alpha-D-Ribose 5-phosphate"
         },
         {
-            "_initial_condition": 0.00500101,
+            "_initial_condition": 0.005001013700712159,
             "charge": -5,
             "compartment": "c",
             "formula": "C5H8O14P3",
@@ -82,7 +82,7 @@
             "name": "5-Phospho-alpha-D-ribose 1-diphosphate"
         },
         {
-            "_initial_condition": 1.60001407,
+            "_initial_condition": 1.6000140680180168,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -90,7 +90,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.28998593,
+            "_initial_condition": 0.28998593198198247,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -98,7 +98,7 @@
             "name": "ADP"
         },
         {
-            "_initial_condition": 0.0867281,
+            "_initial_condition": 0.08672809991942748,
             "charge": -2,
             "compartment": "c",
             "formula": "C10H12N5O7P",
@@ -106,7 +106,7 @@
             "name": "AMP"
         },
         {
-            "_initial_condition": 2.5,
+            "_initial_condition": 2.5000000000805724,
             "charge": -2,
             "compartment": "c",
             "formula": "HPO4",
@@ -114,7 +114,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 0.09100224,
+            "_initial_condition": 0.09100223999167467,
             "charge": 0,
             "compartment": "c",
             "formula": "H3N",
@@ -122,7 +122,7 @@
             "name": "Ammonia"
         },
         {
-            "_initial_condition": 6.31e-05,
+            "_initial_condition": 6.30957e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -130,7 +130,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 0.99999976,
+            "_initial_condition": 0.9999997599277528,
             "charge": 0,
             "compartment": "c",
             "formula": "H2O",
@@ -155,7 +155,7 @@
                 "h_c": 1
             },
             "name": "Adenosine kinase",
-            "steady_state_flux": 0.11999106,
+            "steady_state_flux": 0.11999106478113876,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -173,7 +173,7 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (AMP)",
-            "steady_state_flux": 0.12,
+            "steady_state_flux": 0.11999999988851706,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -191,7 +191,7 @@
                 "nh3_c": 1
             },
             "name": "Adenosine monophosphate deaminase",
-            "steady_state_flux": 0.014,
+            "steady_state_flux": 0.01399999998699366,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -209,7 +209,7 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (IMP)",
-            "steady_state_flux": 0.014,
+            "steady_state_flux": 0.01399999998699366,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -227,7 +227,7 @@
                 "nh3_c": 1
             },
             "name": "Adenosine deaminase",
-            "steady_state_flux": 0.00999917,
+            "steady_state_flux": 0.009999167480635562,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -245,7 +245,7 @@
                 "r1p_c": 1
             },
             "name": "Purine-nucleoside phosphorylase (Inosine)",
-            "steady_state_flux": 0.01400088,
+            "steady_state_flux": 0.014000877841700616,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -261,7 +261,7 @@
                 "r5p_c": 1
             },
             "name": "Phosphopentomutase",
-            "steady_state_flux": 0.01400088,
+            "steady_state_flux": 0.014000877841700614,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -280,7 +280,7 @@
                 "r5p_c": -1
             },
             "name": "Phosphoribosylpyrophosphate synthetase",
-            "steady_state_flux": 0.01400088,
+            "steady_state_flux": 0.014000877841700614,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -300,7 +300,7 @@
                 "prpp_c": -1
             },
             "name": "",
-            "steady_state_flux": 0.01400088,
+            "steady_state_flux": 0.01400087784170061,
             "subsystem": "AMPSalvageNetwork"
         },
         {
@@ -319,7 +319,7 @@
                 "pi_c": -1
             },
             "name": "ATP maintenance requirement",
-            "steady_state_flux": 0.14799282,
+            "steady_state_flux": 0.14799282046454001,
             "subsystem": "Misc."
         },
         {
@@ -337,7 +337,7 @@
                 "adn_c": -1
             },
             "name": "Adenosine_sink",
-            "steady_state_flux": -0.00999023,
+            "steady_state_flux": -0.009990232373259175,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -355,7 +355,7 @@
                 "ade_c": -1
             },
             "name": "Adenine_sink",
-            "steady_state_flux": -0.01400088,
+            "steady_state_flux": -0.014000877841704833,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -373,7 +373,7 @@
                 "ins_c": -1
             },
             "name": "Inosine_sink",
-            "steady_state_flux": 0.00999829,
+            "steady_state_flux": 0.00999828962593239,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -391,7 +391,7 @@
                 "hxan_c": -1
             },
             "name": "Hypoxanthine_sink",
-            "steady_state_flux": 0.01400088,
+            "steady_state_flux": 0.014000877841683149,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -409,7 +409,7 @@
                 "nh3_c": -1
             },
             "name": "Ammonia_sink",
-            "steady_state_flux": 0.02399917,
+            "steady_state_flux": 0.02399916746720354,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -427,7 +427,7 @@
                 "pi_c": -1
             },
             "name": "Phosphate_sink",
-            "steady_state_flux": 8.06e-06,
+            "steady_state_flux": 8.057243761072641e-06,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -445,7 +445,7 @@
                 "amp_c": -1
             },
             "name": "AMP_sink",
-            "steady_state_flux": -8.06e-06,
+            "steady_state_flux": -8.057252087745326e-06,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -481,7 +481,7 @@
                 "h2o_c": -1
             },
             "name": "H2O_sink",
-            "steady_state_flux": -0.02400722,
+            "steady_state_flux": -0.024007224719291287,
             "subsystem": "Pseudoreaction"
         }
     ],

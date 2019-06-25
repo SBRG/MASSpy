@@ -4,9 +4,9 @@ from __future__ import absolute_import
 
 import logging
 import re
+import warnings
 from copy import copy, deepcopy
 from functools import partial
-from warnings import warn
 
 import numpy as np
 
@@ -401,7 +401,7 @@ class MassModel(Object):
         # the metabolite already exists in the model, ignoring those that do.
         for met in metabolite_list:
             if not isinstance(met, MassMetabolite):
-                warn("Skipping {0}, not a MassMetabolite".format(met))
+                warnings.warn("Skipping {0}, not a MassMetabolite".format(met))
                 metabolite_list.remove(met)
 
         existing_mets = [met for met in metabolite_list
@@ -471,6 +471,10 @@ class MassModel(Object):
     def add_boundary_conditions(self, boundary_conditions):
         """Add boundary conditions values for the given boundary metabolites.
 
+        Boundary condition values can be a numerical value, or they can be a
+        string or sympy expression representing a function of time. The
+        function must only depend on time.
+
         Parameters
         ----------
         boundary_conditions: dict
@@ -487,18 +491,32 @@ class MassModel(Object):
         if not isinstance(boundary_conditions, dict):
             raise TypeError("boundary_conditions must be a dict.")
 
-        for bound_met, bound_cond in iteritems(boundary_conditions):
+        boundary_conditions_to_set = boundary_conditions.copy()
+        for bound_met, bound_cond in iteritems(boundary_conditions_to_set):
             if bound_met not in self.boundary_metabolites and \
                bound_met not in self.metabolites:
                 raise ValueError("Did not find {0} in model metabolites or in "
                                  "boundary reactions.".format(bound_met))
-
-            # TODO handle functions of time for boundary conditions
-            if not isinstance(bound_cond, (integer_types, float)):
-                raise TypeError("Boundary conditions must be ints or floats.")
-            bound_cond = float(bound_cond)
-            if bound_cond < 0.:
-                raise ValueError("Boundary conditions must be non-negative.")
+            # Boundary condition is a function
+            if isinstance(bound_cond, (sym.Basic, string_types)):
+                if isinstance(bound_cond, string_types):
+                    bound_cond = sym.sympify(bound_cond)
+                for arg in list(bound_cond.atoms(sym.Function)):
+                    if arg.atoms(sym.Symbol) != {sym.Symbol("t")}:
+                        raise ValueError(
+                            "Function '{0}' for '{1}' has independent "
+                            "variables {2}, expecting only {{t}}".format(
+                                str(bound_cond), bound_met,
+                                str(arg.atoms(sym.Symbol))))
+                boundary_conditions_to_set[bound_met] = bound_cond
+            # Boundary condition is an integer or float
+            elif isinstance(bound_cond, (integer_types, float)):
+                boundary_conditions_to_set[bound_met] = float(bound_cond)
+            else:
+                raise TypeError(
+                    "Invalid boundary value for '{0}'. Boundary conditions can"
+                    "only be numerical values or functions of time.".format(
+                        bound_met))
         # Keep track of existing concentrations for context management.
         context = get_context(self)
         if context:
@@ -506,7 +524,7 @@ class MassModel(Object):
                               for bound_met in boundary_conditions
                               if bound_met in self.boundary_conditions}
 
-        self.boundary_conditions.update(boundary_conditions)
+        self.boundary_conditions.update(boundary_conditions_to_set)
 
         if context:
             context(partial(self.boundary_conditions.pop, key)
@@ -570,7 +588,8 @@ class MassModel(Object):
         # the reaction already exists in the model, ignoring those that do.
         for rxn in reaction_list:
             if not isinstance(rxn, MassReaction):
-                warn("Skipping {0}, not a MassReaction object".format(rxn))
+                warnings.warn(
+                    "Skipping {0}, not a MassReaction object".format(rxn))
                 reaction_list.remove(rxn)
 
         # Check whether reactions exist in the model.
@@ -776,10 +795,6 @@ class MassModel(Object):
         if sbo_term:
             rxn.annotation["sbo"] = sbo_term
         self.add_reactions(rxn)
-        # TODO handle boundary condition functions.
-        if not isinstance(boundary_condition, (integer_types, float)):
-            pass
-
         self.add_boundary_conditions({
             rxn.boundary_metabolite: boundary_condition})
 
@@ -972,8 +987,8 @@ class MassModel(Object):
         try:
             rate_to_remove = self.custom_rates[reaction]
         except KeyError:
-            warn("Did not find a custom custom rate expression associated "
-                 "with reaction {0}.".format(reaction.id))
+            warnings.warn("Did not find a custom custom rate expression "
+                          "associated with reaction {0}.".format(reaction.id))
             return
         # Remove the rate
         del self.custom_rates[reaction]
@@ -1046,8 +1061,8 @@ class MassModel(Object):
                     "'{0}' is not a valid UnitDefinition.".format(str(unit)))
             # Skip existing units.
             if unit.id in self.units.list_attr("id"):
-                warn("Skipping '{0}' for it already exists in the model."
-                     .format(unit))
+                warnings.warn("Skipping '{0}' for it already exists in the"
+                              " model.".format(unit))
                 new_unit_defs.remove(unit)
         # Add new unit definitions to the units attribute
         self.units += new_unit_defs
@@ -1552,7 +1567,6 @@ class MassModel(Object):
                 sol = float(next(iter(sol)))
 
             return sol
-            
 
         percs_dict = {}
         for reaction, flux in iteritems(steady_state_fluxes):
@@ -1666,13 +1680,14 @@ class MassModel(Object):
                     term_split=term_split)
             except ValueError as e:
                 # Log reactions that could not be built.
-                warn("Failed to build reaction '{0}' due to the following:\n"
-                     "{1}".format(orig_reaction_str, str(e)))
+                warnings.warn(
+                    "Failed to build reaction '{0}' due to the following:\n"
+                    "{1}".format(orig_reaction_str, str(e)))
                 continue
         # Ensure all pointers are updated.
         self.repair(rebuild_index=True, rebuild_relationships=True)
 
-    def update_parameters(self, parameters):
+    def update_parameters(self, parameters, verbose=True):
         """Update the parameters associated with the MassModel.
 
         Parameters can be one or more of the following:
@@ -1686,8 +1701,11 @@ class MassModel(Object):
         Parameters
         ----------
         parameters: dict
-            A dictionary containing the parameter identifiers as strings and
-            their corresponding numerical values.
+            A dict containing the parameter identifiers as strings and their
+            corresponding values to set in the model.
+        verbose: bool, optional
+            If True, display the warnings for setting irreversible reaction
+            parameters. Default is True.
 
         Notes
         -----
@@ -1706,11 +1724,6 @@ class MassModel(Object):
             if not isinstance(key, string_types):
                 raise TypeError(
                     "Keys must be strings. '{0}' not a string.".format(key))
-            if not isinstance(value, (integer_types, float)) \
-               and value is not None:
-                raise TypeError(
-                    "Values must be ints or floats. The value '{0}' for key "
-                    "'{1}' not a valid number.".format(str(value), str(key)))
 
         for key, value in iteritems(parameters):
             # Check the parameter type
@@ -1722,7 +1735,10 @@ class MassModel(Object):
                 try:
                     p_type, reaction = key.split("_", 1)
                     reaction = self.reactions.get_by_id(reaction)
-                    setattr(reaction, p_type, value)
+                    with warnings.catch_warnings():
+                        if not verbose:
+                            warnings.simplefilter("ignore")
+                        setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
                     self.custom_parameters.update({key: value})
             # If parameter not found, assume parameter is a custom parameter
@@ -1756,14 +1772,15 @@ class MassModel(Object):
             try:
                 metabolite = self.metabolites.get_by_id(str(metabolite))
             except KeyError as e:
-                warn("No metabolite found for {0}".format(str(e)))
+                warnings.warn("No metabolite found for {0}".format(str(e)))
                 continue
             # Try setting the initial condition
             try:
                 metabolite.initial_condition = ic_value
             except (TypeError, ValueError) as e:
-                warn("Cannot set initial condition for {0} due to the "
-                     "following: {1}".format(metabolite.id, str(e)))
+                warnings.warn(
+                    "Cannot set initial condition for {0} due to the "
+                    "following: {1}".format(metabolite.id, str(e)))
                 continue
 
     def update_custom_rates(self, custom_rates, custom_parameters=None):
@@ -1800,13 +1817,13 @@ class MassModel(Object):
                 try:
                     reaction = self.reactions.get_by_id(reaction)
                 except KeyError as e:
-                    warn("No reaction found for {0}".format(str(e)))
+                    warnings.warn("No reaction found for {0}".format(str(e)))
                     continue
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
-                warn("Unable to sympify rate equation for '{0}'.".format(
-                    reaction.id))
+                warnings.warn("Unable to sympify rate equation for "
+                              "'{0}'.".format(reaction.id))
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine if ODEs between two MassModels are equivalent.
@@ -1858,7 +1875,7 @@ class MassModel(Object):
                         "{0} with different {1}: ".format(*msgs)]
                 for item, msg in zip([missing, diff_equations], msgs):
                     if item:
-                        warn(msg + str(sorted(list(item))))
+                        warnings.warn(msg + str(sorted(list(item))))
 
         return equivalent
 

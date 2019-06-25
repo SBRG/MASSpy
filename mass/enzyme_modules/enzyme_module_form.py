@@ -2,6 +2,7 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
+import re
 from collections import defaultdict
 from itertools import chain
 
@@ -182,7 +183,11 @@ class EnzymeModuleForm(MassMetabolite):
         """
         formula = ""
         if self.enzyme_module_id:
-            formula += "[" + str(self.enzyme_module_id) + "]"
+            moiety = self.enzyme_module_id.lower()
+            if not re.match('^[A-Z]+[a-z]+$', moiety):
+                moiety = re.sub("[0-9]", "", moiety)
+
+            formula += "[" + moiety + "]"
 
         total_elements = defaultdict(list)
         for dictionary in [self.bound_catalytic, self.bound_effectors]:

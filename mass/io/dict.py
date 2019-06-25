@@ -11,7 +11,7 @@ import pandas as pd
 
 from six import iteritems, iterkeys, string_types
 
-from sympy import Eq, Symbol, sympify
+from sympy import Basic, Eq, Symbol, sympify
 
 from cobra.core import Gene
 
@@ -86,12 +86,13 @@ _OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "description", "boundary_conditions", "compartments", "notes",
-    "annotation"]
+    "name", "description", "boundary_conditions", "custom_parameters",
+    "compartments", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
     "description": "",
     "boundary_conditions": {},
+    "custom_parameters": {},
     "compartments": {},
     "notes": {},
     "annotation": {}
@@ -275,7 +276,7 @@ def enzyme_to_dict(enzyme):
 
     key = "enzyme_net_flux_equation"
     if key in new_enzyme:
-        new_enzyme[key] = str(new_enzyme[key].rhs)
+        new_enzyme[key] = str(getattr(enzyme, key).rhs)
 
     return new_enzyme
 
@@ -387,16 +388,14 @@ def model_to_dict(model, sort=False):
         obj["genes"].sort(key=get_id)
         obj["enzyme_modules"].sort(key=get_id)
         obj["units"].sort(key=get_id)
-
-    for key in ["boundary_conditions", "custom_rates", "custom_parameters"]:
-        values = getattr(model, key, {})
-        if values:
-            values = OrderedDict(
-                (k.id, str(v)) if key == "custom_rates"
-                else (str(k), _fix_type(v)) for k, v in iteritems(values))
-            if sort:
-                values = OrderedDict((k, values[k]) for k in sorted(values))
-            obj[key] = values
+    custom_rates = getattr(model, "custom_rates", {})
+    if custom_rates:
+        custom_rates = OrderedDict(
+            (k.id, _fix_type(v)) for k, v in iteritems(custom_rates))
+        if sort:
+            custom_rates = OrderedDict(
+                (k, custom_rates[k]) for k in sorted(custom_rates))
+        obj["custom_rates"] = custom_rates
 
     _update_optional(model, obj, _OPTIONAL_MODEL_ATTRIBUTES,
                      _ORDERED_OPTIONAL_MODEL_KEYS)
@@ -407,7 +406,6 @@ def model_to_dict(model, sort=False):
             obj["enzyme_module_ligands"].sort(key=get_id)
             obj["enzyme_module_forms"].sort(key=get_id)
             obj["enzyme_module_reactions"].sort(key=get_id)
-
     return obj
 
 
@@ -450,16 +448,15 @@ def model_from_dict(obj):
         model.add_boundary_conditions({
             met: bc for met, bc in iteritems(obj["boundary_conditions"])})
 
+    # Get custom parameters if they exist
+    if "custom_parameters" in obj:
+        model.custom_parameters.update(obj["custom_parameters"])
     # Add custom rates and any custom parameters if they exist
     if "custom_rates" in obj:
-        custom_parameters = {}
-        # Get custom parameters if they exist
-        if "custom_parameters" in obj:
-            custom_parameters.update(obj["custom_parameters"])
         # Add custom rates to the model
         for reaction, custom_rate in iteritems(obj["custom_rates"]):
             model.add_custom_rate(model.reactions.get_by_id(reaction),
-                                  custom_rate, custom_parameters)
+                                  custom_rate, model.custom_parameters)
     # Update with any opitonal attributes.
     for k, v in iteritems(obj):
         # Set MassModel attributes (and subsystem attribute for EnzymeModules)
@@ -538,7 +535,7 @@ def _fix_type(value):
     This method is intended for internal use only.
 
     """
-    if isinstance(value, string_types):
+    if isinstance(value, (string_types, Basic)):
         return str(value)
     if isinstance(value, np.float_):
         return float(value)
@@ -549,7 +546,7 @@ def _fix_type(value):
     if isinstance(value, set):
         return sorted(list(value))
     if isinstance(value, dict):
-        return OrderedDict((key, value[key]) for key in sorted(value))
+        return OrderedDict((k, _fix_type(value[k])) for k in sorted(value))
     if value is None:
         return ""
     if isinstance(value, float) and abs(value) == _INF:

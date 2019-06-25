@@ -98,7 +98,7 @@
             "PYK_R43"
         ]
     },
-    "_enzyme_net_flux": 2.24,
+    "_enzyme_net_flux": 2.2399999999999998,
     "_enzyme_net_flux_equation": "kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))",
     "compartments": {
         "c": "Cytosol"
@@ -108,11 +108,11 @@
         "Keq_PYK_ACT": 200.0,
         "Keq_PYK_I": 0.2949852507374631,
         "Keq_PYK_P": 4.444444444444445,
-        "kf_PYK": 2189198.0,
-        "kf_PYK_A": 10268302.0,
+        "kf_PYK": 2202784.0,
+        "kf_PYK_A": 10138015.0,
         "kf_PYK_ACT": 1000000.0,
         "kf_PYK_I": 1000000.0,
-        "kf_PYK_P": 10265064.0
+        "kf_PYK_P": 10133594.0
     },
     "custom_rates": {
         "PYK_R01": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t))/Keq_PYK_P",
@@ -225,7 +225,7 @@
     "id": "PYK",
     "metabolites": [
         {
-            "_initial_condition": 0.017,
+            "_initial_condition": 0.017000002450186093,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H2O6P",
@@ -233,7 +233,7 @@
             "name": "Phosphoenolpyruvate"
         },
         {
-            "_initial_condition": 0.28999996,
+            "_initial_condition": 0.2899999582027138,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -241,7 +241,7 @@
             "name": "ADP"
         },
         {
-            "_initial_condition": 0.0146,
+            "_initial_condition": 0.014600002607780488,
             "charge": -4,
             "compartment": "c",
             "formula": "C6H10O12P2",
@@ -249,7 +249,7 @@
             "name": "D-Fructose 1,6-bisphosphate"
         },
         {
-            "_initial_condition": 1.6,
+            "_initial_condition": 1.5999999999999996,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -265,7 +265,7 @@
             "name": "Pyruvate"
         },
         {
-            "_initial_condition": 8.998e-05,
+            "_initial_condition": 8.99757e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -275,11 +275,11 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.40856e-07,
+            "_initial_condition": 1.40888e-07,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]",
+            "formula": "[pyk]",
             "id": "pyk_R0_c",
             "name": "PYK"
         },
@@ -288,11 +288,11 @@
                 "adp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.518e-08,
+            "_initial_condition": 8.5187e-08,
             "charge": -3,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C10H12N5O10P2",
+            "formula": "[pyk]-C10H12N5O10P2",
             "id": "pyk_R0_A_c",
             "name": "PYK-adp complex"
         },
@@ -301,11 +301,11 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.638e-09,
+            "_initial_condition": 8.614e-09,
             "charge": -3,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C3H2O6P1",
+            "formula": "[pyk]-C3H2O6P1",
             "id": "pyk_R0_P_c",
             "name": "PYK-pep complex"
         },
@@ -315,22 +315,22 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 4.333e-09,
+            "_initial_condition": 4.307e-09,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C13H14N5O16P3",
+            "formula": "[pyk]-C13H14N5O16P3",
             "id": "pyk_R0_AP_c",
             "name": "PYK-adp-pep complex"
         },
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 2.676267e-06,
+            "_initial_condition": 2.676868e-06,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]",
+            "formula": "[pyk]",
             "id": "pyk_T0_c",
             "name": "PYK"
         },
@@ -339,11 +339,11 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 1.6452e-06,
+            "_initial_condition": 1.64557e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C6H10O12P2",
+            "formula": "[pyk]-C6H10O12P2",
             "id": "pyk_R1_c",
             "name": "PYK; 1 fdp_c"
         },
@@ -354,11 +354,11 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 9.94903e-07,
+            "_initial_condition": 9.9498e-07,
             "charge": -7,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C16H22N5O22P4",
+            "formula": "[pyk]-C16H22N5O22P4",
             "id": "pyk_R1_A_c",
             "name": "PYK-adp complex; 1 fdp_c"
         },
@@ -369,11 +369,11 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 1.00888e-07,
+            "_initial_condition": 1.00612e-07,
             "charge": -7,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C9H12O18P3",
+            "formula": "[pyk]-C9H12O18P3",
             "id": "pyk_R1_P_c",
             "name": "PYK-pep complex; 1 fdp_c"
         },
@@ -385,11 +385,11 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 5.0613e-08,
+            "_initial_condition": 5.0301e-08,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C19H24N5O28P5",
+            "formula": "[pyk]-C19H24N5O28P5",
             "id": "pyk_R1_AP_c",
             "name": "PYK-adp-pep complex; 1 fdp_c"
         },
@@ -398,11 +398,11 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 5.052539e-06,
+            "_initial_condition": 5.053675e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C10H12N5O13P3",
+            "formula": "[pyk]-C10H12N5O13P3",
             "id": "pyk_T1_c",
             "name": "PYK; 1 atp_c"
         },
@@ -411,11 +411,11 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 7.205975e-06,
+            "_initial_condition": 7.207597e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C12H20O24P4",
+            "formula": "[pyk]-C12H20O24P4",
             "id": "pyk_R2_c",
             "name": "PYK; 2 fdp_c"
         },
@@ -426,11 +426,11 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 4.357676e-06,
+            "_initial_condition": 4.358014e-06,
             "charge": -11,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C22H32N5O34P6",
+            "formula": "[pyk]-C22H32N5O34P6",
             "id": "pyk_R2_A_c",
             "name": "PYK-adp complex; 2 fdp_c"
         },
@@ -441,11 +441,11 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 4.41889e-07,
+            "_initial_condition": 4.40678e-07,
             "charge": -11,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C15H22O30P5",
+            "formula": "[pyk]-C15H22O30P5",
             "id": "pyk_R2_P_c",
             "name": "PYK-pep complex; 2 fdp_c"
         },
@@ -457,11 +457,11 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 2.21685e-07,
+            "_initial_condition": 2.20317e-07,
             "charge": -14,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C25H34N5O40P7",
+            "formula": "[pyk]-C25H34N5O40P7",
             "id": "pyk_R2_AP_c",
             "name": "PYK-adp-pep complex; 2 fdp_c"
         },
@@ -470,11 +470,11 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 3.577019e-06,
+            "_initial_condition": 3.577823e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C20H24N10O26P6",
+            "formula": "[pyk]-C20H24N10O26P6",
             "id": "pyk_T2_c",
             "name": "PYK; 2 atp_c"
         },
@@ -483,11 +483,11 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 1.4027631e-05,
+            "_initial_condition": 1.4030792e-05,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C18H30O36P6",
+            "formula": "[pyk]-C18H30O36P6",
             "id": "pyk_R3_c",
             "name": "PYK; 3 fdp_c"
         },
@@ -498,11 +498,11 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 8.482944e-06,
+            "_initial_condition": 8.483602e-06,
             "charge": -15,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C28H42N5O46P8",
+            "formula": "[pyk]-C28H42N5O46P8",
             "id": "pyk_R3_A_c",
             "name": "PYK-adp complex; 3 fdp_c"
         },
@@ -513,11 +513,11 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 8.60211e-07,
+            "_initial_condition": 8.57854e-07,
             "charge": -15,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C21H32O42P7",
+            "formula": "[pyk]-C21H32O42P7",
             "id": "pyk_R3_P_c",
             "name": "PYK-pep complex; 3 fdp_c"
         },
@@ -529,11 +529,11 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 4.31546e-07,
+            "_initial_condition": 4.28885e-07,
             "charge": -18,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C31H44N5O52P9",
+            "formula": "[pyk]-C31H44N5O52P9",
             "id": "pyk_R3_AP_c",
             "name": "PYK-adp-pep complex; 3 fdp_c"
         },
@@ -542,11 +542,11 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 1.125512e-06,
+            "_initial_condition": 1.125765e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C30H36N15O39P9",
+            "formula": "[pyk]-C30H36N15O39P9",
             "id": "pyk_T3_c",
             "name": "PYK; 3 atp_c"
         },
@@ -555,11 +555,11 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 1.0240171e-05,
+            "_initial_condition": 1.024248e-05,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C24H40O48P8",
+            "formula": "[pyk]-C24H40O48P8",
             "id": "pyk_R4_c",
             "name": "PYK; 4 fdp_c"
         },
@@ -570,11 +570,11 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 6.192549e-06,
+            "_initial_condition": 6.193031e-06,
             "charge": -19,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C34H52N5O58P10",
+            "formula": "[pyk]-C34H52N5O58P10",
             "id": "pyk_R4_A_c",
             "name": "PYK-adp complex; 4 fdp_c"
         },
@@ -585,11 +585,11 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 6.27954e-07,
+            "_initial_condition": 6.26234e-07,
             "charge": -19,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C27H42O54P9",
+            "formula": "[pyk]-C27H42O54P9",
             "id": "pyk_R4_P_c",
             "name": "PYK-pep complex; 4 fdp_c"
         },
@@ -601,11 +601,11 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 3.15029e-07,
+            "_initial_condition": 3.13086e-07,
             "charge": -22,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C37H54N5O64P11",
+            "formula": "[pyk]-C37H54N5O64P11",
             "id": "pyk_R4_AP_c",
             "name": "PYK-adp-pep complex; 4 fdp_c"
         },
@@ -614,11 +614,11 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 1.32804e-07,
+            "_initial_condition": 1.32834e-07,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PYK",
-            "formula": "[PYK]-C40H48N20O52P12",
+            "formula": "[pyk]-C40H48N20O52P12",
             "id": "pyk_T4_c",
             "name": "PYK; 4 atp_c"
         }

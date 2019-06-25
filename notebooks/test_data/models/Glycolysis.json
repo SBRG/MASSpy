@@ -1,10 +1,10 @@
 {
     "boundary_conditions": {
-        "amp_b": 1,
-        "glc__D_b": 1,
-        "h2o_b": 1,
+        "amp_b": 1.0,
+        "glc__D_b": 1.0,
+        "h2o_b": 1.0,
         "h_b": 6.30957e-05,
-        "lac__L_b": 1,
+        "lac__L_b": 1.0,
         "pi_b": 2.5,
         "pyr_b": 0.06
     },
@@ -16,7 +16,7 @@
     "id": "Glycolysis",
     "metabolites": [
         {
-            "_initial_condition": 1.0,
+            "_initial_condition": 0.999999999998507,
             "charge": 0,
             "compartment": "c",
             "formula": "C6H12O6",
@@ -24,7 +24,7 @@
             "name": "D-Glucose"
         },
         {
-            "_initial_condition": 0.0486,
+            "_initial_condition": 0.048600000000718034,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -32,7 +32,7 @@
             "name": "D-Glucose 6-phosphate"
         },
         {
-            "_initial_condition": 0.0198,
+            "_initial_condition": 0.019800000000294395,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -40,7 +40,7 @@
             "name": "D-Fructose 6-phosphate"
         },
         {
-            "_initial_condition": 0.0146,
+            "_initial_condition": 0.014600002607780488,
             "charge": -4,
             "compartment": "c",
             "formula": "C6H10O12P2",
@@ -48,7 +48,7 @@
             "name": "D-Fructose 1,6-bisphosphate"
         },
         {
-            "_initial_condition": 0.16000001,
+            "_initial_condition": 0.16000001302074907,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -56,7 +56,7 @@
             "name": "Dihydroxyacetone phosphate"
         },
         {
-            "_initial_condition": 0.00728,
+            "_initial_condition": 0.00728000074404336,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -64,7 +64,7 @@
             "name": "Glyceraldehyde 3-phosphate"
         },
         {
-            "_initial_condition": 0.000243,
+            "_initial_condition": 0.00024300006515384965,
             "charge": -4,
             "compartment": "c",
             "formula": "C3H4O10P2",
@@ -72,7 +72,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.07730001,
+            "_initial_condition": 0.07730000983010729,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -80,7 +80,7 @@
             "name": "3-Phospho-D-glycerate"
         },
         {
-            "_initial_condition": 0.0113,
+            "_initial_condition": 0.011300001445605747,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -88,7 +88,7 @@
             "name": "D-Glycerate 2-phosphate"
         },
         {
-            "_initial_condition": 0.017,
+            "_initial_condition": 0.017000002450186093,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H2O6P",
@@ -136,7 +136,7 @@
             "name": "AMP"
         },
         {
-            "_initial_condition": 0.28999996,
+            "_initial_condition": 0.2899999582027138,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -144,7 +144,7 @@
             "name": "ADP"
         },
         {
-            "_initial_condition": 1.6,
+            "_initial_condition": 1.5999999999999996,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -152,7 +152,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 2.5,
+            "_initial_condition": 2.4999999999999987,
             "charge": -2,
             "compartment": "c",
             "formula": "HPO4",
@@ -160,7 +160,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 8.998e-05,
+            "_initial_condition": 8.99757e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -193,7 +193,7 @@
                 "h_c": 1
             },
             "name": "Hexokinase (D-glucose:ATP)",
-            "steady_state_flux": 1.12,
+            "steady_state_flux": 1.1200000000000003,
             "subsystem": "Glycolysis"
         },
         {
@@ -245,7 +245,7 @@
                 "g3p_c": 1
             },
             "name": "Fructose-bisphosphate aldolase",
-            "steady_state_flux": 1.12,
+            "steady_state_flux": 1.1199999999999901,
             "subsystem": "Glycolysis"
         },
         {
@@ -261,7 +261,7 @@
                 "g3p_c": 1
             },
             "name": "Triose-phosphate isomerase",
-            "steady_state_flux": 1.12,
+            "steady_state_flux": 1.1200000000000012,
             "subsystem": "Glycolysis"
         },
         {
@@ -281,7 +281,7 @@
                 "pi_c": -1
             },
             "name": "Glyceraldehyde-3-phosphate dehydrogenase",
-            "steady_state_flux": 2.24,
+            "steady_state_flux": 2.2400000000000007,
             "subsystem": "Glycolysis"
         },
         {
@@ -299,7 +299,7 @@
                 "atp_c": 1
             },
             "name": "Phosphoglycerate kinase",
-            "steady_state_flux": 2.24,
+            "steady_state_flux": 2.2400000000000175,
             "subsystem": "Glycolysis"
         },
         {
@@ -351,7 +351,7 @@
                 "pyr_c": 1
             },
             "name": "Pyruvate kinase",
-            "steady_state_flux": 2.24,
+            "steady_state_flux": 2.2399999999999998,
             "subsystem": "Glycolysis"
         },
         {
@@ -388,7 +388,7 @@
                 "amp_c": -1
             },
             "name": "AMP_demand",
-            "steady_state_flux": 0.014,
+            "steady_state_flux": 0.014000000000000002,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -405,7 +405,7 @@
                 "atp_c": 1
             },
             "name": "Adenylate kinase",
-            "steady_state_flux": -0.0,
+            "steady_state_flux": 0.0,
             "subsystem": "Misc."
         },
         {
@@ -423,7 +423,7 @@
                 "pyr_c": -1
             },
             "name": "Pyruvate_sink",
-            "steady_state_flux": 0.224,
+            "steady_state_flux": 0.22400000000000003,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -460,7 +460,7 @@
                 "pi_c": 1
             },
             "name": "ATP maintenance requirement",
-            "steady_state_flux": 2.24,
+            "steady_state_flux": 2.2399999999999998,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -477,7 +477,7 @@
                 "nadh_c": -1
             },
             "name": "Demand NADH",
-            "steady_state_flux": 0.224,
+            "steady_state_flux": 0.22400000000000003,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -567,7 +567,7 @@
                 "pi_c": -1
             },
             "name": "Phosphate_sink",
-            "steady_state_flux": -0.0,
+            "steady_state_flux": -3.4638958368304885e-16,
             "subsystem": "Pseudoreaction"
         }
     ],
