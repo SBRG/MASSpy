@@ -1701,8 +1701,8 @@ class MassModel(Object):
         Parameters
         ----------
         parameters: dict
-            A dictionary containing the parameter identifiers as strings and
-            their corresponding numerical values.
+            A dict containing the parameter identifiers as strings and their
+            corresponding values to set in the model.
         verbose: bool, optional
             If True, display the warnings for setting irreversible reaction
             parameters. Default is True.
@@ -1724,11 +1724,6 @@ class MassModel(Object):
             if not isinstance(key, string_types):
                 raise TypeError(
                     "Keys must be strings. '{0}' not a string.".format(key))
-            if not isinstance(value, (integer_types, float)) \
-               and value is not None:
-                raise TypeError(
-                    "Values must be ints or floats. The value '{0}' for key "
-                    "'{1}' not a valid number.".format(str(value), str(key)))
 
         for key, value in iteritems(parameters):
             # Check the parameter type
