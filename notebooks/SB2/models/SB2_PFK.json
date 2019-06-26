@@ -566,6 +566,7 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -644,6 +645,7 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -722,6 +724,7 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -800,6 +803,7 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -878,6 +882,7 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",

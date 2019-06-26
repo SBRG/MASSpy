@@ -353,6 +353,7 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 6.734006734006732,
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -371,6 +372,7 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 9.157509157509155,
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -389,6 +391,7 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.7893345120728713,
             "_lower_bound": 0.0,
+            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "annotation": {
