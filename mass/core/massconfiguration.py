@@ -184,9 +184,7 @@ class MassBaseConfiguration(object):
         Equilibrium constants cannot be negative.
 
         """
-        if value is None:
-            pass
-        elif not isinstance(value, (integer_types, float)):
+        if not isinstance(value, (integer_types, float)):
             raise TypeError("Must be an int or float")
         elif value < 0.:
             raise ValueError("Must be a non-negative number")
@@ -212,9 +210,7 @@ class MassBaseConfiguration(object):
         Reverse rate constants cannot be negative.
 
         """
-        if value is None:
-            pass
-        elif not isinstance(value, (integer_types, float)):
+        if not isinstance(value, (integer_types, float)):
             raise TypeError("Must be an int or float")
         elif value < 0.:
             raise ValueError("Must be a non-negative number")

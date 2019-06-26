@@ -23,8 +23,9 @@ from cobra.util.context import get_context, resettable
 from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, generate_mass_action_rate_expression,
-    generate_mass_action_ratio)
+    generate_disequilibrium_ratio, generate_foward_mass_action_rate_expression,
+    generate_mass_action_rate_expression, generate_mass_action_ratio,
+    generate_reverse_mass_action_rate_expression)
 from mass.util.util import (
     ensure_non_negative_value, get_object_attributes,
     get_subclass_specific_attributes)
@@ -648,22 +649,65 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        rtype: int {1, 2, 3}, optional
+        rtype: int {1, 2, 3}
             The type of rate law to display. Must be 1, 2, or 3.
-            Type 1 will utilize kf and Keq.
-            Type 2 will utilize kf and kr.
-            Type 3 will utilize kr and Keq.
+                Type 1 will utilize the forward rate and equilibrium constants.
+                Type 2 will utilize the forward and reverse rate constants.
+                Type 3 will utilize the equilibrium and reverse rate constants.
+            Default is 1.
         update_reaction: bool, optional
-            If True, update the MassReaction in addition to returning the rate
-            law.
+            Whether to update the MassReaction in addition to returning the
+            rate law. Default is False.
 
         Returns
         -------
-        The rate law expression as a str or sympy expression (sympy.Basic).
+        rate_expression: sympy.Basic, None
+            The rate law as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
 
         """
         return generate_mass_action_rate_expression(self, rtype,
                                                     update_reaction)
+
+    def get_foward_mass_action_rate_expression(self, rtype=1):
+        """Get the foward mass action rate expression for the reaction.
+
+        Parameters
+        ----------
+        rtype: int {1, 2, 3}
+            The type of foward rate law to return. Must be 1, 2, or 3.
+                Type 1 and 2 will utilize the forward rate constant.
+                Type 3 will utilize the equilibrium and reverse rate constants.
+            Default is 1.
+
+        Returns
+        -------
+        fwd_rate: sympy.Basic
+            The forward rate as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
+
+        """
+        return generate_foward_mass_action_rate_expression(self, rtype)
+
+    def get_reverse_mass_action_rate_expression(self, rtype=1):
+        """Get the reverse mass action rate expression for the reaction.
+
+        Parameters
+        ----------
+        rtype: int {1, 2, 3}
+            The type of foward rate law to return. Must be 1, 2, or 3.
+                Type 1 will utilize the foward rate and equilibrium constant.
+                Type 2 and 3 will utilize the reverse rate constant.
+            Default is 1.
+
+        Returns
+        -------
+        rev_rate: sympy.Basic
+            The forward rate as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
+
+        """
+        return generate_reverse_mass_action_rate_expression(self, rtype)
 
     def get_mass_action_ratio(self):
         """Get the mass action ratio of the reaction as a sympy expression.

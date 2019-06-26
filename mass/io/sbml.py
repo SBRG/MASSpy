@@ -475,7 +475,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     default_kwargs = {
         "number": float,
         "set_missing_bounds": False,
-        "remove_char": False,
+        "remove_char": True,
         "promote_local_parameters": False}
     # Use default kwargs or get missing kwargs with their default values
     if kwargs is None:
@@ -669,7 +669,7 @@ def _read_model_meta_info_from_sbml(doc, model, model_id=None):
         "level": model.getLevel(),
         "version": model.getVersion()}
     # Read Model history, creation date, and creators
-    created = None
+    created = ""
     creators = []
     modified = []
     if model.isSetModelHistory():
@@ -949,12 +949,12 @@ def _read_model_reactions_from_sbml(model, f_replace=None, metabolites=None,
             rate_eq, local_parameters = _read_reaction_kinetic_law_from_sbml(
                 reaction, mass_reaction, metabolites, f_replace=f_replace,
                 **kwargs)
+            local_parameters_dict.update(local_parameters)
             # Get the rate equation, check if it is a mass action rate law.
             # If not a mass action rate law, assume it is a custom rate law
             mass_action_rates = [
                 strip_time(mass_reaction.get_mass_action_rate_law(x))
                 for x in range(1, 4)]
-            local_parameters_dict.update(local_parameters)
             if rate_eq in mass_action_rates:
                 # Rate law is a mass action rate law identical to the one
                 # automatically generated when reaction rate type is 1, 2, or 3
@@ -1527,8 +1527,8 @@ def _write_model_meta_info_to_sbml(model, meta):
             # Add creator to the ModelHistory
             _check(history.addCreator(creator),
                    "adding creator to ModelHistory")
-    # Set the ModelHistory
-    _check(model.setModelHistory(history), 'set ModelHistory')
+        # Set the ModelHistory
+        _check(model.setModelHistory(history), 'set ModelHistory')
 
 
 def _write_model_units_to_sbml(model, mass_model):

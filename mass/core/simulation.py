@@ -44,8 +44,7 @@ All simulation results are returned as mass.MassSolution objects. MassSolutions
 are specialized dictionaries with additional attributes and properties to help
 with accessing, grouping, and plotting solutions. They can also behave as
 booleans, with empty MassSolution objects returning as False, and those with
-solutions returning as True. Note that boundary metabolites are only returned
-in the concentration solutions if they are a function of time.
+solutions returning as True.
 
 
 """
