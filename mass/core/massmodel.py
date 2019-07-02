@@ -838,12 +838,12 @@ class MassModel(Object):
 
         if rtype == 0:
             rate_dict = {
-                rxn: rxn.get_mass_action_rate_law(rxn._rtype, update_reactions)
+                rxn: rxn.get_mass_action_rate(rxn._rtype, update_reactions)
                 for rxn in reaction_list}
 
         else:
             rate_dict = {
-                rxn: rxn.get_mass_action_rate_law(rtype, update_reactions)
+                rxn: rxn.get_mass_action_rate(rtype, update_reactions)
                 for rxn in reaction_list}
 
         if self.custom_rates:
@@ -1822,6 +1822,7 @@ class MassModel(Object):
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
+                print(custom_rate, "uh oh")
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 

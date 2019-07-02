@@ -15,7 +15,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import integer_types, string_types
+from six import integer_types, iteritems, string_types
 
 import sympy as sym
 
@@ -150,6 +150,32 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
 
 
 # Internal
+def _check_kwargs(default_kwargs, kwargs):
+    """Check the provided kwargs against the default values for kwargs."""
+    if kwargs is not None:
+        for key, value in iteritems(default_kwargs):
+            if key in kwargs:
+                # Check the value type against the default.
+                if value is None:
+                    continue
+                type_ = type(value)
+                if not isinstance(kwargs[key], type_):
+                    raise TypeError(
+                        "'{0}' must be of type: {1}.".format(
+                            key, str(type_)))
+            else:
+                # Set the kwarg as the default
+                kwargs[key] = value
+        if len(kwargs) != len(default_kwargs):
+            warnings.warn("Unrecognized kwargs: {0:r}".format(
+                str([key for key in kwargs if key not in default_kwargs])))
+    else:
+        # Set the kwargs as the defaults
+        kwargs = default_kwargs
+
+    return kwargs
+
+
 def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
     """Return a new DictList with object references updated."""
     items = ref_dictlist.get_by_any([i.id if hasattr(i, "id") else str(i)

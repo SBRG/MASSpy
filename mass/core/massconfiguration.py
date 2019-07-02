@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import logging
 
-from six import integer_types, iteritems, with_metaclass
+from six import integer_types, iteritems, string_types, with_metaclass
 
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
@@ -21,7 +21,7 @@ class MassBaseConfiguration(object):
 
     Attributes for model construction:
         ['boundary_compartment', 'default_compartment'. 'irreversible_Keq',
-         'irreversible_kr', 'exclude_from_rates']
+         'irreversible_kr', 'exclude_metabolites_from_rates', 'model_creator']
 
     Attributes for model simulation:
         ['decimal_precision', 'steady_state_threshold']
@@ -62,6 +62,11 @@ class MassBaseConfiguration(object):
         Whether to include the compartment volumes in rate expressions.
         The boundary compartment will always excluded.
         Default is False.
+    model_creator: dict
+        A dict containing the information about the model creator where keys
+        are {'familyName', 'givenName', 'organization', 'email'} and values
+        are strings, or None. No additional keys are allowed in the
+        model_creator dict.
     decimal_precision: int, None
         An integer indicating the decimal precision to use for rounding
         numerical values. Positive numbers indicated digits to the right of the
@@ -114,12 +119,17 @@ class MassBaseConfiguration(object):
         """Initialize MassBaseConfiguration object."""
         # Model construction configuration options
         self._boundary_compartment = {"b": "boundary"}
-        self._default_compartment = {"default": "default_compartment"}
+        self._default_compartment = {"compartment": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
         self.exclude_metabolites_from_rates = {
             "elements": [{"H": 2, "O": 1}, {"H": 1}]}
         self.include_compartments_in_rates = False
+        self._model_creator = {
+            "familyName": None,
+            "givenName": None,
+            "organization": None,
+            "email": None}
 
         # Model simulation options
         self._decimal_precision = None
@@ -212,9 +222,37 @@ class MassBaseConfiguration(object):
         """
         if not isinstance(value, (integer_types, float)):
             raise TypeError("Must be an int or float")
-        elif value < 0.:
+        if value < 0.:
             raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_kr", value)
+
+    @property
+    def model_creator(self):
+        """Return a copy of the dict representing the model creator."""
+        return self._model_creator.copy()
+
+    @model_creator.setter
+    def model_creator(self, value):
+        """Set the information in the dict representing the model creator.
+
+        Parameters
+        ----------
+        value: dict
+            A dict containing the model creator information. Keys can only be
+            {'familyName', 'givenName', 'organization', 'email'} and values
+            must be strings or None.
+
+        """
+        valid = {'familyName', 'givenName', 'organization', 'email'}
+        for k, v in iteritems(value):
+            if k not in valid:
+                raise ValueError("Invalid key '{0}'. Keys can only be the"
+                                 " following: {1:r}".format(k, str(valid)))
+            if v is not None and not isinstance(v, string_types):
+                raise TypeError("'{0}' not a string. Values must be strings or"
+                                " None.".format(str(v)))
+
+        self._model_creator.update(value)
 
     @property
     def decimal_precision(self):
