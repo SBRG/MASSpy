@@ -15,14 +15,14 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
     <listOfCompartments>
-      <compartment id="c" name="Cytosol" constant="true"/>
+      <compartment id="c" name="Cytosol" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
       <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="0.999999999998507" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
@@ -93,32 +93,27 @@
       <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
-      <parameter id="Keq_HEX1_A" value="0.485436893203884" constant="true"/>
-      <parameter id="Keq_HEX1_G" value="26.3157894736842" constant="true"/>
-      <parameter id="Keq_HEX1" value="313.12" constant="true"/>
-      <parameter id="kf_HEX1" value="2925079" constant="true"/>
-      <parameter id="kf_HEX1_A" value="2305855" constant="true"/>
-      <parameter id="kf_HEX1_G" value="57889" constant="true"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="R_HEX1_1" name="hex1-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_A_PI_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_A_PI_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HEX1_1 </ci>
+              <ci> kf_R_HEX1_1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -129,35 +124,36 @@
                 <apply>
                   <divide/>
                   <ci> M_hex1_A_PI_c </ci>
-                  <ci> Keq_HEX1_1 </ci>
+                  <ci> Keq_R_HEX1_1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1_1" value="1000000"/>
-            <localParameter id="Keq_HEX1_1" value="1"/>
+            <localParameter id="kf_R_HEX1_1" value="1000000"/>
+            <localParameter id="Keq_R_HEX1_1" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_2" name="hex1-g6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_G_PI_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_G_PI_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HEX1_2 </ci>
+              <ci> kf_R_HEX1_2 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -168,29 +164,30 @@
                 <apply>
                   <divide/>
                   <ci> M_hex1_G_PI_c </ci>
-                  <ci> Keq_HEX1_2 </ci>
+                  <ci> Keq_R_HEX1_2 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1_2" value="1000000"/>
-            <localParameter id="Keq_HEX1_2" value="0.015"/>
+            <localParameter id="kf_R_HEX1_2" value="1000000"/>
+            <localParameter id="Keq_R_HEX1_2" value="0.015"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_3" name="hex1-glc__D binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -212,20 +209,25 @@
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1_G" value="57889"/>
+            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_4" name="hex1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -247,26 +249,31 @@
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1_A" value="2305855"/>
+            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_5" name="hex1_G-_23dpg binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_G_CI_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_G_CI_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HEX1_5 </ci>
+              <ci> kf_R_HEX1_5 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -277,29 +284,30 @@
                 <apply>
                   <divide/>
                   <ci> M_hex1_G_CI_c </ci>
-                  <ci> Keq_HEX1_5 </ci>
+                  <ci> Keq_R_HEX1_5 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1_5" value="1000000"/>
-            <localParameter id="Keq_HEX1_5" value="0.181818181818182"/>
+            <localParameter id="Keq_R_HEX1_5" value="0.181818181818182"/>
+            <localParameter id="kf_R_HEX1_5" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_6" name="hex1_G-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_G_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -321,20 +329,25 @@
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1_A" value="2305855"/>
+            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_7" name="hex1_A-glc__D binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -356,22 +369,27 @@
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1_G" value="57889"/>
+            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HEX1_8" name="hex1_AG catalyzation" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: HEX1</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_AG_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hex1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hex1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -394,6 +412,10 @@
               </apply>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_HEX1" value="2925079"/>
+            <localParameter id="Keq_HEX1" value="313.12"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
     </listOfReactions>

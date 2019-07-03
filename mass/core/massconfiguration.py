@@ -65,8 +65,9 @@ class MassBaseConfiguration(object):
     model_creator: dict
         A dict containing the information about the model creator where keys
         are {'familyName', 'givenName', 'organization', 'email'} and values
-        are strings, or None. No additional keys are allowed in the
-        model_creator dict.
+        are strings. No additional keys are allowed in the model_creator dict.
+        To successfully export a model creator, all keys must have non-empty
+        string values.
     decimal_precision: int, None
         An integer indicating the decimal precision to use for rounding
         numerical values. Positive numbers indicated digits to the right of the
@@ -126,10 +127,10 @@ class MassBaseConfiguration(object):
             "elements": [{"H": 2, "O": 1}, {"H": 1}]}
         self.include_compartments_in_rates = False
         self._model_creator = {
-            "familyName": None,
-            "givenName": None,
-            "organization": None,
-            "email": None}
+            "familyName": "",
+            "givenName": "",
+            "organization": "",
+            "email": ""}
 
         # Model simulation options
         self._decimal_precision = None

@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -22,8 +22,8 @@
       </unitDefinition>
     </listOfUnitDefinitions>
     <listOfCompartments>
-      <compartment id="c" name="Cytosol" constant="true"/>
-      <compartment id="b" name="boundary" constant="true"/>
+      <compartment id="c" name="Cytosol" spatialDimensions="3" size="1" constant="true"/>
+      <compartment id="b" name="boundary" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
       <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="1.30460965676731" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
@@ -260,108 +260,99 @@
       <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
-      <parameter id="v_HEX1" value="1.11999999999972" constant="false"/>
-      <parameter id="v_PGI" value="0.909849830233427" constant="false"/>
-      <parameter id="v_FBA" value="1.09165145180651" constant="false"/>
-      <parameter id="v_TPI" value="1.09165145180667" constant="false"/>
-      <parameter id="v_GAPD" value="2.27420371440856" constant="false"/>
-      <parameter id="v_PGK" value="1.81457647293416" constant="false"/>
-      <parameter id="v_PGM" value="2.27420371441649" constant="false"/>
-      <parameter id="v_ENO" value="2.27420371441652" constant="false"/>
-      <parameter id="v_PYK" value="2.27420371441655" constant="false"/>
-      <parameter id="v_LDH_L" value="2.05349479618411" constant="false"/>
-      <parameter id="v_G6PDH2r" value="0.210150169752733" constant="false"/>
-      <parameter id="v_PGL" value="0.210150169752712" constant="false"/>
-      <parameter id="v_GND" value="0.210150169740449" constant="false"/>
-      <parameter id="v_RPE" value="0.18180162158531" constant="false"/>
-      <parameter id="v_RPI" value="0.0283485481549901" constant="false"/>
-      <parameter id="v_TKT1" value="0.0909008107953303" constant="false"/>
-      <parameter id="v_TKT2" value="0.0909008107894657" constant="false"/>
-      <parameter id="v_TALA" value="0.0909008107895164" constant="false"/>
-      <parameter id="v_ADNK1" value="0.0920087863710674" constant="false"/>
-      <parameter id="v_NTD7" value="0.11165627386505" constant="false"/>
-      <parameter id="v_ADA" value="0.0100016356913801" constant="false"/>
-      <parameter id="v_AMPDA" value="0.0130265652842559" constant="false"/>
-      <parameter id="v_NTD11" value="0.0130265652842344" constant="false"/>
-      <parameter id="v_PUNP5" value="0.0952263154193131" constant="false"/>
-      <parameter id="v_PPM" value="0.0952263154193" constant="false"/>
-      <parameter id="v_PRPPS" value="0.0326740527785299" constant="false"/>
-      <parameter id="v_ADPT" value="0.0326740527784202" constant="false"/>
-      <parameter id="v_ADK1" value="-0.0326740527786806" constant="false"/>
-      <parameter id="v_DPGM" value="0.459627241474417" constant="false"/>
-      <parameter id="v_DPGase" value="0.459627241482265" constant="false"/>
-      <parameter id="v_HBDPG" value="0" constant="false"/>
-      <parameter id="v_HBO1" value="0" constant="false"/>
-      <parameter id="v_HBO2" value="2.2164431748295e-13" constant="false"/>
-      <parameter id="v_HBO3" value="0" constant="false"/>
-      <parameter id="v_HBO4" value="-4.35064310966293e-13" constant="false"/>
-      <parameter id="v_ATPM" value="1.71977184361664" constant="false"/>
-      <parameter id="v_DM_nadh" value="0.22070891822445" constant="false"/>
-      <parameter id="v_GTHOr" value="0.420300339493163" constant="false"/>
-      <parameter id="v_GSHR" value="0.420300339493162" constant="false"/>
-      <parameter id="v_SK_glc__D_c" value="1.12" constant="false"/>
-      <parameter id="v_SK_pyr_c" value="0.220708918232436" constant="false"/>
-      <parameter id="v_SK_lac__L_c" value="2.0534947961842" constant="false"/>
-      <parameter id="v_SK_ade_c" value="-0.0326740527784014" constant="false"/>
-      <parameter id="v_SK_adn_c" value="0.00964585180260871" constant="false"/>
-      <parameter id="v_SK_ins_c" value="-0.0721981144436931" constant="false"/>
-      <parameter id="v_SK_hxan_c" value="0.0952263154191973" constant="false"/>
-      <parameter id="v_SK_pi_c" value="-4.44089209850063e-11" constant="false"/>
-      <parameter id="v_SK_h_c" value="3.5562222298562" constant="false"/>
-      <parameter id="v_SK_h2o_c" value="-0.295730633337321" constant="false"/>
-      <parameter id="v_SK_co2_c" value="0.210150169743315" constant="false"/>
-      <parameter id="v_SK_nh3_c" value="0.0230282009754551" constant="false"/>
-      <parameter id="v_SK_o2_c" value="0" constant="false"/>
-      <parameter id="v_PFK_R01" value="0.00774696241411625" constant="false"/>
-      <parameter id="v_PFK_R02" value="0.00774696241411669" constant="false"/>
-      <parameter id="v_PFK_R03" value="0.00774696241411625" constant="false"/>
-      <parameter id="v_PFK_R10" value="1.96538113542599e-18" constant="false"/>
-      <parameter id="v_PFK_T1" value="-5.89366186444032e-19" constant="false"/>
-      <parameter id="v_PFK_R11" value="0.0757773157379443" constant="false"/>
-      <parameter id="v_PFK_R12" value="0.075777315737948" constant="false"/>
-      <parameter id="v_PFK_R13" value="0.0757773157379442" constant="false"/>
-      <parameter id="v_PFK_R20" value="-1.83435572639759e-17" constant="false"/>
-      <parameter id="v_PFK_T2" value="-7.03103520670074e-19" constant="false"/>
-      <parameter id="v_PFK_R21" value="0.277957408021541" constant="false"/>
-      <parameter id="v_PFK_R22" value="0.277957408021554" constant="false"/>
-      <parameter id="v_PFK_R23" value="0.277957408021541" constant="false"/>
-      <parameter id="v_PFK_R30" value="-1.5723049083408e-17" constant="false"/>
-      <parameter id="v_PFK_T3" value="-2.64697796016969e-18" constant="false"/>
-      <parameter id="v_PFK_R31" value="0.453142473643798" constant="false"/>
-      <parameter id="v_PFK_R32" value="0.453142473643816" constant="false"/>
-      <parameter id="v_PFK_R33" value="0.453142473643798" constant="false"/>
-      <parameter id="v_PFK_R40" value="-1.3976043629696e-17" constant="false"/>
-      <parameter id="v_PFK_T4" value="-7.94093388050907e-18" constant="false"/>
-      <parameter id="v_PFK_R41" value="0.277027291989067" constant="false"/>
-      <parameter id="v_PFK_R42" value="0.277027291989077" constant="false"/>
-      <parameter id="v_PFK_R43" value="0.277027291989067" constant="false"/>
-      <parameter id="v_PFK_L" value="2.06795153138257e-13" constant="false"/>
-      <parameter id="Keq_PFK_F" value="10" constant="true"/>
-      <parameter id="Keq_PFK_A" value="14.7058823529412" constant="true"/>
-      <parameter id="Keq_PFK_I" value="10" constant="true"/>
-      <parameter id="Keq_PFK_ACT" value="30.3030303030303" constant="true"/>
-      <parameter id="kf_PFK" value="18791158" constant="true"/>
-      <parameter id="kf_PFK_A" value="4240227" constant="true"/>
-      <parameter id="kf_PFK_F" value="5355749" constant="true"/>
-      <parameter id="kf_PFK_I" value="1000000" constant="true"/>
-      <parameter id="kf_PFK_ACT" value="1000000" constant="true"/>
+      <parameter id="v_R_HEX1" value="1.11999999999972" constant="false"/>
+      <parameter id="v_R_PGI" value="0.909849830233427" constant="false"/>
+      <parameter id="v_R_FBA" value="1.09165145180651" constant="false"/>
+      <parameter id="v_R_TPI" value="1.09165145180667" constant="false"/>
+      <parameter id="v_R_GAPD" value="2.27420371440856" constant="false"/>
+      <parameter id="v_R_PGK" value="1.81457647293416" constant="false"/>
+      <parameter id="v_R_PGM" value="2.27420371441649" constant="false"/>
+      <parameter id="v_R_ENO" value="2.27420371441652" constant="false"/>
+      <parameter id="v_R_PYK" value="2.27420371441655" constant="false"/>
+      <parameter id="v_R_LDH_L" value="2.05349479618411" constant="false"/>
+      <parameter id="v_R_G6PDH2r" value="0.210150169752733" constant="false"/>
+      <parameter id="v_R_PGL" value="0.210150169752712" constant="false"/>
+      <parameter id="v_R_GND" value="0.210150169740449" constant="false"/>
+      <parameter id="v_R_RPE" value="0.18180162158531" constant="false"/>
+      <parameter id="v_R_RPI" value="0.0283485481549901" constant="false"/>
+      <parameter id="v_R_TKT1" value="0.0909008107953303" constant="false"/>
+      <parameter id="v_R_TKT2" value="0.0909008107894657" constant="false"/>
+      <parameter id="v_R_TALA" value="0.0909008107895164" constant="false"/>
+      <parameter id="v_R_ADNK1" value="0.0920087863710674" constant="false"/>
+      <parameter id="v_R_NTD7" value="0.11165627386505" constant="false"/>
+      <parameter id="v_R_ADA" value="0.0100016356913801" constant="false"/>
+      <parameter id="v_R_AMPDA" value="0.0130265652842559" constant="false"/>
+      <parameter id="v_R_NTD11" value="0.0130265652842344" constant="false"/>
+      <parameter id="v_R_PUNP5" value="0.0952263154193131" constant="false"/>
+      <parameter id="v_R_PPM" value="0.0952263154193" constant="false"/>
+      <parameter id="v_R_PRPPS" value="0.0326740527785299" constant="false"/>
+      <parameter id="v_R_ADPT" value="0.0326740527784202" constant="false"/>
+      <parameter id="v_R_ADK1" value="-0.0326740527786806" constant="false"/>
+      <parameter id="v_R_DPGM" value="0.459627241474417" constant="false"/>
+      <parameter id="v_R_DPGase" value="0.459627241482265" constant="false"/>
+      <parameter id="v_R_HBDPG" value="0" constant="false"/>
+      <parameter id="v_R_HBO1" value="0" constant="false"/>
+      <parameter id="v_R_HBO2" value="2.2164431748295e-13" constant="false"/>
+      <parameter id="v_R_HBO3" value="0" constant="false"/>
+      <parameter id="v_R_HBO4" value="-4.35064310966293e-13" constant="false"/>
+      <parameter id="v_R_ATPM" value="1.71977184361664" constant="false"/>
+      <parameter id="v_R_DM_nadh" value="0.22070891822445" constant="false"/>
+      <parameter id="v_R_GTHOr" value="0.420300339493163" constant="false"/>
+      <parameter id="v_R_GSHR" value="0.420300339493162" constant="false"/>
+      <parameter id="v_R_SK_glc__D_c" value="1.12" constant="false"/>
+      <parameter id="v_R_SK_pyr_c" value="0.220708918232436" constant="false"/>
+      <parameter id="v_R_SK_lac__L_c" value="2.0534947961842" constant="false"/>
+      <parameter id="v_R_SK_ade_c" value="-0.0326740527784014" constant="false"/>
+      <parameter id="v_R_SK_adn_c" value="0.00964585180260871" constant="false"/>
+      <parameter id="v_R_SK_ins_c" value="-0.0721981144436931" constant="false"/>
+      <parameter id="v_R_SK_hxan_c" value="0.0952263154191973" constant="false"/>
+      <parameter id="v_R_SK_pi_c" value="-4.44089209850063e-11" constant="false"/>
+      <parameter id="v_R_SK_h_c" value="3.5562222298562" constant="false"/>
+      <parameter id="v_R_SK_h2o_c" value="-0.295730633337321" constant="false"/>
+      <parameter id="v_R_SK_co2_c" value="0.210150169743315" constant="false"/>
+      <parameter id="v_R_SK_nh3_c" value="0.0230282009754551" constant="false"/>
+      <parameter id="v_R_SK_o2_c" value="0" constant="false"/>
+      <parameter id="v_R_PFK_R01" value="0.00774696241411625" constant="false"/>
+      <parameter id="v_R_PFK_R02" value="0.00774696241411669" constant="false"/>
+      <parameter id="v_R_PFK_R03" value="0.00774696241411625" constant="false"/>
+      <parameter id="v_R_PFK_R10" value="1.96538113542599e-18" constant="false"/>
+      <parameter id="v_R_PFK_T1" value="-5.89366186444032e-19" constant="false"/>
+      <parameter id="v_R_PFK_R11" value="0.0757773157379443" constant="false"/>
+      <parameter id="v_R_PFK_R12" value="0.075777315737948" constant="false"/>
+      <parameter id="v_R_PFK_R13" value="0.0757773157379442" constant="false"/>
+      <parameter id="v_R_PFK_R20" value="-1.83435572639759e-17" constant="false"/>
+      <parameter id="v_R_PFK_T2" value="-7.03103520670074e-19" constant="false"/>
+      <parameter id="v_R_PFK_R21" value="0.277957408021541" constant="false"/>
+      <parameter id="v_R_PFK_R22" value="0.277957408021554" constant="false"/>
+      <parameter id="v_R_PFK_R23" value="0.277957408021541" constant="false"/>
+      <parameter id="v_R_PFK_R30" value="-1.5723049083408e-17" constant="false"/>
+      <parameter id="v_R_PFK_T3" value="-2.64697796016969e-18" constant="false"/>
+      <parameter id="v_R_PFK_R31" value="0.453142473643798" constant="false"/>
+      <parameter id="v_R_PFK_R32" value="0.453142473643816" constant="false"/>
+      <parameter id="v_R_PFK_R33" value="0.453142473643798" constant="false"/>
+      <parameter id="v_R_PFK_R40" value="-1.3976043629696e-17" constant="false"/>
+      <parameter id="v_R_PFK_T4" value="-7.94093388050907e-18" constant="false"/>
+      <parameter id="v_R_PFK_R41" value="0.277027291989067" constant="false"/>
+      <parameter id="v_R_PFK_R42" value="0.277027291989077" constant="false"/>
+      <parameter id="v_R_PFK_R43" value="0.277027291989067" constant="false"/>
+      <parameter id="v_R_PFK_L" value="2.06795153138257e-13" constant="false"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="R_HEX1" name="Hexokinase (D-glucose:ATP)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HEX1 </ci>
+              <ci> kf_R_HEX1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -376,59 +367,59 @@
                     <ci> M_adp_c </ci>
                     <ci> M_g6p_c </ci>
                   </apply>
-                  <ci> Keq_HEX1 </ci>
+                  <ci> Keq_R_HEX1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1" value="0.700007254339884"/>
-            <localParameter id="Keq_HEX1" value="850"/>
+            <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
+            <localParameter id="Keq_R_HEX1" value="850"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PGI" name="Glucose-6-phosphate isomerase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PGI </ci>
+              <ci> kf_R_PGI </ci>
               <apply>
                 <minus/>
                 <ci> M_g6p_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_f6p_c </ci>
-                  <ci> Keq_PGI </ci>
+                  <ci> Keq_R_PGI </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PGI" value="2961.11111111162"/>
-            <localParameter id="Keq_PGI" value="0.41"/>
+            <localParameter id="kf_R_PGI" value="2961.11111111162"/>
+            <localParameter id="Keq_R_PGI" value="0.41"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_FBA" name="Fructose-bisphosphate aldolase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_dhap_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_dhap_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_FBA </ci>
+              <ci> kf_R_FBA </ci>
               <apply>
                 <minus/>
                 <ci> M_fdp_c </ci>
@@ -439,62 +430,62 @@
                     <ci> M_dhap_c </ci>
                     <ci> M_g3p_c </ci>
                   </apply>
-                  <ci> Keq_FBA </ci>
+                  <ci> Keq_R_FBA </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_FBA" value="2797.4485596707"/>
-            <localParameter id="Keq_FBA" value="0.082"/>
+            <localParameter id="kf_R_FBA" value="2797.4485596707"/>
+            <localParameter id="Keq_R_FBA" value="0.082"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_TPI" name="Triose-phosphate isomerase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_dhap_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_dhap_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_TPI </ci>
+              <ci> kf_R_TPI </ci>
               <apply>
                 <minus/>
                 <ci> M_dhap_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_g3p_c </ci>
-                  <ci> Keq_TPI </ci>
+                  <ci> Keq_R_TPI </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_TPI" value="33.9058310930553"/>
-            <localParameter id="Keq_TPI" value="0.0571429"/>
+            <localParameter id="kf_R_TPI" value="33.9058310930553"/>
+            <localParameter id="Keq_R_TPI" value="0.0571429"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_GAPD" name="Glyceraldehyde-3-phosphate dehydrogenase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_nad_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nad_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadh_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadh_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_GAPD </ci>
+              <ci> kf_R_GAPD </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -510,31 +501,31 @@
                     <ci> M__13dpg_c </ci>
                     <ci> M_nadh_c </ci>
                   </apply>
-                  <ci> Keq_GAPD </ci>
+                  <ci> Keq_R_GAPD </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_GAPD" value="3479.76019376109"/>
-            <localParameter id="Keq_GAPD" value="0.0179"/>
+            <localParameter id="Keq_R_GAPD" value="0.0179"/>
+            <localParameter id="kf_R_GAPD" value="3479.76019376109"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PGK" name="Phosphoglycerate kinase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__3pg_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__3pg_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PGK </ci>
+              <ci> kf_R_PGK </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -549,91 +540,91 @@
                     <ci> M__3pg_c </ci>
                     <ci> M_atp_c </ci>
                   </apply>
-                  <ci> Keq_PGK </ci>
+                  <ci> Keq_R_PGK </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PGK" value="1061655.08528104"/>
-            <localParameter id="Keq_PGK" value="1800"/>
+            <localParameter id="Keq_R_PGK" value="1800"/>
+            <localParameter id="kf_R_PGK" value="1061655.08528104"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PGM" name="Phosphoglycerate mutase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M__3pg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__3pg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__2pg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__2pg_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PGM </ci>
+              <ci> kf_R_PGM </ci>
               <apply>
                 <minus/>
                 <ci> M__3pg_c </ci>
                 <apply>
                   <divide/>
                   <ci> M__2pg_c </ci>
-                  <ci> Keq_PGM </ci>
+                  <ci> Keq_R_PGM </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PGM" value="5017.11025257525"/>
-            <localParameter id="Keq_PGM" value="0.147059"/>
+            <localParameter id="Keq_R_PGM" value="0.147059"/>
+            <localParameter id="kf_R_PGM" value="5017.11025257525"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_ENO" name="Enolase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M__2pg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__2pg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pep_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_ENO </ci>
+              <ci> kf_R_ENO </ci>
               <apply>
                 <minus/>
                 <ci> M__2pg_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pep_c </ci>
-                  <ci> Keq_ENO </ci>
+                  <ci> Keq_R_ENO </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ENO" value="1817.54510987361"/>
-            <localParameter id="Keq_ENO" value="1.69492"/>
+            <localParameter id="Keq_R_ENO" value="1.69492"/>
+            <localParameter id="kf_R_ENO" value="1817.54510987361"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PYK" name="Pyruvate kinase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_pep_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pep_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pyr_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pyr_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PYK </ci>
+              <ci> kf_R_PYK </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -648,32 +639,32 @@
                     <ci> M_atp_c </ci>
                     <ci> M_pyr_c </ci>
                   </apply>
-                  <ci> Keq_PYK </ci>
+                  <ci> Keq_R_PYK </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PYK" value="468.247015920569"/>
-            <localParameter id="Keq_PYK" value="363000"/>
+            <localParameter id="Keq_R_PYK" value="363000"/>
+            <localParameter id="kf_R_PYK" value="468.247015920569"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_LDH_L" name="L-lactate dehydrogenase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadh_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pyr_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadh_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pyr_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_lac__L_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nad_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_lac__L_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nad_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_LDH_L </ci>
+              <ci> kf_R_LDH_L </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -688,32 +679,32 @@
                     <ci> M_lac__L_c </ci>
                     <ci> M_nad_c </ci>
                   </apply>
-                  <ci> Keq_LDH_L </ci>
+                  <ci> Keq_R_LDH_L </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_LDH_L" value="1150.28524317678"/>
-            <localParameter id="Keq_LDH_L" value="26300"/>
+            <localParameter id="kf_R_LDH_L" value="1150.28524317678"/>
+            <localParameter id="Keq_R_LDH_L" value="26300"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r" name="Glucose 6-phosphate dehydrogenase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r </ci>
+              <ci> kf_R_G6PDH2r </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -728,63 +719,63 @@
                     <ci> M__6pgl_c </ci>
                     <ci> M_nadph_c </ci>
                   </apply>
-                  <ci> Keq_G6PDH2r </ci>
+                  <ci> Keq_R_G6PDH2r </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r" value="21864.5892483921"/>
-            <localParameter id="Keq_G6PDH2r" value="1000"/>
+            <localParameter id="Keq_R_G6PDH2r" value="1000"/>
+            <localParameter id="kf_R_G6PDH2r" value="21864.5892483921"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PGL" name="6-phosphogluconolactonase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PGL </ci>
+              <ci> kf_R_PGL </ci>
               <apply>
                 <minus/>
                 <ci> M__6pgl_c </ci>
                 <apply>
                   <divide/>
                   <ci> M__6pgc_c </ci>
-                  <ci> Keq_PGL </ci>
+                  <ci> Keq_R_PGL </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PGL" value="122.323111606386"/>
-            <localParameter id="Keq_PGL" value="1000"/>
+            <localParameter id="Keq_R_PGL" value="1000"/>
+            <localParameter id="kf_R_PGL" value="122.323111606386"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_GND" name="Phosphogluconate dehydrogenase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__6pgc_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_co2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_co2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_GND </ci>
+              <ci> kf_R_GND </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -800,89 +791,89 @@
                     <ci> M_nadph_c </ci>
                     <ci> M_ru5p__D_c </ci>
                   </apply>
-                  <ci> Keq_GND </ci>
+                  <ci> Keq_R_GND </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_GND" value="29287.8074735599"/>
-            <localParameter id="Keq_GND" value="1000"/>
+            <localParameter id="kf_R_GND" value="29287.8074735599"/>
+            <localParameter id="Keq_R_GND" value="1000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_RPE" name="Ribulose 5-phosphate 3-epimerase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_RPE </ci>
+              <ci> kf_R_RPE </ci>
               <apply>
                 <minus/>
                 <ci> M_ru5p__D_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_xu5p__D_c </ci>
-                  <ci> Keq_RPE </ci>
+                  <ci> Keq_R_RPE </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_RPE" value="22392.0519678593"/>
-            <localParameter id="Keq_RPE" value="3"/>
+            <localParameter id="Keq_R_RPE" value="3"/>
+            <localParameter id="kf_R_RPE" value="22392.0519678593"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_RPI" name="Ribulose 5-Phosphate Isomerase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ru5p__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_RPI </ci>
+              <ci> kf_R_RPI </ci>
               <apply>
                 <minus/>
                 <ci> M_ru5p__D_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_r5p_c </ci>
-                  <ci> Keq_RPI </ci>
+                  <ci> Keq_R_RPI </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_RPI" value="2021.05774885077"/>
-            <localParameter id="Keq_RPI" value="2.57"/>
+            <localParameter id="kf_R_RPI" value="2021.05774885077"/>
+            <localParameter id="Keq_R_RPI" value="2.57"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_TKT1" name="Transketolase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_s7p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_s7p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_TKT1 </ci>
+              <ci> kf_R_TKT1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -897,31 +888,31 @@
                     <ci> M_g3p_c </ci>
                     <ci> M_s7p_c </ci>
                   </apply>
-                  <ci> Keq_TKT1 </ci>
+                  <ci> Keq_R_TKT1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_TKT1" value="2338.07047521285"/>
-            <localParameter id="Keq_TKT1" value="1.2"/>
+            <localParameter id="Keq_R_TKT1" value="1.2"/>
+            <localParameter id="kf_R_TKT1" value="2338.07047521285"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_TKT2" name="Transketolase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_e4p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_e4p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_xu5p__D_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_TKT2 </ci>
+              <ci> kf_R_TKT2 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -936,31 +927,31 @@
                     <ci> M_f6p_c </ci>
                     <ci> M_g3p_c </ci>
                   </apply>
-                  <ci> Keq_TKT2 </ci>
+                  <ci> Keq_R_TKT2 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_TKT2" value="1600.14106520246"/>
-            <localParameter id="Keq_TKT2" value="10.3"/>
+            <localParameter id="kf_R_TKT2" value="1600.14106520246"/>
+            <localParameter id="Keq_R_TKT2" value="10.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_TALA" name="Transaldolase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_g3p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_s7p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g3p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_s7p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_e4p_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_e4p_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_TALA </ci>
+              <ci> kf_R_TALA </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -975,26 +966,26 @@
                     <ci> M_e4p_c </ci>
                     <ci> M_f6p_c </ci>
                   </apply>
-                  <ci> Keq_TALA </ci>
+                  <ci> Keq_R_TALA </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_TALA" value="1237.3623624164"/>
-            <localParameter id="Keq_TALA" value="1.05"/>
+            <localParameter id="Keq_R_TALA" value="1.05"/>
+            <localParameter id="kf_R_TALA" value="1237.3623624164"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_ADNK1" name="Adenosine kinase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_ADNK1" name="Adenosine kinase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1002,121 +993,116 @@
               <times/>
               <ci> M_adn_c </ci>
               <ci> M_atp_c </ci>
-              <ci> kf_ADNK1 </ci>
+              <ci> kf_R_ADNK1 </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ADNK1" value="62.505203679244"/>
-            <localParameter id="Keq_ADNK1" value="INF"/>
+            <localParameter id="kf_R_ADNK1" value="62.505203679244"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_NTD7" name="5&apos;-nucleotidase (AMP)" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_NTD7" name="5&apos;-nucleotidase (AMP)" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_amp_c </ci>
-              <ci> kf_NTD7 </ci>
+              <ci> kf_R_NTD7 </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_NTD7" value="1.38363460055046"/>
-            <localParameter id="Keq_NTD7" value="INF"/>
+            <localParameter id="kf_R_NTD7" value="1.38363460055046"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_ADA" name="Adenosine deaminase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_ADA" name="Adenosine deaminase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_adn_c </ci>
-              <ci> kf_ADA </ci>
+              <ci> kf_R_ADA </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ADA" value="8.33402715723253"/>
-            <localParameter id="Keq_ADA" value="INF"/>
+            <localParameter id="kf_R_ADA" value="8.33402715723253"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_AMPDA" name="Adenosine monophosphate deaminase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_AMPDA" name="Adenosine monophosphate deaminase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_imp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_imp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_amp_c </ci>
-              <ci> kf_AMPDA </ci>
+              <ci> kf_R_AMPDA </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_AMPDA" value="0.161424036730887"/>
-            <localParameter id="Keq_AMPDA" value="INF"/>
+            <localParameter id="kf_R_AMPDA" value="0.161424036730887"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_NTD11" name="5&apos;-nucleotidase (IMP)" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_NTD11" name="5&apos;-nucleotidase (IMP)" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_imp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_imp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_imp_c </ci>
-              <ci> kf_NTD11 </ci>
+              <ci> kf_R_NTD11 </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_NTD11" value="1.40000000130063"/>
-            <localParameter id="Keq_NTD11" value="INF"/>
+            <localParameter id="kf_R_NTD11" value="1.40000000130063"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PUNP5" name="Purine-nucleoside phosphorylase (Inosine)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hxan_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_r1p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hxan_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_r1p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PUNP5 </ci>
+              <ci> kf_R_PUNP5 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1131,55 +1117,55 @@
                     <ci> M_hxan_c </ci>
                     <ci> M_r1p_c </ci>
                   </apply>
-                  <ci> Keq_PUNP5 </ci>
+                  <ci> Keq_R_PUNP5 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PUNP5" value="83.1376441706748"/>
-            <localParameter id="Keq_PUNP5" value="0.09"/>
+            <localParameter id="kf_R_PUNP5" value="83.1376441706748"/>
+            <localParameter id="Keq_R_PUNP5" value="0.09"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PPM" name="Phosphopentomutase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_r1p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_r1p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PPM </ci>
+              <ci> kf_R_PPM </ci>
               <apply>
                 <minus/>
                 <ci> M_r1p_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_r5p_c </ci>
-                  <ci> Keq_PPM </ci>
+                  <ci> Keq_R_PPM </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PPM" value="1.64264212872392"/>
-            <localParameter id="Keq_PPM" value="13.3"/>
+            <localParameter id="kf_R_PPM" value="1.64264212872392"/>
+            <localParameter id="Keq_R_PPM" value="13.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PRPPS" name="Phosphoribosylpyrophosphate synthetase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PRPPS" name="Phosphoribosylpyrophosphate synthetase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_r5p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_r5p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_prpp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_prpp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1187,25 +1173,24 @@
               <times/>
               <ci> M_atp_c </ci>
               <ci> M_r5p_c </ci>
-              <ci> kf_PRPPS </ci>
+              <ci> kf_R_PRPPS </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PRPPS" value="0.690667698063767"/>
-            <localParameter id="Keq_PRPPS" value="INF"/>
+            <localParameter id="kf_R_PRPPS" value="0.690667698063767"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_ADPT" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_ADPT" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ade_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_prpp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ade_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_prpp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="2" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1213,28 +1198,27 @@
               <times/>
               <ci> M_ade_c </ci>
               <ci> M_prpp_c </ci>
-              <ci> kf_ADPT </ci>
+              <ci> kf_R_ADPT </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ADPT" value="2799.82444266784"/>
-            <localParameter id="Keq_ADPT" value="INF"/>
+            <localParameter id="kf_R_ADPT" value="2799.82444266784"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_ADK1" name="Adenylate kinase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_adp_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="2" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_ADK1 </ci>
+              <ci> kf_R_ADK1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1249,83 +1233,82 @@
                     <ci> M_amp_c </ci>
                     <ci> M_atp_c </ci>
                   </apply>
-                  <ci> Keq_ADK1 </ci>
+                  <ci> Keq_R_ADK1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ADK1" value="100000"/>
-            <localParameter id="Keq_ADK1" value="1.65"/>
+            <localParameter id="Keq_R_ADK1" value="1.65"/>
+            <localParameter id="kf_R_ADK1" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_DPGM" name="Diphosphoglyceromutase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__13dpg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_DPGM </ci>
+              <ci> kf_R_DPGM </ci>
               <apply>
                 <minus/>
                 <ci> M__13dpg_c </ci>
                 <apply>
                   <divide/>
                   <ci> M__23dpg_c </ci>
-                  <ci> Keq_DPGM </ci>
+                  <ci> Keq_R_DPGM </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_DPGM" value="1824.93653567151"/>
-            <localParameter id="Keq_DPGM" value="2300000"/>
+            <localParameter id="Keq_R_DPGM" value="2300000"/>
+            <localParameter id="kf_R_DPGM" value="1824.93653567151"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_DPGase" name="Diphosphoglycerate phosphatase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_DPGase" name="Diphosphoglycerate phosphatase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__3pg_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__3pg_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M__23dpg_c </ci>
-              <ci> kf_DPGase </ci>
+              <ci> kf_R_DPGase </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_DPGase" value="0.142258064516129"/>
-            <localParameter id="Keq_DPGase" value="INF"/>
+            <localParameter id="kf_R_DPGase" value="0.142258064516129"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HBDPG" name="Hemoglobin-23dpg binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_hb_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M__23dpg_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_dhb_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_dhb_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HBDPG </ci>
+              <ci> kf_R_HBDPG </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1336,30 +1319,30 @@
                 <apply>
                   <divide/>
                   <ci> M_dhb_c </ci>
-                  <ci> Keq_HBDPG </ci>
+                  <ci> Keq_R_HBDPG </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HBDPG" value="519613"/>
-            <localParameter id="Keq_HBDPG" value="0.25"/>
+            <localParameter id="kf_R_HBDPG" value="519613"/>
+            <localParameter id="Keq_R_HBDPG" value="0.25"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HBO1" name="Oxygen Loading (1)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_o2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_hb_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_hb_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hb_1o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_1o2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HBO1 </ci>
+              <ci> kf_R_HBO1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1370,30 +1353,30 @@
                 <apply>
                   <divide/>
                   <ci> M_hb_1o2_c </ci>
-                  <ci> Keq_HBO1 </ci>
+                  <ci> Keq_R_HBO1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HBO1" value="506935"/>
-            <localParameter id="Keq_HBO1" value="41.8352"/>
+            <localParameter id="kf_R_HBO1" value="506935"/>
+            <localParameter id="Keq_R_HBO1" value="41.8352"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HBO2" name="Oxygen Loading (2)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_hb_1o2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_1o2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hb_2o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_2o2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HBO2 </ci>
+              <ci> kf_R_HBO2 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1404,30 +1387,30 @@
                 <apply>
                   <divide/>
                   <ci> M_hb_2o2_c </ci>
-                  <ci> Keq_HBO2 </ci>
+                  <ci> Keq_R_HBO2 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HBO2" value="511077"/>
-            <localParameter id="Keq_HBO2" value="73.2115"/>
+            <localParameter id="Keq_R_HBO2" value="73.2115"/>
+            <localParameter id="kf_R_HBO2" value="511077"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HBO3" name="Oxygen Loading (3)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_hb_2o2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_2o2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hb_3o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_3o2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HBO3 </ci>
+              <ci> kf_R_HBO3 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1438,30 +1421,30 @@
                 <apply>
                   <divide/>
                   <ci> M_hb_3o2_c </ci>
-                  <ci> Keq_HBO3 </ci>
+                  <ci> Keq_R_HBO3 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HBO3" value="509243"/>
-            <localParameter id="Keq_HBO3" value="177.799"/>
+            <localParameter id="Keq_R_HBO3" value="177.799"/>
+            <localParameter id="kf_R_HBO3" value="509243"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_HBO4" name="Oxygen Loading (4)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_hb_3o2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_3o2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_hb_4o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hb_4o2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_HBO4 </ci>
+              <ci> kf_R_HBO4 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1472,78 +1455,76 @@
                 <apply>
                   <divide/>
                   <ci> M_hb_4o2_c </ci>
-                  <ci> Keq_HBO4 </ci>
+                  <ci> Keq_R_HBO4 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HBO4" value="501595"/>
-            <localParameter id="Keq_HBO4" value="1289.92"/>
+            <localParameter id="Keq_R_HBO4" value="1289.92"/>
+            <localParameter id="kf_R_HBO4" value="501595"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_ATPM" name="ATP maintenance requirement" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_ATPM" name="ATP maintenance requirement" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_atp_c </ci>
-              <ci> kf_ATPM </ci>
+              <ci> kf_R_ATPM </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_ATPM" value="1.40208333333333"/>
-            <localParameter id="Keq_ATPM" value="INF"/>
+            <localParameter id="kf_R_ATPM" value="1.40208333333333"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_DM_nadh" name="Demand NADH" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_DM_nadh" name="Demand NADH" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_nadh_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadh_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_nad_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nad_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
               <ci> M_nadh_c </ci>
-              <ci> kf_DM_nadh </ci>
+              <ci> kf_R_DM_nadh </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_DM_nadh" value="7.44186046511628"/>
-            <localParameter id="Keq_DM_nadh" value="INF"/>
+            <localParameter id="kf_R_DM_nadh" value="7.44186046511628"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_GTHOr" name="Glutathione oxidoreductase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_gthox_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_gthox_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="false"/>
-          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="true"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_GTHOr </ci>
+              <ci> kf_R_GTHOr </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1562,30 +1543,30 @@
                     </apply>
                     <ci> M_nadp_c </ci>
                   </apply>
-                  <ci> Keq_GTHOr </ci>
+                  <ci> Keq_R_GTHOr </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_GTHOr" value="53.3298118727409"/>
-            <localParameter id="Keq_GTHOr" value="100"/>
+            <localParameter id="Keq_R_GTHOr" value="100"/>
+            <localParameter id="kf_R_GTHOr" value="53.3298118727409"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_GSHR" name="Glutathione-disulfide reductase" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_gthrd_c" stoichiometry="2" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_gthox_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="2" constant="false"/>
+          <speciesReference species="M_gthox_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="2" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_GSHR </ci>
+              <ci> kf_R_GSHR </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -1596,49 +1577,49 @@
                 <apply>
                   <divide/>
                   <ci> M_gthox_c </ci>
-                  <ci> Keq_GSHR </ci>
+                  <ci> Keq_R_GSHR </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_GSHR" value="0.0412573673870342"/>
-            <localParameter id="Keq_GSHR" value="2"/>
+            <localParameter id="Keq_R_GSHR" value="2"/>
+            <localParameter id="kf_R_GSHR" value="0.0412573673870342"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_glc__D_c" name="D-Glucose_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_glc__D_c" sboTerm="SBO:0000632" id="R_SK_glc__D_c" name="D-Glucose_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
           <speciesReference species="M_glc__D_b" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_glc__D_c </ci>
+              <ci> kf_R_SK_glc__D_c </ci>
               <apply>
                 <minus/>
                 <ci> M_glc__D_b </ci>
                 <apply>
                   <divide/>
                   <ci> M_glc__D_c </ci>
-                  <ci> Keq_SK_glc__D_c </ci>
+                  <ci> Keq_R_SK_glc__D_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_glc__D_c" value="1.12"/>
-            <localParameter id="Keq_SK_glc__D_c" value="INF"/>
+            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
+            <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_pyr_c" name="Pyruvate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_pyr_c" sboTerm="SBO:0000632" id="R_SK_pyr_c" name="Pyruvate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_pyr_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pyr_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_pyr_b" stoichiometry="1" constant="true"/>
@@ -1647,27 +1628,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_pyr_c </ci>
+              <ci> kf_R_SK_pyr_c </ci>
               <apply>
                 <minus/>
                 <ci> M_pyr_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pyr_b </ci>
-                  <ci> Keq_SK_pyr_c </ci>
+                  <ci> Keq_R_SK_pyr_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_pyr_c" value="744.186046511621"/>
-            <localParameter id="Keq_SK_pyr_c" value="1"/>
+            <localParameter id="Keq_R_SK_pyr_c" value="1"/>
+            <localParameter id="kf_R_SK_pyr_c" value="744.186046511621"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_lac__L_c" name="L-Lactate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_lac__L_c" sboTerm="SBO:0000632" id="R_SK_lac__L_c" name="L-Lactate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_lac__L_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_lac__L_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_lac__L_b" stoichiometry="1" constant="true"/>
@@ -1676,27 +1657,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_lac__L_c </ci>
+              <ci> kf_R_SK_lac__L_c </ci>
               <apply>
                 <minus/>
                 <ci> M_lac__L_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_lac__L_b </ci>
-                  <ci> Keq_SK_lac__L_c </ci>
+                  <ci> Keq_R_SK_lac__L_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_lac__L_c" value="5.78981481481481"/>
-            <localParameter id="Keq_SK_lac__L_c" value="1"/>
+            <localParameter id="kf_R_SK_lac__L_c" value="5.78981481481481"/>
+            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_ade_c" name="Adenine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_ade_c" sboTerm="SBO:0000632" id="R_SK_ade_c" name="Adenine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ade_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ade_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_ade_b" stoichiometry="1" constant="true"/>
@@ -1705,27 +1686,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_ade_c </ci>
+              <ci> kf_R_SK_ade_c </ci>
               <apply>
                 <minus/>
                 <ci> M_ade_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_ade_b </ci>
-                  <ci> Keq_SK_ade_c </ci>
+                  <ci> Keq_R_SK_ade_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_ade_c" value="99993.73009525"/>
-            <localParameter id="Keq_SK_ade_c" value="1"/>
+            <localParameter id="kf_R_SK_ade_c" value="99993.73009525"/>
+            <localParameter id="Keq_R_SK_ade_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_adn_c" name="Adenosine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_adn_c" sboTerm="SBO:0000632" id="R_SK_adn_c" name="Adenosine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_adn_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_adn_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_adn_b" stoichiometry="1" constant="true"/>
@@ -1734,27 +1715,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_adn_c </ci>
+              <ci> kf_R_SK_adn_c </ci>
               <apply>
                 <minus/>
                 <ci> M_adn_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_adn_b </ci>
-                  <ci> Keq_SK_adn_c </ci>
+                  <ci> Keq_R_SK_adn_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_adn_c" value="100097.771769828"/>
-            <localParameter id="Keq_SK_adn_c" value="1"/>
+            <localParameter id="kf_R_SK_adn_c" value="100097.771769828"/>
+            <localParameter id="Keq_R_SK_adn_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_ins_c" name="Inosine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_ins_c" sboTerm="SBO:0000632" id="R_SK_ins_c" name="Inosine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_ins_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_ins_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_ins_b" stoichiometry="1" constant="true"/>
@@ -1763,27 +1744,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_ins_c </ci>
+              <ci> kf_R_SK_ins_c </ci>
               <apply>
                 <minus/>
                 <ci> M_ins_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_ins_b </ci>
-                  <ci> Keq_SK_ins_c </ci>
+                  <ci> Keq_R_SK_ins_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_ins_c" value="100000"/>
-            <localParameter id="Keq_SK_ins_c" value="1"/>
+            <localParameter id="kf_R_SK_ins_c" value="100000"/>
+            <localParameter id="Keq_R_SK_ins_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_hxan_c" name="Hypoxanthine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_hxan_c" sboTerm="SBO:0000632" id="R_SK_hxan_c" name="Hypoxanthine_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_hxan_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_hxan_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_hxan_b" stoichiometry="1" constant="true"/>
@@ -1792,27 +1773,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_hxan_c </ci>
+              <ci> kf_R_SK_hxan_c </ci>
               <apply>
                 <minus/>
                 <ci> M_hxan_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_hxan_b </ci>
-                  <ci> Keq_SK_hxan_c </ci>
+                  <ci> Keq_R_SK_hxan_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_hxan_c" value="692813.701360283"/>
-            <localParameter id="Keq_SK_hxan_c" value="1"/>
+            <localParameter id="kf_R_SK_hxan_c" value="692813.701360283"/>
+            <localParameter id="Keq_R_SK_hxan_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_pi_c" name="Phosphate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_pi_c" sboTerm="SBO:0000632" id="R_SK_pi_c" name="Phosphate_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_pi_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_pi_b" stoichiometry="1" constant="true"/>
@@ -1821,27 +1802,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_pi_c </ci>
+              <ci> kf_R_SK_pi_c </ci>
               <apply>
                 <minus/>
                 <ci> M_pi_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pi_b </ci>
-                  <ci> Keq_SK_pi_c </ci>
+                  <ci> Keq_R_SK_pi_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_pi_c" value="100000"/>
-            <localParameter id="Keq_SK_pi_c" value="1"/>
+            <localParameter id="Keq_R_SK_pi_c" value="1"/>
+            <localParameter id="kf_R_SK_pi_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_h_c" name="H+_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_h_c" sboTerm="SBO:0000632" id="R_SK_h_c" name="H+_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
@@ -1850,27 +1831,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_h_c </ci>
+              <ci> kf_R_SK_h_c </ci>
               <apply>
                 <minus/>
                 <ci> M_h_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_h_b </ci>
-                  <ci> Keq_SK_h_c </ci>
+                  <ci> Keq_R_SK_h_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_h_c" value="133792.162698413"/>
-            <localParameter id="Keq_SK_h_c" value="1"/>
+            <localParameter id="Keq_R_SK_h_c" value="1"/>
+            <localParameter id="kf_R_SK_h_c" value="133792.162698413"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_h2o_c" name="H2O_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_h2o_c" sboTerm="SBO:0000632" id="R_SK_h2o_c" name="H2O_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_h2o_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
@@ -1879,27 +1860,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_h2o_c </ci>
+              <ci> kf_R_SK_h2o_c </ci>
               <apply>
                 <minus/>
                 <ci> M_h2o_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_h2o_b </ci>
-                  <ci> Keq_SK_h2o_c </ci>
+                  <ci> Keq_R_SK_h2o_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_h2o_c" value="100000"/>
-            <localParameter id="Keq_SK_h2o_c" value="1"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
+            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_co2_c" name="CO2_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_co2_c" sboTerm="SBO:0000632" id="R_SK_co2_c" name="CO2_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_co2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_co2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_co2_b" stoichiometry="1" constant="true"/>
@@ -1908,27 +1889,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_co2_c </ci>
+              <ci> kf_R_SK_co2_c </ci>
               <apply>
                 <minus/>
                 <ci> M_co2_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_co2_b </ci>
-                  <ci> Keq_SK_co2_c </ci>
+                  <ci> Keq_R_SK_co2_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_co2_c" value="100000.000005055"/>
-            <localParameter id="Keq_SK_co2_c" value="1"/>
+            <localParameter id="Keq_R_SK_co2_c" value="1"/>
+            <localParameter id="kf_R_SK_co2_c" value="100000.000005055"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_nh3_c" name="Ammonia_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_nh3_c" sboTerm="SBO:0000632" id="R_SK_nh3_c" name="Ammonia_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_nh3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nh3_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_nh3_b" stoichiometry="1" constant="true"/>
@@ -1937,27 +1918,27 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_nh3_c </ci>
+              <ci> kf_R_SK_nh3_c </ci>
               <apply>
                 <minus/>
                 <ci> M_nh3_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_nh3_b </ci>
-                  <ci> Keq_SK_nh3_c </ci>
+                  <ci> Keq_R_SK_nh3_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_nh3_c" value="100003.468995422"/>
-            <localParameter id="Keq_SK_nh3_c" value="1"/>
+            <localParameter id="kf_R_SK_nh3_c" value="100003.468995422"/>
+            <localParameter id="Keq_R_SK_nh3_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_SK_o2_c" name="Oxygen_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_o2_c" sboTerm="SBO:0000632" id="R_SK_o2_c" name="Oxygen_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
-          <speciesReference species="M_o2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_o2_b" stoichiometry="1" constant="true"/>
@@ -1966,36 +1947,37 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_SK_o2_c </ci>
+              <ci> kf_R_SK_o2_c </ci>
               <apply>
                 <minus/>
                 <ci> M_o2_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_o2_b </ci>
-                  <ci> Keq_SK_o2_c </ci>
+                  <ci> Keq_R_SK_o2_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_SK_o2_c" value="509726"/>
-            <localParameter id="Keq_SK_o2_c" value="1"/>
+            <localParameter id="Keq_R_SK_o2_c" value="1"/>
+            <localParameter id="kf_R_SK_o2_c" value="509726"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R01" name="pfk_R0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2018,20 +2000,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R02" name="pfk_R0_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2054,22 +2041,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R03" name="pfk_R0_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R03" name="pfk_R0_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2080,22 +2072,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R03" value="INF"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R10" name="pfk_R0-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2119,20 +2112,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T1" name="pfk_T0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2156,20 +2154,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+            <localParameter id="Keq_PFK_I" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R11" name="pfk_R1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2192,20 +2195,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R12" name="pfk_R1_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2228,22 +2236,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R13" name="pfk_R1_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R13" name="pfk_R1_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2254,22 +2267,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R13" value="INF"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R20" name="pfk_R1-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2297,20 +2311,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T2" name="pfk_T1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2338,20 +2357,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+            <localParameter id="Keq_PFK_I" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R21" name="pfk_R2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2374,20 +2398,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R22" name="pfk_R2_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2410,22 +2439,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R23" name="pfk_R2_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R23" name="pfk_R2_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2436,22 +2470,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R23" value="INF"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R30" name="pfk_R2-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2479,20 +2514,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T3" name="pfk_T2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2520,20 +2560,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+            <localParameter id="Keq_PFK_I" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R31" name="pfk_R3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2556,20 +2601,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R32" name="pfk_R3_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2592,22 +2642,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R33" name="pfk_R3_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R33" name="pfk_R3_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2618,22 +2673,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R33" value="INF"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R40" name="pfk_R3-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2660,20 +2716,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T4" name="pfk_T3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T4_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T4_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2700,20 +2761,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+            <localParameter id="Keq_PFK_I" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R41" name="pfk_R4-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2736,20 +2802,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R42" name="pfk_R4_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2772,22 +2843,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R43" name="pfk_R4_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R43" name="pfk_R4_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -2798,41 +2874,42 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R43" value="INF"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_L" name="pfk_R0-pfk_T0 transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PFK_L </ci>
+              <ci> kf_R_PFK_L </ci>
               <apply>
                 <minus/>
                 <ci> M_pfk_R0_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pfk_T0_c </ci>
-                  <ci> Keq_PFK_L </ci>
+                  <ci> Keq_R_PFK_L </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_L" value="1000000000000"/>
-            <localParameter id="Keq_PFK_L" value="0.0011"/>
+            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
+            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

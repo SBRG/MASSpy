@@ -1194,7 +1194,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 62.50520367924398,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1214,7 +1214,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.383634600550456,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1233,7 +1233,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 8.334027157232526,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1252,7 +1252,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.16142403673088654,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1271,7 +1271,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4000000013006337,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1322,7 +1322,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.6906676980637675,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1342,7 +1342,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 2799.824442667844,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1395,7 +1395,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.14225806451612902,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1494,7 +1494,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4020833333333331,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1514,7 +1514,7 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 7.441860465116281,
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_rtype": 2,
@@ -1569,6 +1569,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_glc__D_c",
             "metabolites": {
@@ -1583,6 +1586,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_pyr_c",
             "metabolites": {
@@ -1597,6 +1603,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_lac__L_c",
             "metabolites": {
@@ -1611,6 +1620,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_ade_c",
             "metabolites": {
@@ -1625,6 +1637,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_adn_c",
             "metabolites": {
@@ -1639,6 +1654,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_ins_c",
             "metabolites": {
@@ -1653,6 +1671,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_hxan_c",
             "metabolites": {
@@ -1667,6 +1688,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_pi_c",
             "metabolites": {
@@ -1681,6 +1705,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_h_c",
             "metabolites": {
@@ -1695,6 +1722,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_h2o_c",
             "metabolites": {
@@ -1709,6 +1739,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_co2_c",
             "metabolites": {
@@ -1723,6 +1756,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_nh3_c",
             "metabolites": {
@@ -1737,6 +1773,9 @@
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
             "gene_reaction_rule": "",
             "id": "SK_o2_c",
             "metabolites": {
@@ -1758,7 +1797,8 @@
                 "pfk_R0_c": -1.0
             },
             "name": "pfk_R0-atp binding",
-            "steady_state_flux": 0.007746962414116253
+            "steady_state_flux": 0.007746962414116253,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1773,11 +1813,12 @@
                 "pfk_R0_A_c": -1.0
             },
             "name": "pfk_R0_A-f6p binding",
-            "steady_state_flux": 0.007746962414116694
+            "steady_state_flux": 0.007746962414116694,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1792,7 +1833,8 @@
                 "pfk_R0_c": 1.0
             },
             "name": "pfk_R0_AF catalyzation",
-            "steady_state_flux": 0.007746962414116251
+            "steady_state_flux": 0.007746962414116251,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1807,7 +1849,8 @@
                 "pfk_R1_c": 1.0
             },
             "name": "pfk_R0-amp binding",
-            "steady_state_flux": 1.9653811354259938e-18
+            "steady_state_flux": 1.9653811354259938e-18,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1822,7 +1865,8 @@
                 "pfk_T1_c": 1.0
             },
             "name": "pfk_T0-atp binding",
-            "steady_state_flux": -5.893661864440322e-19
+            "steady_state_flux": -5.893661864440322e-19,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1837,7 +1881,8 @@
                 "pfk_R1_c": -1.0
             },
             "name": "pfk_R1-atp binding",
-            "steady_state_flux": 0.07577731573794429
+            "steady_state_flux": 0.07577731573794429,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1852,11 +1897,12 @@
                 "pfk_R1_A_c": -1.0
             },
             "name": "pfk_R1_A-f6p binding",
-            "steady_state_flux": 0.07577731573794802
+            "steady_state_flux": 0.07577731573794802,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1871,7 +1917,8 @@
                 "pfk_R1_c": 1.0
             },
             "name": "pfk_R1_AF catalyzation",
-            "steady_state_flux": 0.07577731573794422
+            "steady_state_flux": 0.07577731573794422,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1886,7 +1933,8 @@
                 "pfk_R2_c": 1.0
             },
             "name": "pfk_R1-amp binding",
-            "steady_state_flux": -1.8343557263975942e-17
+            "steady_state_flux": -1.8343557263975942e-17,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1901,7 +1949,8 @@
                 "pfk_T2_c": 1.0
             },
             "name": "pfk_T1-atp binding",
-            "steady_state_flux": -7.031035206700735e-19
+            "steady_state_flux": -7.031035206700735e-19,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1916,7 +1965,8 @@
                 "pfk_R2_c": -1.0
             },
             "name": "pfk_R2-atp binding",
-            "steady_state_flux": 0.2779574080215409
+            "steady_state_flux": 0.2779574080215409,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1931,11 +1981,12 @@
                 "pfk_R2_A_c": -1.0
             },
             "name": "pfk_R2_A-f6p binding",
-            "steady_state_flux": 0.27795740802155405
+            "steady_state_flux": 0.27795740802155405,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1950,7 +2001,8 @@
                 "pfk_R2_c": 1.0
             },
             "name": "pfk_R2_AF catalyzation",
-            "steady_state_flux": 0.27795740802154134
+            "steady_state_flux": 0.27795740802154134,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1965,7 +2017,8 @@
                 "pfk_R3_c": 1.0
             },
             "name": "pfk_R2-amp binding",
-            "steady_state_flux": -1.572304908340795e-17
+            "steady_state_flux": -1.572304908340795e-17,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1980,7 +2033,8 @@
                 "pfk_T3_c": 1.0
             },
             "name": "pfk_T2-atp binding",
-            "steady_state_flux": -2.6469779601696886e-18
+            "steady_state_flux": -2.6469779601696886e-18,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -1995,7 +2049,8 @@
                 "pfk_R3_c": -1.0
             },
             "name": "pfk_R3-atp binding",
-            "steady_state_flux": 0.4531424736437982
+            "steady_state_flux": 0.4531424736437982,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -2010,11 +2065,12 @@
                 "pfk_R3_A_c": -1.0
             },
             "name": "pfk_R3_A-f6p binding",
-            "steady_state_flux": 0.4531424736438165
+            "steady_state_flux": 0.4531424736438165,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -2029,7 +2085,8 @@
                 "pfk_R3_c": 1.0
             },
             "name": "pfk_R3_AF catalyzation",
-            "steady_state_flux": 0.4531424736437982
+            "steady_state_flux": 0.4531424736437982,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -2044,7 +2101,8 @@
                 "pfk_R4_c": 1.0
             },
             "name": "pfk_R3-amp binding",
-            "steady_state_flux": -1.3976043629695956e-17
+            "steady_state_flux": -1.3976043629695956e-17,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -2059,7 +2117,8 @@
                 "pfk_T4_c": 1.0
             },
             "name": "pfk_T3-atp binding",
-            "steady_state_flux": -7.940933880509066e-18
+            "steady_state_flux": -7.940933880509066e-18,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -2074,7 +2133,8 @@
                 "pfk_R4_c": -1.0
             },
             "name": "pfk_R4-atp binding",
-            "steady_state_flux": 0.27702729198906695
+            "steady_state_flux": 0.27702729198906695,
+            "subsystem": "Glycolysis"
         },
         {
             "_lower_bound": -1000.0,
@@ -2089,11 +2149,12 @@
                 "pfk_R4_A_c": -1.0
             },
             "name": "pfk_R4_A-f6p binding",
-            "steady_state_flux": 0.27702729198907694
+            "steady_state_flux": 0.27702729198907694,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": -1000.0,
+            "_lower_bound": 0.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -2108,7 +2169,8 @@
                 "pfk_R4_c": 1.0
             },
             "name": "pfk_R4_AF catalyzation",
-            "steady_state_flux": 0.27702729198906695
+            "steady_state_flux": 0.27702729198906695,
+            "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.0011,
@@ -2124,7 +2186,8 @@
                 "pfk_T0_c": 1.0
             },
             "name": "pfk_R0-pfk_T0 transition",
-            "steady_state_flux": 2.0679515313825692e-13
+            "steady_state_flux": 2.0679515313825692e-13,
+            "subsystem": "Glycolysis"
         }
     ],
     "units": [

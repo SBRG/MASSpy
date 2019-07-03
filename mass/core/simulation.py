@@ -76,7 +76,8 @@ from mass.util.util import ensure_iterable
 MASSCONFIGURATION = MassConfiguration()
 LOGGER = roadrunner.Logger
 # SBML writing kwargs
-SBML_KWARGS = {"units": False, "local_parameters": False}
+SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
+               "units": False, "local_parameters": False}
 
 
 class Simulation(Object):
