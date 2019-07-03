@@ -256,6 +256,7 @@ def _to_dok(matrix):
         matrix = sym.matrix2numpy(matrix, dtype=float)
     return dok_matrix(matrix)
 
+
 def _make_logger(name):
     """Make the logger instance and set the default format."""
     name = name.split(".")[-1]
