@@ -2,7 +2,6 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-import logging
 import re
 import warnings
 from copy import copy, deepcopy
@@ -25,8 +24,8 @@ from mass.core.massreaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable,
-    get_object_attributes, get_subclass_specific_attributes, _make_logger)
+    _get_matrix_constructor, _make_logger, convert_matrix, ensure_iterable,
+    get_object_attributes, get_subclass_specific_attributes)
 
 # Set the logger
 LOGGER = _make_logger(__name__)

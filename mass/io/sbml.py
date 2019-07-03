@@ -37,7 +37,7 @@ from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
 from mass.util.util import (
-    _check_kwargs, get_subclass_specific_attributes, _make_logger)
+    _check_kwargs, _make_logger, get_subclass_specific_attributes)
 
 LOGGER = _make_logger(__name__)
 # -----------------------------------------------------------------------------
