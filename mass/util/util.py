@@ -230,6 +230,7 @@ def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
 
 # Define small conversion functions based on the original matrix type.
 def _to_dense(matrix):
+    """Convert matrix to a numpy array."""
     if isinstance(matrix, np.ndarray):
         pass
     elif isinstance(matrix, pd.DataFrame):
@@ -243,12 +244,21 @@ def _to_dense(matrix):
 
 
 def _to_lil(matrix):
+    """Convert matrix to a scipy lil matrix."""
     if isinstance(matrix, sym.Matrix):
         matrix = sym.matrix2numpy(matrix, dtype=float)
     return lil_matrix(matrix)
 
 
 def _to_dok(matrix):
+    """Convert matrix to a scipy dok matrix."""
     if isinstance(matrix, sym.Matrix):
         matrix = sym.matrix2numpy(matrix, dtype=float)
     return dok_matrix(matrix)
+
+def _make_logger(name):
+    """Make the logger instance and set the default format."""
+    name = name.split(".")[-1]
+    logging.basicConfig(format="%(name)s %(levelname)s: %(message)s")
+    logger = logging.getLogger(name)
+    return logger

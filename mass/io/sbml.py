@@ -36,9 +36,10 @@ from mass.enzyme_modules.enzyme_module_form import (
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
-from mass.util.util import _check_kwargs, get_subclass_specific_attributes
+from mass.util.util import (
+    _check_kwargs, get_subclass_specific_attributes, _make_logger)
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = _make_logger(__name__)
 # -----------------------------------------------------------------------------
 # Defaults and constants for writing SBML
 # -----------------------------------------------------------------------------
@@ -471,13 +472,12 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     This method is intended for internal use only.
 
     """
-    default_kwargs = {
+    # Check kwargs
+    kwargs = _check_kwargs({
         "number": float,
         "set_missing_bounds": True,
         "remove_char": True,
-        "stop_on_conversion_fail": True}
-    # Check kwargs
-    kwargs = _check_kwargs(default_kwargs, kwargs)
+        "stop_on_conversion_fail": True}, kwargs)
 
     if f_replace is None:
         f_replace = F_REPLACE
@@ -1576,14 +1576,12 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
     This method is intended for internal use only.
 
     """
-    # Create dict of default kwargs
-    default_kwargs = {
+    # Check kwargs
+    kwargs = _check_kwargs({
         "use_fbc_package": True,
         "use_groups_package": True,
         "units": True,
-        "local_parameters": True}
-    # Check kwargs
-    kwargs = _check_kwargs(default_kwargs, kwargs)
+        "local_parameters": True}, kwargs)
 
     if f_replace is None:
         f_replace = F_REPLACE
@@ -2557,8 +2555,7 @@ def _check(value, message):
 
     """
     if value is None:
-        LOGGER.error("Error: LibSBML returned a null value trying to "
-                     "<%s>.", message)
+        LOGGER.error("LibSBML returned a null value trying to <%s>.", message)
     if isinstance(value, integer_types)\
        and value != libsbml.LIBSBML_OPERATION_SUCCESS:
         LOGGER.error("Error encountered trying to  <%s>.", message)
@@ -2810,7 +2807,8 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
     MassSBMLError
 
     """
-    all_kwargs = {
+    # Check kwargs
+    kwargs = _check_kwargs({
         "use_fbc_package": True,
         "use_groups_package": True,
         "units": True,
@@ -2822,10 +2820,16 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         "check_model": True,
         "internal_consistency": True,
         "check_units_consistency": False,
-        "check_modeling_practice": False}
+        "check_modeling_practice": False}, kwargs)
 
-    # Check kwargs
-    kwargs = _check_kwargs(all_kwargs, kwargs)
+    all_kwargs = {"export": {}, "validate": {}}
+    for k, v in iteritems(kwargs):
+        if k in ["use_fbc_package", "use_groups_package", "units",
+                 "local_parameters"]:
+            all_kwargs["export"][k] = v
+        else:
+            all_kwargs["validate"][k] = v
+
     errors = {
         "SBML_FATAL": [],
         "SBML_ERROR": [],
@@ -2836,13 +2840,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         "MASS_WARNING": [],
         "MASS_CHECK": [],
     }
-    all_kwargs = {"export": {}, "validate": {}}
-    for k, v in iteritems(kwargs):
-        if k in ["use_fbc_package", "use_groups_package", "units",
-                 "local_parameters"]:
-            all_kwargs["export"][k] = v
-        else:
-            all_kwargs["validate"][k] = v
+
     try:
         doc = _model_to_sbml(mass_model, f_replace=f_replace,
                              **all_kwargs["export"])

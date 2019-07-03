@@ -26,10 +26,11 @@ from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
     _get_matrix_constructor, convert_matrix, ensure_iterable,
-    get_object_attributes, get_subclass_specific_attributes)
+    get_object_attributes, get_subclass_specific_attributes, _make_logger)
 
 # Set the logger
-LOGGER = logging.getLogger(__name__)
+LOGGER = _make_logger(__name__)
+
 # Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
 # Pre-compiled regular expressions for building reactions from strings

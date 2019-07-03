@@ -12,7 +12,10 @@ from cobra.util.solver import interface_to_str
 
 __all__ = ("MassConfiguration",)
 
+# Set the logger
+logging.basicConfig(format="%(name)s %(levelname)s: %(message)s")
 LOGGER = logging.getLogger(__name__)
+
 COBRA_CONFIGURATION = Configuration()
 
 
