@@ -22,6 +22,7 @@ copyright = '2019, Z. Haiman'
 author = 'Z. Haiman'
 
 # The full version, including alpha/beta/rc tags
+version = '0.1.0a38'
 release = '0.1.0a38'
 
 
