@@ -32,11 +32,14 @@ release = '0.1.0a38'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary',
     'autoapi.extension',
+    'nbsphinx'
 ]
 
 # Document Python Code
