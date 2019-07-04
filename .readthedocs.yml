@@ -9,14 +9,13 @@ version: 2
 sphinx:
   builder: html
   configuration: documentation_builder/conf.py
-  fail_on_warning: true
 
 # Build documentation with MkDocs
 #mkdocs:
 #  configuration: mkdocs.yml
 
 # Optionally build docs in additional formats such as PDF and ePub
-formats: htmlzip
+formats: all
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
