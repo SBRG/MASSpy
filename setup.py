@@ -29,7 +29,7 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.0a36",
+        version="0.1.0a37",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
