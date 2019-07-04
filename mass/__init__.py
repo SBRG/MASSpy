@@ -15,7 +15,7 @@ from mass.core import (
     plot_simulation, plot_tiled_phase_portrait, set_defaults)
 
 from mass.util import (
-    is_simulatable, qcqa_model, qcqa_simulation, show_versions, strip_time)
+    is_simulatable, qcqa_model, show_versions, strip_time)
 
 __version__ = "0.1.0a36"
 

@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,14 +15,14 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
     <listOfCompartments>
-      <compartment id="c" name="Cytosol" constant="true"/>
+      <compartment id="c" name="Cytosol" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
       <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198000000002944" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
@@ -204,29 +204,21 @@
       <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
-      <parameter id="Keq_PFK_F" value="10" constant="true"/>
-      <parameter id="Keq_PFK_A" value="14.7058823529412" constant="true"/>
-      <parameter id="Keq_PFK_I" value="10" constant="true"/>
-      <parameter id="Keq_PFK_ACT" value="30.3030303030303" constant="true"/>
-      <parameter id="kf_PFK" value="2000064" constant="true"/>
-      <parameter id="kf_PFK_A" value="61635" constant="true"/>
-      <parameter id="kf_PFK_F" value="5000028" constant="true"/>
-      <parameter id="kf_PFK_I" value="1000000" constant="true"/>
-      <parameter id="kf_PFK_ACT" value="1000000" constant="true"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="R_PFK_R01" name="pfk_R0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -249,20 +241,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R02" name="pfk_R0_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -285,22 +282,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="Keq_PFK_F" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R03" name="pfk_R0_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -311,22 +313,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R03" value="INF"/>
+            <localParameter id="kf_PFK" value="2000064"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R10" name="pfk_R0-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -350,20 +353,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T1" name="pfk_T0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -387,20 +395,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R11" name="pfk_R1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -423,20 +436,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R12" name="pfk_R1_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -459,22 +477,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="Keq_PFK_F" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R13" name="pfk_R1_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -485,22 +508,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R13" value="INF"/>
+            <localParameter id="kf_PFK" value="2000064"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R20" name="pfk_R1-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -528,20 +552,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T2" name="pfk_T1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T1_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -569,20 +598,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R21" name="pfk_R2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -605,20 +639,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R22" name="pfk_R2_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -641,22 +680,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="Keq_PFK_F" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R23" name="pfk_R2_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -667,22 +711,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R23" value="INF"/>
+            <localParameter id="kf_PFK" value="2000064"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R30" name="pfk_R2-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -710,20 +755,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T3" name="pfk_T2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T2_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -751,20 +801,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R31" name="pfk_R3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -787,20 +842,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R32" name="pfk_R3_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -823,22 +883,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="Keq_PFK_F" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R33" name="pfk_R3_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -849,22 +914,23 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R33" value="INF"/>
+            <localParameter id="kf_PFK" value="2000064"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R40" name="pfk_R3-amp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_amp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -891,20 +957,25 @@
               <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
+            <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_T4" name="pfk_T3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T3_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T4_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T4_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -931,20 +1002,25 @@
               <ci> Keq_PFK_I </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R41" name="pfk_R4-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -967,20 +1043,25 @@
               <ci> Keq_PFK_A </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R42" name="pfk_R4_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_f6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_A_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_f6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1003,22 +1084,27 @@
               <ci> Keq_PFK_F </ci>
             </apply>
           </math>
+          <listOfLocalParameters>
+            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="Keq_PFK_F" value="10"/>
+          </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_R43" name="pfk_R4_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_AF_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_adp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_fdp_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R4_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_fdp_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1029,41 +1115,42 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_R43" value="INF"/>
+            <localParameter id="kf_PFK" value="2000064"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_PFK_L" name="pfk_R0-pfk_T0 transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Glycolysis</p>
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_R0_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_pfk_T0_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_PFK_L </ci>
+              <ci> kf_R_PFK_L </ci>
               <apply>
                 <minus/>
                 <ci> M_pfk_R0_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_pfk_T0_c </ci>
-                  <ci> Keq_PFK_L </ci>
+                  <ci> Keq_R_PFK_L </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_L" value="1000000000000"/>
-            <localParameter id="Keq_PFK_L" value="0.0011"/>
+            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
+            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

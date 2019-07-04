@@ -347,5 +347,5 @@ def _make_bound_attr_str_repr(attribute_dict):
 
     """
     return "; ".join([
-        "{0:d} {1}".format(v, k)
+        "{0} {1}".format(v, k)
         for k, v in iteritems(attribute_dict) if v != 0])

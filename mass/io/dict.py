@@ -35,7 +35,7 @@ _OPTIONAL_REACTION_ATTRIBUTES = {
     "steady_state_flux": None,
     "_forward_rate_constant": None,
     "_equilibrium_constant": None,
-    "_reverse_rate_constant": 0,
+    "_reverse_rate_constant": None,
     "objective_coefficient": 0,
     "variable_kind": "continuous",
     "_rtype": 1,

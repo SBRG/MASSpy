@@ -22,7 +22,7 @@
       </unitDefinition>
     </listOfUnitDefinitions>
     <listOfCompartments>
-      <compartment id="c" name="Cytosol" constant="true"/>
+      <compartment id="c" name="Cytosol" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
       <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.048600000000718" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
@@ -98,21 +98,22 @@
       <reaction id="R_G6PDH2r_1" name="g6pdh2r-nadph binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g6pdh2r_N_PI_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_N_PI_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_1 </ci>
+              <ci> kf_R_G6PDH2r_1 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -123,35 +124,36 @@
                 <apply>
                   <divide/>
                   <ci> M_g6pdh2r_N_PI_c </ci>
-                  <ci> Keq_G6PDH2r_1 </ci>
+                  <ci> Keq_R_G6PDH2r_1 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_1" value="1000000"/>
-            <localParameter id="Keq_G6PDH2r_1" value="41.6666666666667"/>
+            <localParameter id="kf_R_G6PDH2r_1" value="1000000"/>
+            <localParameter id="Keq_R_G6PDH2r_1" value="41.6666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_2" name="g6pdh2r-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_atp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g6pdh2r_A_CI_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_A_CI_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_2 </ci>
+              <ci> kf_R_G6PDH2r_2 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -162,35 +164,36 @@
                 <apply>
                   <divide/>
                   <ci> M_g6pdh2r_A_CI_c </ci>
-                  <ci> Keq_G6PDH2r_2 </ci>
+                  <ci> Keq_R_G6PDH2r_2 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_2" value="1000000"/>
-            <localParameter id="Keq_G6PDH2r_2" value="22.7272727272727"/>
+            <localParameter id="Keq_R_G6PDH2r_2" value="22.7272727272727"/>
+            <localParameter id="kf_R_G6PDH2r_2" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_3" name="g6pdh2r-g6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6p_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g6pdh2r_G_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_G_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_3 </ci>
+              <ci> kf_R_G6PDH2r_3 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -201,35 +204,36 @@
                 <apply>
                   <divide/>
                   <ci> M_g6pdh2r_G_c </ci>
-                  <ci> Keq_G6PDH2r_3 </ci>
+                  <ci> Keq_R_G6PDH2r_3 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_3" value="2246662"/>
-            <localParameter id="Keq_G6PDH2r_3" value="37.037037037037"/>
+            <localParameter id="Keq_R_G6PDH2r_3" value="37.037037037037"/>
+            <localParameter id="kf_R_G6PDH2r_3" value="2246662"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_4" name="g6pdh2r_G_P-_6pgl release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_G_P_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_G_P_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M__6pgl_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6pdh2r_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_4 </ci>
+              <ci> kf_R_G6PDH2r_4 </ci>
               <apply>
                 <minus/>
                 <ci> M_g6pdh2r_G_P_c </ci>
@@ -240,35 +244,36 @@
                     <ci> M__6pgl_c </ci>
                     <ci> M_g6pdh2r_c </ci>
                   </apply>
-                  <ci> Keq_G6PDH2r_4 </ci>
+                  <ci> Keq_R_G6PDH2r_4 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_4" value="671430"/>
-            <localParameter id="Keq_G6PDH2r_4" value="0.05"/>
+            <localParameter id="kf_R_G6PDH2r_4" value="671430"/>
+            <localParameter id="Keq_R_G6PDH2r_4" value="0.05"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_5" name="g6pdh2r_G-nadp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_G_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_nadp_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_G_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_nadp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g6pdh2r_GN_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_GN_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_5 </ci>
+              <ci> kf_R_G6PDH2r_5 </ci>
               <apply>
                 <minus/>
                 <apply>
@@ -279,35 +284,36 @@
                 <apply>
                   <divide/>
                   <ci> M_g6pdh2r_GN_c </ci>
-                  <ci> Keq_G6PDH2r_5 </ci>
+                  <ci> Keq_R_G6PDH2r_5 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_5" value="32233627"/>
-            <localParameter id="Keq_G6PDH2r_5" value="52.6315789473684"/>
+            <localParameter id="kf_R_G6PDH2r_5" value="32233627"/>
+            <localParameter id="Keq_R_G6PDH2r_5" value="52.6315789473684"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_6" name="g6pdh2r_GN_P-nadph release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_GN_P_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_GN_P_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_nadph_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_g6pdh2r_G_P_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_nadph_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_g6pdh2r_G_P_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_6 </ci>
+              <ci> kf_R_G6PDH2r_6 </ci>
               <apply>
                 <minus/>
                 <ci> M_g6pdh2r_GN_P_c </ci>
@@ -318,49 +324,50 @@
                     <ci> M_g6pdh2r_G_P_c </ci>
                     <ci> M_nadph_c </ci>
                   </apply>
-                  <ci> Keq_G6PDH2r_6 </ci>
+                  <ci> Keq_R_G6PDH2r_6 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_6" value="181563"/>
-            <localParameter id="Keq_G6PDH2r_6" value="0.0105"/>
+            <localParameter id="kf_R_G6PDH2r_6" value="181563"/>
+            <localParameter id="Keq_R_G6PDH2r_6" value="0.0105"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction id="R_G6PDH2r_7" name="g6pdh2r_GN catalyzation" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
         <listOfReactants>
-          <speciesReference species="M_g6pdh2r_GN_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_GN_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
         <listOfProducts>
-          <speciesReference species="M_g6pdh2r_GN_P_c" stoichiometry="1" constant="false"/>
-          <speciesReference species="M_h_c" stoichiometry="1" constant="false"/>
+          <speciesReference species="M_g6pdh2r_GN_P_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <times/>
-              <ci> kf_G6PDH2r_7 </ci>
+              <ci> kf_R_G6PDH2r_7 </ci>
               <apply>
                 <minus/>
                 <ci> M_g6pdh2r_GN_c </ci>
                 <apply>
                   <divide/>
                   <ci> M_g6pdh2r_GN_P_c </ci>
-                  <ci> Keq_G6PDH2r_7 </ci>
+                  <ci> Keq_R_G6PDH2r_7 </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_G6PDH2r_7" value="3412567"/>
-            <localParameter id="Keq_G6PDH2r_7" value="977.142857142857"/>
+            <localParameter id="Keq_R_G6PDH2r_7" value="977.142857142857"/>
+            <localParameter id="kf_R_G6PDH2r_7" value="3412567"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

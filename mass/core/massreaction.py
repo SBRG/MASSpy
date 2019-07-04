@@ -23,8 +23,9 @@ from cobra.util.context import get_context, resettable
 from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, generate_mass_action_rate_expression,
-    generate_mass_action_ratio)
+    generate_disequilibrium_ratio, generate_foward_mass_action_rate_expression,
+    generate_mass_action_rate_expression, generate_mass_action_ratio,
+    generate_reverse_mass_action_rate_expression)
 from mass.util.util import (
     ensure_non_negative_value, get_object_attributes,
     get_subclass_specific_attributes)
@@ -270,8 +271,8 @@ class MassReaction(Object):
         if self.model is not None and self in self.model.custom_rates:
             rate = self._model.custom_rates[self]
         else:
-            rate = self.get_mass_action_rate_law(rtype=self._rtype,
-                                                 update_reaction=True)
+            rate = self.get_mass_action_rate(rtype=self._rtype,
+                                             update_reaction=True)
         return rate
 
     @property
@@ -354,7 +355,10 @@ class MassReaction(Object):
 
         """
         if self.boundary:
-            bc_metabolite = self._make_boundary_metabolites()[0]
+            for metabolite in self.metabolites:
+                bc_metabolite = metabolite._remove_compartment_from_id_str()
+                bc_metabolite += "_" + str(next(iter(
+                    MASSCONFIGURATION.boundary_compartment)))
         else:
             bc_metabolite = None
 
@@ -517,6 +521,26 @@ class MassReaction(Object):
         setattr(self, "_upper_bound", value)
 
     @property
+    def bounds(self):
+        """Get or set the bounds directly from a tuple.
+
+        Convenience method for setting upper and lower bounds in one line
+        using a tuple of lower and upper bound. Invalid bounds will raise an
+        AssertionError.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+        """
+        return self.lower_bound, self.upper_bound
+
+    @bounds.setter
+    @resettable
+    def bounds(self, value):
+        lower, upper = value
+        self.lower_bound = lower
+        self.upper_bound = upper
+
+    @property
     def kf_str(self):
         """Return the string representation of the forward rate constant."""
         if self.id is not None:
@@ -643,27 +667,70 @@ class MassReaction(Object):
 
         return new_reaction
 
-    def get_mass_action_rate_law(self, rtype=1, update_reaction=False):
+    def get_mass_action_rate(self, rtype=1, update_reaction=False):
         """Get the mass action rate law for the reaction.
 
         Parameters
         ----------
-        rtype: int {1, 2, 3}, optional
+        rtype: int {1, 2, 3}
             The type of rate law to display. Must be 1, 2, or 3.
-            Type 1 will utilize kf and Keq.
-            Type 2 will utilize kf and kr.
-            Type 3 will utilize kr and Keq.
+                Type 1 will utilize the forward rate and equilibrium constants.
+                Type 2 will utilize the forward and reverse rate constants.
+                Type 3 will utilize the equilibrium and reverse rate constants.
+            Default is 1.
         update_reaction: bool, optional
-            If True, update the MassReaction in addition to returning the rate
-            law.
+            Whether to update the MassReaction in addition to returning the
+            rate law. Default is False.
 
         Returns
         -------
-        The rate law expression as a str or sympy expression (sympy.Basic).
+        rate_expression: sympy.Basic, None
+            The rate law as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
 
         """
         return generate_mass_action_rate_expression(self, rtype,
                                                     update_reaction)
+
+    def get_foward_mass_action_rate_expression(self, rtype=1):
+        """Get the foward mass action rate expression for the reaction.
+
+        Parameters
+        ----------
+        rtype: int {1, 2, 3}
+            The type of foward rate law to return. Must be 1, 2, or 3.
+                Type 1 and 2 will utilize the forward rate constant.
+                Type 3 will utilize the equilibrium and reverse rate constants.
+            Default is 1.
+
+        Returns
+        -------
+        fwd_rate: sympy.Basic
+            The forward rate as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
+
+        """
+        return generate_foward_mass_action_rate_expression(self, rtype)
+
+    def get_reverse_mass_action_rate_expression(self, rtype=1):
+        """Get the reverse mass action rate expression for the reaction.
+
+        Parameters
+        ----------
+        rtype: int {1, 2, 3}
+            The type of foward rate law to return. Must be 1, 2, or 3.
+                Type 1 will utilize the foward rate and equilibrium constant.
+                Type 2 and 3 will utilize the reverse rate constant.
+            Default is 1.
+
+        Returns
+        -------
+        rev_rate: sympy.Basic
+            The forward rate as a sympy expression. If the reaction has no
+            metabolites associated, None will be returned.
+
+        """
+        return generate_reverse_mass_action_rate_expression(self, rtype)
 
     def get_mass_action_ratio(self):
         """Get the mass action ratio of the reaction as a sympy expression.
@@ -1152,8 +1219,8 @@ class MassReaction(Object):
         bc_metabolites = []
         for metabolite in list(self.metabolites):
             bc_metabolite = metabolite._remove_compartment_from_id_str()
-            bc_metabolite += "_" + str(list(
-                MASSCONFIGURATION.boundary_compartment)[0])
+            bc_metabolite += "_" + str(next(iter(
+                MASSCONFIGURATION.boundary_compartment)))
             bc_metabolites += [bc_metabolite]
 
         return bc_metabolites

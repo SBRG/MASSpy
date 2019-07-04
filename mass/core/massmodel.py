@@ -2,7 +2,6 @@
 """TODO Module Docstrings."""
 from __future__ import absolute_import
 
-import logging
 import re
 import warnings
 from copy import copy, deepcopy
@@ -25,11 +24,12 @@ from mass.core.massreaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, convert_matrix, ensure_iterable,
+    _get_matrix_constructor, _make_logger, convert_matrix, ensure_iterable,
     get_object_attributes, get_subclass_specific_attributes)
 
 # Set the logger
-LOGGER = logging.getLogger(__name__)
+LOGGER = _make_logger(__name__)
+
 # Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
 # Pre-compiled regular expressions for building reactions from strings
@@ -838,12 +838,12 @@ class MassModel(Object):
 
         if rtype == 0:
             rate_dict = {
-                rxn: rxn.get_mass_action_rate_law(rxn._rtype, update_reactions)
+                rxn: rxn.get_mass_action_rate(rxn._rtype, update_reactions)
                 for rxn in reaction_list}
 
         else:
             rate_dict = {
-                rxn: rxn.get_mass_action_rate_law(rtype, update_reactions)
+                rxn: rxn.get_mass_action_rate(rtype, update_reactions)
                 for rxn in reaction_list}
 
         if self.custom_rates:
@@ -1822,6 +1822,7 @@ class MassModel(Object):
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
+                print(custom_rate, "uh oh")
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 

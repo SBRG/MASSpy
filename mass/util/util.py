@@ -15,7 +15,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import integer_types, string_types
+from six import integer_types, iteritems, string_types
 
 import sympy as sym
 
@@ -150,6 +150,32 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
 
 
 # Internal
+def _check_kwargs(default_kwargs, kwargs):
+    """Check the provided kwargs against the default values for kwargs."""
+    if kwargs is not None:
+        for key, value in iteritems(default_kwargs):
+            if key in kwargs:
+                # Check the value type against the default.
+                if value is None:
+                    continue
+                type_ = type(value)
+                if not isinstance(kwargs[key], type_):
+                    raise TypeError(
+                        "'{0}' must be of type: {1}.".format(
+                            key, str(type_)))
+            else:
+                # Set the kwarg as the default
+                kwargs[key] = value
+        if len(kwargs) != len(default_kwargs):
+            warnings.warn("Unrecognized kwargs: {0}".format(
+                str([key for key in kwargs if key not in default_kwargs])))
+    else:
+        # Set the kwargs as the defaults
+        kwargs = default_kwargs
+
+    return kwargs
+
+
 def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
     """Return a new DictList with object references updated."""
     items = ref_dictlist.get_by_any([i.id if hasattr(i, "id") else str(i)
@@ -204,6 +230,7 @@ def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
 
 # Define small conversion functions based on the original matrix type.
 def _to_dense(matrix):
+    """Convert matrix to a numpy array."""
     if isinstance(matrix, np.ndarray):
         pass
     elif isinstance(matrix, pd.DataFrame):
@@ -217,12 +244,22 @@ def _to_dense(matrix):
 
 
 def _to_lil(matrix):
+    """Convert matrix to a scipy lil matrix."""
     if isinstance(matrix, sym.Matrix):
         matrix = sym.matrix2numpy(matrix, dtype=float)
     return lil_matrix(matrix)
 
 
 def _to_dok(matrix):
+    """Convert matrix to a scipy dok matrix."""
     if isinstance(matrix, sym.Matrix):
         matrix = sym.matrix2numpy(matrix, dtype=float)
     return dok_matrix(matrix)
+
+
+def _make_logger(name):
+    """Make the logger instance and set the default format."""
+    name = name.split(".")[-1]
+    logging.basicConfig(format="%(name)s %(levelname)s: %(message)s")
+    logger = logging.getLogger(name)
+    return logger

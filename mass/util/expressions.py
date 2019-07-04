@@ -156,10 +156,10 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
     ----------
     reaction: mass.MassReaction
         The MassReaction object to generate the rate expression for.
-    rate type: int {1, 2, 3}
+    rtype: int {1, 2, 3}
         The type of rate law to display. Must be 1, 2, or 3.
             Type 1 will utilize the forward rate and equilibrium constants.
-            Type 2 will utilize the forward rate and reverse rate constants.
+            Type 2 will utilize the forward and reverse rate constants.
             Type 3 will utilize the equilibrium and reverse rate constants.
         Default is 1.
     update_reaction: bool, optional
@@ -181,10 +181,10 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
     rev_rate = generate_reverse_mass_action_rate_expression(reaction, rtype)
 
     # Ignore reverse rate if it is mathematically equal to 0.
-    if reaction.Keq != float("inf") or reaction.kr != 0.:
-        rate_expression = sym.Add(fwd_rate, -rev_rate)
-    else:
+    if reaction.Keq == float("inf") and reaction.kr == 0:
         rate_expression = fwd_rate
+    else:
+        rate_expression = sym.Add(fwd_rate, sym.Mul(-sym.S.One, rev_rate))
 
     # Try to group the forward rate constants
     if rtype == 1:
@@ -209,7 +209,7 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
     ----------
     reaction: mass.MassReaction
         The MassReaction object to generate the rate expression for.
-    rate type: int {1, 2, 3}
+    rtype: int {1, 2, 3}
         The type of foward rate law to return. Must be 1, 2, or 3.
             Type 1 and 2 will utilize the forward rate constant.
             Type 3 will utilize the equilibrium and reverse rate constants.
@@ -218,9 +218,14 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
     Returns
     -------
     fwd_rate: sympy.Basic
-        The forward rate as a sympy expression.
+        The forward rate as a sympy expression. If the reaction has no
+        metabolites associated, None will be returned.
 
     """
+    if not reaction.metabolites:
+        warn("No metabolites exist in reaction.")
+        return None
+
     if MASSCONFIGURATION.exclude_metabolites_from_rates\
        and not reaction.boundary:
         reaction = _remove_metabolites_from_rate(reaction)
@@ -250,7 +255,7 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
     ----------
     reaction: mass.MassReaction
         The MassReaction object to generate the rate expression for.
-    rate type: int {1, 2, 3}
+    rtype: int {1, 2, 3}
         The type of foward rate law to return. Must be 1, 2, or 3.
             Type 1 will utilize the foward rate and equilibrium constant.
             Type 2 and 3 will utilize the reverse rate constant.
@@ -262,6 +267,10 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
         The reverse rate as a sympy expression.
 
     """
+    if not reaction.metabolites:
+        warn("No metabolites exist in reaction.")
+        return None
+
     if MASSCONFIGURATION.exclude_metabolites_from_rates\
        and not reaction.boundary:
         reaction = _remove_metabolites_from_rate(reaction)
