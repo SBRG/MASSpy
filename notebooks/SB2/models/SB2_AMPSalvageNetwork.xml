@@ -8,7 +8,7 @@
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
-      <unitDefinition id="hr" name="Hour">
+      <unitDefinition id="hr" name="hour">
         <listOfUnits>
           <unit kind="second" exponent="1" scale="0" multiplier="3600"/>
         </listOfUnits>
@@ -359,8 +359,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_adn_c" value="1"/>
             <localParameter id="kf_R_SK_adn_c" value="100000"/>
+            <localParameter id="Keq_R_SK_adn_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -446,8 +446,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_hxan_c" value="1"/>
             <localParameter id="kf_R_SK_hxan_c" value="100000"/>
+            <localParameter id="Keq_R_SK_hxan_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -533,8 +533,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_amp_c" value="1"/>
             <localParameter id="kf_R_SK_amp_c" value="100000"/>
+            <localParameter id="Keq_R_SK_amp_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -562,8 +562,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h_c" value="1"/>
             <localParameter id="kf_R_SK_h_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -591,8 +591,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
             <localParameter id="Keq_R_SK_h2o_c" value="1"/>
+            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

@@ -31,14 +31,14 @@
       <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289999958202714" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
       <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
-      <species id="M_pfk_R0_c" name="PFK" compartment="c" initialConcentration="6.9014e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
+      <species id="M_pfk_R0_c" name="PFK" compartment="c" initialConcentration="1.65e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R0_A_c" name="PFK-atp complex" compartment="c" initialConcentration="8.1613e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
+      <species id="M_pfk_R0_A_c" name="PFK-atp complex" compartment="c" initialConcentration="2.944e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -46,7 +46,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R0_AF_c" name="PFK-atp-f6p complex" compartment="c" initialConcentration="3.232e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C16H23N5O22P4Moietypfk">
+      <species id="M_pfk_R0_AF_c" name="PFK-atp-f6p complex" compartment="c" initialConcentration="3.44e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C16H23N5O22P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c; 1 M_f6p_c</p>
@@ -54,7 +54,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_c" name="PFK; 1 amp_c" compartment="c" initialConcentration="7.25509e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P1Moietypfk">
+      <species id="M_pfk_R1_c" name="PFK; 1 amp_c" compartment="c" initialConcentration="1.7341e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P1Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 1 M_amp_c</p>
@@ -62,7 +62,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_A_c" name="PFK-atp complex; 1 amp_c" compartment="c" initialConcentration="8.57957e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C20H24N10O20P4Moietypfk">
+      <species id="M_pfk_R1_A_c" name="PFK-atp complex; 1 amp_c" compartment="c" initialConcentration="3.0951e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C20H24N10O20P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -71,7 +71,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_AF_c" name="PFK-atp-f6p complex; 1 amp_c" compartment="c" initialConcentration="3.3974e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C26H35N10O29P5Moietypfk">
+      <species id="M_pfk_R1_AF_c" name="PFK-atp-f6p complex; 1 amp_c" compartment="c" initialConcentration="3.616e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C26H35N10O29P5Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c; 1 M_f6p_c</p>
@@ -80,7 +80,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_c" name="PFK; 2 amp_c" compartment="c" initialConcentration="2.86009e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C20H24N10O14P2Moietypfk">
+      <species id="M_pfk_R2_c" name="PFK; 2 amp_c" compartment="c" initialConcentration="6.836e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C20H24N10O14P2Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 2 M_amp_c</p>
@@ -88,7 +88,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_A_c" name="PFK-atp complex; 2 amp_c" compartment="c" initialConcentration="3.382225e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C30H36N15O27P5Moietypfk">
+      <species id="M_pfk_R2_A_c" name="PFK-atp complex; 2 amp_c" compartment="c" initialConcentration="1.22013e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C30H36N15O27P5Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -97,7 +97,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_AF_c" name="PFK-atp-f6p complex; 2 amp_c" compartment="c" initialConcentration="1.33933e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C36H47N15O36P6Moietypfk">
+      <species id="M_pfk_R2_AF_c" name="PFK-atp-f6p complex; 2 amp_c" compartment="c" initialConcentration="1.4255e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C36H47N15O36P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c; 1 M_f6p_c</p>
@@ -106,7 +106,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_c" name="PFK; 3 amp_c" compartment="c" initialConcentration="5.011115e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C30H36N15O21P3Moietypfk">
+      <species id="M_pfk_R3_c" name="PFK; 3 amp_c" compartment="c" initialConcentration="1.19773e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C30H36N15O21P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 3 M_amp_c</p>
@@ -114,7 +114,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_A_c" name="PFK-atp complex; 3 amp_c" compartment="c" initialConcentration="5.925939e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C40H48N20O34P6Moietypfk">
+      <species id="M_pfk_R3_A_c" name="PFK-atp complex; 3 amp_c" compartment="c" initialConcentration="2.13777e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C40H48N20O34P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -123,7 +123,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_AF_c" name="PFK-atp-f6p complex; 3 amp_c" compartment="c" initialConcentration="2.34662e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C46H59N20O43P7Moietypfk">
+      <species id="M_pfk_R3_AF_c" name="PFK-atp-f6p complex; 3 amp_c" compartment="c" initialConcentration="2.4977e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C46H59N20O43P7Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c; 1 M_f6p_c</p>
@@ -132,7 +132,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_c" name="PFK; 4 amp_c" compartment="c" initialConcentration="3.292458e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C40H48N20O28P4Moietypfk">
+      <species id="M_pfk_R4_c" name="PFK; 4 amp_c" compartment="c" initialConcentration="7.8695e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C40H48N20O28P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 4 M_amp_c</p>
@@ -140,7 +140,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_A_c" name="PFK-atp complex; 4 amp_c" compartment="c" initialConcentration="3.893526e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C50H60N25O41P7Moietypfk">
+      <species id="M_pfk_R4_A_c" name="PFK-atp complex; 4 amp_c" compartment="c" initialConcentration="1.40458e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C50H60N25O41P7Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c</p>
@@ -149,7 +149,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_AF_c" name="PFK-atp-f6p complex; 4 amp_c" compartment="c" initialConcentration="1.5418e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C56H71N25O50P8Moietypfk">
+      <species id="M_pfk_R4_AF_c" name="PFK-atp-f6p complex; 4 amp_c" compartment="c" initialConcentration="1.641e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C56H71N25O50P8Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_catalytic: 1 M_atp_c; 1 M_f6p_c</p>
@@ -158,14 +158,14 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T0_c" name="PFK" compartment="c" initialConcentration="7.6e-11" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
+      <species id="M_pfk_T0_c" name="PFK" compartment="c" initialConcentration="2e-12" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T1_c" name="PFK; 1 atp_c" compartment="c" initialConcentration="4.859e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
+      <species id="M_pfk_T1_c" name="PFK; 1 atp_c" compartment="c" initialConcentration="1.16e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 1 M_atp_c</p>
@@ -173,7 +173,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T2_c" name="PFK; 2 atp_c" compartment="c" initialConcentration="1.16606e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypfk">
+      <species id="M_pfk_T2_c" name="PFK; 2 atp_c" compartment="c" initialConcentration="2.787e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 2 M_atp_c</p>
@@ -181,7 +181,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T3_c" name="PFK; 3 atp_c" compartment="c" initialConcentration="1.243797e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypfk">
+      <species id="M_pfk_T3_c" name="PFK; 3 atp_c" compartment="c" initialConcentration="2.9729e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 3 M_atp_c</p>
@@ -189,7 +189,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T4_c" name="PFK; 4 atp_c" compartment="c" initialConcentration="4.975186e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypfk">
+      <species id="M_pfk_T4_c" name="PFK; 4 atp_c" compartment="c" initialConcentration="1.18914e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>bound_effectors: 4 M_atp_c</p>
@@ -243,7 +243,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -283,7 +283,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -313,7 +313,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="2000064"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -354,8 +354,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -438,7 +438,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -478,7 +478,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -508,7 +508,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="2000064"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -553,8 +553,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -641,7 +641,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -681,7 +681,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -711,7 +711,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="2000064"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -756,8 +756,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -844,7 +844,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -884,7 +884,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -914,7 +914,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="2000064"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -958,8 +958,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1045,7 +1045,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1085,7 +1085,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5000028"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -1115,7 +1115,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="2000064"/>
+            <localParameter id="kf_PFK" value="18791158"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1149,8 +1149,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
             <localParameter id="kf_R_PFK_L" value="1000000000000"/>
+            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1273,7 +1273,34 @@
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category1" groups:name="Tense" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category1" groups:name="Free Catalytic" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
+          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
+          <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
+          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category2" groups:name="Complexed ATP" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category3" groups:name="Complexed ATP &amp; F6P" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category4" groups:name="Tense" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
           <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
@@ -1285,7 +1312,10 @@
       <groups:group groups:id="PFK_enzyme_module_forms_categorized" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="Relaxed" groups:idRef="PFK_enzyme_module_forms_categorized_Category0"/>
-          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_forms_categorized_Category1"/>
+          <groups:member groups:name="Free Catalytic" groups:idRef="PFK_enzyme_module_forms_categorized_Category1"/>
+          <groups:member groups:name="Complexed ATP" groups:idRef="PFK_enzyme_module_forms_categorized_Category2"/>
+          <groups:member groups:name="Complexed ATP &amp; F6P" groups:idRef="PFK_enzyme_module_forms_categorized_Category3"/>
+          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_forms_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category0" groups:name="atp_c binding" groups:kind="collection">
