@@ -36,11 +36,13 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
+    'autoapi.extension',
 ]
 
 # Document Python Code
 autoapi_type = 'python'
-autoapi_dirs = ['..']
+autoapi_dirs = ['../mass']
+autoapi_root = "_autogen/modules"
 autoapi_ignore = [
     '.tox', '.pytest_cache', 'scripts', 'benchmarks', "notebooks"]
 
