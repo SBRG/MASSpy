@@ -160,6 +160,11 @@ class Simulation(Object):
         return getattr(self, "_reference_massmodel")
 
     @property
+    def all_solvers(self):
+        """Return a list of possible solvers that can be used."""
+        return sorted(set([sol_opts.id for sol_opts in _ALL_DEFAULT_OPTIONS]))
+
+    @property
     def models(self):
         """Return the identifiers of models that exist in the Simulation."""
         return [d.id.replace("_values", "") for d in self._model_values]
