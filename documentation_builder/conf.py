@@ -8,11 +8,11 @@
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+# documentation root, use os.path.abspath to make it absolute.
+
+import sys
+from os.path import dirname
+sys.path.insert(0, dirname(dirname(__file__)))
 
 
 # -- Project information ------------------------------------------------------
@@ -34,17 +34,35 @@ release = '0.1.0a38'
 extensions = [
     'nbsphinx',
     'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
 ]
+
+# Document Python Code
+autoapi_type = 'python'
+autoapi_dirs = ['..']
+autoapi_ignore = [
+    '.tox', '.pytest_cache', 'scripts', 'benchmarks', "notebooks"]
+
+# Napoleon settings
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ['_build', '**.ipynb_checkpoints', 'Thumbs.db', '.DS_Store']
 
 # The master toctree document.
 master_doc = 'index'
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = False
+
+pygments_style = 'sphinx'
 
 # -- Options for HTML output --------------------------------------------------
 
@@ -58,9 +76,9 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
 
-# A list of paths that contain extra files not directly related to the 
-# documentation, such as robots.txt or .htaccess. Relative paths are taken as 
-# relative to the configuration directory. They are copied to the output 
+# A list of paths that contain extra files not directly related to the
+# documentation, such as robots.txt or .htaccess. Relative paths are taken as
+# relative to the configuration directory. They are copied to the output
 # directory. They will overwrite any existing file of the same name.
 html_extra_path = ["robots.txt"]
 
