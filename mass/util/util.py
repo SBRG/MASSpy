@@ -167,7 +167,7 @@ def _check_kwargs(default_kwargs, kwargs):
                 # Set the kwarg as the default
                 kwargs[key] = value
         if len(kwargs) != len(default_kwargs):
-            warnings.warn("Unrecognized kwargs: {0:r}".format(
+            warnings.warn("Unrecognized kwargs: {0}".format(
                 str([key for key in kwargs if key not in default_kwargs])))
     else:
         # Set the kwargs as the defaults
