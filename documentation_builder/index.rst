@@ -5,7 +5,6 @@ Welcome to masspy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   _autogen/modules
 
 Indices and tables
 ==================
