@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """TODO Module Docstrings."""
-from __future__ import absolute_import
-
 try:
     import simplejson as json
 except ImportError:

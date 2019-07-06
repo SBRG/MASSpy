@@ -51,8 +51,6 @@ see https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging
 for more information on how to configure the RoadRunner logger.
 
 """
-from __future__ import absolute_import
-
 import sys
 from warnings import warn
 

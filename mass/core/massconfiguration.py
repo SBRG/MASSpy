@@ -28,8 +28,6 @@ and :attr:`optimization_tolerance` in the :class:`mass.MassConfiguration`
 class to help prevent confusion.
 
 """
-from __future__ import absolute_import
-
 import logging
 
 from six import integer_types, iteritems, string_types, with_metaclass

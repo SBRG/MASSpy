@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-
 from mass.core.massconfiguration import MassConfiguration
 from mass.core.massmetabolite import MassMetabolite
 from mass.core.massmodel import MassModel

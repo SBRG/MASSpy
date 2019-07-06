@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """TODO Module Docstrings."""
-from __future__ import absolute_import
-
 import datetime
 import logging
 import re
@@ -301,7 +299,7 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
     through the `sympy.printing.mathml` module. However, the mathml module will
     interpret '_' as a subscript and '__' as a superscript. In order to prevent
     the module from misinterpreting underscores in identifiers, the underscores
-    are converted into ampsersands. Additionally, all MathML presentation
+    are converted into str 'UNDERSCORE'. Additionally, all MathML presentation
     markup must be removed for similar reasons. After the XML string is made,
     the identifiers are returned to their original state.
 
@@ -311,14 +309,13 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
 
     """
     # Replace underscores before conversion
-    underscore_replace = {str(arg): str(arg).replace("_", "&")
+    underscore_replace = {str(arg): str(arg).replace("_", "UNDERSCORE")
                           for arg in sympy_equation.atoms(Symbol)}
     sympy_equation = sympy_equation.subs(underscore_replace)
     # Convert equation into MathML and remove tags that libsbml cannot parse
     mathml_xml = mathml(sympy_equation)
-    mathml_xml = MATHML_XML_NS.format(mathml_xml.replace("&", "_"))
+    mathml_xml = MATHML_XML_NS.format(mathml_xml.replace("UNDERSCORE", "_"))
     mathml_xml = REMOVE_MML_TAGS_RE.sub("", mathml_xml)
-
     # Fix the time symbol
     if REPLACE_TIME_RE.search(mathml_xml):
         time_symbol = '><csymbol encoding="text" definitionURL=' +\
