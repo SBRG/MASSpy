@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-
-# set the warning format to be on a single line
 import warnings as _warnings
 from os import name as _name
 from os.path import abspath as _abspath
@@ -26,6 +22,7 @@ else:
 
 
 def _warn_format(message, category, filename, lineno, file=None, line=None):
+    """set the warning format to be prettier and fit on one line."""
     shortname = filename.replace(_mass_path, "mass", 1)
     return _warning_base % (shortname, lineno, category.__name__, message)
 

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """TODO Module Docstrings."""
-from __future__ import absolute_import
-
 import re
 import warnings
 from copy import copy, deepcopy
