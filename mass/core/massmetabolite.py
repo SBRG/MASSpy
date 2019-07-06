@@ -13,8 +13,8 @@ from mass.util.util import (
     get_subclass_specific_attributes)
 
 
-# Precompiled regular expression for element parsing
 ELEMENT_RE = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
+"""Precompiled regular expression for element parsing"""
 
 
 class MassMetabolite(Species):
@@ -22,20 +22,20 @@ class MassMetabolite(Species):
 
     Parameters
     ----------
-    id_or_specie: str, MassMetabolite
+    id_or_specie : str or MassMetabolite
         Either a string identifier to associate with the MassMetabolite,
         or an existing MassMetabolite object. If an existing MassMetabolite
         object is provided, a new MassMetabolite object is instantiated with
         the same properties as the original MassMetabolite.
-    name: str, optional
+    name : str
         A human readable name for the metabolite.
-    formula: str, optional
+    formula : str
         Chemical formula associated with the metabolite.
-    charge: float, optional
+    charge : float
         The charge number associated with the metabolite.
-    compartment: str, optional
+    compartment : str
         The compartment where the metabolite is located.
-    fixed: bool, optional
+    fixed : bool
         Whether the metabolite concentration should remain at a fixed value.
         Default is False.
 
@@ -43,7 +43,7 @@ class MassMetabolite(Species):
 
     def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
-        """Initialize the MassMetabolite Object."""
+        """Initialize the MassMetabolite."""
         super(MassMetabolite, self).__init__(str(id_or_specie), name)
         if isinstance(id_or_specie, MassMetabolite):
             # Instiantiate a new MassMetabolite with state identical to
@@ -72,15 +72,15 @@ class MassMetabolite(Species):
 
         Returns
         -------
-        composition: dictionary
-            A dictionary where the elements are the keys and their coefficients
-            given as integers are the values.
+        composition: dict
+            A dictionary where the elements are the keys and their
+            coefficients given as integers are the values.
 
         Notes
         -----
         Enzyme and macromolecule moieties can be recognized by enclosing them
-            in brackets (e.g. [ENZYME]) when defining  the chemical formula.
-            They are treated as one entity and therefore are only counted once.
+        in brackets (e.g. [ENZYME]) when defining  the chemical formula.
+        They are treated as one entity and therefore are only counted once.
 
         """
         tmp_formula = self.formula
@@ -123,14 +123,7 @@ class MassMetabolite(Species):
 
     @property
     def initial_condition(self):
-        """Return the initial condition of the metabolite.
-
-        Warnings
-        --------
-        This method returns the initial condition stored inside the
-            MassMetabolite. This initial condition does not necessarily return
-            the initial condition stored inside the MassModel.
-        """
+        """Return the initial condition of the metabolite."""
         return getattr(self, "_initial_condition")
 
     @initial_condition.setter
@@ -152,10 +145,11 @@ class MassMetabolite(Species):
 
     @property
     def ordinary_differential_equation(self):
-        """Return a sympy expression of the metabolite's associated ODE.
+        """Return a :mod:`sympy` expression of the metabolite's associated ODE.
 
-        Will return None if metabolite is not associated with a MassReaction,
-            and a 0. if the fixed attribute is set to True.
+        Will return None if metabolite is not associated with a
+        :class:`MassReaction`, and 0. if the :attr:`fixed` attribute is set
+        as True.
         """
         return generate_ode(self)
 
@@ -417,3 +411,6 @@ ELEMENTS_AND_MOLECULAR_WEIGHTS = {
     'Ts': 294.000000,
     'Og': 294.000000,
 }
+"""A dict containing element abbreviations and their molecular weights."""
+
+__all__ = ("MassMetabolite", "ELEMENT_RE", "ELEMENTS_AND_MOLECULAR_WEIGHTS")
