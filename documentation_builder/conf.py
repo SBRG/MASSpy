@@ -71,6 +71,28 @@ todo_include_todos = False
 
 pygments_style = 'sphinx'
 
+# In order to build documentation that requires libraries to import
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        return
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        else:
+            return Mock()
+
+# These modules should correspond to the importable Python packages.
+MOCK_MODULES = [
+    
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
+
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
