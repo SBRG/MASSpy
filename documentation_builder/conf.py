@@ -127,3 +127,12 @@ html_extra_path = ["robots.txt"]
 # -- Options for manual page output -------------------------------------------
 
 # -- Options for Texinfo output -----------------------------------------------
+
+
+# Refer to the Python standard libraries and cobra documentation.
+intersphinx_mapping = {
+    "http://docs.python.org/": None,
+    "http://docs.scipy.org/doc/numpy/": None,
+    "http://docs.scipy.org/doc/scipy/reference": None,
+    "https://cobrapy.readthedocs.io/en/latest/": None,}
+intersphinx_cache_limit = 10  # days to keep the cached inventories
