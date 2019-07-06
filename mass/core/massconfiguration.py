@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-Define the global configuration values through the MassConfiguration.
+Define the global configuration values through the :class:`MassConfiguration`.
 
 Attributes for model construction:
-    :attr:`boundary_compartment`, :attr:`default_compartment`,
-    :attr:`irreversible_Keq`, :attr:`irreversible_kr`,
-    :attr:`exclude_metabolites_from_rates`, :attr:`model_creator`
+    :attr:`boundary_compartment`
+    :attr:`default_compartment`
+    :attr:`irreversible_Keq`
+    :attr:`irreversible_kr`
+    :attr:`exclude_metabolites_from_rates`
+    :attr:`model_creator`
 
 Attributes for model simulation:
-    :attr:`decimal_precision`, :attr:`steady_state_threshold`
+    :attr:`decimal_precision`
+    :attr:`steady_state_threshold`
 
 Attributes for flux balance analysis (FBA):
-    :attr:`optimization_solver`, :attr:`optimization_tolerance`,
-    :attr:`processes`, :attr:`lower_bound`, :attr:`upper_bound`, :attr:`bounds`
+    :attr:`optimization_solver`
+    :attr:`optimization_tolerance`
+    :attr:`processes`
+    :attr:`lower_bound`
+    :attr:`upper_bound`
+    :attr:`bounds`
 
 Notes
 -----
@@ -23,14 +31,14 @@ to change solver options such as tolerances, since an optimization solver may
 need to utilize a different tolerance than the ODE solver.
 
 Therefore, the :attr:`solver` and :attr:`tolerance` attributes of the
-:class:`cobra.Configuration` class are renamed to :attr:`optimization_solver`
-and :attr:`optimization_tolerance` in the :class:`mass.MassConfiguration`
+:class:`Configuration` class are renamed to :attr:`optimization_solver`
+and :attr:`optimization_tolerance` in the :class:`MassConfiguration`
 class to help prevent confusion.
 
 """
 import logging
 
-from six import integer_types, iteritems, string_types, with_metaclass
+from six import integer_types, iteritems, string_types
 
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
@@ -123,7 +131,8 @@ class MassBaseConfiguration:
     Notes
     -----
     The :class:`MassConfiguration` should be always be used over the
-    :class:`MassBaseConfiguration`.
+    :class:`MassBaseConfiguration` in order for global configuration to work
+    as intended.
 
     """
 
@@ -483,8 +492,8 @@ class MassBaseConfiguration:
             processes=self.processes)
 
 
-class MassConfiguration(with_metaclass(Singleton, MassBaseConfiguration)):
-    """Define the configuration to be singleton based."""
+class MassConfiguration(MassBaseConfiguration, metaclass=Singleton):
+    """Define the configuration to be :class:`Singleton` based."""
 
 
 __all__ = ("MassConfiguration", "MassBaseConfiguration")

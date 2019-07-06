@@ -32,9 +32,14 @@ class Mock(object):
         else:
             return Mock()
 
-# These modules should correspond to the importable Python packages.
+# These modules should correspond to the importable cobra modules.
 MOCK_MODULES = [
     "cobra",
+    "cobra.core",
+    "cobra.core.configuration"
+]
+# These modules should correspond to the importable Python packages.
+MOCK_MODULES += [
     "depinfo",
     "libroadrunner",
     "matplotlib",
