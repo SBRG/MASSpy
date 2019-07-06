@@ -12,6 +12,9 @@
 
 import sys
 from os.path import dirname
+
+from mass import __version__
+
 sys.path.insert(0, dirname(dirname(__file__)))
 
 
@@ -22,9 +25,8 @@ copyright = '2019, Z. Haiman'
 author = 'Z. Haiman'
 
 # The full version, including alpha/beta/rc tags
-version = '0.1.0a38'
-release = '0.1.0a38'
-
+release = __version__
+version = '.'.join(release.split('.')[:2])
 
 # -- General configuration ----------------------------------------------------
 
@@ -38,6 +40,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
+    'sphinx.ext.autosectionlabel',
     'autoapi.extension',
     'nbsphinx'
 ]
@@ -45,7 +48,6 @@ extensions = [
 # Document Python Code
 autoapi_type = 'python'
 autoapi_dirs = ['../mass']
-autoapi_root = "_autogen/modules"
 autoapi_ignore = [
     '.tox', '.pytest_cache', 'scripts', 'benchmarks', "notebooks"]
 
@@ -69,12 +71,33 @@ todo_include_todos = False
 
 pygments_style = 'sphinx'
 
+# In order to build documentation that requires libraries to import
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        return
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        else:
+            return Mock()
+
+# These modules should correspond to the importable Python packages.
+MOCK_MODULES = [
+    
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
+
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'alabaster'
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
