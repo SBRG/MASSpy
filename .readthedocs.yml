@@ -22,4 +22,5 @@ python:
   version: 3.7
   install:
     - requirements: documentation_builder/requirements.txt
+    - requirements: requirements.txt
   system_packages: true
