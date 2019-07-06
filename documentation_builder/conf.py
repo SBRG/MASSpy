@@ -13,10 +13,9 @@
 import sys
 from os.path import dirname
 
-from mass import __version__
-
 sys.path.insert(0, dirname(dirname(__file__)))
 
+from mass import __version__
 
 # -- Project information ------------------------------------------------------
 
