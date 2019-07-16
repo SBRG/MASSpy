@@ -1,5 +1,42 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""
+EnzymeModuleForm is a class for holding information regarding enzyme species.
+
+The :class:`EnzymeModuleForm` class inherits and extends the
+:class:`~.MassMetabolite` class. It is designed to represent various bound
+states and conformations of the enzymes represented through the
+:class:`~.EnzymeModule` class.
+
+The enzyme specific attributes on the :class`EnzymeModuleForm` are the
+following:
+
+    * :attr:`~EnzymeModuleForm.enzyme_module_id`
+    * :attr:`~EnzymeModuleForm.bound_catalytic`
+    * :attr:`~EnzymeModuleForm.bound_effectors`
+
+The :class:`EnzymeModuleForm` contains the attributes
+:attr:`~EnzymeModuleForm.bound_catalytic` and
+:attr:`~EnzymeModuleForm.bound_effectors`, designed to hold the
+:class:`~.MassMetabolite`\ (s) that could be bound to the catalytic site and
+regularory sites. There are no differences between the attributes other than
+their name.
+
+Some other important points about the :class:`EnzymeModuleForm` include:
+
+    * If the :attr:`name` attribute is not set upon initializing, it is
+      automatically generated using the enzyme specific attributes.
+    * If the :attr:`formula` or charge attributes are not set upon
+      initialization, it is inferred using the formulas and charges set on the
+      :class:`~.MassMetabolite`\ (s) found in
+      :attr:`~EnzymeModuleForm.bound_catalytic` and
+      :attr:`~EnzymeModuleForm.bound_effectors`. A moiety is also included for
+      the formula using the :attr:`~EnzymeModuleForm.enzyme_module_id`.
+    * The purpose of the generated formula and charge is to ensure reactions
+      remained mass and charge balanaced as metabolite species are bound and
+      altered by the :class:`~.EnzymeModuleReaction`\ s of the
+      :class:`~.EnzymeModule`.
+
+"""
 import re
 from collections import defaultdict
 from itertools import chain
@@ -10,46 +47,47 @@ from mass.core.massmetabolite import MassMetabolite
 
 
 class EnzymeModuleForm(MassMetabolite):
-    """Class for representing an enzymatic species in an EnzymeModule.
+    r"""Class representing enzymatic species in an :class:`~.EnzymeModule`.
 
     Parameters
     ----------
-    id_or_specie: str, MassMetabolite, EnzymeModuleForm
-        Either a string identifier to associate with the EnzymeModuleForm,
-        or an existing EnzymeModuleForm object. If an existing EnzymeModuleForm
-        or MassMetabolite object is provided, a new EnzymeModuleForm object is
-        instantiated with the same properties as the original object.
-    name: str, optional
-        A human readable name for the metabolite.
-    formula: str, optional
-        Chemical formula associated with the metabolite.
-    charge: float, optional
-        The charge number associated with the metabolite.
-    compartment: str, optional
-        The compartment where the metabolite is located.
-    fixed: bool, optional
-        Whether the metabolite concentration should remain at a fixed value.
-        Default is False.
+    id_or_specie : str, MassMetabolite, EnzymeModuleForm
+        A string identifier to associate with the enzymatic species, or an
+        existing metabolite object. If an existing metabolite object is
+        provided, a new :class:`EnzymeModuleForm` is instantiated with the
+        same properties as the original metabolite.
+    name : str
+        A human readable name for the enzymatic species.
+    formula : str
+        Chemical formula associated with the enzymatic species.
+    charge : float
+        The charge number associated with the enzymatic species.
+    compartment : str
+        The compartment where the enzymatic species is located.
+    fixed : bool
+        Whether the enzymatic species concentration should remain at a
+        fixed value. Default is ``False``.
 
     Attributes
     ----------
-    enzyme_module_id: str, optional
-        The identifier of the EnzymeModule represented by the EnzymeModuleForm.
-    bound_catalytic: dict, optional
-        A dict representing the metabolites bound to the enzyme's active
-        site(s), with MassMetabolites as keys and number bound as values.
-        If the final coefficient for a metabolite is 0 then it is removed.
-    bound_effectors: dict, optional
-        A dict representing the metabolites bound to the enzyme's regulatory
-        site(s), with MassMetabolites as keys and the number bound as values.
-        If the final coefficient for a metabolite is 0 then it is removed.
+    enzyme_module_id : str
+        The identifier of the associated :class:`~.EnzymeModule`.
+    bound_catalytic : dict
+        A dictionary representing the ligands bound to the enzyme's active
+        site(s), with :class:`~.MassMetabolite`\ s as keys and number bound as
+        values. If the final coefficient for a metabolite is 0, it is removed.
+    bound_effectors : dict
+        A dictionary representing the ligands bound to the enzyme's
+        regulatory site(s), with :class:`~.MassMetabolite`\ s as keys and
+        number bound as values. If the final coefficient for a metabolite is 0,
+        it is removed.
 
     """
 
     def __init__(self, id_or_specie=None, name="", formula=None, charge=None,
                  compartment=None, fixed=False, enzyme_module_id="",
                  bound_catalytic=None, bound_effectors=None):
-        """Initialize the EnzymeModuleForm Object."""
+        """Initialize the EnzymeModuleForm."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
             id_or_specie=id_or_specie, name=name, formula=formula,
@@ -81,69 +119,75 @@ class EnzymeModuleForm(MassMetabolite):
 
     @property
     def bound_catalytic(self):
-        """Return metabolites bound to the active site(s) of the enzyme."""
+        r"""Get or set ligands bound to the enzyme's active site(s).
+
+        Notes
+        -----
+        Assigning a dict to this property updates the current dict of
+        ligands bound at the active site(s) with the new values.
+
+        Parameters
+        ----------
+        value : dict
+            Dictionary where keys are :class:`~.MassMetabolite` and values are
+            the number currently bound to the active site(s).
+            An empty ``dict`` will reset the bound ligands.
+
+        """
         return getattr(self, "_bound_catalytic")
 
     @bound_catalytic.setter
     def bound_catalytic(self, value):
-        """Set the dictionary of metabolites bound to the active site(s).
-
-        Assigning a dict to this property updates the EnzymeModuleForms's dict
-        of metabolites bound at the active site(s) with the new values.
-
-        Parameters
-        ----------
-        value : dict
-            Dict where keys are MassMetabolites representing metabolites and
-            values are the number currently bound to the active site(s).
-            An empty dict will reset the bound metabolites.
-
-        """
+        """Set the dictionary of ligands bound to the active site(s)."""
         self._set_bound_dict("bound_catalytic", value)
 
     @property
     def bound_effectors(self):
-        """Return metabolites bound to the regulatory site(s) of the enzyme."""
-        return getattr(self, "_bound_effectors")
+        r"""Get or set ligands bound to the enzyme's regulatory site(s).
 
-    @bound_effectors.setter
-    def bound_effectors(self, value):
-        """Set the dictionary of metabolites bound to the regualtory site(s).
-
-        Assigning a dict to this property updates the EnzymeModuleForms's dict
-        of metabolites bound at the regulatory site(s) with the new values.
+        Notes
+        -----
+        Assigning a dict to this property updates the current dict of
+        ligands bound at the regulatory site(s) with the new values.
 
         Parameters
         ----------
         value : dict
-            Dict where keys are MassMetabolites representing metabolites and
-            values are the number currently bound to the regulatory site(s).
-            An empty dict will reset the bound metabolites.
+            Dictionary where keys are :class:`~.MassMetabolite` and values are
+            the number currently bound to the regulatory site(s).
+            An empty ``dict`` will reset the bound ligands.
 
         """
+        return getattr(self, "_bound_effectors")
+
+    @bound_effectors.setter
+    def bound_effectors(self, value):
+        """Set the dictionary of ligands bound to the active site(s)."""
         self._set_bound_dict("bound_effectors", value)
 
     def generate_enzyme_module_form_name(self, update_enzyme=False):
-        """Generate a name for the EnzymeModuleForm based on bound ligands.
-
-        The enzyme_module_id, bound_catalytic, and bound_effector attributes
-        are used in generating the name of the EnzymeModuleForm.
-
-        Parameters
-        ----------
-        update_enzyme: bool, optional
-            If True, update the name attribute of the enzyme form in addition
-            to returning the generated name of the EnzymeModuleForm as a str.
-            Default is False.
-
-        Returns
-        -------
-        name: A str representing the name of the EnzymeModuleForm.
+        """Generate a name for the enzymatic species based on bound ligands.
 
         Notes
         -----
-        If the enzyme_module_id attributes are not set, the string "Enzyme"
-            will be used in its place.
+        * The :attr:`~EnzymeModuleForm.enzyme_module_id`,
+          :attr:`~EnzymeModuleForm.bound_catalytic`, and
+          :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
+          generating the name.
+        * If the :attr:`~EnzymeModuleForm.enzyme_module_id` attributes are not
+          set, the string ``'Enzyme'`` will be used in its place.
+
+        Parameters
+        ----------
+        update_enzyme : bool
+            If ``True``, update the :attr:`name` attribute of the enzymatic
+            species in addition to returning the generated name.
+            Default is ``False``.
+
+        Returns
+        -------
+        str
+            String representing the name of the :class:`EnzymeModuleForm`.
 
         """
         if self.enzyme_module_id:
@@ -169,14 +213,26 @@ class EnzymeModuleForm(MassMetabolite):
         return name
 
     def get_species_formula(self, update_enzyme=False):
-        """Get the chemical formula for the enzyme form and bound species.
+        """Generate the chemical formula for the enzymatic species.
+
+        Notes
+        -----
+        The :attr:`~EnzymeModuleForm.enzyme_module_id`,
+        :attr:`~EnzymeModuleForm.bound_catalytic`, and
+        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
+        generating the name.
 
         Parameters
         ----------
-        update_enzyme: bool, optional
-            If True, update the formula attribute of the enzyme form in
-            addition to returning the generated name of the EnzymeModuleForm as
-            a str. Default is False.
+        update_enzyme : bool
+            If ``True``, update the :attr:`formula` attribute of the enzymatic
+            species in addition to returning the generated formula.
+            Default is ``False``.
+
+        Returns
+        -------
+        str
+            String representing the formula of the :class:`EnzymeModuleForm`.
 
         """
         formula = ""
@@ -210,14 +266,25 @@ class EnzymeModuleForm(MassMetabolite):
         return formula
 
     def get_species_charge(self, update_enzyme=False):
-        """Get the chemical formula for the enzyme form and bound species.
+        """Generate the charge for the enzymatic species.
+
+        Notes
+        -----
+        The attr:`~EnzymeModuleForm.bound_catalytic`, and
+        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
+        generating the name.
 
         Parameters
         ----------
-        update_enzyme: bool, optional
-            If True, update the charge attribute of the enzyme form in
-            addition to returning the generated name of the EnzymeModuleForm as
-            a str. Default is False.
+        update_enzyme : bool
+            If ``True``, update the :attr:`charge` attribute of the enzymatic
+            species in addition to returning the generated charge.
+            Default is ``False``.
+
+        Returns
+        -------
+        float
+            Value representing the charge of the :class:`EnzymeModuleForm`.
 
         """
         charge = 0
@@ -296,7 +363,13 @@ class EnzymeModuleForm(MassMetabolite):
                 bound_dict = setattr(self, attr, bound_dict)
 
     def _repr_html_(self):
-        """HTML representation of the overview for the EnzymeModuleForm."""
+        """HTML representation of the overview for the EnzymeModuleForm.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return """
         <table>
             <tr>
@@ -347,3 +420,6 @@ def _make_bound_attr_str_repr(attribute_dict):
     return "; ".join([
         "{0} {1}".format(v, k)
         for k, v in iteritems(attribute_dict) if v != 0])
+
+
+__all__ = ("EnzymeModuleForm",)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""Module containing functions to assess the quality of a model."""
 from math import ceil, floor
 
 from six import iteritems, itervalues
@@ -19,29 +19,43 @@ MASSCONFIGURTION = MassConfiguration()
 def qcqa_model(model, **kwargs):
     """Check the model quality and print a summary of the results.
 
+    Notes
+    -----
     Checking the model quality involves running a series of quality control and
     assessment tests to determine consistency (e.g. elemental)
     in the model, missing values, and whether the model can be simulated.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
+    model : MassModel
+        The model to inspect.
     **kwargs
-        parameters: bool, optional
-            If True, then check for undefined parameters in the model.
-        concentrations: bool, optional
-            If True, then check for undefined initial and boundary conditions
-            in the model.
-        fluxes: bool, optional
-            If True, then check for undefined steady state fluxes in the model.
-        superfluous: bool, optional
-            If True, then check for superfluous parameters in the model and
-            ensure existing parameters are consistent with one another if
-            superfluous parameters are present.
-        elemental: bool, optional
-            If True, then check for elemental consistency in the model.
-            Boundary reactions are ignored.
+        parameters :
+            ``bool`` indicating whether to check for undefined parameters in
+            the model.
+
+            Default is ``False.``
+        concentrations :
+            ``bool`` indicating whether to check for undefined initial and
+            boundary conditions in the model.
+
+            Default is ``False.``
+        fluxes :
+            ``bool`` indicating whether to check for undefined steady state
+            fluxes in the model.
+
+             Default is ``False.``
+        superfluous :
+            ``bool`` indicating whether to check for superfluous parameters
+            in the model and ensure existing parameters are consistent with
+            one another if superfluous parameters are present.
+
+             Default is ``False.``
+        elemental :
+            ``bool`` indicating whether to check for elemental consistency in
+            the model. Boundary reactions are ignored.
+
+            Default is ``False.``
 
     """
     kwargs = _check_kwargs({
@@ -78,32 +92,33 @@ def qcqa_model(model, **kwargs):
 
 
 def get_missing_reaction_parameters(model, reaction_list=None):
-    """Identify the missing parameters for reactions in a model.
+    r"""Identify the missing parameters for reactions in a model.
+
+    Notes
+    -----
+    Will include the default reaction parameters in custom rate laws. To get
+    missing custom parameters for reactions with custom rate expressions,
+    use :func:`get_missing_custom_parameters` instead.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    reaction_list: list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
 
     Returns
     -------
-    missing: dict
-        A dictionary with MassReactions objects as keys and a string
-        identifying the missing parameters as values. Returns as
-        empty if there are no missing values.
-
-    Note
-    ----
-    Will include standard reaction parameters in custom rate laws. To get
-        missing custom parameters for reactions with custom rate expressions,
-        use qcqa.get_missing_custom_parameters instead.
+    missing : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and a string
+        identifying the missing parameters as values. Will return as an
+        empty ``dict`` if there are no missing values.
 
     See Also
     --------
-    qcqa_model
+    :attr:`.MassReaction.all_parameter_ids`
+        List of default reaction parameters.
 
     """
     if reaction_list is None:
@@ -136,32 +151,33 @@ def get_missing_reaction_parameters(model, reaction_list=None):
 
 
 def get_missing_custom_parameters(model, reaction_list=None):
-    """Identify the missing custom parameters in a model.
+    r"""Identify the missing custom parameters in a model.
+
+    Notes
+    -----
+    Will not include default reaction parameters. To get missing standard
+    reaction parameters for reactions with custom rate laws, use
+    :func:`get_missing_reaction_parameters` instead.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    reaction_list : list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
 
     Returns
     -------
-    missing: dict
-        A dictionary with MassReactions objects as keys and a string
-        identifying the missing custom parameters as values. Returns as
-        empty if there are no missing values.
-
-    Note
-    ----
-    Will not include standard reaction parameters. To get missing standard
-        reaction parameters for reactions with custom rate laws, use
-        qcqa.get_missing_reaction_parameters instead.
+    missing : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and a string
+        identifying the missing custom parameters as values. Will return as an
+        empty ``dict`` if there are no missing values.
 
     See Also
     --------
-    qcqa_model
+    :attr:`.MassReaction.all_parameter_ids`
+        List of default reaction parameters.
 
     """
     if reaction_list is None:
@@ -192,25 +208,21 @@ def get_missing_custom_parameters(model, reaction_list=None):
 
 
 def get_missing_steady_state_fluxes(model, reaction_list=None):
-    """Identify the missing steady state flux values for reactions in a model.
+    r"""Identify the missing steady state flux values for reactions in a model.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    reaction_list : list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
 
     Returns
     -------
-    missing: list
-        A list of reactions with missing steady state fluxes values. Returns as
-        empty if there are no missing values.
-
-    See Also
-    --------
-    qcqa_model
+    missing : list
+        List of :class:`~.MassReaction`\ s with missing steady state fluxes.
+        Will return as an empty ``list`` if there are no missing values.
 
     """
     if reaction_list is None:
@@ -223,25 +235,25 @@ def get_missing_steady_state_fluxes(model, reaction_list=None):
 
 
 def get_missing_initial_conditions(model, metabolite_list=None):
-    """Identify the missing initial conditions for metabolites in a model.
+    r"""Identify the missing initial conditions for metabolites in a model.
+
+    Notes
+    -----
+    Does not include boundary conditions.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    metabolite_list : list of MassMetabolites, optional
-        A list of MassMetabolite objects in the model to be checked.
-        If None provided, will use all metabolites in the model.
+    model : MassModel
+        The model to inspect.
+    metabolite_list : iterable
+        An iterable of :class:`~.MassMetabolite`\ s in the model to be checked.
+        If ``None`` then all metabolites in the model will be utilized.
 
     Returns
     -------
-    missing: list
-        A list of metabolites with missing initial conditions. Returns as
-        empty if there are no missing values.
-
-    See Also
-    --------
-    qcqa_model
+    missing : list
+        List of :class:`~.MassMetabolite`\ s with missing initial conditions.
+        Will return as an empty ``list`` if there are no missing values.
 
     """
     if metabolite_list is None:
@@ -261,25 +273,27 @@ def get_missing_initial_conditions(model, metabolite_list=None):
 
 
 def get_missing_boundary_conditions(model, metabolite_list=None):
-    """Identify the missing boundary conditions for metabolites in a model.
+    r"""Identify the missing boundary conditions for metabolites in a model.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    metabolite_list : list of MassMetabolites, optional
-        A list of MassMetabolite objects in the model to be checked.
-        If None provided, will use all 'boundary metabolites' in the model.
+    model : MassModel
+        The model to inspect.
+    metabolite_list : iterable
+        An iterable of 'boundary metabolites' or :class:`~.MassMetabolite`\ s
+        in the model to be checked. If ``None`` then all 'boundary metabolites'
+        in the model will be utilized.
 
     Returns
     -------
-    missing: list
-        A list of metabolites with missing boundary conditions. Returns as
-        empty if there are no missing values.
+    missing : list
+        List of metabolites with missing boundary conditions.
+        Will return as an empty ``list`` if there are no missing values.
 
     See Also
     --------
-    qcqa_model
+    :attr:`.MassModel.boundary_metabolites`
+        List of boundary metabolites found in the model.
 
     """
     if metabolite_list is None:
@@ -299,36 +313,32 @@ def get_missing_boundary_conditions(model, metabolite_list=None):
 
 
 def check_superfluous_consistency(model, reaction_list=None):
-    """Check parameters of model reactions to ensure numerical consistentency.
+    r"""Check parameters of model reactions to ensure numerical consistentency.
 
-    Parameter numerical consistency includes checking reaction rate constants
-    and equilibrium constants to ensure they are mathematically consistent with
-    one another. If there are no superfluous parameters, existing parameters
-    are considered consistent.
-
-    Parameters
-    ----------
-    model: Massmodel
-        The MassModel to inspect
-    reaction_list: list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
-
-    Returns
-    -------
-    inconsistent: dict
-        A dictionary with MassReactions objects as keys and a string
-        identifying the inconsistencies as values. Returns as empty if there
-        are no missing values.
+    Parameter numerical consistency includes checking reaction rate and
+    equilibrium constants to ensure they are mathematically consistent with
+    one another. If there are no superfluous parameters, the existing
+    parameters are considered consistent.
 
     Notes
     -----
     The `MassConfiguration.decimal_precision` is used to round the value of
-    abs(rxn.kr - rxn.kf/rxn.Keq) before comparison.
+    ``abs(rxn.kr - rxn.kf/rxn.Keq)`` before comparison.
 
-    See Also
-    --------
-    qcqa_model
+    Parameters
+    ----------
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
+
+    Returns
+    -------
+    inconsistent : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and a string
+        identifying the incosistencies as values. Will return as an
+        empty ``dict`` if there are no inconsistencies.
 
     """
     if reaction_list is None:
@@ -348,7 +358,7 @@ def check_superfluous_consistency(model, reaction_list=None):
 
 
 def check_elemental_consistency(model, reaction_list=None):
-    """Check the reactions in the model to ensure elemental consistentency.
+    r"""Check the reactions in the model to ensure elemental consistentency.
 
     Elemental consistency includes checking reactions to ensure they are mass
     and charged balanced. Boundary reactions are ignored because they are
@@ -356,22 +366,18 @@ def check_elemental_consistency(model, reaction_list=None):
 
     Parameters
     ----------
-    model: Massmodel
-        The MassModel to inspect
-    reaction_list: list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
 
     Returns
     -------
-    inconsistent: dict
-        A dictionary with MassReactions objects as keys and a string
-        identifying the inconsistencies as values. Returns as empty if there
-        are no missing values.
-
-    See Also
-    --------
-    qcqa_model
+    inconsistent : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and a string
+        identifying the incosistencies as values. Will return as an
+        empty ``dict`` if there are no inconsistencies.
 
     """
     if reaction_list is None:
@@ -390,29 +396,27 @@ def check_elemental_consistency(model, reaction_list=None):
 
 
 def check_reaction_parameters(model, reaction_list=None):
-    """Check the model reactions for missing and superfluous parameters.
+    r"""Check the model reactions for missing and superfluous parameters.
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
-    reaction_list: list of MassReaction, optional
-        A list of MassReaction objects in the model to be checked.
-        If None provided, will use all reactions in the model.
+    model : MassModel
+        The model to inspect.
+    reaction_list : iterable
+        An iterable of :class:`~.MassReaction`\ s in the model to be checked.
+        If ``None`` then all reactions in the model will be utilized.
 
     Returns
     -------
-    missing: dict
-        A dictionary with MassReactions objects as keys and missing parameters
-        as values. Returns as empty if there are no missing values.
-    superfluous: dict
-        A dictionary with MassReactions objects as keys and superfluous
-        parameters as values. Returns as empty if there are no superfluous
-        parameters.
-
-    See Also
-    --------
-    qcqa_model
+    tuple (missing, superfluous)
+    missing : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and a string
+        identifying the missing parameters as values. Will return as an
+        empty ``dict`` if there are no missing values.
+    superfluous : dict
+        A ``dict`` with :class:`~.MassReaction`\ s as keys and superfluous
+        parameters as values. Will return as an empty ``dict`` if there are no
+        superfluous values.
 
     """
     if reaction_list is None:
@@ -458,19 +462,17 @@ def is_simulatable(model):
 
     Parameters
     ----------
-    model: MassModel
-        The MassModel to inspect.
+    model : MassModel
+        The model to inspect.
 
     Returns
     -------
-    simulate_check: bool
-        True if the model can be simulated, False otherwise.
-    consistency_check: bool
-        True if the model has no numerical consistency issues, False otherwise.
-
-    See Also
-    --------
-    qcqa_model
+    tuple (simulate_check, consistency_check)
+    simulate_check : bool
+        ``True`` if the model can be simulated, ``False`` otherwise.
+    consistency_check : bool
+        ``True`` if the model has no issues with numerical consistency,
+        ``False`` otherwise.
 
     """
     missing_params, superfluous = check_reaction_parameters(model)
@@ -692,7 +694,7 @@ def _is_consistent(kf, Keq, kr):
 
 
 def _check_if_needed(model, missing):
-    """Get the time-dependent concentrations and/or parameters in rate laws.
+    """Check whether the missing values are needed for simulation.
 
     Warnings
     --------
@@ -709,3 +711,11 @@ def _check_if_needed(model, missing):
                or _mk_met_func(str(met)) in needed]
 
     return missing
+
+
+__all__ = (
+    "qcqa_model", "get_missing_reaction_parameters",
+    "get_missing_custom_parameters", "get_missing_steady_state_fluxes",
+    "get_missing_initial_conditions", "get_missing_boundary_conditions",
+    "check_superfluous_consistency", "check_elemental_consistency",
+    "check_reaction_parameters", "is_simulatable",)

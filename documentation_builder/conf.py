@@ -17,41 +17,6 @@ sys.path.insert(0, dirname(dirname(__file__)))
 
 from mass import __version__
 
-# In order to build documentation that requires libraries to import
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        return
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
-        else:
-            return Mock()
-
-# These modules should correspond to the importable cobra modules.
-MOCK_MODULES = [
-    "cobra",
-    "cobra.core",
-    "cobra.core.configuration"
-]
-# These modules should correspond to the importable Python packages.
-MOCK_MODULES += [
-    "depinfo",
-    "libroadrunner",
-    "matplotlib",
-    "numpy",
-    "pandas",
-    "scipy", 'scipy.sparse', "scipy.linalg", "scipy.interpolate",
-    "sympy",
-    "tabulate",
-]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
-
 # -- Project information ------------------------------------------------------
 
 project = 'masspy'
@@ -68,22 +33,36 @@ version = '.'.join(release.split('.')[:2])
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.mathjax',
+    'nbsphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.autosectionlabel',
     'autoapi.extension',
-    'nbsphinx'
 ]
 
-# Document Python Code
+# Automated documention of Python Code
 autoapi_type = 'python'
 autoapi_dirs = ['../mass']
 autoapi_ignore = [
     '.tox', '.pytest_cache', 'scripts', 'benchmarks', "notebooks"]
+
+autosectionlabel_prefix_document = True
+autodoc_mock_imports = [
+    "cobra",
+    "depinfo",
+    "libroadrunner",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scipy",
+    "sympy",
+    "tabulate"
+]
 
 # Napoleon settings
 napoleon_google_docstring = False
@@ -129,10 +108,15 @@ html_extra_path = ["robots.txt"]
 # -- Options for Texinfo output -----------------------------------------------
 
 
-# Refer to the Python standard libraries and cobra documentation.
+# Refer to the Python documentation for other libraries.
 intersphinx_mapping = {
     "http://docs.python.org/": None,
+    "https://cobrapy.readthedocs.io/en/latest/": None,
+    "https://libroadrunner.readthedocs.io/en/latest/": None,
+    "https://matplotlib.org/": None,
     "http://docs.scipy.org/doc/numpy/": None,
+    "https://pandas.pydata.org/pandas-docs/stable/": None,
     "http://docs.scipy.org/doc/scipy/reference": None,
-    "https://cobrapy.readthedocs.io/en/latest/": None,}
+    "https://docs.sympy.org/latest/": None,
+    }
 intersphinx_cache_limit = 10  # days to keep the cached inventories

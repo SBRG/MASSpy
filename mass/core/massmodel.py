@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""
+MassModel is a class for holding information regarding a :mod:`mass` model.
+
+The :class:`MassModel` class inherits and extends the
+:class:`~cobra.core.model.Model` class in :mod:`cobra`. It contains additional
+information required for simulations and other :mod:`mass` functions and
+workflows.
+"""
 import re
 import warnings
 from copy import copy, deepcopy
@@ -27,90 +34,86 @@ from mass.util.util import (
 
 # Set the logger
 LOGGER = _make_logger(__name__)
+"""logging.Logger: Logger for :mod:`~mass.core.massmodel` submodule."""
 
-# Global
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
-# Pre-compiled regular expressions for building reactions from strings
-_RXN_ID_RE = re.compile("^(\w+):")
-_MET_ID_RE = re.compile("^s\[(\S+)[,|\]]")
-_REVERSIBLE_ARROW_RE = re.compile("<(-+|=+)>")
-_FORWARD_ARROW_RE = re.compile("(-+|=+)>")
-_REVERSE_ARROW_RE = re.compile("<(-+|=+)")
-_NAME_ARG_RE = re.compile("name=(\w+)")
-_FORMULA_ARG_RE = re.compile("formula=(\w+)")
-_CHARGE_ARG_RE = re.compile("charge=(\w+)")
-_COMPARTMENT_RE = re.compile("\](\[[A-Za-z]\])")
-_EQUALS_RE = re.compile("=")
+"""list: Contains the six most abundant elements and charge for molecules."""
 
 
 class MassModel(Object):
-    """Class representation of a model.
+    r"""Class representation of a model.
 
     Parameters
     ----------
-    id_or_model: str, MassModel
-        Either a string identifier to associate with the MassModel,
-        or an existing MassModel object. If an existing MassModel object is
-        provided, a new MassModel object is instantiated with the same
-        properties as the original MassModel.
-    name: str, optional
+    id_or_model : str, ~cobra.core.model.Model, MassModel
+        A string identifier to associate with the model, or an existing
+        :class:`MassModel`. If an existing :class:`MassModel` is provided,
+        a new :class:`MassModel` object is instantiated with the same
+        properties as the original model.
+    name : str
         A human readable name for the model.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-        A string identifiying the desired format for the stoichiometric matrix
-        of the model. Types can include 'dense' for a standard numpy.array,
-        'dok' or 'lil' to obtain the corresponding scipy.sparse matrix,
-        'DataFrame' for a pandas.DataFrame, and 'symbolic' for a
-        sympy.MutableDenseMatrix. For all matrix types, species (excluding
-        genes) are row indicies and reactions are column indicies. If None,
-        defaults to "dense".
-    dtype: data-type, optional
-        The desired array data-type for the stoichiometric matrix. If None,
-        defaults to np.float64.
+    matrix_type : str
+        A string identifiying the desired format for the returned matrix.
+        Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
+        ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
+        See the :mod:`~.linear` module documentation for more information
+        on the ``matrix_type``.
+    dtype : data-type
+        The desired array data-type for the stoichiometric matrix. If ``None``
+        then the data-type will default to ``numpy.float64``.
 
     Attributes
     ----------
-    description: str
+    description : str
         A human-readable description of the model.
-    reactions: cobra.DictList
-        A cobra.DictList where keys are the reaction identifiers and the
-        values are the associated MassReaction objects.
-    metabolites: cobra.DictList
-        A cobra.DictList where the keys are the metabolite identifiers and the
-        values are the associated MassMetabolite objects.
-    genes: cobra.DictList
-        A cobra.DictList where the keys are the gene identifiers and the
-        values are the associated cobra.Gene objects.
-    enzyme_modules: cobra.DictList
-        A cobra.DictList where the keys are the EnzymeModuleDict identifiers
-        and the values are the associated EnzymeModuleDict objects.
-    custom_rates: dict
+    reactions : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where the keys are reaction
+        identifiers and the values are the associated
+        :class:`~.MassReaction`\ s.
+    metabolites : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where the keys are metabolite
+        identifiers and the values are the associated
+        :class:`~.MassMetabolite`\ s.
+    genes : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where the keys are gene
+        identifiers and the values are the associated
+        :class:`~cobra.core.gene.Gene`\ s.
+    enzyme_modules : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where the keys are enzyme
+        module identifiers and the values are the associated
+        :class:`~.EnzymeModuleDict`\ s.
+    custom_rates : dict
         A dictionary to store custom rate expressions for specific reactions,
-        where keys are the MassReaction objects and values are the custom rate
-        expressions given as sympy objects. Custom rate expressions will always
-        be prioritized over automatically generated mass action rates.
-    custom_parameters: dict
+        where the keys are :class:`~.MassReaction`\ s and values are the
+        custom rate expressions given as :mod:`sympy` expressions. Custom rate
+        expressions will always be prioritized over automatically generated
+        mass action rates.
+    custom_parameters : dict
         A dictionary to store the custom parameters for the custom rates,
-        where key:value pairs are the string identifiers of the parameters and
-        their numerical value. Custom rate expressions will always be
-        prioritized over automatically generated mass action rate.
-    boundary_conditions: dict
+        where key:value pairs are the string identifiers for the parameters
+        and their corresponding numerical value.
+    boundary_conditions : dict
         A dictionary to store boundary conditions, where keys are string
         identifiers for 'boundary metabolites' of boundary reactions, and
-        values are the boundary conditions.
-    compartments: dict
+        values are the corresponding boundary condition numerical value or
+        function of time.
+    compartments : dict
         A dictionary to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
-        Example: {'c': 'cytosol'}
-    units: cobra.DictList
-        A DictList of UnitDefinitions to store in the model for referencing.
-        Note that the MassModel does NOT track units, and it is up to the user
-        to maintain unit consistency the model.
+    units : ~cobra.core.dictlist.DictList
+        :class:`~cobra.core.dictlist.DictList` of :class:`~.UnitDefinition`\ s
+        to store in the model for referencing.
+
+    Warnings
+    --------
+    Note that the :class:`MassModel` does NOT track units, and it is therefore
+    incumbent upon the user to maintain unit consistency the model.
 
     """
 
-    def __init__(self, id_or_model=None, name=None, matrix_type="dense",
+    def __init__(self, id_or_model=None, name=None, matrix_type="DataFrame",
                  dtype=np.float64):
-        """Initialize the MassModel Object."""
+        """Initialize the MassModel."""
         super(MassModel, self).__init__(id_or_model, name)
         if isinstance(id_or_model, MassModel):
             # Instiantiate a new MassModel with state identical to
@@ -145,7 +148,7 @@ class MassModel(Object):
     # Public
     @property
     def stoichiometric_matrix(self):
-        """Return the stoichiometric matrix of the MassModel."""
+        """Return the stoichiometric matrix."""
         return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
                              update_model=False)
 
@@ -156,7 +159,7 @@ class MassModel(Object):
 
     @property
     def ordinary_differential_equations(self):
-        """Return a dict of ODEs for the metabolites as sympy expressions."""
+        """Return a dict of ODEs for the metabolites."""
         return {met: met.ode for met in self.metabolites}
 
     @property
@@ -166,24 +169,24 @@ class MassModel(Object):
 
     @property
     def initial_conditions(self):
-        """Return a dict of all metabolites' initial conditions."""
+        """Return a dict of all metabolite initial conditions."""
         return {met: met.initial_condition for met in self.metabolites
                 if met.initial_condition is not None}
 
     @property
     def ics(self):
-        """Shorthand method to get all metabolites' initial conditions."""
+        """Shorthand method to get all metabolite initial conditions."""
         return self.initial_conditions
 
     @property
     def fixed(self):
-        """Return a dict of all metabolites' with their fixed conditions."""
+        """Return a dict of all metabolite fixed conditions."""
         return {met: ic for met, ic in iteritems(self.initial_conditions)
                 if met.fixed}
 
     @property
     def rates(self):
-        """Return a dict of reaction rate expressions as sympy expressions.
+        """Return a dict of reaction rate expressions.
 
         If a reaction has an associated custom rate expression, the custom rate
         will be prioritized and returned in the dictionary instead of the
@@ -194,13 +197,13 @@ class MassModel(Object):
 
     @property
     def steady_state_fluxes(self):
-        """Return a dict of all reactions' steady state fluxes."""
+        """Return a dict of all reaction steady state fluxes."""
         return {rxn: rxn.steady_state_flux for rxn in self.reactions
                 if rxn.steady_state_flux is not None}
 
     @property
     def v(self):
-        """Shorthand method to get all reactions' steady state fluxes."""
+        """Shorthand method to get all reaction steady state fluxes."""
         return self.steady_state_fluxes
 
     @property
@@ -210,35 +213,41 @@ class MassModel(Object):
 
     @property
     def boundary_metabolites(self):
-        """Return a sorted list of all 'boundary' metabolites in the model."""
+        """Return a sorted list of all 'boundary metabolites' in the model.
+
+        See Also
+        --------
+        :attr:`.MassReaction.boundary_metabolite`
+
+        """
         return sorted(list(set(rxn.boundary_metabolite
                                for rxn in self.reactions if rxn.boundary)))
 
     @property
     def exchanges(self):
-        """Return exchange reactions in the MassModel.
+        """Return exchange reactions in the model.
 
-        Reactions that exchange mass with the exterior. Uses annotations
-        and heuristics to exclude non-exchanges such as sink and demand
-        reactions.
+        Exchange reactions are reactions that exchange mass with the exterior.
+        Uses annotations and heuristics to exclude non-exchanges such as sink
+        and demand reactions.
         """
         return find_boundary_types(self, "exchange", None)
 
     @property
     def demands(self):
-        """Return demand reactions in the MassModel.
+        """Return demand reactions in the model.
 
-        Irreversible reactions that accumulate or consume a metabolite in
-        the inside of the model.
+        Demands are irreversible reactions that accumulate or consume a
+        metabolite in the inside of the model.
         """
         return find_boundary_types(self, "demand", None)
 
     @property
     def sinks(self):
-        """Return sink reactions in the MassModel.
+        """Return sink reactions in the model.
 
-        Reversible reactions that accumulate or consume a metabolite in
-        the inside of the model.
+        Sinks are reversible reactions that accumulate or consume a metabolite
+        in the inside of the model.
         """
         return find_boundary_types(self, "sink", None)
 
@@ -249,7 +258,7 @@ class MassModel(Object):
 
     @property
     def parameters(self):
-        """Return all parameters associateed with the MassModel."""
+        """Return all parameters associateed with the model."""
         parameters = {}
         # Sort rate and equilibrium constants into seperate dictionaries,
         # then add dictionaries to returned parameter dictionary.
@@ -271,39 +280,39 @@ class MassModel(Object):
 
     @property
     def compartments(self):
-        """Return a dict of all metabolite compartments."""
-        return {met.compartment: self._compartments.get(met.compartment, '')
-                for met in self.metabolites if met.compartment is not None}
-
-    @compartments.setter
-    def compartments(self, value):
-        """Set the dictionary of current compartment descriptions.
+        """Get or set a dict of all metabolite compartments.
 
         Assigning a dictionary to this property updates the model's
         dictionary of compartment descriptions with the new values.
 
         Parameters
         ----------
-        value : dict
+        compartment_dict : dict
             Dictionary mapping compartments abbreviations to full names.
             An empty dictionary will reset the compartments.
 
         """
-        if value:
-            self._compartments.update(value)
+        return {met.compartment: self._compartments.get(met.compartment, '')
+                for met in self.metabolites if met.compartment is not None}
+
+    @compartments.setter
+    def compartments(self, compartment_dict):
+        """Set the dictionary of current compartment descriptions."""
+        if compartment_dict:
+            self._compartments.update(compartment_dict)
         else:
             setattr(self, "_compartments", {})
 
-    def print_attributes(self, sep="\n", exclude_parent=False):
+    def print_attributes(self, sep=r"\n", exclude_parent=False):
         r"""Print the attributes and properties of the MassModel.
 
         Parameters
         ----------
-        sep: str, optional
+        sep : str
             The string used to seperate different attrubutes. Affects how the
-            final string is printed. Default is '\n'.
-        exclude_parent: bool, optional
-            If True, only display attributes specific to the current class,
+            final string is printed. Default is ``'\n'``.
+        exclude_parent : bool
+            If ``True``, only display attributes specific to the current class,
             excluding attributes from the parent class.
 
         """
@@ -319,38 +328,38 @@ class MassModel(Object):
 
     def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
                  update_model=True):
-        """Update the stoichiometric matrix of the model.
-
-        Parameters
-        ----------
-        reaction_list: list of MassReactions, optional
-            A list of MassReactions to be add to the stoichiometric matrix.
-            Reactions must already exist in the model in order to update.
-            If None, the entire stoichiometric matrix is reconstructed.
-        matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-            A string identifiying the desired format for the stoichiometric
-            matrix of the model. Types can include 'dense' for a standard
-            numpy.array, 'dok' or 'lil' to obtain the corresponding
-            scipy.sparse matrix, 'DataFrame' for a pandas.DataFrame, and
-            'symbolic' for a sympy.MutableDenseMatrix. For all matrix types,
-            species (excluding  genes) are the row indicies and reactions are
-            the column indicies. If None, defaults to "dense".
-        dtype: data-type, optional
-            The desired array data-type for the stoichiometric matrix. If None,
-            defaults to np.float64.
-        update_model: bool, optional
-            If True, will update the stored stoichiometric matrix, the matrix
-            type, and the data-type for the model.
-
-        Returns
-        -------
-        stoich_mat: matrix of class 'dtype'
-            The stoichiometric matrix for the MassModel returned as the given
-            matrix_type and with a data-type of 'dtype'.
+        r"""Update the stoichiometric matrix of the model.
 
         Notes
         -----
-        reaction_list is assumed to be at the end of self.reactions.
+        ``reaction_list`` is assumed to be at the end of :attr:`reactions`.
+
+        Parameters
+        ----------
+        reaction_list : list
+            A list containing :class:`~.MassReaction`\ s to add to
+            the stoichiometric matrix. The reactions must already exist in
+            the model in order to update. If ``None``, the entire
+            stoichiometric matrix is reconstructed.
+        matrix_type : str
+            A string identifiying the desired format for the returned matrix.
+            Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
+            ``'DataFrame'``, and ``'symbolic'``
+            Default is the current ``matrix_type``. See the :mod:`~.linear`
+            module documentation for more information on the ``matrix_type``.
+        dtype : data-type
+            The desired array data-type for the stoichiometric matrix.
+            If ``None`` then the data-type will default to the
+            current ``dtype``.
+        update_model : bool
+            If ``True``, will update the stored stoichiometric matrix,
+            the matrix type, and the data-type for the model.
+
+        Returns
+        -------
+        matrix of type ``matrix_type``
+            The stoichiometric matrix for the :class:`~.MassModel` returned
+            as the given ``matrix_type`` and with a data-type of ``dtype``.
 
         """
         # Use the model's stored matrix type if the matrix-type is not given.
@@ -382,14 +391,16 @@ class MassModel(Object):
         return stoich_mat
 
     def add_metabolites(self, metabolite_list):
-        """Add a list of metabolites to the MassModel.
+        r"""Add a list of metabolites to the model.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        metabolite_list: list of MassMetabolites
-            A list of MassMetabolites to add to the MassModel.
+        metabolite_list : list
+            A list containing :class:`~.MassMetabolite`\ s to add to
+            the model.
 
         """
         # Ensure list is iterable.
@@ -423,18 +434,20 @@ class MassModel(Object):
                     for met in metabolite_list)
 
     def remove_metabolites(self, metabolite_list, destructive=False):
-        """Remove a list of metabolites from the MassModel.
+        r"""Remove a list of metabolites from the model.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        metabolite_list: list of MassMetabolites
-            A list of MassMetabolites to add to the MassModel.
-        destructive: bool, optional
-            If False, the MassMetabolite is removed from all associated
-            MassReactions. If True, also remove associated MassReactions from
-            the MassModel.
+        metabolite_list : list
+            A list containing :class:`~.MassMetabolite`\ s to remove
+                from the model.
+        destructive : bool
+            If ``False``, the metabolites are removed from all associated
+            reactions. If ``True``, also remove associated
+            :class:`~.MassReaction`\ s from the model.
 
         """
         # Ensure list is iterable.
@@ -470,20 +483,20 @@ class MassModel(Object):
         """Add boundary conditions values for the given boundary metabolites.
 
         Boundary condition values can be a numerical value, or they can be a
-        string or sympy expression representing a function of time. The
-        function must only depend on time.
+        string or :mod:`sympy` expression representing a function of time.
+        The function must only depend on time.
 
         Parameters
         ----------
-        boundary_conditions: dict
+        boundary_conditions : dict
             A dict of boundary conditions containing the 'boundary metabolites'
             and their corresponding value. The string representing the
             'boundary_metabolite' must exist the list returned by
-            `MassModel.boundary_metabolites`.
+            :attr:`MassModel.boundary_metabolites`.
 
         See Also
         --------
-        MassModel.boundary_metabolites
+        :attr:`boundary_metabolites`
 
         """
         if not isinstance(boundary_conditions, dict):
@@ -531,18 +544,18 @@ class MassModel(Object):
             context(partial(self.boundary_conditions.update, existing_concs))
 
     def remove_boundary_conditions(self, boundary_metabolite_list):
-        """Remove the boundary condition for a list of boundary metabolites.
+        """Remove the boundary condition for a list of `boundary metabolites`.
 
         Parameters
         ----------
-        metabolite_list: list
+        metabolite_list : list
             A list of metabolites to remove the boundary conditions for.
             Boundary metabolites must already exist in the model in order
             for them to be removed.
 
         See Also
         --------
-        MassModel.boundary_metabolites
+        :attr:`boundary_metabolites`
 
         """
         boundary_metabolite_list = ensure_iterable(boundary_metabolite_list)
@@ -566,17 +579,18 @@ class MassModel(Object):
             context(partial(self.boundary_conditions.update, existing_concs))
 
     def add_reactions(self, reaction_list):
-        """Add MassReactions to the MassModel.
+        r"""Add reactions to the model.
 
-        MassReaction objects with identifiers identical to an existing reaction
-        are ignored.
+        :class:`~.MassReaction`\ s with identifiers identical to an
+        existing reaction are ignored.
 
-        The change is reverted upon exit when using the MassModel as a context
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        reaction_list: list of MassReactions
-            A list of MassReaction objects.
+        reaction_list : list
+            A list of :class:`~.MassReaction`\ s to add to the model.
 
         """
         # Ensure list is iterable.
@@ -635,17 +649,19 @@ class MassModel(Object):
                 context(partial(setattr, rxn, "_model", None))
 
     def remove_reactions(self, reaction_list, remove_orphans=False):
-        """Remove MassReactions from the MassModel.
+        r"""Remove reactions from the model.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        reaction_list: list of MassReactions
-            A list of MassReaction objects to be removed from the model.
-        remove_orphans: bool, optional
-            If True, will also remove orphaned genes and MassMetabolites from
-            the MassModel.
+        reaction_list : list
+            A list of :class:`~.MassReaction`\ s to be removed
+            from the model.
+        remove_orphans : bool
+            If ``True``, will also remove orphaned genes and metabolites from
+            the model.
 
         """
         # Ensure list is iterable.
@@ -700,49 +716,55 @@ class MassModel(Object):
 
         There are three different types of pre-defined boundary reactions:
         exchange, demand, and sink reactions.
-        An exchange reaction is a reversible, unbalanced reaction that adds
-        to or removes an extracellular metabolite from the extracellular
-        compartment.
-        A demand reaction is an irreversible reaction that consumes an
-        intracellular metabolite.
-        A sink is similar to an exchange but specifically for intracellular
-        metabolites.
 
-        If you set the reaction `boundary_type` to something else, you must
-        specify the desired identifier of the created reaction. The name will
-        be given by the metabolite name and the given `boundary_type`, and the
-        reaction will be set its reversible attribute to True.
+            * An exchange reaction is a reversible, unbalanced reaction that
+              adds to or removes an extracellular metabolite from the
+              extracellular compartment.
+            * A demand reaction is an irreversible reaction that consumes an
+              intracellular metabolite.
+            * A sink is similar to an exchange but specifically for
+              intracellular metabolites.
+
+        Notes
+        ------
+        To set the reaction ``boundary_type`` to something else, the desired
+        identifier of the created reaction must be specified. The name will
+        be given by the metabolite name and the given ``boundary_type``, and
+        the reaction will be set its reversible attribute to ``True``.
 
         Parameters
         ----------
         metabolite : MassMetabolite
-            Any MassMetabolite object, or an identifier of a metabolite that
-            already exists in the model. The metabolite compartment is not
-            checked but you are encouraged to stick to the definition of
+            Any :class:`~.MassMetabolite`, or an identifier of a metabolite
+            that already exists in the model. The metabolite compartment is
+            not checked but it is encouraged to stick to the definition of
             exchanges, demands, and sinks.
-        boundary_type : str, {"exchange", "demand", "sink"}
-            Using one of the pre-defined reaction types is easiest. If you
-            want to create your own kind of boundary reaction choose
-            any other string, e.g., 'my-boundary'.
-        reaction_id : str, optional
+        boundary_type : str
+            One of the pre-defined boundary types, or a user-defined type.
+            Pre-defined boundary types include ``"exchange"``, ``"demand"``,
+            and ``"sink"``. Using one of the pre-defined reaction types is
+            easiest. To  create a user-defined kind of boundary reaction
+            choose any other string, e.g., 'my-boundary'.
+        reaction_id : str
             The ID of the resulting reaction. This takes precedence over the
             auto-generated identifiers but beware that it might make boundary
             reactions harder to identify afterwards when using
-            `MassModel.boundary` or specifically `MassModel.exchanges` etc.
-        subsystem: str, optional
+            :attr:`~.MassModel.boundary` or specifically
+            :attr:`~.MassModel.exchanges` etc.
+        subsystem : str
             The subsystem where the reaction is meant to occur.
-        boundary_condition: float, sympy.Basic, optional
-            The boundary condition value to set. Must be an int, float, or a
-            or a sympy expression dependent only on time.
-            Default value is 0.
-        sbo_term : str, optional
+        boundary_condition : float, str, ~sympy.core.basic.Basic
+            The boundary condition value to set. Must be an ``int``,
+            ``float``, or a :mod:`sympy` expression dependent only on time.
+            Default value is ``0.``
+        sbo_term : str
             A correct SBO term is set for the available types. If a custom
             type is chosen, a suitable SBO term should also be set.
 
         Returns
         -------
-        boundary_reaction: MassReaction
-            The MassReaction object of the new boundary reaction.
+        MassReaction
+            The :class:`~.MassReaction` of the new boundary reaction.
 
         """
         # Check whether a metabolite is a MassMetabolite object:
@@ -800,27 +822,34 @@ class MassModel(Object):
 
     def get_rate_expressions(self, reaction_list=None, rtype=0,
                              update_reactions=False):
-        """Get the rate expressions for a list of reactions in the model.
+        r"""Get the rate expressions for a list of reactions in the model.
 
         Parameters
         ----------
-        reaction_list: list, optional
-            A list of MassReactions to get the rate expressions for. Reactions
-            must already exist in the model. If None, then return the rates for
-            all reactions in the model.
-        rtype: int {0, 1, 2, 3}, optional
+        reaction_list : list
+            A list of :class:`~.MassReaction`\ s to get the rate
+            expressions for. Reactions must already exist in the model.
+            If ``None``, then return the rates for all reactions in the model.
+        rtype : int
             The type of rate law to display. Must be 0, 1, 2, or 3.
-                If 0, the currrent default rate law type is used. Default is 0.
-                Type 1 will utilize the forward rate and equilibrium constants.
-                Type 2 will utilize the forward and reverse rate constants.
-                Type 3 will utilize the equilibrium and reverse rate constants.
-        update_reactions: bool, optional
-            If True, update the MassReaction default rate type in addition to
-            returning the rate expressions.
+
+                * If 0, the currrent default rate law type is used.
+                * Type 1 will utilize the :attr:`forward_rate_constant` and the
+                  :attr:`equilibrium_constant`.
+                * Type 2 will utilize the :attr:`forward_rate_constant` and the
+                  :attr:`reverse_rate_constant`.
+                * Type 3 will utilize the :attr:`equilibrium_constant` and the
+                  :attr:`reverse_rate_constant`.
+
+            Default is `` 0.``
+        update_reactions : bool
+            If ``True``, update the :class:`~.MassReaction` default rate type
+            in addition to returning the rate expressions.
 
         Returns
         -------
-        rate_dict: dictionary of reaction rates where keys are the reaction ids
+        dict
+            Dictionary of reaction rates where keys are the reaction ids
             and values are the rate law expressions.
 
         """
@@ -850,21 +879,22 @@ class MassModel(Object):
         return rate_dict
 
     def get_mass_action_ratios(self, reaction_list=None, sympy_expr=True):
-        """Get the mass action ratios for a list of reactions in the model.
+        r"""Get the mass action ratios for a list of reactions in the model.
 
         Parameters
         ----------
-        reaction_list: list, optional
-            A list of MassReactions to get the mass action ratios for.
-            Reactions must already exist in the model. If None, then return the
-            rates for all reactions in the model.
-        sympy_expr: bool, optional
-            If True, then return the mass action ratios as a sympy expression,
-            otherwise return the ratio as a human readable string.
+        reaction_list : list
+            A list of :class:`~.MassReaction`\ s to get the mass action
+            ratios for. Reactions must already exist in the model.
+            If ``None``, then return the ratios for all reactions in the model.
+        sympy_expr : bool
+            If ``True`` then return the mass action ratios as a :mod:`sympy`
+            expression, otherwise return the ratio as a human readable string.
 
         Returns
         -------
-        ratio_dict: dictionary of mass action ratios where keys are the
+        dict
+            Dictionary of mass action ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -880,21 +910,22 @@ class MassModel(Object):
         return ratio_dict
 
     def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=True):
-        """Get the disequilibrium ratios for a list of reactions in the model.
+        r"""Get the disequilibrium ratios for a list of reactions in the model.
 
         Parameters
         ----------
-        reaction_list: list, optional
-            A list of MassReactions to get the disequilibrium ratios for.
-            Reactions must already exist in the model. If None, then return the
-            rates for all reactions in the model.
-        sympy_expr: bool, optional
-            If True, then return the disequilibrium ratios as a sympy
+        reaction_list : list
+            A list of :class:`~.MassReaction`\ s to get the disequilibrium
+            ratios for. Reactions must already exist in the model.
+            If ``None``, then return the ratios for all reactions in the model.
+        sympy_expr : bool
+            If ``True`` then return the disequilibrium ratios as a :mod:`sympy`
             expression, otherwise return the ratio as a human readable string.
 
         Returns
         -------
-        ratio_dict: dict of disequilibrium ratios where keys are the
+        dict
+            Dictionary of mass action ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -912,30 +943,36 @@ class MassModel(Object):
     def add_custom_rate(self, reaction, custom_rate, custom_parameters=None):
         """Add a custom rate for a reaction to the model.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
+
+        Notes
+        -----
+        * Metabolites must already exist in the :class:`MassModel`.
+        * Default parameters of a :class:`~.MassReaction` are automatically
+          taken into account and do not need to be defined as additional
+          custom parameters.
 
         Parameters
         ----------
-        reaction: MassReaction
-            The MassReaction associated with the custom rate.
-        custom_rate: str
+        reaction : MassReaction
+            The reaction associated with the custom rate.
+        custom_rate : str
             The string representation of the custom rate expression. The string
-            representation of the custom rate will be used to create a sympy
-            expression that represents the custom rate.
-        custom_parameters: dict, optional
+            representation of the custom rate will be used to create a
+            :mod:`sympy` expression that represents the custom rate.
+        custom_parameters : dict
             A dictionary of custom parameters for the custom rate where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. The string representation of the custom
             parametes will be used to create the symbols needed for the sympy
-            expression of the custom rate. If None, then parameters are assumed
-            to already exist in the MassModel.
+            expression of the custom rate. If ``None``, then parameters are
+            assumed to already exist in the model.
 
-        Notes
-        -----
-        Metabolites must already exist in the MassReaction. However, the
-            default parameters of a MassReaction (kf_RID, Keq_RID, kr_RID) are
-            automatically taken into account and do not need to be defined as
-            an additional custom parameter.
+        See Also
+        --------
+        ~MassReaction.all_parameter_ids
+            List of default reaction parameters automatically accounted for.
 
         """
         if custom_parameters is not None:
@@ -972,14 +1009,16 @@ class MassModel(Object):
     def remove_custom_rate(self, reaction, remove_orphans=True):
         """Remove the custom rate for a given reaction from the model.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        reaction: MassReaction
-            The MassReaction assoicated with the custom rate to be removed.
-        remove_orphans: bool, optional
-            If True, then remove any orphaned custom parameters from the model.
+        reaction : MassReaction
+            The reaction assoicated with the custom rate to be removed.
+        remove_orphans : bool
+            If ``True``, then remove any orphaned custom parameters from
+            the model.
 
         """
         try:
@@ -1028,32 +1067,32 @@ class MassModel(Object):
         Warnings
         --------
         Using this method will remove all custom rates and custom rate
-            parameters in the MassModel object. To remove a specific rate
-            without affecting the other custom rates or custom parameters, use
-            the MassModel.remove_custom_rate method instead.
+        parameters in the model. To remove a specific rate without affecting
+        the other custom rates or parameters, use :meth:`remove_custom_rate`
+        instead.
 
         """
         self.custom_rates = {}
         self.custom_parameters = {}
         print("All custom rate expressions and parameters have been reset")
 
-    def add_units(self, new_unit_defs):
-        """Add a UnitDefinition to the MassModel units attribute.
+    def add_units(self, unit_defs):
+        r"""Add a :class:`~.UnitDefinition` to the model :attr:`units`.
+
+        Notes
+        -----
+        The model will not automatically track or convert units. Therefore,
+        it is up to the user to ensure unit consistency in the model.
 
         Parameters
         ----------
-        new_unit_defs: list of mass.UnitDefinition objects
-            A list of mass.UnitDefinition objects to add to the model.
-
-        Warnings
-        --------
-        The MassModel will not automatically track or convert units. Therefore,
-            it is up to the user to ensure unit consistency in the model.
+        unit_defs : list
+            A list of :class:`~.UnitDefinition`\ s to add to the model.
 
         """
         # Ensure iterable input and units are valid Unit objects.
-        new_unit_defs = DictList(ensure_iterable(new_unit_defs))
-        for unit in list(new_unit_defs):
+        unit_defs = DictList(ensure_iterable(unit_defs))
+        for unit in list(unit_defs):
             if not isinstance(unit, UnitDefinition):
                 raise ValueError(
                     "'{0}' is not a valid UnitDefinition.".format(str(unit)))
@@ -1061,44 +1100,44 @@ class MassModel(Object):
             if unit.id in self.units.list_attr("id"):
                 warnings.warn("Skipping '{0}' for it already exists in the"
                               " model.".format(unit))
-                new_unit_defs.remove(unit)
+                unit_defs.remove(unit)
         # Add new unit definitions to the units attribute
-        self.units += new_unit_defs
+        self.units += unit_defs
 
-    def remove_units(self, unit_defs_to_remove):
-        """Remove a UnitDefinition from the MassModel units attribute.
+    def remove_units(self, unit_defs):
+        r"""Remove a :class:`~.UnitDefinition` from the model :attr:`units`.
+
+        Notes
+        -----
+        The model will not automatically track or convert units. Therefore,
+        it is up to the user to ensure unit consistency in the model.
 
         Parameters
         ----------
-        unit_defs_to_remove: list of mass.UnitDefinition objects
-            A list of mass.UnitDefinition objects to remove from the model.
-
-        Warnings
-        --------
-        The MassModel will not automatically track or convert units. Therefore,
-            it is up to the user to ensure unit consistency in the model.
+        unit_defs : list
+            A list of :class:`~.UnitDefinition`\ s or their string identifiers
+            to remove from the model.
 
         """
-        unit_defs_to_remove = ensure_iterable(unit_defs_to_remove)
+        unit_defs = ensure_iterable(unit_defs)
         # Iteratre through units, raise ValueError if unit does not exist.
-        for unit in unit_defs_to_remove:
+        for unit in unit_defs:
             try:
                 unit = self.units.get_by_id(unit)
             except KeyError as e:
                 raise ValueError(
                     "'{0}' does not exist in the model.".format(str(e)))
         # Remove unit definitions to the units attribute
-        self.units -= unit_defs_to_remove
+        self.units -= unit_defs
 
     def reset_units(self):
-        """Reset all unit definitions in the units in a model.
+        r"""Reset all unit definitions in a model.
 
         Warnings
         --------
-        Using this method will remove all UnitDefinitions from the units
-            attribute in the MassModel object. To remove a UnitDefinition
-            without affecting the others in the units attribute, use
-            the MassModel.remove_units method instead.
+        Using this method will remove all :class:`~.UnitDefinition`\ s from
+        the model. To remove a :class:`~.UnitDefinition` without affecting
+        other units, use :meth:`remove_units` instead.
 
         """
         self.units = DictList()
@@ -1109,21 +1148,21 @@ class MassModel(Object):
 
         Parameters
         ----------
-        matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-            A string identifiying the desired format for the elemental matrix
-            of the model. Types can include 'dense' for a standard numpy.array,
-            'dok' or 'lil' to obtain the corresponding scipy.sparse matrix,
-            'DataFrame' for a pandas.DataFrame, and 'symbolic' for a
-            sympy.MutableDenseMatrix. For all matrix types, the elements are
-            row indicies and species (excluding genes) are column indicies.
-            Default is 'dense'.
-        dtype: data-type, optional
-            The desired data-type for the array. Default is np.float64.
+        matrix_type : str
+            A string identifiying the desired format for the returned matrix.
+            Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
+            ``'DataFrame'``, and ``'symbolic'``
+            Default is ``'dense'``. See the :mod:`~.linear` module
+            documentation for more information on the ``matrix_type``.
+        dtype : data-type
+            The desired array data-type for the matrix. If ``None`` then
+            the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        elem_mat: matrix of class 'dtype'
-            The elemental matrix for the model.
+        matrix of type ``matrix_type``
+            The elemntal matrix for the :class:`~.MassModel` returned
+            as the given ``matrix_type`` and with a data-type of ``dtype``.
 
         """
         # Set up for matrix construction if matrix types are correct.
@@ -1184,21 +1223,21 @@ class MassModel(Object):
 
         Parameters
         ----------
-        matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-            A string identifiying the desired format for the elemental charge
-            balancing matrix of the model. Types can include 'dense' for a
-            standard numpy.array, 'dok' or 'lil' to obtain the corresponding
-            scipy.sparse matrix, 'DataFrame' for a pandas.DataFrame, and
-            'symbolic' for a sympy.MutableDenseMatrix. For all matrix types,
-            the elements are row indicies and reactions are column indicies.'
-            Default is 'dense'.
-        dtype: data-type, optional
-            The desired data-type for the array. Default is np.float64.
+        matrix_type : str
+            A string identifiying the desired format for the returned matrix.
+            Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
+            ``'DataFrame'``, and ``'symbolic'``
+            Default is ``'dense'``. See the :mod:`~.linear` module
+            documentation for more information on the ``matrix_type``.
+        dtype : data-type
+            The desired array data-type for the matrix. If ``None`` then
+            the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        charge_mat: matrix of class 'dtype'
-            The elemental charge balancing as a matrix for the model.
+        matrix of type ``matrix_type``
+            The charge balancing matrix for the :class:`~.MassModel` returned
+            as the given ``matrix_type`` and with a data-type of ``dtype``.
 
         """
         elem_mat = self.get_elemental_matrix(matrix_type="DataFrame")
@@ -1222,12 +1261,13 @@ class MassModel(Object):
 
         Parameters
         ----------
-        rebuild_index: bool, optional
-            If True, then rebuild the indicies kept in the reactions,
+        rebuild_index: bool
+            If ``True``, then rebuild the indicies kept in the reactions,
             metabolites, and genes.
-        rebuild_relationships: bool, optional
-            If True, then reset all associations between the reactions,
-            metabolites genes, and the MassModel, and rebuilds them.
+        rebuild_relationships: bool
+            If ``True``, then reset all associations between the reactions,
+            metabolites, genes, enzyme_modules, and the :class:`MassModel`,
+            and rebuilds them.
 
         """
         if not isinstance(rebuild_index, bool) or \
@@ -1260,11 +1300,12 @@ class MassModel(Object):
                 item._model = self
 
     def copy(self):
-        """Create a partial "deepcopy" of the MassModel.
+        r"""Create a partial "deepcopy" of the :class:`MassModel`.
 
-        All of the MassMetabolite, MassReaction, Gene and EnzymeModuleDict
-        objects, the boundary conditions, custom_rates, custom_parameters,
-        and the stoichiometric matrix are created anew, but in a faster fashion
+        All of the :class:`~.MassMetabolite`\ s, :class:`~.MassReaction`\ s,
+        :class:`~cobra.core.gene.Gene`\ s and :class:`~.EnzymeModuleDict`\ s,
+        the boundary conditions, custom_rates, custom_parameters, and the
+        stoichiometric matrix are created anew, but in a faster fashion
         than deepcopy.
 
         """
@@ -1302,7 +1343,7 @@ class MassModel(Object):
 
     def merge(self, right, prefix_existing=None, inplace=False,
               new_model_id=None):
-        """Merge two MassModels into one MassModel with the objects from both.
+        """Merge two models into one model with the objects from both.
 
         The reactions, metabolites, genes, enzyme modules, boundary conditions,
         custom rate expressions, rate parameters, compartments, units, notes,
@@ -1311,37 +1352,39 @@ class MassModel(Object):
         or a dict item has an identical key(s), priority will be given to what
         already exists in the left model.
 
+        Notes
+        -----
+        When merging an :class:`.~EnzymeModule` into a :class:`MassModel`,
+        the enzyme module` is converted to an :class:`.~EnzymeModuleDict` and
+        stored in a :class:`~cobra.core.dictlist.DictList` accessible via the
+        :attr:`enzyme_modules` attribute. If an :class:`.~EnzymeModuleDict`
+        already exists in the model, it will be replaced.
+
         Parameters
         ----------
-        right: MassModel
-            The MassModel to merge into the left model.
-        prefix_existing: str, optional
+        right : MassModel
+            The model to merge into the left model.
+        prefix_existing : str
             If provided, the string is used to prefix the reaction identifier
             of a reaction in the second model if that reaction already exists
             within the left model. Will also apply prefix to enzyme identifiers
-            of an enzyme in the second model.
+            of enzyme modules in the second model.
         inplace : bool
-            Add reactions from right directly to left model object.
-            Otherwise, create a new model leaving the left model untouched.
-            When done within the model as context, changes to the models are
-            reverted upon exit.
-        new_model_id: str, optional
+            If ``True`` then add reactions from right model directly to the
+            left model. Otherwise, create a new model leaving the left model
+            untouched. When done within the model as context, changes to the
+            models are reverted upon exit.
+        new_model_id : str
             If provided, the string is used as the identifier for the merged
-            model. If None and inplace is True, the model ID of the first model
-            will be used. If None and inplace is False, a new combined ID
-            will be used for the new MassModel object.
+            model. If ``None`` and inplace is ``True``, the model ID of the
+            first model will be used. If ``None`` and inplace is ``False``,
+            a new combined ID will be used for the new :class:`MassModel`.
 
         Returns
         -------
-        new_model: MassModel
-            A new MassModel object or self representing the merged model.
-
-        Notes
-        -----
-        When merging an EnzymeModule into a MassModel, the EnzymeModule is
-            converted to an EnzymeDict and stored in a DictList accessible
-            via MassModel.enzyme_modules.
-        If an EnzymeModule already exists in the model, it will be replaced.
+        MassModel
+            A new :class:`MassModel` or ``self`` representing the
+            merged model.
 
         """
         # Check whether two MassModels are being merged,
@@ -1420,48 +1463,49 @@ class MassModel(Object):
 
     def compute_steady_state_fluxes(self, pathways, independent_fluxes,
                                     update_reactions=False):
-        """Calculate the unique steady state flux for each reaction.
+        r"""Calculate the unique steady state flux for each reaction.
 
-        The unique steady state flux for each reaction in the MassModel is
-        calculated using defined pathways, independently defined fluxes, and
-        steady state concentrations, where index of values in the pathways
-        corresponds to the index of the reaction in the MassModel.reactions
-        attribute.
-
-        Parameters
-        ----------
-        pathways: array or array-like
-            An array or array-like object that define the pathways through the
-            reaction network of the MassModel. The given pathway vectors must
-            be the same length as the number of reactions in the model, with
-            indicies of values in the pathway vector corresponding to the
-            indicies of reactions in the MassModel.reactions attribute.
-        independent_fluxes: dict
-            A dictionary of steady state fluxes where MassReactions are keys
-            and fluxes are values to utilize in order to calculate all other
-            steady state fluxes. Must be the same length as the number of
-            specified pathways.
-        update_reactions: bool, optional
-            If True, then update the MassReaction.steady_state_flux attribute
-            with the calculated steady state flux values.
-
-        Return
-        ------
-        steady_state_fluxes: dict
-            A numpy array of the calculated steady state fluxes.
-
-        Warnings
-        --------
-        The indicies of the values in the pathway vector must correspond to the
-            indicies of the reactions in the MassModel.reactions attribute in
-            order for the method to work as intended.
+        The unique steady state flux for each reaction in the
+        :class:`MassModel` is calculated using defined pathways, independently
+        defined fluxes, and steady state concentrations, where index of values
+        in the pathways must correspond to the index of the reaction in
+        :attr:`MassModel.reactions`.
 
         Notes
         -----
         The number of individually defined fluxes must be the same as the
-            number of pathways in order to determine the solution. For best
-            results, the number of pathways to specify must equal the dimension
-            of the right nullspace.
+        number of pathways in order to determine the solution. For best
+        results, the number of pathways to specify must equal the dimension
+        of the right nullspace.
+
+        Parameters
+        ----------
+        pathways : array-like
+            An array-like object that define the pathways through the reaction
+            network of the model. The given pathway vectors must be the same
+            length as the number of reactions in the model, with indicies of
+            values in the pathway vector corresponding to the indicies of
+            reactions in the :attr:`reactions` attribute.
+        independent_fluxes : dict
+            A dict of steady state fluxes where :class:`~.MassReaction`\ s are
+            keys and fluxes are values to utilize in order to calculate all
+            other steady state fluxes. Must be the same length as the number
+            of specified pathways.
+        update_reactions : bool
+            If True, then update the :attr:`.MassReaction.steady_state_flux`
+            with the calculated steady state flux value for each reaction.
+
+        Return
+        ------
+        dict
+            A dict where key:value pairs are the :class:`~.MassReaction`\ s
+            with their corresponding calculated steady state fluxes.
+
+        Warnings
+        --------
+        The indicies of the values in the pathway vector must correspond to the
+        indicies of the reactions in the :attr:`reactions` attribute in order
+        for the method to work as intended.
 
         """
         # Check inputs:
@@ -1502,37 +1546,41 @@ class MassModel(Object):
     def calculate_PERCs(self, steady_state_fluxes=None,
                         steady_state_concentrations=None,
                         at_equilibrium_default=100000, update_reactions=False):
-        """Calculate pseudo-order rate constants for reactions in the model.
+        r"""Calculate pseudo-order rate constants for reactions in the model.
 
-        Pseudo-order rate constants (PERCs) are forward rate constants, and are
+        Pseudo-order rate constants (PERCs) are considered to be the same as
+        :attr:`~.MassReaction.forward_rate_constant` attributes, and are
         calculated based on the steady state concentrations and fluxes.
 
         Parameters
         ----------
-        steady_state_fluxes: dict, optional
-            A dict of steady state fluxes where MassReactions are keys
-            and fluxes are the values. All reactions provided will have their
-            PERCs calculated. If None, all of the reaction PERCs are calculated
-            using the current steady state fluxes for all reactions that exist
-            in the model.
-        steady_state_concentrations: dict, optional
+        steady_state_fluxes : dict
+            A dict of steady state fluxes where :class:`~MassReaction`\ s
+            are keys and fluxes are the values. All reactions provided will
+            have their PERCs calculated. If ``None``, PERCs are calculated
+            using the current steady state fluxes for all reactions that
+            exist in the model.
+        steady_state_concentrations : dict
             A dict of all steady state concentrations necessary for the PERC
-            calculations, where MassMetabolites are keys and concentrations are
-            the values. If None, the relevant concentrations that exist in the
-            MassModel are used. All concentrations used in calculations must be
-            provided, including relevant boundary conditions.
-        at_equilibrium_default: float, optional
+            calculations, where :class:`~.MassMetabolite`\ s are keys and
+            concentrations are the values. If ``None``, the relevant
+            concentrations that exist in the model are used. All
+            concentrations used in calculations must be provided, including
+            relevant boundary conditions.
+        at_equilibrium_default : float
             The value to set the pseudo-order rate constant if the reaction is
-            at equilibrium. Default is 100,000.
-        update_reactions: bool, optional
-            If True, will update the values for the forward rate constants in
-            the MassReactions with the calculated pseudo-order rate constants.
+            at equilibrium. Default is ``100,000``.
+        update_reactions : bool
+            If ``True`` then will update the values for the
+            :attr:`~MassReaction.forward_rate_constant` attributes with the
+            calculated PERC values.
 
         Returns
         -------
-        percs_dict: dict
+        dict
             A dict where keys are strings identifers of the pseudo-order rate
-            constants and values are the calculated PERC values.
+            constants (as given by :attr:`.MassReaction.kf_str`) and values
+            are the calculated PERC values.
 
         """
         # Get the model steady state concentrations if None are provided.
@@ -1603,15 +1651,16 @@ class MassModel(Object):
                                 rev_arrow=None, reversible_arrow=None,
                                 term_split="+", reaction_split=";",
                                 reaction_id_split=":"):
-        """Create a model from a string of reaction equations using parser.
+        """Create a :class:`MassModel` from strings of reaction equations.
 
         Takes a string representation of the reactions and uses the
-        specifications supplied in the optional arguments to infer a set of
-        reactions and their identifiers, then to infer metabolites, metabolite
-        compartments, and stoichiometries for the reactions. It also infers the
-        refversibility of the reaction from the reaction arrow.
+        specifications supplied in the optional arguments to first infer a set
+        of reactions and their identifiers, then to infer metabolites,
+        metabolite compartments, and stoichiometries for the reactions. It
+        also infers the reversibility of the reaction from the reaction arrow.
+        For example::
 
-        For example: '''
+            '''
             ReactionID_1: S + E <=> ES
             ReactionID_2: ES -> E + P;
             ReactionID_3: E + I <=> EI
@@ -1619,28 +1668,32 @@ class MassModel(Object):
 
         Parameters
         ----------
-        model: str
+        model : str
             A string representing the reaction formulas (equation) for the
             model.
-        verbose: bool, optional
+        verbose : bool
             Setting the verbosity of the function.
-        fwd_arrow: re.compile, optional
-            For forward irreversible reaction arrows.
-        rev_arrow: re.compile, optional
-            For backward irreversible reaction arrows.
-        reversible_arrow: re.compile, optional
-            For reversible reaction arrows.
-        term_split: str, optional
-            Dividing individual metabolite entries. Default is "+".
-        reaction_split: str, optional
-            Dividing individual reaction entries. Default is ";".
-        reaction_id_split: str, optional
+        fwd_arrow: re.compile, None
+            For forward irreversible reaction arrows. If ``None``, the
+            arrow is expected to be ``'-->'`` or ``'==>'``.
+        rev_arrow: re.compile, None
+            For backward irreversible reaction arrows. If ``None``, the
+            arrow is expected to be ``'<--'`` or ``'<=='``.
+        reversible_arrow: re.compile, None
+            For reversible reaction arrows. If ``None``, the arrow is expected
+            to be ``'<=>'`` or ``'<->'``.
+        term_split : str
+            Dividing individual metabolite entries. Default is ``"+"``.
+        reaction_split : str
+            Dividing individual reaction entries. Default is ``";"``.
+        reaction_id_split : str
             Dividing individual reaction entries from their identifiers.
-            Default is ":".
+            Default is ``":"``.
 
         See Also
         --------
-        MassReaction.build_reaction_from_string: Method for building reactions.
+        :meth:`.MassReaction.build_reaction_from_string`
+            Base function for building reactions.
 
         """
         # Use the reaction split arguments to get the reactions and strip them
@@ -1657,8 +1710,7 @@ class MassModel(Object):
                     raise ValueError("Could not parse '{0}' for the reaction "
                                      "ID and formula (equation).".format(
                                          orig_reaction_str))
-                else:
-                    reaction_id, reaction_str = (s.strip() for s in split)
+                reaction_id, reaction_str = (s.strip() for s in split)
                 # Cannot build reaction without an ID
                 if not reaction_id:
                     raise ValueError("No reaction ID found in '{0}'"
@@ -1688,31 +1740,41 @@ class MassModel(Object):
     def update_parameters(self, parameters, verbose=True):
         """Update the parameters associated with the MassModel.
 
-        Parameters can be one or more of the following:
-            Reaction forward rate constant (kf)
-            Reaction reverse rate constant (kr)
-            Reaction equilibrium constant (Keq)
-            Reaction flux (v)
-            Boundary conditions of boundary reactions (boundary_metabolites)
-            Custom Parameters
+        Parameters can be the following:
 
-        Parameters
-        ----------
-        parameters: dict
-            A dict containing the parameter identifiers as strings and their
-            corresponding values to set in the model.
-        verbose: bool, optional
-            If True, display the warnings for setting irreversible reaction
-            parameters. Default is True.
+            * :attr:`.MassReaction.forward_rate_constant` (
+              :attr:`~.MassReaction.kf`)
+            * :attr:`.MassReaction.reverse_rate_constant` (
+              :attr:`~.MassReaction.kr`)
+            * :attr:`.MassReaction.equilibrium_constant` (
+              :attr:`~.MassReaction.Keq`)
+            * :attr:`.MassReaction.steady_state_flux` (
+              :attr:`~.MassReaction.v`)
+            * :attr:`~MassModel.boundary_conditions`
+            * :attr:`~MassModel.custom_parameters`
 
         Notes
         -----
-        The MassReaction object(s) must already exist in the model in order to
-        change associated parameters. Any identifiers that are not
-        the identifiers of a standard reaction parameter (does not appear in
-        MassReaction.all_parameter_ids) and is not an boundary metabolite of a
-        boundary reaction (does not appear in MassModel.boundary_metabolites)
-        will be considered a custom parameter.
+        The reactions must already exist in the model in order to change
+        associated parameters. Any identifiers that are not identifiers of
+        standard reaction parameter or of any 'boundary metabolites' will be
+        set as a custom parameter.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dict containing the parameter identifiers as strings and their
+            corresponding values to set in the model.
+        verbose : bool
+            If ``True`` then display the warnings that may be raised when
+            setting reaction parameters. Default is ``True``.
+
+        See Also
+        --------
+        :attr:`.MassReaction.all_parameter_ids`
+            List of default reaction parameter identifiers.
+        :attr:`MassModel.boundary_metabolites`
+            List of 'boundary metabolites' found in the model.
 
         """
         if not isinstance(parameters, dict):
@@ -1744,23 +1806,23 @@ class MassModel(Object):
                 self.custom_parameters.update({key: value})
 
     def update_initial_conditions(self, initial_conditions):
-        """Update the initial conditions of the MassModel.
+        """Update the initial conditions of the model.
 
-        Can be used to update initial conditions of fixed metabolites to change
-        the concentration value at which the metabolite concentration is fixed.
-
-        Parameters
-        ----------
-        initial_conditions: dict
-            A dictionary where MassMetabolites are the keys and the initial
-            conditions are the values.
+        Can also be used to update initial conditions of fixed metabolites to
+        change the concentration value at which the metabolite is fixed.
 
         Notes
         -----
         The metabolite(s) must already exist in the model to set the initial
         conditions. Initial conditions for the metabolites are accessed through
-        MassMetabolite.initial_condition. If an initial condition for a
-        metabolite already exists in the model, it will be replaced.
+        :attr:`.MassMetabolite.initial_condition`. If an initial condition for
+        a metabolite already exists, it will be replaced.
+
+        Parameters
+        ----------
+        initial_conditions : dict
+            A dictionary where metabolites are the keys and the initial
+            conditions are the values.
 
         """
         if not isinstance(initial_conditions, dict):
@@ -1782,16 +1844,16 @@ class MassModel(Object):
                 continue
 
     def update_custom_rates(self, custom_rates, custom_parameters=None):
-        """Update the custom rates of the MassModel.
+        r"""Update the custom rates of the model.
 
         Parameters
         ----------
-        custom_rates: dict
-            A dictionary where MassReactions or their string identifiers are
-            the keys and the rates are the string representations of the
-            custom rate expression.
-        custom_parameters: dict, optional
-            A dictionary of custom parameters for the custom rate where the
+        custom_rates : dict
+            A dictionary where :class:`.MassReaction`\ s or their string
+            identifiers are the keys and the rates are the string
+            representations of the custom rate expression.
+        custom_parameters : dict
+            A dictionary of custom parameters for the custom rates, where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. If a custom parameter already exists in
             the model, it will be updated.
@@ -1802,7 +1864,7 @@ class MassModel(Object):
 
         See Also
         --------
-        MassModel.add_custom_rate
+        :meth:`add_custom_rate`
 
         """
         if custom_parameters is not None:
@@ -1825,24 +1887,28 @@ class MassModel(Object):
                               "'{0}'.".format(reaction.id))
 
     def has_equivalent_odes(self, right, verbose=False):
-        """Determine if ODEs between two MassModels are equivalent.
+        """Determine if :attr:`odes` between two models are equivalent.
 
-        The ODEs between two MassModels are compared to determine whether
-        the models are equivalent, meaning that the models contain the same
-        metabolites, reactions, and rate expressions such that they require the
-        same set of parameters and initial conditions for simulation.
+        Notes
+        -----
+        The ODEs between two models are compared to determine whether the
+        models can be considered equivalent, meaning that the models contain
+        the same metabolites, reactions, and rate expressions such that they
+        require the same set of parameters and initial conditions for
+        simulation.
 
         Parameters
         ----------
-        right: MassModel
-            The MassModel to compare to the left model (self).
-        verbose: bool, optional
-            If True, display the reason(s) for the differences in the left and
-            right models. Default is False.
+        right : MassModel
+            The :class:`MassModel` to compare to the left model (``self``).
+        verbose : bool
+            If ``True``, display the reason(s) for the differences in the left
+            and right models. Default is ``False``.
 
         Returns
         -------
-        equivalent: A bool indicating whether the ODEs are equivalent.
+        bool
+            Returns a bool indicating whether the model ODEs are equivalent.
 
         """
         equivalent = True
@@ -1887,33 +1953,10 @@ class MassModel(Object):
         reaction. S[i, j] therefore contains the quantity of species 'i'
         produced (positive) or consumed (negative) by reaction 'j'.
 
-        Parameters
-        ----------
-        matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-            A string identifiying the desired format for the stoichiometric
-            matrix of the model. Types can include 'dense' for a standard
-            numpy.array, 'dok' or 'lil' to obtain the corresponding
-            scipy.sparse matrix, 'DataFrame' for a pandas.DataFrame, and
-            'symbolic' for a sympy.MutableDenseMatrix. For all matrix types,
-            species (excluding  genes) are the row indicies and reactions are
-            the column indicies. If None, defaults to "dense".
-        dtype: data-type, optional
-            The desired array data-type for the stoichiometric matrix. If None,
-            defaults to np.float64.
-        update_model: bool, optional
-            If True, will update the stored stoichiometric matrix, the matrix
-            type, and the data-type for the model.
-
-        Returns
-        -------
-        stoich_mat: matrix of class 'dtype'
-            The stoichiometric matrix for the MassModel returned as the given
-            matrix_type and with a data-type of 'dtype'.
-
         Warnings
         --------
         This method is intended for internal use only. To safely update the
-        stoichiometric matrix, use the MassModel.update_S method instead.
+        stoichiometric matrix, use :meth:`~MassModel.update_S` instead.
 
         """
         if not isinstance(update_model, bool):
@@ -1955,17 +1998,10 @@ class MassModel(Object):
         matrix, updated with the new objects, and lastly converted back into
         the desired matrix type.
 
-        Parameters
-        ----------
-        reaction_list: list of MassReactions, optional
-            A list of MassReactions to be added to the stoichiometric matrix.
-        matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}
-            The desired type after converting the matrix.
-
         Warnings
         --------
         This method is intended for internal use only. To safely update the
-        stoichiometric matrix, use the MassModel.update_S method instead.
+        stoichiometric matrix, use :meth:`~MassModel.update_S` instead.
 
         """
         shape = (len(self.metabolites), len(self.reactions))
@@ -1996,12 +2032,13 @@ class MassModel(Object):
         return stoich_mat
 
     def _update_model_s(self, stoich_mat, matrix_type, dtype):
-        """Update the model stoichiometric matrix and properties.
+        """Update the model stoichiometric matrix and its properties.
 
         Warnings
         --------
         This method is intended for internal use only. To safely update the
-        stoichiometric matrix, use the MassModel.update_S method instead.
+        stoichiometric matrix, use :meth:`~MassModel.update_S` instead.
+
         """
         self._S = stoich_mat
         self._matrix_type = matrix_type
@@ -2013,6 +2050,7 @@ class MassModel(Object):
         Warnings
         --------
         This method is intended for internal use only.
+
         """
         return {str(param): value for subdict in itervalues(self.parameters)
                 for param, value in iteritems(subdict)}
@@ -2146,7 +2184,13 @@ class MassModel(Object):
 
     # TODO Fix when changes finished
     def _repr_html_(self):
-        """HTML representation of the overview for the MassModel."""
+        """HTML representation of the overview for the MassModel.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
@@ -2238,6 +2282,11 @@ class MassModel(Object):
         """Record all future changes for context management of the MassModel.
 
         Changes are undone when a call to __exit__ is received.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         # Create a new context and add it to the stack
         try:
@@ -2247,12 +2296,24 @@ class MassModel(Object):
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        """Pop the top context manager and trigger the undo functions."""
+        """Pop the top context manager and trigger the undo functions.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         context = self._contexts.pop()
         context.reset()
 
     def __setstate__(self, state):
-        """Ensure all Objects in the MassModel point to the MassModel."""
+        """Ensure all objects in the model point to the MassModel.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         self.__dict__.update(state)
         for attr in ['reactions', 'metabolites', 'genes', 'enzyme_modules']:
             for x in getattr(self, attr):
@@ -2265,7 +2326,15 @@ class MassModel(Object):
 
         Ensures that the context stack is cleared prior to serialization,
         since partial functions cannot be pickled reliably
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         odict = self.__dict__.copy()
         odict['_contexts'] = []
         return odict
+
+
+__all__ = ("MassModel", "LOGGER", "CHOPNSQ")
