@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the setup for the installation of MASSpy."""
-from __future__ import absolute_import
-
 from sys import argv
 
 from setuptools import find_packages, setup
@@ -13,7 +11,7 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
     setup_requirements.append("pytest-runner")
 
 extras = {
-    "sbml": ["python-libsbml", "lxml"]
+    "json": "simplejson",
 }
 extras["all"] = sorted(list(extras))
 
@@ -34,15 +32,15 @@ if __name__ == "__main__":
         setup_requires=setup_requirements,
         install_requires=[
             "cobra>=0.15.0",
-            "future>=0.16.0",
+            "depinfo",
+            "libroadrunner==1.5.3",
             "matplotlib>=3.0.0",
-            "numpy>=1.15.2",
-            "pandas>=0.23.4",
+            "numpy>=1.13.0",
+            "pandas>=0.17.0",
             "scipy>=1.2.0",
             "six>=1.11.0",
-            "sympy>=1.3",
-            "tabulate>=0.8.2",
-            "libroadrunner>=1.5.3",
+            "sympy>=1.0.0",
+            "tabulate>=0.8.1",
         ],
         tests_require=[
             "pytest",

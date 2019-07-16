@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """TODO Module Docstrings."""
-from __future__ import absolute_import
-
 import datetime
 import logging
 import re
@@ -301,7 +299,7 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
     through the `sympy.printing.mathml` module. However, the mathml module will
     interpret '_' as a subscript and '__' as a superscript. In order to prevent
     the module from misinterpreting underscores in identifiers, the underscores
-    are converted into ampsersands. Additionally, all MathML presentation
+    are converted into str 'UNDERSCORE'. Additionally, all MathML presentation
     markup must be removed for similar reasons. After the XML string is made,
     the identifiers are returned to their original state.
 
@@ -311,14 +309,13 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
 
     """
     # Replace underscores before conversion
-    underscore_replace = {str(arg): str(arg).replace("_", "&")
+    underscore_replace = {str(arg): str(arg).replace("_", "UNDERSCORE")
                           for arg in sympy_equation.atoms(Symbol)}
     sympy_equation = sympy_equation.subs(underscore_replace)
     # Convert equation into MathML and remove tags that libsbml cannot parse
     mathml_xml = mathml(sympy_equation)
-    mathml_xml = MATHML_XML_NS.format(mathml_xml.replace("&", "_"))
+    mathml_xml = MATHML_XML_NS.format(mathml_xml.replace("UNDERSCORE", "_"))
     mathml_xml = REMOVE_MML_TAGS_RE.sub("", mathml_xml)
-
     # Fix the time symbol
     if REPLACE_TIME_RE.search(mathml_xml):
         time_symbol = '><csymbol encoding="text" definitionURL=' +\
@@ -2260,6 +2257,7 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
     if kwargs.get("local_parameters"):
         all_parameter_values = mass_reaction.model._get_all_parameters()
 
+    # Nested function to create local parameters
     def _create_local_parameter(key, pid, sbo, udef, **kwargs):
         """Create a local reaction paramter and write it into SBMLDocument."""
         try:
@@ -2307,6 +2305,15 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
         else:
             if f_replace and F_SPECIE_REV in f_replace:
                 new_arg = f_replace[F_SPECIE_REV](new_arg)
+            # Account for metabolites in the rate law that
+            # are not considered reactants or products via modifiers
+            if str(arg) not in [m.id for m in mass_reaction.metabolites]:
+                msref = reaction.createModifier()
+                _check(msref,
+                       "create modifier specie " + new_arg + _for_id(rid))
+                _check(msref.setSpecies(new_arg),
+                       "set modifier specie species " + new_arg + _for_id(rid))
+
         id_subs[arg] = new_arg
 
     # Make xml string of rate equation via sympy conversion to MathML

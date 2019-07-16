@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """TODO Module Docstrings."""
-
 from collections import OrderedDict
 from copy import copy
 
