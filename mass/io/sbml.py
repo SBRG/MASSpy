@@ -2257,6 +2257,7 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
     if kwargs.get("local_parameters"):
         all_parameter_values = mass_reaction.model._get_all_parameters()
 
+    # Nested function to create local parameters
     def _create_local_parameter(key, pid, sbo, udef, **kwargs):
         """Create a local reaction paramter and write it into SBMLDocument."""
         try:
@@ -2304,6 +2305,15 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
         else:
             if f_replace and F_SPECIE_REV in f_replace:
                 new_arg = f_replace[F_SPECIE_REV](new_arg)
+            # Account for metabolites in the rate law that
+            # are not considered reactants or products via modifiers
+            if str(arg) not in [m.id for m in mass_reaction.metabolites]:
+                msref = reaction.createModifier()
+                _check(msref,
+                       "create modifier specie " + new_arg + _for_id(rid))
+                _check(msref.setSpecies(new_arg),
+                       "set modifier specie species " + new_arg + _for_id(rid))
+
         id_subs[arg] = new_arg
 
     # Make xml string of rate equation via sympy conversion to MathML
