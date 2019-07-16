@@ -3,15 +3,15 @@
 from collections import OrderedDict
 from copy import copy, deepcopy
 
+from cobra.core.dictlist import DictList
+
 import numpy as np
 
 import pandas as pd
 
 from six import iteritems, iterkeys, itervalues
 
-from cobra.core.dictlist import DictList
-
-from mass.util.DictWithID import OrderedDictWithID
+from mass.util.dict_with_id import OrderedDictWithID
 from mass.util.util import (
     _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
 
@@ -75,7 +75,7 @@ class EnzymeModuleDict(OrderedDictWithID):
         # No references to the MassModel when copying the EnzymeModuleDict
         model = self.model
         setattr(self, "model", None)
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+        for attr in ["enzyme_module_ligands", "enzyme_module_species",
                      "enzyme_module_reactions"]:
             for i in getattr(self, attr):
                 setattr(i, "_model", None)
@@ -87,7 +87,7 @@ class EnzymeModuleDict(OrderedDictWithID):
         enzyme_dict_copy = deepcopy(self)
         # Restore references for the original EnzymeModuleDict
         setattr(self, "model", model)
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+        for attr in ["enzyme_module_ligands", "enzyme_module_species",
                      "enzyme_module_reactions"]:
             for i in getattr(self, attr):
                 setattr(i, "_model", model)
@@ -120,11 +120,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         if model is None:
             model = self.model
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
+        for attr in ["enzyme_module_ligands", "enzyme_module_species",
                      "enzyme_module_reactions"]:
             model_dictlist = {
                 "enzyme_module_ligands": model.metabolites,
-                "enzyme_module_forms": model.metabolites,
+                "enzyme_module_species": model.metabolites,
                 "enzyme_module_reactions": model.reactions}.get(attr)
             self[attr] = _mk_new_dictlist(model_dictlist, getattr(self, attr))
             attr += "_categorized"
@@ -132,8 +132,8 @@ class EnzymeModuleDict(OrderedDictWithID):
                 key: _mk_new_dictlist(model_dictlist, old_dictlist)
                 for key, old_dictlist in iteritems(getattr(self, attr))}
 
-        for enzyme_module_form in self.enzyme_module_forms:
-            enzyme_module_form._repair_bound_obj_pointers()
+        for enzyme_module_specie in self.enzyme_module_species:
+            enzyme_module_specie._repair_bound_obj_pointers()
 
     def _make_enzyme_stoichiometric_matrix(self, update=False):
         """Return the S matrix based on enzyme forms, reactions, and ligands.
@@ -148,7 +148,7 @@ class EnzymeModuleDict(OrderedDictWithID):
             matrix_type="DataFrame", dtype=np.float_)
 
         metabolites = DictList([
-            met for attr in ["enzyme_module_ligands", "enzyme_module_forms"]
+            met for attr in ["enzyme_module_ligands", "enzyme_module_species"]
             for met in self[attr]])
 
         stoich_mat = matrix_constructor((len(metabolites),
@@ -229,7 +229,7 @@ class EnzymeModuleDict(OrderedDictWithID):
                    dim_stoich_mat=dim_S, mat_rank=rank,
                    subsystem=self.subsystem,
                    num_enzyme_module_ligands=len(self.enzyme_module_ligands),
-                   num_enz_forms=len(self.enzyme_module_forms),
+                   num_enz_forms=len(self.enzyme_module_species),
                    num_enz_reactions=len(self.enzyme_module_reactions),
                    enz_conc=self.enzyme_concentration_total,
                    enz_flux=self.enzyme_net_flux)
@@ -276,10 +276,10 @@ _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "name": None,
     "subsystem": "",
     "enzyme_module_ligands": DictList(),
-    "enzyme_module_forms": DictList(),
+    "enzyme_module_species": DictList(),
     "enzyme_module_reactions": DictList(),
     "enzyme_module_ligands_categorized": {"Undefined": DictList()},
-    "enzyme_module_forms_categorized": {"Undefined": DictList()},
+    "enzyme_module_species_categorized": {"Undefined": DictList()},
     "enzyme_module_reactions_categorized": {"Undefined": DictList()},
     "enzyme_concentration_total": None,
     "enzyme_net_flux": None,

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""Handles generation and manipulation of :mod:`sympy` expressions."""
 import re
 from warnings import warn
 
@@ -8,29 +8,29 @@ from six import iteritems, iterkeys, string_types
 import sympy as sym
 from sympy.physics.vector import dynamicsymbols
 
-from mass.core.massconfiguration import MassConfiguration
+from mass.core.mass_configuration import MassConfiguration
 
 MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
 def Keq2k(sympy_expr, simplify=True):
-    """Replace all Keq symbols with kf/kr in in sympy expressions.
+    """Replace ``'Keq'`` symbols with ``'kf/kr'`` in :mod:`sympy` expressions.
 
     Parameters
     ----------
-    sympy_expr: sympy.Basic dict, or list
-        A sympy expression, a list of sympy expressions, or a dictionary with
-        sympy expressions as the values.
-    simplify: bool, optional
-        If True, simplify the expression after making the substitution.
-        Otherwise leave the expression as is.
+    sympy_expr : ~sympy.core.basic.Basic, dict, or list
+        A :mod:`sympy` expression, a list of :mod:`sympy` expressions, or a
+        dictionary with :mod:`sympy` expressions as the values.
+    simplify : bool
+        If ``True`` then try to simplify the expression after making the
+        substitution. Otherwise leave the expression as is.
 
     Returns
     -------
-    new_expr: sympy.Basic, dict, or list
-        The sympy expression(s) with the substitution made, returned as the
-        same type as the original input.
+    ~sympy.core.basic.Basic, dict, or list
+        The :mod:`sympy` expression(s) with the substitution made, returned as
+        the same type as the original input.
 
     """
     def _replace_Keq(expr, simplify):
@@ -62,22 +62,22 @@ def Keq2k(sympy_expr, simplify=True):
 
 
 def k2Keq(sympy_expr, simplify=True):
-    """Replace all kr symbols with kf/Keq in in sympy expressions.
+    """Replace ``'kr'`` symbols with ``'kf/Keq'`` in :mod:`sympy` expressions.
 
     Parameters
     ----------
-    sympy_expr: sympy expression, dict, or list
-        A sympy expression, a list of sympy expressions, or a dictionary with
-        sympy expressions as the values.
-    simplify: bool, optional
-        If True, simplify the expression after making the substitution.
-        Otherwise leave the expression as is.
+    sympy_expr : ~sympy.core.basic.Basic, dict, or list
+        A :mod:`sympy` expression, a list of :mod:`sympy` expressions, or a
+        dictionary with :mod:`sympy` expressions as the values.
+    simplify : bool
+        If ``True`` then try to simplify the expression after making the
+        substitution. Otherwise leave the expression as is.
 
     Returns
     -------
-    new_expr: sympy expression, dict, or list
-        The sympy expression(s) with the substitution made, returned as the
-        same type as the original input.
+    ~sympy.core.basic.Basic, dict, or list
+        The :mod:`sympy` expression(s) with the substitution made, returned as
+        the same type as the original input.
 
     """
     def _replace_kr(expr, simplify):
@@ -113,19 +113,19 @@ def k2Keq(sympy_expr, simplify=True):
 
 
 def strip_time(sympy_expr):
-    """Strip the time dependency in sympy expressions.
+    """Strip the time dependency in :mod:`sympy` expressions.
 
     Parameters
     ----------
-    sympy_expr: sympy.Basic, dict, or list
-        A sympy expression, a list of sympy expressions, or a dictionary with
-        sympy expressions as the values.
+    sympy_expr : ~sympy.core.basic.Basic, dict, or list
+        A :mod:`sympy` expression, a list of :mod:`sympy` expressions, or a
+        dictionary with :mod:`sympy` expressions as the values.
 
     Returns
     -------
-    new_expr: sympy.Basic, dict, or list
-        The sympy expression(s) without the time dependency, returned as the
-        same type as the original input.
+    ~sympy.core.basic.Basic, dict, or list
+        The :mod:`sympy` expression(s) with the time dependency removed,
+        returned as the same type as the original input.
 
     """
     # Helper function to strip a single expression
@@ -152,22 +152,31 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
 
     Parameters
     ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the rate expression for.
-    rtype: int {1, 2, 3}
+    reaction : MassReaction
+        The reaction to generate the rate expression for.
+    rtype : int
         The type of rate law to display. Must be 1, 2, or 3.
-            Type 1 will utilize the forward rate and equilibrium constants.
-            Type 2 will utilize the forward and reverse rate constants.
-            Type 3 will utilize the equilibrium and reverse rate constants.
-        Default is 1.
-    update_reaction: bool, optional
-        If True, update the MassReaction in addition to returning the rate law.
+
+            * Type 1 will utilize the
+              :attr:`~.MassReaction.forward_rate_constant` and the
+              :attr:`~.MassReaction.equilibrium_constant`.
+            * Type 2 will utilize the
+              :attr:`~.MassReaction.forward_rate_constant` and the
+              :attr:`~.MassReaction.reverse_rate_constant`.
+            * Type 3 will utilize the
+              :attr:`~.MassReaction.equilibrium_constant` and the
+              :attr:`~.MassReaction.reverse_rate_constant`.
+
+        Default is ``1``.
+    update_reaction : bool
+        Whether to update the reaction in addition to returning the
+        rate law. Default is ``False``.
 
     Returns
     -------
-    rate_expression: sympy.Basic
-        The rate law as a sympy expression. If the reaction has no metabolites
-        associated, None will be returned
+    ~sympy.core.basic.Basic or None
+        The rate law as a :mod:`sympy` expression. If the reaction has no
+        metabolites associated, ``None`` will be returned.
 
     """
     if not reaction.metabolites:
@@ -205,19 +214,24 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
 
     Parameters
     ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the rate expression for.
-    rtype: int {1, 2, 3}
-        The type of foward rate law to return. Must be 1, 2, or 3.
-            Type 1 and 2 will utilize the forward rate constant.
-            Type 3 will utilize the equilibrium and reverse rate constants.
-        Default is 1.
+    reaction : MassReaction
+        The reaction to generate the rate expression for.
+    rtype : int
+        The type of rate law to display. Must be 1, 2, or 3.
+
+            * Type 1 and 2 will utilize the
+              :attr:`~.MassReaction.`forward_rate_constant`.
+            * Type 3 will utilize the
+              :attr:`~.MassReaction.equilibrium_constant` and the
+              :attr:`~.MassReaction.reverse_rate_constant`.
+
+        Default is `1`.
 
     Returns
     -------
-    fwd_rate: sympy.Basic
-        The forward rate as a sympy expression. If the reaction has no
-        metabolites associated, None will be returned.
+    ~sympy.core.basic.Basic or None
+        The forward rate as a :mod:`sympy` expression. If the reaction
+        has no metabolites associated, ``None`` will be returned.
 
     """
     if not reaction.metabolites:
@@ -251,18 +265,24 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
 
     Parameters
     ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the rate expression for.
-    rtype: int {1, 2, 3}
-        The type of foward rate law to return. Must be 1, 2, or 3.
-            Type 1 will utilize the foward rate and equilibrium constant.
-            Type 2 and 3 will utilize the reverse rate constant.
-        Default is 1.
+    reaction : MassReaction
+        The reaction to generate the rate expression for.
+    rtype : int
+        The type of rate law to display. Must be 1, 2, or 3.
+
+            * Type 1 will utilize the
+              :attr:`~.MassReaction.forward_rate_constant` and the
+              :attr:`~.MassReaction.equilibrium_constant`.
+            * Type 2 and 3 will utilize the
+              :attr:`~.MassReaction.reverse_rate_constant`.
+
+        Default is `1`.
 
     Returns
     -------
-    rev_rate: sympy.Basic
-        The reverse rate as a sympy expression.
+    ~sympy.core.basic.Basic or None
+        The reverse rate as a :mod`sympy` expression. If the reaction
+        has no metabolites associated, ``None`` will be returned.
 
     """
     if not reaction.metabolites:
@@ -292,52 +312,23 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
     return rev_rate
 
 
-def _remove_metabolites_from_rate(reaction):
-    """Remove metabolites from a copy of the reaction before creating the rate.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-    """
-    reaction = reaction.copy()
-    # Get exclusion criteria and reaction metabolites
-    exclusion_criteria_dict = MASSCONFIGURATION.exclude_metabolites_from_rates
-    metabolites_to_exclude = []
-    # Iterate through attributes and exclusion values
-    for attr, exclusion_values in iteritems(exclusion_criteria_dict):
-        exclusion_values = [
-            getattr(value, attr) if hasattr(value, attr) else value
-            for value in exclusion_values]
-        # Iterate through reaction metabolites
-        for met in list(reaction.metabolites):
-            met_value = getattr(met, attr)
-            # Add metabolite to be excluded if it matches the criteria
-            if met_value in exclusion_values:
-                metabolites_to_exclude += [str(met)]
-
-    # Remove metabolites from reaction copy
-    reaction.subtract_metabolites({
-        met: coeff for met, coeff in iteritems(reaction.metabolites)
-        if str(met) in metabolites_to_exclude})
-
-    return reaction
-
-
 def generate_mass_action_ratio(reaction):
     """Generate the mass action ratio for a given reaction.
 
     Parameters
     ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the mass action ratio for.
+    reaction : MassReaction
+        The reaction to generate the mass action ratio for.
 
     Returns
     -------
-    ma_ratio: sympy.Basic
-        The mass action ratio as a sympy expression (sympy.Basic).
+    ~sympy.core.basic.Basic
+        The mass action ratio as a :mod:`sympy` expression.
 
     """
-    reaction = _ignore_h_and_h2o(reaction)
+    if MASSCONFIGURATION.exclude_metabolites_from_rates\
+       and not reaction.boundary:
+        reaction = _remove_metabolites_from_rate(reaction)
 
     # Handle reactants
     r_bits = _format_metabs_sym(sym.S.One, reaction, reaction.reactants)
@@ -354,13 +345,13 @@ def generate_disequilibrium_ratio(reaction):
 
     Parameters
     ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the disequilibrium ratio for.
+    reaction: MassReaction
+        The reaction to generate the disequilibrium ratio for.
 
     Returns
     -------
-    diseq_ratio: sympy.Basic
-        The disequilibrium ratio as a sympy expression (sympy.Basic).
+    ~sympy.core.basic.Basic
+        The disequilibrium ratio as a :mod:`sympy` expression.
 
     """
     diseq_ratio = sym.Mul(generate_mass_action_ratio(reaction),
@@ -370,40 +361,41 @@ def generate_disequilibrium_ratio(reaction):
 
 
 def create_custom_rate(reaction, custom_rate, custom_parameters=None):
-    """Create a sympy expression for a given custom rate law.
-
-    Parameters
-    ----------
-    reaction: mass.MassReaction
-        The MassReaction object to generate the custom rate ratio for.
-    custom_rate: str
-        The custom rate law as a string. The string representation of the
-        custom rate law will be used to create the sympy expression through the
-        sympy.sympify method.
-    custom_parameters: str, list of str, optional
-        The custom parameters of the custom rate law as strings. The string
-        representation of the custom parameters will be used for creation and
-        recognition of the custom parameter symbols in the sympy expression.
-        If None, parameters are assumed to be one or more of the MassReaction
-        rate or equilibrium constants.
-
-    Returns
-    -------
-    custom_rate_expression: sympy.Basic, None
-        A sympy expression of the custom rate. If no metabolites are assoicated
-        with the reaction, None will be returned.
-
-    Warnings
-    --------
-    Any metabolite in a custom rate expression must already exist as a
-        MassMetabolite in the MassModel or MassReaction object.
+    """Create a :mod:`sympy` expression for a given custom rate law.
 
     Notes
     -----
-    The default MassReaction parameters (kf_RID, Keq_RID, and kr_RID), the
-        reaction metabolites, and the fixed concentration parameters from the
-        associated MassModel are automatically recognized and should not be
-        included the list of custom parameters. RID: MassReaction identifier.
+    * Metabolites must already exist in the :class:`~.MassModel` or
+      :class:`~.MassReaction`.
+    * Default parameters of a :class:`~.MassReaction` are automatically
+      taken into account and do not need to be defined as additional
+      custom parameters.
+
+    Parameters
+    ----------
+    reaction : MassReaction
+        The reaction associated with the custom rate.
+    custom_rate : str
+        The custom rate law as a str. The string representation of the
+        custom rate law will be used to create the expression through the
+        :func:`~sympy.core.sympify.sympify` function.
+    custom_parameters : list of str
+        The custom parameter(s) of the custom rate law as a list of strings.
+        The string representation of the custom parameters will be used for
+        creation and recognition of the custom parameter symbols in the
+        :mod:`sympy` expression. If ``None`` then parameters are assumed to be
+        one or more of the reaction rate or equilibrium constants.
+
+    Returns
+    -------
+    ~sympy.core.basic.Basic or None
+        A :mod:`sympy` expression of the custom rate. If no metabolites are
+        assoicated with the reaction, ``None`` will be returned.
+
+    See Also
+    --------
+    :attr:`.MassReaction.all_parameter_ids`
+        List of default reaction parameters automatically accounted for.
 
     """
     # Check inputs
@@ -458,19 +450,18 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
 
 
 def generate_ode(metabolite):
-    """Generate the ODE for a given metabolite as a sympy expression.
+    """Generate the ODE for a given metabolite as a :mod:`sympy` expression.
 
     Parameters
     ----------
-    metabolite: mass.MassMetabolite
-        The MassMetabolite object to generate the ODE for.
-    update_metabolite: bool, optional
-        If True, update the MassMetabolite in addition to returning the ODE.
+    metabolite : MassMetabolite
+        The metabolite to generate the ODE for.
 
     Returns
     -------
-    ode: sympy.Basic
-        The metabolite ODE as a sympy expression.
+    ode : ~sympy.core.basic.Basic or None
+        A :mod:`sympy` expression of the metabolite ODE. If the metabolite
+        is not associated with any reactions, then ``None`` will be returned.
 
     """
     if metabolite._reaction:
@@ -485,27 +476,35 @@ def generate_ode(metabolite):
     return ode
 
 
-def _ignore_h_and_h2o(reaction):
-    """Remove hydrogen and water from reactions.
+def _remove_metabolites_from_rate(reaction):
+    """Remove metabolites from a copy of the reaction before creating the rate.
 
-    Designed for internal use. Remove hydrogen and water from reactions to
-    prevent their inclusion in simulation. Does not effect water and hydrogen
-    boundary reactions.
+    Warnings
+    --------
+    This method is intended for internal use only.
     """
     reaction = reaction.copy()
-    for met, coeff in iteritems(reaction.metabolites):
-        # Must be water or hydrogen.
-        if met.elements == {"H": 2, "O": 1} or met.elements == {"H": 1}:
-            # Must not be an boundary reaction.
-            if not reaction.boundary:
-                reaction.subtract_metabolites({met: coeff})
+    # Get exclusion criteria and reaction metabolites
+    exclusion_criteria_dict = MASSCONFIGURATION.exclude_metabolites_from_rates
+    metabolites_to_exclude = []
+    # Iterate through attributes and exclusion values
+    for attr, exclusion_values in iteritems(exclusion_criteria_dict):
+        exclusion_values = [
+            getattr(value, attr) if hasattr(value, attr) else value
+            for value in exclusion_values]
+        # Iterate through reaction metabolites
+        for met in list(reaction.metabolites):
+            met_value = getattr(met, attr)
+            # Add metabolite to be excluded if it matches the criteria
+            if met_value in exclusion_values:
+                metabolites_to_exclude += [str(met)]
+
+    # Remove metabolites from reaction copy
+    reaction.subtract_metabolites({
+        met: coeff for met, coeff in iteritems(reaction.metabolites)
+        if str(met) in metabolites_to_exclude})
 
     return reaction
-
-# def _remove_h_from_rate(reaction, rate)
-
-
-# def _remove_h2o_from_rate(reaction, rate)
 
 
 # Internal
@@ -581,3 +580,11 @@ def _apply_func_to_expressions(sympy_expr, function, args=None):
         new_expr = func(sympy_expr)
 
     return new_expr
+
+
+__all__ = (
+    "Keq2k", "k2Keq", "strip_time", "generate_mass_action_rate_expression",
+    "generate_foward_mass_action_rate_expression",
+    "generate_reverse_mass_action_rate_expression",
+    "generate_mass_action_ratio", "generate_disequilibrium_ratio",
+    "create_custom_rate", "generate_ode",)

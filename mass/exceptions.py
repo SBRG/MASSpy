@@ -8,3 +8,6 @@ class MassSBMLError(Exception):
 
 class MassSimulationError(Exception):
     """Simulation error class."""
+
+
+__all__ = ("MassSBMLError", "MassSimulationError")

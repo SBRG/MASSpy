@@ -1,44 +1,65 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""
+EnzymeModuleReaction is a class for holding information regarding enzymatic reactions.
+
+The :class:`EnzymeModuleReaction` class inherits and extends the
+:class:`~.MassReaction` class. It is designed to represent the reactions
+and transitions involving :class:`~.EnzymeModuleSpecies`\ s represented in the
+:class:`~.EnzymeModule` class.
+
+The enzyme specific attributes on the :class:`EnzymeModuleReaction` are the
+following:
+
+    * :attr:`~EnzymeModuleReaction.enzyme_module_id`
+
+Some other important points about the :class:`EnzymeModuleReaction` include:
+
+    * If the :attr:`name` attribute is not set upon initializing, it is
+      automatically generated using the enzyme specific attributes of the
+      associated :class:`~.EnzymeModuleSpecies`\ s.
+    * Even though :class:`~.MassReaction`\ s are catalyzed by enzymes, an
+      enzymatic reaction in the context of this module will refer to reactions
+      that involve :class:`~.EnzymeModuleSpecies`\ (s) and are associated with
+      an :class:`~.EnzymeModule`.
+
+"""  # noqa
 from collections import defaultdict
 
-from mass.core.massreaction import MassReaction
-from mass.enzyme_modules.enzyme_module_form import EnzymeModuleForm
+from mass.core.mass_reaction import MassReaction
+from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 
 
 class EnzymeModuleReaction(MassReaction):
-    """Class for representing a reaction containing an EnzymeModuleForm.
+    """Class representing enzymatic reaction in an :class:`~.EnzymeModule`.
 
     Parameters
     ----------
     id_or_reaction: str, MassReaction, EnzymeModuleReaction
-        Either a string identifier to associate with the EnzymeModuleReaction,
-        or an existing EnzymeModuleReaction object. If an existing
-        EnzymeModuleReaction or MassReaction object is provided, a new
-        EnzymeModuleReaction object is instantiated with the same properties as
-        the original object.
-    name: str, optional
-        A human readable name for the reaction.
-    subsystem: str, optional
-        The subsystem where the reaction is meant to occur.
-    reversible: bool, optional
+        A string identifier to associate with the enzymatic reaction, or an
+        existing reaction object. If an existing reaction object is
+        provided, a new :class:`EnzymeModuleReaction` is instantiated with the
+        same properties as the original reaction.
+    name : str
+        A human readable name for the enzymatic reaction.
+    subsystem : str
+        The subsystem where the enzymatic reaction is meant to occur.
+    reversible : bool
         The kinetic reversibility of the reaction. Irreversible reactions have
-        an equilibrium constant of infinity and a reverse rate constant of 0.
-        If not provided, the reaction is assumed to be reversible.
+        an equilibrium constant and a reverse rate constant as set in the
+        :attr:`~.MassBaseConfiguration.irreversible_Keq` and
+        :attr:`~.MassBaseConfiguration.irreversible_kr` attributes of the
+        :class:`~.MassConfiguration`. Default is ``True``.
 
     Attributes
     ----------
-    enzyme_module_id: str, optional
-        The identifier of the EnzymeModule represented by the EnzymeModuleForm.
-    steady_state_flux: float, optional
-        The stored (typically steady state) flux for the reaction. Stored flux
-        values can be accessed for operations such as PERC calculations.
+    enzyme_module_id : str
+        The identifier of the associated :class:`~.EnzymeModule`.
 
     """
 
     def __init__(self, id_or_reaction=None, name="", subsystem="",
                  reversible=True, steady_state_flux=None, enzyme_module_id=""):
-        """Initialize the MassReaction Object."""
+        """Initialize the EnzymeModuleReaction."""
         super(EnzymeModuleReaction, self).__init__(
             id_or_reaction=id_or_reaction, name=name, subsystem=subsystem,
             reversible=reversible, steady_state_flux=steady_state_flux)
@@ -49,28 +70,32 @@ class EnzymeModuleReaction(MassReaction):
             self.enzyme_module_id = enzyme_module_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
-        """Generate a name for the EnzymeModuleReaction based on bound ligands.
+        r"""Generate a name for the enzymatic reaction based on bound ligands.
 
-        The name is generated based on, bound_catalytic and bound_effector
-        attributes of the EnzymeModuleForms involved in the enzyme module
-        reactions.
+        Notes
+        -----
+        * The :attr:`~.EnzymeModuleSpecies.bound_catalytic` and
+          :attr:`~.EnzymeModuleSpecies.bound_effectors` attributes of the
+          associated :class:`~.EnzymeModuleSpecies` are used in generating
+          the name.
 
         Parameters
         ----------
-        update_enzyme: bool, optional
-            If True, update the name attribute of the enzyme form in
-            addition to returning the automatically generated name of the
-            enzyme form as a str. Default is False.
+        update_enzyme : bool
+            If ``True``, update the :attr:`name` attribute of the enzymatic
+            reaction in addition to returning the generated name.
+            Default is ``False``.
 
         Returns
         -------
-        name: A str representing the name of the enzyme reaction.
+        str
+            String representing the name of the :class:`EnzymeModuleReaction`.
 
         """
         name = ""
         items = defaultdict(list)
         for met in self.metabolites:
-            key = "Enz" if isinstance(met, EnzymeModuleForm) else "Lig"
+            key = "Enz" if isinstance(met, EnzymeModuleSpecies) else "Lig"
             key += " React" if met in self.reactants else " Prod"
             items[key].append(met)
 
@@ -111,3 +136,6 @@ class EnzymeModuleReaction(MassReaction):
             self.name = name
 
         return name
+
+
+__all__ = ("EnzymeModuleReaction",)

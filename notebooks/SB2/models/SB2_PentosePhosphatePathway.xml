@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -142,8 +142,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGL" value="122.323111606384"/>
             <localParameter id="Keq_R_PGL" value="1000"/>
+            <localParameter id="kf_R_PGL" value="122.323111606384"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -241,8 +241,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_RPI" value="2.57"/>
             <localParameter id="kf_R_RPI" value="10564.6200507944"/>
+            <localParameter id="Keq_R_RPI" value="2.57"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -280,8 +280,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TKT1" value="1595.95197455381"/>
             <localParameter id="Keq_R_TKT1" value="1.2"/>
+            <localParameter id="kf_R_TKT1" value="1595.95197455381"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -402,8 +402,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GTHOr" value="53.3298118727398"/>
             <localParameter id="Keq_R_GTHOr" value="100"/>
+            <localParameter id="kf_R_GTHOr" value="53.3298118727398"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -436,8 +436,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GSHR" value="0.0412573673870334"/>
             <localParameter id="Keq_R_GSHR" value="2"/>
+            <localParameter id="kf_R_GSHR" value="0.0412573673870334"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -448,6 +448,9 @@
         <listOfProducts>
           <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_g6p_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -465,8 +468,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_g6p_c" value="1"/>
             <localParameter id="kf_R_SK_g6p_c" value="0.220727349169645"/>
+            <localParameter id="Keq_R_SK_g6p_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -537,6 +540,9 @@
         <listOfProducts>
           <speciesReference species="M_co2_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_co2_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -566,6 +572,9 @@
         <listOfProducts>
           <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -595,6 +604,9 @@
         <listOfProducts>
           <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h2o_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>

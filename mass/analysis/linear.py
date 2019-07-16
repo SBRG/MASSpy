@@ -1,5 +1,31 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""
+Containins basic matrix operations that can be applied to a :mod:`mass` model.
+
+To assist with various matrix operations using different packages, the
+following values can be provided to the ``matrix_type`` argument to set the
+return type of the output. Valid matrix types include:
+
+* ``'dense'`` for a :class:`numpy.ndarray`
+* ``'dok'`` for a :class:`scipy.sparse.dok_matrix`
+* ``'lil'`` for a :class:`scipy.sparse.lil_matrix`
+* ``'DataFrame'`` for a :class:`pandas.DataFrame`
+* ``'symbolic'`` for a
+  :class:`sympy.MutableDenseMatrix <sympy.matrices.dense.MutableDenseMatrix>`
+
+For all matrix types, species (excluding genes) are the row indicies and
+reactions are the column indicies.
+
+There are also several methods that are nearly identical to :mod:`scipy.linalg`
+methods, with the main exception being that matrix conversions are performed
+beforehand to ensure that valid input is passed to the scipy method. These
+methods include:
+
+* :func:`~mass.analysis.linear.svd`
+* :func:`~mass.analysis.linear.eig`
+
+"""
+
 import numpy as np
 
 import pandas as pd
@@ -22,30 +48,27 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
 
     Parameters
     ----------
-    model: mass.MassModel
-        The MassModel object to construct the matrix for.
-    use_parameter_values: bool, optional
+    model : MassModel
+        The :class:`~.MassModel` to construct the matrix for.
+    use_parameter_values : bool
         Whether to substitute the numerical values for parameters into the
-        matrix. If True, then numerical values of the kinetic parameters are
-        substituted into the matrix. Otherwise parametrs in the matrix are
-        left as symbols.
-    use_concentration_values: bool, optional
+        matrix. If ``True`` then numerical values of the kinetic parameters
+        are substituted into the matrix. Otherwise parameters in the matrix
+        are left as symbols.
+    use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
-        matrix. If True, then numerical values of the initial conditions are
-        substituted into the matrix. Otherwise species concentrations in the
-        matrix are left as symbols.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
+        matrix. If ``True`` then numerical values of the initial conditions
+        are substituted into the matrix. Otherwise species concentrations in
+        the matrix are left as symbols.
+    matrix_type : str
         A string identifiying the desired format for the returned matrix.
-        Types can include 'dense' for a standard numpy.array, 'dok' or 'lil' to
-        obtain the corresponding scipy.sparse matrix, 'DataFrame' for a
-        pandas.DataFrame, and 'symbolic' for a sympy.MutableDenseMatrix. For
-        all matrix types, species (excluding  genes) are the row indicies and
-        reactions are the column indicies. Defaults to "dense".
+        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        for more information on the ``matrix_type``
 
     Returns
     -------
-    gradient_mat: matrix of type 'matrix_type'
-        The gradient matrix for the model returned as the given matrix_type.
+    matrix of type ``matrix_type``
+        The gradient matrix for the model.
 
     """
     # Get model rates and metabolites dependent on time.
@@ -93,35 +116,34 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
           matrix_type="dense"):
     """Create the kappa matrix for a given model.
 
+    Notes
+    -----
     The kappa matrix is the diagnolization of the norms for the rows in the
     gradient matrix.
 
     Parameters
     ----------
-    model: mass.MassModel
-        The MassModel object to construct the matrix for.
-    use_parameter_values: bool, optional
+    model : MassModel
+        The :class:`~.MassModel` to construct the matrix for.
+    use_parameter_values : bool
         Whether to substitute the numerical values for parameters into the
-        matrix. If True, then numerical values of the kinetic parameters are
-        substituted into the matrix. Otherwise parametrs in the matrix are
-        left as symbols.
-    use_concentration_values: bool, optional
+        matrix. If ``True`` then numerical values of the kinetic parameters
+        are substituted into the matrix. Otherwise parameters in the matrix
+        are left as symbols.
+    use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
-        matrix. If True, then numerical values of the initial conditions are
-        substituted into the matrix. Otherwise species concentrations in the
-        matrix are left as symbols.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
+        matrix. If ``True`` then numerical values of the initial conditions
+        are substituted into the matrix. Otherwise species concentrations in
+        the matrix are left as symbols.
+    matrix_type : str
         A string identifiying the desired format for the returned matrix.
-        Types can include 'dense' for a standard numpy.array, 'dok' or 'lil' to
-        obtain the corresponding scipy.sparse matrix, 'DataFrame' for a
-        pandas.DataFrame, and 'symbolic' for a sympy.MutableDenseMatrix. For
-        all matrix types, species (excluding  genes) are the row indicies and
-        reactions are the column indicies. If None, defaults to "dense".
+        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        for more information on the ``matrix_type``.
 
     Returns
     -------
-    kappa_matrix: matrix of type 'matrix_type'
-        The kappa matrix for the model returned as the given matrix_type.
+    matrix of type ``matrix_type``
+        The kappa matrix for the model.
 
     """
     gradient_matrix = gradient(model, use_parameter_values,
@@ -140,37 +162,33 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
           matrix_type="dense"):
     """Create the gamma matrix for a given model.
 
-    The gamma matrix are the 1-norms of the gradient matrix.
+    Notes
+    -----
+    The gamma matrix is composed of the 1-norms of the gradient matrix.
 
     Parameters
     ----------
-    model: mass.MassModel
-        The MassModel object to construct the matrix for.
-    strip_time: bool, optional
-        If True, will strip the time dependency on concentration solutions in
-        the returned matrix. (e.g. MetabID(t) -> MetabID)
-    use_parameter_values: bool, optional
+    model : MassModel
+        The :class:`~.MassModel` to construct the matrix for.
+    use_parameter_values : bool
         Whether to substitute the numerical values for parameters into the
-        matrix. If True, then numerical values of the kinetic parameters are
-        substituted into the matrix. Otherwise parametrs in the matrix are
-        left as symbols.
-    use_concentration_values: bool, optional
-        Whether to substitute the numerical values for concentrations into the
-        matrix. If True, then numerical values of the initial conditions are
-        substituted into the matrix. Otherwise species concentrations in the
-        matrix are left as symbols.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
+        matrix. If ``True`` then numerical values of the kinetic parameters
+        are substituted into the matrix. Otherwise parameters in the matrix
+        are left as symbols.
+    use_concentration_values : bool
+        Whether to substitute the numerical values for concentrations into
+        the matrix. If ``True`` then numerical values of the initial
+        conditions are substituted into the matrix. Otherwise species
+        concentrations in the matrix are left as symbols.
+    matrix_type : str
         A string identifiying the desired format for the returned matrix.
-        Types can include 'dense' for a standard numpy.array, 'dok' or 'lil' to
-        obtain the corresponding scipy.sparse matrix, 'DataFrame' for a
-        pandas.DataFrame, and 'symbolic' for a sympy.MutableDenseMatrix. For
-        all matrix types, species (excluding  genes) are the row indicies and
-        reactions are the column indicies. If None, defaults to "dense".
+        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        for more information on the ``matrix_type``.
 
     Returns
     -------
-    gamma_matrix: matrix of type 'matrix_type'
-        The gamma matrix for the model returned as the given matrix_type.
+    matrix of type ``matrix_type``
+        The gamma matrix for the model.
 
     """
     gradient_matrix = gradient(model, use_parameter_values,
@@ -191,41 +209,35 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
 
     Parameters
     ----------
-    model: mass.MassModel
-        The MassModel object to construct the matrix for.
-    jacobian_type: {'Jx', 'Jv'}
-        Whether to obtain the jacobian matrix with respect to metabolites (Jx),
-        or to obtain the jacobian matrix with respect to the reactions (Jv).
-        Default is 'Jx'.
-    strip_time: bool, optional
-        If True, will strip the time dependency on concentration solutions in
-        the returned matrix. (e.g. MetabID(t) -> MetabID)
-    use_parameter_values: bool, optional
+    model : MassModel
+        The :class:`~.MassModel` to construct the matrix for.
+    jacobian_type: str
+        Either the string ``'Jx'`` to obtain the jacobian matrix with respect
+        to species, or the string ``'Jv'`` to obtain the jacobian matrix
+        with respect to the reactions. Default is ``'Jx'``.
+    use_parameter_values : bool
         Whether to substitute the numerical values for parameters into the
-        matrix. If True, then numerical values of the kinetic parameters are
-        substituted into the matrix. Otherwise parametrs in the matrix are
-        left as symbols.
-    use_concentration_values: bool, optional
+        matrix. If ``True`` then numerical values of the kinetic parameters
+        are substituted into the matrix. Otherwise parameters in the matrix
+        are left as symbols.
+    use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
-        matrix. If True, then numerical values of the initial conditions are
-        substituted into the matrix. Otherwise species concentrations in the
-        matrix are left as symbols.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
+        matrix. If ``True`` then numerical values of the initial conditions
+        are substituted into the matrix. Otherwise species concentrations in
+        the matrix are left as symbols.
+    matrix_type : str
         A string identifiying the desired format for the returned matrix.
-        Types can include 'dense' for a standard numpy.array, 'dok' or 'lil' to
-        obtain the corresponding scipy.sparse matrix, 'DataFrame' for a
-        pandas.DataFrame, and 'symbolic' for a sympy.MutableDenseMatrix. For
-        all matrix types, species (excluding  genes) are the row indicies and
-        reactions are the column indicies. If None, defaults to "dense".
+        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        for more information on the ``matrix_type``.
 
     Returns
     -------
-    jacobian_matrix: matrix of type 'matrix_type'
-        The jacobian matrix for the model returned as the given matrix_type.
+    matrix of type ``matrix_type``
+        The jacobian matrix for the model.
 
     """
     if jacobian_type not in {"Jx", "Jv"}:
-        raise ValueError("jacobian_type must be either 'Jx' or Jv'")
+        raise ValueError("jacobian_type must be either 'Jx' or 'Jv'")
 
     gradient_matrix = gradient(model, use_parameter_values,
                                use_concentration_values,
@@ -247,39 +259,40 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
 
 
 def nullspace(matrix, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the nullspace of `matrix`.
+    """Compute an approximate basis for the nullspace of a matrix.
 
-    The algorithm used by this function is based on the singular value
-    decomposition of `matrix`.
-
-    Parameters
-    ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
-        array with length k will be treated as a 2-D with shape (1, k).
-    atol: float, optional
-        The absolute tolerance for a zero singular value.  Singular values
-        smaller than `atol` are considered to be zero.
-    rtol: float, optional
-        The relative tolerance.  Singular values less than rtol*smax are
-        considered to be zero, where smax is the largest singular value.
-
-    Returns
-    -------
-    ns: ndarray
-        If `matrix` is an array with shape (m, k), then `ns` will be an array
-        with shape (k, n), where n is the estimated dimension of the
-        nullspace of `matrix`.  The columns of `ns` are a basis for the
-        nullspace; each element in numpy.dot(A, ns) will be approximately
-        zero.
+    The algorithm used by this function is based on singular value
+    decomposition.
 
     Notes
     -----
-    If both `atol` and `rtol` are positive, the combined tolerance is the
+    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
     maximum of the two; that is::
+
         tol = max(atol, rtol * smax)
-    Singular values smaller than `tol` are considered to be zero.
+
+    Singular values smaller than ``tol`` are considered to be zero.
+
+    Parameters
+    ----------
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
+    atol : float
+        The absolute tolerance for a zero singular value.  Singular values
+        smaller than ``atol`` are considered to be zero.
+    rtol : float
+        The relative tolerance.  Singular values less than ``rtol * smax`` are
+        considered to be zero, where **smax** is the largest singular value.
+
+    Returns
+    -------
+    ns : numpy.ndarray
+        If ``matrix`` is an array with shape (m, k), then **ns** will be an
+        array with shape (k, n), where 'n' is the estimated dimension of the
+        nullspace of ``matrix``.  The columns of **ns** are a basis for the
+        nullspace; each element in the dot product of the matrix
+        and the nullspace will be approximately 0.
 
     """
     matrix = np.atleast_2d(_ensure_dense_matrix(matrix))
@@ -297,43 +310,44 @@ def nullspace(matrix, atol=1e-13, rtol=0):
 
 
 def left_nullspace(matrix, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the left nullspace of `matrix`.
+    """Compute an approximate basis for the left nullspace of a matrix.
 
-    The algorithm used by this function is based on the singular value
-    decomposition of `matrix`.
-
-    Parameters
-    ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
-        array with length k will be treated as a 2-D with shape (1, k).
-    atol: float, optional
-        The absolute tolerance for a zero singular value.  Singular values
-        smaller than `atol` are considered to be zero.
-    rtol: float, optional
-        The relative tolerance.  Singular values less than rtol*smax are
-        considered to be zero, where smax is the largest singular value.
-
-    Returns
-    -------
-    lns: ndarray
-        If `matrix` is an array with shape (m, k), then `lns` will be an array
-        with shape (n, m), where n is the estimated dimension of the
-        left nullspace of `matrix`.  The rows of `lns` are a basis for the
-        left nullspace; each element in numpy.dot(lns A) will be
-        approximately zero.
-
-    See Also
-    --------
-    nullspace: Base function.
+    The algorithm used by this function is based on singular value
+    decomposition.
 
     Notes
     -----
-    If both `atol` and `rtol` are positive, the combined tolerance is the
+    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
     maximum of the two; that is::
+
         tol = max(atol, rtol * smax)
-    Singular values smaller than `tol` are considered to be zero.
+
+    Singular values smaller than ``tol`` are considered to be zero.
+
+    Parameters
+    ----------
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
+    atol : float
+        The absolute tolerance for a zero singular value.  Singular values
+        smaller than ``atol`` are considered to be zero.
+    rtol : float
+        The relative tolerance.  Singular values less than ``rtol * smax`` are
+        considered to be zero, where **smax** is the largest singular value.
+
+    Returns
+    -------
+    lns : numpy.ndarray
+        If ``matrix`` is an array with shape (m, k), then **lns** will be an
+        array with shape (n, m), where 'n' is the estimated dimension of the
+        left nullspace of ``matrix``.  The rows of **lns** are a basis for the
+        left nullspace; each element in the dot product of the matrix
+        and the left nullspace will be approximately 0.
+
+    See Also
+    --------
+    :func:`nullspace` : Base function.
 
     """
     lns = nullspace(matrix.T, atol, rtol).T
@@ -341,38 +355,39 @@ def left_nullspace(matrix, atol=1e-13, rtol=0):
 
 
 def columnspace(matrix, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the columnspace of `matrix`.
+    """Compute an approximate basis for the columnspace of a matrix.
 
-    This function utilizes the scipy.linalg.qr method to obtain an orthogonal
-    basis for the columnspace of `matrix`.
-
-    Parameters
-    ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
-        array with length k will be treated as a 2-D with shape (1, k).
-    atol: float, optional
-        The absolute tolerance for a zero singular value.  Singular values
-        smaller than `atol` are considered to be zero.
-    rtol: float, optional
-        The relative tolerance.  Singular values less than rtol*smax are
-        considered to be zero, where smax is the largest singular value.
-
-    Returns
-    -------
-    cs: numpy.ndarray
-        If `matrix` is an array with shape (m, k), then `cs` will be an array
-        with shape (m, n), where n is the estimated dimension of the
-        columnspace of `matrix`. The columns of cs are a basis for the
-        columnspace.
+    This function utilizes the :func:`scipy.linalg.qr` function to obtain an
+    orthogonal basis for the columnspace of the matrix.
 
     Notes
     -----
-    If both `atol` and `rtol` are positive, the combined tolerance is the
+    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
     maximum of the two; that is::
+
         tol = max(atol, rtol * smax)
-    Singular values smaller than `tol` are considered to be zero.
+
+    Singular values smaller than ``tol`` are considered to be zero.
+
+    Parameters
+    ----------
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
+    atol : float
+        The absolute tolerance for a zero singular value.  Singular values
+        smaller than ``atol`` are considered to be zero.
+    rtol : float
+        The relative tolerance.  Singular values less than ``rtol * smax`` are
+        considered to be zero, where **smax** is the largest singular value.
+
+    Returns
+    -------
+    cs : numpy.ndarray
+        If ``matrix`` is an array with shape (m, k), then **cs** will be an
+        array with shape (m, n), where 'n' is the estimated dimension of the
+        columnspace of ``matrix``. The columns of **cs** are a basis for the
+        columnspace.
 
     """
     matrix = _ensure_dense_matrix(matrix)
@@ -391,41 +406,43 @@ def columnspace(matrix, atol=1e-13, rtol=0):
 
 
 def rowspace(matrix, atol=1e-13, rtol=0):
-    """Compute an approximate basis for the columnspace of `matrix`.
+    """Compute an approximate basis for the rowspace of a matrix.
 
-    This function utilizes the scipy.linalg.qr method to obtain an orthogonal
-    basis for the columnspace of `matrix`.
-
-    Parameters
-    ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
-        array with length k will be treated as a 2-D with shape (1, k).
-    atol: float, optional
-        The absolute tolerance for a zero singular value.  Singular values
-        smaller than `atol` are considered to be zero.
-    rtol: float, optional
-        The relative tolerance.  Singular values less than rtol*smax are
-        considered to be zero, where smax is the largest singular value.
-
-    Returns
-    -------
-    rs: numpy.ndarray
-        If `matrix` is an array with shape (m, k), then `rs` will be an array
-        with shape (m, n), where n is the estimated dimension of the rowspace
-        of `matrix`. The columns of rs are a basis for the rowspace.
-
-    See Also
-    --------
-    columnspace: Base function.
+    This function utilizes the :func:`scipy.linalg.qr` function to obtain an
+    orthogonal basis for the rowspace of the matrix.
 
     Notes
     -----
-    If both `atol` and `rtol` are positive, the combined tolerance is the
+    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
     maximum of the two; that is::
+
         tol = max(atol, rtol * smax)
-    Singular values smaller than `tol` are considered to be zero.
+
+    Singular values smaller than ``tol`` are considered to be zero.
+
+    Parameters
+    ----------
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
+    atol : float
+        The absolute tolerance for a zero singular value.  Singular values
+        smaller than ``atol`` are considered to be zero.
+    rtol : float
+        The relative tolerance.  Singular values less than ``rtol * smax`` are
+        considered to be zero, where **smax** is the largest singular value.
+
+    Returns
+    -------
+    rs : numpy.ndarray
+        If ``matrix`` is an array with shape (m, k), then **rs** will be an
+        array with shape (n, k), where 'n' is the estimated dimension of the
+        rowspace of ``matrix``. The columns of **rs** are a basis for the
+        rowspace.
+
+    See Also
+    --------
+    :func:`columnspace` : Base function.
 
     """
     rs = columnspace(matrix.T, atol, rtol)
@@ -435,40 +452,41 @@ def rowspace(matrix, atol=1e-13, rtol=0):
 def matrix_rank(matrix, atol=1e-13, rtol=0):
     """Estimate the rank (i.e. the dimension of the nullspace) of a matrix.
 
-    The algorithm used by this function is based on the singular value
-    decomposition of `matrix`.
-
-    Parameters
-    ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to obtain the rank of. Note: `matrix` should be at most 2-D.
-        A 1-D array with length k will be treated as a 2-D with shape (1, k).
-    atol: float, optional
-        The absolute tolerance for a zero singular value.  Singular values
-        smaller than `atol` are considered to be zero.
-    rtol: float, optional
-        The relative tolerance.  Singular values less than rtol*smax are
-        considered to be zero, where smax is the largest singular value.
-
-    Returns
-    -------
-    rank: int
-        The estimated rank of the matrix.
+    The algorithm used by this function is based on singular value
+    decomposition. Taken from the scipy cookbook.
 
     Notes
     -----
-    If both `atol` and `rtol` are positive, the combined tolerance is the
+    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
     maximum of the two; that is::
+
         tol = max(atol, rtol * smax)
-    Singular values smaller than `tol` are considered to be zero.
-    Taken from the scipy cookbook.
+
+    Singular values smaller than ``tol`` are considered to be zero.
+
+    Parameters
+    ----------
+    matrix : array-like
+        The matrix to obtain the rank for. The matrix should be at most
+        2-D. A 1-D array with length 'k' will be treated as a 2-D with
+        shape (1, k).
+    atol : float
+        The absolute tolerance for a zero singular value.  Singular values
+        smaller than ``atol`` are considered to be zero.
+    rtol : float
+        The relative tolerance.  Singular values less than ``rtol * smax`` are
+        considered to be zero, where **smax** is the largest singular value.
+
+    Returns
+    -------
+    rank : int
+        The estimated rank of the matrix.
 
     See Also
     --------
-    numpy.linalg.matrix_rank
-        matrix_rank is basically the same as this function, but it does not
-        provide the option of the absolute tolerance.
+    :func:`numpy.linalg.matrix_rank`
+        :func:`mass.analysis.linear.matrix_rank` is nearly identical to this
+        function, but it does not provide the option of the absolute tolerance.
 
     """
     matrix = np.atleast_2d(_ensure_dense_matrix(matrix))
@@ -479,29 +497,32 @@ def matrix_rank(matrix, atol=1e-13, rtol=0):
 
 
 def svd(matrix, **kwargs):
-    """Get the singular value decomposition of `matrix`.
+    """Get the singular value decomposition of a matrix.
 
-    `kwargs`` are passed on to ``scipy.linalg.svd``
-    See documentation for ``scipy.linalg.svd`` for more details.
+    ``kwargs`` are passed on to :func:`scipy.linalg.svd`.
 
     Parameters
     ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-        The matrix to decompose. Note: `matrix` should be at most 2-D.  A 1-D
-        array with length k will be treated as a 2-D with shape (1, k).
-
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
 
     Returns
     -------
-    matrix of the same type as `matrix`.
+    U : ndarray
+        Unitary matrix having left singular vectors as columns.
+        Of shape ``(M, M)`` or ``(M, K)``, depending on `full_matrices`.
+    s : ndarray
+        The singular values, sorted in non-increasing order.
+        Of shape (K,), with ``K = min(M, N)``.
+    Vh : ndarray
+        Unitary matrix having right singular vectors as rows.
+        Of shape ``(N, N)`` or ``(K, N)`` depending on `full_matrices`.
+    For ``compute_uv=False``, only ``s`` is returned.
 
     See Also
     --------
-    scipy.linalg.svd: Base function.
-        svd and its arguments are the same as this method. The only difference
-        is that matrices of various formats are converted in order to ensure
-        the correct input for scipy.linalg.svd.
+    :func:`scipy.linalg.svd`: Base function.
 
     """
     matrix = _ensure_dense_matrix(matrix)
@@ -509,38 +530,36 @@ def svd(matrix, **kwargs):
 
 
 def eig(matrix, left=False, right=False, **kwargs):
-    """Get the eigenvalues of `matrix`.
+    """Get the eigenvalues of a matrix.
 
-    `kwargs`` are passed on to ``scipy.linalg.eig``
-    See documentation for ``scipy.linalg.eig`` for more details.
+    `kwargs`` are passed on to :func:`scipy.linalg.eig`
 
     Parameters
     ----------
-    matrix: numpy.ndarray, scipy.sparse dok matrix or lil matrix,
-        pandas.DataFrame, or sympy.Matrix
-    left: bool, optional
-        Whether to calculate and return left eigenvectors. Default is False.
-    right: bool, optional
-        Whether to calculate and return right eigenvectors. Default is True.
+    matrix : array-like
+        The matrix to decompose. The matrix should be at most 2-D. A 1-D
+        array with length 'k' will be treated as a 2-D with shape (1, k).
+    left : bool
+        Whether to calculate and return left eigenvectors.
+        Default is ``False``.
+    right : bool
+        Whether to calculate and return right eigenvectors.
+        Default is ``True``.
 
     Returns
     -------
-    w: (M,) or (2, M) double or complex ndarray
+    w : (M,) double or complex ndarray
         The eigenvalues, each repeated according to its multiplicity.
-        The shape is (M,) unless homogeneous_eigvals=True.
-    vl: (M, M) double or complex ndarray
-        The normalized left eigenvector corresponding to the eigenvalue w[i]
-        is the column vl[:,i]. Only returned if left=True.
-    vr: (M, M) double or complex ndarray
-        The normalized right eigenvector corresponding to the eigenvalue w[i]
-        is the column vr[:,i]. Only returned if right=True.
+    vl : (M, M) double or complex ndarray
+        The normalized left eigenvector corresponding to the eigenvalue
+        ``w[i]`` is the column v[:,i]. Only returned if ``left=True``.
+    vr : (M, M) double or complex ndarray
+        The normalized right eigenvector corresponding to the eigenvalue
+        ``w[i]`` is the column ``vr[:,i]``.  Only returned if ``right=True``.
 
     See Also
     --------
-    scipy.linalg.eig: Base function.
-        svd and its arguments are the same as this method. The only difference
-        is that matrices of various formats are converted in order to ensure
-        the correct input for scipy.linalg.eig.
+    :func:`scipy.linalg.eig`: Base function.
 
     """
     matrix = _ensure_dense_matrix(matrix)
@@ -569,3 +588,8 @@ def _ensure_dense_matrix(matrix):
                         "numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
                         "pandas.DataFrame, or sympy.Matrix.")
     return matrix
+
+
+__all__ = (
+    "columnspace", "eig", "gamma", "gradient", "jacobian", "kappa",
+    "left_nullspace", "matrix_rank", "nullspace", "rowspace", "svd")

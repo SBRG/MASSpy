@@ -1,18 +1,5 @@
 {
     "_enzyme_concentration_total": 0.001,
-    "_enzyme_module_forms_categorized": {
-        "Free": [
-            "g6pdh2r_GN_P_c",
-            "g6pdh2r_GN_c",
-            "g6pdh2r_G_P_c",
-            "g6pdh2r_G_c",
-            "g6pdh2r_c"
-        ],
-        "Inhibited": [
-            "g6pdh2r_A_CI_c",
-            "g6pdh2r_N_PI_c"
-        ]
-    },
     "_enzyme_module_ligands_categorized": {
         "Cofactors": [
             "nadp_c"
@@ -50,20 +37,24 @@
             "G6PDH2r_2"
         ]
     },
+    "_enzyme_module_species_categorized": {
+        "Free": [
+            "g6pdh2r_GN_P_c",
+            "g6pdh2r_GN_c",
+            "g6pdh2r_G_P_c",
+            "g6pdh2r_G_c",
+            "g6pdh2r_c"
+        ],
+        "Inhibited": [
+            "g6pdh2r_A_CI_c",
+            "g6pdh2r_N_PI_c"
+        ]
+    },
     "_enzyme_net_flux": 0.20999999999999638,
     "_enzyme_net_flux_equation": "kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7",
     "compartments": {
         "c": "Cytosol"
     },
-    "enzyme_module_forms": [
-        "g6pdh2r_c",
-        "g6pdh2r_G_c",
-        "g6pdh2r_GN_c",
-        "g6pdh2r_GN_P_c",
-        "g6pdh2r_G_P_c",
-        "g6pdh2r_N_PI_c",
-        "g6pdh2r_A_CI_c"
-    ],
     "enzyme_module_ligands": [
         "g6p_c",
         "_6pgl_c",
@@ -80,6 +71,15 @@
         "G6PDH2r_5",
         "G6PDH2r_6",
         "G6PDH2r_7"
+    ],
+    "enzyme_module_species": [
+        "g6pdh2r_c",
+        "g6pdh2r_G_c",
+        "g6pdh2r_GN_c",
+        "g6pdh2r_GN_P_c",
+        "g6pdh2r_G_P_c",
+        "g6pdh2r_N_PI_c",
+        "g6pdh2r_A_CI_c"
     ],
     "enzyme_modules": [],
     "genes": [],

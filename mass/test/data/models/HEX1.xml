@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -130,8 +130,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HEX1_1" value="1"/>
             <localParameter id="kf_R_HEX1_1" value="1000000"/>
+            <localParameter id="Keq_R_HEX1_1" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -210,8 +210,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
             <localParameter id="kf_HEX1_G" value="57889"/>
+            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -430,7 +430,7 @@
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="HEX1_enzyme_module_forms" groups:kind="collection">
+      <groups:group groups:id="HEX1_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="HEX1" groups:idRef="M_hex1_c"/>
           <groups:member groups:name="HEX1-atp complex" groups:idRef="M_hex1_A_c"/>
@@ -483,7 +483,7 @@
           <groups:member groups:name="Products" groups:idRef="HEX1_enzyme_module_ligands_categorized_Category3"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="HEX1_enzyme_module_forms_categorized_Category0" groups:name="Free" groups:kind="collection">
+      <groups:group groups:id="HEX1_enzyme_module_species_categorized_Category0" groups:name="Free" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="HEX1-glc__D-atp complex" groups:idRef="M_hex1_AG_c"/>
           <groups:member groups:name="HEX1-atp complex" groups:idRef="M_hex1_A_c"/>
@@ -491,17 +491,17 @@
           <groups:member groups:name="HEX1" groups:idRef="M_hex1_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="HEX1_enzyme_module_forms_categorized_Category1" groups:name="Inhibited" groups:kind="collection">
+      <groups:group groups:id="HEX1_enzyme_module_species_categorized_Category1" groups:name="Inhibited" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="HEX1-adp complex" groups:idRef="M_hex1_A_PI_c"/>
           <groups:member groups:name="HEX1-glc__D-_23dpg complex" groups:idRef="M_hex1_G_CI_c"/>
           <groups:member groups:name="HEX1-g6p complex" groups:idRef="M_hex1_G_PI_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="HEX1_enzyme_module_forms_categorized" groups:kind="collection">
+      <groups:group groups:id="HEX1_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Free" groups:idRef="HEX1_enzyme_module_forms_categorized_Category0"/>
-          <groups:member groups:name="Inhibited" groups:idRef="HEX1_enzyme_module_forms_categorized_Category1"/>
+          <groups:member groups:name="Free" groups:idRef="HEX1_enzyme_module_species_categorized_Category0"/>
+          <groups:member groups:name="Inhibited" groups:idRef="HEX1_enzyme_module_species_categorized_Category1"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category0" groups:name="product inhibition" groups:kind="collection">
@@ -552,10 +552,10 @@
         </notes>
         <groups:listOfMembers>
           <groups:member groups:idRef="HEX1_enzyme_module_ligands"/>
-          <groups:member groups:idRef="HEX1_enzyme_module_forms"/>
+          <groups:member groups:idRef="HEX1_enzyme_module_species"/>
           <groups:member groups:idRef="HEX1_enzyme_module_reactions"/>
           <groups:member groups:idRef="HEX1_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="HEX1_enzyme_module_forms_categorized"/>
+          <groups:member groups:idRef="HEX1_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="HEX1_enzyme_module_reactions_categorized"/>
         </groups:listOfMembers>
       </groups:group>

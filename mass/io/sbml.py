@@ -1,17 +1,73 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""
+SBML import and export using the :mod:`python-libsbml` package.
+
+* The SBML importer supports all versions of `SBML <http://sbml.org/Main_Page>`_
+  that are compatible with the :mod:`roadrunner` package.
+* The :mod:`sbml` module supports the latest version of
+  `python-libsbml <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/index.html>`_
+  that is compatible with the :mod:`roadrunner` package.
+* The SBML importer supports the 'fbc' and 'groups' package extension.
+* The SBML exporter writes SBML Level 3 models.
+* Annotation information is stored on the :mod:`mass` objects.
+* Information from the 'groups' package is read.
+* All equations are written via `MathML <https://www.w3.org/Math/>`_.
+
+Parsing of models using the
+`fbc extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__fbc.html>`_
+was implemented as efficiently as possible, whereas (discouraged) fallback
+solutions are not optimized for efficiency. Futhermore, because the SBML
+kinetic law is used for the reaction kinetic laws, fbc information will NOT
+be written into the SBML kinetic laws, even when the fbc package extension is
+disbaled.
+
+Notes are only supported in a minimal way relevant for kinetic models, i.e.
+structured information from notes in the form::
+
+   "<p>key: value</p>"
+
+Notes are read into the :attr:`.notes` attribute of :mod:`mass` objects when
+reading SBML files. On writing, the :attr:`.notes` attribute of :mod:`mass`
+objects dictionary is serialized to the SBML notes information.
+
+Attribute information for :class:`~.EnzymeModuleSpecies`\ s and
+:class:`~.EnzymeModuleReaction`\ s are written into the SBML object notes
+field. Upon import of the SBML, the information is read into the
+enzyme specific attribute as long as the ``"key"`` in the notes matches the
+attribute name precisely.
+
+The information specific to attributes of the :class:`~.EnzymeModule` and
+:class:`~.EnzymeModuleDict` information is stored using the
+`groups extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__groups.html>`_
+by creating an SBML 'group' representing the enzyme module containing
+additional SBML group objects for enzyme module ligands, forms, and reactions
+for the categories of the enzyme module categorized dictionary attributes.
+The remaining information is written to the the notes field of the main SBML
+group for the enzyme module. Disabling use of the 'groups' package extension
+will result in the loss of the  enzyme specific information, but it will not
+prevent :class:`~.EnzymeModuleSpecies`\ s and :class:`~.EnzymeModuleReaction`\ s
+from being written to the SBML model as species and reactions, respectively.
+
+Annotations are read and written via :attr:`annotation` attribute for
+:mod:`mass` objects.
+
+Some SBML related issues are still open, please refer to the respective issue:
+
+* update annotation format and support qualifiers (depends on decision
+  for new annotation format; https://github.com/opencobra/cobrapy/issues/684)
+* write compartment annotations and notes (depends on updated first-class
+  compartments; see https://github.com/opencobra/cobrapy/issues/760)
+* support compression on file handles (depends on solution for
+  https://github.com/opencobra/cobrapy/issues/812)
+
+"""  # noqa
+
 import datetime
 import logging
 import re
 import traceback
 from collections import defaultdict
 from io import StringIO
-
-import libsbml
-
-from six import integer_types, iteritems, itervalues, string_types
-
-from sympy import Basic, Symbol, SympifyError, mathml, sympify
 
 from cobra.core.gene import Gene
 from cobra.io.sbml import (
@@ -21,44 +77,72 @@ from cobra.io.sbml import (
     _get_doc_from_filename as _cobra_get_doc_from_filename, _parse_annotations,
     _sbase_annotations as _cobra_sbase_annotations, _sbase_notes_dict)
 
-from mass.core.massconfiguration import MassConfiguration
-from mass.core.massmetabolite import MassMetabolite
-from mass.core.massmodel import MassModel
-from mass.core.massreaction import MassReaction
-from mass.core.units import Unit, UnitDefinition, _SBML_BASE_UNIT_KINDS_DICT
+import libsbml
+
+from six import integer_types, iteritems, itervalues, string_types
+
+from sympy import Basic, Symbol, SympifyError, mathml, sympify
+
+from mass.core.mass_configuration import MassConfiguration
+from mass.core.mass_metabolite import MassMetabolite
+from mass.core.mass_model import MassModel
+from mass.core.mass_reaction import MassReaction
+from mass.core.units import SBML_BASE_UNIT_KINDS_DICT, Unit, UnitDefinition
 from mass.enzyme_modules.enzyme_module import EnzymeModule
 from mass.enzyme_modules.enzyme_module_dict import (
     EnzymeModuleDict, _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
-from mass.enzyme_modules.enzyme_module_form import (
-    EnzymeModuleForm, _make_bound_attr_str_repr)
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
+from mass.enzyme_modules.enzyme_module_species import (
+    EnzymeModuleSpecies, _make_bound_attr_str_repr)
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
 from mass.util.util import (
     _check_kwargs, _make_logger, get_subclass_specific_attributes)
 
 LOGGER = _make_logger(__name__)
+"""logging.Logger: Logger for the :mod:`~mass.io.sbml` submodule."""
+
 # -----------------------------------------------------------------------------
 # Defaults and constants for writing SBML
 # -----------------------------------------------------------------------------
 MASSCONFIGURATION = MassConfiguration()
 # For SBML level and core version, and package extension versions
 SBML_LEVEL_VERSION = (3, 1)
+"""tuple: Current level and version supported for SBML export."""
+
 FBC_VERSION = 2
+"""int: Current version of the SBML 'fbc' package extension."""
+
 GROUPS_VERSION = 1
+"""int: Current version of the SBML 'groups' package extension."""
 
 # Precompiled regex
-CHAR_RE = re.compile(r"(?P<char>_Char\d*_)")           # For ASCII Char removal
-MASS_MOIETY_RE = re.compile(r"\[\S+\]")                # For mass moieties
-SBML_MOIETY_RE = re.compile(r"Moiety")                 # For SBML moieties
-CATEGORY_GROUP_RE = re.compile(r"_Category\d$")        # For category groups
-RATE_CONSTANT_RE = re.compile(r"k_(\S*)_(fwd|rev)\Z")  # For kf & kr
-NOTES_RE = re.compile(r"\s*(\w+\s*\w*)\s*:\s*(.+)", re.DOTALL)  # For notes
+CHAR_RE = re.compile(r"(?P<char>_Char\d*_)")
+""":class:`re.Pattern`: Regex for ASCII character removal."""
+
+MASS_MOIETY_RE = re.compile(r"\[\S+\]")
+""":class:`re.Pattern`: Regex for :mod:`mass` moiety replacements."""
+
+SBML_MOIETY_RE = re.compile(r"Moiety")
+""":class:`re.Pattern`: Regex for SBML moiety replacements."""
+
+RATE_CONSTANT_RE = re.compile(r"k_(\S*)_(fwd|rev)\Z")
+""":class:`re.Pattern`: Regex for recognizing and rate constants."""
+
+_NOTES_RE = re.compile(r"\s*(\w+\s*\w*)\s*:\s*(.+)", re.DOTALL)
+""":class:`re.Pattern`: Regex for basic parsing of notes on SBML objects."""
+
+_CATEGORY_GROUP_RE = re.compile(r"_Category\d$")
+""":class:`re.Pattern`: Regex for enzyme module category groups."""
+
 # For parsing rate laws
-KLAW_POW_RE = re.compile(r"pow\((?P<arg>...*?(?=,)), (?P<exp>\d*)\)")
+_KLAW_POW_RE = re.compile(
+    r"pow\((?P<arg>...*?(?=,)), (?P<exp>[\d|\-\d]*)\)")
+""":class:`re.Pattern`: Regex for power rules in SBML kinetic laws."""
 
 # For SBO terms
 SBO_MODELING_FRAMEWORK = "SBO:0000062"
+"""str: SBO term for the modeling framework"""
 
 # COBRA Flux units
 COBRA_FLUX_UNIT = UnitDefinition(
@@ -68,11 +152,16 @@ COBRA_FLUX_UNIT = UnitDefinition(
         Unit(kind="second", exponent=-1, scale=0, multiplier=3600),
     ]
 )
+""":class:`~.UnitDefintion`: Unit definition for :mod:`cobra` flux units."""
+
 # -----------------------------------------------------------------------------
 # Functions for replacements (import/export)
 # -----------------------------------------------------------------------------
 SBML_DOT = "__SBML_DOT__"
+"""str: For replacement of the period character '.' in SBML."""
+
 NUMBER_ID_PREFIX = "_"  # To prefix identifiers with starting with numbers
+"""str: String to use as a prefix for identifiers starting with a number."""
 
 
 def _prefix_number_id(sid, obj_type=None):
@@ -173,11 +262,22 @@ def _f_reaction_rev(sid, prefix="R_"):
 
 
 F_GENE = "F_GENE"
+"""str: Key in :const:`F_REPLACE` for the gene prefix clipping function."""
+
 F_GENE_REV = "F_GENE_REV"
+"""str: Key in :const:`F_REPLACE` for the gene prefix adding function."""
+
 F_SPECIE = "F_SPECIE"
+"""str: Key in :const:`F_REPLACE` for the specie prefix clipping function."""
+
 F_SPECIE_REV = "F_SPECIE_REV"
+"""str: Key in :const:`F_REPLACE` for the specie prefix adding function."""
+
 F_REACTION = "F_REACTION"
+"""str: Key in :const:`F_REPLACE` for the reaction prefix clipping function."""
+
 F_REACTION_REV = "F_REACTION_REV"
+"""str: Key in :const:`F_REPLACE` for the reaction prefix adding function."""
 
 F_REPLACE = {
     F_GENE: _f_gene,
@@ -187,12 +287,14 @@ F_REPLACE = {
     F_REACTION: _f_reaction,
     F_REACTION_REV: _f_reaction_rev,
 }
+"""dict: Contains functions for ID clipping/adding of prefixes."""
 
-ID_ASCII_REPLACE = {
+ASCII_REPLACE = {
     "_Char45_": "__",
     "_Char91_": "_",
     "_Char93_": "_",
 }
+"""dict: Contains ASCII characters and the value for their replacement."""
 
 
 def _f_moiety_formula(formula_str):
@@ -252,8 +354,8 @@ def _remove_char_from_id(sid):
     """Remove ASCII characters from an identifier."""
     for match in CHAR_RE.finditer(sid):
         char_key = match.group("char")
-        if ID_ASCII_REPLACE.get(char_key):
-            replacement_str = ID_ASCII_REPLACE[char_key]
+        if ASCII_REPLACE.get(char_key):
+            replacement_str = ASCII_REPLACE[char_key]
         else:
             replacement_str = "_"
         sid = re.sub(char_key, replacement_str, sid)
@@ -283,18 +385,11 @@ def _get_corrected_id(item, f_items, obj_type, remove_char):
 # -----------------------------------------------------------------------------
 # MathML
 # -----------------------------------------------------------------------------
-SBML_MATH_PACKAGE_NAME = "l{0}v{1}extendedmath".format(*SBML_LEVEL_VERSION)
-MATHML_XML_NS = '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'
-REPLACE_TIME_RE = re.compile(r"\>\<ci\>t\<\/ci\>\<")
-REMOVE_MML_TAGS_RE = re.compile(r"\<mml:.*?\>|\<\/mml:.*?\>")
-
-
 def _create_math_xml_str_from_sympy_expr(sympy_equation):
     """Create a MathML string from a sympy expression to be parsed by libsbml.
 
-    This also requires removing 'mml' tags from XML representation of
-        mathematical equations.
-
+    Notes
+    -----
     Sympy expressions can be converted into their equivalent MathML string
     through the `sympy.printing.mathml` module. However, the mathml module will
     interpret '_' as a subscript and '__' as a superscript. In order to prevent
@@ -314,14 +409,16 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
     sympy_equation = sympy_equation.subs(underscore_replace)
     # Convert equation into MathML and remove tags that libsbml cannot parse
     mathml_xml = mathml(sympy_equation)
-    mathml_xml = MATHML_XML_NS.format(mathml_xml.replace("UNDERSCORE", "_"))
-    mathml_xml = REMOVE_MML_TAGS_RE.sub("", mathml_xml)
+    mathml_xml = str(
+        '<math xmlns="http://www.w3.org/1998/Math/MathML">{0}</math>'.format(
+            mathml_xml.replace("UNDERSCORE", "_")))
+    mathml_xml = re.sub(r"\<mml:.*?\>|\<\/mml:.*?\>", "", mathml_xml)
     # Fix the time symbol
-    if REPLACE_TIME_RE.search(mathml_xml):
+    if re.search(r"\>\<ci\>t\<\/ci\>\<", mathml_xml):
         time_symbol = '><csymbol encoding="text" definitionURL=' +\
                       '"http://www.sbml.org/sbml/symbols/time">' +\
                       't</csymbol><'
-        mathml_xml = REPLACE_TIME_RE.sub(time_symbol, mathml_xml)
+        mathml_xml = re.sub(r"\>\<ci\>t\<\/ci\>\<", time_symbol, mathml_xml)
     return mathml_xml
 
 
@@ -329,20 +426,22 @@ def _create_math_xml_str_from_sympy_expr(sympy_equation):
 # Read SBML
 # -----------------------------------------------------------------------------
 def read_sbml_model(filename, f_replace=None, **kwargs):
-    """Read SBML model from the given filename into a MassModel.
+    """Read SBML model from the given filename into a :mod:`mass` model.
 
-    If the given filename ends with the suffix ''.gz'' (for example,
-    ''myfile.xml.gz'),' the file is assumed to be compressed in gzip
+    If the given filename ends with the suffix ``'.gz'`` (for example,
+    ``'myfile.xml.gz'``), the file is assumed to be compressed in gzip
     format and will be automatically decompressed upon reading. Similarly,
-    if the given filename ends with ''.zip'' or ''.bz2',' the file is
-    assumed to be compressed in zip or bzip2 format (respectively).  Files
-    whose names lack these suffixes will be read uncompressed.  Note that
-    if the file is in zip format but the archive contains more than one
-    file, only the first file in the archive will be read and the rest ignored.
-    To read a gzip/zip file, libSBML needs to be configured and linked
-    with the zlib library at compile time.  It also needs to be linked
-    with the bzip2 library to read files in bzip2 format. (Both of these
-    are the default configurations for libSBML.)
+    if the given filename ends with ``'.zip'`` or ``'.bz2'``, the file is
+    assumed to be compressed in zip or bzip2 format (respectively).
+
+    Files whose names lack these suffixes will be read uncompressed. Note that
+    if the file is in zip format but the archive contains more than one file,
+    only the first file in the archive will be read and the rest are ignored.
+
+    To read a gzip/zip file, :mod:`libSBML` needs to be configured and linked
+    with the :mod:`zlib` library at compile time.  It also needs to be linked
+    with the :mod:`bz2` library to read files in bzip2 format.
+    (Both of these are the default configurations for :mod:`libSBML`.)
 
     This function supports SBML with FBC-v1 and FBC-v2. FBC-v1 models
     are converted to FBC-v2 models before reading.
@@ -351,41 +450,57 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
     if information is not available in the FBC packages, e.g.,
     CHARGE, FORMULA on species, or GENE_ASSOCIATION, SUBSYSTEM on reactions.
 
+    Notes
+    -----
+    * Provided file handles cannot be opened in binary mode, i.e., use::
+
+        with open(path, "r" as f):
+            read_sbml_model(f)
+
+    * File handles to compressed files are not supported yet.
+
     Parameters
     ----------
-    filename: path to SBML file, or SBML string, or SBML file handle
-        SBML which is read into a MassModel.
-    f_replace: dict of replacement functions for id replacement
-        Dictionary of replacement functions for gene, specie, and reaction.
-        By default the following id changes are performed on import:
-        clip G_ from genes, clip M_ from species, clip R_ from reactions
-        If no replacements should be performed, set f_replace={}.
-    number: data type of stoichiometry: {float, int}
-        In which data type should the stoichiometry be parsed.
-        Default is float.
-    set_missing_bounds: bool
-        If True, missing bounds are set to default bounds from the
-        mass.MassConfiguration.
-        Default is True.
-    remove_char: bool
-        If True, remove ASCII characters from identifiers.
-        Default is True.
-    stop_on_conversion_fail: bool
-        Whether to stop trying to load the model if a conversion process fails.
-        If False, then the loading of the model will be attempted anyways,
-        despite a potential loss of information.
-        Default is True.
+    filename : path to SBML file, SBML string, or SBML file handle
+        SBML which is read into a :mod:`mass` model.
+    f_replace : dict
+        Dictionary of replacement functions for gene, specie, and reaction. By
+        default the following id changes are performed on import: clip ``'G_'``
+        from genes, clip ``'M_'`` from species, clip ``'R_'`` from reactions.
+
+        If no replacements should be performed, set ``f_replace={}``.
+    **kwargs
+        number :
+            In which data type should the stoichiometry be parsed. Can be
+            ``float`` or ``int``.
+
+            Default is ``float``.
+        set_missing_bounds :
+            ``bool`` indicating whether to set missing bounds to the
+            default bounds from the :class:`~.MassConfiguration`.
+
+            Default is ``True``.
+        remove_char :
+            ``bool`` indicating whether to remove ASCII characters from IDs.
+
+            Default is ``True``.
+        stop_on_conversion_fail : bool
+            ``bool`` indicating whether to stop trying to load the model if a
+            conversion process fails. If ``False``, then the loading of the
+            model will be attempted anyways, despite a potential loss of
+            information.
+
+            Default is ``True``.
 
     Returns
     -------
-    mass.core.MassModel
+    MassModel or EnzymeModule
+        The generated :mod:`mass` model.
 
-    Notes
-    -----
-    Provided file handles cannot be opened in binary mode, i.e., use
-        with open(path, "r" as f):
-            read_sbml_model(f)
-    File handles to compressed files are not supported yet.
+    Raises
+    ------
+    MassSBMLError
+        Errors due to `:mass` model specific requirements.
 
     """
     # Try getting the SBMLDocument from the file 'filename' and if successful,
@@ -404,7 +519,7 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
         raise MassSBMLError(
             "Something went wrong reading the SBML model. Most likely the SBML"
             " model is not valid. Please check that your model is valid using "
-            "the `cobra.io.sbml.validate_sbml_model` function or via the "
+            "the `mass.io.sbml.validate_sbml_model` function or via the "
             "online validator at http://sbml.org/validator .\n"
             "\t`(model, errors) = validate_sbml_model(filename)`"
             "\nIf the model is valid and cannot be read please open an issue "
@@ -433,36 +548,45 @@ def _get_doc_from_filename(filename):
 
 
 def _sbml_to_model(doc, f_replace=None, **kwargs):
-    """Create MassModel from SBMLDocument.
+    """Create model from SBMLDocument.
 
     Parameters
     ----------
-    doc: libsbml.SBMLDocument
-        SBMLDocument which is read into a MassModel
-    f_replace: dict of replacement functions for id replacement
-        Dictionary of replacement functions for gene, specie, and reaction.
-        By default the following id changes are performed on import:
-        clip G_ from genes, clip M_ from species, clip R_ from reactions
-        If no replacements should be performed, set f_replace={}.
-    number: data type of stoichiometry: {float, int}
-        In which data type should the stoichiometry be parsed.
-        Default is float.
-    set_missing_bounds: bool
-        If True, missing bounds are set to default bounds from the
-        mass.MassConfiguration.
-        Default is False.
-    remove_char: bool
-        If True, remove ASCII characters from identifiers.
-        Default is True.
-    stop_on_conversion_fail: bool
-        Whether to stop trying to load the model if a conversion process fails.
-        If False, then the loading of the model will be attempted anyways,
-        despite a potential loss of information.
-        Default is True.
+    doc : libsbml.SBMLDocument
+        SBMLDocument which is read into a :mod:`mass` model.
+    f_replace : dict
+        Dictionary of replacement functions for gene, specie, and reaction. By
+        default the following id changes are performed on import: clip ``'G_'``
+        from genes, clip ``'M_'`` from species, clip ``'R_'`` from reactions.
+
+        If no replacements should be performed, set ``f_replace={}``.
+    **kwargs
+        number :
+            In which data type should the stoichiometry be parsed. Can be
+            ``float`` or ``int``.
+
+            Default is ``float``.
+        set_missing_bounds :
+            ``bool`` indicating whether to set missing bounds to the
+            default bounds from the :class:`~.MassConfiguration`.
+
+            Default is ``True``.
+        remove_char :
+            ``bool`` indicating whether to remove ASCII characters from IDs.
+
+            Default is ``True``.
+        stop_on_conversion_fail : bool
+            ``bool`` indicating whether to stop trying to load the model if a
+            conversion process fails. If ``False``, then the loading of the
+            model will be attempted anyways, despite a potential loss of
+            information.
+
+            Default is ``True``.
 
     Returns
     -------
-    mass.core.MassModel
+    MassModel or EnzymeModule
+        The generated :mod:`mass` model.
 
     Warnings
     --------
@@ -508,7 +632,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     mass_model.compartments = _read_model_compartments_from_sbml(model)
 
     # Read the MassModel species information from the SBMLDocument
-    # Includes MassMetabolites and EnzymeModuleForms, boundary conditions are
+    # Includes MassMetabolites and EnzymeModuleSpecies, boundary conditions are
     # stored in order to be added after boundary reactions.
     metabolites, boundary_conditions = _read_model_species_from_sbml(model,
                                                                      f_replace,
@@ -581,10 +705,9 @@ def _get_sbml_models_from_doc(doc, **kwargs):
             msg = "Conversion " + msg + " failed."
             if stop_on_conversion_fail:
                 raise Exception(msg)
-            else:
-                LOGGER.warning(
-                    "%s Loading of model will continue, but may yield "
-                    "unexpected results and some information loss.", msg)
+            LOGGER.warning(
+                "%s Loading of model will continue, but may yield "
+                "unexpected results and some information loss.", msg)
 
     def convert_package_extensions(plugin, new_version):
         """Convert the plugin package extension to a different version."""
@@ -686,12 +809,13 @@ def _read_model_meta_info_from_sbml(doc, model):
         meta["model.id"], meta["level"], meta["version"])
 
     packages = {}
+    math_package = "l{0}v{1}extendedmath".format(*SBML_LEVEL_VERSION)
     for k in range(doc.getNumPlugins()):
         plugin = doc.getPlugin(k)
         k, v = (plugin.getPackageName(), plugin.getPackageVersion())
         packages[k] = v
         meta["info"] += ", {0}-v{1}".format(k, v)
-        if k not in [SBML_MATH_PACKAGE_NAME, "fbc", "groups"]:
+        if k not in [math_package, "fbc", "groups"]:
             LOGGER.warning(
                 "SBML package '%s' not supported by masspy. Therefore the "
                 "package information is not parsed.", k)
@@ -825,7 +949,7 @@ def _read_global_parameters_from_sbml(model, reactions, f_replace, **kwargs):
 def _read_model_species_from_sbml(model, f_replace, **kwargs):
     """Read SBML species and boundary conditions and return them.
 
-    MassMetabolites and EnzymeModuleForms are created and returned in a list.
+    MassMetabolites and EnzymeModuleSpecies are created and returned in a list.
     Boundary conditions are returned as a dict.
 
     Warnings
@@ -861,10 +985,10 @@ def _read_model_species_from_sbml(model, f_replace, **kwargs):
         met.initial_condition = _read_specie_initial_value(model, specie, sid)
 
         # Using notes information, determine whether the metabolite should
-        # be added to the model as an EnzymeModuleForm.
+        # be added to the model as an EnzymeModuleSpecies.
         notes = _parse_notes_dict(specie)
         if "enzyme_module_id" in notes:
-            met = EnzymeModuleForm(met)
+            met = EnzymeModuleSpecies(met)
             _read_enzyme_attr_info_from_notes(met, notes, f_replace)
 
         # Add the notes and annotations to the metabolite
@@ -911,7 +1035,7 @@ def _read_specie_initial_value(model, specie, sid):
         if assignment_rule is not None:
             initial_condition = assignment_rule.getFormula()
             # Perform substitution for power law operations to sympify rate
-            for match in KLAW_POW_RE.finditer(initial_condition):
+            for match in _KLAW_POW_RE.finditer(initial_condition):
                 old = match.group(0)
                 new = "(({0})**{1})".format(
                     match.group("arg"), match.group("exp"))
@@ -928,7 +1052,7 @@ def _read_specie_initial_value(model, specie, sid):
 def _read_specie_formula_charge_from_sbml(specie, metabolite):
     """Read the specie formula and charge values and return them.
 
-     Warnings
+    Warnings
     --------
     This method is intended for internal use only.
 
@@ -1159,10 +1283,11 @@ def _read_reaction_kinetic_law_from_sbml(reaction, mass_reaction, f_replace,
                                   "formula")
 
         # Perform substitution for power law operations to sympify rate
-        for match in KLAW_POW_RE.finditer(rate_eq):
+        for match in _KLAW_POW_RE.finditer(rate_eq):
             old = match.group(0)
             new = "(({0})**{1})".format(match.group("arg"), match.group("exp"))
             rate_eq = rate_eq.replace(old, new)
+
         # Try to sympify the reaction rate
         try:
             rate_eq = sympify(rate_eq)
@@ -1229,18 +1354,18 @@ def _read_reaction_gpr_from_sbml(reaction, mass_notes, f_replace):
                     "(", ' or '.join(
                         process_association(c)
                         for c in ass.getListOfAssociations()), ")"])
-            elif ass.isFbcAnd():
+            if ass.isFbcAnd():
                 return " ".join([
                     "(", ' and '.join(
                         process_association(c)
                         for c in ass.getListOfAssociations()), ")"])
-            elif ass.isGeneProductRef():
+            if ass.isGeneProductRef():
                 gid = ass.getGeneProduct()
                 if f_replace and F_GENE in f_replace:
                     gid = f_replace[F_GENE](gid)
                 return gid
-            else:
-                return ""
+
+            return ""
 
         gpr = ''
         gpa = reaction_fbc.getGeneProductAssociation()
@@ -1326,8 +1451,8 @@ def _read_model_groups_from_sbml(model_groups):
         # Determine whether the group represents an enzyme
         try:
             enzyme_module_id, attr = group_id.split("_", 1)
-            if CATEGORY_GROUP_RE.search(attr):
-                attr = attr[:CATEGORY_GROUP_RE.search(attr).start()]
+            if _CATEGORY_GROUP_RE.search(attr):
+                attr = attr[:_CATEGORY_GROUP_RE.search(attr).start()]
             if attr not in list(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)\
                and "EnzymeModule" not in attr:
                 raise ValueError
@@ -1363,7 +1488,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
             # Correct object ID if necessary.
             replace_key = {
                 "enzyme_module_ligands": F_SPECIE,
-                "enzyme_module_forms": F_SPECIE,
+                "enzyme_module_species": F_SPECIE,
                 "enzyme_module_reactions": F_REACTION}.get(gid)
             obj_id = _get_corrected_id(obj_id, (f_replace, replace_key),
                                        None, kwargs.get("remove_char"))
@@ -1374,8 +1499,8 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
 
     def _parse_enzyme_group(gid, gname, group, enzyme_module_dict, **kwargs):
         """Parse the various enzyme groups and add to the EnzymeModuleDict."""
-        if "_categorized" in gid and CATEGORY_GROUP_RE.search(gid):
-            attr = gid[:CATEGORY_GROUP_RE.search(gid).start()]
+        if "_categorized" in gid and _CATEGORY_GROUP_RE.search(gid):
+            attr = gid[:_CATEGORY_GROUP_RE.search(gid).start()]
             gid = attr[:-len("_categorized")]
             member_list = _get_group_members(group, gid, **kwargs)
             categorized_dicts[attr][gname].extend(member_list)
@@ -1426,7 +1551,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
 def _read_enzyme_attr_info_from_notes(mass_obj, notes, f_replace, **kwargs):
     """Read the enzyme object attributes from the notes into the mass object.
 
-    Applies to the EnzymeModuleForms and EnzymeModuleReaction
+    Applies to the EnzymeModuleSpecies and EnzymeModuleReactions
 
     Warnings
     --------
@@ -1486,50 +1611,75 @@ def _check_required(sbase, value, attribute):
 # Write SBML
 # -----------------------------------------------------------------------------
 def write_sbml_model(mass_model, filename, f_replace=None, **kwargs):
-    """Write MassModel to filename in SBML format.
+    """Write :mod:`mass` model to ``filename`` in SBML format.
 
     The created model is SBML level 3 version 1 core (L3V1) using packages
-    fbc-v2 and groups-v1 for optimal exporting. Not including these packages
-    may result in some information loss when exporting the model.
+    'fbc-v2' and 'groups-v1' for optimal exporting. Not including these
+    packages may result in some information loss when exporting the model.
 
-    If the given filename ends with the suffix ".gz" (for example,
-    "myfile.xml.gz"), libSBML assumes the caller wants the file to be
-    written compressed in gzip format. Similarly, if the given filename
-    ends with ".zip" or ".bz2", libSBML assumes the caller wants the
-    file to be compressed in zip or bzip2 format (respectively). Files
-    whose names lack these suffixes will be written uncompressed. Special
-    considerations for the zip format: If the given filename ends with
-    ".zip", the file placed in the zip archive will have the suffix
-    ".xml" or ".sbml".  For example, the file in the zip archive will
-    be named "test.xml" if the given filename is "test.xml.zip" or
-    "test.zip". Similarly, the filename in the archive will be
-    "test.sbml" if the given filename is "test.sbml.zip".
+    If the given filename ends with the suffix ``'.gz'`` (for example,
+    ``'myfile.xml.gz'``), :mod:`libSBML` assumes the caller wants the file
+    to be written compressed in gzip format. Similarly, if the given filename
+    ends with ``'.zip'`` or ``'.bz2'``, :mod:`libSBML` assumes the caller
+    wants the file to be compressed in zip or bzip2 format (respectively).
+    Files whose names lack these suffixes will be written uncompressed.
+
+    Special considerations for the zip format: If the given filename ends with
+    ``'.zip'``, the file placed in the zip archive will have the suffix
+    ``".xml"`` or ``".sbml"``.  For example, the file in the zip archive will
+    be named ``"test.xml"`` if the given filename is ``"test.xml.zip"`` or
+    ``"test.zip"``. Similarly, the filename in the archive will be
+    ``"test.sbml"`` if the given filename is ``"test.sbml.zip"``.
 
     Parameters
     ----------
-    mass_model : mass.core.MassModel
-        MassModel instance which is written to SBML
-    filename : string
-        path to which the model is written
-    f_replace: dict of replacement functions for id replacement
-        A dict of replacement functions to apply on identifiers.
-        If no replacements should be performed, set f_replace={}.
-    use_fbc_package: bool
-        Should the fbc package be used. Defaukt is True.
-    use_groups_package: bool
-        Should the groups package be used. Defaukt is True.
-    units: bool
-        Should the units be written into the SBMLDocument.
-        Default is True.
-    local_parameters: bool
-        If True, standard reaction parameters [kf, Keq, kr] be written
-        as SBML local parameters of the kinetic law. Otherwise. all parameters
-        are written as SBML global model parameters. Default is True.
+    mass_model : MassModel or EnzymeModule
+        The :mod:`mass` model to write to into an SBML compliant modle file.
+    filename : str
+        Path to which the model should be written
+    f_replace : dict
+        Dictionary of replacement functions for gene, specie, and reaction. By
+        default the following id changes are performed on import: add ``'G_'``
+        to genes, add ``'M_'`` to species, add ``'R_'`` to reactions.
 
+        If no replacements should be performed,set ``f_replace={}``.
+    **kwargs
+        use_fbc_package :
+            ``bool`` indicating whether SBML 'fbc' package extension
+            should be used.
 
-    Notes
-    -----
-    Custom parameters are always written as SBML global parameters.
+            Default is ``True``.
+        use_groups_package :
+            ``bool`` indicating whether SBML 'groups' package extension
+            should be used.
+
+            Default is ``True``.
+        units :
+            ``bool`` indicating whether units should be written into
+            the SBMLDocument.
+
+            Default is ``True``.
+        local_parameters :
+            ``bool`` indicating whether reaction kinetic parameters should be
+            written as local parameters of the kinetic law (default),
+            or as global model parameters in the SBML model file.
+
+            Default is ``True`` to write parameters as local parameters.
+
+    Raises
+    ------
+    MassSBMLError
+        Errors due to `:mass` model specific requirements.
+
+    Warnings
+    --------
+    * Setting the ``use_fbc_package=False`` may result in some information
+      loss when writing the model.
+    * Setting the ``use_groups_package=False`` may result in some information
+      loss when writing the model. Information lost will include some
+      attributes associated with enzyme modules and will likely result in an
+      exported :class:`~.EnzymeModule` becoming a :class:`~.MassModel` upon
+      reloading the model.
 
     """
     doc = _model_to_sbml(mass_model, f_replace=f_replace, **kwargs)
@@ -1544,29 +1694,47 @@ def write_sbml_model(mass_model, filename, f_replace=None, **kwargs):
 
 
 def _model_to_sbml(mass_model, f_replace=None, **kwargs):
-    """Convert MassModel to SBMLDocument.
+    """Convert model to SBMLDocument.
 
     Parameters
     ----------
-    mass_model: mass.MassModel
-        MassModel instance which is written to SBML
-    f_replace: dict of replacement functions
-        Replacement to apply on identifiers.
-    use_fbc_package: bool
-        Should the fbc package be used. Defaukt is True.
-    use_groups_package: bool
-        Should the groups package be used. Defaukt is True.
-    units: bool
-        Should the units be written into the SBMLDocument.
-        Default is True.
-    local_parameters: bool
-        If True, standard reaction parameters [kf, Keq, kr] be written
-        as SBML local parameters of the kinetic law. Otherwise. all parameters
-        are written as SBML global model parameters. Default is True.
+    mass_model : MassModel or EnzymeModule
+        The :mod:`mass` model to write to into an SBML compliant modle file.
+    filename : str
+        Path to which the model should be written
+    f_replace : dict
+        Dictionary of replacement functions for gene, specie, and reaction. By
+        default the following id changes are performed on import: add ``'G_'``
+        to genes, add ``'M_'`` to species, add ``'R_'`` to reactions.
+
+        If no replacements should be performed,set ``f_replace={}``.
+    **kwargs
+        use_fbc_package :
+            ``bool`` indicating whether SBML 'fbc' package extension
+            should be used.
+
+            Default is ``True``.
+        use_groups_package :
+            ``bool`` indicating whether SBML 'groups' package extension
+            should be used.
+
+            Default is ``True``.
+        units :
+            ``bool`` indicating whether units should be written into
+            the SBMLDocument.
+
+            Default is ``True``.
+        local_parameters :
+            ``bool`` indicating whether reaction kinetic parameters should be
+            written as local parameters of the kinetic law (default),
+            or as global model parameters in the SBML model file.
+
+            Default is ``True`` to write parameters as local parameters.
 
     Returns
     -------
-    doc: libsbml.SBMLDocument
+    libsbml.SBMLDocument
+        The model written into a :class:`libsbml.SBMLDocument`.
 
     Warnings
     --------
@@ -1604,7 +1772,7 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
     _write_model_compartments_to_sbml(model, mass_model)
 
     # Write the species information into the SBMLDocument
-    # Includes MassMetabolites, EnzymeModuleForms, and their concentrations
+    # Includes MassMetabolites, EnzymeModuleSpecies, and their concentrations
     _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs)
     if mass_model.boundary_conditions:
         _write_model_boundary_species_to_sbml(model, mass_model, f_replace)
@@ -1703,7 +1871,7 @@ def _create_doc_and_models(mass_model, **kwargs):
 
 
 def _write_model_meta_info_to_sbml(doc, mass_model, model):
-    """Write MassModel Meta Information (ModelHistory) into SBMLDocument.
+    """Write model meta information (ModelHistory) into SBMLDocument.
 
     Warnings
     --------
@@ -1776,9 +1944,7 @@ def _write_model_meta_info_to_sbml(doc, mass_model, model):
 
 
 def _write_model_units_to_sbml(model, mass_model, **kwargs):
-    """Write MassModel unit information into SBMLDocument.
-
-    Currently, all units will be in terms of Millimole, Litres, and Hours.
+    """Write model unit information into SBMLDocument.
 
     Warnings
     --------
@@ -1798,7 +1964,7 @@ def _write_model_units_to_sbml(model, mass_model, **kwargs):
         for u in unit_def:
             unit = udef.createUnit()
             _check(unit, "create Unit" + _for_id(id_str))
-            _check(unit.setKind(_SBML_BASE_UNIT_KINDS_DICT[u.kind]),
+            _check(unit.setKind(SBML_BASE_UNIT_KINDS_DICT[u.kind]),
                    "set Unit kind '" + u.kind + "'" + _for_id(id_str))
             _check(unit.setExponent(u.exponent),
                    "set Unit exponent" + _for_id(u.kind))
@@ -1820,7 +1986,7 @@ def _write_model_units_to_sbml(model, mass_model, **kwargs):
 
 
 def _write_model_compartments_to_sbml(model, mass_model):
-    """Write MassModel compartment information into SBMLDocument.
+    """Write model compartment information into SBMLDocument.
 
     Warnings
     --------
@@ -1855,7 +2021,7 @@ def _write_model_compartments_to_sbml(model, mass_model):
 
 
 def _write_global_flux_bounds_to_sbml(model, mass_model, **kwargs):
-    """Write MassModel flux bound information into SBMLDocument.
+    """Write model flux bound information into SBMLDocument.
 
     This includes the default upper and lower bounds, positive and negative
     infinity values, and a flux bound of value 0.
@@ -1896,7 +2062,7 @@ def _write_global_flux_bounds_to_sbml(model, mass_model, **kwargs):
 
 def _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
                                             **kwargs):
-    """Write MassModel kinetic parameter information into SBMLDocument.
+    """Write model kinetic parameter information into SBMLDocument.
 
     The kinetic parameters include the reaction parameters kf, Keq, kr, v, and
     any custom parameters in the model.
@@ -1938,7 +2104,7 @@ def _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
 
 
 def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
-    """Write MassModel species information into SBMLDocument.
+    """Write model species information into SBMLDocument.
 
     Warnings
     --------
@@ -1991,8 +2157,8 @@ def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
                                                                   metabolite,
                                                                   **kwargs)
         # Set metabolite annotation and notes
-        if isinstance(metabolite, EnzymeModuleForm):
-            # Set enzyme information if EnzymeModuleForm
+        if isinstance(metabolite, EnzymeModuleSpecies):
+            # Set enzyme information if EnzymeModuleSpecies
             _write_enzyme_attr_info_to_notes(specie, metabolite, f_replace,
                                              additional_notes=additional_notes)
         else:
@@ -2006,7 +2172,7 @@ def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
 def _write_specie_formula_charge_into_sbml(specie, metabolite, **kwargs):
     """Write the specie charge and formula into the SBMLDocument.
 
-     Warnings
+    Warnings
     --------
     This method is intended for internal use only.
 
@@ -2036,7 +2202,7 @@ def _write_specie_formula_charge_into_sbml(specie, metabolite, **kwargs):
 
 
 def _write_model_boundary_species_to_sbml(model, mass_model, f_replace):
-    """Write MassModel boundary condition information into SBMLDocument.
+    """Write model boundary condition information into SBMLDocument.
 
     Warnings
     --------
@@ -2091,7 +2257,7 @@ def _write_model_boundary_species_to_sbml(model, mass_model, f_replace):
 
 
 def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
-    """Write MassModel gene information into SBMLDocument.
+    """Write model gene information into SBMLDocument.
 
     Warnings
     --------
@@ -2117,7 +2283,7 @@ def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
 
 
 def _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs):
-    """Write MassModel reaction information into SBMLDocument.
+    """Write model reaction information into SBMLDocument.
 
     Warnings
     --------
@@ -2451,7 +2617,7 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
                                      additional_notes=None):
     """Write the enzyme object attribute into SBMLDocument in the notes.
 
-    Applies to the EnzymeModuleForms and EnzymeModuleReaction
+    Applies to the EnzymeModuleSpecies and EnzymeModuleReaction
 
     Warnings
     --------
@@ -2470,7 +2636,7 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
     for attr_name, default_value in zip(attributes, default_values):
         attr_value = getattr(mass_obj, attr_name)
         # Skip attributes equal to their defaults
-        if attr_value == default_value and attr_name != "enzyme_module_form":
+        if attr_value == default_value:
             continue
 
         if "bound" in attr_name:
@@ -2527,7 +2693,7 @@ def _write_group_to_sbml(model_groups, gid, gname="", kind="collection",
             if m_type in ["MassReaction", "EnzymeModuleReaction"]:
                 if f_replace and F_REACTION_REV in f_replace:
                     mid = f_replace[F_REACTION_REV](mid)
-            if m_type in ["MassMetabolite", "EnzymeModuleForm"]:
+            if m_type in ["MassMetabolite", "EnzymeModuleSpecies"]:
                 if f_replace and F_SPECIE_REV in f_replace:
                     mid = f_replace[F_SPECIE_REV](mid)
             if m_type in ["Gene"]:
@@ -2627,7 +2793,7 @@ def _parse_notes_dict(sbase):
         end_list = (match.start() for match in re.finditer(r"</p>", notes_str))
         # Iterate through notes string to get keys and values for notes
         for s, e in zip(start_list, end_list):
-            match = NOTES_RE.search(notes_str[s:e])
+            match = _NOTES_RE.search(notes_str[s:e])
             if match is not None:
                 k, v = match.groups()
                 k, v = (k.strip(), v.strip())
@@ -2651,33 +2817,53 @@ def _parse_notes_dict(sbase):
 def validate_sbml_model(filename, check_model=True, internal_consistency=True,
                         check_units_consistency=False,
                         check_modeling_practice=False, **kwargs):
-    """Validate SBML model and returns the model along with a list of errors.
+    """Validate the SBML model and returns the model along with the errors.
+
+    ``kwargs`` are passed to :func:`~.read_sbml_model`.
 
     Parameters
     ----------
     filename : str
         The filename (or SBML string) of the SBML model to be validated.
-    check_model: boolean {True, False}
-        Check some basic model properties. Default is True
-    internal_consistency: bool
-        Check internal consistency. Default is True.
-    check_units_consistency: bool
-        Check consistency of units. Default is False.
-    check_modeling_practice: bool
-        Check modeling practice. Default is False.
+    check_model : bool
+        Check some basic model properties. Default is ``True``.
+    internal_consistency : bool
+        Check internal consistency. Default is ``True``.
+    check_units_consistency : bool
+        Check consistency of units. Default is ``False``.
+    check_modeling_practice : bool
+        Check modeling practice. Default is ``False``.
+    **kwargs
+        number :
+            In which data type should the stoichiometry be parsed. Can be
+            ``float`` or ``int``.
+
+            Default is ``float``.
+        set_missing_bounds :
+            ``bool`` indicating whether to set missing bounds to the
+            default bounds from the :class:`~.MassConfiguration`.
+
+            Default is ``True``.
+        remove_char :
+            ``bool`` indicating whether to remove ASCII characters from IDs.
+
+            Default is ``True``.
+        stop_on_conversion_fail : bool
+            ``bool`` indicating whether to stop trying to load the model if a
+            conversion process fails. If ``False``, then the loading of the
+            model will be attempted anyways, despite a potential loss of
+            information.
+
+            Default is ``True``.
 
     Returns
     -------
-    (model, errors)
-    model: :class:`~mass.core.massmodel.MassModel` object
-        The mass model if the file could be read successfully or None
-        otherwise.
-    errors: dict
+    tuple (model, errors)
+    model : :class:`~.MassModel` or :class:`~.EnzymeModule`, or ``None``
+        The :mod:`mass` model if the file could be read successfully.
+        If the file was not successfully read, ``None`` will be returned.
+    errors : dict
         Warnings and errors grouped by their respective types.
-
-    Raises
-    ------
-    MassSBMLError
 
     """
     # Errors and warnings are grouped based on their type. SBML_* types are
@@ -2737,7 +2923,7 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
     except MassSBMLError as e:
         errors["MASS_ERROR"].append(str(e))
         return None, errors
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         errors["MASS_FATAL"].append(str(e))
         return None, errors
 
@@ -2785,33 +2971,94 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
 
 
 def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
-    """Validate export of model to SBML, returning a list of errors.
+    """Validate export of a :mod:`mass` model to SBML, returning any errors.
 
     If no SBML errors or MASS fatal errors occur, the model will be written to
-    the 'filename'.
+    the ``'filename'``.
 
-    Parameters:
-    -----------
-    mass_model : mass.core.MassModel
-        MassModel instance which is written to SBML
-    filename: path to SBML file, or SBML string, or SBML file handle
-        SBML which is read into a MassModel.
-    f_replace: dict of replacement functions for id replacement
-        A dict of replacement functions to apply on identifiers.
-        If no replacements should be performed, set f_replace={}.
+    ``kwargs`` are passed to either :func:`~.write_sbml_model` or
+    :func:`~.validate_sbml_model`.
+
+    Parameters
+    ----------
+    mass_model : MassModel or EnzymeModule
+        The :mod:`mass` model to write to into an SBML compliant modle file.
+    filename : str
+        Path to which the model should be written
+    f_replace : dict
+        Dictionary of replacement functions for gene, specie, and reaction. By
+        default the following id changes are performed on import: add ``'G_'``
+        to genes, add ``'M_'`` to species, add ``'R_'`` to reactions.
+
+        If no replacements should be performed,set ``f_replace={}``.
+    **kwargs
+        use_fbc_package :
+            ``bool`` indicating whether SBML 'fbc' package extension
+            should be used.
+
+            Default is ``True``.
+        use_groups_package :
+            ``bool`` indicating whether SBML 'groups' package extension
+            should be used.
+
+            Default is ``True``.
+        units :
+            ``bool`` indicating whether units should be written into
+            the SBMLDocument.
+
+            Default is ``True``.
+        local_parameters :
+            ``bool`` indicating whether reaction kinetic parameters should be
+            written as local parameters of the kinetic law (default),
+            or as global model parameters in the SBML model file.
+
+            Default is ``True`` to write parameters as local parameters.
+        check_model : bool
+            ``bool`` indicating whether to check some basic model properties.
+
+            Default is ``True``.
+        internal_consistency : bool
+            ``bool`` indicating whether to check internal consistency.
+
+            Default is ``True``.
+        check_units_consistency : bool
+            ``bool`` indicating whether to check consistency of units.
+
+            Default is ``False``.
+        check_modeling_practice : bool
+            ``bool`` indicating whether to check modeling practice.
+
+            Default is ``False``.
+        number :
+            In which data type should the stoichiometry be parsed. Can be
+            ``float`` or ``int``.
+
+            Default is ``float``.
+        set_missing_bounds :
+            ``bool`` indicating whether to set missing bounds to the
+            default bounds from the :class:`~.MassConfiguration`.
+
+            Default is ``True``.
+        remove_char :
+            ``bool`` indicating whether to remove ASCII characters from IDs.
+
+            Default is ``True``.
+        stop_on_conversion_fail : bool
+            ``bool`` indicating whether to stop trying to load the model if a
+            conversion process fails. If ``False``, then the loading of the
+            model will be attempted anyways, despite a potential loss of
+            information.
+
+            Default is ``True``.
 
     Returns
     -------
-    (success, errors)
-    success: bool
-        A bool indicating whether the model was successfully exported to
-        'filename'.
-    errors: dict
+    tuple (success, errors)
+    success : bool
+        ``bool`` indicating whether the model was successfully exported to
+        ``'filename'``.
+    errors : dict
         Warnings and errors grouped by their respective types.
-
-    Raises
-    ------
-    MassSBMLError
 
     """
     # Check kwargs
@@ -2854,7 +3101,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         sbml_str = libsbml.writeSBMLToString(doc)
         model, errors = validate_sbml_model(sbml_str, **all_kwargs["validate"])
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         success = False
         model = None
         errors["MASS_FATAL"].append(str(e))
@@ -2877,3 +3124,12 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         filename.write(sbml_str)
 
     return success, errors
+
+
+__all__ = (
+    "LOGGER", "SBML_LEVEL_VERSION", "FBC_VERSION", "GROUPS_VERSION", "CHAR_RE",
+    "MASS_MOIETY_RE", "SBML_MOIETY_RE", "RATE_CONSTANT_RE",
+    "SBO_MODELING_FRAMEWORK", "COBRA_FLUX_UNIT", "NUMBER_ID_PREFIX", "F_GENE",
+    "F_GENE_REV", "F_SPECIE", "F_SPECIE_REV", "F_REACTION", "F_REACTION_REV",
+    "F_REPLACE", "ASCII_REPLACE", "read_sbml_model", "write_sbml_model",
+    "validate_sbml_model", "validate_sbml_model_export")

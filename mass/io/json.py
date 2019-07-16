@@ -1,5 +1,17 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""Create or load models in `JSON <https://www.json.org/>`_ format.
+
+Models created in JSON format can also be viewed using the
+`Escher <https://escher.github.io/#/>`_ network visualization tool. See the
+Escher `web-based tool <https://escher.readthedocs.io/en/stable/index.html>`_
+or the
+`Python package <https://escher.readthedocs.io/en/stable/escher-python.html>`_
+documentation for more information on Escher.
+
+If the :mod:`~mass.core.visualization` submodule is installed, see the
+mass.visualiation.escher documentation for more information on using
+:mod:`mass` with :mod:`escher` (Coming soon).
+"""
 try:
     import simplejson as json
 except ImportError:
@@ -15,27 +27,27 @@ JSON_SPEC = "1"
 def to_json(mass_model, sort=False, **kwargs):
     """Return the model as a JSON document.
 
-    `kwargs`` are passed on to ``json.dumps``
-    See documentation for ``json.dumps`` for more details.
+    ``kwargs`` are passed on to ``json.dumps``
 
     Parameters
     ----------
-    mass_model: MassModel
-        The MassModel object to represent.
-    sort: bool, optional
-        Whether to sort the metabolites, reactions, and genes or maintain the
-        order defined in the model. Default is False.
+    mass_model : MassModel or EnzymeModule
+        The :mod:`mass` model to represent.
+    sort : bool
+        Whether to sort the objects in the lists representing attributes, or
+        to maintain the order defined in the model. Default is ``False``.
 
     Returns
     -------
     str
-        String representation of the MassModel as a JSON documentation
+        String representation of the :mod:`mass` model as a JSON document.
 
     See Also
     --------
-    save_json_model: Write directly to a file.
-    mass.io.dict.model_to_dict: Make dict representation of a MassModel.
-    json.dumps: Base Function.
+    save_json_model
+        Write directly to a file.
+    json.dumps
+        Base function.
 
     """
     obj = model_to_dict(mass_model, sort=sort)
@@ -44,55 +56,53 @@ def to_json(mass_model, sort=False, **kwargs):
 
 
 def from_json(document):
-    """Load a MassModel as a JSON document.
-
-    `kwargs`` are passed on to ``json.dumps``
-    See documentation for ``json.dumps`` for more details.
+    """Load a model from a JSON document.
 
     Parameters
     ----------
-    document: str
-        The JSON document representation of a MassModel.
+    document : str
+        The JSON document representation of a :mod:`mass` model.
 
     Returns
     -------
-    MassModel:
-        The MassModel as represented in the JSON documentation.
+    MassModel or EnzymeModule
+        The :mod:`mass` model as represented in the JSON document.
 
     See Also
     --------
-    load_json_model: Load MassModel directly from a file.
-    mass.io.dict.model_to_dict: Make MassModel from dict representation.
+    load_json_model
+        Load directly from a file.
 
     """
     return model_from_dict(json.loads(document))
 
 
 def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
-    """Write the MassModel to a file in JSON format.
+    """Write the model to a file in JSON format.
 
-    `kwargs`` are passed on to ``json.dumps``
-    See documentation for ``json.dumps`` for more details.
+    `kwargs`` are passed on to ``json.dump``
 
     Parameters
     ----------
-    mass_model: MassModel
-        The MassModel object to represent.
-    filename: str or file-like
+    mass_model : MassModel or EnzymeModule
+        The :mod:`mass` model to represent.
+    filename : str or file-like
         File path or descriptor the the JSON representation should be
         written to.
-    sort: bool, optional
-        Whether to sort the metabolites, reactions, and genes or maintain the
-        order defined in the model. Default is False.
-    pretty: bool, optional
+    sort : bool
+        Whether to sort the objects in the lists representing attributes, or
+        to maintain the order defined in the model. Default is ``False``.
+    pretty : bool
         Whether to format the JSON more compactly (default), or in a more
-        verbose but easier to read fashion. Default is False. Can be partially
-        overwritten by the ``kwargs``.
+        verbose but easier to read fashion. Default is ``False``.
+        Can be partially overwritten by the ``kwargs``.
 
     See Also
     --------
-    to_json: Return a string represenation.
-    json.dump: Base function.
+    to_json
+        Create a string represenation of the model in JSON format.
+    json.dump
+        Base function.
 
     """
     obj = model_to_dict(mass_model, sort=sort)
@@ -114,23 +124,23 @@ def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
 
 
 def load_json_model(filename):
-    """Load the MassModel from a file in JSON format.
+    """Load the model from a file in JSON format.
 
     Parameters
     ----------
-    filename: str or file-like
+    filename : str or file-like
         File path or descriptor the contains JSON document describing the
-        MassModel to be loaded.
+        :mod:`mass` model to be loaded.
 
     Returns
     -------
-    MassModel:
-        The MassModel as represented in the JSON documentation.
+    MassModel or EnzymeModule
+        The :mod:`mass` model as represented in the JSON formatted file.
 
     See Also
     --------
-    from_json: Load from a string representation.
-    mass.io.dict.model_to_dict: Make MassModel from dict representation.
+    from_json
+        Load a model from a string representation in JSON format.
 
     """
     if isinstance(filename, string_types):
@@ -272,7 +282,7 @@ JSON_SCHEMA = {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    " enzyme_module_forms": {
+                    "enzyme_module_species": {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
@@ -287,7 +297,7 @@ JSON_SCHEMA = {
                             "allOf": {"type": "string"}
                         },
                     },
-                    "enzyme_module_form_categorizeds": {
+                    "enzyme_module_species_categorized": {
                         "type": "object",
                         "allOf": {
                             "type": "array",
@@ -356,7 +366,7 @@ JSON_SCHEMA = {
             "type": "array",
             "allOf": {"type": "string"}
         },
-        " enzyme_module_forms": {
+        "enzyme_module_species": {
             "type": "array",
             "allOf": {"type": "string"}
         },
@@ -371,7 +381,7 @@ JSON_SCHEMA = {
                 "allOf": {"type": "string"}
             },
         },
-        "_enzyme_module_form_categorizeds": {
+        "_enzyme_module_species_categorized": {
             "type": "object",
             "allOf": {
                 "type": "array",
@@ -396,3 +406,8 @@ JSON_SCHEMA = {
     "required": ["id", "reactions", "metabolites", "genes"],
     "additionalProperties": False,
 }
+"""dict: The generic JSON schema for representing a model in :mod:`mass`."""
+
+__all__ = (
+    "to_json", "from_json", "save_json_model", "load_json_model",
+    "JSON_SCHEMA")

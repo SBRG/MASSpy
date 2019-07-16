@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""
+MassReaction is a class for holding information regarding reactions.
+
+The :class:`MassReaction` class inherits and extends the
+:class:`~cobra.core.reaction.Reaction` class in :mod:`cobra`. It contains
+additional information required for simulations and other :mod:`mass`
+functions and workflows.
+"""
 import re
 from collections import defaultdict
 from copy import copy, deepcopy
 from functools import partial
 from operator import attrgetter
 from warnings import warn
-
-from six import iteritems, iterkeys, itervalues, string_types
-
-from sympy import Symbol
 
 from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
@@ -18,8 +21,12 @@ from cobra.core.reaction import (
     and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
 from cobra.util.context import get_context, resettable
 
-from mass.core.massconfiguration import MassConfiguration
-from mass.core.massmetabolite import MassMetabolite
+from six import iteritems, iterkeys, itervalues, string_types
+
+from sympy import Symbol
+
+from mass.core.mass_configuration import MassConfiguration
+from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
     generate_disequilibrium_ratio, generate_foward_mass_action_rate_expression,
     generate_mass_action_rate_expression, generate_mass_action_ratio,
@@ -36,23 +43,25 @@ class MassReaction(Object):
 
     Parameters
     ----------
-    id_or_reaction: str, MassReaction
-        Either a string identifier to associate with the MassReaction,
-        or an existing MassReaction object. If an existing MassReaction
-        object is provided, a new MassReaction object is instantiated with
-        the same properties as the original MassReaction.
-    name: str, optional
+    id_or_reaction : str, ~cobra.core.reaction.Reaction, MassReaction
+        A string identifier to associate with the reaction, or an existing
+        reaction. If an existing reaction object is provided, a new
+        :class:`MassReaction` object is instantiated with the same properties
+        as the original reaction.
+    name : str
         A human readable name for the reaction.
-    subsystem: str, optional
+    subsystem : str
         The subsystem where the reaction is meant to occur.
-    reversible: bool, optional
+    reversible : bool
         The kinetic reversibility of the reaction. Irreversible reactions have
-        an equilibrium constant of infinity and a reverse rate constant of 0.
-        If not provided, the reaction is assumed to be reversible.
+        an equilibrium constant and a reverse rate constant as set in the
+        :attr:`~.MassBaseConfiguration.irreversible_Keq` and
+        :attr:`~.MassBaseConfiguration.irreversible_kr` attributes of the
+        :class:`~.MassConfiguration`. Default is ``True``.
 
     Attributes
     ----------
-    steady_state_flux: float, optional
+    steady_state_flux : float
         The stored (typically steady state) flux for the reaction. Stored flux
         values can be accessed for operations such as PERC calculations.
 
@@ -60,13 +69,10 @@ class MassReaction(Object):
 
     def __init__(self, id_or_reaction=None, name="", subsystem="",
                  reversible=True, steady_state_flux=None):
-        """Initialize the MassReaction Object."""
+        """Initialize the MassReaction."""
         # Get the identifer and initialize
-        if hasattr(id_or_reaction, "id"):
-            id_str = id_or_reaction.id
-        else:
-            id_str = id_or_reaction
-        super(MassReaction, self).__init__(id_str, name)
+        super(MassReaction, self).__init__(
+            getattr(id_or_reaction, "id", id_or_reaction), name)
         if isinstance(id_or_reaction, MassReaction):
             # Instiantiate a new MassReaction with state identical to
             # the provided MassReaction object.
@@ -103,31 +109,34 @@ class MassReaction(Object):
             self._genes = set()
             self._gene_reaction_rule = ""
 
-            # The Gibbs reaction energy associated with the reaction.
-            self._gibbs_reaction_energy = None
-
     # Public
     @property
     def reversible(self):
-        """Return the kinetic reversibility of the reaction."""
-        return getattr(self, "_reversible")
+        """Get or set the kinetic reversibility of the reaction.
 
-    @reversible.setter
-    def reversible(self, value):
-        """Set the kinetic reversibility of the reaction.
+        Parameters
+        ----------
+        reversible : bool
+            The kinetic reversibility of the reaction.
 
         Warnings
         --------
-        Changing the reversibility will reset the equilibrium constant and the
-            reverse rate constant  to the defaults.
+        Changing the :attr:`reversible` attribute will reset the
+        :attr:`equilibrium_constant` and the :attr:`reverse_rate_constant`
+        to the initialization defaults.
 
         """
-        if not isinstance(value, bool):
+        return getattr(self, "_reversible")
+
+    @reversible.setter
+    def reversible(self, reversible):
+        """Set the kinetic reversibility of the reaction."""
+        if not isinstance(reversible, bool):
             raise TypeError("value must be a bool")
 
-        if value != self.reversible:
-            self._reversible = value
-            if value:
+        if reversible != self.reversible:
+            self._reversible = reversible
+            if reversible:
                 setattr(self, "_reverse_rate_constant", None)
                 setattr(self, "_equilibrium_constant", None)
             else:
@@ -138,48 +147,59 @@ class MassReaction(Object):
 
     @property
     def forward_rate_constant(self):
-        """Return the forward rate constant (kf) of the reaction."""
+        """Get or set the forward rate constant (kf) of the reaction.
+
+        Notes
+        -----
+        Forward rate constants cannot be negative.
+
+        Parameters
+        ----------
+        value : float
+            A non-negative number for the forward rate constant (kf) of the
+            reaction.
+
+        Raises
+        ------
+        ValueError
+            Occurs when trying to set a negative value.
+
+        """
         return getattr(self, "_forward_rate_constant")
 
     @forward_rate_constant.setter
     def forward_rate_constant(self, value):
-        """Set the forward rate constant (kf) of the reaction.
-
-        Parameters
-        ----------
-        value: float
-            A non-negative number for the forward rate constant (kf) of the
-            reaction.
-
-        Warnings
-        --------
-        Forward rate constants cannot be negative.
-
-        """
+        """Set the forward rate constant (kf) of the reaction."""
         value = ensure_non_negative_value(value)
         setattr(self, "_forward_rate_constant", value)
 
     @property
     def reverse_rate_constant(self):
-        """Return the reverse rate constant (kr) of the reaction."""
+        """Get or set the reverse rate constant (kr) of the reaction.
+
+        Notes
+        -----
+        * Reverse rate constants cannot be negative.
+        * If reaction is not reversible, will warn the user instead of setting
+          the parameter value.
+
+        Parameters
+        ----------
+        value : float
+            A non-negative number for the reverse rate constant (kr) of the
+            reaction.
+
+        Raises
+        ------
+        ValueError
+            Occurs when trying to set a negative value.
+
+        """
         return getattr(self, "_reverse_rate_constant")
 
     @reverse_rate_constant.setter
     def reverse_rate_constant(self, value):
-        """Set the reverse rate constant (kr) of the reaction.
-
-        Parameters
-        ----------
-        value: float
-            A non-negative number for the reverse rate constant (kr) of the
-            reaction.
-
-        Warnings
-        --------
-        Reverse rate constants cannot be negative.
-        If reaction is not reversible, will warn the user instead.
-
-        """
+        """Set the reverse rate constant (kr) of the reaction."""
         if self.reversible:
             value = ensure_non_negative_value(value)
             setattr(self, "_reverse_rate_constant", value)
@@ -189,25 +209,31 @@ class MassReaction(Object):
 
     @property
     def equilibrium_constant(self):
-        """Return the equilibrium constant (Keq) of the reaction."""
+        """Get or set the equilibrium constant (Keq) of the reaction.
+
+        Notes
+        -----
+        * Equilibrium constants cannot be negative.
+        * If reaction is not reversible, will warn the user instead of setting
+          the parameter value.
+
+        Parameters
+        ----------
+        value : float
+            A non-negative number for the equilibrium constant (Keq)
+            of the reaction.
+
+        Raises
+        ------
+        ValueError
+            Occurs when trying to set a negative value.
+
+        """
         return getattr(self, "_equilibrium_constant")
 
     @equilibrium_constant.setter
     def equilibrium_constant(self, value):
-        """Set the equilibrium constant (Keq) of the reaction.
-
-        Parameters
-        ----------
-        value: float
-            A non-negative number for the equilibrium constant (Keq)
-            of the reaction.
-
-        Warnings
-        --------
-        Equilibrium constants cannot be negative.
-        If reaction is not reversible, will warn the user instead.
-
-        """
+        """Set the equilibrium constant (Keq) of the reaction."""
         if self._reversible:
             value = ensure_non_negative_value(value)
             setattr(self, "_equilibrium_constant", value)
@@ -217,14 +243,15 @@ class MassReaction(Object):
 
     @property
     def parameters(self):
-        """Return a dictionary of rate and equilibrium constants.
+        """Return a dict of rate and equilibrium constants.
 
         Notes
         -----
-        Reverse rate constants are only included for reversible reactions.
-        Only rate and equilibrium constantx are accessed here. Steady state
-            fluxes can be accessed through the steady_state_flux attribute,
-            and custom parameters can only be accessed through the model.
+        The :attr:`reverse_rate_constant` is only included for reversible
+        reactions. Additionally, only rate and equilibrium constants are
+        accessed here. Steady state fluxes can be accessed through the
+        :attr:`steady_state_flux` attribute, and custom parameters can only be
+        accessed through the model.
 
         """
         keys = [self.kf_str, self.Keq_str]
@@ -261,10 +288,10 @@ class MassReaction(Object):
 
     @property
     def rate(self):
-        """Return the current rate for the reaction as a sympy expression.
+        """Return the current rate as a :mod:`sympy` expression.
 
-        If reaction has a custom rate law in its associated MassModel, the
-        custom rate law will be returned instead.
+        If reaction has a custom rate in its associated :class:`~.MassModel`,
+        the custom rate will be returned instead.
         """
         if self.model is not None and self in self.model.custom_rates:
             rate = self._model.custom_rates[self]
@@ -275,45 +302,36 @@ class MassReaction(Object):
 
     @property
     def model(self):
-        """Return the MassModel associated with the reaction."""
+        """Return the  :class:`~.MassModel` associated with the reaction."""
         return getattr(self, "_model")
 
     @property
     def reaction(self):
-        """Return the reaction as a human readable string."""
-        return self.build_reaction_string()
-
-    @reaction.setter
-    def reaction(self, value):
-        """Set the reaction using a human readable string.
-
-         For example:
-            'A + B <=> C' for reversible reactions, A & B are reactants.
-            'A + B --> C' for irreversible reactions, A & B are reactants.
-            'A + B <-- C' for irreversible reactions, A & B are products.
-
+        """Get or set the reaction as a human readable string.
 
         Parameters
         ----------
-        value: str
+        reaction_str : str
             String representation of the reaction.
-
-        Notes
-        -----
-        The direction of the arrow is used to determine reversibility.
 
         Warnings
         --------
-        Care must be taken when setting a reaction in this manner to ensure the
-            reaction identifier matches those in an assoicated model.
+        Care must be taken when setting a reaction using this method.
+        See documentation for :meth:`build_reaction_from_string` for more
+        information.
 
-        For forward and reversible arrows, reactants are searched on the left
-            side of the arrow while products are searched on the right side.
-            For reverse arrows, reactants are searched on the right side of the
-            arrow while products are searched on the left side.
+        See Also
+        --------
+        build_reaction_string: Base function for getter method.
+        build_reaction_from_string: Base function for setter method.
 
         """
-        return self.build_reaction_from_string(value)
+        return self.build_reaction_string()
+
+    @reaction.setter
+    def reaction(self, reaction_str):
+        """Set the reaction using a human readable string."""
+        return self.build_reaction_from_string(reaction_str)
 
     @property
     def compartments(self):
@@ -327,7 +345,8 @@ class MassReaction(Object):
     def boundary(self):
         """Determine whether or not the reaction is a boundary reaction.
 
-        Will return True if the reaction has no products or no reactants.
+        Will return ``True`` if the reaction has no products or no reactants
+        and only one metabolite.
 
         Notes
         -----
@@ -341,15 +360,23 @@ class MassReaction(Object):
     def boundary_metabolite(self):
         """Return an 'boundary' metabolite for bounary reactions.
 
+        Notes
+        -----
+        The 'boundary_metabolite' represents the metabolite that corresponds
+        to the empty part of a boundary reaction through a string. It's primary
+        use is for setting of the :attr:`~.MassModel.boundary_conditions`
+        without creating a :class:`~.MassMetabolite` object. Therefore it is
+        not counted as a metabolite.
+
         Returns
         -------
-        boundary_metabolite: str
+        boundary_metabolite : str
             String representation of the boundary metabolite of the reaction,
-            or None if the reaction is not considered a boundary reaction.
+            or ``None`` if the reaction is not considered a boundary reaction.
 
         See Also
         --------
-        MassReaction.boundary
+        boundary: Method must return ``True`` to get the boundary_metabolite.
 
         """
         if self.boundary:
@@ -369,22 +396,24 @@ class MassReaction(Object):
 
     @property
     def gene_reaction_rule(self):
-        """Return the gene reaction rule for the reaction as a string."""
+        """Get or set the gene reaction rule for the reaction.
+
+        Parameters
+        ----------
+        new_rule : str
+            String representation of the new reaction rule.
+
+        Notes
+        -----
+        New genes will be associated with the reaction and old genes will be
+        dissociated from the reaction.
+
+        """
         return getattr(self, "_gene_reaction_rule")
 
     @gene_reaction_rule.setter
     def gene_reaction_rule(self, new_rule):
-        """Set the gene reaction rule of a reaction using a string.
-
-        New genes will be associated with the reaction and old genes will be
-        dissociated from the reaction.
-
-        Parameters
-        ----------
-        new_rule: str
-            String representation of the new reaction rule.
-
-        """
+        """Set the gene reaction rule of a reaction using a string."""
         if get_context(self):
             warn("Context management not implemented for "
                  "gene reaction rules")
@@ -441,8 +470,8 @@ class MassReaction(Object):
         Warnings
         --------
         Do NOT use this string for computation. It is intended to give a
-            representation of the rule using more familiar gene names instead
-            of the often cryptic ids.
+        representation of the rule using more familiar gene names instead
+        of the often cryptic ids.
 
         """
         names = {i.id: i.name for i in self._genes}
@@ -456,9 +485,10 @@ class MassReaction(Object):
 
         Returns
         -------
-        True if the gene-protein-reaction (GPR) rule is fulfilled for
-            the reaction, or if the reaction does not have an assoicated
-            MassModel. Otherwise returns False.
+        bool
+            Returns ``True`` if the gene-protein-reaction (GPR) rule is
+            fulfilled for the reaction, or if the reaction does not have an
+            assoicated :class:`~.MassModel`. Otherwise returns ``False``.
 
         """
         if self._model:
@@ -483,23 +513,25 @@ class MassReaction(Object):
 
     @property
     def lower_bound(self):
-        """Get the lower bound of the reaction."""
-        return getattr(self, "_lower_bound")
+        """Get or set the lower bound of the reaction.
 
-    @lower_bound.setter
-    @resettable
-    def lower_bound(self, value):
-        """Set the lower bound of the reaction.
-
+        Notes
+        -----
         Infeasible combinations, such as a upper bound lower than the current
         lower bound will update the other bound.
 
         Parameters
         ----------
-        value: float
+        value : float
             The new value for the lower bound.
 
         """
+        return getattr(self, "_lower_bound")
+
+    @lower_bound.setter
+    @resettable
+    def lower_bound(self, value):
+        """Set the lower bound of the reaction."""
         if self.upper_bound < value:
             self.upper_bound = value
 
@@ -507,12 +539,25 @@ class MassReaction(Object):
 
     @property
     def upper_bound(self):
-        """Get the lower bound of the reaction."""
+        """Get or set the upper bound of the reaction.
+
+        Notes
+        -----
+        Infeasible combinations, such as a upper bound lower than the current
+        lower bound will update the other bound.
+
+        Parameters
+        ----------
+        value : float
+            The new value for the upper bound.
+
+        """
         return getattr(self, "_upper_bound")
 
     @upper_bound.setter
     @resettable
     def upper_bound(self, value):
+        """Set the upper bound of the reaction."""
         if self.lower_bound > value:
             self.lower_bound = value
 
@@ -523,17 +568,23 @@ class MassReaction(Object):
         """Get or set the bounds directly from a tuple.
 
         Convenience method for setting upper and lower bounds in one line
-        using a tuple of lower and upper bound. Invalid bounds will raise an
-        AssertionError.
+        using a tuple of lower and upper bound.
 
         When using a `HistoryManager` context, this attribute can be set
         temporarily, reversed when the exiting the context.
+
+        Raises
+        ------
+        AssertionError
+            Occurs when setting invalid bound values.
+
         """
         return self.lower_bound, self.upper_bound
 
     @bounds.setter
     @resettable
     def bounds(self, value):
+        """Set the bounds directly from a tuple."""
         lower, upper = value
         self.lower_bound = lower
         self.upper_bound = upper
@@ -608,16 +659,16 @@ class MassReaction(Object):
         """Shorthand method to set the reaction steady state flux."""
         self.steady_state_flux = value
 
-    def print_attributes(self, sep="\n", exclude_parent=False):
-        r"""Print the attributes and properties of the MassReaction.
+    def print_attributes(self, sep=r"\n", exclude_parent=False):
+        r"""Print the attributes and properties of the :class:`MassReaction`.
 
         Parameters
         ----------
-        sep: str, optional
+        sep : str
             The string used to seperate different attrubutes. Affects how the
-            final string is printed. Default is '\n'.
-        exclude_parent: bool, optional
-            If True, only display attributes specific to the current class,
+            final string is printed. Default is ``'\n'``.
+        exclude_parent : bool
+            If ``True``, only display attributes specific to the current class,
             excluding attributes from the parent class.
 
         """
@@ -637,22 +688,22 @@ class MassReaction(Object):
         Reversing the stoichiometry will turn the products into the reactants
         and the reactants into the products.
 
+        Notes
+        -----
+        Only the stoichiometry of the reaction is modified. The reaction
+        parameters (e.g. rate and equilibrium constants) are not altered.
+
         Parameters
         ----------
-        inplace: bool, optional
-            If True, modify the reaction directly. Otherwise a new MassReaction
-            Object is created, and modified.
+        inplace : bool
+            If ``True``, modify the reaction directly. Otherwise a new reaction
+            is created, modified, and returned.
 
         Returns
         -------
-        new_reaction: MassReaction
-            Returns the original MassReaction if inplace=True. Otherwise return
-            a modified copy of the original MassReaction.
-
-        Warnings
-        --------
-        Only the stoichiometry of the reaction is modified. The reaction
-        parameters (e.g. rate and equilibrium constants) are not altered.
+        new_reaction : MassReaction
+            Returns the original :class:`MassReaction` if ``inplace=True``.
+            Otherwise return a modified copy of the original reaction.
 
         """
         if inplace:
@@ -670,21 +721,26 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        rtype: int {1, 2, 3}
+        rtype : int
             The type of rate law to display. Must be 1, 2, or 3.
-                Type 1 will utilize the forward rate and equilibrium constants.
-                Type 2 will utilize the forward and reverse rate constants.
-                Type 3 will utilize the equilibrium and reverse rate constants.
-            Default is 1.
-        update_reaction: bool, optional
-            Whether to update the MassReaction in addition to returning the
-            rate law. Default is False.
+
+                * Type 1 will utilize the :attr:`forward_rate_constant` and the
+                  :attr:`equilibrium_constant`.
+                * Type 2 will utilize the :attr:`forward_rate_constant` and the
+                  :attr:`reverse_rate_constant`.
+                * Type 3 will utilize the :attr:`equilibrium_constant` and the
+                  :attr:`reverse_rate_constant`.
+
+            Default is ``1``.
+        update_reaction : bool
+            Whether to update the reaction in addition to returning the
+            rate law. Default is ``False``.
 
         Returns
         -------
-        rate_expression: sympy.Basic, None
-            The rate law as a sympy expression. If the reaction has no
-            metabolites associated, None will be returned.
+        rate_expression : :class:`sympy.core.basic.Basic` or ``None``
+            The rate law as a :mod:`sympy` expression. If the reaction has no
+            metabolites associated, ``None`` will be returned.
 
         """
         return generate_mass_action_rate_expression(self, rtype,
@@ -695,17 +751,20 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        rtype: int {1, 2, 3}
-            The type of foward rate law to return. Must be 1, 2, or 3.
-                Type 1 and 2 will utilize the forward rate constant.
-                Type 3 will utilize the equilibrium and reverse rate constants.
-            Default is 1.
+        rtype : int
+            The type of rate law to display. Must be 1, 2, or 3.
+
+                * Type 1 and 2 will utilize the :attr:`forward_rate_constant`.
+                * Type 3 will utilize the :attr:`equilibrium_constant` and the
+                  :attr:`reverse_rate_constant`.
+
+            Default is `1`.
 
         Returns
         -------
-        fwd_rate: sympy.Basic
-            The forward rate as a sympy expression. If the reaction has no
-            metabolites associated, None will be returned.
+        fwd_rate : :class:`sympy.core.basic.Basic` or ``None``
+            The forward rate as a :mod:`sympy` expression. If the reaction
+            has no metabolites associated, ``None`` will be returned.
 
         """
         return generate_foward_mass_action_rate_expression(self, rtype)
@@ -715,53 +774,60 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        rtype: int {1, 2, 3}
-            The type of foward rate law to return. Must be 1, 2, or 3.
-                Type 1 will utilize the foward rate and equilibrium constant.
-                Type 2 and 3 will utilize the reverse rate constant.
-            Default is 1.
+        rtype : int
+            The type of rate law to display. Must be 1, 2, or 3.
+
+                * Type 1 will utilize the :attr:`forward_rate_constant` and the
+                  :attr:`equilibrium_constant`.
+                * Type 2 and 3 will utilize the :attr:`reverse_rate_constant`.
+
+            Default is `1`.
 
         Returns
         -------
-        rev_rate: sympy.Basic
-            The forward rate as a sympy expression. If the reaction has no
-            metabolites associated, None will be returned.
+        rev_rate : :class:`sympy.core.basic.Basic` or ``None``
+            The reverse rate as a :mod`sympy` expression. If the reaction
+            has no metabolites associated, ``None`` will be returned.
 
         """
         return generate_reverse_mass_action_rate_expression(self, rtype)
 
     def get_mass_action_ratio(self):
-        """Get the mass action ratio of the reaction as a sympy expression.
+        """Get the mass action ratio as a :`mod`sympy` expression.
 
         Returns
         -------
-        The mass action ratio as a sympy expression (sympy.Basic).
+        :class:`sympy.core.basic.Basic`
+            The mass action ratio as a sympy expression.
 
         """
         return generate_mass_action_ratio(self)
 
     def get_disequilibrium_ratio(self):
-        """Get the disequilibrium ratio of the reaction as a sympy expression.
+        """Get the disequilibrium ratio as a :mod:`sympy` expression.
 
         Returns
         -------
-        The disequilibrium ratio as a sympy expression (sympy.Basic).
+        :class:`sympy.core.basic.Basic`
+            The disequilibrium ratio as a sympy expression.
 
         """
         return generate_disequilibrium_ratio(self)
 
     def remove_from_model(self, remove_orphans=False):
-        """Remove the reaction from the MassModel.
+        """Remove the reaction from the :class:`~.MassModel`.
 
         This removes all associations between a reaction, the associated
-        MassModel, metabolites, and genes.
+        model, metabolites, and genes.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
-        remove_orphans: bool, optional
-            Remove orphaned genes and metabolites from the MassModel as well.
+        remove_orphans: bool
+            Remove orphaned genes and metabolites from the :class:`~.MassModel`
+            as well.
 
         """
         return self._model.remove_reactions([self], remove_orphans)
@@ -796,9 +862,9 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        metabolite_id: str, MassMetabolite
-            The MassMetabolite or the string identifier of the MassMetabolite
-            whose coefficient is desired.
+        metabolite_id : str or MassMetabolite
+            The :class:`~.MassMetabolite` or the string identifier of the
+            metabolite whose coefficient is desired.
 
         """
         if isinstance(metabolite_id, MassMetabolite):
@@ -808,12 +874,13 @@ class MassReaction(Object):
         return self._metabolites[_id_to_mets[metabolite_id]]
 
     def get_coefficients(self, metabolite_ids):
-        """Return the coefficients for a list of metabolites in the reaction.
+        r"""Return the coefficients for a list of metabolites in the reaction.
 
         Parameters
         ----------
-        metabolite_ids: iterable
-            Iterable of the MassMetabolites or their string identifiers.
+        metabolite_ids : iterable
+            Iterable containing the :class:`~.MassMetabolite`\ s or
+            their string identifiers.
 
         """
         return map(self.get_coefficient, metabolite_ids)
@@ -824,42 +891,43 @@ class MassReaction(Object):
 
     def add_metabolites(self, metabolites_to_add, combine=True,
                         reversibly=True):
-        """Add metabolites and their coefficients to the reaction.
+        r"""Add metabolites and their coefficients to the reaction.
 
         If the final coefficient for a metabolite is 0 then it is removed from
         the reaction.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
+
+        Notes
+        -----
+        A final coefficient of < 0 implies a reactant and a final
+        coefficient of > 0 implies a product.
 
         Parameters
         ----------
-        metabolites_to_add: dict
-            A dictionary with MassMetabolite objects or metabolite identifiers
-            as keys and stoichiometric coefficients as values. If keys are
-            strings (id of a metabolite), the reaction must already be part of
-            a MassModel and a MassMetabolite with the given id must already
-            exist in the MassModel.
-        combine: bool, optional
-            If True, the metabolite coefficients are combined together.
+        metabolites_to_add : dict
+            A dictionary with :class:`.MassMetabolite`\ s or metabolite
+            identifiers as keys and stoichiometric coefficients as values. If
+            keys are strings (id of a metabolite), the reaction must already
+            be part of a :class:`~.MassModel` and a metabolite with the given
+            id must already exist in the :class:`~.MassModel`.
+        combine : bool
+            If ``True``, the metabolite coefficients are combined together.
             Otherwise the coefficients are replaced.
-        reversibly: bool, optional
+        reversibly : bool
             Whether to add the change to the context to make the change
             reversible (primarily intended for internal use).
 
         Warnings
         --------
-        A cobra Metabolite cannot be directly added to a MassReaction. Instead,
-            the cobra Metabolite must first be converted to a MassMetabolite
-            through the mass.util.conversion class.
-
-        Notes
-        -----
-        A final coefficient of < 0 implies a reactant and a final
-            coefficient of > 0 implies a product.
+        A :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>` cannot
+        be directly added to a :class:`MassReaction`. Instead, the metabolite
+        must first be instantiated as a :class:`~.MassMetabolite`.
 
         See Also
         --------
-        MassReaction.subtract_metabolites
+        :meth:`subtract_metabolites`
 
         """
         old_coefficients = self.metabolites
@@ -931,43 +999,45 @@ class MassReaction(Object):
 
     def subtract_metabolites(self, metabolites_to_subtract, combine=True,
                              reversibly=True):
-        """Subtract metabolites and their coefficients from the reaction.
+        r"""Subtract metabolites and their coefficients from the reaction.
 
         This function will 'subtract' metabolites from a reaction by adding
-        the given metabolites with -1*coeffcient. If the final coefficient for
-        a metabolite is 0, the metabolite is removed from the reaction.
+        the given metabolites with ``-1 * coeffcient``. If the final
+        coefficient for a metabolite is 0, the metabolite is removed from the
+        reaction.
 
-        The change is reverted upon exit when using the MassModel as a context.
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
+
+        Notes
+        -----
+        A final coefficient of < 0 implies a reactant and a final
+        coefficient of > 0 implies a product.
 
         Parameters
         ----------
-        metabolites_to_subtract: dict
-            A dictionary with MassMetabolite objects or metabolite identifiers
+        metabolites_to_subtract : dict
+            A dictionary with :class:`~.MassMetabolite`\ s or their identifiers
             as keys and stoichiometric coefficients as values. If keys are
             strings (id of a metabolite), the reaction must already be part of
-            a MassModel and a MassMetabolite with the given id must already
-            exist in the MassModel.
-        combine: bool, optional
-            If True, the metabolite coefficients are combined together.
+            a :class:`~.MassModel` and a metabolite with the given id must
+            already exist in the :class:`~.MassModel`.
+        combine : bool
+            If ``True``, the metabolite coefficients are combined together.
             Otherwise the coefficients are replaced.
-        reversibly: bool, optional
+        reversibly : bool
             Whether to add the change to the context to make the change
             reversible (primarily intended for internal use).
 
         Warnings
         --------
-        A cobra Metabolite cannot be directly added to a MassReaction. Instead,
-            the cobra Metabolite must first be converted to a MassMetabolite
-            through the mass.util.conversion class.
-
-        Notes
-        -----
-        A final coefficient of < 0 implies a reactant and a final
-            coefficient of > 0 implies a product.
+        A :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>` cannot
+        be directly added to a :class:`MassReaction`. Instead, the metabolite
+        must first be instantiated as a :class:`~.MassMetabolite`.
 
         See Also
         --------
-        MassReaction.add_metabolites
+        :meth:`add_metabolites`
 
         """
         self.add_metabolites({k: -v
@@ -979,13 +1049,13 @@ class MassReaction(Object):
 
         Parameters
         ----------
-        use_metabolite_names: bool, optional
-            If True, use the metabolite names instead of their identifiers.
-            Default is false.
+        use_metabolite_names : bool
+            If ``True``, use the metabolite names instead of their identifiers.
+            Default is ``False``.
 
         Returns
         -------
-        reaction_string: str
+        reaction_string : str
             A string representation of the reaction.
 
         """
@@ -1017,11 +1087,15 @@ class MassReaction(Object):
         return reaction_string
 
     def check_mass_balance(self):
-        """Compute tbhe mass and charge balances for the reaction.
+        """Compute the mass and charge balances for the reaction.
 
-        Returns a dictionary of {element: amount} for unbalanced elements,
-        with the "charge" treated as an element in this dictionary.
-        For a balanced reaction, an empty dictionary is returned.
+        Returns
+        -------
+        dict
+            Returns a dictionary of ``{element: amount}`` for unbalanced
+            elements, with the "charge" treated as an element in the dict.
+            For a balanced reaction, an empty dict is returned.
+
         """
         reaction_element_dict = defaultdict(int)
         for metabolite, coeff in iteritems(self._metabolites):
@@ -1038,7 +1112,7 @@ class MassReaction(Object):
     def build_reaction_from_string(self, reaction_str, verbose=True,
                                    fwd_arrow=None, rev_arrow=None,
                                    reversible_arrow=None, term_split="+"):
-        """Build a reaction from reaction equation reaction_str using parser.
+        """Build reaction from reaction equation ``reaction_str`` using parser.
 
         Takes a string representation of the reaction and uses the
         specifications supplied in the optional arguments to infer a set of
@@ -1047,26 +1121,31 @@ class MassReaction(Object):
         reaction arrow.
 
         For example:
-            'A + B <=> C' for reversible reactions, A & B are reactants.
-            'A + B --> C' for irreversible reactions, A & B are reactants.
-            'A + B <-- C' for irreversible reactions, A & B are products.
 
-        The change is reverted upon exit when using the MassModel as a context.
+            * 'A + B <=> C' for reversible reactions, A & B are reactants.
+            * 'A + B --> C' for irreversible reactions, A & B are reactants.
+            * 'A + B <-- C' for irreversible reactions, A & B are products.
+
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Parameters
         ----------
         reaction_str: str
             A string containing the reaction formula (equation).
-        verbose: bool, optional
-            Setting the verbosity of the function.
-        fwd_arrow: re.compile, optional
-            For forward irreversible reaction arrows.
-        rev_arrow: re.compile, optional
-            For backward irreversible reaction arrows.
-        reversible_arrow: re.compile, optional
-            For reversible reaction arrows.
-        term_split: str, optional
-            Dividing individual metabolite entries. Default is "+".
+        verbose: bool
+            Setting the verbosity of the function. Default is ``True``.
+        fwd_arrow: re.compile, None
+            For forward irreversible reaction arrows. If ``None``, the
+            arrow is expected to be ``'-->'`` or ``'==>'``.
+        rev_arrow: re.compile, None
+            For backward irreversible reaction arrows. If ``None``, the
+            arrow is expected to be ``'<--'`` or ``'<=='``.
+        reversible_arrow: re.compile, None
+            For reversible reaction arrows. If ``None``, the arrow is expected
+            to be ``'<=>'`` or ``'<->'``.
+        term_split: str
+            Dividing individual metabolite entries. Default is ``"+"``.
 
         """
         # Set the arrows
@@ -1153,12 +1232,12 @@ class MassReaction(Object):
 
     # Internal
     def _associate_gene(self, cobra_gene):
-        """Associates a cobra.Gene object with the reaction.
+        """Associates a :class:`~cobra.core.gene.Gene` with the reaction.
 
         Parameters
         ----------
-        cobra_gene: cobra.core.Gene.Gene
-            Gene object to be assoicated with the reaction.
+        cobra_gene: Gene
+            :class:`~cobra.core.gene.Gene` to be assoicated with the reaction.
 
         Warnings
         --------
@@ -1170,12 +1249,13 @@ class MassReaction(Object):
         cobra_gene._model = self._model
 
     def _dissociate_gene(self, cobra_gene):
-        """Dissociates a cobra.Gene object with the reaction.
+        """Dissociates a :class:`~cobra.core.gene.Gene` with the reaction.
 
         Parameters
         ----------
-        cobra_gene: cobra.core.Gene.Gene
-            Gene object to be assoicated with the reaction.
+        cobra_gene: Gene
+            :class:`~cobra.core.gene.Gene` to be disassociated with the
+            reaction.
 
         Warnings
         --------
@@ -1213,7 +1293,13 @@ class MassReaction(Object):
             gene._reaction.add(self)
 
     def _make_boundary_metabolites(self):
-        """Make the boundary metabolite."""
+        """Make the boundary metabolite.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         bc_metabolites = []
         for metabolite in list(self.metabolites):
             bc_metabolite = metabolite._remove_compartment_from_id_str()
@@ -1224,7 +1310,13 @@ class MassReaction(Object):
         return bc_metabolites
 
     def _repr_html_(self):
-        """HTML representation of the overview for the MassReaction."""
+        """HTML representation of the overview for the MassReaction.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return """
             <table>
                 <tr>
@@ -1262,11 +1354,23 @@ class MassReaction(Object):
 
     # Dunders
     def __copy__(self):
-        """Create a copy of the MassReaction."""
+        """Create a copy of the MassReaction.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return copy(super(MassReaction, self))
 
     def __deepcopy__(self, memo):
-        """Create a deepcopy of the MassReaction."""
+        """Create a deepcopy of the MassReaction.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return deepcopy(super(MassReaction, self), memo)
 
     def __setstate__(self, state):
@@ -1278,6 +1382,10 @@ class MassReaction(Object):
 
         However, to increase performance speed, let the metabolite
         and gene know that they are employed in this reaction
+
+        Warnings
+        --------
+        This method is intended for internal use only.
 
         """
         # These are necessary for old pickles which store attributes
@@ -1307,7 +1415,10 @@ class MassReaction(Object):
         and. All other attributes (i.e. rate constants) will match those of
         the first reaction, Return a new MassReaction object.
 
-        Similar to the method in cobra.core.reaction
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         new_reaction = self.copy()
         new_reaction += other
@@ -1320,6 +1431,11 @@ class MassReaction(Object):
         reactions, and the gene reaction rule will be both rules combined by an
         and. All other attributes (i.e. rate constants) will match those of the
         first reaction. Return the same MassReaction object with its updates.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         self.add_metabolites(other._metabolites, combine=True)
         gpr1 = self.gene_reaction_rule.strip()
@@ -1341,6 +1457,11 @@ class MassReaction(Object):
         reactions, and the gene reaction rule will be both rules combined by an
         'and'. All other attributes (i.e. rate constants) will match those of
         the first reaction. Return a new MassReaction object.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         new_reaction = self.copy()
         new_reaction -= other
@@ -1351,6 +1472,11 @@ class MassReaction(Object):
 
         The stoichiometry will be the combined stoichiometry of the two
         reactions. Returns the same MassReaction object with its updates.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         self.subtract_metabolites(other._metabolites, combine=True)
         return self
@@ -1360,6 +1486,11 @@ class MassReaction(Object):
 
         Returns a new MassReaction object
         E.g. A -> B becomes 2A -> 2B.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         new_reaction = self.copy()
         new_reaction *= coefficient
@@ -1370,12 +1501,26 @@ class MassReaction(Object):
 
         Returns the same MassReaction object with its updates
         E.g. A -> B becomes 2A -> 2B.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
         """
         self._metabolites = {met: value * coefficient
                              for met, value in iteritems(self._metabolites)}
         return self
 
     def __str__(self):
-        """Create an id string with the stoichiometry."""
+        """Create an id string with the stoichiometry.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return "{id}: {stoichiometry}".format(
             id=self.id, stoichiometry=self.build_reaction_string())
+
+
+__all__ = ("MassReaction",)

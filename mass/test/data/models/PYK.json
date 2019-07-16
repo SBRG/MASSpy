@@ -1,36 +1,5 @@
 {
     "_enzyme_concentration_total": 6.9e-05,
-    "_enzyme_module_forms_categorized": {
-        "Relaxed": [
-            "pyk_R0_AP_c",
-            "pyk_R0_A_c",
-            "pyk_R0_P_c",
-            "pyk_R0_c",
-            "pyk_R1_AP_c",
-            "pyk_R1_A_c",
-            "pyk_R1_P_c",
-            "pyk_R1_c",
-            "pyk_R2_AP_c",
-            "pyk_R2_A_c",
-            "pyk_R2_P_c",
-            "pyk_R2_c",
-            "pyk_R3_AP_c",
-            "pyk_R3_A_c",
-            "pyk_R3_P_c",
-            "pyk_R3_c",
-            "pyk_R4_AP_c",
-            "pyk_R4_A_c",
-            "pyk_R4_P_c",
-            "pyk_R4_c"
-        ],
-        "Tense": [
-            "pyk_T0_c",
-            "pyk_T1_c",
-            "pyk_T2_c",
-            "pyk_T3_c",
-            "pyk_T4_c"
-        ]
-    },
     "_enzyme_module_ligands_categorized": {
         "Activators": [
             "fdp_c"
@@ -98,6 +67,37 @@
             "PYK_R43"
         ]
     },
+    "_enzyme_module_species_categorized": {
+        "Relaxed": [
+            "pyk_R0_AP_c",
+            "pyk_R0_A_c",
+            "pyk_R0_P_c",
+            "pyk_R0_c",
+            "pyk_R1_AP_c",
+            "pyk_R1_A_c",
+            "pyk_R1_P_c",
+            "pyk_R1_c",
+            "pyk_R2_AP_c",
+            "pyk_R2_A_c",
+            "pyk_R2_P_c",
+            "pyk_R2_c",
+            "pyk_R3_AP_c",
+            "pyk_R3_A_c",
+            "pyk_R3_P_c",
+            "pyk_R3_c",
+            "pyk_R4_AP_c",
+            "pyk_R4_A_c",
+            "pyk_R4_P_c",
+            "pyk_R4_c"
+        ],
+        "Tense": [
+            "pyk_T0_c",
+            "pyk_T1_c",
+            "pyk_T2_c",
+            "pyk_T3_c",
+            "pyk_T4_c"
+        ]
+    },
     "_enzyme_net_flux": 2.2399999999999998,
     "_enzyme_net_flux_equation": "kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))",
     "compartments": {
@@ -149,33 +149,6 @@
         "PYK_T3": "kf_PYK_I*(2*Keq_PYK_I*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t))/Keq_PYK_I",
         "PYK_T4": "kf_PYK_I*(Keq_PYK_I*atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t))/Keq_PYK_I"
     },
-    "enzyme_module_forms": [
-        "pyk_R0_c",
-        "pyk_R0_A_c",
-        "pyk_R0_P_c",
-        "pyk_R0_AP_c",
-        "pyk_T0_c",
-        "pyk_R1_c",
-        "pyk_R1_A_c",
-        "pyk_R1_P_c",
-        "pyk_R1_AP_c",
-        "pyk_T1_c",
-        "pyk_R2_c",
-        "pyk_R2_A_c",
-        "pyk_R2_P_c",
-        "pyk_R2_AP_c",
-        "pyk_T2_c",
-        "pyk_R3_c",
-        "pyk_R3_A_c",
-        "pyk_R3_P_c",
-        "pyk_R3_AP_c",
-        "pyk_T3_c",
-        "pyk_R4_c",
-        "pyk_R4_A_c",
-        "pyk_R4_P_c",
-        "pyk_R4_AP_c",
-        "pyk_T4_c"
-    ],
     "enzyme_module_ligands": [
         "pep_c",
         "adp_c",
@@ -219,6 +192,33 @@
         "PYK_R44",
         "PYK_R45",
         "PYK_L"
+    ],
+    "enzyme_module_species": [
+        "pyk_R0_c",
+        "pyk_R0_A_c",
+        "pyk_R0_P_c",
+        "pyk_R0_AP_c",
+        "pyk_T0_c",
+        "pyk_R1_c",
+        "pyk_R1_A_c",
+        "pyk_R1_P_c",
+        "pyk_R1_AP_c",
+        "pyk_T1_c",
+        "pyk_R2_c",
+        "pyk_R2_A_c",
+        "pyk_R2_P_c",
+        "pyk_R2_AP_c",
+        "pyk_T2_c",
+        "pyk_R3_c",
+        "pyk_R3_A_c",
+        "pyk_R3_P_c",
+        "pyk_R3_AP_c",
+        "pyk_T3_c",
+        "pyk_R4_c",
+        "pyk_R4_A_c",
+        "pyk_R4_P_c",
+        "pyk_R4_AP_c",
+        "pyk_T4_c"
     ],
     "enzyme_modules": [],
     "genes": [],

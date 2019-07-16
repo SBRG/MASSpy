@@ -1,58 +1,85 @@
 # -*- coding: utf-8 -*-
-"""The Simulation module addresses the simulation of mass.MassModels.
+r"""The Simulation module addresses the simulation of :class:`~.MassModel`\ s.
 
-The Simulation module is designed to address all aspects related to the
-simulation of one or more MassModel objects. These aspects include initializing
-and compiling the model into a RoadRunner instance (the ODE integrator),
-storing the numerical values necessary for the simulations, and handling the
-simulation results by creating and storing MassSolution objects.
+The :class:`~.Simulation` is designed to address all aspects related to the
+simulation of one or more :class:`~.MassModel`\ s. These aspects include
+initializing and compiling the model into a :class:`roadrunner.RoadRunner`
+instance (the ODE integrator), storing the numerical values necessary for the
+simulations, and handling the simulation results by creating and storing
+:class:`~.MassSolution`\ s.
 
-A Simulation is initialized by providing a MassModel object
+A :class:`~.Simulation` is initialized by providing a simulatable
+:class:`~.MassModel` that can be converted into an SBML compliant model.
 
-Perturbations can also be implemented for a given simulation as long as they
+Multiple models can be added to the :class:`Simualtion` in order to simulate
+an ensemble of models. To add an additional model to the ensemble, the model
+must meet three criteria:
+
+    1. The model must have equivalent ODEs to the
+       :attr:`~Simulation.reference_model`
+    2. The model must not have the same ID as the
+       :attr:`~Simulation.reference_model`.
+    3. The model must have all numerical values needed for simulation.
+
+Perturbations can be implemented for a given simulation as long as they
 follow the following guidelines:
-    1. Perturbations are dicts where key:value pairs are the variables to be
-       perturbed and the corresponding value change.
-    2. To scale the current value of a variable, the value should be a string
-       representation of a formula altering the variable where the variable is
-       identical to the perturbation key.
-    3. If providing a formula string as the perturbation value, it must be
-       possible to sympify the string via sympy.sympify. It must only have one
-       variable that is identical to the perturbation key.
-    4. Only boundary metabolites can be changed to have functions of time that
+
+    1. Perturbations are ``dict``\ s where the ``{key: value}`` pairs are the
+       variables to be perturbed and the new numerical value or value change.
+    2. To scale the current value of a variable, the value should be a ``str``
+       representing the formula for altering perturbation variable, where the
+       variable in the ``str`` is identical to the perturbation key.
+    3. If providing a formula ``str`` as the perturbation value, it must be
+       possible to 'sympify' the string using the
+       :func:`~sympy.core.sympify.sympify` function. It must only have one
+       variable, identical to the perturbation key.
+    4. Only boundary conditions can be changed to have functions of time that
        represent the external concentration at that point in time.
-       If a perturbation value is to be a function, it must be a function of
-       time and it must be possible to sympify the string via sympy.sympify.
+       If a perturbation value is to be a string representing a function, it
+       must be a function, it may only contain the time variable ``'t'`` and
+       the boundary metabolite variable.
 
-Examples of perturbations following the guidelines for a model containing the
-specie with ID 'MID_c', boundary metabolite with ID 'MID_b', and reaction
-with ID 'RID':
-    Altering initial conditions of metabolites:
-        {'MID_c': float}, {'MID_c': 'MID_c * value'}
-    Altering a reaction parameter:
-        {'kf_RID': float}, {'kf_RID': 'kf_RID * value'}
-        {'kr_RID': float}, {'kr_RID': 'kr_RID * value'}
-        {'Keq_RID': float}, {'Keq_RID': 'Keq_RID * value'}
-    Altering a boundary condition:
-        {'MID_b': float}, {'MID_b': 'MID_b * value'}
-        {'MID_b': 'sin(t)'}, {'MID_b': 'MID_b + sin(t)'}
+Some examples of perturbations following the guidelines for a model containing
+the specie with ID ``'MID_c'``, boundary metabolite with ID ``'MID_b'``, and
+reaction with ID ``'RID'``:
 
-    Note that perturbations with functions of time as values take longer to
-    implement than other perturbations.
+    * Altering :attr:`~.MassModel.initial_conditions` (ICs):
 
-All simulation results are returned as mass.MassSolution objects. MassSolutions
-are specialized dictionaries with additional attributes and properties to help
-with accessing, grouping, and plotting solutions. They can also behave as
-booleans, with empty MassSolution objects returning as False, and those with
-solutions returning as True.
+        * ``{'MID_c': 2}`` Change the IC value to 2.
+        * ``{'MID_c': 'MID_c * 1.5'}`` Increase current IC value by 50%.
 
-RoadRunner implements logging via the Poco logging system,
-see https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging
-for more information on how to configure the RoadRunner logger.
+    * Altering :attr:`~.MassModel.parameters`:
 
-"""
+        * ``{'kf_RID': 'kf_RID * 0.75'}`` Decrease kf parameter value by 25%.
+        * ``{'Keq_RID': 100}`` Change Keq parameter value to 100.
+
+    * Altering :attr:`~.MassModel.boundary_conditions` (BCs):
+
+        * ``{'MID_b': 'sin(2 * pi * t)'}`` Change BC to a sin function.
+        * ``{'MID_b': 'MID_b + cos(t)'}`` Add ``cos`` function to current BC value.
+
+Note that perturbations using functions of time may take longer to implement
+than other perturbations.
+
+All simulation results are returned as :class:`.MassSolution`\ s.
+Each simulated model has a corresponding :class:`.MassSolution`\ s stored
+in the :class:`Simulation`. These solution objects are stored until being
+replaced by a new :class:`~.MassSolution` upon resimulating the model. This
+means that there can only be one concentration solution and one flux solution
+per simulated model. A failed simulation of a model will return an empty
+:class:`~.MassSolution`.
+
+Because the :class:`Simulation` utilizes the :mod:`roadrunner` package for
+simulating models, the :class:`Simulation` will also utilize the :mod:`roadrunner`
+implementation of the Poco logging system. See the :mod:`roadrunner`
+documentation for more information on how to configure the
+`RoadRunner logger <https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging>`_.
+""" # noqa
 import sys
 from warnings import warn
+
+from cobra.core.dictlist import DictList
+from cobra.core.object import Object
 
 from libsbml import writeSBMLToString
 
@@ -64,75 +91,74 @@ from six import iteritems
 
 from sympy import Basic, Function, Symbol, sympify
 
-from cobra.core.dictlist import DictList
-from cobra.core.object import Object
-
-from mass.core.massconfiguration import MassConfiguration
-from mass.core.massmodel import MassModel
-from mass.core.masssolution import MassSolution, _CONC_STR, _FLUX_STR
+from mass.core.mass_configuration import MassConfiguration
+from mass.core.mass_model import MassModel
+from mass.core.mass_solution import MassSolution, _CONC_STR, _FLUX_STR
 from mass.exceptions import MassSimulationError
 from mass.io.sbml import _model_to_sbml
-from mass.util.DictWithID import DictWithID
-from mass.util.util import _check_kwargs, ensure_iterable
+from mass.util.dict_with_id import DictWithID
 from mass.util.qcqa import is_simulatable, qcqa_model
+from mass.util.util import _check_kwargs, ensure_iterable
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
-LOGGER = roadrunner.Logger
+
+RR_LOGGER = roadrunner.Logger
 # If working in Python application (e.g. iPython notebooks), enable logging
 if sys.__stderr__ != sys.stderr:
-    LOGGER.enablePythonLogging()
-LOGGER.setFormattingPattern("'roadrunner %p: %t'")
+    RR_LOGGER.enablePythonLogging()
+RR_LOGGER.setFormattingPattern("'roadrunner %p: %t'")
 
 # SBML writing kwargs
-SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
-               "units": False, "local_parameters": False}
+_SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
+                "units": False, "local_parameters": False}
 
 
 class Simulation(Object):
     """Class for managing setup and result handling of simulations.
 
-    The mass.Simulation class is designed to address all aspects related to the
-    simulation of MassModel objects, some of which includes setting solver
-    and solver options, perturbation of concentrations and parameters,
-    simulation of a single MassModel or an ensemble of models, and handling
+    The :class:`Simulation` class is designed to address all aspects related
+    to the simulation of :class:`~.MassModel` objects, including setting the
+    solver and solver options, perturbation of concentrations and parameters,
+    simulation of a single model or an ensemble of models, and handling
     of simulation results.
 
     Parameters
     ----------
-    mass_model: mass.MassModel
-        The MassModel to load into the Simulation. The model will be set as the
-        Simulation's reference model.
-    simulation_id: str, optional
-        An identifier to associate with the Simulation given as a string.
-        If None provided, will default to "(MassModel.id)_Simulation."
-    simulation_name: str, optional
-        A human readable name for the Simulation.
-    verbose: bool, optional
+    reference_model : MassModel
+        The model to load for simulation. The model will be set as the
+        :attr:`Simulation.reference_model`.
+    simulation_id : str or None
+        An identifier to associate with the :class:`Simulation`. If ``None``
+        then one is automatically created based on the model identifier.
+    simulation_name : str
+        A human readable name for the :class:`Simulation`.
+    verbose : bool
         Whether to provide a QCQA report and more verbose messages when trying
-        to load the model.
+        to load the model. Default is ``False``.
 
     """
 
-    def __init__(self, mass_model=None, simulation_id=None,
+    def __init__(self, reference_model=None, simulation_id=None,
                  simulation_name=None, verbose=False):
-        """Initialize the Simulation Object."""
-        if not isinstance(mass_model, MassModel):
+        """Initialize the Simulation."""
+        if not isinstance(reference_model, MassModel):
             raise TypeError(
                 "'{0}' is not a valid MassModel instance".format(
-                    str(mass_model)))
+                    str(reference_model)))
 
         if simulation_id is None:
-            simulation_id = "{0}_Simulation".format(str(mass_model))
+            simulation_id = "{0}_Simulation".format(str(reference_model))
 
         try:
             # QCQA check model
-            _assess_model_quality_for_simulation(mass_model, verbose, verbose)
+            _assess_model_quality_for_simulation(
+                reference_model, verbose, verbose)
             # Load model into RoadRunner
-            rr = _load_model_into_roadrunner(mass_model, rr=None,
-                                             verbose=verbose, **SBML_KWARGS)
+            rr = _load_model_into_roadrunner(reference_model, rr=None,
+                                             verbose=verbose, **_SBML_KWARGS)
         except MassSimulationError as e:
             msg = "Could not load MassModel '{0}' in Simulation object".format(
-                str(mass_model))
+                str(reference_model))
             if verbose:
                 msg += ": " + str(e)
             raise MassSimulationError(msg)
@@ -140,13 +166,13 @@ class Simulation(Object):
         # Initialize Simulation
         super(Simulation, self).__init__(simulation_id, simulation_name)
         # Store the original model used to create the Simulation
-        self._reference_massmodel = mass_model
+        self._reference_model = reference_model
         # Set roadrunner
         self._roadrunner = rr
 
         # Storing model values for simulations
         self._model_values = DictList()
-        self._model_values.add(_get_sim_values_from_model(mass_model))
+        self._model_values.add(_get_sim_values_from_model(reference_model))
 
         # Storing concentration and flux solutions in simulations
         self._conc_solutions = DictList()
@@ -154,56 +180,54 @@ class Simulation(Object):
 
     @property
     def reference_model(self):
-        """Return the reference MassModel of the Simulation."""
-        return getattr(self, "_reference_massmodel")
-
-    @property
-    def all_solvers(self):
-        """Return a list of possible solvers that can be used."""
-        return sorted(set([sol_opts.id for sol_opts in _ALL_DEFAULT_OPTIONS]))
+        """Return the reference model of the :class:`Simulation`."""
+        return getattr(self, "_reference_model")
 
     @property
     def models(self):
-        """Return the identifiers of models that exist in the Simulation."""
+        """Return the IDs of models that exist in the :class:`Simulation`."""
         return [d.id.replace("_values", "") for d in self._model_values]
 
     @property
     def roadrunner(self):
-        """Return the roadrunner instance of the Simulation."""
+        """Return the :class:`~roadrunner.RoadRunner` instance."""
         return self._roadrunner
 
     @property
     def logger(self):
-        """Return the logger of the Simulation for direct configuration.
+        """Return the logging instance of the :class:`Simulation`.
 
         For more information on setting the logging system configuration,
-        please see the logging section of the RoadRunner documentation:
-        https://libroadrunner.readthedocs.io/en/latest/api_reference.html#
+        see the :mod:`~.simulation` documentation.
         """
-        return LOGGER
+        return RR_LOGGER
 
     def set_new_reference_model(self, model, verbose=False):
-        """Set a new reference MassModel for the Simulation.
+        """Set a new reference model for the :class:`Simulation`.
 
         To set a new reference model, the model must meet three criteria:
-            1. The model must have equivalent ODEs to the reference model.
-            2. The model must not have the same ID as the reference model.
+
+            1. The model must have equivalent ODEs to the
+               :attr:`~Simulation.reference_model`.
+            2. The model must not have the same ID as the
+               :attr:`~Simulation.reference_model`
             3. The model must have all numerical values needed for simulation.
 
         If the criteria is not met, a warning is raised and the reference model
         will not change.
 
-        After changing the reference model, it will remain included in the
-        Simulation.
+        After changing the reference model, the previous reference model will
+        remain included in the :class:`Simulation`.
 
         Parameters
         ----------
-        model: str, MassModel
-            Either a new or existing MassModel, or the string identifer of an
-            existing model in the Simulation to be set as the Simulation's new
-            reference model.
-        verbose: bool
-            Whether to additional and more verbose messages. Default is True.
+        model : MassModel or str
+            Either a new or existing :class:`~.MassModel`, or the string
+            identifer of an existing model in the :class:`Simulation` to be set
+            as the new reference model.
+        verbose : bool
+            Whether to output additional and more verbose messages.
+            Default is ``True``.
 
         """
         # If a MassModel is provided, add the model to the Simulation,
@@ -226,18 +250,25 @@ class Simulation(Object):
             setattr(self, "_reference_model", new_model)
             self._roadrunner = _load_model_into_roadrunner(
                 new_model, rr=self.roadrunner, verbose=verbose,
-                **SBML_KWARGS)
+                **_SBML_KWARGS)
 
     def get_model_values(self, model):
-        """Return two DictWithIDs containing initial and parameter values.
-
-        The first DictWithID contains the model initial condition values.
-        The second DictWithID contains the model parameter values.
+        """Return two dictionaries containing initial and parameter values.
 
         Parameters
         ----------
-        model: MassModel or its identifier
-            The model whose values are to be returned.
+        model : MassModel or str
+            The model or its identifier whose values are to be returned.
+
+        Returns
+        -------
+        tuple (init_conds, parameters)
+        init_conds : :class:`~mass.util.dict_with_id.DictWithID`
+            A :class:`~mass.util.dict_with_id.DictWithID` containing
+            initial conditions.
+        parameters : :class:`~mass.util.dict_with_id.DictWithID`
+            A :class:`~mass.util.dict_with_id.DictWithID` containing
+            model parameters.
 
         """
         try:
@@ -250,27 +281,29 @@ class Simulation(Object):
         return (values_dict["init_conds"], values_dict["parameters"])
 
     def add_models(self, models, verbose=False):
-        """Add the model values to the Simulation object.
+        r"""Add the model values to the :class:`Simulation`.
 
-        To add a model to the Simulation, the model must meet three criteria:
-            1. The model must have equivalent ODEs to the reference model.
-            2. The model must not have the same ID as the reference model.
+        To add a model to the :class:`Simulation`, three criteria must be met:
+
+            1. The model must have equivalent ODEs to the
+               :attr:`~Simulation.reference_model`
+            2. The model must not have the same ID as the
+               :attr:`~Simulation.reference_model`.
             3. The model must have all numerical values needed for simulation.
 
-        To verify that the model has equivalent ODEs to the reference model,
-        use the `MassModel.has_equivalent_odes` method.
+        Notes
+        -----
+        * Only the model values are added to the :class:`Simulation`.
+        * If a model already exists in the Simulation, it will be replaced.
+        * To verify that the model has equivalent ODEs to the reference model,
+          use :meth:`.MassModel.has_equivalent_odes`.
 
         Parameters
         ----------
-        models: iterable of MassModels
-            An iterable containing the MassModels to add to the Simulation.
-        verbose: bool, optional
-            Whether to log successful loading of a model. Default is True.
-
-        Note
-        ----
-        Only the model values are added to the Simulation for performance.
-        If a model already exists in the Simulation, it will be replaced.
+        models : iterable of models
+            An iterable containing the :class:`~.MassModel`\ s to add.
+        verbose : bool
+            Whether to log successful loading of models. Default is ``True``.
 
         """
         models = ensure_iterable(models)
@@ -284,8 +317,8 @@ class Simulation(Object):
 
         for model in models:
             if not self.reference_model.has_equivalent_odes(model, verbose):
-                LOGGER.log(
-                    LOGGER.LOG_WARNING,
+                RR_LOGGER.log(
+                    RR_LOGGER.LOG_WARNING,
                     "Skipping Model '{0}', ODEs are not equivalent to the "
                     "reference model.".format(str(model)))
                 continue
@@ -295,41 +328,42 @@ class Simulation(Object):
                 msg = "Could not load Model '" + str(model) + "'"
                 if verbose:
                     msg += ": " + str(e)
-                LOGGER.log(LOGGER.LOG_WARNING, msg)
+                RR_LOGGER.log(RR_LOGGER.LOG_WARNING, msg)
                 continue
 
             values = _get_sim_values_from_model(model)
             if values in self._model_values:
                 self._model_values._replace_on_id(values)
                 if verbose:
-                    LOGGER.log(
-                        LOGGER.LOG._NOTICE,
+                    RR_LOGGER.log(
+                        RR_LOGGER.LOG._NOTICE,
                         "Model '{0}' already exists, existing values will be "
                         "replaced".format(str(model)))
             else:
                 self._model_values.add(values)
             if verbose:
-                LOGGER.log(
-                    LOGGER.LOG_NOTICE,
+                RR_LOGGER.log(
+                    RR_LOGGER.LOG_NOTICE,
                     "Successfully loaded Model '{0}' into Simulation.".format(
                         str(model)))
 
     def remove_models(self, models, verbose=False):
-        """Remove the model values to the Simulation object.
+        r"""Remove the model values to the :class:`Simulation`.
+
+        Notes
+        -----
+        The :attr:`~Simulation.reference_model` cannot be removed from the
+        :class:`Simulation`. In order to remove the current reference model,
+        the reference model must first be changed to a different model using
+        the :meth:`set_new_reference_model` method.
 
         Parameters
         ----------
-        models: iterable of MassModels or their identifiers
-            An iterable containing the MassModels to remove to the Simulation.
-        verbose: bool, optional
-            Whether to log successful removal of a model. Default is True.
-
-        Note
-        ----
-        The reference model cannot be removed from the Simulation. To remove
-        the Simulation's current reference model, the reference model must
-        changed to a different model first using the
-        `Simulation.reference_model` setter.
+        models : iterable of models or their identifiers
+            An iterable of :class:`.MassModel`\ s or their string identifiers
+            to be removed.
+        verbose : bool
+            Whether to log successful removal of a model. Default is ``True``.
 
         """
         models = [str(m) for m in ensure_iterable(models)]
@@ -342,32 +376,34 @@ class Simulation(Object):
             else:
                 self._model_values -= [values_dict]
                 if verbose:
-                    LOGGER.log(
-                        LOGGER.LOG_NOTICE, "Successfully removed Model '{0}' "
-                        "from Simulation.".format(str(model)))
+                    RR_LOGGER.log(RR_LOGGER.LOG_NOTICE,
+                                  "Successfully removed Model '{0}' from the "
+                                  "Simulation.".format(str(model)))
 
     def get_model_objects(self, models=None):
-        """Return the loaded Simulation models as MassModel objects.
-
-        Parameters
-        ----------
-        models: iterable of model identifiers
-            An iterable containing the model identifiers of the desired
-            MassModels to return. If None, all models in the Simulation will be
-            returned.
-
-        Returns
-        -------
-        mass_models: MassModel, DictList of MassModels
-            A DictList containing all of the MassModel objects.
+        r"""Return the loaded models as :class:`~.MassModel`\ s.
 
         Notes
         -----
-        With the exception of the reference model, only the model values are
-        stored in the Simulation in order to improve performance. Therefore,
-        when using this method to retrieve the MassModel objects, all models
-        are created anew meaning that they will NOT be the same MassModel
-        objects that were loaded into the Simulation.
+        With the exception of the :attr:`~Simulation.reference_model`, only
+        the numerical values of a mdoel are stored in order to improve
+        performance. Therefore, when using this method to retrieve the
+        :class:`~.MassModel`\ s, all models are created anew, meaning that
+        they will NOT be the same :class:`~.MassModel`\ s that were loaded
+        into the Simulation.
+
+        Parameters
+        ----------
+        models : iterable of model identifiers
+            An iterable of strings containing the model identifiers of the
+            desired :class:`~.MassModel`\ s to return. If ``None`` then all
+            models in the :class:`Simulation` will be returned.
+
+        Returns
+        -------
+        mass_models : ~cobra.core.dictlist.DictList
+            A :class:`~cobra.core.dictlist.DictList` containing all of the
+            :class:`~.MassModel`\ s.
 
         """
         if models is None:
@@ -386,7 +422,7 @@ class Simulation(Object):
 
             try:
                 # Try to update model values
-                new_model = self._update_massmodel_with_values(new_model)
+                new_model = self._update_mass_model_with_values(new_model)
             except ValueError as e:
                 warn(str(e))
             else:
@@ -395,48 +431,77 @@ class Simulation(Object):
         return mass_models
 
     def simulate(self, models=None, time=None, perturbations=None, **kwargs):
-        """Simulate models and return solutions as MassSolutions.
+        r"""Simulate models and return results as :class:`~.MassSolution`\ s.
 
         A simulation is carried out by simultaneously integrating the ODEs
-        of the 'models' to compute their solutions over the time interval
-        specified by 'time', while temporarily incorporating events and changes
-        specified in 'perturbations'. See the Simulation Module documentation
-        for more information.
+        of the ``models`` to compute their solutions over the time interval
+        specified by ``time``, while temporarily incorporating events and
+        changes specified in ``perturbations``.
 
         Parameters
         ----------
-        models: iterable of MassModels or iterable of MassModel IDs, None
-            The models to simulate. If None provided, all models loaded into
+        models : iterable of models or their string identifiers, None
+            The models to simulate. If ``None`` then all models loaded into
             the simulation object will be used. All models must already
-            exist in the Simulation.
-        time: tuple of len 2 or len 3
-            Either tuple of len 2 containing the start and end time points, or
-            the a tuple of len 3 containing the starting time, ending time, and
-            the number of time points to use.
-        perturbations: dict, optional
-            A dict of perturbations to incorporate into the simulation.
-            See Simulation Module Documentation for more information on valid
-            perturbations.
+            exist in the :class:`Simulation`.
+        time : tuple
+            Either a ``tuple`` containing the initial and final time points, or
+            a ``tuple`` containing the initial time point, final time point,
+            and the number of time points to use.
+        perturbations : dict
+            A ``dict`` of perturbations to incorporate into the simulation.
+            See :mod:`~.simulation` documentation for more information on
+            valid perturbations.
         **kwargs
-            selections
-            boundary_metabolites
-            disable_warnings
-            steps
-            interpolate
-            update_solutions
+            selections :
+                ``list`` of identifiers corresponding to the time course
+                selections to return in the solutions. If pools or net fluxes
+                are included, all variables for their formulas must be
+                included.
+
+                Default is ``None`` for all concentrations, fluxes, pools,
+                and net fluxes.
+            boundary_metabolites :
+                ``bool`` indicating whether to include boundary metabolite
+                concentrations in the output.
+
+                Default is ``False``.
+            disable_warnings :
+                ``bool`` indicating disable the user warnings that are raised
+                in addition to logging.
+
+                Default is ``False``.
+            steps :
+                ``int`` indicating number of steps at which the output is
+                sampled where the samples are evenly spaced and
+                ``steps = (number of time points) - 1.``
+                Steps and number of time points may not both be specified.
+
+                Default is ``None``.
+            interpolate :
+                ``bool`` indicating whether simulation results should be
+                returned to as interpolating functions.
+
+                Default is ``False``.
+            update_solutions :
+                ``bool`` indicating whether to replace the stored solutions in
+                the simulation with the new simulation results.
+
+                Default is ``True``.
 
         Returns
         -------
-        conc_solutions: DictList of mass.MassSolution, MassSolution
-            A DictList of MassSolutions containing the concentration solutions
+        tuple (conc_solutions, flux_solutions)
+        conc_solutions : :class:`~cobra.core.dictlist.DictList`
+            A :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the concentration solutions
             for successful simulations. If the simulation failed, the
-            MassSolution will be returned as empty. If there is only one
-            model, a single MassSolution is returned instead of the DictList.
-        flux_solutions: DictList of mass.MassSolution, MassSolution
-            A DictList of MassSolutions containing the flux solutions for
-            successful simulations. If the simulation failed, the MassSolution
-            will be returned as empty. If there is only one model, a single
-            MassSolution is returned instead of the DictList.
+            :class:`~.MassSolution` will be returned as empty.
+        flux_solutions : :class:`~cobra.core.dictlist.DictList`
+            A :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the flux solutions for
+            successful simulations. If the simulation failed, the
+            :class:`~.MassSolution` will be returned as empty.
 
         """
         # Check kwargs
@@ -487,8 +552,8 @@ class Simulation(Object):
                     if not kwargs.get("disable_warnings"):
                         warn("One or more simulations failed. Check the log "
                              "for more details.")
-                    LOGGER.log(
-                        LOGGER.LOG_ERROR,
+                    RR_LOGGER.log(
+                        RR_LOGGER.LOG_ERROR,
                         "Failed simulation for '{0}' due the following error: "
                         "'{1}'".format(model, str(e)))
                     # Make empty MassSolutions
@@ -516,65 +581,101 @@ class Simulation(Object):
             self._update_stored_solutions(_CONC_STR, conc_sol_list)
             self._update_stored_solutions(_FLUX_STR, flux_sol_list)
 
-        # Return just a tuple of two MassSolutions if only one model simulated
-        if len(models) == 1:
-            return conc_sol_list[0], flux_sol_list[0]
-
         return conc_sol_list, flux_sol_list
 
     def find_steady_state(self, models=None, strategy="nleq2",
                           perturbations=None, update_values=False, **kwargs):
-        """Find steady states for models and return solutions as MassSolutions.
+        r"""Find steady states for models.
 
         The steady state is found by carrying out the provided strategy.
 
-        The 'simulate' strategy will simulate the model for a long time (1e8),
-        and ensure the absolute difference between solutions at the final two
-        time points is smaller than the steady state threshold specified in the
-        MassConfiguration.
-
-        All other strategies involve using the Roadrunner steady state solver
-        to determine the steady state through root finding methods. The steady
-        state is found when the sum of squares of the rates of change is less
-        than the steady state threshold specified in the MassConfiguration.
+        * The ``'simulate'`` strategy will simulate the model for a long time
+          (default ``1e8``), and ensure the absolute difference between
+          solutions at the final two time points is less than the
+          :attr:`~.MassBaseConfiguration.steady_state_threshold` in the
+          :class:`.MassConfiguration`.
+        * Other strategies involve using the
+          :class:`roadrunner.roadrunner.SteadyStateSolver` class to determine
+          the steady state through global Newtonian methods. The steady state
+          is found when the sum of squares of the rates of change is less than
+          the :attr:`~.MassBaseConfiguration.steady_state_threshold` in the
+          :class:`.MassConfiguration`.
 
         Parameters
         ----------
-        models: iterable of MassModels or iterable of MassModel IDs, None
-            The models to simulate. If None provided, all models loaded into
+        models : iterable of models or their string identifiers, None
+            The models to simulate. If ``None`` then all models loaded into
             the simulation object will be used. All models must already
-            exist in the Simulation.
-        strategy: {'simulate', 'nleq1', nleq2'}
-            The strategy for finding the steady state.
-        perturbations: dict, optional
-            A dict of perturbations to incorporate into the simulation.
-            See Simulation Module Documentation for more information on valid
-            perturbations.
-        update_values: bool, optional
-            Whether to update the stored model values with the steady state
-            results.
-            Default is False.
+            exist in the :class:`Simulation`.
+        strategy : str
+            The strategy for finding the steady state. Must be one of the
+            following:
+
+                * ``'simulate'``
+                * ``'nleq1'``
+                * ``'nleq2'``
+
+        perturbations : dict
+            A ``dict`` of perturbations to incorporate into the simulation.
+            See :mod:`~.simulation` documentation for more information on
+            valid perturbations.
+        update_values : bool
+            Whether to update the model with the steady state results.
+            Default is ``False``.
         **kwargs
-            selections
-            boundary_metabolites
-            disable_warnings
-            steps
-            tfinal
-            num_attempts
+            selections :
+                ``list`` of identifiers corresponding to the time course
+                selections to return in the solutions. If pools or net fluxes
+                are included, all variables for their formulas must be
+                included.
+
+                Default is ``None`` for all concentrations, fluxes, pools,
+                and net fluxes.
+            boundary_metabolites :
+                ``bool`` indicating whether to include boundary metabolite
+                concentrations in the output.
+
+                Default is ``False``.
+            disable_warnings :
+                ``bool`` indicating disable the user warnings that are raised
+                in addition to logging.
+
+                Default is ``False``.
+            steps :
+                ``int`` indicating number of steps at which the output is
+                sampled where the samples are evenly spaced and
+                ``steps = (number of time points) - 1.``
+                Steps and number of time points may not both be specified.
+                Only valid for ``strategy='simulate'``.
+
+                Default is ``None``.
+            tfinal :
+                ``float`` indicating the final time point to use in when
+                simulating to long times to find a steady state.
+                Only valid for ``strategy='simulate'``.
+
+                Default is ``1e8``.
+            num_attempts :
+                ``int`` indicating the number of attempts the steady state
+                solver should make before determining that a steady state
+                cannot be found. Only valid for ``strategy='nleq1'`` or
+                ``strategy='nleq2'``.
+
+                Default is ``2``.
 
         Returns
         -------
-        conc_solutions: DictList of mass.MassSolution, MassSolution
-            A DictList of MassSolutions containing the concentration solutions
-            for successfully finding steady state. If no steady state is found,
-            the MassSolution will be returned as empty. If there is only one
-            model, a single MassSolution is returned instead of the
-            DictList.
-        flux_solutions: DictList of mass.MassSolution, MassSolution
-            A DictList of MassSolutions containing the flux solutions for
-            successfully finding steady state. If no steady state is found, the
-            MassSolution will be returned as empty. If there is only one model,
-            a single MassSolution is returned instead of the DictList.
+        tuple (conc_solutions, flux_solutions)
+        conc_solutions : :class:`~cobra.core.dictlist.DictList`
+            A :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the concentration solutions
+            for successful simulations. If the simulation failed, the
+            :class:`~.MassSolution` will be returned as empty.
+        flux_solutions : :class:`~cobra.core.dictlist.DictList`
+            A :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the flux solutions for
+            successful simulations. If the simulation failed, the
+            :class:`~.MassSolution` will be returned as empty.
 
         """
         # Check kwargs
@@ -599,7 +700,7 @@ class Simulation(Object):
            and strategy != "simulate":
             raise ValueError(
                 "Invalid steady state strategy: '{0}'".format(strategy))
-        elif strategy == "simulate":
+        if strategy == "simulate":
             steady_state_function = self._find_steady_state_simulate
         else:
             steady_state_function = self._find_steady_state_solver
@@ -635,8 +736,8 @@ class Simulation(Object):
                     if not kwargs.get("disable_warnings"):
                         warn("Unable to find a steady state for one or more "
                              "models. Check the log for more details.")
-                    LOGGER.log(
-                        LOGGER.LOG_ERROR,
+                    RR_LOGGER.log(
+                        RR_LOGGER.LOG_ERROR,
                         "Unable to find a steady state for Model '{0}' using "
                         "strategy '{1}' due to the following: '{2}'".format(
                             model, strategy, str(e)))
@@ -662,13 +763,9 @@ class Simulation(Object):
 
         # Update reference model to have the new values
         if update_values:
-            model = self._update_massmodel_with_values(self.reference_model)
+            model = self._update_mass_model_with_values(self.reference_model)
             setattr(self, "_reference_model", model)
             self._reset_roadrunner(True)
-
-        # Return just a tuple of two MassSolutions if only one model simulated
-        if len(models) == 1:
-            return conc_sol_list[0], flux_sol_list[0]
 
         return conc_sol_list, flux_sol_list
 
@@ -791,17 +888,23 @@ class Simulation(Object):
         return rr, reset
 
     def _set_values_in_roadrunner(self, model, reset, model_values_to_set):
-        """TODO DOCSTRING."""
+        """Set the roadrunner values to reflect the given model.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         rr = self.roadrunner
         if reset:
             new_model = self.reference_model.copy()
             new_model.id = model
-            new_model = self._update_massmodel_with_values(new_model,
-                                                           model_values_to_set)
+            new_model = self._update_mass_model_with_values(
+                new_model, model_values_to_set)
 
             rr = _load_model_into_roadrunner(
                 new_model, rr=self.roadrunner, verbose=False,
-                **SBML_KWARGS)
+                **_SBML_KWARGS)
         else:
             for key, value in iteritems(model_values_to_set):
                 if isinstance(value, Basic):
@@ -905,7 +1008,7 @@ class Simulation(Object):
         if reset:
             _load_model_into_roadrunner(
                 self.reference_model, rr=self.roadrunner, verbose=False,
-                **SBML_KWARGS)
+                **_SBML_KWARGS)
         else:
             self.roadrunner.resetToOrigin()
 
@@ -1015,7 +1118,7 @@ class Simulation(Object):
             for key, value in iteritems(new_value_dict):
                 current_value_dict[id_fix_func(key)] = value
 
-    def _update_massmodel_with_values(self, mass_model, value_dict=None):
+    def _update_mass_model_with_values(self, mass_model, value_dict=None):
         """Update the MassModel object with the stored model values.
 
         Warnings
@@ -1086,7 +1189,7 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
         if verbose:
             msg += " To help determine which values are not numerically " + \
                    "consistent, use the `qcqa_model` method in mass.util.qcqa."
-        LOGGER.log(LOGGER.LOG_WARNING, msg)
+        RR_LOGGER.log(RR_LOGGER.LOG_WARNING, msg)
 
 
 def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
@@ -1117,8 +1220,8 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
         rr.load(sbml_str)
 
     if verbose:
-        LOGGER.log(
-            LOGGER.LOG_NOTICE, "Successfully loaded Model '{0}' into "
+        RR_LOGGER.log(
+            RR_LOGGER.LOG_NOTICE, "Successfully loaded Model '{0}' into "
             "RoadRunner.".format(str(mass_model)))
 
     return rr
@@ -1248,3 +1351,6 @@ def _make_ss_flux(reaction_str):
 
     """
     return "v_" + reaction_str
+
+
+__all__ = ("Simulation",)

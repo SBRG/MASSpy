@@ -1,52 +1,5 @@
 {
     "_enzyme_concentration_total": 3.3e-05,
-    "_enzyme_module_forms_categorized": {
-        "Complexed ATP": [
-            "pfk_R0_A_c",
-            "pfk_R1_A_c",
-            "pfk_R2_A_c",
-            "pfk_R3_A_c",
-            "pfk_R4_A_c"
-        ],
-        "Complexed ATP & F6P": [
-            "pfk_R0_AF_c",
-            "pfk_R1_AF_c",
-            "pfk_R2_AF_c",
-            "pfk_R3_AF_c",
-            "pfk_R4_AF_c"
-        ],
-        "Free Catalytic": [
-            "pfk_R0_c",
-            "pfk_R1_c",
-            "pfk_R2_c",
-            "pfk_R3_c",
-            "pfk_R4_c"
-        ],
-        "Relaxed": [
-            "pfk_R0_AF_c",
-            "pfk_R0_A_c",
-            "pfk_R0_c",
-            "pfk_R1_AF_c",
-            "pfk_R1_A_c",
-            "pfk_R1_c",
-            "pfk_R2_AF_c",
-            "pfk_R2_A_c",
-            "pfk_R2_c",
-            "pfk_R3_AF_c",
-            "pfk_R3_A_c",
-            "pfk_R3_c",
-            "pfk_R4_AF_c",
-            "pfk_R4_A_c",
-            "pfk_R4_c"
-        ],
-        "Tense": [
-            "pfk_T0_c",
-            "pfk_T1_c",
-            "pfk_T2_c",
-            "pfk_T3_c",
-            "pfk_T4_c"
-        ]
-    },
     "_enzyme_module_ligands_categorized": {
         "Activators": [
             "amp_c"
@@ -104,6 +57,53 @@
             "PFK_R42"
         ]
     },
+    "_enzyme_module_species_categorized": {
+        "Complexed ATP": [
+            "pfk_R0_A_c",
+            "pfk_R1_A_c",
+            "pfk_R2_A_c",
+            "pfk_R3_A_c",
+            "pfk_R4_A_c"
+        ],
+        "Complexed ATP & F6P": [
+            "pfk_R0_AF_c",
+            "pfk_R1_AF_c",
+            "pfk_R2_AF_c",
+            "pfk_R3_AF_c",
+            "pfk_R4_AF_c"
+        ],
+        "Free Catalytic": [
+            "pfk_R0_c",
+            "pfk_R1_c",
+            "pfk_R2_c",
+            "pfk_R3_c",
+            "pfk_R4_c"
+        ],
+        "Relaxed": [
+            "pfk_R0_AF_c",
+            "pfk_R0_A_c",
+            "pfk_R0_c",
+            "pfk_R1_AF_c",
+            "pfk_R1_A_c",
+            "pfk_R1_c",
+            "pfk_R2_AF_c",
+            "pfk_R2_A_c",
+            "pfk_R2_c",
+            "pfk_R3_AF_c",
+            "pfk_R3_A_c",
+            "pfk_R3_c",
+            "pfk_R4_AF_c",
+            "pfk_R4_A_c",
+            "pfk_R4_c"
+        ],
+        "Tense": [
+            "pfk_T0_c",
+            "pfk_T1_c",
+            "pfk_T2_c",
+            "pfk_T3_c",
+            "pfk_T4_c"
+        ]
+    },
     "_enzyme_net_flux": 1.12,
     "_enzyme_net_flux_equation": "kf_PFK*(pfk_R0_AF_c(t) + pfk_R1_AF_c(t) + pfk_R2_AF_c(t) + pfk_R3_AF_c(t) + pfk_R4_AF_c(t))",
     "compartments": {
@@ -145,28 +145,6 @@
         "PFK_T3": "kf_PFK_I*(2*Keq_PFK_I*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t))/Keq_PFK_I",
         "PFK_T4": "kf_PFK_I*(Keq_PFK_I*atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t))/Keq_PFK_I"
     },
-    "enzyme_module_forms": [
-        "pfk_R0_c",
-        "pfk_R0_A_c",
-        "pfk_R0_AF_c",
-        "pfk_T0_c",
-        "pfk_R1_c",
-        "pfk_R1_A_c",
-        "pfk_R1_AF_c",
-        "pfk_T1_c",
-        "pfk_R2_c",
-        "pfk_R2_A_c",
-        "pfk_R2_AF_c",
-        "pfk_T2_c",
-        "pfk_R3_c",
-        "pfk_R3_A_c",
-        "pfk_R3_AF_c",
-        "pfk_T3_c",
-        "pfk_R4_c",
-        "pfk_R4_A_c",
-        "pfk_R4_AF_c",
-        "pfk_T4_c"
-    ],
     "enzyme_module_ligands": [
         "f6p_c",
         "fdp_c",
@@ -200,6 +178,28 @@
         "PFK_R42",
         "PFK_R43",
         "PFK_L"
+    ],
+    "enzyme_module_species": [
+        "pfk_R0_c",
+        "pfk_R0_A_c",
+        "pfk_R0_AF_c",
+        "pfk_T0_c",
+        "pfk_R1_c",
+        "pfk_R1_A_c",
+        "pfk_R1_AF_c",
+        "pfk_T1_c",
+        "pfk_R2_c",
+        "pfk_R2_A_c",
+        "pfk_R2_AF_c",
+        "pfk_T2_c",
+        "pfk_R3_c",
+        "pfk_R3_A_c",
+        "pfk_R3_AF_c",
+        "pfk_T3_c",
+        "pfk_R4_c",
+        "pfk_R4_A_c",
+        "pfk_R4_AF_c",
+        "pfk_T4_c"
     ],
     "enzyme_modules": [],
     "genes": [],

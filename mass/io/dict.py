@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""Module to convert or create :mod:`mass` objects into or from dictionaries.
+
+Converting objects into dictionaries allow for the exportation of
+:class:`~.MassModel`\ s in various formats. These formats include:
+
+    * `JSON <https://www.json.org/>`_ format using the functions in
+      :mod:`~mass.io.json`.
+
+"""
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
+
+from cobra.io.dict import gene_from_dict, gene_to_dict
 
 import numpy as np
 
@@ -11,12 +21,15 @@ from six import iteritems, iterkeys, string_types
 
 from sympy import Basic, Eq, Symbol, sympify
 
-from cobra.core import Gene
-
-from mass.core import MassMetabolite, MassModel, MassReaction, UnitDefinition
-from mass.enzyme_modules import (
-    EnzymeModule, EnzymeModuleDict, EnzymeModuleForm, EnzymeModuleReaction,
-    _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
+from mass.core.mass_metabolite import MassMetabolite
+from mass.core.mass_model import MassModel
+from mass.core.mass_reaction import MassReaction
+from mass.core.units import UnitDefinition
+from mass.enzyme_modules.enzyme_module import EnzymeModule
+from mass.enzyme_modules.enzyme_module_dict import (
+    EnzymeModuleDict, _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
+from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
+from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 
 # Global
 _INF = float("inf")
@@ -65,15 +78,8 @@ _REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES = [
 _ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS = []
 _OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES = {}
 
-_REQUIRED_GENE_ATTRIBUTES = ["id", "name"]
-_ORDERED_OPTIONAL_GENE_KEYS = ["notes", "annotation"]
-_OPTIONAL_GENE_ATTRIBUTES = {
-    "notes": {},
-    "annotation": {}
-}
-
 _REQUIRED_ENZYMEMODULE_ATTRIBUTES = [
-    "id", "name", "enzyme_module_ligands", "enzyme_module_forms",
+    "id", "name", "enzyme_module_ligands", "enzyme_module_species",
     "enzyme_module_reactions"]
 _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS = [
     key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
@@ -97,278 +103,32 @@ _OPTIONAL_MODEL_ATTRIBUTES = {
 }
 
 
-def metabolite_to_dict(metabolite):
-    """Represent a MassMetabolite object as a dict.
-
-    Parameters
-    ----------
-    metabolite: MassMetabolite
-        The metabolite to represent as a dict.
-
-    """
-    # Turn object into an OrderedDict with the required attributes
-    new_met = OrderedDict()
-    for key in _REQUIRED_METABOLITE_ATTRIBUTES:
-        new_met[key] = _fix_type(getattr(metabolite, key))
-    # Update with any opitonal attributes that are not their defaults.
-    _update_optional(metabolite, new_met, _OPTIONAL_METABOLITE_ATTRIBUTES,
-                     _ORDERED_OPTIONAL_METABOLITE_KEYS)
-
-    # Add EnzymeModuleForm attributes if metabolite is an EnzymeModuleForm
-    if isinstance(metabolite, EnzymeModuleForm):
-        _add_enzyme_module_form_attributes_into_dict(metabolite, new_met)
-
-    return new_met
-
-
-def metabolite_from_dict(metabolite):
-    """Create a MassMetabolite object from its dict representation.
-
-    Parameters
-    ----------
-    metabolite: dict
-        The dict representation of the metabolite to create.
-
-    """
-    # Determine if saved object should be a MassMetabolite or a subclass
-    if "enzyme_module_id" in metabolite:
-        new_metabolite = EnzymeModuleForm(metabolite["id"])
-    else:
-        new_metabolite = MassMetabolite(metabolite["id"])
-
-    # Set object attributes
-    for k, v in iteritems(metabolite):
-        setattr(new_metabolite, k, v)
-
-    return new_metabolite
-
-
-def reaction_to_dict(reaction):
-    """Represent a MassReaction object as a dict.
-
-    Parameters
-    ----------
-    reaction: MassReaction
-        The reaction to represent as a dict.
-
-    """
-    # Turn object into an OrderedDict with the required attributes
-    new_reaction = OrderedDict()
-    for key in _REQUIRED_REACTION_ATTRIBUTES:
-        if key != "metabolites":
-            new_reaction[key] = _fix_type(getattr(reaction, key))
-            continue
-        # Store metabolites objects as their string identifiers
-        mets = OrderedDict()
-        for met in sorted(reaction.metabolites, key=attrgetter("id")):
-            mets[str(met)] = reaction.metabolites[met]
-        new_reaction["metabolites"] = mets
-    # Update with any opitonal attributes that are not their defaults.
-    _update_optional(reaction, new_reaction, _OPTIONAL_REACTION_ATTRIBUTES,
-                     _ORDERED_OPTIONAL_REACTION_KEYS)
-    # Add EnzymeModuleReaction attributes
-    # if reaction is an EnzymeModuleReaction
-    if isinstance(reaction, EnzymeModuleReaction):
-        _add_enzyme_module_reaction_attributes_into_dict(
-            reaction, new_reaction)
-
-    return new_reaction
-
-
-def reaction_from_dict(reaction, model):
-    """Create a MassReaction object from its dict representation.
-
-    Parameters
-    ----------
-    reaction: dict
-        The dict representation of the reaction to create.
-    model: MassModel
-        The MassModel to assoicate with the reaction.
-
-    """
-    # Determine if saved object should be a MassReaction or a subclass
-    if "enzyme_module_id" in reaction:
-        new_reaction = EnzymeModuleReaction(reaction["id"])
-    else:
-        new_reaction = MassReaction(reaction["id"])
-
-    # Set object attributes
-    for k, v in iteritems(reaction):
-        # Change infinity type from a string to a float
-        if isinstance(v, string_types) and v == "inf":
-            v = _INF
-        if k in {"objective_coefficient", "reaction"}:
-            continue
-        elif k == "metabolites":
-            new_reaction.add_metabolites(OrderedDict(
-                (model.metabolites.get_by_id(str(met)), coeff)
-                for met, coeff in iteritems(v)))
-        else:
-            setattr(new_reaction, k, v)
-
-    return new_reaction
-
-
-def gene_to_dict(gene):
-    """Represent a gene object as a dict.
-
-    Parameters
-    ----------
-    gene: cobra.Gene
-        The gene to represent as a dict.
-
-    """
-    # Turn object into an OrderedDict with the required attributes
-    new_gene = OrderedDict()
-    for key in _REQUIRED_GENE_ATTRIBUTES:
-        new_gene[key] = _fix_type(getattr(gene, key))
-    # Update with any opitonal attributes that are not their defaults.
-    _update_optional(gene, new_gene, _OPTIONAL_GENE_ATTRIBUTES,
-                     _ORDERED_OPTIONAL_GENE_KEYS)
-    return new_gene
-
-
-def gene_from_dict(gene):
-    """Create a gene object from its dict representation.
-
-    Parameters
-    ----------
-    gene: dict
-        The dict representation of the gene to create.
-
-    """
-    new_gene = Gene(gene["id"])
-    # Set object attributes
-    for k, v in iteritems(gene):
-        setattr(new_gene, k, v)
-    return new_gene
-
-
-def enzyme_to_dict(enzyme):
-    """Represent an EnzymeModuleDict object as a dict.
-
-    Parameters
-    ----------
-    enzyme: EnzymeModuleDict
-        The enzyme to represent as a dict.
-
-    """
-    # Turn object into an OrderedDict with the required attributes
-    new_enzyme = OrderedDict()
-    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES:
-        new_enzyme[key] = _fix_type(getattr(enzyme, key))
-
-    # Update with any opitonal attributes that are not their defaults.
-    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEMODULE_ATTRIBUTES,
-                     _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS)
-
-    # Store objects and expressions as string for the attributes
-    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]:
-        new_enzyme[key] = [i.id for i in getattr(enzyme, key)]
-        # Repeat for categorized attribute
-        key += "_categorized"
-        if getattr(enzyme, key) != _OPTIONAL_ENZYMEMODULE_ATTRIBUTES[key]:
-            new_enzyme[key] = {
-                category: [i.id for i in old_dictlist]
-                for category, old_dictlist in iteritems(getattr(enzyme, key))}
-
-    key = "enzyme_net_flux_equation"
-    if key in new_enzyme:
-        new_enzyme[key] = str(getattr(enzyme, key).rhs)
-
-    return new_enzyme
-
-
-def enzyme_from_dict(enzyme, model):
-    """Create an EnzymeModuleDict from its dict representation.
-
-    Parameters
-    ----------
-    enzyme: dict
-        The dict representation of the gene to create.
-
-    """
-    # Set object attributes
-    new_enzyme = EnzymeModuleDict(id_or_enzyme=enzyme)
-    # Update model and get objects from the model to populate the DictLists
-    new_enzyme["model"] = model
-    new_enzyme._update_object_pointers(model)
-
-    # Make the enzyme equations
-    new_enzyme.enzyme_net_flux_equation = Eq(Symbol(
-        "v_" + new_enzyme.id), sympify(new_enzyme.enzyme_net_flux_equation))
-
-    # Make the stoichiometric matrix and clean up the EnzymeModuleDict
-    new_enzyme._make_enzyme_stoichiometric_matrix(update=True)
-    new_enzyme._set_missing_to_defaults()
-    new_enzyme._fix_order()
-
-    return new_enzyme
-
-
-def unit_to_dict(unit_definition):
-    """Represent a UnitDefinition object as a dict.
-
-    Parameters
-    ----------
-    unit: UnitDefintion
-        The UnitDefinition to represent as a dict.
-
-    """
-    # Turn object into an OrderedDict
-    new_unit_definition = OrderedDict()
-    for key, value in iteritems(unit_definition.__dict__):
-        if value and key != "list_of_units":
-            new_unit_definition[key] = _fix_type(value)
-        if value and key == "list_of_units":
-            new_unit_definition[key] = []
-            value = sorted(value, key=attrgetter("kind"))
-            # Iterate through list of units and write to dict.
-            for unit in value:
-                new_unit = OrderedDict(
-                    (k, _fix_type(v)) for k, v in iteritems(unit.__dict__))
-                new_unit_definition[key] += [new_unit]
-
-    return new_unit_definition
-
-
-def unit_from_dict(unit_definition):
-    """Create a UnitDefinition object from its dict representation.
-
-    Parameters
-    ----------
-    unit: dict
-        The dict representation of the UnitDefinition to create.
-
-    """
-    # Create the new unit definition
-    new_unit_definition = UnitDefinition()
-    for key, value in iteritems(unit_definition):
-        if key == "list_of_units":
-            # Create Unit objects for units in the list_of_units attribute
-            for unit in value:
-                new_unit_definition.create_unit(
-                    kind=unit["_kind"], exponent=unit["_exponent"],
-                    scale=unit["_scale"], multiplier=unit["_multiplier"])
-        else:
-            # Set attribute if not list of units
-            new_unit_definition.__dict__[key] = value
-
-    return new_unit_definition
-
-
 def model_to_dict(model, sort=False):
-    """Represent a MassModel object as a dict.
+    """Convert a :class:`~.MassModel` into a serializable dictionary.
 
     Parameters
     ----------
-    model: MassModel, EnzymeModule
-        The model to represent as a dict.
-    sort: bool, optional
-        Whether to sort the metabolites, reactions, genes, and enzyme_modules
+    model : MassModel or EnzymeModule
+        The model to represent as a dictionary.
+    sort : bool
+        Whether to sort the metabolites, reactions, genes, and enzyme modules
         or maintain the order defined in the model. If the model is an
-        EnzymeModule, the enzyme_module_ligands, enzyme_module_forms, and
-        enzyme_module_reactions attributes are also included. Default is False.
+        :class:`~.EnzymeModule`, the
+        :attr:`~.EnzymeModule.enzyme_module_ligands`,
+        :attr:`~.EnzymeModule.enzyme_module_species`, and
+        :attr:`~.EnzymeModule.enzyme_module_reactions` attributes are also
+        included. Default is ``False``.
+
+    Returns
+    -------
+    ~collections.OrderedDict
+        A dictionary with elements corresponding to the model attributes as
+        which are in turn lists containing dictionaries holding all attribute
+        information to form the corresponding object.
+
+    See Also
+    --------
+    model_from_dict
 
     """
     obj = OrderedDict()
@@ -402,23 +162,44 @@ def model_to_dict(model, sort=False):
         _add_enzyme_module_attributes_into_dict(model, obj)
         if sort:
             obj["enzyme_module_ligands"].sort(key=get_id)
-            obj["enzyme_module_forms"].sort(key=get_id)
+            obj["enzyme_module_species"].sort(key=get_id)
             obj["enzyme_module_reactions"].sort(key=get_id)
     return obj
 
 
 def model_from_dict(obj):
-    """Create a MassModel object from its dict representation.
+    """Create a :class:`~.MassModel` from a dictionary.
+
+    Notes
+    -----
+    The :attr:`~.EnzymeModule.enzyme_module_ligands`,
+    :attr:`~.EnzymeModule.enzyme_module_species`, and
+    :attr:`~.EnzymeModule.enzyme_module_reactions` attributes are used to
+    determine whether the model should be initialized as an
+    :class:`~.EnzymeModule` or as a :class:`~.MassModel`. At least one of these
+    three attributes must be present in order for an :class:`~.EnzymeModule`
+    to be created.
 
     Parameters
     ----------
-    obj: dict
-        The dict representation of the MassModel to create.
+    obj : dict
+        A dictionary with elements corresponding to the model attributes as
+        which are in turn lists containing dictionaries holding all attribute
+        information to form the corresponding object.
+
+    Returns
+    -------
+    MassModel or EnzymeModule
+        The generated model or enzyme module.
+
+    See Also
+    --------
+    model_to_dict
 
     """
     if "reactions" not in obj:
         raise ValueError("Object has no reactions attribute. Cannot load.")
-    if all([k in obj for k in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]]):
+    if any([k in obj for k in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]]):
         model = EnzymeModule(obj["id"])
     else:
         model = MassModel(obj["id"])
@@ -467,9 +248,326 @@ def model_from_dict(obj):
     return model
 
 
+def metabolite_to_dict(metabolite):
+    """Convert a :class:`~.MassMetabolite` into a serializable dictionary.
+
+    Parameters
+    ----------
+    metabolite : ~.MassMetabolite
+        The metabolite to represent as a dictionary.
+
+    Returns
+    -------
+    ~collections.OrderedDict
+        A dictionary with elements corresponding to metabolite attributes.
+
+    See Also
+    --------
+    metabolite_from_dict
+
+    """
+    # Turn object into an OrderedDict with the required attributes
+    new_met = OrderedDict()
+    for key in _REQUIRED_METABOLITE_ATTRIBUTES:
+        new_met[key] = _fix_type(getattr(metabolite, key))
+    # Update with any opitonal attributes that are not their defaults.
+    _update_optional(metabolite, new_met, _OPTIONAL_METABOLITE_ATTRIBUTES,
+                     _ORDERED_OPTIONAL_METABOLITE_KEYS)
+
+    # Add EnzymeModuleSpecies attributes if metabolite is an
+    # EnzymeModuleSpecies
+    if isinstance(metabolite, EnzymeModuleSpecies):
+        _add_enzyme_module_species_attributes_into_dict(metabolite, new_met)
+
+    return new_met
+
+
+def metabolite_from_dict(metabolite):
+    """Create a :class:`~.MassMetabolite` from a dictionary.
+
+    Notes
+    -----
+    The presence of the :attr:`~.EnzymeModuleSpecies.enzyme_module_id`
+    attribute is used to determine whether the dictionary should be
+    initialized as an :class:`~.EnzymeModuleSpecies` or as a
+    :class:`~.MassMetabolite`.
+
+    Parameters
+    ----------
+    metabolite : dict
+        A dictionary with elements corresponding to the metabolite attributes.
+
+    Returns
+    -------
+    MassMetabolite or EnzymeModuleSpecies
+        The generated metabolite.
+
+    See Also
+    --------
+    metabolite_to_dict
+
+    """
+    # Determine if saved object should be a MassMetabolite or a subclass
+    if "enzyme_module_id" in metabolite:
+        new_metabolite = EnzymeModuleSpecies(metabolite["id"])
+    else:
+        new_metabolite = MassMetabolite(metabolite["id"])
+
+    # Set object attributes
+    for k, v in iteritems(metabolite):
+        setattr(new_metabolite, k, v)
+
+    return new_metabolite
+
+
+def reaction_to_dict(reaction):
+    """Convert a :class:`~.MassReaction` into a serializable dictionary.
+
+    Parameters
+    ----------
+    reaction : ~.MassReaction
+        The reaction to represent as a dictionary.
+
+    Returns
+    -------
+    ~collections.OrderedDict
+        A dictionary with elements corresponding to reaction attributes.
+
+    See Also
+    --------
+    reaction_from_dict
+
+    """
+    # Turn object into an OrderedDict with the required attributes
+    new_reaction = OrderedDict()
+    for key in _REQUIRED_REACTION_ATTRIBUTES:
+        if key != "metabolites":
+            new_reaction[key] = _fix_type(getattr(reaction, key))
+            continue
+        # Store metabolites objects as their string identifiers
+        mets = OrderedDict()
+        for met in sorted(reaction.metabolites, key=attrgetter("id")):
+            mets[str(met)] = reaction.metabolites[met]
+        new_reaction["metabolites"] = mets
+    # Update with any opitonal attributes that are not their defaults.
+    _update_optional(reaction, new_reaction, _OPTIONAL_REACTION_ATTRIBUTES,
+                     _ORDERED_OPTIONAL_REACTION_KEYS)
+    # Add EnzymeModuleReaction attributes
+    # if reaction is an EnzymeModuleReaction
+    if isinstance(reaction, EnzymeModuleReaction):
+        _add_enzyme_module_reaction_attributes_into_dict(
+            reaction, new_reaction)
+
+    return new_reaction
+
+
+def reaction_from_dict(reaction, model):
+    """Create a :class:`~.MassReaction` from a dictionary.
+
+    Notes
+    -----
+    The presence of the :attr:`.EnzymeModuleReaction.enzyme_module_id`
+    attribute is used to determine whether the dictionary should be initialized
+    as an :class:`~.EnzymeModuleReaction` or as a :class:`~.MassReaction`.
+
+    Parameters
+    ----------
+    reaction : dict
+        A dictionary with elements corresponding to the reaction attributes.
+    model : MassModel
+        The model to assoicate with the reaction.
+
+    Returns
+    -------
+    MassReaction or EnzymeModuleReaction
+        The generated reaction.
+
+    See Also
+    --------
+    reaction_to_dict
+
+    """
+    # Determine if saved object should be a MassReaction or a subclass
+    if "enzyme_module_id" in reaction:
+        new_reaction = EnzymeModuleReaction(reaction["id"])
+    else:
+        new_reaction = MassReaction(reaction["id"])
+
+    # Set object attributes
+    for k, v in iteritems(reaction):
+        # Change infinity type from a string to a float
+        if isinstance(v, string_types) and v == "inf":
+            v = _INF
+        if k in {"objective_coefficient", "reaction"}:
+            continue
+        elif k == "metabolites":
+            new_reaction.add_metabolites(OrderedDict(
+                (model.metabolites.get_by_id(str(met)), coeff)
+                for met, coeff in iteritems(v)))
+        else:
+            setattr(new_reaction, k, v)
+
+    return new_reaction
+
+
+def enzyme_to_dict(enzyme):
+    """Convert an :class:`~.EnzymeModuleDict` into a serializable dictionary.
+
+    Parameters
+    ----------
+    enzyme : ~.EnzymeModuleDict
+        The enzyme module to represent as a dictionary.
+
+    Returns
+    -------
+    ~collections.OrderedDict
+        A dictionary with elements corresponding to the enzyme module
+        attributes.
+
+    See Also
+    --------
+    enzyme_from_dict
+
+    """
+    # Turn object into an OrderedDict with the required attributes
+    new_enzyme = OrderedDict()
+    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES:
+        new_enzyme[key] = _fix_type(getattr(enzyme, key))
+
+    # Update with any opitonal attributes that are not their defaults.
+    _update_optional(enzyme, new_enzyme, _OPTIONAL_ENZYMEMODULE_ATTRIBUTES,
+                     _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS)
+
+    # Store objects and expressions as string for the attributes
+    for key in _REQUIRED_ENZYMEMODULE_ATTRIBUTES[2:]:
+        new_enzyme[key] = [i.id for i in getattr(enzyme, key)]
+        # Repeat for categorized attribute
+        key += "_categorized"
+        if getattr(enzyme, key) != _OPTIONAL_ENZYMEMODULE_ATTRIBUTES[key]:
+            new_enzyme[key] = {
+                category: [i.id for i in old_dictlist]
+                for category, old_dictlist in iteritems(getattr(enzyme, key))}
+
+    key = "enzyme_net_flux_equation"
+    if key in new_enzyme:
+        new_enzyme[key] = str(getattr(enzyme, key).rhs)
+
+    return new_enzyme
+
+
+def enzyme_from_dict(enzyme, model):
+    """Create an :class:`~.EnzymeModuleDict` from a dictionary.
+
+    Parameters
+    ----------
+    enzyme : dict
+        A dictionary with elements corresponding to the enzyme module
+        dictionary attributes.
+    model : MassModel
+        The model to assoicate with the enzyme module dictionary.
+
+    Returns
+    -------
+    EnzymeModuleDict
+        The generated enzyme module dictionary.
+
+    See Also
+    --------
+    enzyme_to_dict
+
+    """
+    # Set object attributes
+    new_enzyme = EnzymeModuleDict(id_or_enzyme=enzyme)
+    # Update model and get objects from the model to populate the DictLists
+    new_enzyme["model"] = model
+    new_enzyme._update_object_pointers(model)
+
+    # Make the enzyme equations
+    new_enzyme.enzyme_net_flux_equation = Eq(Symbol(
+        "v_" + new_enzyme.id), sympify(new_enzyme.enzyme_net_flux_equation))
+
+    # Make the stoichiometric matrix and clean up the EnzymeModuleDict
+    new_enzyme._make_enzyme_stoichiometric_matrix(update=True)
+    new_enzyme._set_missing_to_defaults()
+    new_enzyme._fix_order()
+
+    return new_enzyme
+
+
+def unit_to_dict(unit_definition):
+    """Convert an :class:`~.UnitDefintion` into a serializable dictionary.
+
+    Parameters
+    ----------
+    unit_definition : ~.UnitDefintion
+        The unit definition to represent as a dictionary.
+
+    Returns
+    -------
+    ~collections.OrderedDict
+        A dictionary with elements corresponding to the unit definition
+        attributes.
+
+    See Also
+    --------
+    unit_from_dict
+
+    """
+    # Turn object into an OrderedDict
+    new_unit_definition = OrderedDict()
+    for key, value in iteritems(unit_definition.__dict__):
+        if value and key != "list_of_units":
+            new_unit_definition[key] = _fix_type(value)
+        if value and key == "list_of_units":
+            new_unit_definition[key] = []
+            value = sorted(value, key=attrgetter("kind"))
+            # Iterate through list of units and write to dict.
+            for unit in value:
+                new_unit = OrderedDict(
+                    (k, _fix_type(v)) for k, v in iteritems(unit.__dict__))
+                new_unit_definition[key] += [new_unit]
+
+    return new_unit_definition
+
+
+def unit_from_dict(unit_definition):
+    """Create an :class:`~.UnitDefintion` from a dictionary.
+
+    Parameters
+    ----------
+    unit_definition : dict
+        A dictionary with elements corresponding to the unit definition
+        attributes.
+
+    Returns
+    -------
+    UnitDefintion
+        The generated unit definition.
+
+    See Also
+    --------
+    unit_to_dict
+
+    """
+    # Create the new unit definition
+    new_unit_definition = UnitDefinition()
+    for key, value in iteritems(unit_definition):
+        if key == "list_of_units":
+            # Create Unit objects for units in the list_of_units attribute
+            for unit in value:
+                new_unit_definition.create_unit(
+                    kind=unit["_kind"], exponent=unit["_exponent"],
+                    scale=unit["_scale"], multiplier=unit["_multiplier"])
+        else:
+            # Set attribute if not list of units
+            new_unit_definition.__dict__[key] = value
+
+    return new_unit_definition
+
+
 # Internal
-def _add_enzyme_module_form_attributes_into_dict(enzyme, new_enzyme):
-    """Add EnzymeModuleForm attributes to its dict representation.
+def _add_enzyme_module_species_attributes_into_dict(enzyme, new_enzyme):
+    """Add EnzymeModuleSpecies attributes to its dict representation.
 
     Warnings
     --------
@@ -572,3 +670,9 @@ def _update_optional(mass_object, new_dict, optional_attribute_dict,
         else:
             pass
         new_dict[key] = _fix_type(value)
+
+
+__all__ = (
+    "model_to_dict", "model_from_dict", "metabolite_to_dict",
+    "metabolite_from_dict", "reaction_to_dict", "reaction_from_dict",
+    "enzyme_to_dict", "enzyme_from_dict", "unit_to_dict", "unit_from_dict")

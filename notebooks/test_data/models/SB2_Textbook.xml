@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,8 +15,8 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
@@ -373,8 +373,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HEX1" value="850"/>
             <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
+            <localParameter id="Keq_R_HEX1" value="850"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -402,8 +402,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGI" value="2961.11111111115"/>
             <localParameter id="Keq_R_PGI" value="0.41"/>
+            <localParameter id="kf_R_PGI" value="2961.11111111115"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -436,8 +436,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_FBA" value="2797.44855967081"/>
             <localParameter id="Keq_R_FBA" value="0.082"/>
+            <localParameter id="kf_R_FBA" value="2797.44855967081"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -507,8 +507,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_GAPD" value="0.0179"/>
             <localParameter id="kf_R_GAPD" value="3479.76019376109"/>
+            <localParameter id="Keq_R_GAPD" value="0.0179"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -575,8 +575,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PGM" value="0.147059"/>
             <localParameter id="kf_R_PGM" value="5017.11025257889"/>
+            <localParameter id="Keq_R_PGM" value="0.147059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -725,8 +725,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r" value="1000"/>
             <localParameter id="kf_R_G6PDH2r" value="21864.5892483921"/>
+            <localParameter id="Keq_R_G6PDH2r" value="1000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -756,8 +756,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGL" value="122.323111606386"/>
             <localParameter id="Keq_R_PGL" value="1000"/>
+            <localParameter id="kf_R_PGL" value="122.323111606386"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -826,8 +826,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_RPE" value="3"/>
             <localParameter id="kf_R_RPE" value="22392.0519679016"/>
+            <localParameter id="Keq_R_RPE" value="3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -855,8 +855,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_RPI" value="2.57"/>
             <localParameter id="kf_R_RPI" value="2021.05774884763"/>
+            <localParameter id="Keq_R_RPI" value="2.57"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -933,8 +933,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TKT2" value="1600.14106520245"/>
             <localParameter id="Keq_R_TKT2" value="10.3"/>
+            <localParameter id="kf_R_TKT2" value="1600.14106520245"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -972,8 +972,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_TALA" value="1.05"/>
             <localParameter id="kf_R_TALA" value="1237.3623624164"/>
+            <localParameter id="Keq_R_TALA" value="1.05"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1393,8 +1393,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HBO2" value="511077"/>
             <localParameter id="Keq_R_HBO2" value="73.2115"/>
+            <localParameter id="kf_R_HBO2" value="511077"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1427,8 +1427,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO3" value="177.799"/>
             <localParameter id="kf_R_HBO3" value="509243"/>
+            <localParameter id="Keq_R_HBO3" value="177.799"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1549,8 +1549,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GTHOr" value="53.3298118727407"/>
             <localParameter id="Keq_R_GTHOr" value="100"/>
+            <localParameter id="kf_R_GTHOr" value="53.3298118727407"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1583,8 +1583,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GSHR" value="0.0412573673870341"/>
             <localParameter id="Keq_R_GSHR" value="2"/>
+            <localParameter id="kf_R_GSHR" value="0.0412573673870341"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1595,6 +1595,9 @@
         <listOfProducts>
           <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_glc__D_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1624,6 +1627,9 @@
         <listOfProducts>
           <speciesReference species="M_pyr_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_pyr_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1653,6 +1659,9 @@
         <listOfProducts>
           <speciesReference species="M_lac__L_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_lac__L_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1670,8 +1679,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
             <localParameter id="kf_R_SK_lac__L_c" value="5.78981481481481"/>
+            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1682,6 +1691,9 @@
         <listOfProducts>
           <speciesReference species="M_ade_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_ade_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1711,6 +1723,9 @@
         <listOfProducts>
           <speciesReference species="M_adn_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_adn_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1728,8 +1743,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_adn_c" value="1"/>
             <localParameter id="kf_R_SK_adn_c" value="100097.771767221"/>
+            <localParameter id="Keq_R_SK_adn_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1740,6 +1755,9 @@
         <listOfProducts>
           <speciesReference species="M_ins_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_ins_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1769,6 +1787,9 @@
         <listOfProducts>
           <speciesReference species="M_hxan_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_hxan_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1786,8 +1807,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_hxan_c" value="692813.701375305"/>
             <localParameter id="Keq_R_SK_hxan_c" value="1"/>
+            <localParameter id="kf_R_SK_hxan_c" value="692813.701375305"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1798,6 +1819,9 @@
         <listOfProducts>
           <speciesReference species="M_pi_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_pi_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1815,8 +1839,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_pi_c" value="100000"/>
             <localParameter id="Keq_R_SK_pi_c" value="1"/>
+            <localParameter id="kf_R_SK_pi_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1827,6 +1851,9 @@
         <listOfProducts>
           <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1856,6 +1883,9 @@
         <listOfProducts>
           <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h2o_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1873,8 +1903,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1885,6 +1915,9 @@
         <listOfProducts>
           <speciesReference species="M_co2_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_co2_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1914,6 +1947,9 @@
         <listOfProducts>
           <speciesReference species="M_nh3_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_nh3_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1943,6 +1979,9 @@
         <listOfProducts>
           <speciesReference species="M_o2_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_o2_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -1960,8 +1999,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="Keq_R_SK_o2_c" value="1"/>
+            <localParameter id="kf_R_SK_o2_c" value="509726"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2908,8 +2947,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
             <localParameter id="Keq_R_PFK_L" value="0.0011"/>
+            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2925,7 +2964,7 @@
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
@@ -3013,7 +3052,7 @@
           <groups:member groups:name="Substrates" groups:idRef="PFK_enzyme_module_ligands_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category0" groups:name="Complexed ATP" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category0" groups:name="Complexed ATP" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
           <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
@@ -3022,7 +3061,7 @@
           <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category1" groups:name="Complexed ATP &amp; F6P" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category1" groups:name="Complexed ATP &amp; F6P" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
@@ -3031,7 +3070,7 @@
           <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category2" groups:name="Free Catalytic" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category2" groups:name="Free Catalytic" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
@@ -3040,7 +3079,7 @@
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category3" groups:name="Relaxed" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category3" groups:name="Relaxed" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
@@ -3059,7 +3098,7 @@
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category4" groups:name="Tense" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category4" groups:name="Tense" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
           <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
@@ -3068,13 +3107,13 @@
           <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Complexed ATP" groups:idRef="PFK_enzyme_module_forms_categorized_Category0"/>
-          <groups:member groups:name="Complexed ATP &amp; F6P" groups:idRef="PFK_enzyme_module_forms_categorized_Category1"/>
-          <groups:member groups:name="Free Catalytic" groups:idRef="PFK_enzyme_module_forms_categorized_Category2"/>
-          <groups:member groups:name="Relaxed" groups:idRef="PFK_enzyme_module_forms_categorized_Category3"/>
-          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_forms_categorized_Category4"/>
+          <groups:member groups:name="Complexed ATP" groups:idRef="PFK_enzyme_module_species_categorized_Category0"/>
+          <groups:member groups:name="Complexed ATP &amp; F6P" groups:idRef="PFK_enzyme_module_species_categorized_Category1"/>
+          <groups:member groups:name="Free Catalytic" groups:idRef="PFK_enzyme_module_species_categorized_Category2"/>
+          <groups:member groups:name="Relaxed" groups:idRef="PFK_enzyme_module_species_categorized_Category3"/>
+          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_species_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category0" groups:name="R/T transition" groups:kind="collection">
@@ -3146,10 +3185,10 @@
         </notes>
         <groups:listOfMembers>
           <groups:member groups:idRef="PFK_enzyme_module_ligands"/>
-          <groups:member groups:idRef="PFK_enzyme_module_forms"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions"/>
           <groups:member groups:idRef="PFK_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="PFK_enzyme_module_forms_categorized"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
         </groups:listOfMembers>
       </groups:group>

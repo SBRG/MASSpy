@@ -22,3 +22,7 @@ python:
   version: 3.7
   install:
     - requirements: documentation_builder/requirements.txt
+    - requirements: requirements.txt
+    - method: pip
+      path: .
+  system_packages: true

@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""
+DictWithID and OrderedDictWithID are dictionaries with identifers attributes.
+
+The :mod:`~.dict_with_id` submodule utilizes the built-in :class:`type` to
+dynamically create the :class:`DictWithID` and :class:`OrderedDictWithID`
+classes based on whether the parent class should be a standard :class:`dict`
+or an :class:`~.collections.OrderedDict`, therefore allowing each object to
+inherit its parent class methods and generable behavior.
+
+The :class:`DictWithID` and :class:`OrderedDictWithID` classes are primarily
+used for in order to use dictionaries with the speciailized
+:class:`~cobra.core.dictlist.DictList` container for both performance gains
+and user convenience.
+"""
 from collections import OrderedDict
 from copy import copy
 
@@ -117,7 +130,7 @@ def __make_class_constructor(ordered=False):
     Returns:
     --------
     constructor: class constructor
-        The class constructor for _OrderedDictWithID or _DictWithID
+        The class constructor for OrderedDictWithID or DictWithID
 
     Warnings
     --------
@@ -144,4 +157,11 @@ def __make_class_constructor(ordered=False):
 
 
 DictWithID = __make_class_constructor(False)
+"""
+class: Has ID attribute, inherits :class:`dict` methods"""
+
 OrderedDictWithID = __make_class_constructor(True)
+"""
+class: Has ID attribute, inherits :class:`~collections.OrderedDict` methods."""
+
+__all__ = ("DictWithID", "OrderedDictWithID")

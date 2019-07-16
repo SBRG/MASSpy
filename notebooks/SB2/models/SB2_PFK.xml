@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -396,8 +396,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -599,8 +599,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -802,8 +802,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -843,8 +843,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
             <localParameter id="kf_PFK_A" value="4240227"/>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1003,8 +1003,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1149,8 +1149,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
             <localParameter id="Keq_R_PFK_L" value="0.0011"/>
+            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1166,7 +1166,7 @@
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
@@ -1254,7 +1254,7 @@
           <groups:member groups:name="Products" groups:idRef="PFK_enzyme_module_ligands_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category0" groups:name="Relaxed" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category0" groups:name="Relaxed" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
@@ -1273,7 +1273,7 @@
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category1" groups:name="Free Catalytic" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category1" groups:name="Free Catalytic" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
@@ -1282,7 +1282,7 @@
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category2" groups:name="Complexed ATP" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category2" groups:name="Complexed ATP" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
           <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
@@ -1291,7 +1291,7 @@
           <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category3" groups:name="Complexed ATP &amp; F6P" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category3" groups:name="Complexed ATP &amp; F6P" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
@@ -1300,7 +1300,7 @@
           <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized_Category4" groups:name="Tense" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized_Category4" groups:name="Tense" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
           <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
@@ -1309,13 +1309,13 @@
           <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PFK_enzyme_module_forms_categorized" groups:kind="collection">
+      <groups:group groups:id="PFK_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Relaxed" groups:idRef="PFK_enzyme_module_forms_categorized_Category0"/>
-          <groups:member groups:name="Free Catalytic" groups:idRef="PFK_enzyme_module_forms_categorized_Category1"/>
-          <groups:member groups:name="Complexed ATP" groups:idRef="PFK_enzyme_module_forms_categorized_Category2"/>
-          <groups:member groups:name="Complexed ATP &amp; F6P" groups:idRef="PFK_enzyme_module_forms_categorized_Category3"/>
-          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_forms_categorized_Category4"/>
+          <groups:member groups:name="Relaxed" groups:idRef="PFK_enzyme_module_species_categorized_Category0"/>
+          <groups:member groups:name="Free Catalytic" groups:idRef="PFK_enzyme_module_species_categorized_Category1"/>
+          <groups:member groups:name="Complexed ATP" groups:idRef="PFK_enzyme_module_species_categorized_Category2"/>
+          <groups:member groups:name="Complexed ATP &amp; F6P" groups:idRef="PFK_enzyme_module_species_categorized_Category3"/>
+          <groups:member groups:name="Tense" groups:idRef="PFK_enzyme_module_species_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category0" groups:name="atp_c binding" groups:kind="collection">
@@ -1387,10 +1387,10 @@
         </notes>
         <groups:listOfMembers>
           <groups:member groups:idRef="PFK_enzyme_module_ligands"/>
-          <groups:member groups:idRef="PFK_enzyme_module_forms"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions"/>
           <groups:member groups:idRef="PFK_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="PFK_enzyme_module_forms_categorized"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
         </groups:listOfMembers>
       </groups:group>
