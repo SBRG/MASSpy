@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
-# Compatibility with Python 2.7
-from __future__ import absolute_import
+"""
+Module containing functions for testing various :mod:`mass` methods.
 
+There is the :func:`test_all` function to run all tests. Note that the testing
+requirements must be installed (e.g. :mod:`pytest`) for this function to work.
+
+There are also functions for viewing and loading pre-built example
+:class:`~.MassModel` objects via the :mod:`~mass.io.json` or
+:mod:`~mass.io.sbml` submodules, as well as functions to view
+`Escher <https://escher.readthedocs.io/en/stable/escher-python.html>`_
+maps that correspond to certain pre-defined models.
+"""
 from os import listdir
 from os.path import abspath, dirname, join
 
@@ -15,29 +23,38 @@ except ImportError:
 from mass.io.json import load_json_model
 from mass.io.sbml import read_sbml_model
 
-FILETYPES = [".xml", ".json"]
+FILE_EXTENSIONS = [".xml", ".json"]
+"""list: list of recognized file extensions."""
+
 MASS_DIR = abspath(join(dirname(abspath(__file__)), ".."))
-MASS_LOC = abspath(join(MASS_DIR, ".."))
+"""str: The directory location of where :mod:`mass` is installed."""
+
 DATA_DIR = join(MASS_DIR, "test", "data", "")
+"""str: The directory location of the test data model files and maps."""
+
 MODELS_DIR = join(DATA_DIR, "models", "")
+"""str: The directory location of the pre-built :class:`MassModel` files."""
+
 MAPS_DIR = join(DATA_DIR, "maps", "")
+"""str: The directory location of the pre-made :mod:`escher` maps files."""
+
 
 def create_test_model(model_name, io="sbml"):
-    """Return a mass MassModel for testing.
+    """Return a :class:`mass.MassModel <~.MassModel>` for testing.
 
     Parameters
     ----------
     model_name: str
         The name of the test model to load. Valid model names can be printed
-        and viewed using the `view_test_models` method.
-    io: {'sbml', 'json'}, optional
-        A string representing the mass.io module to use to load the model.
-        Default is "sbml". Case sensitive.
+        and viewed using the :func:`view_test_models` function.
+    io: str ``{'sbml', 'json'}``
+        A string representing the :mod:`mass.io` module to use to load the
+        model. Default is ``"sbml"``. Case sensitive.
 
     Returns
     -------
-    MassModel:
-        The loaded MassModel object.
+    MassModel
+        The loaded :class:`~.MassModel`
 
     """
     load_dict = {"sbml": (read_sbml_model, ".xml"),
@@ -68,20 +85,8 @@ def view_test_maps():
         print(map_name)
 
 
-def _get_directory_files(directory):
-    """Return a list of files in a given directory."""
-    all_filenames = []
-    for filename in listdir(directory):
-        # Do not include invalid/broken models used in testing suite.
-        if "invalid" in filename:
-            continue
-        if any(list(map(lambda x: filename.endswith(x), FILETYPES))):
-            all_filenames.append(filename)
-
-    return sorted(all_filenames)
-
 def test_all(args=None):
-    """Alias for running all unit-tests on installed mass."""
+    """Alias for running all unit-tests on installed :mod:`mass`."""
     if pytest is None:
         raise ImportError('missing package pytest and pytest_benchmark'
                           ' required for testing')
@@ -89,3 +94,21 @@ def test_all(args=None):
     args = args if args else []
     return pytest.main(
         ['--pyargs', 'mass', '--benchmark-skip', '-v', '-rs'] + args)
+
+
+def _get_directory_files(directory):
+    """Return a list of files in a given directory."""
+    all_filenames = []
+    for filename in listdir(directory):
+        # Do not include invalid/broken models used in testing suite.
+        if "invalid" in filename:
+            continue
+        if any(list(map(lambda x: filename.endswith(x), FILE_EXTENSIONS))):
+            all_filenames.append(filename)
+
+    return sorted(all_filenames)
+
+
+__all__ = (
+    "FILE_EXTENSIONS", "MASS_DIR", "DATA_DIR", "MODELS_DIR", "MAPS_DIR",
+    "create_test_model", "view_test_models", "view_test_maps", "test_all")

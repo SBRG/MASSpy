@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""
+MassMetabolite is a class for holding information regarding metabolites.
+
+The :class:`MassMetabolite` class inherits and extends the
+:class:`~cobra.core.metabolite.Metabolite` class in :mod:`cobra`. It contains
+additional information required for simulations and other :mod:`mass`
+functions and workflows.
+"""
 import re
 from warnings import warn
+
+from six import iteritems
 
 from cobra.core.species import Species
 
@@ -12,7 +21,7 @@ from mass.util.util import (
 
 
 ELEMENT_RE = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
-"""Precompiled regular expression for element parsing"""
+""":class:`re.Pattern`: Precompiled regular expression for element parsing"""
 
 
 class MassMetabolite(Species):
@@ -20,11 +29,11 @@ class MassMetabolite(Species):
 
     Parameters
     ----------
-    id_or_specie : str or MassMetabolite
-        Either a string identifier to associate with the MassMetabolite,
-        or an existing MassMetabolite object. If an existing MassMetabolite
-        object is provided, a new MassMetabolite object is instantiated with
-        the same properties as the original MassMetabolite.
+    id_or_specie : str, ~cobra.core.metabolite.Metabolite, MassMetabolite
+        A string identifier to associate with the metabolite, or an existing
+        metabolite object. If an existing metabolite object is
+        provided, a new :class:`MassMetabolite` is instantiated with the same
+        properties as the original metabolite.
     name : str
         A human readable name for the metabolite.
     formula : str
@@ -35,7 +44,7 @@ class MassMetabolite(Species):
         The compartment where the metabolite is located.
     fixed : bool
         Whether the metabolite concentration should remain at a fixed value.
-        Default is False.
+        Default is ``False``.
 
     """
 
@@ -57,8 +66,7 @@ class MassMetabolite(Species):
             self.fixed = fixed
             # The initial condition of the metabolite.
             self._initial_condition = None
-            # Gibbs energy of formation of the metabolite
-            self._gibbs_formation_energy = None
+
             # For cobra compatibility
             self._constraint_sense = "E"
             self._bound = 0.
@@ -66,18 +74,18 @@ class MassMetabolite(Species):
     # Public
     @property
     def elements(self):
-        """Generate a dictionary of elements in the metabolite formula.
+        """Get or set a dict of elements in the metabolite :attr:`~.formula`.
 
-        Returns
-        -------
-        composition: dict
-            A dictionary where the elements are the keys and their
-            coefficients given as integers are the values.
+        Parameters
+        ----------
+        elements_dict : dict
+            A dict representing the elements of the chemical formula where
+            keys are elements and values are the amount.
 
         Notes
         -----
         Enzyme and macromolecule moieties can be recognized by enclosing them
-        in brackets (e.g. [ENZYME]) when defining  the chemical formula.
+        in brackets (e.g. [ENZYME]) when defining the chemical formula.
         They are treated as one entity and therefore are only counted once.
 
         """
@@ -119,35 +127,49 @@ class MassMetabolite(Species):
 
         return composition
 
+    @elements.setter
+    def elements(self, elements_dict):
+        """Set the :attr:`~.formula` using a dict of elements."""
+        def stringify(element, number):
+            return element if number == 1 else element + str(number)
+
+        self.formula = ''.join(stringify(e, n) for e, n in
+                               sorted(iteritems(elements_dict)))
+
     @property
     def initial_condition(self):
-        """Return the initial condition of the metabolite."""
-        return getattr(self, "_initial_condition")
+        """Get or set the initial condition of the metabolite.
 
-    @initial_condition.setter
-    def initial_condition(self, value):
-        """Set the initial condition of the metabolite.
+        Notes
+        -----
+        Initial conditions of metabolites cannot be negative.
 
         Parameters
         ----------
-        value: float
+        value : float
             A non-negative number for the concentration of the metabolite.
 
-        Warnings
-        --------
-        Initial conditions of metabolites cannot be negative.
+        Raises
+        ------
+        ValueError
+            Occurs when trying to set a negative value.
 
         """
-        value = ensure_non_negative_value(value)
-        setattr(self, "_initial_condition", value)
+        return getattr(self, "_initial_condition")
+
+    @initial_condition.setter
+    def initial_condition(self, initial_condition):
+        """Set the initial condition of the metabolite."""
+        initial_condition = ensure_non_negative_value(initial_condition)
+        setattr(self, "_initial_condition", initial_condition)
 
     @property
     def ordinary_differential_equation(self):
         """Return a :mod:`sympy` expression of the metabolite's associated ODE.
 
-        Will return None if metabolite is not associated with a
-        :class:`MassReaction`, and 0. if the :attr:`fixed` attribute is set
-        as True.
+        Will return ``None`` if metabolite is not associated with a
+        :class:`~.MassReaction`, or ``0``. if the :attr:`fixed` attribute
+        is set as ``True``.
         """
         return generate_ode(self)
 
@@ -164,37 +186,36 @@ class MassMetabolite(Species):
             warn("The element {0} does not appear in the periodic table"
                  .format(e))
 
-    # Shorthands
+    @property
+    def model(self):
+        """Return the :class:`.MassModel` associated with the metabolite."""
+        return getattr(self, "_model")
+
     @property
     def ic(self):
-        """Shorthand getter for the initial condition."""
+        """Shorthand getter or setter for the :attr:`initial_condition`."""
         return self.initial_condition
 
     @ic.setter
     def ic(self, value):
-        """Shorthand setter for the initial condition."""
+        """Shorthand setter for the :attr:`initial_condition`."""
         self.initial_condition = value
 
     @property
     def ode(self):
-        """Shorthand getter for the metabolite's associated ODE."""
+        """Shorthand getter for the :attr:`ordinary_differential_equation`."""
         return self.ordinary_differential_equation
 
-    @property
-    def model(self):
-        """Return the MassModel associated with the metabolite."""
-        return getattr(self, "_model")
-
-    def print_attributes(self, sep="\n", exclude_parent=False):
-        r"""Print the attributes and properties of the MassMetabolite.
+    def print_attributes(self, sep=r"\n", exclude_parent=False):
+        r"""Print the attributes and properties of the :class:`MassMetabolite`.
 
         Parameters
         ----------
-        sep: str, optional
+        sep : str
             The string used to seperate different attrubutes. Affects how the
-            final string is printed. Default is '\n'.
-        exclude_parent: bool, optional
-            If True, only display attributes specific to the current class,
+            final string is printed. Default is ``'\n'``.
+        exclude_parent : bool
+            If ``True``, only display attributes specific to the current class,
             excluding attributes from the parent class.
 
         """
@@ -209,15 +230,14 @@ class MassMetabolite(Species):
         print(sep.join(attributes))
 
     def remove_from_model(self, destructive=False):
-        """Remove the metabolite's association from its MassModel.
-
-        The change is reverted back upon when using the MassModel as a context.
+        """Remove the metabolite's association from its model.
 
         Parameters
         ----------
-        destructive: bool, optional
-            If False, the metabolite is removed from all associated reactions.
-            If True, all associated reactions are remove from the MassModel.
+        destructive : bool
+            If ``False``, the metabolite is removed from all associated
+            reactions. If ``True``, all associated reactions are remove from
+            the model.
 
         """
         return self._model.remove_metabolites(self, destructive)
@@ -252,7 +272,13 @@ class MassMetabolite(Species):
         self.model.metabolites._generate_index()
 
     def _repr_html_(self):
-        """HTML representation of the overview for the MassMetabolite."""
+        """HTML representation of the overview for the MassMetabolite.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return """
         <table>
             <tr>
@@ -274,9 +300,6 @@ class MassMetabolite(Species):
                 <td><strong>Initial Condition</strong></td>
                 <td>{ic}</td>
             </tr><tr>
-                <td><strong>Gibbs formation energy</strong></td>
-                <td>{gibbs}</td>
-            </tr><tr>
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
@@ -284,7 +307,6 @@ class MassMetabolite(Species):
                           address='0x0%x' % id(self),
                           compartment=self.compartment,
                           ic=self._initial_condition,
-                          gibbs=self._gibbs_formation_energy,
                           n_reactions=len(self.reactions),
                           reactions=', '.join(r.id for r in self.reactions))
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+"""Contains utility functions to assist in various :mod:`mass` functions."""
 import inspect
 import logging
 import re
@@ -29,7 +29,19 @@ def show_versions():
 
 
 def get_object_attributes(obj):
-    """Get the public attributes for an object. Includes properties."""
+    """Get the public attributes for an object, including properties.
+
+    Parameters
+    ----------
+    obj : object
+        Any object in :mod:`mass` package.
+
+    Returns
+    -------
+    list
+        List of strings corresponding to public attributes for the object.
+
+    """
     def filter_function(item):
         """Filter for non-routine and non-class methods."""
         return not inspect.isroutine(item) and not inspect.ismethod(item)
@@ -48,7 +60,20 @@ def get_object_attributes(obj):
 
 
 def get_subclass_specific_attributes(obj):
-    """Get the public attributes for an object. Includes properties."""
+    """Get the subclass specific public attributes, including properties.
+
+    Parameters
+    ----------
+    obj : object
+        Any object in :mod:`mass` package.
+
+    Returns
+    -------
+    list
+        List of strings corresponding to the subclass specific-attributes
+        for the object.
+
+    """
     attributes = get_object_attributes(obj)
     attributes = [
         attr for attr in attributes
@@ -57,35 +82,38 @@ def get_subclass_specific_attributes(obj):
     return attributes
 
 
-def ensure_iterable(list_to_check):
-    """Ensure the given list is an iterable.
+def ensure_iterable(item):
+    """Ensure the given item is an returned as an iterable.
 
     Parameters
     ----------
-    list_to_check: list
-        The list to ensure is iterable.
+    item : object
+        The item to ensure is returned as an iterable.
 
     """
     # Make list iterable if necessary
-    if list_to_check is None:
-        list_to_check = list()
-    if not hasattr(list_to_check, "__iter__") or \
-       isinstance(list_to_check, string_types):
-        list_to_check = [list_to_check]
+    if item is None:
+        item = list()
+    if not hasattr(item, "__iter__") or \
+       isinstance(item, string_types):
+        item = [item]
 
-    list_to_check = list(list_to_check)
-    return list_to_check
+    item = list(item)
+    return item
 
 
 def ensure_non_negative_value(value):
-    """Ensure provided value is a non-negative value, or None.
-
-    Will raise a ValueError if the provided value is negative.
+    """Ensure provided value is a non-negative value, or ``None``.
 
     Parameters
     ----------
-    value: float
+    value : float
         The value to ensure is non-negative
+
+    Raises
+    ------
+    ValueError
+        Occurs if the value is negative.
 
     """
     if value is None:
@@ -102,24 +130,25 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
 
     Parameters
     ----------
-    matrix: array or array-like
+    matrix : array-like
         The matrix to convert.
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}
-        The desired type after converting the matrix.
-    dtype: data-type
-        The desired data-type for the array.
-    row_ids: array
-        The idenfifiers for each row. Only necessary if type is "dataframe",
-        otherwise is ignored.
-    col_ids: array
-        The idenfifiers for each column. Only necessary if type is "dataframe",
-        otherwise is ignored.
+    matrix_type : str
+        A string identifiying the desired format for the returned matrix.
+        Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
+        ``'DataFrame'``, and ``'symbolic'`` See the :mod:`~.linear` module
+        documentation for more information on the ``matrix_type``.
+    dtype : data-type
+        The desired array data-type for the matrix.
+    row_ids : array-like
+        The idenfifiers for each row. Only used if type is ``'DataFrame'``.
+    col_ids : array-like
+        The idenfifiers for each column. Only used if type is ``'DataFrame'``.
 
     Warnings
     --------
-    This method is not the safest way to convert a matrix. To safely convert
-    a matrix into another type, use the "matrix_type" argument in the method
-    that returns the desired matrix.
+    This method is NOT the safest way to convert a matrix to another type.
+    To safely convert a matrix into another type, use the ``'matrix_type'``
+    argument in the method that returns the desired matrix.
 
     """
     if matrix_type not in _MATRIX_TYPES:
@@ -261,3 +290,9 @@ def _make_logger(name):
     logging.basicConfig(format="%(name)s %(levelname)s: %(message)s")
     logger = logging.getLogger(name)
     return logger
+
+
+__all__ = (
+    "show_versions", "get_object_attributes",
+    "get_subclass_specific_attributes", "ensure_iterable",
+    "ensure_non_negative_value", "convert_matrix")

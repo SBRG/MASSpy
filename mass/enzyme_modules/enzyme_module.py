@@ -92,6 +92,7 @@ class EnzymeModule(MassModel):
 
     """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, id_or_model=None, name=None, subsystem="",
                  matrix_type="dense", dtype=np.float64):
         """Initialize the EnzymeModule Object."""
@@ -118,18 +119,18 @@ class EnzymeModule(MassModel):
     @property
     def enzyme_total_symbol(self):
         """Return the sympy symbol for the total enzyme concentration."""
-        if self.id is not None:
-            return sym.Symbol(self.id + "_Total")
-        else:
+        if self.id is None:
             return sym.Symbol("Enzyme_Total")
+
+        return sym.Symbol(self.id + "_Total")
 
     @property
     def enzyme_flux_symbol(self):
         """Return the sympy symbol for the net flux through the enzyme."""
-        if self.id is not None:
-            return sym.Symbol("v_" + self.id)
-        else:
+        if self.id is None:
             return sym.Symbol("v")
+
+        return sym.Symbol("v_" + self.id)
 
     @property
     def enzyme_concentration_total(self):

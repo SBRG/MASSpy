@@ -11,7 +11,7 @@ from six import iteritems, iterkeys, itervalues
 
 from cobra.core.dictlist import DictList
 
-from mass.util.DictWithID import OrderedDictWithID
+from mass.util.dict_with_id import OrderedDictWithID
 from mass.util.util import (
     _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
 
