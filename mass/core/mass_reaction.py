@@ -14,16 +14,16 @@ from functools import partial
 from operator import attrgetter
 from warnings import warn
 
-from six import iteritems, iterkeys, itervalues, string_types
-
-from sympy import Symbol
-
 from cobra.core.gene import Gene, ast2str, eval_gpr, parse_gpr
 from cobra.core.object import Object
 from cobra.core.reaction import (
     _forward_arrow_finder, _reverse_arrow_finder, _reversible_arrow_finder,
     and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
 from cobra.util.context import get_context, resettable
+
+from six import iteritems, iterkeys, itervalues, string_types
+
+from sympy import Symbol
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite

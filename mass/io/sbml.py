@@ -60,7 +60,7 @@ Some SBML related issues are still open, please refer to the respective issue:
 * support compression on file handles (depends on solution for
   https://github.com/opencobra/cobrapy/issues/812)
 
-""" # noqa
+"""  # noqa
 
 import datetime
 import logging
@@ -69,12 +69,6 @@ import traceback
 from collections import defaultdict
 from io import StringIO
 
-import libsbml
-
-from six import integer_types, iteritems, itervalues, string_types
-
-from sympy import Basic, Symbol, SympifyError, mathml, sympify
-
 from cobra.core.gene import Gene
 from cobra.io.sbml import (
     BOUND_MINUS_INF, BOUND_PLUS_INF, CobraSBMLError, LOWER_BOUND_ID,
@@ -82,6 +76,12 @@ from cobra.io.sbml import (
     _create_bound, _error_string,
     _get_doc_from_filename as _cobra_get_doc_from_filename, _parse_annotations,
     _sbase_annotations as _cobra_sbase_annotations, _sbase_notes_dict)
+
+import libsbml
+
+from six import integer_types, iteritems, itervalues, string_types
+
+from sympy import Basic, Symbol, SympifyError, mathml, sympify
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite

@@ -78,6 +78,9 @@ documentation for more information on how to configure the
 import sys
 from warnings import warn
 
+from cobra.core.dictlist import DictList
+from cobra.core.object import Object
+
 from libsbml import writeSBMLToString
 
 import numpy as np
@@ -87,9 +90,6 @@ import roadrunner
 from six import iteritems
 
 from sympy import Basic, Function, Symbol, sympify
-
-from cobra.core.dictlist import DictList
-from cobra.core.object import Object
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_model import MassModel

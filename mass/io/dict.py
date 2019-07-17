@@ -11,6 +11,8 @@ Converting objects into dictionaries allow for the exportation of
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
 
+from cobra.io.dict import gene_from_dict, gene_to_dict
+
 import numpy as np
 
 import pandas as pd
@@ -18,8 +20,6 @@ import pandas as pd
 from six import iteritems, iterkeys, string_types
 
 from sympy import Basic, Eq, Symbol, sympify
-
-from cobra.io.dict import gene_from_dict, gene_to_dict
 
 from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_model import MassModel

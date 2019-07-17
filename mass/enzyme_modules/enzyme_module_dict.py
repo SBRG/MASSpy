@@ -3,13 +3,13 @@
 from collections import OrderedDict
 from copy import copy, deepcopy
 
+from cobra.core.dictlist import DictList
+
 import numpy as np
 
 import pandas as pd
 
 from six import iteritems, iterkeys, itervalues
-
-from cobra.core.dictlist import DictList
 
 from mass.util.dict_with_id import OrderedDictWithID
 from mass.util.util import (

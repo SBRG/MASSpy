@@ -12,17 +12,17 @@ import warnings
 from copy import copy, deepcopy
 from functools import partial
 
-import numpy as np
-
-from six import integer_types, iteritems, iterkeys, itervalues, string_types
-
-import sympy as sym
-
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 from cobra.medium import (
     find_boundary_types, find_external_compartment, sbo_terms)
 from cobra.util.context import HistoryManager, get_context
+
+import numpy as np
+
+from six import integer_types, iteritems, iterkeys, itervalues, string_types
+
+import sympy as sym
 
 from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction

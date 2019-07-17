@@ -22,7 +22,7 @@ Some other important points about the :class:`EnzymeModuleReaction` include:
       that involve :class:`~.EnzymeModuleSpecies`\ (s) and are associated with
       an :class:`~.EnzymeModule`.
 
-""" # noqa
+"""  # noqa
 from collections import defaultdict
 
 from mass.core.mass_reaction import MassReaction

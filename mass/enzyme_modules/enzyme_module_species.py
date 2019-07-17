@@ -36,7 +36,7 @@ Some other important points about the :class:`EnzymeModuleSpecies` include:
       altered by the :class:`~.EnzymeModuleReaction`\ s of the
       :class:`~.EnzymeModule`.
 
-""" # noqa
+"""  # noqa
 import re
 from collections import defaultdict
 from itertools import chain

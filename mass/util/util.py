@@ -5,6 +5,8 @@ import logging
 import re
 import warnings
 
+from cobra import DictList
+
 from depinfo import print_dependencies
 
 import numpy as np
@@ -16,8 +18,6 @@ from scipy.sparse import dok_matrix, lil_matrix
 from six import integer_types, iteritems, string_types
 
 import sympy as sym
-
-from cobra import DictList
 
 _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 

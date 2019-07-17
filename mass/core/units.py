@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit and UnitDefinition implementation based on SBML specifications.
+r"""Unit and UnitDefinition implementation based on SBML specifications.
 
 The :mod:`~.units` module contains the :class:`Unit` and
 :class:`UnitDefinition` classes based on the implementation of units in
@@ -15,13 +15,13 @@ Please send a PR if you want to add something to the pre-built
 """
 from warnings import warn
 
+from cobra.core.object import Object
+
 import libsbml
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 from tabulate import tabulate
-
-from cobra.core.object import Object
 
 from mass.util.dict_with_id import DictWithID
 

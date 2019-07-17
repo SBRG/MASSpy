@@ -38,12 +38,11 @@ Therefore, the :attr:`~.BaseConfiguration.solver` and
 :class:`MassConfiguration` class to help prevent confusion.
 
 """
-from six import integer_types, iteritems, string_types
-
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
 
+from six import integer_types, iteritems, string_types
 
 COBRA_CONFIGURATION = Configuration()
 

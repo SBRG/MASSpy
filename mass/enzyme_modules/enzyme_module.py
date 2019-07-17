@@ -6,14 +6,14 @@ from copy import deepcopy
 from functools import partial
 from warnings import warn
 
+from cobra.core.dictlist import DictList
+from cobra.util.context import get_context
+
 import numpy as np
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 import sympy as sym
-
-from cobra.core.dictlist import DictList
-from cobra.util.context import get_context
 
 from mass.core.mass_model import MassModel
 from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict

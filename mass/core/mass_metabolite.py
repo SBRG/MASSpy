@@ -10,9 +10,9 @@ functions and workflows.
 import re
 from warnings import warn
 
-from six import iteritems
-
 from cobra.core.species import Species
+
+from six import iteritems
 
 from mass.util.expressions import generate_ode
 from mass.util.util import (
