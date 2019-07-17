@@ -4,6 +4,7 @@ from sys import argv
 
 from setuptools import find_packages, setup
 
+
 setup_kwargs = dict()
 setup_requirements = []
 # prevent pytest-runner from being installed on every invocation
@@ -75,6 +76,7 @@ if __name__ == "__main__":
             'License :: OSI Approved :: GNU General Public License v2'
                 ' or later (GPLv2+)',
             'Operating System :: OS Independent',
+            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: Implementation :: CPython',
