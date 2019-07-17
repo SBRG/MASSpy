@@ -136,7 +136,8 @@ _CATEGORY_GROUP_RE = re.compile(r"_Category\d$")
 """:class:`re.Pattern`: Regex for enzyme module category groups."""
 
 # For parsing rate laws
-_KLAW_POW_RE = re.compile(r"pow\((?P<arg>...*?(?=,)), (?P<exp>\d*)\)")
+_KLAW_POW_RE = re.compile(
+    r"pow\((?P<arg>...*?(?=,)), (?P<exp>[\d|\-\d]*)\)")
 """:class:`re.Pattern`: Regex for power rules in SBML kinetic laws."""
 
 # For SBO terms
@@ -1286,6 +1287,7 @@ def _read_reaction_kinetic_law_from_sbml(reaction, mass_reaction, f_replace,
             old = match.group(0)
             new = "(({0})**{1})".format(match.group("arg"), match.group("exp"))
             rate_eq = rate_eq.replace(old, new)
+
         # Try to sympify the reaction rate
         try:
             rate_eq = sympify(rate_eq)
