@@ -21,15 +21,15 @@ from sympy import Basic, Eq, Symbol, sympify
 
 from cobra.io.dict import gene_from_dict, gene_to_dict
 
-from mass.core.massmetabolite import MassMetabolite
-from mass.core.massmodel import MassModel
-from mass.core.massreaction import MassReaction
+from mass.core.mass_metabolite import MassMetabolite
+from mass.core.mass_model import MassModel
+from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.enzyme_modules.enzyme_module import EnzymeModule
 from mass.enzyme_modules.enzyme_module_dict import (
     EnzymeModuleDict, _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
-from mass.enzyme_modules.enzyme_module_form import EnzymeModuleForm
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
+from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 
 # Global
 _INF = float("inf")
@@ -79,7 +79,7 @@ _ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS = []
 _OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES = {}
 
 _REQUIRED_ENZYMEMODULE_ATTRIBUTES = [
-    "id", "name", "enzyme_module_ligands", "enzyme_module_forms",
+    "id", "name", "enzyme_module_ligands", "enzyme_module_species",
     "enzyme_module_reactions"]
 _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS = [
     key for key in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
@@ -115,7 +115,7 @@ def model_to_dict(model, sort=False):
         or maintain the order defined in the model. If the model is an
         :class:`~.EnzymeModule`, the
         :attr:`~.EnzymeModule.enzyme_module_ligands`,
-        :attr:`~.EnzymeModule.enzyme_module_forms`, and
+        :attr:`~.EnzymeModule.enzyme_module_species`, and
         :attr:`~.EnzymeModule.enzyme_module_reactions` attributes are also
         included. Default is ``False``.
 
@@ -162,7 +162,7 @@ def model_to_dict(model, sort=False):
         _add_enzyme_module_attributes_into_dict(model, obj)
         if sort:
             obj["enzyme_module_ligands"].sort(key=get_id)
-            obj["enzyme_module_forms"].sort(key=get_id)
+            obj["enzyme_module_species"].sort(key=get_id)
             obj["enzyme_module_reactions"].sort(key=get_id)
     return obj
 
@@ -173,7 +173,7 @@ def model_from_dict(obj):
     Notes
     -----
     The :attr:`~.EnzymeModule.enzyme_module_ligands`,
-    :attr:`~.EnzymeModule.enzyme_module_forms`, and
+    :attr:`~.EnzymeModule.enzyme_module_species`, and
     :attr:`~.EnzymeModule.enzyme_module_reactions` attributes are used to
     determine whether the model should be initialized as an
     :class:`~.EnzymeModule` or as a :class:`~.MassModel`. At least one of these
@@ -274,9 +274,10 @@ def metabolite_to_dict(metabolite):
     _update_optional(metabolite, new_met, _OPTIONAL_METABOLITE_ATTRIBUTES,
                      _ORDERED_OPTIONAL_METABOLITE_KEYS)
 
-    # Add EnzymeModuleForm attributes if metabolite is an EnzymeModuleForm
-    if isinstance(metabolite, EnzymeModuleForm):
-        _add_enzyme_module_form_attributes_into_dict(metabolite, new_met)
+    # Add EnzymeModuleSpecies attributes if metabolite is an
+    # EnzymeModuleSpecies
+    if isinstance(metabolite, EnzymeModuleSpecies):
+        _add_enzyme_module_species_attributes_into_dict(metabolite, new_met)
 
     return new_met
 
@@ -286,9 +287,10 @@ def metabolite_from_dict(metabolite):
 
     Notes
     -----
-    The presence of the :attr:`~.EnzymeModuleForm.enzyme_module_id` attribute
-    is used to determine whether the dictionary should be initialized as an
-    :class:`~.EnzymeModuleForm` or as a :class:`~.MassMetabolite`.
+    The presence of the :attr:`~.EnzymeModuleSpecies.enzyme_module_id`
+    attribute is used to determine whether the dictionary should be
+    initialized as an :class:`~.EnzymeModuleSpecies` or as a
+    :class:`~.MassMetabolite`.
 
     Parameters
     ----------
@@ -297,7 +299,7 @@ def metabolite_from_dict(metabolite):
 
     Returns
     -------
-    MassMetabolite or EnzymeModuleForm
+    MassMetabolite or EnzymeModuleSpecies
         The generated metabolite.
 
     See Also
@@ -307,7 +309,7 @@ def metabolite_from_dict(metabolite):
     """
     # Determine if saved object should be a MassMetabolite or a subclass
     if "enzyme_module_id" in metabolite:
-        new_metabolite = EnzymeModuleForm(metabolite["id"])
+        new_metabolite = EnzymeModuleSpecies(metabolite["id"])
     else:
         new_metabolite = MassMetabolite(metabolite["id"])
 
@@ -564,8 +566,8 @@ def unit_from_dict(unit_definition):
 
 
 # Internal
-def _add_enzyme_module_form_attributes_into_dict(enzyme, new_enzyme):
-    """Add EnzymeModuleForm attributes to its dict representation.
+def _add_enzyme_module_species_attributes_into_dict(enzyme, new_enzyme):
+    """Add EnzymeModuleSpecies attributes to its dict representation.
 
     Warnings
     --------

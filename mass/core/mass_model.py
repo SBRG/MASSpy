@@ -24,8 +24,8 @@ from cobra.medium import (
     find_boundary_types, find_external_compartment, sbo_terms)
 from cobra.util.context import HistoryManager, get_context
 
-from mass.core.massmetabolite import MassMetabolite
-from mass.core.massreaction import MassReaction
+from mass.core.mass_metabolite import MassMetabolite
+from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
@@ -34,7 +34,7 @@ from mass.util.util import (
 
 # Set the logger
 LOGGER = _make_logger(__name__)
-"""logging.Logger: Logger for :mod:`~mass.core.massmodel` submodule."""
+"""logging.Logger: Logger for :mod:`~mass.core.mass_model` submodule."""
 
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
 """list: Contains the six most abundant elements and charge for molecules."""

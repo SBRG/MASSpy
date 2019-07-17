@@ -32,7 +32,7 @@ from scipy.interpolate import interp1d
 
 from six import iteritems, iterkeys, string_types
 
-from mass.core.massmodel import MassModel
+from mass.core.mass_model import MassModel
 from mass.core.visualization import (
     plot_simulation, plot_tiled_phase_portrait)
 from mass.util.dict_with_id import DictWithID

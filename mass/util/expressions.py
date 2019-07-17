@@ -8,7 +8,7 @@ from six import iteritems, iterkeys, string_types
 import sympy as sym
 from sympy.physics.vector import dynamicsymbols
 
-from mass.core.massconfiguration import MassConfiguration
+from mass.core.mass_configuration import MassConfiguration
 
 MASSCONFIGURATION = MassConfiguration()
 

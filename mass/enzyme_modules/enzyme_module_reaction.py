@@ -4,7 +4,7 @@ EnzymeModuleReaction is a class for holding information regarding enzymatic reac
 
 The :class:`EnzymeModuleReaction` class inherits and extends the
 :class:`~.MassReaction` class. It is designed to represent the reactions
-and transitions involving :class:`~.EnzymeModuleForm`\ s represented in the
+and transitions involving :class:`~.EnzymeModuleSpecies`\ s represented in the
 :class:`~.EnzymeModule` class.
 
 The enzyme specific attributes on the :class:`EnzymeModuleReaction` are the
@@ -16,17 +16,17 @@ Some other important points about the :class:`EnzymeModuleReaction` include:
 
     * If the :attr:`name` attribute is not set upon initializing, it is
       automatically generated using the enzyme specific attributes of the
-      associated :class:`~.EnzymeModuleForm`\ s.
+      associated :class:`~.EnzymeModuleSpecies`\ s.
     * Even though :class:`~.MassReaction`\ s are catalyzed by enzymes, an
       enzymatic reaction in the context of this module will refer to reactions
-      that involve :class:`~.EnzymeModuleForm`\ (s) and are associated with
+      that involve :class:`~.EnzymeModuleSpecies`\ (s) and are associated with
       an :class:`~.EnzymeModule`.
 
 """ # noqa
 from collections import defaultdict
 
-from mass.core.massreaction import MassReaction
-from mass.enzyme_modules.enzyme_module_form import EnzymeModuleForm
+from mass.core.mass_reaction import MassReaction
+from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 
 
 class EnzymeModuleReaction(MassReaction):
@@ -74,9 +74,9 @@ class EnzymeModuleReaction(MassReaction):
 
         Notes
         -----
-        * The :attr:`~.EnzymeModuleForm.bound_catalytic` and
-          :attr:`~.EnzymeModuleForm.bound_effectors` attributes of the
-          associated :class:`~.EnzymeModuleForms` are used in generating
+        * The :attr:`~.EnzymeModuleSpecies.bound_catalytic` and
+          :attr:`~.EnzymeModuleSpecies.bound_effectors` attributes of the
+          associated :class:`~.EnzymeModuleSpecies` are used in generating
           the name.
 
         Parameters
@@ -95,7 +95,7 @@ class EnzymeModuleReaction(MassReaction):
         name = ""
         items = defaultdict(list)
         for met in self.metabolites:
-            key = "Enz" if isinstance(met, EnzymeModuleForm) else "Lig"
+            key = "Enz" if isinstance(met, EnzymeModuleSpecies) else "Lig"
             key += " React" if met in self.reactants else " Prod"
             items[key].append(met)
 

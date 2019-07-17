@@ -25,8 +25,8 @@ from cobra.core.reaction import (
     and_or_search, compartment_finder, gpr_clean, uppercase_AND, uppercase_OR)
 from cobra.util.context import get_context, resettable
 
-from mass.core.massconfiguration import MassConfiguration
-from mass.core.massmetabolite import MassMetabolite
+from mass.core.mass_configuration import MassConfiguration
+from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
     generate_disequilibrium_ratio, generate_foward_mass_action_rate_expression,
     generate_mass_action_rate_expression, generate_mass_action_ratio,

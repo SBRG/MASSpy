@@ -24,14 +24,14 @@ from mass.io.dict import model_from_dict, model_to_dict
 JSON_SPEC = "1"
 
 
-def to_json(model, sort=False, **kwargs):
+def to_json(mass_model, sort=False, **kwargs):
     """Return the model as a JSON document.
 
     ``kwargs`` are passed on to ``json.dumps``
 
     Parameters
     ----------
-    model : MassModel or EnzymeModule
+    mass_model : MassModel or EnzymeModule
         The :mod:`mass` model to represent.
     sort : bool
         Whether to sort the objects in the lists representing attributes, or
@@ -50,7 +50,7 @@ def to_json(model, sort=False, **kwargs):
         Base function.
 
     """
-    obj = model_to_dict(model, sort=sort)
+    obj = model_to_dict(mass_model, sort=sort)
     obj[u'version'] = JSON_SPEC
     return json.dumps(obj, allow_nan=False, **kwargs)
 
@@ -77,14 +77,14 @@ def from_json(document):
     return model_from_dict(json.loads(document))
 
 
-def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
+def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
     """Write the model to a file in JSON format.
 
     `kwargs`` are passed on to ``json.dump``
 
     Parameters
     ----------
-    model : MassModel or EnzymeModule
+    mass_model : MassModel or EnzymeModule
         The :mod:`mass` model to represent.
     filename : str or file-like
         File path or descriptor the the JSON representation should be
@@ -105,7 +105,7 @@ def save_json_model(model, filename, sort=False, pretty=False, **kwargs):
         Base function.
 
     """
-    obj = model_to_dict(model, sort=sort)
+    obj = model_to_dict(mass_model, sort=sort)
     obj[u'version'] = JSON_SPEC
 
     if pretty:
@@ -282,7 +282,7 @@ JSON_SCHEMA = {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    " enzyme_module_forms": {
+                    "enzyme_module_species": {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
@@ -297,7 +297,7 @@ JSON_SCHEMA = {
                             "allOf": {"type": "string"}
                         },
                     },
-                    "enzyme_module_form_categorizeds": {
+                    "enzyme_module_species_categorized": {
                         "type": "object",
                         "allOf": {
                             "type": "array",
@@ -366,7 +366,7 @@ JSON_SCHEMA = {
             "type": "array",
             "allOf": {"type": "string"}
         },
-        " enzyme_module_forms": {
+        "enzyme_module_species": {
             "type": "array",
             "allOf": {"type": "string"}
         },
@@ -381,7 +381,7 @@ JSON_SCHEMA = {
                 "allOf": {"type": "string"}
             },
         },
-        "_enzyme_module_form_categorizeds": {
+        "_enzyme_module_species_categorized": {
             "type": "object",
             "allOf": {
                 "type": "array",

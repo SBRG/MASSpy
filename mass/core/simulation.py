@@ -91,9 +91,9 @@ from sympy import Basic, Function, Symbol, sympify
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
 
-from mass.core.massconfiguration import MassConfiguration
-from mass.core.massmodel import MassModel
-from mass.core.masssolution import MassSolution, _CONC_STR, _FLUX_STR
+from mass.core.mass_configuration import MassConfiguration
+from mass.core.mass_model import MassModel
+from mass.core.mass_solution import MassSolution, _CONC_STR, _FLUX_STR
 from mass.exceptions import MassSimulationError
 from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
@@ -422,7 +422,7 @@ class Simulation(Object):
 
             try:
                 # Try to update model values
-                new_model = self._update_massmodel_with_values(new_model)
+                new_model = self._update_mass_model_with_values(new_model)
             except ValueError as e:
                 warn(str(e))
             else:
@@ -763,7 +763,7 @@ class Simulation(Object):
 
         # Update reference model to have the new values
         if update_values:
-            model = self._update_massmodel_with_values(self.reference_model)
+            model = self._update_mass_model_with_values(self.reference_model)
             setattr(self, "_reference_model", model)
             self._reset_roadrunner(True)
 
@@ -899,8 +899,8 @@ class Simulation(Object):
         if reset:
             new_model = self.reference_model.copy()
             new_model.id = model
-            new_model = self._update_massmodel_with_values(new_model,
-                                                           model_values_to_set)
+            new_model = self._update_mass_model_with_values(
+                new_model, model_values_to_set)
 
             rr = _load_model_into_roadrunner(
                 new_model, rr=self.roadrunner, verbose=False,
@@ -1118,7 +1118,7 @@ class Simulation(Object):
             for key, value in iteritems(new_value_dict):
                 current_value_dict[id_fix_func(key)] = value
 
-    def _update_massmodel_with_values(self, mass_model, value_dict=None):
+    def _update_mass_model_with_values(self, mass_model, value_dict=None):
         """Update the MassModel object with the stored model values.
 
         Warnings

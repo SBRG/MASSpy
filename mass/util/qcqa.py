@@ -8,7 +8,7 @@ import sympy as sym
 
 from tabulate import tabulate
 
-from mass.core.massconfiguration import MassConfiguration
+from mass.core.mass_configuration import MassConfiguration
 from mass.util.expressions import _mk_met_func
 from mass.util.util import _check_kwargs, ensure_iterable
 
