@@ -111,8 +111,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r" value="21864.5892487112"/>
             <localParameter id="Keq_R_G6PDH2r" value="1000"/>
+            <localParameter id="kf_R_G6PDH2r" value="21864.5892487112"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -142,8 +142,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGL" value="122.323111606384"/>
             <localParameter id="Keq_R_PGL" value="1000"/>
+            <localParameter id="kf_R_PGL" value="122.323111606384"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -183,8 +183,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GND" value="29287.8074735594"/>
             <localParameter id="Keq_R_GND" value="1000"/>
+            <localParameter id="kf_R_GND" value="29287.8074735594"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -280,8 +280,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_TKT1" value="1.2"/>
             <localParameter id="kf_R_TKT1" value="1595.95197455381"/>
+            <localParameter id="Keq_R_TKT1" value="1.2"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -319,8 +319,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_TKT2" value="10.3"/>
             <localParameter id="kf_R_TKT2" value="1092.24643529008"/>
+            <localParameter id="Keq_R_TKT2" value="10.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -358,8 +358,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TALA" value="844.61613801298"/>
             <localParameter id="Keq_R_TALA" value="1.05"/>
+            <localParameter id="kf_R_TALA" value="844.61613801298"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -402,8 +402,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_GTHOr" value="100"/>
             <localParameter id="kf_R_GTHOr" value="53.3298118727398"/>
+            <localParameter id="Keq_R_GTHOr" value="100"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -436,8 +436,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GSHR" value="0.0412573673870334"/>
             <localParameter id="Keq_R_GSHR" value="2"/>
+            <localParameter id="kf_R_GSHR" value="0.0412573673870334"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -448,6 +448,9 @@
         <listOfProducts>
           <speciesReference species="M_g6p_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_g6p_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -537,6 +540,9 @@
         <listOfProducts>
           <speciesReference species="M_co2_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_co2_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -566,6 +572,9 @@
         <listOfProducts>
           <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -595,6 +604,9 @@
         <listOfProducts>
           <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h2o_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -612,8 +624,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

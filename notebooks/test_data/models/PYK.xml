@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -480,8 +480,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_ACT" value="200"/>
             <localParameter id="kf_PYK_ACT" value="1000000"/>
+            <localParameter id="Keq_PYK_ACT" value="200"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -719,8 +719,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_ACT" value="200"/>
             <localParameter id="kf_PYK_ACT" value="1000000"/>
+            <localParameter id="Keq_PYK_ACT" value="200"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -958,8 +958,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_ACT" value="200"/>
             <localParameter id="kf_PYK_ACT" value="1000000"/>
+            <localParameter id="Keq_PYK_ACT" value="200"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1196,8 +1196,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_ACT" value="200"/>
             <localParameter id="kf_PYK_ACT" value="1000000"/>
+            <localParameter id="Keq_PYK_ACT" value="200"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1620,7 +1620,7 @@
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PYK_enzyme_module_forms" groups:kind="collection">
+      <groups:group groups:id="PYK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_R0_c"/>
           <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
@@ -1723,7 +1723,7 @@
           <groups:member groups:name="Products" groups:idRef="PYK_enzyme_module_ligands_categorized_Category4"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PYK_enzyme_module_forms_categorized_Category0" groups:name="Relaxed" groups:kind="collection">
+      <groups:group groups:id="PYK_enzyme_module_species_categorized_Category0" groups:name="Relaxed" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
           <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
@@ -1747,7 +1747,7 @@
           <groups:member groups:name="PYK; 4 fdp_c" groups:idRef="M_pyk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PYK_enzyme_module_forms_categorized_Category1" groups:name="Tense" groups:kind="collection">
+      <groups:group groups:id="PYK_enzyme_module_species_categorized_Category1" groups:name="Tense" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_T0_c"/>
           <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
@@ -1756,10 +1756,10 @@
           <groups:member groups:name="PYK; 4 atp_c" groups:idRef="M_pyk_T4_c"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="PYK_enzyme_module_forms_categorized" groups:kind="collection">
+      <groups:group groups:id="PYK_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Relaxed" groups:idRef="PYK_enzyme_module_forms_categorized_Category0"/>
-          <groups:member groups:name="Tense" groups:idRef="PYK_enzyme_module_forms_categorized_Category1"/>
+          <groups:member groups:name="Relaxed" groups:idRef="PYK_enzyme_module_species_categorized_Category0"/>
+          <groups:member groups:name="Tense" groups:idRef="PYK_enzyme_module_species_categorized_Category1"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category0" groups:name="pep_c binding" groups:kind="collection">
@@ -1841,10 +1841,10 @@
         </notes>
         <groups:listOfMembers>
           <groups:member groups:idRef="PYK_enzyme_module_ligands"/>
-          <groups:member groups:idRef="PYK_enzyme_module_forms"/>
+          <groups:member groups:idRef="PYK_enzyme_module_species"/>
           <groups:member groups:idRef="PYK_enzyme_module_reactions"/>
           <groups:member groups:idRef="PYK_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="PYK_enzyme_module_forms_categorized"/>
+          <groups:member groups:idRef="PYK_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="PYK_enzyme_module_reactions_categorized"/>
         </groups:listOfMembers>
       </groups:group>

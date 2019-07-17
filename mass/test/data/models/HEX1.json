@@ -1,18 +1,5 @@
 {
     "_enzyme_concentration_total": 2.4e-05,
-    "_enzyme_module_forms_categorized": {
-        "Free": [
-            "hex1_AG_c",
-            "hex1_A_c",
-            "hex1_G_c",
-            "hex1_c"
-        ],
-        "Inhibited": [
-            "hex1_A_PI_c",
-            "hex1_G_CI_c",
-            "hex1_G_PI_c"
-        ]
-    },
     "_enzyme_module_ligands_categorized": {
         "Cofactors": [
             "atp_c"
@@ -49,6 +36,19 @@
             "HEX1_2"
         ]
     },
+    "_enzyme_module_species_categorized": {
+        "Free": [
+            "hex1_AG_c",
+            "hex1_A_c",
+            "hex1_G_c",
+            "hex1_c"
+        ],
+        "Inhibited": [
+            "hex1_A_PI_c",
+            "hex1_G_CI_c",
+            "hex1_G_PI_c"
+        ]
+    },
     "_enzyme_net_flux": 1.1200000000000003,
     "_enzyme_net_flux_equation": "kf_HEX1*(Keq_HEX1*hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t))/Keq_HEX1",
     "compartments": {
@@ -69,15 +69,6 @@
         "HEX1_7": "kf_HEX1_G*(glc__D_c(t)*hex1_A_c(t) - hex1_AG_c(t)/Keq_HEX1_G)",
         "HEX1_8": "kf_HEX1*(hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t)/Keq_HEX1)"
     },
-    "enzyme_module_forms": [
-        "hex1_c",
-        "hex1_A_c",
-        "hex1_G_c",
-        "hex1_AG_c",
-        "hex1_G_CI_c",
-        "hex1_A_PI_c",
-        "hex1_G_PI_c"
-    ],
     "enzyme_module_ligands": [
         "glc__D_c",
         "g6p_c",
@@ -95,6 +86,15 @@
         "HEX1_6",
         "HEX1_7",
         "HEX1_8"
+    ],
+    "enzyme_module_species": [
+        "hex1_c",
+        "hex1_A_c",
+        "hex1_G_c",
+        "hex1_AG_c",
+        "hex1_G_CI_c",
+        "hex1_A_PI_c",
+        "hex1_G_PI_c"
     ],
     "enzyme_modules": [],
     "genes": [],

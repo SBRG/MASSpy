@@ -224,8 +224,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PUNP5" value="12"/>
             <localParameter id="Keq_R_PUNP5" value="0.09"/>
+            <localParameter id="kf_R_PUNP5" value="12"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -253,8 +253,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PPM" value="13.3"/>
             <localParameter id="kf_R_PPM" value="0.234786775275515"/>
+            <localParameter id="Keq_R_PPM" value="13.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -342,6 +342,9 @@
         <listOfProducts>
           <speciesReference species="M_adn_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_adn_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -359,8 +362,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_adn_c" value="100000"/>
             <localParameter id="Keq_R_SK_adn_c" value="1"/>
+            <localParameter id="kf_R_SK_adn_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -371,6 +374,9 @@
         <listOfProducts>
           <speciesReference species="M_ade_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_ade_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -400,6 +406,9 @@
         <listOfProducts>
           <speciesReference species="M_ins_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_ins_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -429,6 +438,9 @@
         <listOfProducts>
           <speciesReference species="M_hxan_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_hxan_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -458,6 +470,9 @@
         <listOfProducts>
           <speciesReference species="M_nh3_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_nh3_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -475,8 +490,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_nh3_c" value="100000"/>
             <localParameter id="Keq_R_SK_nh3_c" value="1"/>
+            <localParameter id="kf_R_SK_nh3_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -487,6 +502,9 @@
         <listOfProducts>
           <speciesReference species="M_pi_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_pi_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -504,8 +522,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_pi_c" value="100000"/>
             <localParameter id="Keq_R_SK_pi_c" value="1"/>
+            <localParameter id="kf_R_SK_pi_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -516,6 +534,9 @@
         <listOfProducts>
           <speciesReference species="M_amp_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_amp_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -545,6 +566,9 @@
         <listOfProducts>
           <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -574,6 +598,9 @@
         <listOfProducts>
           <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
         </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="M_h2o_b"/>
+        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -591,8 +618,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
