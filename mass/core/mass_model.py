@@ -607,6 +607,7 @@ class MassModel(Object):
         # Check whether reactions exist in the model.
         pruned = self._existing_obj_filter("reactions", reaction_list)
         context = get_context(self)
+        boundary_conditions = {}
         # Add reactions, and have reactions point to the model.
         for rxn in pruned:
             rxn._model = self
@@ -624,6 +625,16 @@ class MassModel(Object):
                 met._reaction.add(rxn)
                 if context:
                     context(partial(met._reaction.remove, rxn))
+                # Add boundary condition if reaction is a boundary reaction
+                # and no boundary condition exists for it.
+                if rxn.boundary\
+                   and rxn.boundary_metabolite not in self.boundary_conditions:
+                    warnings.warn(
+                        "Boundary reaction '{0}' added without boundary "
+                        "condition for '{1}', therefore setting boundary "
+                        "condition value to 0.".format(
+                            rxn.id, rxn.boundary_metabolite))
+                    boundary_conditions.update({rxn.boundary_metabolite: 0})
 
             # Loop through genes associated with a reaction.
             for gene in list(rxn._genes):
@@ -642,11 +653,14 @@ class MassModel(Object):
                         rxn._associate_gene(model_gene)
         # Add reactions to the model
         self.reactions += pruned
+        self.add_boundary_conditions(boundary_conditions)
 
         if context:
             context(partial(self.reactions.__isub__, pruned))
             for rxn in reaction_list:
                 context(partial(setattr, rxn, "_model", None))
+            context(partial(self.remove_boundary_conditions,
+                            list(boundary_conditions)))
 
     def remove_reactions(self, reaction_list, remove_orphans=False):
         r"""Remove reactions from the model.
@@ -1661,9 +1675,9 @@ class MassModel(Object):
         For example::
 
             '''
-            ReactionID_1: S + E <=> ES
+            ReactionID_1: S + E <=> ES;
             ReactionID_2: ES -> E + P;
-            ReactionID_3: E + I <=> EI
+            ReactionID_3: E + I <=> EI;
             '''
 
         Parameters
@@ -2182,7 +2196,6 @@ class MassModel(Object):
 
         return DictList(filter(existing_filter, item_list))
 
-    # TODO Fix when changes finished
     def _repr_html_(self):
         """HTML representation of the overview for the MassModel.
 
@@ -2210,72 +2223,35 @@ class MassModel(Object):
                     <td><strong>Matrix Rank</strong></td>
                     <td>{mat_rank}</td>
                 </tr><tr>
-                    <td><strong>Matrix Type</strong></td>
-                    <td>{S_type}</td>
-                </tr><tr>
-                    <td><strong>Number of Metabolites</strong></td>
+                    <td><strong>Number of metabolites</strong></td>
                     <td>{num_metabolites}</td>
                 </tr><tr>
-                    <td><strong>Number of Initial Conditions</strong></td>
-                    <td>{num_ic}</td>
+                    <td><strong>Initial conditions defined</strong></td>
+                    <td>{num_ic}/{num_metabolites}</td>
                 </tr><tr>
-                    <td><strong>Number of Fixed Metabolites</strong></td>
-                    <td>{num_fixed}</td>
-                </tr><tr>
-                    <td><strong>Number of Reactions</strong></td>
+                    <td><strong>Number of reactions</strong></td>
                     <td>{num_reactions}</td>
-                </tr><tr>
-                    <td><strong>Number of Forward Rate Constants</strong></td>
-                    <td>{num_kfs}</td>
-                </tr><tr>
-                    <td><strong>Number of Equilibrium Constants</strong></td>
-                    <td>{num_Keqs}</td>
-                </tr><tr>
-                    <td><strong>Number of Irreversible Reactions</strong></td>
-                    <td>{num_irreversible}</td>
-                </tr><tr>
-                    <td><strong>Number of Boundary Reactions</strong></td>
-                    <td>{num_boundary}</td>
-                </tr><tr>
-                    <td><strong>Number of Boundary Conditions</strong></td>
-                    <td>{num_boundary_conditions}</td>
-                </tr><tr>
-                    <td><strong>Number of Custom Rates</strong></td>
-                    <td>{num_custom_rates}</td>
                 </tr><tr>
                     <td><strong>Number of Genes</strong></td>
                     <td>{num_genes}</td>
                 </tr><tr>
-                    <td><strong>Number of Enzymes</strong></td>
+                    <td><strong>Number of Enzyme Modules</strong></td>
                     <td>{num_enzyme_modules}</td>
                 </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
-                </tr><tr>
-                    <td><strong>Units</strong></td>
-                    <td>{units}</td>
                 </tr>
             </table>
         """.format(name=self.id, address='0x0%x' % id(self),
                    dim_stoich_mat=dim_S,
                    mat_rank=rank,
-                   S_type="{0}, {1}".format(self._matrix_type,
-                                            self._dtype.__name__),
                    num_metabolites=len(self.metabolites),
                    num_ic=len(self.initial_conditions),
-                   num_fixed=len(self.fixed),
                    num_reactions=len(self.reactions),
-                   num_kfs=len(self.parameters["kf"]),
-                   num_Keqs=len(self.parameters["Keq"]),
-                   num_irreversible=len(self.irreversible_reactions),
-                   num_boundary=len(self.boundary),
-                   num_boundary_conditions=len(self.boundary_conditions),
-                   num_custom_rates=len(self.custom_rates),
                    num_genes=len(self.genes),
                    num_enzyme_modules=len(self.enzyme_modules),
                    compartments=", ".join(v if v else k for k, v in
-                                          iteritems(self.compartments)),
-                   units=", ".join([u.id for u in self.units]))
+                                          iteritems(self.compartments)),)
 
     # Dunders
     def __enter__(self):

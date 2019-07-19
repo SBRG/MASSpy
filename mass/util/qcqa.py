@@ -2,7 +2,7 @@
 """Module containing functions to assess the quality of a model."""
 from math import ceil, floor
 
-from six import iteritems, itervalues
+from six import iteritems, itervalues, string_types
 
 import sympy as sym
 
@@ -423,22 +423,24 @@ def check_reaction_parameters(model, reaction_list=None):
         reaction_list = model.reactions
     reaction_list = ensure_iterable(reaction_list)
 
-    count = []
     missing = []
     superfluous = []
     customs = {}
     for rxn in reaction_list:
         if rxn in model.custom_rates:
             missing_customs = _check_custom_for_standard(model, rxn)
+            print(missing_customs)
             if missing_customs:
-                customs.update({rxn: "; ".join(missing_customs)})
+                customs.update(dict(
+                    (rxn, "; ".join([missing]))
+                    if isinstance(missing, string_types)
+                    else (rxn, "; ".join(missing))
+                    for rxn, missing in iteritems(missing_customs)))
         # Address reactions that are missing parameters
-        elif (len(rxn.parameters) < 2 and not count) or \
-             (isinstance(count, dict) and count[rxn.id] < 2):
+        elif len(rxn.parameters) < 2:
             missing.append(rxn)
         # Address reactions that have superfluous parameters
-        elif (len(rxn.parameters) > 2 and not count) or \
-             (isinstance(count, dict) and count[rxn.id] > 2):
+        elif len(rxn.parameters) > 2:
             superfluous.append(rxn)
         # Only two reaction parameters exist, no consistency check required
         else:
