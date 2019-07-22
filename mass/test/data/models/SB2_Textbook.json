@@ -56,6 +56,7 @@
     "enzyme_modules": [
         {
             "enzyme_concentration_total": 3.3e-05,
+            "enzyme_concentration_total_equation": "pfk_R0_AF_c(t) + pfk_R0_A_c(t) + pfk_R0_c(t) + pfk_R1_AF_c(t) + pfk_R1_A_c(t) + pfk_R1_c(t) + pfk_R2_AF_c(t) + pfk_R2_A_c(t) + pfk_R2_c(t) + pfk_R3_AF_c(t) + pfk_R3_A_c(t) + pfk_R3_c(t) + pfk_R4_AF_c(t) + pfk_R4_A_c(t) + pfk_R4_c(t) + pfk_T0_c(t) + pfk_T1_c(t) + pfk_T2_c(t) + pfk_T3_c(t) + pfk_T4_c(t)",
             "enzyme_module_ligands": [
                 "f6p_c",
                 "fdp_c",
@@ -1837,7 +1838,7 @@
                 "pfk_R0_A_c": 1,
                 "pfk_R0_c": -1
             },
-            "name": "pfk_R0-atp binding",
+            "name": "pfk_R0-pfk_R0_A transition",
             "steady_state_flux": 0.007746970711156127,
             "subsystem": "Glycolysis"
         },
@@ -1853,7 +1854,7 @@
                 "pfk_R0_AF_c": 1,
                 "pfk_R0_A_c": -1
             },
-            "name": "pfk_R0_A-f6p binding",
+            "name": "pfk_R0_A-pfk_R0_AF transition",
             "steady_state_flux": 0.007746970711157895,
             "subsystem": "Glycolysis"
         },
@@ -1873,7 +1874,7 @@
                 "pfk_R0_AF_c": -1,
                 "pfk_R0_c": 1
             },
-            "name": "pfk_R0_AF catalyzation",
+            "name": "pfk_R0_AF-pfk_R0 transition",
             "steady_state_flux": 0.007746970711156137,
             "subsystem": "Glycolysis"
         },
@@ -1921,7 +1922,7 @@
                 "pfk_R1_A_c": 1,
                 "pfk_R1_c": -1
             },
-            "name": "pfk_R1-atp binding",
+            "name": "pfk_R1-pfk_R1_A transition",
             "steady_state_flux": 0.07577736916932845,
             "subsystem": "Glycolysis"
         },
@@ -1937,7 +1938,7 @@
                 "pfk_R1_AF_c": 1,
                 "pfk_R1_A_c": -1
             },
-            "name": "pfk_R1_A-f6p binding",
+            "name": "pfk_R1_A-pfk_R1_AF transition",
             "steady_state_flux": 0.07577736916934405,
             "subsystem": "Glycolysis"
         },
@@ -1957,7 +1958,7 @@
                 "pfk_R1_AF_c": -1,
                 "pfk_R1_c": 1
             },
-            "name": "pfk_R1_AF catalyzation",
+            "name": "pfk_R1_AF-pfk_R1 transition",
             "steady_state_flux": 0.07577736916932841,
             "subsystem": "Glycolysis"
         },
@@ -2005,7 +2006,7 @@
                 "pfk_R2_A_c": 1,
                 "pfk_R2_c": -1
             },
-            "name": "pfk_R2-atp binding",
+            "name": "pfk_R2-pfk_R2_A transition",
             "steady_state_flux": 0.2779575023090421,
             "subsystem": "Glycolysis"
         },
@@ -2021,7 +2022,7 @@
                 "pfk_R2_AF_c": 1,
                 "pfk_R2_A_c": -1
             },
-            "name": "pfk_R2_A-f6p binding",
+            "name": "pfk_R2_A-pfk_R2_AF transition",
             "steady_state_flux": 0.27795750230909294,
             "subsystem": "Glycolysis"
         },
@@ -2041,7 +2042,7 @@
                 "pfk_R2_AF_c": -1,
                 "pfk_R2_c": 1
             },
-            "name": "pfk_R2_AF catalyzation",
+            "name": "pfk_R2_AF-pfk_R2 transition",
             "steady_state_flux": 0.27795750230904254,
             "subsystem": "Glycolysis"
         },
@@ -2089,7 +2090,7 @@
                 "pfk_R3_A_c": 1,
                 "pfk_R3_c": -1
             },
-            "name": "pfk_R3-atp binding",
+            "name": "pfk_R3-pfk_R3_A transition",
             "steady_state_flux": 0.453142461554358,
             "subsystem": "Glycolysis"
         },
@@ -2105,7 +2106,7 @@
                 "pfk_R3_AF_c": 1,
                 "pfk_R3_A_c": -1
             },
-            "name": "pfk_R3_A-f6p binding",
+            "name": "pfk_R3_A-pfk_R3_AF transition",
             "steady_state_flux": 0.4531424615544332,
             "subsystem": "Glycolysis"
         },
@@ -2125,7 +2126,7 @@
                 "pfk_R3_AF_c": -1,
                 "pfk_R3_c": 1
             },
-            "name": "pfk_R3_AF catalyzation",
+            "name": "pfk_R3_AF-pfk_R3 transition",
             "steady_state_flux": 0.45314246155435933,
             "subsystem": "Glycolysis"
         },
@@ -2173,7 +2174,7 @@
                 "pfk_R4_A_c": 1,
                 "pfk_R4_c": -1
             },
-            "name": "pfk_R4-atp binding",
+            "name": "pfk_R4-pfk_R4_A transition",
             "steady_state_flux": 0.2770271832354277,
             "subsystem": "Glycolysis"
         },
@@ -2189,7 +2190,7 @@
                 "pfk_R4_AF_c": 1,
                 "pfk_R4_A_c": -1
             },
-            "name": "pfk_R4_A-f6p binding",
+            "name": "pfk_R4_A-pfk_R4_AF transition",
             "steady_state_flux": 0.27702718323546477,
             "subsystem": "Glycolysis"
         },
@@ -2209,7 +2210,7 @@
                 "pfk_R4_AF_c": -1,
                 "pfk_R4_c": 1
             },
-            "name": "pfk_R4_AF catalyzation",
+            "name": "pfk_R4_AF-pfk_R4 transition",
             "steady_state_flux": 0.27702718323542724,
             "subsystem": "Glycolysis"
         },

@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -46,13 +46,6 @@
       <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
       <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
-      <species id="M_glc__D_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_lac__L_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_pyr_b" compartment="b" initialConcentration="0.06" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_h_b" compartment="b" initialConcentration="6.30957e-05" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_h2o_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_amp_b" compartment="b" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
-      <species id="M_pi_b" compartment="b" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
     </listOfSpecies>
     <listOfParameters>
       <parameter sboTerm="SBO:0000626" id="cobra_default_lb" value="-1000" units="mmol_per_gDW_per_hr" constant="true"/>
@@ -119,8 +112,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HEX1" value="850"/>
             <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
+            <localParameter id="Keq_R_HEX1" value="850"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -148,8 +141,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PGI" value="0.41"/>
             <localParameter id="kf_R_PGI" value="3644.44444444449"/>
+            <localParameter id="Keq_R_PGI" value="0.41"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -188,8 +181,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PFK" value="310"/>
             <localParameter id="kf_R_PFK" value="35.3687837477994"/>
+            <localParameter id="Keq_R_PFK" value="310"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -222,8 +215,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_FBA" value="0.082"/>
             <localParameter id="kf_R_FBA" value="2834.56790123458"/>
+            <localParameter id="Keq_R_FBA" value="0.082"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -431,8 +424,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PYK" value="454.385551911368"/>
             <localParameter id="Keq_R_PYK" value="363000"/>
+            <localParameter id="kf_R_PYK" value="454.385551911368"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -480,9 +473,6 @@
         <listOfReactants>
           <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_amp_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -529,8 +519,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_ADK1" value="1.65"/>
             <localParameter id="kf_R_ADK1" value="100000"/>
+            <localParameter id="Keq_R_ADK1" value="1.65"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -538,12 +528,6 @@
         <listOfReactants>
           <speciesReference species="M_pyr_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_pyr_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_pyr_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -554,7 +538,7 @@
                 <ci> M_pyr_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_pyr_b </ci>
+                  <ci> pyr_b </ci>
                   <ci> Keq_R_SK_pyr_c </ci>
                 </apply>
               </apply>
@@ -562,6 +546,7 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_R_SK_pyr_c" value="1"/>
+            <localParameter id="pyr_b" value="0.06"/>
             <localParameter id="kf_R_SK_pyr_c" value="744.186046511621"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -570,12 +555,6 @@
         <listOfReactants>
           <speciesReference species="M_lac__L_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_lac__L_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_lac__L_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -586,7 +565,7 @@
                 <ci> M_lac__L_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_lac__L_b </ci>
+                  <ci> lac__L_b </ci>
                   <ci> Keq_R_SK_lac__L_c </ci>
                 </apply>
               </apply>
@@ -595,6 +574,7 @@
           <listOfLocalParameters>
             <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
             <localParameter id="kf_R_SK_lac__L_c" value="5.6"/>
+            <localParameter id="lac__L_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -643,15 +623,9 @@
         </kineticLaw>
       </reaction>
       <reaction metaid="meta_R_SK_glc__D_c" sboTerm="SBO:0000632" id="R_SK_glc__D_c" name="D-Glucose_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
-        <listOfReactants>
-          <speciesReference species="M_glc__D_b" stoichiometry="1" constant="true"/>
-        </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_glc__D_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_glc__D_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -659,7 +633,7 @@
               <ci> kf_R_SK_glc__D_c </ci>
               <apply>
                 <minus/>
-                <ci> M_glc__D_b </ci>
+                <ci> glc__D_b </ci>
                 <apply>
                   <divide/>
                   <ci> M_glc__D_c </ci>
@@ -669,21 +643,16 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
+            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
+            <localParameter id="glc__D_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
       <reaction metaid="meta_R_SK_amp_c" sboTerm="SBO:0000632" id="R_SK_amp_c" name="AMP_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
-        <listOfReactants>
-          <speciesReference species="M_amp_b" stoichiometry="1" constant="true"/>
-        </listOfReactants>
         <listOfProducts>
           <speciesReference species="M_amp_c" stoichiometry="1" constant="true"/>
         </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_amp_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -691,7 +660,7 @@
               <ci> kf_R_SK_amp_c </ci>
               <apply>
                 <minus/>
-                <ci> M_amp_b </ci>
+                <ci> amp_b </ci>
                 <apply>
                   <divide/>
                   <ci> M_amp_c </ci>
@@ -701,8 +670,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_amp_c" value="INF"/>
             <localParameter id="kf_R_SK_amp_c" value="0.014"/>
+            <localParameter id="Keq_R_SK_amp_c" value="INF"/>
+            <localParameter id="amp_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -710,12 +680,6 @@
         <listOfReactants>
           <speciesReference species="M_h_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_h_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_h_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -726,13 +690,14 @@
                 <ci> M_h_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_h_b </ci>
+                  <ci> h_b </ci>
                   <ci> Keq_R_SK_h_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="h_b" value="6.30957e-05"/>
             <localParameter id="kf_R_SK_h_c" value="100000"/>
             <localParameter id="Keq_R_SK_h_c" value="1"/>
           </listOfLocalParameters>
@@ -742,12 +707,6 @@
         <listOfReactants>
           <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_h2o_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_h2o_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -758,15 +717,16 @@
                 <ci> M_h2o_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_h2o_b </ci>
+                  <ci> h2o_b </ci>
                   <ci> Keq_R_SK_h2o_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
             <localParameter id="Keq_R_SK_h2o_c" value="1"/>
+            <localParameter id="h2o_b" value="1"/>
+            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -774,12 +734,6 @@
         <listOfReactants>
           <speciesReference species="M_pi_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_pi_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_pi_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -790,15 +744,16 @@
                 <ci> M_pi_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_pi_b </ci>
+                  <ci> pi_b </ci>
                   <ci> Keq_R_SK_pi_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_pi_c" value="1"/>
+            <localParameter id="pi_b" value="2.5"/>
             <localParameter id="kf_R_SK_pi_c" value="0.26"/>
+            <localParameter id="Keq_R_SK_pi_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

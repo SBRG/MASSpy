@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -206,7 +206,7 @@
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_PFK_R01" name="pfk_R0-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R01" name="pfk_R0-pfk_R0_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -247,7 +247,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R02" name="pfk_R0_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R02" name="pfk_R0_A-pfk_R0_AF transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -288,7 +288,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R03" name="pfk_R0_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R03" name="pfk_R0_AF-pfk_R0 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -401,7 +401,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R11" name="pfk_R1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R11" name="pfk_R1-pfk_R1_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -437,12 +437,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="61635"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="61635"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R12" name="pfk_R1_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R12" name="pfk_R1_A-pfk_R1_AF transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -483,7 +483,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R13" name="pfk_R1_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R13" name="pfk_R1_AF-pfk_R1 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -604,7 +604,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R21" name="pfk_R2-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R21" name="pfk_R2-pfk_R2_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -640,12 +640,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
             <localParameter id="kf_PFK_A" value="61635"/>
+            <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R22" name="pfk_R2_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R22" name="pfk_R2_A-pfk_R2_AF transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -686,7 +686,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R23" name="pfk_R2_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R23" name="pfk_R2_AF-pfk_R2 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -807,7 +807,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R31" name="pfk_R3-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R31" name="pfk_R3-pfk_R3_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -848,7 +848,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R32" name="pfk_R3_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R32" name="pfk_R3_A-pfk_R3_AF transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -889,7 +889,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R33" name="pfk_R3_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R33" name="pfk_R3_AF-pfk_R3 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1008,7 +1008,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R41" name="pfk_R4-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R41" name="pfk_R4-pfk_R4_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1049,7 +1049,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R42" name="pfk_R4_A-f6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R42" name="pfk_R4_A-pfk_R4_AF transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1090,7 +1090,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PFK_R43" name="pfk_R4_AF catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PFK_R43" name="pfk_R4_AF-pfk_R4 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1149,8 +1149,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
             <localParameter id="kf_R_PFK_L" value="1000000000000"/>
+            <localParameter id="Keq_R_PFK_L" value="0.0011"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1192,29 +1192,29 @@
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
-          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
+          <groups:member groups:name="pfk_R0-pfk_R0_A transition" groups:idRef="R_PFK_R01"/>
+          <groups:member groups:name="pfk_R0_A-pfk_R0_AF transition" groups:idRef="R_PFK_R02"/>
+          <groups:member groups:name="pfk_R0_AF-pfk_R0 transition" groups:idRef="R_PFK_R03"/>
           <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
           <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
-          <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
-          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R1-pfk_R1_A transition" groups:idRef="R_PFK_R11"/>
+          <groups:member groups:name="pfk_R1_A-pfk_R1_AF transition" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R1_AF-pfk_R1 transition" groups:idRef="R_PFK_R13"/>
           <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
           <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
-          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
-          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
-          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
+          <groups:member groups:name="pfk_R2-pfk_R2_A transition" groups:idRef="R_PFK_R21"/>
+          <groups:member groups:name="pfk_R2_A-pfk_R2_AF transition" groups:idRef="R_PFK_R22"/>
+          <groups:member groups:name="pfk_R2_AF-pfk_R2 transition" groups:idRef="R_PFK_R23"/>
           <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
           <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
-          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
-          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
-          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
+          <groups:member groups:name="pfk_R3-pfk_R3_A transition" groups:idRef="R_PFK_R31"/>
+          <groups:member groups:name="pfk_R3_A-pfk_R3_AF transition" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R3_AF-pfk_R3 transition" groups:idRef="R_PFK_R33"/>
           <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
           <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
-          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
-          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
-          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_R4-pfk_R4_A transition" groups:idRef="R_PFK_R41"/>
+          <groups:member groups:name="pfk_R4_A-pfk_R4_AF transition" groups:idRef="R_PFK_R42"/>
+          <groups:member groups:name="pfk_R4_AF-pfk_R4 transition" groups:idRef="R_PFK_R43"/>
           <groups:member groups:name="pfk_R0-pfk_T0 transition" groups:idRef="R_PFK_L"/>
         </groups:listOfMembers>
       </groups:group>
@@ -1290,29 +1290,29 @@
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category0" groups:name="atp_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
-          <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
-          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
-          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
+          <groups:member groups:name="pfk_R0-pfk_R0_A transition" groups:idRef="R_PFK_R01"/>
+          <groups:member groups:name="pfk_R1-pfk_R1_A transition" groups:idRef="R_PFK_R11"/>
+          <groups:member groups:name="pfk_R2-pfk_R2_A transition" groups:idRef="R_PFK_R21"/>
+          <groups:member groups:name="pfk_R3-pfk_R3_A transition" groups:idRef="R_PFK_R31"/>
+          <groups:member groups:name="pfk_R4-pfk_R4_A transition" groups:idRef="R_PFK_R41"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category1" groups:name="f6p_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
-          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
-          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
-          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
-          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
+          <groups:member groups:name="pfk_R0_A-pfk_R0_AF transition" groups:idRef="R_PFK_R02"/>
+          <groups:member groups:name="pfk_R1_A-pfk_R1_AF transition" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R2_A-pfk_R2_AF transition" groups:idRef="R_PFK_R22"/>
+          <groups:member groups:name="pfk_R3_A-pfk_R3_AF transition" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R4_A-pfk_R4_AF transition" groups:idRef="R_PFK_R42"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category2" groups:name="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
-          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
-          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
-          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
-          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_R0_AF-pfk_R0 transition" groups:idRef="R_PFK_R03"/>
+          <groups:member groups:name="pfk_R1_AF-pfk_R1 transition" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R2_AF-pfk_R2 transition" groups:idRef="R_PFK_R23"/>
+          <groups:member groups:name="pfk_R3_AF-pfk_R3 transition" groups:idRef="R_PFK_R33"/>
+          <groups:member groups:name="pfk_R4_AF-pfk_R4 transition" groups:idRef="R_PFK_R43"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized_Category3" groups:name="amp_c activation" groups:kind="collection">
@@ -1352,6 +1352,7 @@
             <p>subsystem: Glycolysis</p>
             <p>enzyme_concentration_total: 3.3e-05</p>
             <p>enzyme_net_flux: 1.12</p>
+            <p>enzyme_concentration_total_equation: pfk_R0_AF_c(t) + pfk_R0_A_c(t) + pfk_R0_c(t) + pfk_R1_AF_c(t) + pfk_R1_A_c(t) + pfk_R1_c(t) + pfk_R2_AF_c(t) + pfk_R2_A_c(t) + pfk_R2_c(t) + pfk_R3_AF_c(t) + pfk_R3_A_c(t) + pfk_R3_c(t) + pfk_R4_AF_c(t) + pfk_R4_A_c(t) + pfk_R4_c(t) + pfk_T0_c(t) + pfk_T1_c(t) + pfk_T2_c(t) + pfk_T3_c(t) + pfk_T4_c(t)</p>
             <p>enzyme_net_flux_equation: kf_PFK*(pfk_R0_AF_c(t) + pfk_R1_AF_c(t) + pfk_R2_AF_c(t) + pfk_R3_AF_c(t) + pfk_R4_AF_c(t))</p>
           </html>
         </notes>

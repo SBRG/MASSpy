@@ -74,12 +74,12 @@ class MassMetabolite(Species):
     # Public
     @property
     def elements(self):
-        """Get or set a dict of elements in the metabolite :attr:`~.formula`.
+        """Get or set ``dict`` of elements in the metabolite :attr:`~.formula`.
 
         Parameters
         ----------
         elements_dict : dict
-            A dict representing the elements of the chemical formula where
+            A ``dict`` representing the elements of the chemical formula where
             keys are elements and values are the amount.
 
         Notes
@@ -129,7 +129,7 @@ class MassMetabolite(Species):
 
     @elements.setter
     def elements(self, elements_dict):
-        """Set the :attr:`~.formula` using a dict of elements."""
+        """Set the :attr:`~.formula` using a ``dict`` of elements."""
         def stringify(element, number):
             return element if number == 1 else element + str(number)
 
@@ -431,6 +431,6 @@ ELEMENTS_AND_MOLECULAR_WEIGHTS = {
     'Ts': 294.000000,
     'Og': 294.000000,
 }
-"""A dict containing element abbreviations and their molecular weights."""
+"""A ``dict`` containing element abbreviations and their molecular weights."""
 
 __all__ = ("MassMetabolite", "ELEMENT_RE", "ELEMENTS_AND_MOLECULAR_WEIGHTS")

@@ -55,8 +55,8 @@ class MassSolution(DictWithID):
     solution_type : str
         The type of solution being stored.  Must be  ``'Conc'`` or ``'flux'``.
     data_dict : dict
-        A dict containing the solutions to store. If ``None`` provided then the
-        :class:`MassSolution` will be initialized with no solutions.
+        A dict containing the solutions to store. If ``None`` provided then
+        the :class:`MassSolution` will be initialized with no solutions.
         Solutions can be added or changed later using various ``dict``
         methods (e.g. :meth:`~dict.update`).
     time : array-like
@@ -160,7 +160,7 @@ class MassSolution(DictWithID):
 
     @t.setter
     def t(self, value):
-        """Shorthand to set the time points stored in the MassSolution."""
+        """Shorthand method to set the stored time points."""
         self.time = value
 
     @property
@@ -200,9 +200,6 @@ class MassSolution(DictWithID):
     def preview_time_profile(self):
         """Generate a preview of the time profile for the solution.
 
-        In order to use this method, the :mod:`mass.core.visualization` module
-        must be installed.
-
         See :mod:`~mass.core.visualization` documentation for more information.
 
         Notes
@@ -226,9 +223,6 @@ class MassSolution(DictWithID):
     @property
     def preview_phase_portraits(self):
         """Generate a preview of the phase portraits for the solution.
-
-        In order to use this method, the :mod:`mass.core.visualization` module
-        must be installed.
 
         See :mod:`~mass.core.visualization` documentation for more information.
 

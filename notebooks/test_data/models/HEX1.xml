@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -95,7 +95,7 @@
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_HEX1_1" name="hex1-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_1" name="hex1-hex1_A_PI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -130,12 +130,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HEX1_1" value="1000000"/>
             <localParameter id="Keq_R_HEX1_1" value="1"/>
+            <localParameter id="kf_R_HEX1_1" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_2" name="hex1-g6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_2" name="hex1-hex1_G_PI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -170,12 +170,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HEX1_2" value="1000000"/>
             <localParameter id="Keq_R_HEX1_2" value="0.015"/>
+            <localParameter id="kf_R_HEX1_2" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_3" name="hex1-glc__D binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_3" name="hex1-hex1_G transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -210,12 +210,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1_G" value="57889"/>
             <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
+            <localParameter id="kf_HEX1_G" value="57889"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_4" name="hex1-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_4" name="hex1-hex1_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -255,7 +255,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_5" name="hex1_G-_23dpg binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_5" name="hex1_G-hex1_G_CI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -290,12 +290,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HEX1_5" value="1000000"/>
             <localParameter id="Keq_R_HEX1_5" value="0.181818181818182"/>
+            <localParameter id="kf_R_HEX1_5" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_6" name="hex1_G-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_6" name="hex1_G-hex1_AG transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -335,7 +335,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_7" name="hex1_A-glc__D binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_7" name="hex1_A-hex1_AG transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -375,7 +375,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_HEX1_8" name="hex1_AG catalyzation" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_HEX1_8" name="hex1_AG-hex1 transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -413,8 +413,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_HEX1" value="2925079"/>
             <localParameter id="Keq_HEX1" value="313.12"/>
+            <localParameter id="kf_HEX1" value="2925079"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -443,14 +443,14 @@
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1-adp binding" groups:idRef="R_HEX1_1"/>
-          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
-          <groups:member groups:name="hex1-glc__D binding" groups:idRef="R_HEX1_3"/>
-          <groups:member groups:name="hex1-atp binding" groups:idRef="R_HEX1_4"/>
-          <groups:member groups:name="hex1_G-_23dpg binding" groups:idRef="R_HEX1_5"/>
-          <groups:member groups:name="hex1_G-atp binding" groups:idRef="R_HEX1_6"/>
-          <groups:member groups:name="hex1_A-glc__D binding" groups:idRef="R_HEX1_7"/>
-          <groups:member groups:name="hex1_AG catalyzation" groups:idRef="R_HEX1_8"/>
+          <groups:member groups:name="hex1-hex1_A_PI transition" groups:idRef="R_HEX1_1"/>
+          <groups:member groups:name="hex1-hex1_G_PI transition" groups:idRef="R_HEX1_2"/>
+          <groups:member groups:name="hex1-hex1_G transition" groups:idRef="R_HEX1_3"/>
+          <groups:member groups:name="hex1-hex1_A transition" groups:idRef="R_HEX1_4"/>
+          <groups:member groups:name="hex1_G-hex1_G_CI transition" groups:idRef="R_HEX1_5"/>
+          <groups:member groups:name="hex1_G-hex1_AG transition" groups:idRef="R_HEX1_6"/>
+          <groups:member groups:name="hex1_A-hex1_AG transition" groups:idRef="R_HEX1_7"/>
+          <groups:member groups:name="hex1_AG-hex1 transition" groups:idRef="R_HEX1_8"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_ligands_categorized_Category0" groups:name="Substrates" groups:kind="collection">
@@ -506,30 +506,30 @@
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category0" groups:name="product inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1-adp binding" groups:idRef="R_HEX1_1"/>
-          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
+          <groups:member groups:name="hex1-hex1_A_PI transition" groups:idRef="R_HEX1_1"/>
+          <groups:member groups:name="hex1-hex1_G_PI transition" groups:idRef="R_HEX1_2"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category1" groups:name="glc__D_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1-glc__D binding" groups:idRef="R_HEX1_3"/>
-          <groups:member groups:name="hex1_A-glc__D binding" groups:idRef="R_HEX1_7"/>
+          <groups:member groups:name="hex1-hex1_G transition" groups:idRef="R_HEX1_3"/>
+          <groups:member groups:name="hex1_A-hex1_AG transition" groups:idRef="R_HEX1_7"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category2" groups:name="atp_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1-atp binding" groups:idRef="R_HEX1_4"/>
-          <groups:member groups:name="hex1_G-atp binding" groups:idRef="R_HEX1_6"/>
+          <groups:member groups:name="hex1-hex1_A transition" groups:idRef="R_HEX1_4"/>
+          <groups:member groups:name="hex1_G-hex1_AG transition" groups:idRef="R_HEX1_6"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category3" groups:name="competitive inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1_G-_23dpg binding" groups:idRef="R_HEX1_5"/>
+          <groups:member groups:name="hex1_G-hex1_G_CI transition" groups:idRef="R_HEX1_5"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized_Category4" groups:name="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1_AG catalyzation" groups:idRef="R_HEX1_8"/>
+          <groups:member groups:name="hex1_AG-hex1 transition" groups:idRef="R_HEX1_8"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized" groups:kind="collection">
@@ -547,6 +547,7 @@
             <p>subsystem: Glycolysis</p>
             <p>enzyme_concentration_total: 2.4e-05</p>
             <p>enzyme_net_flux: 1.1200000000000003</p>
+            <p>enzyme_concentration_total_equation: hex1_AG_c(t) + hex1_A_PI_c(t) + hex1_A_c(t) + hex1_G_CI_c(t) + hex1_G_PI_c(t) + hex1_G_c(t) + hex1_c(t)</p>
             <p>enzyme_net_flux_equation: kf_HEX1*(Keq_HEX1*hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t))/Keq_HEX1</p>
           </html>
         </notes>

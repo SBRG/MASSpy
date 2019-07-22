@@ -241,6 +241,8 @@ def model_from_dict(obj):
         # Set MassModel attributes (and subsystem attribute for EnzymeModules)
         if k in _ORDERED_OPTIONAL_MODEL_KEYS or k == "subsystem":
             setattr(model, k, v)
+        elif k == "enzyme_concentration_total_equation":
+            continue
         # Update with EnzymeModule attributes if obj represents an EnzymeModule
         elif k.lstrip("_") in _ORDERED_OPTIONAL_ENZYMEMODULE_KEYS:
             model.__class__.__dict__[k.lstrip("_")].fset(model, v)
@@ -448,9 +450,10 @@ def enzyme_to_dict(enzyme):
                 category: [i.id for i in old_dictlist]
                 for category, old_dictlist in iteritems(getattr(enzyme, key))}
 
-    key = "enzyme_net_flux_equation"
-    if key in new_enzyme:
-        new_enzyme[key] = str(getattr(enzyme, key).rhs)
+    for key in ["enzyme_concentration_total_equation",
+                "enzyme_net_flux_equation"]:
+        if key in new_enzyme:
+            new_enzyme[key] = str(getattr(enzyme, key).rhs)
 
     return new_enzyme
 
@@ -483,8 +486,12 @@ def enzyme_from_dict(enzyme, model):
     new_enzyme._update_object_pointers(model)
 
     # Make the enzyme equations
+    new_enzyme.enzyme_concentration_total_equation = Eq(Symbol(
+        new_enzyme.id + "_Total"), sympify(
+            new_enzyme.enzyme_concentration_total_equation))
     new_enzyme.enzyme_net_flux_equation = Eq(Symbol(
-        "v_" + new_enzyme.id), sympify(new_enzyme.enzyme_net_flux_equation))
+        "v_" + new_enzyme.id), sympify(
+            new_enzyme.enzyme_net_flux_equation))
 
     # Make the stoichiometric matrix and clean up the EnzymeModuleDict
     new_enzyme._make_enzyme_stoichiometric_matrix(update=True)
@@ -615,10 +622,11 @@ def _add_enzyme_module_attributes_into_dict(model, obj):
     # Get a list of keys that should be represented as internal variables
     to_fix = ["_categorized", "enzyme_net_flux", "enzyme_concentration"]
     for key, value in iteritems(enzyme_to_dict(model)):
-        if key in("id", "name"):
+        if key in ("id", "name"):
             continue
         # Prefix the key so that it is an internal variable
-        if any([s in key for s in to_fix]):
+        if any([s in key for s in to_fix
+                if s and key != "enzyme_concentration_total_equation"]):
             key = "_" + key
         obj[key] = value
 

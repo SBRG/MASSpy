@@ -59,12 +59,12 @@ class MassBaseConfiguration:
     Attributes
     ----------
     boundary_compartment : dict
-        A dictionary containing the identifier of the boundary compartment
+        A ``dict`` containing the identifier of the boundary compartment
         mapped to the name of the boundary compartment.
 
         Default value is ``{"b": "boundary"}``.
     default_compartment : dict
-        A dictionary containing the identifier of the default compartment
+        A ``dict`` containing the identifier of the default compartment
         mapped to the name of the desired name of default compartment.
         Primarily used in writing models to SBML when there are no set
         compartments in the model.
@@ -180,7 +180,7 @@ class MassBaseConfiguration:
         Parameters
         ----------
         compartment_dict : dict
-            A dictionary containing the identifier of the boundary compartment
+            A ``dict`` containing the identifier of the boundary compartment
             mapped to the name of the boundary compartment.
 
         """
@@ -198,7 +198,7 @@ class MassBaseConfiguration:
         Parameters
         ----------
         compartment_dict : dict
-            A dictionary containing the identifier of the default compartment
+            A ``dict`` containing the identifier of the default compartment
             mapped to the name of the default compartment.
 
         """
@@ -211,11 +211,11 @@ class MassBaseConfiguration:
 
     @property
     def irreversible_Keq(self):
-        """Get or set the default 'Keq' value of an irreversible reaction.
+        r"""Get or set the default ``Keq`` value of an irreversible reaction.
 
         Notes
         -----
-        Equilibrium constants cannot be negative.
+        :attr:`.MassReaction.equilibrium_constant`\ s cannot be negative.
 
         Parameters
         ----------
@@ -242,11 +242,11 @@ class MassBaseConfiguration:
 
     @property
     def irreversible_kr(self):
-        """Get or set the default 'kr' value of an irreversible reaction.
+        r"""Get or set the default ``kr`` value of an irreversible reaction.
 
         Notes
         -----
-        Reverse rate constants cannot be negative.
+        :attr:`.MassReaction.reverse_rate_constant`\ s cannot be negative.
 
         Parameters
         ----------
@@ -273,16 +273,16 @@ class MassBaseConfiguration:
 
     @property
     def model_creator(self):
-        """Get or set the values for the dict representing the model creator.
+        """Get or set values for the ``dict`` representing the model creator.
 
         Notes
         -----
-        A read-only copy of the dict is returned.
+        A read-only copy of the ``dict`` is returned.
 
         Parameters
         ----------
         creator_dict : dict
-            A dict containing the model creator information. Keys can only
+            A ``dict`` containing the model creator information. Keys can only
             be the following:
 
             * 'familyName'
@@ -483,7 +483,7 @@ class MassBaseConfiguration:
 
     @property
     def shared_state(self):
-        """Return a read-only dict for shared configuration attributes."""
+        """Return a read-only ``dict`` for shared configuration attributes."""
         shared_state = {}
         for k, v in iteritems(self._shared_state):
             if k in ["_solver", "tolerance"]:

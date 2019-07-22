@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-EnzymeModuleSpecies is a class for holding information regarding enzyme species.
+EnzymeModuleSpecies is a class for holding information regarding enzyme module species.
 
 The :class:`EnzymeModuleSpecies` class inherits and extends the
 :class:`~.MassMetabolite` class. It is designed to represent various bound
@@ -47,25 +47,25 @@ from mass.core.mass_metabolite import MassMetabolite
 
 
 class EnzymeModuleSpecies(MassMetabolite):
-    r"""Class representing enzymatic species in an :class:`~.EnzymeModule`.
+    r"""Class representing an enzyme species of an :class:`~.EnzymeModule`.
 
     Parameters
     ----------
     id_or_specie : str, MassMetabolite, EnzymeModuleSpecies
-        A string identifier to associate with the enzymatic species, or an
+        A string identifier to associate with the enzyme module species, or an
         existing metabolite object. If an existing metabolite object is
         provided, a new :class:`EnzymeModuleSpecies` is instantiated with the
         same properties as the original metabolite.
     name : str
-        A human readable name for the enzymatic species.
+        A human readable name for the enzyme module species.
     formula : str
-        Chemical formula associated with the enzymatic species.
+        Chemical formula associated with the enzyme module species.
     charge : float
-        The charge number associated with the enzymatic species.
+        The charge number associated with the enzyme module species.
     compartment : str
-        The compartment where the enzymatic species is located.
+        The compartment where the enzyme module species is located.
     fixed : bool
-        Whether the enzymatic species concentration should remain at a
+        Whether the enzyme module species concentration should remain at a
         fixed value. Default is ``False``.
 
     Attributes
@@ -73,14 +73,14 @@ class EnzymeModuleSpecies(MassMetabolite):
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
     bound_catalytic : dict
-        A dictionary representing the ligands bound to the enzyme's active
+        A ``dict`` representing the ligands bound to the enzyme's active
         site(s), with :class:`~.MassMetabolite`\ s as keys and number bound as
         values. If the final coefficient for a metabolite is 0, it is removed.
     bound_effectors : dict
-        A dictionary representing the ligands bound to the enzyme's
+        A ``dict`` representing the ligands bound to the enzyme's
         regulatory site(s), with :class:`~.MassMetabolite`\ s as keys and
-        number bound as values. If the final coefficient for a metabolite is 0,
-        it is removed.
+        number bound as values. If the final coefficient for a metabolite
+        is 0, it is removed.
 
     """
 
@@ -123,14 +123,14 @@ class EnzymeModuleSpecies(MassMetabolite):
 
         Notes
         -----
-        Assigning a dict to this property updates the current dict of
+        Assigning a ``dict`` to this property updates the current ``dict`` of
         ligands bound at the active site(s) with the new values.
 
         Parameters
         ----------
         value : dict
-            Dictionary where keys are :class:`~.MassMetabolite` and values are
-            the number currently bound to the active site(s).
+            A ``dict`` where keys are :class:`~.MassMetabolite` and values
+            are the number currently bound to the active site(s).
             An empty ``dict`` will reset the bound ligands.
 
         """
@@ -138,7 +138,7 @@ class EnzymeModuleSpecies(MassMetabolite):
 
     @bound_catalytic.setter
     def bound_catalytic(self, value):
-        """Set the dictionary of ligands bound to the active site(s)."""
+        """Set the ``dict`` of ligands bound to the active site(s)."""
         self._set_bound_dict("bound_catalytic", value)
 
     @property
@@ -147,14 +147,14 @@ class EnzymeModuleSpecies(MassMetabolite):
 
         Notes
         -----
-        Assigning a dict to this property updates the current dict of
+        Assigning a ``dict`` to this property updates the current ``dict`` of
         ligands bound at the regulatory site(s) with the new values.
 
         Parameters
         ----------
         value : dict
-            Dictionary where keys are :class:`~.MassMetabolite` and values are
-            the number currently bound to the regulatory site(s).
+            A ``dict`` where keys are :class:`~.MassMetabolite` and values
+            are the number currently bound to the regulatory site(s).
             An empty ``dict`` will reset the bound ligands.
 
         """
@@ -162,11 +162,11 @@ class EnzymeModuleSpecies(MassMetabolite):
 
     @bound_effectors.setter
     def bound_effectors(self, value):
-        """Set the dictionary of ligands bound to the active site(s)."""
+        """Set the ``dict`` of ligands bound to the active site(s)."""
         self._set_bound_dict("bound_effectors", value)
 
     def generate_enzyme_module_species_name(self, update_enzyme=False):
-        """Generate a name for the enzymatic species based on bound ligands.
+        """Generate name for the enzyme module species based on bound ligands.
 
         Notes
         -----
@@ -180,8 +180,8 @@ class EnzymeModuleSpecies(MassMetabolite):
         Parameters
         ----------
         update_enzyme : bool
-            If ``True``, update the :attr:`name` attribute of the enzymatic
-            species in addition to returning the generated name.
+            If ``True``, update the :attr:`name` attribute of the enzyme
+            module species in addition to returning the generated name.
             Default is ``False``.
 
         Returns
@@ -213,20 +213,23 @@ class EnzymeModuleSpecies(MassMetabolite):
         return name
 
     def generate_species_formula(self, update_enzyme=False):
-        """Generate the chemical formula for the enzymatic species.
+        """Generate the chemical formula for the enzyme module species.
+
+        This function is primarily utilized for keeping reactions between
+        :class:`EnzymeModuleSpecies` mass and charge balanced.
 
         Notes
         -----
         The :attr:`~EnzymeModuleSpecies.enzyme_module_id`,
         :attr:`~EnzymeModuleSpecies.bound_catalytic`, and
         :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used in
-        generating the name.
+        generating the formula.
 
         Parameters
         ----------
         update_enzyme : bool
-            If ``True``, update the :attr:`formula` attribute of the enzymatic
-            species in addition to returning the generated formula.
+            If ``True``, update the :attr:`formula` attribute of the enzyme
+            module species in addition to returning the generated formula.
             Default is ``False``.
 
         Returns
@@ -267,19 +270,22 @@ class EnzymeModuleSpecies(MassMetabolite):
         return formula
 
     def generate_species_charge(self, update_enzyme=False):
-        """Generate the charge for the enzymatic species.
+        """Generate the charge for the enzyme module species.
+
+        This function is primarily utilized for keeping reactions between
+        :class:`EnzymeModuleSpecies` mass and charge balanced.
 
         Notes
         -----
         The attr:`~EnzymeModuleSpecies.bound_catalytic`, and
-        :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used in
-        generating the name.
+        :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used
+        in generating the charge.
 
         Parameters
         ----------
         update_enzyme : bool
-            If ``True``, update the :attr:`charge` attribute of the enzymatic
-            species in addition to returning the generated charge.
+            If ``True``, update the :attr:`charge` attribute of the enzyme
+            module species in addition to returning the generated charge.
             Default is ``False``.
 
         Returns
@@ -302,7 +308,7 @@ class EnzymeModuleSpecies(MassMetabolite):
 
     # Internal
     def _set_bound_dict(self, attribute, value):
-        """Set a dictionary of metabolites for a site.
+        """Set a ``dict`` of metabolites for a site.
 
         Warnings
         --------

@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -250,7 +250,7 @@
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_PYK_R01" name="pyk_R0-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R01" name="pyk_R0-pyk_R0_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -291,7 +291,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R02" name="pyk_R0-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R02" name="pyk_R0-pyk_R0_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -332,7 +332,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R03" name="pyk_R0_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R03" name="pyk_R0_A-pyk_R0_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -373,7 +373,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R04" name="pyk_R0_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R04" name="pyk_R0_P-pyk_R0_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -414,7 +414,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R05" name="pyk_R0_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R05" name="pyk_R0_AP-pyk_R0 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -485,7 +485,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R11" name="pyk_R1-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R11" name="pyk_R1-pyk_R1_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -526,7 +526,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R12" name="pyk_R1-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R12" name="pyk_R1-pyk_R1_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -567,7 +567,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R13" name="pyk_R1_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R13" name="pyk_R1_A-pyk_R1_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -608,7 +608,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R14" name="pyk_R1_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R14" name="pyk_R1_P-pyk_R1_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -649,7 +649,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R15" name="pyk_R1_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R15" name="pyk_R1_AP-pyk_R1 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -724,7 +724,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R21" name="pyk_R2-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R21" name="pyk_R2-pyk_R2_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -765,7 +765,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R22" name="pyk_R2-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R22" name="pyk_R2-pyk_R2_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -806,7 +806,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R23" name="pyk_R2_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R23" name="pyk_R2_A-pyk_R2_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -847,7 +847,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R24" name="pyk_R2_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R24" name="pyk_R2_P-pyk_R2_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -888,7 +888,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R25" name="pyk_R2_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R25" name="pyk_R2_AP-pyk_R2 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -963,7 +963,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R31" name="pyk_R3-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R31" name="pyk_R3-pyk_R3_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1004,7 +1004,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R32" name="pyk_R3-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R32" name="pyk_R3-pyk_R3_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1045,7 +1045,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R33" name="pyk_R3_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R33" name="pyk_R3_A-pyk_R3_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1086,7 +1086,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R34" name="pyk_R3_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R34" name="pyk_R3_P-pyk_R3_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1127,7 +1127,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R35" name="pyk_R3_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R35" name="pyk_R3_AP-pyk_R3 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1201,7 +1201,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R41" name="pyk_R4-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R41" name="pyk_R4-pyk_R4_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1242,7 +1242,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R42" name="pyk_R4-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R42" name="pyk_R4-pyk_R4_A transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1283,7 +1283,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R43" name="pyk_R4_A-pep binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R43" name="pyk_R4_A-pyk_R4_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1324,7 +1324,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R44" name="pyk_R4_P-adp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R44" name="pyk_R4_P-pyk_R4_AP transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1365,7 +1365,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_PYK_R45" name="pyk_R4_AP catalyzation" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_PYK_R45" name="pyk_R4_AP-pyk_R4 transition" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Glycolysis</p>
@@ -1466,8 +1466,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PYK_I" value="1000000"/>
             <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
+            <localParameter id="kf_PYK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1512,8 +1512,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PYK_I" value="1000000"/>
             <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
+            <localParameter id="kf_PYK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1558,8 +1558,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PYK_I" value="1000000"/>
             <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
+            <localParameter id="kf_PYK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1603,8 +1603,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PYK_I" value="1000000"/>
             <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
+            <localParameter id="kf_PYK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1651,39 +1651,39 @@
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
-          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
-          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
-          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
-          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
+          <groups:member groups:name="pyk_R0-pyk_R0_P transition" groups:idRef="R_PYK_R01"/>
+          <groups:member groups:name="pyk_R0-pyk_R0_A transition" groups:idRef="R_PYK_R02"/>
+          <groups:member groups:name="pyk_R0_A-pyk_R0_AP transition" groups:idRef="R_PYK_R03"/>
+          <groups:member groups:name="pyk_R0_P-pyk_R0_AP transition" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R0_AP-pyk_R0 transition" groups:idRef="R_PYK_R05"/>
           <groups:member groups:name="pyk_R0-fdp binding" groups:idRef="R_PYK_R10"/>
           <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
-          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
-          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
-          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
-          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
-          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
+          <groups:member groups:name="pyk_R1-pyk_R1_P transition" groups:idRef="R_PYK_R11"/>
+          <groups:member groups:name="pyk_R1-pyk_R1_A transition" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_R1_A-pyk_R1_AP transition" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R1_P-pyk_R1_AP transition" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R1_AP-pyk_R1 transition" groups:idRef="R_PYK_R15"/>
           <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
           <groups:member groups:name="pyk_T1-atp binding" groups:idRef="R_PYK_T2"/>
-          <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
-          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
-          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
-          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
-          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
+          <groups:member groups:name="pyk_R2-pyk_R2_P transition" groups:idRef="R_PYK_R21"/>
+          <groups:member groups:name="pyk_R2-pyk_R2_A transition" groups:idRef="R_PYK_R22"/>
+          <groups:member groups:name="pyk_R2_A-pyk_R2_AP transition" groups:idRef="R_PYK_R23"/>
+          <groups:member groups:name="pyk_R2_P-pyk_R2_AP transition" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R2_AP-pyk_R2 transition" groups:idRef="R_PYK_R25"/>
           <groups:member groups:name="pyk_R2-fdp binding" groups:idRef="R_PYK_R30"/>
           <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
-          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
-          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
-          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
-          <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
-          <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R3-pyk_R3_P transition" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R3-pyk_R3_A transition" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_R3_A-pyk_R3_AP transition" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R3_P-pyk_R3_AP transition" groups:idRef="R_PYK_R34"/>
+          <groups:member groups:name="pyk_R3_AP-pyk_R3 transition" groups:idRef="R_PYK_R35"/>
           <groups:member groups:name="pyk_R3-fdp binding" groups:idRef="R_PYK_R40"/>
           <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
-          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
-          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
-          <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
-          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
-          <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
+          <groups:member groups:name="pyk_R4-pyk_R4_P transition" groups:idRef="R_PYK_R41"/>
+          <groups:member groups:name="pyk_R4-pyk_R4_A transition" groups:idRef="R_PYK_R42"/>
+          <groups:member groups:name="pyk_R4_A-pyk_R4_AP transition" groups:idRef="R_PYK_R43"/>
+          <groups:member groups:name="pyk_R4_P-pyk_R4_AP transition" groups:idRef="R_PYK_R44"/>
+          <groups:member groups:name="pyk_R4_AP-pyk_R4 transition" groups:idRef="R_PYK_R45"/>
           <groups:member groups:name="pyk_R0-pyk_T0 transition" groups:idRef="R_PYK_L"/>
         </groups:listOfMembers>
       </groups:group>
@@ -1764,39 +1764,39 @@
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category0" groups:name="pep_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
-          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
-          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
-          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
-          <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
-          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
-          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
-          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
-          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
-          <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
+          <groups:member groups:name="pyk_R0-pyk_R0_P transition" groups:idRef="R_PYK_R01"/>
+          <groups:member groups:name="pyk_R0_A-pyk_R0_AP transition" groups:idRef="R_PYK_R03"/>
+          <groups:member groups:name="pyk_R1-pyk_R1_P transition" groups:idRef="R_PYK_R11"/>
+          <groups:member groups:name="pyk_R1_A-pyk_R1_AP transition" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R2-pyk_R2_P transition" groups:idRef="R_PYK_R21"/>
+          <groups:member groups:name="pyk_R2_A-pyk_R2_AP transition" groups:idRef="R_PYK_R23"/>
+          <groups:member groups:name="pyk_R3-pyk_R3_P transition" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R3_A-pyk_R3_AP transition" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R4-pyk_R4_P transition" groups:idRef="R_PYK_R41"/>
+          <groups:member groups:name="pyk_R4_A-pyk_R4_AP transition" groups:idRef="R_PYK_R43"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category1" groups:name="adp_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
-          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
-          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
-          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
-          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
-          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
-          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
-          <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
-          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
-          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
+          <groups:member groups:name="pyk_R0-pyk_R0_A transition" groups:idRef="R_PYK_R02"/>
+          <groups:member groups:name="pyk_R0_P-pyk_R0_AP transition" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R1-pyk_R1_A transition" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_R1_P-pyk_R1_AP transition" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R2-pyk_R2_A transition" groups:idRef="R_PYK_R22"/>
+          <groups:member groups:name="pyk_R2_P-pyk_R2_AP transition" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R3-pyk_R3_A transition" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_R3_P-pyk_R3_AP transition" groups:idRef="R_PYK_R34"/>
+          <groups:member groups:name="pyk_R4-pyk_R4_A transition" groups:idRef="R_PYK_R42"/>
+          <groups:member groups:name="pyk_R4_P-pyk_R4_AP transition" groups:idRef="R_PYK_R44"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category2" groups:name="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
-          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
-          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
-          <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
-          <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
+          <groups:member groups:name="pyk_R0_AP-pyk_R0 transition" groups:idRef="R_PYK_R05"/>
+          <groups:member groups:name="pyk_R1_AP-pyk_R1 transition" groups:idRef="R_PYK_R15"/>
+          <groups:member groups:name="pyk_R2_AP-pyk_R2 transition" groups:idRef="R_PYK_R25"/>
+          <groups:member groups:name="pyk_R3_AP-pyk_R3 transition" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R4_AP-pyk_R4 transition" groups:idRef="R_PYK_R45"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized_Category3" groups:name="fdp_c activation" groups:kind="collection">
@@ -1836,6 +1836,7 @@
             <p>subsystem: Glycolysis</p>
             <p>enzyme_concentration_total: 6.9e-05</p>
             <p>enzyme_net_flux: 2.2399999999999998</p>
+            <p>enzyme_concentration_total_equation: pyk_R0_AP_c(t) + pyk_R0_A_c(t) + pyk_R0_P_c(t) + pyk_R0_c(t) + pyk_R1_AP_c(t) + pyk_R1_A_c(t) + pyk_R1_P_c(t) + pyk_R1_c(t) + pyk_R2_AP_c(t) + pyk_R2_A_c(t) + pyk_R2_P_c(t) + pyk_R2_c(t) + pyk_R3_AP_c(t) + pyk_R3_A_c(t) + pyk_R3_P_c(t) + pyk_R3_c(t) + pyk_R4_AP_c(t) + pyk_R4_A_c(t) + pyk_R4_P_c(t) + pyk_R4_c(t) + pyk_T0_c(t) + pyk_T1_c(t) + pyk_T2_c(t) + pyk_T3_c(t) + pyk_T4_c(t)</p>
             <p>enzyme_net_flux_equation: kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))</p>
           </html>
         </notes>

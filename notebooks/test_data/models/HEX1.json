@@ -69,6 +69,7 @@
         "HEX1_7": "kf_HEX1_G*(glc__D_c(t)*hex1_A_c(t) - hex1_AG_c(t)/Keq_HEX1_G)",
         "HEX1_8": "kf_HEX1*(hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t)/Keq_HEX1)"
     },
+    "enzyme_concentration_total_equation": "hex1_AG_c(t) + hex1_A_PI_c(t) + hex1_A_c(t) + hex1_G_CI_c(t) + hex1_G_PI_c(t) + hex1_G_c(t) + hex1_c(t)",
     "enzyme_module_ligands": [
         "glc__D_c",
         "g6p_c",
@@ -256,7 +257,7 @@
                 "hex1_A_PI_c": 1,
                 "hex1_c": -1
             },
-            "name": "hex1-adp binding",
+            "name": "hex1-hex1_A_PI transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -273,7 +274,7 @@
                 "hex1_G_PI_c": 1,
                 "hex1_c": -1
             },
-            "name": "hex1-g6p binding",
+            "name": "hex1-hex1_G_PI transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -288,7 +289,7 @@
                 "hex1_G_c": 1,
                 "hex1_c": -1
             },
-            "name": "hex1-glc__D binding",
+            "name": "hex1-hex1_G transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -303,7 +304,7 @@
                 "hex1_A_c": 1,
                 "hex1_c": -1
             },
-            "name": "hex1-atp binding",
+            "name": "hex1-hex1_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -320,7 +321,7 @@
                 "hex1_G_CI_c": 1,
                 "hex1_G_c": -1
             },
-            "name": "hex1_G-_23dpg binding",
+            "name": "hex1_G-hex1_G_CI transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -335,7 +336,7 @@
                 "hex1_AG_c": 1,
                 "hex1_G_c": -1
             },
-            "name": "hex1_G-atp binding",
+            "name": "hex1_G-hex1_AG transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -350,7 +351,7 @@
                 "hex1_AG_c": 1,
                 "hex1_A_c": -1
             },
-            "name": "hex1_A-glc__D binding",
+            "name": "hex1_A-hex1_AG transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -367,7 +368,7 @@
                 "hex1_AG_c": -1,
                 "hex1_c": 1
             },
-            "name": "hex1_AG catalyzation",
+            "name": "hex1_AG-hex1 transition",
             "subsystem": "Glycolysis"
         }
     ],

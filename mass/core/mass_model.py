@@ -83,22 +83,23 @@ class MassModel(Object):
         module identifiers and the values are the associated
         :class:`~.EnzymeModuleDict`\ s.
     custom_rates : dict
-        A dictionary to store custom rate expressions for specific reactions,
+        A ``dict`` to store custom rate expressions for specific reactions,
         where the keys are :class:`~.MassReaction`\ s and values are the
         custom rate expressions given as :mod:`sympy` expressions. Custom rate
         expressions will always be prioritized over automatically generated
         mass action rates.
     custom_parameters : dict
-        A dictionary to store the custom parameters for the custom rates,
+        A ``dict`` to store the custom parameters for the custom rates,
         where key:value pairs are the string identifiers for the parameters
         and their corresponding numerical value.
     boundary_conditions : dict
-        A dictionary to store boundary conditions, where keys are string
+        A ``dict`` to store boundary conditions, where keys are string
         identifiers for 'boundary metabolites' of boundary reactions, and
         values are the corresponding boundary condition numerical value or
-        function of time.
+        function of time. Note that boundary conditions are treated as
+        parameters and NOT as species.
     compartments : dict
-        A dictionary to store the compartment shorthands and their full names.
+        A ``dict`` to store the compartment shorthands and their full names.
         Keys are the shorthands while values are the full names.
     units : ~cobra.core.dictlist.DictList
         :class:`~cobra.core.dictlist.DictList` of :class:`~.UnitDefinition`\ s
@@ -106,8 +107,11 @@ class MassModel(Object):
 
     Warnings
     --------
-    Note that the :class:`MassModel` does NOT track units, and it is therefore
-    incumbent upon the user to maintain unit consistency the model.
+    * Note that the :class:`MassModel` does NOT track units, and it is
+      therefore incumbent upon the user to maintain unit consistency the model.
+    * Note that boundary conditions are considered parameters and NOT as
+      species in a reaction.
+
 
     """
 
@@ -189,7 +193,7 @@ class MassModel(Object):
         """Return a dict of reaction rate expressions.
 
         If a reaction has an associated custom rate expression, the custom rate
-        will be prioritized and returned in the dictionary instead of the
+        will be prioritized and returned in the ``dict`` instead of the
         automatically generated mass action rate law expression.
         """
         return self.get_rate_expressions(
@@ -280,16 +284,16 @@ class MassModel(Object):
 
     @property
     def compartments(self):
-        """Get or set a dict of all metabolite compartments.
+        """Get or set a ``dict`` of all metabolite compartments.
 
-        Assigning a dictionary to this property updates the model's
-        dictionary of compartment descriptions with the new values.
+        Assigning a ``dict`` to this property updates the model's
+        ``dict`` of compartment descriptions with the new values.
 
         Parameters
         ----------
         compartment_dict : dict
             Dictionary mapping compartments abbreviations to full names.
-            An empty dictionary will reset the compartments.
+            An empty ``dict`` will reset the compartments.
 
         """
         return {met.compartment: self._compartments.get(met.compartment, '')
@@ -297,7 +301,7 @@ class MassModel(Object):
 
     @compartments.setter
     def compartments(self, compartment_dict):
-        """Set the dictionary of current compartment descriptions."""
+        """Set the ``dict`` of current compartment descriptions."""
         if compartment_dict:
             self._compartments.update(compartment_dict)
         else:
@@ -607,7 +611,6 @@ class MassModel(Object):
         # Check whether reactions exist in the model.
         pruned = self._existing_obj_filter("reactions", reaction_list)
         context = get_context(self)
-        boundary_conditions = {}
         # Add reactions, and have reactions point to the model.
         for rxn in pruned:
             rxn._model = self
@@ -625,16 +628,6 @@ class MassModel(Object):
                 met._reaction.add(rxn)
                 if context:
                     context(partial(met._reaction.remove, rxn))
-                # Add boundary condition if reaction is a boundary reaction
-                # and no boundary condition exists for it.
-                if rxn.boundary\
-                   and rxn.boundary_metabolite not in self.boundary_conditions:
-                    warnings.warn(
-                        "Boundary reaction '{0}' added without boundary "
-                        "condition for '{1}', therefore setting boundary "
-                        "condition value to 0.".format(
-                            rxn.id, rxn.boundary_metabolite))
-                    boundary_conditions.update({rxn.boundary_metabolite: 0})
 
             # Loop through genes associated with a reaction.
             for gene in list(rxn._genes):
@@ -653,14 +646,11 @@ class MassModel(Object):
                         rxn._associate_gene(model_gene)
         # Add reactions to the model
         self.reactions += pruned
-        self.add_boundary_conditions(boundary_conditions)
 
         if context:
             context(partial(self.reactions.__isub__, pruned))
             for rxn in reaction_list:
                 context(partial(setattr, rxn, "_model", None))
-            context(partial(self.remove_boundary_conditions,
-                            list(boundary_conditions)))
 
     def remove_reactions(self, reaction_list, remove_orphans=False):
         r"""Remove reactions from the model.
@@ -828,9 +818,9 @@ class MassModel(Object):
         # Add SBO annotation
         if sbo_term:
             rxn.annotation["sbo"] = sbo_term
-        self.add_reactions(rxn)
-        self.add_boundary_conditions({
+        self.boundary_conditions.update({
             rxn.boundary_metabolite: boundary_condition})
+        self.add_reactions(rxn)
 
         return rxn
 
@@ -976,7 +966,7 @@ class MassModel(Object):
             representation of the custom rate will be used to create a
             :mod:`sympy` expression that represents the custom rate.
         custom_parameters : dict
-            A dictionary of custom parameters for the custom rate where the
+            A ``dict`` of custom parameters for the custom rate where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. The string representation of the custom
             parametes will be used to create the symbols needed for the sympy
@@ -1320,7 +1310,7 @@ class MassModel(Object):
         :class:`~cobra.core.gene.Gene`\ s and :class:`~.EnzymeModuleDict`\ s,
         the boundary conditions, custom_rates, custom_parameters, and the
         stoichiometric matrix are created anew, but in a faster fashion
-        than deepcopy.
+        than ``deepcopy``.
 
         """
         # Define a new model
@@ -1675,10 +1665,13 @@ class MassModel(Object):
         For example::
 
             '''
-            ReactionID_1: S + E <=> ES;
-            ReactionID_2: ES -> E + P;
-            ReactionID_3: E + I <=> EI;
+            RID_1: S + E <=> ES;
+            RID_2: ES -> E + P;
+            RID_3: E + I <=> EI;
             '''
+
+        where ``RID`` represents the identifier to assign the
+        :class:`~.MassReaction`.
 
         Parameters
         ----------
@@ -1835,7 +1828,7 @@ class MassModel(Object):
         Parameters
         ----------
         initial_conditions : dict
-            A dictionary where metabolites are the keys and the initial
+            A ``dict`` where metabolites are the keys and the initial
             conditions are the values.
 
         """
@@ -1863,11 +1856,11 @@ class MassModel(Object):
         Parameters
         ----------
         custom_rates : dict
-            A dictionary where :class:`.MassReaction`\ s or their string
+            A ``dict`` where :class:`.MassReaction`\ s or their string
             identifiers are the keys and the rates are the string
             representations of the custom rate expression.
         custom_parameters : dict
-            A dictionary of custom parameters for the custom rates, where the
+            A ``dict`` of custom parameters for the custom rates, where the
             key:value pairs are the strings representing the custom parameters
             and their numerical values. If a custom parameter already exists in
             the model, it will be updated.
@@ -1901,7 +1894,7 @@ class MassModel(Object):
                               "'{0}'.".format(reaction.id))
 
     def has_equivalent_odes(self, right, verbose=False):
-        """Determine if :attr:`odes` between two models are equivalent.
+        """Determine whether :attr:`odes` between two models are equivalent.
 
         Notes
         -----
