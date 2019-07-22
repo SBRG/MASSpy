@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -39,7 +39,6 @@
       <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
       <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
-      <species id="M_o2_b" compartment="b" initialConcentration="0.0200788" hasOnlySubstanceUnits="false" boundaryCondition="true" constant="true"/>
     </listOfSpecies>
     <listOfParameters>
       <parameter sboTerm="SBO:0000626" id="cobra_default_lb" value="-1000" units="mmol_per_gDW_per_hr" constant="true"/>
@@ -82,8 +81,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_DPGM" value="1824.93653567151"/>
             <localParameter id="Keq_R_DPGM" value="2300000"/>
+            <localParameter id="kf_R_DPGM" value="1824.93653567151"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -206,8 +205,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO3" value="177.799"/>
             <localParameter id="kf_R_HBO3" value="509243"/>
+            <localParameter id="Keq_R_HBO3" value="177.799"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -240,8 +239,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO4" value="1289.92"/>
             <localParameter id="kf_R_HBO4" value="501595"/>
+            <localParameter id="Keq_R_HBO4" value="1289.92"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -274,8 +273,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBDPG" value="0.25"/>
             <localParameter id="kf_R_HBDPG" value="519613"/>
+            <localParameter id="Keq_R_HBDPG" value="0.25"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -283,12 +282,6 @@
         <listOfReactants>
           <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
-        <listOfProducts>
-          <speciesReference species="M_o2_b" stoichiometry="1" constant="true"/>
-        </listOfProducts>
-        <listOfModifiers>
-          <modifierSpeciesReference species="M_o2_b"/>
-        </listOfModifiers>
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
@@ -299,15 +292,16 @@
                 <ci> M_o2_c </ci>
                 <apply>
                   <divide/>
-                  <ci> M_o2_b </ci>
+                  <ci> o2_b </ci>
                   <ci> Keq_R_SK_o2_c </ci>
                 </apply>
               </apply>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="Keq_R_SK_o2_c" value="1"/>
+            <localParameter id="kf_R_SK_o2_c" value="509726"/>
+            <localParameter id="o2_b" value="0.0200788"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

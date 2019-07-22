@@ -55,7 +55,7 @@ reaction with ID ``'RID'``:
 
     * Altering :attr:`~.MassModel.boundary_conditions` (BCs):
 
-        * ``{'MID_b': 'sin(2 * pi * t)'}`` Change BC to a sin function.
+        * ``{'MID_b': 'sin(2 * pi * t)'}`` Change BC to a ``sin`` function.
         * ``{'MID_b': 'MID_b + cos(t)'}`` Add ``cos`` function to current BC value.
 
 Note that perturbations using functions of time may take longer to implement
@@ -1131,13 +1131,14 @@ class Simulation(Object):
 
         # Update with provided model values
         if value_dict is not None:
-            init_conds = {_strip_init_cond(key): value_dict[key]
-                          for key in init_conds}
+            init_conds = dict(
+                (_strip_init_cond(key), value_dict[key]) if "init" in key
+                else (key, value_dict[key]) for key in init_conds)
             parameters = {key: value_dict[key] for key in parameters}
         else:
-            init_conds = {_strip_init_cond(met): ic
-                          for met, ic in iteritems(init_conds)}
-
+            init_conds = dict(
+                (_strip_init_cond(key), ic) if "init" in key
+                else (key, ic) for key, ic in iteritems(init_conds))
         # Update the model initial conditions
         mass_model.update_initial_conditions(init_conds)
         # Update the model parameter values
@@ -1240,9 +1241,10 @@ def _get_sim_values_from_model(mass_model):
 
     values = {
         "init_conds": DictWithID(
-            id=mass_model.id + "_init_conds", data_dict={
-                _make_init_cond(met.id): ic
-                for met, ic in iteritems(init_conds)}),
+            id=mass_model.id + "_init_conds", data_dict=dict(
+                (_make_init_cond(met.id), ic)
+                if not met.fixed else (met.id, ic)
+                for met, ic in iteritems(init_conds))),
         "parameters": DictWithID(
             id=mass_model.id + "_parameters", data_dict={
                 param: value

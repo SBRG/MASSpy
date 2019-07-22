@@ -1,5 +1,48 @@
 # -*- coding: utf-8 -*-
-"""TODO Module Docstrings."""
+r"""EnzymeModuleDict is a class representing the EnzymeModule after merging.
+
+This object is intended to represent the :class:`.EnzymeModule` once merged
+into a :class:`.MassModel` in order to retain :class:`.EnzymeModule` specific
+attributes of the :class:`.EnzymeModule` without the need of storing the
+:class:`.EnzymeModule` object itself.
+
+When merging an :class:`.EnzymeModule` into another model, the
+:class:`.EnzymeModule` is converted into an :class:`EnzymeModuleDict`, allowing
+for most of the enzyme specific attribute information of the
+:class:`EnzymeModule` to be preserved during the merging process, and accessed
+after the merging. All keys of the :class:`EnzymeModuleDict` can be used as
+attribute accessors.  Additionally :class:`EnzymeModuleDict` is a subclass of
+an :class:`~.OrderedDictWithID` which in turn is a subclass of an
+:class:~.collections.OrderedDict`, thereby inheriting its methods and behavior.
+
+The :class:`.EnzymeModule` attributes preserved in the
+:class:`EnzymeModuleDict` are the following:
+
+    * :attr:`.EnzymeModule.id`
+    * :attr:`.EnzymeModule.name`
+    * :attr:`.EnzymeModule.subsystem`
+    * :attr:`.EnzymeModule.enzyme_module_ligands`
+    * :attr:`.EnzymeModule.enzyme_module_species`
+    * :attr:`.EnzymeModule.enzyme_module_reactions`
+    * :attr:`.EnzymeModule.enzyme_module_ligands_categorized`
+    * :attr:`.EnzymeModule.enzyme_module_species_categorized`
+    * :attr:`.EnzymeModule.enzyme_module_reactions_categorized`
+    * :attr:`.EnzymeModule.enzyme_concentration_total`
+    * :attr:`.EnzymeModule.enzyme_net_flux`
+    * :attr:`.EnzymeModule.enzyme_concentration_total_equation`
+    * :attr:`.EnzymeModule.enzyme_net_flux_equation`
+    * :attr:`.EnzymeModule.description`
+    * :attr:`.EnzymeModule.S`
+
+If one of the above attributes has not been set, it will be added to the
+:class:`EnzymeModuleDict` as its default value. This means that the above
+attributes can *always* be found in an :class:`EnzymeModuleDict`.
+
+Note that this class is not intended to be used for construction of an
+:class:`.EnzymeModule`, but rather a representation of one after construction.
+See the :mod:`.enzyme_module` documentation for more information on
+constructing :class:`.EnzymeModule`\ s.
+"""  # noqa
 from collections import OrderedDict
 from copy import copy, deepcopy
 
@@ -17,28 +60,16 @@ from mass.util.util import (
 
 
 class EnzymeModuleDict(OrderedDictWithID):
-    """Container to store the attributes of an EnzymeModule.
-
-    This object is intended to represent the EnzymeModule once merged into
-    a MassModel in order to retain EnzymeModule specific attributes of the
-    EnzymeModule without the need of storing the EnzymeModule object itself.
-
-    The EnzymeModuleDict class is essentially a subclass of an OrderedDict with
-    an id and attribute accessors. One can see which attributes are accessible
-    using the keys() method.
+    """Container to store :class:`.EnzymeModule` information after merging.
 
     Parameters
     ----------
-    enzyme: EnzymeModule, EnzymeModuleDict
-        The EnzymeModule to be converted into the EnzymeModuleDict, or an
-        existing EnzymeModuleDict object. If an existing EnzymeModuleDict
-        object is provided, a new EnzymeModuleDict object is instantiated with
-        the same properties as the original EnzymeModuleDict.
-
-    Notes
-    -----
-    EnzymeModuleDict objects can behave as booleans, with empty
-        EnzymeModuleDict objects returning as False.
+    enzyme : EnzymeModule or EnzymeModuleDict
+        The :class:`.EnzymeModule` to be converted into an
+        :class:`EnzymeModuleDict`, or an existing :class:`EnzymeModuleDict`.
+        If an existing :class:`EnzymeModuleDict` is provided, a new
+        :class:`EnzymeModuleDict` is instantiated with the same information
+        as the original.
 
     """
 
@@ -49,17 +80,19 @@ class EnzymeModuleDict(OrderedDictWithID):
             super(EnzymeModuleDict, self).__init__(
                 id_or_enzyme["id"], data_dict=dict(id_or_enzyme))
         # Initialize an EnzymeModuleDict using an EnzymeModule
-        elif hasattr(id_or_enzyme, "_convert_self_into_enzyme_module_dict"):
+        elif id_or_enzyme.__class__.__name__ == "EnzymeModule":
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
-            for key, value in iteritems(id_or_enzyme.__dict__):
+            items = {"enzyme_concentration_total_equation": None}
+            items.update(id_or_enzyme.__dict__)
+            for key, value in iteritems(items):
                 nkey = key.lstrip("_")
                 if nkey not in iterkeys(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
                     continue
                 elif nkey == "S":
                     self[nkey] = id_or_enzyme._mk_stoich_matrix(
                         matrix_type="DataFrame", update_model=False)
-                elif nkey == "enzyme_net_flux_equation":
-                    self[nkey] = id_or_enzyme.enzyme_net_flux_equation
+                elif "_equation" in nkey:
+                    self[nkey] = getattr(id_or_enzyme, nkey, None)
                 else:
                     self[nkey] = value
         # Initialize EnzymeModuleDict with an id and defaults for everything.
@@ -71,7 +104,7 @@ class EnzymeModuleDict(OrderedDictWithID):
         self._fix_order()
 
     def copy(self):
-        """Copy an EnzymeModuleDict object."""
+        """Copy an :class:`EnzymeModuleDict`."""
         # No references to the MassModel when copying the EnzymeModuleDict
         model = self.model
         setattr(self, "model", None)
@@ -186,7 +219,13 @@ class EnzymeModuleDict(OrderedDictWithID):
                 self.move_to_end(key)
 
     def _repr_html_(self):
-        """HTML representation of the overview for the EnzymeModuleDict."""
+        """HTML representation of the overview for the EnzymeModuleDict.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = np.linalg.matrix_rank(self.S)
@@ -236,38 +275,74 @@ class EnzymeModuleDict(OrderedDictWithID):
 
     # Dunders
     def __getattr__(self, name):
-        """Override of default getattr() implementation."""
-        if name == "_id" or name == "_model":
+        """Override of default ``getattr`` implementation.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        if name in ["_id", "_model"]:
             name = name.lstrip("_")
-        if name in self:
-            return self[name]
-        else:
+        if name not in self:
             raise AttributeError("Attribute '" + name + "' does not exist.")
 
+        return self[name]
+
     def __setattr__(self, name, value):
-        """Override of default setattr() implementation."""
-        if name == "_id" or name == "_model":
+        """Override of default ``setattr`` implementation.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        if name in ["_id", "_model"]:
             name = name.lstrip("_")
         self[name] = value
 
     def __delattr__(self, name):
-        """Override of default delattr() implementation."""
+        """Override of default ``delattr`` implementation.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         if name in self:
             del self[name]
         else:
             raise AttributeError("Attribute '" + name + "' does not exist.")
 
     def __dir__(self):
-        """Override of default dir() implementation to include the keys."""
+        """Override of default ``dir`` implementation to include the keys.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return sorted(set(
             list(iterkeys(self)) + super(EnzymeModuleDict, self).__dir__()))
 
     def __copy__(self):
-        """Create a copy of the EnzymeModuleDict."""
+        """Create a copy of the EnzymeModuleDict.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return copy(super(EnzymeModuleDict, self))
 
     def __deepcopy__(self, memo):
-        """Create a deepcopy of the EnzymeModuleDict."""
+        """Create a deepcopy of the EnzymeModuleDict.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         return deepcopy(super(EnzymeModuleDict, self), memo)
 
 
@@ -283,6 +358,7 @@ _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "enzyme_module_reactions_categorized": {"Undefined": DictList()},
     "enzyme_concentration_total": None,
     "enzyme_net_flux": None,
+    "enzyme_concentration_total_equation": None,
     "enzyme_net_flux_equation": None,
     "description": "",
     "S": pd.DataFrame(),

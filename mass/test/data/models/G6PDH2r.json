@@ -55,6 +55,7 @@
     "compartments": {
         "c": "Cytosol"
     },
+    "enzyme_concentration_total_equation": "g6pdh2r_A_CI_c(t) + g6pdh2r_GN_P_c(t) + g6pdh2r_GN_c(t) + g6pdh2r_G_P_c(t) + g6pdh2r_G_c(t) + g6pdh2r_N_PI_c(t) + g6pdh2r_c(t)",
     "enzyme_module_ligands": [
         "g6p_c",
         "_6pgl_c",
@@ -241,7 +242,7 @@
                 "g6pdh2r_c": -1,
                 "nadph_c": -1
             },
-            "name": "g6pdh2r-nadph binding",
+            "name": "g6pdh2r-g6pdh2r_N_PI transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -258,7 +259,7 @@
                 "g6pdh2r_A_CI_c": 1,
                 "g6pdh2r_c": -1
             },
-            "name": "g6pdh2r-atp binding",
+            "name": "g6pdh2r-g6pdh2r_A_CI transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -275,7 +276,7 @@
                 "g6pdh2r_G_c": 1,
                 "g6pdh2r_c": -1
             },
-            "name": "g6pdh2r-g6p binding",
+            "name": "g6pdh2r-g6pdh2r_G transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -292,7 +293,7 @@
                 "g6pdh2r_G_P_c": -1,
                 "g6pdh2r_c": 1
             },
-            "name": "g6pdh2r_G_P-_6pgl release",
+            "name": "g6pdh2r_G_P-g6pdh2r transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -309,7 +310,7 @@
                 "g6pdh2r_G_c": -1,
                 "nadp_c": -1
             },
-            "name": "g6pdh2r_G-nadp binding",
+            "name": "g6pdh2r_G-g6pdh2r_GN transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -326,7 +327,7 @@
                 "g6pdh2r_G_P_c": 1,
                 "nadph_c": 1
             },
-            "name": "g6pdh2r_GN_P-nadph release",
+            "name": "g6pdh2r_GN_P-g6pdh2r_G_P transition",
             "subsystem": "Pentose Phosphate Pathway"
         },
         {
@@ -343,7 +344,7 @@
                 "g6pdh2r_GN_c": -1,
                 "h_c": 1
             },
-            "name": "g6pdh2r_GN catalyzation",
+            "name": "g6pdh2r_GN-g6pdh2r_GN_P transition",
             "subsystem": "Pentose Phosphate Pathway"
         }
     ],

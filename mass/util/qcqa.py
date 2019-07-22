@@ -429,7 +429,6 @@ def check_reaction_parameters(model, reaction_list=None):
     for rxn in reaction_list:
         if rxn in model.custom_rates:
             missing_customs = _check_custom_for_standard(model, rxn)
-            print(missing_customs)
             if missing_customs:
                 customs.update(dict(
                     (rxn, "; ".join([missing]))

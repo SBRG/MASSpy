@@ -149,6 +149,7 @@
         "PYK_T3": "kf_PYK_I*(2*Keq_PYK_I*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t))/Keq_PYK_I",
         "PYK_T4": "kf_PYK_I*(Keq_PYK_I*atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t))/Keq_PYK_I"
     },
+    "enzyme_concentration_total_equation": "pyk_R0_AP_c(t) + pyk_R0_A_c(t) + pyk_R0_P_c(t) + pyk_R0_c(t) + pyk_R1_AP_c(t) + pyk_R1_A_c(t) + pyk_R1_P_c(t) + pyk_R1_c(t) + pyk_R2_AP_c(t) + pyk_R2_A_c(t) + pyk_R2_P_c(t) + pyk_R2_c(t) + pyk_R3_AP_c(t) + pyk_R3_A_c(t) + pyk_R3_P_c(t) + pyk_R3_c(t) + pyk_R4_AP_c(t) + pyk_R4_A_c(t) + pyk_R4_P_c(t) + pyk_R4_c(t) + pyk_T0_c(t) + pyk_T1_c(t) + pyk_T2_c(t) + pyk_T3_c(t) + pyk_T4_c(t)",
     "enzyme_module_ligands": [
         "pep_c",
         "adp_c",
@@ -637,7 +638,7 @@
                 "pyk_R0_P_c": 1,
                 "pyk_R0_c": -1
             },
-            "name": "pyk_R0-pep binding",
+            "name": "pyk_R0-pyk_R0_P transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -652,7 +653,7 @@
                 "pyk_R0_A_c": 1,
                 "pyk_R0_c": -1
             },
-            "name": "pyk_R0-adp binding",
+            "name": "pyk_R0-pyk_R0_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -667,7 +668,7 @@
                 "pyk_R0_AP_c": 1,
                 "pyk_R0_A_c": -1
             },
-            "name": "pyk_R0_A-pep binding",
+            "name": "pyk_R0_A-pyk_R0_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -682,7 +683,7 @@
                 "pyk_R0_AP_c": 1,
                 "pyk_R0_P_c": -1
             },
-            "name": "pyk_R0_P-adp binding",
+            "name": "pyk_R0_P-pyk_R0_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -701,7 +702,7 @@
                 "pyk_R0_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R0_AP catalyzation",
+            "name": "pyk_R0_AP-pyk_R0 transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -731,7 +732,7 @@
                 "pyk_R1_P_c": 1,
                 "pyk_R1_c": -1
             },
-            "name": "pyk_R1-pep binding",
+            "name": "pyk_R1-pyk_R1_P transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -746,7 +747,7 @@
                 "pyk_R1_A_c": 1,
                 "pyk_R1_c": -1
             },
-            "name": "pyk_R1-adp binding",
+            "name": "pyk_R1-pyk_R1_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -761,7 +762,7 @@
                 "pyk_R1_AP_c": 1,
                 "pyk_R1_A_c": -1
             },
-            "name": "pyk_R1_A-pep binding",
+            "name": "pyk_R1_A-pyk_R1_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -776,7 +777,7 @@
                 "pyk_R1_AP_c": 1,
                 "pyk_R1_P_c": -1
             },
-            "name": "pyk_R1_P-adp binding",
+            "name": "pyk_R1_P-pyk_R1_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -795,7 +796,7 @@
                 "pyk_R1_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R1_AP catalyzation",
+            "name": "pyk_R1_AP-pyk_R1 transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -825,7 +826,7 @@
                 "pyk_R2_P_c": 1,
                 "pyk_R2_c": -1
             },
-            "name": "pyk_R2-pep binding",
+            "name": "pyk_R2-pyk_R2_P transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -840,7 +841,7 @@
                 "pyk_R2_A_c": 1,
                 "pyk_R2_c": -1
             },
-            "name": "pyk_R2-adp binding",
+            "name": "pyk_R2-pyk_R2_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -855,7 +856,7 @@
                 "pyk_R2_AP_c": 1,
                 "pyk_R2_A_c": -1
             },
-            "name": "pyk_R2_A-pep binding",
+            "name": "pyk_R2_A-pyk_R2_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -870,7 +871,7 @@
                 "pyk_R2_AP_c": 1,
                 "pyk_R2_P_c": -1
             },
-            "name": "pyk_R2_P-adp binding",
+            "name": "pyk_R2_P-pyk_R2_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -889,7 +890,7 @@
                 "pyk_R2_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R2_AP catalyzation",
+            "name": "pyk_R2_AP-pyk_R2 transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -919,7 +920,7 @@
                 "pyk_R3_P_c": 1,
                 "pyk_R3_c": -1
             },
-            "name": "pyk_R3-pep binding",
+            "name": "pyk_R3-pyk_R3_P transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -934,7 +935,7 @@
                 "pyk_R3_A_c": 1,
                 "pyk_R3_c": -1
             },
-            "name": "pyk_R3-adp binding",
+            "name": "pyk_R3-pyk_R3_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -949,7 +950,7 @@
                 "pyk_R3_AP_c": 1,
                 "pyk_R3_A_c": -1
             },
-            "name": "pyk_R3_A-pep binding",
+            "name": "pyk_R3_A-pyk_R3_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -964,7 +965,7 @@
                 "pyk_R3_AP_c": 1,
                 "pyk_R3_P_c": -1
             },
-            "name": "pyk_R3_P-adp binding",
+            "name": "pyk_R3_P-pyk_R3_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -983,7 +984,7 @@
                 "pyk_R3_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R3_AP catalyzation",
+            "name": "pyk_R3_AP-pyk_R3 transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -1013,7 +1014,7 @@
                 "pyk_R4_P_c": 1,
                 "pyk_R4_c": -1
             },
-            "name": "pyk_R4-pep binding",
+            "name": "pyk_R4-pyk_R4_P transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -1028,7 +1029,7 @@
                 "pyk_R4_A_c": 1,
                 "pyk_R4_c": -1
             },
-            "name": "pyk_R4-adp binding",
+            "name": "pyk_R4-pyk_R4_A transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -1043,7 +1044,7 @@
                 "pyk_R4_AP_c": 1,
                 "pyk_R4_A_c": -1
             },
-            "name": "pyk_R4_A-pep binding",
+            "name": "pyk_R4_A-pyk_R4_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -1058,7 +1059,7 @@
                 "pyk_R4_AP_c": 1,
                 "pyk_R4_P_c": -1
             },
-            "name": "pyk_R4_P-adp binding",
+            "name": "pyk_R4_P-pyk_R4_AP transition",
             "subsystem": "Glycolysis"
         },
         {
@@ -1077,7 +1078,7 @@
                 "pyk_R4_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R4_AP catalyzation",
+            "name": "pyk_R4_AP-pyk_R4 transition",
             "subsystem": "Glycolysis"
         },
         {

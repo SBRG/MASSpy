@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -95,7 +95,7 @@
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_G6PDH2r_1" name="g6pdh2r-nadph binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_1" name="g6pdh2r-g6pdh2r_N_PI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -135,7 +135,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_2" name="g6pdh2r-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_2" name="g6pdh2r-g6pdh2r_A_CI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -170,12 +170,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r_2" value="22.7272727272727"/>
             <localParameter id="kf_R_G6PDH2r_2" value="1000000"/>
+            <localParameter id="Keq_R_G6PDH2r_2" value="22.7272727272727"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_3" name="g6pdh2r-g6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_3" name="g6pdh2r-g6pdh2r_G transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -210,12 +210,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r_3" value="37.037037037037"/>
             <localParameter id="kf_R_G6PDH2r_3" value="2246662"/>
+            <localParameter id="Keq_R_G6PDH2r_3" value="37.037037037037"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_4" name="g6pdh2r_G_P-_6pgl release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_4" name="g6pdh2r_G_P-g6pdh2r transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -255,7 +255,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_5" name="g6pdh2r_G-nadp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_5" name="g6pdh2r_G-g6pdh2r_GN transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -295,7 +295,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_6" name="g6pdh2r_GN_P-nadph release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_6" name="g6pdh2r_GN_P-g6pdh2r_G_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -330,12 +330,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_6" value="181563"/>
             <localParameter id="Keq_R_G6PDH2r_6" value="0.0105"/>
+            <localParameter id="kf_R_G6PDH2r_6" value="181563"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_7" name="g6pdh2r_GN catalyzation" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_7" name="g6pdh2r_GN-g6pdh2r_GN_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -396,13 +396,13 @@
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
-          <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
-          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
-          <groups:member groups:name="g6pdh2r_G_P-_6pgl release" groups:idRef="R_G6PDH2r_4"/>
-          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
-          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
-          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_N_PI transition" groups:idRef="R_G6PDH2r_1"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_A_CI transition" groups:idRef="R_G6PDH2r_2"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_G transition" groups:idRef="R_G6PDH2r_3"/>
+          <groups:member groups:name="g6pdh2r_G_P-g6pdh2r transition" groups:idRef="R_G6PDH2r_4"/>
+          <groups:member groups:name="g6pdh2r_G-g6pdh2r_GN transition" groups:idRef="R_G6PDH2r_5"/>
+          <groups:member groups:name="g6pdh2r_GN_P-g6pdh2r_G_P transition" groups:idRef="R_G6PDH2r_6"/>
+          <groups:member groups:name="g6pdh2r_GN-g6pdh2r_GN_P transition" groups:idRef="R_G6PDH2r_7"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized_Category0" groups:name="Substrates" groups:kind="collection">
@@ -458,33 +458,33 @@
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category0" groups:name="product inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
-          <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_N_PI transition" groups:idRef="R_G6PDH2r_1"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_A_CI transition" groups:idRef="R_G6PDH2r_2"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category1" groups:name="g6p_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
+          <groups:member groups:name="g6pdh2r-g6pdh2r_G transition" groups:idRef="R_G6PDH2r_3"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category2" groups:name="_6pgl_c release" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_G_P-_6pgl release" groups:idRef="R_G6PDH2r_4"/>
+          <groups:member groups:name="g6pdh2r_G_P-g6pdh2r transition" groups:idRef="R_G6PDH2r_4"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category3" groups:name="nadp_c binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
+          <groups:member groups:name="g6pdh2r_G-g6pdh2r_GN transition" groups:idRef="R_G6PDH2r_5"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category4" groups:name="nadph_c release" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
+          <groups:member groups:name="g6pdh2r_GN_P-g6pdh2r_G_P transition" groups:idRef="R_G6PDH2r_6"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category5" groups:name="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
+          <groups:member groups:name="g6pdh2r_GN-g6pdh2r_GN_P transition" groups:idRef="R_G6PDH2r_7"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized" groups:kind="collection">
@@ -503,6 +503,7 @@
             <p>subsystem: PentosePhosphatePathway</p>
             <p>enzyme_concentration_total: 0.001</p>
             <p>enzyme_net_flux: 0.20999999999999638</p>
+            <p>enzyme_concentration_total_equation: g6pdh2r_A_CI_c(t) + g6pdh2r_GN_P_c(t) + g6pdh2r_GN_c(t) + g6pdh2r_G_P_c(t) + g6pdh2r_G_c(t) + g6pdh2r_N_PI_c(t) + g6pdh2r_c(t)</p>
             <p>enzyme_net_flux_equation: kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7</p>
           </html>
         </notes>

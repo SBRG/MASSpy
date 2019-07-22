@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-EnzymeModuleReaction is a class for holding information regarding enzymatic reactions.
+EnzymeModuleReaction is a class for holding information regarding enzyme module reactions.
 
 The :class:`EnzymeModuleReaction` class inherits and extends the
 :class:`~.MassReaction` class. It is designed to represent the reactions
@@ -17,10 +17,10 @@ Some other important points about the :class:`EnzymeModuleReaction` include:
     * If the :attr:`name` attribute is not set upon initializing, it is
       automatically generated using the enzyme specific attributes of the
       associated :class:`~.EnzymeModuleSpecies`\ s.
-    * Even though :class:`~.MassReaction`\ s are catalyzed by enzymes, an
-      enzymatic reaction in the context of this module will refer to reactions
-      that involve :class:`~.EnzymeModuleSpecies`\ (s) and are associated with
-      an :class:`~.EnzymeModule`.
+    * Even though :class:`~.MassReaction`\ s are also catalyzed by enzymes, an
+      enzyme module reaction in the context of this module will refer to
+      reactions that involve :class:`~.EnzymeModuleSpecies`\ (s) and are
+      associated with an :class:`~.EnzymeModule`.
 
 """  # noqa
 from collections import defaultdict
@@ -30,19 +30,19 @@ from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 
 
 class EnzymeModuleReaction(MassReaction):
-    """Class representing enzymatic reaction in an :class:`~.EnzymeModule`.
+    """Class representing an enzyme reaction in an :class:`~.EnzymeModule`.
 
     Parameters
     ----------
-    id_or_reaction: str, MassReaction, EnzymeModuleReaction
-        A string identifier to associate with the enzymatic reaction, or an
-        existing reaction object. If an existing reaction object is
+    id_or_reaction : str, MassReaction, EnzymeModuleReaction
+        A string identifier to associate with the enzyme module reaction,
+        or an existing reaction object. If an existing reaction object is
         provided, a new :class:`EnzymeModuleReaction` is instantiated with the
         same properties as the original reaction.
     name : str
-        A human readable name for the enzymatic reaction.
+        A human readable name for the enzyme module reaction.
     subsystem : str
-        The subsystem where the enzymatic reaction is meant to occur.
+        The subsystem where the enzyme module reaction is meant to occur.
     reversible : bool
         The kinetic reversibility of the reaction. Irreversible reactions have
         an equilibrium constant and a reverse rate constant as set in the
@@ -70,7 +70,7 @@ class EnzymeModuleReaction(MassReaction):
             self.enzyme_module_id = enzyme_module_id
 
     def generate_enzyme_module_reaction_name(self, update_enzyme=False):
-        r"""Generate a name for the enzymatic reaction based on bound ligands.
+        r"""Generate name for an enzyme module reaction based on bound ligands.
 
         Notes
         -----
@@ -82,8 +82,8 @@ class EnzymeModuleReaction(MassReaction):
         Parameters
         ----------
         update_enzyme : bool
-            If ``True``, update the :attr:`name` attribute of the enzymatic
-            reaction in addition to returning the generated name.
+            If ``True``, update the :attr:`name` attribute of the enzyme
+            module reaction in addition to returning the generated name.
             Default is ``False``.
 
         Returns
@@ -101,32 +101,28 @@ class EnzymeModuleReaction(MassReaction):
 
         for attr in ["bound_catalytic", "bound_effectors"]:
             for enz_r, enz_p in zip(items["Enz React"], items["Enz Prod"]):
-                r_dict, p_dict = (getattr(enz_r, attr), getattr(enz_p, attr))
+                enz_dicts = (getattr(enz_r, attr), getattr(enz_p, attr))
                 diff = {}
-                for k in list(set(p_dict).union(set(r_dict))):
-                    if k in p_dict and k in r_dict:
-                        coeff = abs(p_dict[k] - r_dict[k])
-                    elif k in p_dict or k in r_dict:
-                        coeff = [d[k] for d in [r_dict, p_dict]
-                                 if k in d].pop()
+                for key in list(set(enz_dicts[1]).union(set(enz_dicts[0]))):
+                    if key in enz_dicts[1] and key in enz_dicts[0]:
+                        coeff = abs(enz_dicts[1][key] - enz_dicts[0][key])
+                    elif key in enz_dicts[1] or key in enz_dicts[0]:
+                        coeff = [d[key] for d in enz_dicts if key in d].pop()
                     if coeff != 0:
-                        diff[k] = coeff
+                        diff[key] = coeff
 
-                if diff:
-                    if list(diff) == list(items["Lig React"]):
-                        mets = "-".join([m._remove_compartment_from_id_str()
-                                         for m in [enz_r] + list(diff)])
-                        action = " binding"
-                    elif list(diff) == list(items["Lig Prod"]):
-                        mets = "-".join([m._remove_compartment_from_id_str()
-                                         for m in [enz_r] + list(diff)])
-                        action = " release"
-                    else:
-                        mets = enz_r._remove_compartment_from_id_str()
-                        action = " catalyzation"
-                    name = mets + action
-
-                if not name:
+                if diff and list(diff) == list(items["Lig React"]):
+                    name = "-".join([m._remove_compartment_from_id_str()
+                                     for m in [enz_r] + list(diff)])
+                    name += " binding"
+                elif diff and list(diff) == list(items["Lig Prod"]):
+                    name = "-".join([m._remove_compartment_from_id_str()
+                                     for m in [enz_r] + list(diff)])
+                    name += " release"
+                elif diff:
+                    name = enz_r._remove_compartment_from_id_str()
+                    name += " catalyzation"
+                else:
                     name = "-".join([enz_form._remove_compartment_from_id_str()
                                      for enz_form in [enz_r, enz_p]])
                     name += " transition"

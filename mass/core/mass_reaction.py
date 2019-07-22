@@ -907,7 +907,7 @@ class MassReaction(Object):
         Parameters
         ----------
         metabolites_to_add : dict
-            A dictionary with :class:`.MassMetabolite`\ s or metabolite
+            A ``dict`` with :class:`.MassMetabolite`\ s or metabolite
             identifiers as keys and stoichiometric coefficients as values. If
             keys are strings (id of a metabolite), the reaction must already
             be part of a :class:`~.MassModel` and a metabolite with the given
@@ -1017,7 +1017,7 @@ class MassReaction(Object):
         Parameters
         ----------
         metabolites_to_subtract : dict
-            A dictionary with :class:`~.MassMetabolite`\ s or their identifiers
+            A ``dict`` with :class:`~.MassMetabolite`\ s or their identifiers
             as keys and stoichiometric coefficients as values. If keys are
             strings (id of a metabolite), the reaction must already be part of
             a :class:`~.MassModel` and a metabolite with the given id must
@@ -1092,7 +1092,7 @@ class MassReaction(Object):
         Returns
         -------
         dict
-            Returns a dictionary of ``{element: amount}`` for unbalanced
+            Returns a ``dict`` of ``{element: amount}`` for unbalanced
             elements, with the "charge" treated as an element in the dict.
             For a balanced reaction, an empty dict is returned.
 

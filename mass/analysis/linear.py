@@ -18,8 +18,8 @@ reactions are the column indicies.
 
 There are also several methods that are nearly identical to :mod:`scipy.linalg`
 methods, with the main exception being that matrix conversions are performed
-beforehand to ensure that valid input is passed to the scipy method. These
-methods include:
+beforehand to ensure that valid input is passed to the :mod:`scipy` method.
+These methods include:
 
 * :func:`~mass.analysis.linear.svd`
 * :func:`~mass.analysis.linear.eig`
@@ -277,21 +277,21 @@ def nullspace(matrix, atol=1e-13, rtol=0):
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
     atol : float
         The absolute tolerance for a zero singular value.  Singular values
         smaller than ``atol`` are considered to be zero.
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
-        considered to be zero, where **smax** is the largest singular value.
+        considered to be zero, where ``smax`` is the largest singular value.
 
     Returns
     -------
     ns : numpy.ndarray
-        If ``matrix`` is an array with shape (m, k), then **ns** will be an
-        array with shape (k, n), where 'n' is the estimated dimension of the
-        nullspace of ``matrix``.  The columns of **ns** are a basis for the
-        nullspace; each element in the dot product of the matrix
+        If ``matrix`` is an array with shape ``(m, k)``, then ``ns`` will be
+        an array with shape ``(k, n)``, where ``n`` is the estimated dimension
+        of the nullspace of ``matrix``.  The columns of ``ns`` are a basis for
+        the nullspace; each element in the dot product of the matrix
         and the nullspace will be approximately 0.
 
     """
@@ -328,21 +328,21 @@ def left_nullspace(matrix, atol=1e-13, rtol=0):
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
     atol : float
         The absolute tolerance for a zero singular value.  Singular values
         smaller than ``atol`` are considered to be zero.
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
-        considered to be zero, where **smax** is the largest singular value.
+        considered to be zero, where ``smax`` is the largest singular value.
 
     Returns
     -------
     lns : numpy.ndarray
-        If ``matrix`` is an array with shape (m, k), then **lns** will be an
-        array with shape (n, m), where 'n' is the estimated dimension of the
-        left nullspace of ``matrix``.  The rows of **lns** are a basis for the
-        left nullspace; each element in the dot product of the matrix
+        If ``matrix`` is an array with shape ``(m, k)``, then ``lns`` will be
+        an array with shape ``(n, m)``, where ``n`` is the estimated dimension
+        of the left nullspace of ``matrix``.  The rows of ``lns`` are a basis
+        for the left nullspace; each element in the dot product of the matrix
         and the left nullspace will be approximately 0.
 
     See Also
@@ -373,21 +373,21 @@ def columnspace(matrix, atol=1e-13, rtol=0):
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
     atol : float
         The absolute tolerance for a zero singular value.  Singular values
         smaller than ``atol`` are considered to be zero.
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
-        considered to be zero, where **smax** is the largest singular value.
+        considered to be zero, where ``smax`` is the largest singular value.
 
     Returns
     -------
     cs : numpy.ndarray
-        If ``matrix`` is an array with shape (m, k), then **cs** will be an
-        array with shape (m, n), where 'n' is the estimated dimension of the
-        columnspace of ``matrix``. The columns of **cs** are a basis for the
-        columnspace.
+        If ``matrix`` is an array with shape ``(m, k)``, then ``cs`` will be
+        an array with shape ``(m, n)``, where ``n`` is the estimated dimension
+        of the columnspace of ``matrix``. The columns of ``cs`` are a basis
+        for the columnspace.
 
     """
     matrix = _ensure_dense_matrix(matrix)
@@ -424,21 +424,21 @@ def rowspace(matrix, atol=1e-13, rtol=0):
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
     atol : float
         The absolute tolerance for a zero singular value.  Singular values
         smaller than ``atol`` are considered to be zero.
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
-        considered to be zero, where **smax** is the largest singular value.
+        considered to be zero, where ``smax`` is the largest singular value.
 
     Returns
     -------
     rs : numpy.ndarray
-        If ``matrix`` is an array with shape (m, k), then **rs** will be an
-        array with shape (n, k), where 'n' is the estimated dimension of the
-        rowspace of ``matrix``. The columns of **rs** are a basis for the
-        rowspace.
+        If ``matrix`` is an array with shape ``(m, k)``, then ``rs`` will be
+        an array with shape ``(n, k)``, where ``n`` is the estimated dimension
+        of the rowspace of ``matrix``. The columns of ``rs`` are a basis for
+        the rowspace.
 
     See Also
     --------
@@ -453,7 +453,7 @@ def matrix_rank(matrix, atol=1e-13, rtol=0):
     """Estimate the rank (i.e. the dimension of the nullspace) of a matrix.
 
     The algorithm used by this function is based on singular value
-    decomposition. Taken from the scipy cookbook.
+    decomposition. Taken from the :mod:`scipy` cookbook.
 
     Notes
     -----
@@ -468,14 +468,14 @@ def matrix_rank(matrix, atol=1e-13, rtol=0):
     ----------
     matrix : array-like
         The matrix to obtain the rank for. The matrix should be at most
-        2-D. A 1-D array with length 'k' will be treated as a 2-D with
-        shape (1, k).
+        2-D. A 1-D array with length ``k`` will be treated as a 2-D with
+        shape ``(1, k)``.
     atol : float
         The absolute tolerance for a zero singular value.  Singular values
         smaller than ``atol`` are considered to be zero.
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
-        considered to be zero, where **smax** is the largest singular value.
+        considered to be zero, where ``smax`` is the largest singular value.
 
     Returns
     -------
@@ -505,7 +505,7 @@ def svd(matrix, **kwargs):
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
 
     Returns
     -------
@@ -514,7 +514,7 @@ def svd(matrix, **kwargs):
         Of shape ``(M, M)`` or ``(M, K)``, depending on `full_matrices`.
     s : ndarray
         The singular values, sorted in non-increasing order.
-        Of shape (K,), with ``K = min(M, N)``.
+        Of shape ``(K, )``, with ``K = min(M, N)``.
     Vh : ndarray
         Unitary matrix having right singular vectors as rows.
         Of shape ``(N, N)`` or ``(K, N)`` depending on `full_matrices`.
@@ -532,13 +532,13 @@ def svd(matrix, **kwargs):
 def eig(matrix, left=False, right=False, **kwargs):
     """Get the eigenvalues of a matrix.
 
-    `kwargs`` are passed on to :func:`scipy.linalg.eig`
+    ``kwargs`` are passed on to :func:`scipy.linalg.eig`
 
     Parameters
     ----------
     matrix : array-like
         The matrix to decompose. The matrix should be at most 2-D. A 1-D
-        array with length 'k' will be treated as a 2-D with shape (1, k).
+        array with length ``k`` will be treated as a 2-D with shape ``(1, k)``.
     left : bool
         Whether to calculate and return left eigenvectors.
         Default is ``False``.
@@ -548,7 +548,7 @@ def eig(matrix, left=False, right=False, **kwargs):
 
     Returns
     -------
-    w : (M,) double or complex ndarray
+    w : (M, ) double or complex ndarray
         The eigenvalues, each repeated according to its multiplicity.
     vl : (M, M) double or complex ndarray
         The normalized left eigenvector corresponding to the eigenvalue

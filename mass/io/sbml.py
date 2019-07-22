@@ -40,7 +40,7 @@ The information specific to attributes of the :class:`~.EnzymeModule` and
 :class:`~.EnzymeModuleDict` information is stored using the
 `groups extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__groups.html>`_
 by creating an SBML 'group' representing the enzyme module containing
-additional SBML group objects for enzyme module ligands, forms, and reactions
+additional SBML group objects for enzyme module ligands, species, and reactions
 for the categories of the enzyme module categorized dictionary attributes.
 The remaining information is written to the the notes field of the main SBML
 group for the enzyme module. Disabling use of the 'groups' package extension
@@ -69,6 +69,7 @@ import traceback
 from collections import defaultdict
 from io import StringIO
 
+from cobra.core.dictlist import DictList
 from cobra.core.gene import Gene
 from cobra.io.sbml import (
     BOUND_MINUS_INF, BOUND_PLUS_INF, CobraSBMLError, LOWER_BOUND_ID,
@@ -634,9 +635,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     # Read the MassModel species information from the SBMLDocument
     # Includes MassMetabolites and EnzymeModuleSpecies, boundary conditions are
     # stored in order to be added after boundary reactions.
-    metabolites, boundary_conditions = _read_model_species_from_sbml(model,
-                                                                     f_replace,
-                                                                     **kwargs)
+    metabolites = _read_model_species_from_sbml(model, f_replace, **kwargs)
     mass_model.add_metabolites(metabolites)
 
     # Read the MassModel gene information from the SBMLDocument.
@@ -651,10 +650,9 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     mass_model.add_reactions(reactions)
     # Add the parameters and boundary conditions to the model
     # Read the MassModel parameter information from the SBMLDocument
-    parameters = _read_global_parameters_from_sbml(model, mass_model.reactions,
+    parameters = _read_global_parameters_from_sbml(model, DictList(reactions),
                                                    f_replace, **kwargs)
     parameters.update(local_params)
-    parameters.update(boundary_conditions)
     mass_model.update_parameters(parameters, verbose=False)
 
     # Add custom rates
@@ -674,7 +672,8 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
             if enzyme_module_dict["model"] == "EnzymeModule":
                 mass_model = EnzymeModule(mass_model)
                 for attr, value in iteritems(enzyme_module_dict):
-                    if attr in ["id", "name", "description", "S", "model"]:
+                    if attr in ["id", "name", "description", "S", "model",
+                                "enzyme_concentration_total_equation"]:
                         continue
                     setattr(mass_model, attr, value)
             else:
@@ -958,7 +957,6 @@ def _read_model_species_from_sbml(model, f_replace, **kwargs):
 
     """
     metabolite_list = []
-    boundary_conditions = {}
     if model.getNumSpecies() == 0:
         LOGGER.warning("No metabolites in model.")
 
@@ -967,13 +965,7 @@ def _read_model_species_from_sbml(model, f_replace, **kwargs):
         sid = _get_corrected_id(specie, (f_replace, F_SPECIE),
                                 "Metabolite", kwargs.get("remove_char"))
         cid = specie.getCompartment()
-        # Do not read species with boundary compartments as MassMetabolites
-        # to be added but as boundary conditions to be added
-        if cid == next(iter(MASSCONFIGURATION.boundary_compartment)):
-            boundary_conditions[sid] = _read_specie_initial_value(model,
-                                                                  specie,
-                                                                  sid)
-            continue
+
         # Set MassMetabolite id, name, and fixed attributes
         met = MassMetabolite(sid)
         met.name = specie.getName()
@@ -1001,7 +993,7 @@ def _read_model_species_from_sbml(model, f_replace, **kwargs):
         # Append metabolite to list of metabolites
         metabolite_list.append(met)
 
-    return metabolite_list, boundary_conditions
+    return metabolite_list
 
 
 def _read_specie_initial_value(model, specie, sid):
@@ -1511,7 +1503,8 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
                 try:
                     value = float(value)
                 except ValueError:
-                    if attr == "enzyme_net_flux_equation":
+                    if attr in ["enzyme_concentration_total_equation",
+                                "enzyme_net_flux_equation"]:
                         value = sympify(value)
                 finally:
                     enzyme_module_dict[attr] = value
@@ -1522,7 +1515,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
         else:
             # Get members for DictList attribute
             member_list = _get_group_members(group, gid, **kwargs)
-            # Set enzyme module ligands, forms,or reactions attribute list
+            # Set enzyme module ligands, species, or reactions attribute list
             enzyme_module_dict[gid] = member_list
 
     enzyme_module_dicts = []
@@ -1539,7 +1532,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
             _parse_enzyme_group(gid, gname, group, enzyme_module_dict,
                                 **kwargs)
 
-        for attr in ["ligands", "forms", "reactions"]:
+        for attr in ["ligands", "species", "reactions"]:
             attr = "enzyme_module_" + attr + "_categorized"
             enzyme_module_dict[attr] = categorized_dicts[attr]
 
@@ -1774,8 +1767,6 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
     # Write the species information into the SBMLDocument
     # Includes MassMetabolites, EnzymeModuleSpecies, and their concentrations
     _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs)
-    if mass_model.boundary_conditions:
-        _write_model_boundary_species_to_sbml(model, mass_model, f_replace)
 
     if kwargs.get("use_fbc_package"):
         # Write the flux bound parameters into the SBMLDocument
@@ -2079,8 +2070,17 @@ def _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
     local_parameters = kwargs.get("local_parameters")
     for parameter_type, parameter_dict in iteritems(mass_model.parameters):
         # Skip over parameters already written into the model.
-        if (local_parameters and parameter_type != "v") or \
-           (not local_parameters and parameter_type == "Boundary"):
+        if (local_parameters and parameter_type != "v"):
+            continue
+
+        if parameter_type == "Boundary" and not local_parameters:
+            for pid, value in iteritems(parameter_dict):
+                if isinstance(value, (integer_types, float)):
+                    _create_parameter(
+                        model, pid, value, constant=True, sbo=None,
+                        udef=None, **kwargs)
+                else:
+                    _create_boundary_assignment_rule(model, pid, value)
             continue
 
         if parameter_type == "v":
@@ -2101,6 +2101,34 @@ def _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
                 pid = p_type + "_" + rid
             _create_parameter(model, pid, value, constant=constant, sbo=None,
                               udef=None, **kwargs)
+
+
+def _create_boundary_assignment_rule(model, bmid, bc_value):
+    """Write model boundary condition assignment rule into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    parameter = model.createParameter()
+    _check(parameter, "create model parameter" + _for_id(bmid))
+    _check(parameter.setIdAttribute(bmid),
+           "set model parameter id" + _for_id(bmid))
+
+    assignment_rule = model.createAssignmentRule()
+    _check(assignment_rule, "create model assignment rule" + _for_id(bmid))
+    _check(assignment_rule.setVariable(bmid),
+           "set assignment rule variable" + _for_id(bmid))
+
+    # Create MathML string from the sympy expression
+    math = _create_math_xml_str_from_sympy_expr(bc_value)
+    # Set the math for the AssignmentRule
+    _check(assignment_rule.setMath(libsbml.readMathMLFromString(math)),
+           "set math on assignment rule" + _for_id(bmid))
+
+    # Set specie constant
+    _check(parameter.setConstant(False), "set specie constant" + _for_id(bmid))
 
 
 def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
@@ -2199,61 +2227,6 @@ def _write_specie_formula_charge_into_sbml(specie, metabolite, **kwargs):
             notes["FORMULA"] = metabolite.formula
 
     return notes
-
-
-def _write_model_boundary_species_to_sbml(model, mass_model, f_replace):
-    """Write model boundary condition information into SBMLDocument.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    for bmid, bc_value in iteritems(mass_model.boundary_conditions):
-        # Create boundary specie and set ID, name, and compartment
-        if f_replace and F_SPECIE_REV in f_replace:
-            bmid = f_replace[F_SPECIE_REV](bmid)
-        specie = model.createSpecies()
-        _check(specie, "create model boundary specie" + _for_id(bmid))
-        _check(specie.setIdAttribute(bmid),
-               "set boundary specie id" + _for_id(bmid))
-        _check(
-            specie.setCompartment(
-                next(iter(MASSCONFIGURATION.boundary_compartment))),
-            "set boundary specie compartment" + _for_id(bmid))
-        # Set boundary specie value
-        if isinstance(bc_value, (integer_types, float)):
-            constant = True
-            if MASSCONFIGURATION.include_compartments_in_rates:
-                has_only_substance_units = True
-                setter = specie.setInitialAmount
-            else:
-                has_only_substance_units = False
-                setter = specie.setInitialConcentration
-            _check(setter(bc_value),
-                   "set boundary specie concentration" + _for_id(bmid))
-        else:
-            constant = False
-            assignment_rule = model.createAssignmentRule()
-            _check(assignment_rule,
-                   "create model assignment rule" + _for_id(bmid))
-            _check(assignment_rule.setVariable(bmid),
-                   "set assignment rule variable" + _for_id(bmid))
-
-            # Create MathML string from the sympy expression
-            math = _create_math_xml_str_from_sympy_expr(bc_value)
-            # Set the math for the AssignmentRule
-            _check(
-                assignment_rule.setMath(libsbml.readMathMLFromString(math)),
-                "set math on assignment rule" + _for_id(bmid))
-
-        # Set specie constant, unit restrictions, and boundary condition
-        _check(specie.setConstant(constant),
-               "set specie constant" + _for_id(bmid))
-        _check(specie.setHasOnlySubstanceUnits(has_only_substance_units),
-               "set specie unit substance restrictions" + _for_id(bmid))
-        _check(specie.setBoundaryCondition(True),
-               "set specie boundary condition" + _for_id(bmid))
 
 
 def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
@@ -2358,15 +2331,8 @@ def _write_reaction_specie_ref_to_sbml(reaction, mass_reaction, f_replace):
 
     """
     rid = reaction.getIdAttribute()
-    metabolites = mass_reaction.metabolites
-    boundary_conditions = mass_reaction.model.boundary_conditions
-    # Write boundary metabolite in addition if boundary reaction
-    if mass_reaction.boundary and not mass_reaction.products:
-        metabolites.update({mass_reaction.boundary_metabolite: 1})
-    if mass_reaction.boundary and not mass_reaction.reactants:
-        metabolites.update({mass_reaction.boundary_metabolite: -1})
 
-    for metabolite, stoichiometry in iteritems(metabolites):
+    for metabolite, stoichiometry in iteritems(mass_reaction.metabolites):
         # Get specie id
         sid = str(metabolite)
         if f_replace and F_SPECIE_REV in f_replace:
@@ -2382,22 +2348,8 @@ def _write_reaction_specie_ref_to_sbml(reaction, mass_reaction, f_replace):
         _check(sref.setStoichiometry(abs(stoichiometry)),
                "set specie reference stoichiometry" + _for_id(sid))
 
-        if boundary_conditions.get(metabolite) and\
-           not isinstance(boundary_conditions.get(metabolite), float):
-            constant = False
-        else:
-            constant = True
-        _check(sref.setConstant(constant),
+        _check(sref.setConstant(True),
                "set specie reference constant" + _for_id(sid))
-
-        # Fixed metabolites are treated as modifier species in rate laws and
-        # therefore cannot exist in the SBML reaction reactants or products.
-        if isinstance(metabolite, MassMetabolite) and metabolite.fixed:
-            msref = reaction.createModifier()
-            _check(msref,
-                   "create modifier specie " + sid + _for_id(rid))
-            _check(msref.setSpecies(sid),
-                   "set modifier specie species " + sid + _for_id(rid))
 
 
 def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
@@ -2441,8 +2393,11 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
         arg = str(arg)
         new_arg = arg
         # Check if reaction is in the name of the parameter
-        if re.search(mass_rid, arg):
-            new_arg = re.sub(mass_rid, rid, new_arg)
+        if re.search(mass_rid, arg)\
+           or arg in mass_reaction.model.boundary_conditions:
+            if re.search(mass_rid, arg):
+                new_arg = re.sub(mass_rid, rid, new_arg)
+
             if kwargs.get("local_parameters"):
                 _create_local_parameter(
                     arg, new_arg, sbo=None, udef=None, **kwargs)
@@ -2450,9 +2405,8 @@ def _write_reaction_kinetic_law_to_sbml(reaction, mass_reaction, f_replace,
             continue
 
         try:
-            if arg not in mass_reaction.model.boundary_conditions:
-                new_arg = str(
-                    mass_reaction.model.metabolites.get_by_id(arg))
+            new_arg = str(
+                mass_reaction.model.metabolites.get_by_id(arg))
         except KeyError:
             if arg in mass_reaction.model.custom_parameters:
                 if kwargs.get("local_parameters"):

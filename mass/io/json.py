@@ -317,6 +317,7 @@ JSON_SCHEMA = {
                         "exclusiveMinimum": False,
                     },
                     "enzyme_net_flux": {"type": "number"},
+                    "enzyme_concentration_total_equation": {"type": "string"},
                     "enzyme_net_flux_equation": {"type": "string"},
                 },
             },
