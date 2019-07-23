@@ -193,17 +193,17 @@ class MassMetabolite(Species):
 
     @property
     def ic(self):
-        """Shorthand getter or setter for the :attr:`initial_condition`."""
+        """Alias for the :attr:`initial_condition`."""
         return self.initial_condition
 
     @ic.setter
     def ic(self, value):
-        """Shorthand setter for the :attr:`initial_condition`."""
+        """Alias for the :attr:`initial_condition`."""
         self.initial_condition = value
 
     @property
     def ode(self):
-        """Shorthand getter for the :attr:`ordinary_differential_equation`."""
+        """Alias for the :attr:`ordinary_differential_equation`."""
         return self.ordinary_differential_equation
 
     def print_attributes(self, sep=r"\n", exclude_parent=False):

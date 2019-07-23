@@ -243,7 +243,7 @@ class MassReaction(Object):
 
     @property
     def parameters(self):
-        """Return a dict of rate and equilibrium constants.
+        """Return a ``dict`` of rate and equilibrium constants.
 
         Notes
         -----
@@ -616,47 +616,47 @@ class MassReaction(Object):
     # Shorthands
     @property
     def kf(self):
-        """Shorthand method to get the forward rate constant (kf)."""
+        """Alias for the :attr:`forward_rate_constant`."""
         return self.forward_rate_constant
 
     @kf.setter
     def kf(self, value):
-        """Shorthand method to set the forward rate constant (kf)."""
+        """Alias for the :attr:`forward_rate_constant`."""
         self.forward_rate_constant = value
 
     @property
     def kr(self):
-        """Shorthand method to get the reverse rate constant (kr)."""
+        """Alias for the :attr:`reverse_rate_constant`."""
         return self.reverse_rate_constant
 
     @kr.setter
     def kr(self, value):
-        """Shorthand method to set the reverse rate constant (kr)."""
+        """Alias for the :attr:`reverse_rate_constant`."""
         self.reverse_rate_constant = value
 
     @property
     def Keq(self):
-        """Shorthand method to get the equilibrium constant (Keq)."""
+        """Alias for the :attr:`equilibrium_constant`."""
         return self.equilibrium_constant
 
     @Keq.setter
     def Keq(self, value):
-        """Shorthand method to set the equilibrium constant (Keq)."""
+        """Alias for the :attr:`equilibrium_constant`."""
         self.equilibrium_constant = value
 
     @property
     def S(self):
-        """Shorthand method to get the reaction stoichiometry."""
+        """Alias for the :attr:`stoichiometry`."""
         return self.stoichiometry
 
     @property
     def v(self):
-        """Shorthand method to get the reaction steady state flux."""
+        """Alias for the :attr:`steady_state_flux`."""
         return self.steady_state_flux
 
     @v.setter
     def v(self, value):
-        """Shorthand method to set the reaction steady state flux."""
+        """Alias for the :attr:`steady_state_flux`."""
         self.steady_state_flux = value
 
     def print_attributes(self, sep=r"\n", exclude_parent=False):

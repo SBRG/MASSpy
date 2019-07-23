@@ -158,28 +158,28 @@ class MassModel(Object):
 
     @property
     def S(self):
-        """Shorthand method to get the stoichiometric matrix."""
+        """Alias for the :attr:`stoichiometric_matrix`."""
         return self.stoichiometric_matrix
 
     @property
     def ordinary_differential_equations(self):
-        """Return a dict of ODEs for the metabolites."""
+        """Return a ``dict`` of ODEs for the metabolites."""
         return {met: met.ode for met in self.metabolites}
 
     @property
     def odes(self):
-        """Shorthand method to get ODEs for the metabolites."""
+        """Alias for the :attr:`ordinary_differential_equations`."""
         return self.ordinary_differential_equations
 
     @property
     def initial_conditions(self):
-        """Return a dict of all metabolite initial conditions."""
+        r"""Get ``dict`` of all :attr:.MassMetabolite.initial_condition`\ s."""
         return {met: met.initial_condition for met in self.metabolites
                 if met.initial_condition is not None}
 
     @property
     def ics(self):
-        """Shorthand method to get all metabolite initial conditions."""
+        """Alias for the :attr:`initial_conditions`."""
         return self.initial_conditions
 
     @property
@@ -207,7 +207,7 @@ class MassModel(Object):
 
     @property
     def v(self):
-        """Shorthand method to get all reaction steady state fluxes."""
+        """Alias for the :attr:`steady_state_fluxes`."""
         return self.steady_state_fluxes
 
     @property
