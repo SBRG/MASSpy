@@ -2094,7 +2094,14 @@ def _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
                 p_type, rid = pid.split("_", 1)
                 rid = getattr(mass_model.reactions.get_by_id(rid), "id")
             except (ValueError, KeyError):
-                pass
+                if f_replace and F_REACTION_REV in f_replace:
+                    m_rid = [
+                        m_rid for m_rid in mass_model.reactions.list_attr("id")
+                        if re.search(m_rid, pid)]
+                    if m_rid:
+                        m_rid = max(m_rid, key=len)
+                        pid = re.sub(
+                            m_rid, f_replace[F_REACTION_REV](m_rid), pid)
             else:
                 if f_replace and F_REACTION_REV in f_replace:
                     rid = f_replace[F_REACTION_REV](rid)
