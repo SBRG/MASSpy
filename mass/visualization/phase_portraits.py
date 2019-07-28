@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""Contains function for visualizing time profiles of simulation results.
+r"""Contains function for visualizing phase portraits of simulation results.
 
 See the  :mod:`mass.visualization` documentation for general information
 on :mod:`mass.visualization` functions.
@@ -8,7 +8,8 @@ This module contains the following functions for visualization of
 time-dependent solutions returned in :class:`.MassSolution`\ s after
 simulation of models.
 
-    * :func:`~.time_profiles.plot_time_profile`
+    * :func:`~.phase_portraits.plot_phase_portrait`
+    * :func:`~.phase_portraits.plot_tiled_phase_portrait`
 
 The following are optional ``kwargs`` that can be passed to the functions
 from this module.
@@ -38,18 +39,17 @@ from this module.
     annotate_time_points_legend_loc
 
 """
-from six import iteritems
+from six import iteritems, iterkeys, itervalues
 
 from mass.util.util import _check_kwargs
 from mass.visualization import visualization_util as v_util
 
 
-def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
-                      **kwargs):
-    """Plot time profiles of solutions in a given :class:`.MassSolution`.
+def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
+    """Plot phase portraits of solutions in a given :class:`.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
-    in the function. See the :mod:`.visualization.time_profiles` module
+    in the function. See the :mod:`.visualization.phase_portraits` module
     documentation for more detailed information about the possible ``kwargs``.
 
     Notes
@@ -62,10 +62,14 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     mass_solution : MassSolution
         The :class:`.MassSolution` containing the time-dependent solutions
         to be plotted.
-    observable : iterable
-        An iterable containing string identifiers of the :mod:`mass` objects
-        or the objects themselves that correspond to the keys for the desired
-        solutions in the :class:`.MassSolution`.
+    x : :mod:`mass` object or its string identifier
+        The string identifier of a :mod:`mass` object or the object itself
+        that corresponds to the key for the desired solution in the
+        :class:`.MassSolution` for the x-axis of the phase portrait.
+    y : :mod:`mass` object or its string identifier
+        The string identifier of a :mod:`mass` object or the object itself
+        that corresponds to the key for the desired solution in the
+        :class:`.MassSolution` for the y-axis of the phase portrait.
     ax : matplotlib.axes.Axes, None
         An :class:`~matplotlib.axes.Axes` instance to plot the data on.
         If ``None`` then the current axes instance is used.
@@ -78,11 +82,12 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
                legend location.
             3. An iterable of the format ``(labels, loc)`` to set both
                the legend labels and location, where ``labels`` and ``loc``
-               follows the labels specified in **1** and  **2**.
+               follows the format specified in **1** and  **2**.
 
         See the :mod:`~mass.visualization` documentation for more information
         about legend and valid legend locations.
     **kwargs
+
         * time_vector
         * plot_function
         * title
@@ -107,7 +112,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         * annotate_time_points_markersize
         * annotate_time_points_legend_loc
 
-        See :mod:`~mass.visualization.time_profiles` documentation
+        See :mod:`~mass.visualization.phase_portraits` documentation
         for more information on optional ``kwargs``.
 
     Returns
@@ -121,9 +126,8 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_time_profile_default_kwargs("plot_time_profile"),
+        get_phase_portrait_default_kwargs("plot_phase_portrait"),
         kwargs)
-
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
 
@@ -133,13 +137,17 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         return ax
 
     # Get the solutions to be observed.
-    observable = v_util._validate_plot_observables(mass_solution, observable,
-                                                   kwargs.get("time_vector"))
+    xy = v_util._validate_plot_observables(mass_solution, (x, y),
+                                           kwargs.get("time_vector"))
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
         ax, plot_function_str=kwargs.get("plot_function"),
         valid={"plot", "semilogx", "semilogy", "loglog"})
+
+    label = "{0} vs. {1}".format(*v_util._group_xy_items(xy, iterkeys))
+    sols = v_util._group_xy_items(xy, itervalues)
+    observable = {label: sols}
 
     # Get the legend arguments if desired.
     if legend is not None:
@@ -154,12 +162,13 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     prop_cycler = v_util._get_line_properties(
         n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
         **kwargs)
+
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
 
     # Plot lines onto axes using legend entries as labels (if legend valid).
-    for label, sol in iteritems(observable):
-        plot_function(observable.time, sol, label=label)
+    for label, sols in iteritems(observable):
+        plot_function(*sols, label=label)
 
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
@@ -173,7 +182,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
 
     if kwargs.get("annotate_time_points", None):
         ax = v_util._annotate_time_points(
-            ax, observable=observable, type_of_plot="time_profile",
+            ax, observable=xy, type_of_plot="phase_portrait",
             first_legend=(legend, legend_kwargs), **kwargs)
 
     # Reset default prop_cycle
@@ -182,8 +191,8 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     return ax
 
 
-def get_time_profile_default_kwargs(function_name):
-    """Get default ``kwargs`` for plotting functions in :mod:`time_profiles`.
+def get_phase_portrait_default_kwargs(function_name):
+    """Get default ``kwargs`` for plotting functions in :mod:`phase_portraits`.
 
     Parameters
     ----------
@@ -191,7 +200,8 @@ def get_time_profile_default_kwargs(function_name):
         The name of the plotting function to get the ``kwargs`` for.
         Valid values include the following:
 
-            * ``"plot_time_profile"``
+            * ``"plot_phase_portrait"``
+            * ``"plot_tiled_phase_portrait"``
 
     Returns
     -------
@@ -227,10 +237,20 @@ def get_time_profile_default_kwargs(function_name):
         "annotate_time_points_color": None,
         "annotate_time_points_marker": None,
         "annotate_time_points_markersize": None,
-        "annotate_time_points_legend_loc": None,
+        "annotate_time_points_legend_loc": None
     }
+
+    if function_name == "plot_tiled_phase_portrait":
+        default_kwargs.update({
+            "tiled_xlabel_fontsize": None,
+            "tiled_ylabel_fontsize": None,
+            "tiled_data_fontsize": None,
+            "tiled_data_color": None,
+            "tiled_diagonals_color": None,
+            "tiled_empty_color": None,
+        })
 
     return default_kwargs
 
 
-__all__ = ("plot_time_profile", "get_time_profile_default_kwargs")
+__all__ = ("plot_phase_portrait", "get_phase_portrait_default_kwargs")
