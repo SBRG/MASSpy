@@ -231,8 +231,6 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         * annotate_time_points_markersize
         * annotate_time_points_legend_loc
         * tile_ticks_on
-        * tile_xmargin
-        * tile_ymargin
         * tile_xlabel_fontdict
         * tile_ylabel_fontdict
         * data_tile_fontsize
@@ -288,9 +286,6 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
                 bounds=[i * sub_ax_placement_vals[0],
                         1 - sub_ax_placement_vals[0] * (j + 1),
                         sub_ax_placement_vals[1], sub_ax_placement_vals[1]])
-            # Set sub axes margins
-            v_util._set_axes_margins(sub_ax, x_default=0.15, y_default=0.15,
-                                     **kwargs)
             # Create tile (either phase_portrait, data, or empty)
             sub_ax = _create_tiled_phase_portraits_tile(
                 sub_ax, observable, i, j, x, y, plot_tile_placement,
@@ -352,6 +347,8 @@ def get_phase_portrait_default_kwargs(function_name):
         "title": None,
         "xlim": None,
         "ylim": None,
+        "xmargin": None,
+        "ymargin": None,
         "color": None,
         "linestyle": None,
         "linewidth": None,
@@ -373,19 +370,15 @@ def get_phase_portrait_default_kwargs(function_name):
         default_kwargs.update({
             "xlabel": None,
             "ylabel": None,
-            "xmargin": None,
-            "ymargin": None,
             "legend_ncol": None,
         })
 
     if function_name == "plot_tiled_phase_portraits":
         default_kwargs.update({
             "tile_ticks_on": False,
-            "tile_xmargin": None,
-            "tile_ymargin": None,
             "tile_xlabel_fontdict": None,
             "tile_ylabel_fontdict": None,
-            "data_tile_fontsize": None,
+            "data_tile_fontsize": "large",
             "data_tile_color": None,
             "diag_tile_color": None,
             "empty_tile_color": None,
@@ -426,6 +419,8 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
         else:
             # Otherwise kwarg belongs to the phase portrait and will be
             # validated in phase portrait function.
+            if "margin" in key and value is None:
+                value = 0.15
             pp_kwargs[key] = value
 
     # Iterate through tile colors, setting defaults if no color provided.
@@ -440,7 +435,7 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
     if pp_kwargs.get("annotate_time_points") is None:
         pp_kwargs["annotate_time_points"] = "endpoints"
         if pp_kwargs.get("annotate_time_points_color") is None:
-            pp_kwargs["annotate_time_points_color"] = ["r", "b"]
+            pp_kwargs["annotate_time_points_color"] = ["red", "blue"]
 
     return tile_kwargs, pp_kwargs
 
@@ -464,9 +459,13 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     i, j, x, y, plot_tile_placement, data_matrix, tile_kwargs, pp_kwargs = args
     plot_tile_bool = get_plot_tile_bool(i, j, plot_tile_placement)
 
-    # Make default data tile font size as large
-    if data_matrix and tile_kwargs.get("data_tile_fontsize") is None:
-        tile_kwargs["data_tile_fontsize"] = "large"
+    # Validate fontsize and set default data tile fontsize as large if needed.
+    if data_matrix and tile_kwargs.get("data_tile_fontsize"):
+        tile_kwargs["data_tile_fontsize"] = v_util._validate_kwarg_input(
+            "fontsize", tile_kwargs.get("data_tile_fontsize"),
+            prefix="data_tile")
+        if not tile_kwargs.get("data_tile_fontsize"):
+            tile_kwargs["data_tile_fontsize"] = "large"
 
     # Set diagonal tile color
     if i == j:

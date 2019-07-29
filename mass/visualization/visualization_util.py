@@ -379,6 +379,7 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
         "legend_ncol": rc.validate_int_or_None,
         "margin": rc.ValidateInterval(0, 1, closedmin=True, closedmax=True),
         "ticks_on": rc.validate_bool,
+        "fontsize": rc.validate_fontsize,
     }
     # Allow None to be returned
     if arg_value is not None:
@@ -630,7 +631,10 @@ def _set_axes_gridlines(ax, **kwargs):
                 grid_options[k] = v
 
         if isinstance(grid, bool):
-            ax.grid(grid, **grid_options)
+            if grid:
+                ax.grid(grid, **grid_options)
+            else:
+                ax.grid(None)
 
         elif isinstance(grid, Iterable) and len(grid) == 2:
             which, axis = grid
