@@ -89,12 +89,13 @@ def _validate_mass_solution(mass_solution):
         raise TypeError("mass_solution must be a mass.MassSolution.")
 
     if not mass_solution:
-        warn("The MassSolution is empty.")
+        warn("MassSolution '" + mass_solution.id + "' does not contain "
+             "any solutions.")
 
     return mass_solution
 
 
-def _validate_time_vector(time_points, default_time_points):
+def _validate_time_vector(time_vector, default_time_vector):
     """Validate the given vector of time points and return it.
 
     Warnings
@@ -102,13 +103,14 @@ def _validate_time_vector(time_points, default_time_points):
     This method is intended for internal use only.
 
     """
-    if time_points is None:
-        return np.array(default_time_points)
-    if isinstance(time_points, Iterable)\
-       and not isinstance(time_points, string_types):
-        return np.array(sorted(time_points))
+    # Ensure time_vector is valid
+    if time_vector is None:
+        return np.array(sorted(default_time_vector))
+    if isinstance(time_vector, Iterable)\
+       and not isinstance(time_vector, string_types):
+        return np.array(sorted(time_vector))
 
-    raise ValueError("Invalid input for 'time_points'.")
+    raise ValueError("Invalid input for 'time_vector'.")
 
 
 def _validate_plot_observables(mass_solution, observable, time_vector=None):
@@ -148,10 +150,12 @@ def _validate_plot_observables(mass_solution, observable, time_vector=None):
         time=mass_solution.time,
         interpolate=mass_solution.interpolate)
 
+    # Change the time points and solutions if the time_vector has changed
     if not np.array_equal(observable.time, time_vector):
         observable.interpolate = True
         observable.time = time_vector
 
+    # Turn interpolating functions into solutions.
     observable.interpolate = False
 
     return observable
@@ -236,61 +240,125 @@ def _validate_legend_input_fmt(legend, observable):
     return items[0], items[1]
 
 
-def _get_legend_args(ax, legend, observable, **kwargs):
-    """Validate whether the given ``legend`` can be interpreted.
+def _validate_annotate_time_points_input(*args):
+    """Validate the inputs for kwargs of ``annotate_time_point`` and return.
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    n_current = len(_get_ax_current(ax))
-    # Validate legend input format
-    legend_labels, legend_loc = _validate_legend_input_fmt(legend, observable)
-    if legend_labels is None:
-        _raise_kwarg_warning(
-            "legend",
-            msg="therefore utilizing keys from the MassSolution instead")
-        legend_labels = list(iterkeys(observable))
+    # Get args and determine minimum and maximum time points
+    time_vector, time_points, markers, marker_sizes = args
+    t_min = min(time_vector)
+    t_max = max(time_vector)
 
-    if legend_loc is None:
-        _raise_kwarg_warning(
-            "loc", msg="therefore utilizing default legend 'loc' instead",
-            kwarg_prefix="legend")
-        legend_loc = rc.defaultParams['legend.loc'][0]
-
-    if legend_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-        legend_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[legend_loc]
+    # Get the start and finish points
+    if time_points == "endpoints":
+        time_points = [t_min, t_max]
+        default_markers = ["o", "D"]
     else:
-        anchor = None
+        # Ensure the time points are iterable
+        time_points = ensure_iterable(time_points)
+        default_markers = ["o"] * len(time_points)
 
-    # Get the legend properties
-    ncols = _validate_kwarg_input("legend_ncol", kwargs.get("legend_ncol"))
-    if ncols is None:
-        ncols = int(math.ceil(math.sqrt(len(observable) + n_current) / 3))
+    # Get the default marker sizes
+    default_sizes = [
+        rc.defaultParams["lines.markersize"][0]] * len(default_markers)
 
-    legend_kwargs = {
-        "loc": legend_loc, "bbox_to_anchor": anchor, "ncol": ncols}
+    # Ensure time points are in the time vector
+    outside_t_range = []
+    for t in time_points:
+        if t_min <= t <= t_max:
+            continue
+        else:
+            outside_t_range += [t]
 
-    return legend_labels, legend_kwargs
+    # If outside the time range, no need to check markers or markersizes
+    if outside_t_range:
+        outside_t_range += [[t_min, t_max]]
+    else:
+        # Valdiate markers
+        if markers is not None and len(time_points) < len(markers):
+            _raise_kwarg_warning(
+                "marker",
+                msg=", therefore utilizing default 'markers' values instead",
+                kwarg_prefix="annotate_time_points")
+            markers = None
+
+        # Assign value dependning on whether validation was successful
+        markers = default_markers if not markers else markers
+
+        # Validate marker sizes
+        marker_sizes = _validate_time_points_marker_properties("markersize",
+                                                               marker_sizes,
+                                                               len(markers))
+        # Assign value dependning on whether validation was successful
+        marker_sizes = default_sizes if not marker_sizes else marker_sizes
+
+    return ([time_points, markers, marker_sizes], outside_t_range)
 
 
-def _map_labels_to_solutions(observable, legend_labels):
-    """Map the legend labels to the observable solutions and return.
+def _validate_time_points_marker_properties(marker_prop, values, num_expected):
+    """Validate marker properties such as markersize and color.
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    # Map solutions to labels
-    for old_label, new_label in zip(list(observable), list(legend_labels)):
-        observable[new_label.lstrip("_")] = observable.pop(old_label)
+    # Allow 'None' values
+    if values is not None:
+        values = ensure_iterable(values)
+        try:
+            # Check whether the values are valid
+            values = [
+                _validate_kwarg_input(
+                    marker_prop, v, prefix="annotate_time_points",
+                    as_warning=False) for v in values]
+            # Ensure that the number of values is equal to the number expected
+            if len(values) == 1:
+                values = values * num_expected
+            elif len(values) != num_expected:
+                raise ValueError(
+                    "wrong number of values for '{0}' provided".format(
+                        marker_prop))
+        except ValueError as e:
+            # Raise warning and set marker defaults if invalid input.
+            msg = str(e).lower()
+            msg += ", therefore utilizing default {0} values instead".format(
+                marker_prop)
+            _raise_kwarg_warning(marker_prop, msg=msg,
+                                 kwarg_prefix="annotate_time_points")
+            # Returning None causes defaults to be used.
+            values = None
 
-    return observable
+    return values
 
 
-def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True):
+def _validate_tile_placement(tile_placement, prefix=None):
+    """Validate the given ``tile_placement`` input.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Ensure tile placement value is valid
+    valid = {"all", "lower", "upper"}
+    if tile_placement.lower() not in valid:
+        arg_name = "tile_placement"
+        if prefix is not None:
+            arg_name = "_".join(("plot", arg_name))
+        raise ValueError(
+            "Invalid '{0}' input '{1}'. Can only be one of the following: "
+            "{2}.".format(arg_name, tile_placement, str(valid)))
+
+    return tile_placement.lower()
+
+
+def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
+                          alt_arg_name=None):
     """Validate whether the given ``input`` can be interpreted.
 
     Warnings
@@ -309,6 +377,8 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True):
         "grid_axis": rc.validate_grid_axis,
         "legend_loc": rc.validate_legend_loc,
         "legend_ncol": rc.validate_int_or_None,
+        "margin": rc.ValidateInterval(0, 1, closedmin=True, closedmax=True),
+        "ticks_on": rc.validate_bool,
     }
     # Allow None to be returned
     if arg_value is not None:
@@ -316,10 +386,12 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True):
         validator = KWARG_VALIDATION_FUNCTIONS[arg_name]
         try:
             arg_value = validator(arg_value)
-        except ValueError as e:
+        except (ValueError, RuntimeError) as e:
             # Return as error if warning disabled
             if not as_warning:
                 raise ValueError(e)
+            if alt_arg_name is not None:
+                arg_name = alt_arg_name
             # Otherwise raise warning and set arg_value to None
             _raise_kwarg_warning(arg_name, msg=e, kwarg_prefix=prefix)
             arg_value = None
@@ -342,6 +414,7 @@ def _get_plotting_function(ax, plot_function_str, valid):
         "loglog": ax.loglog
     }
 
+    # Ensure plotting function is valid
     if plot_function_str not in plotting_functions_dict\
        or plot_function_str not in valid:
         raise ValueError(
@@ -351,7 +424,63 @@ def _get_plotting_function(ax, plot_function_str, valid):
     return plotting_functions_dict[plot_function_str]
 
 
-def _get_line_properties(n_current, n_new, kwarg_prefix=None, **kwargs):
+def _get_legend_args(ax, legend, observable, **kwargs):
+    """Validate whether the given ``legend`` can be interpreted.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Validate legend input format
+    legend_labels, legend_loc = _validate_legend_input_fmt(legend, observable)
+    if legend_labels is None:
+        _raise_kwarg_warning(
+            "legend",
+            msg="therefore utilizing keys from the MassSolution instead")
+        legend_labels = list(iterkeys(observable))
+
+    if legend_loc is None:
+        _raise_kwarg_warning(
+            "loc", msg="therefore utilizing default legend 'loc' instead",
+            kwarg_prefix="legend")
+        legend_loc = rc.defaultParams['legend.loc'][0]
+
+    if legend_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
+        legend_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[legend_loc]
+    else:
+        anchor = None
+
+    # Get the current number of lines on the axes
+    n_current = len(_get_ax_current(ax))
+    # Get the legend properties
+    ncols = _validate_kwarg_input("legend_ncol", kwargs.get("legend_ncol"))
+    # Use a default number of columns based on the total number of items
+    if ncols is None:
+        ncols = int(math.ceil(math.sqrt(len(observable) + n_current) / 3))
+
+    legend_kwargs = {
+        "loc": legend_loc, "bbox_to_anchor": anchor, "ncol": ncols}
+
+    return legend_labels, legend_kwargs
+
+
+def _map_labels_to_solutions(observable, labels):
+    """Map the legend labels to the observable solutions and return.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Map solutions to labels
+    for old_label, new_label in zip(list(observable), list(labels)):
+        observable[new_label.lstrip("_")] = observable.pop(old_label)
+
+    return observable
+
+
+def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
     """Get the line propertie and return a cycler to be set.
 
     Warnings
@@ -535,105 +664,35 @@ def _set_axes_gridlines(ax, **kwargs):
             _raise_kwarg_warning("grid")
 
 
-def _validate_time_points_marker_properties(marker_prop, values, num_expected):
-    """Validate marker properties such as markersize and color.
+def _set_axes_margins(ax, x_default=None, y_default=None, **kwargs):
+    """Set the axes margins.
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    # Allow 'None' values
-    if values is not None:
-        values = ensure_iterable(values)
-        try:
-            # Check whether the values are valid
-            values = [
-                _validate_kwarg_input(
-                    marker_prop, v, prefix="annotate_time_points",
-                    as_warning=False) for v in values]
-            # Ensure that the number of values is equal to the number expected
-            if len(values) == 1:
-                values = values * num_expected
-            elif len(values) != num_expected:
-                raise ValueError(
-                    "wrong number of values for '{0}' provided".format(
-                        marker_prop))
-        except ValueError as e:
-            # Raise warning and set marker defaults if invalid input.
-            msg = str(e).lower()
-            msg += ", therefore utilizing default {0} values instead".format(
-                marker_prop)
-            _raise_kwarg_warning(marker_prop, msg=msg,
-                                 kwarg_prefix="annotate_time_points")
-            # Returning None causes defaults to be used.
-            values = None
+    for arg, margin_default in zip(["x", "y"], [x_default, y_default]):
+        margin_arg = arg + "margin"
+        # Validate margin value
+        margin_value = kwargs.get("tile_" + margin_arg, None)
+        if margin_value is not None:
+            margin_value = _validate_kwarg_input(
+                "margin", margin_value, prefix="tile", alt_arg_name=margin_arg)
 
-    return values
+        # Use default value if None
+        if margin_value is None:
+            # Use default from rcsetup
+            if margin_default is None:
+                margin_default = rc.defaultParams['axes.' + margin_arg][0]
+            margin_value = margin_default
+        # Set the margin value
+        getattr(ax, "set_" + margin_arg)(margin_value)
 
 
-def _validate_annotate_time_points_input(*args):
-    """Validate the inputs for kwargs of ``annotate_time_point`` and return.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    # Get args and determine minimum and maximum time points
-    time_vector, time_points, markers, marker_sizes = args
-    t_min = min(time_vector)
-    t_max = max(time_vector)
-
-    # Get the start and finish points
-    if time_points == "endpoints":
-        time_points = [t_min, t_max]
-        default_markers = ["o", "D"]
-    else:
-        # Ensure the time points are iterable
-        time_points = ensure_iterable(time_points)
-        default_markers = ["o"] * len(time_points)
-
-    # Get the default marker sizes
-    default_sizes = [
-        rc.defaultParams["lines.markersize"][0]] * len(default_markers)
-
-    # Ensure time points are in the time vector
-    outside_t_range = []
-    for t in time_points:
-        if t_min <= t <= t_max:
-            continue
-        else:
-            outside_t_range += [t]
-
-    # If outside the time range, no need to check markers or markersizes
-    if outside_t_range:
-        outside_t_range += [[t_min, t_max]]
-    else:
-        # Valdiate markers
-        if markers is not None and len(time_points) < len(markers):
-            _raise_kwarg_warning(
-                "marker",
-                msg=", therefore utilizing default 'markers' values instead",
-                kwarg_prefix="annotate_time_points")
-            markers = None
-
-        # Assign value dependning on whether validation was successful
-        markers = default_markers if not markers else markers
-
-        # Validate marker sizes
-        marker_sizes = _validate_time_points_marker_properties("markersize",
-                                                               marker_sizes,
-                                                               len(markers))
-        # Assign value dependning on whether validation was successful
-        marker_sizes = default_sizes if not marker_sizes else marker_sizes
-
-    return ([time_points, markers, marker_sizes], outside_t_range)
-
-
-def _annotate_time_points(ax, observable, type_of_plot=None, first_legend=None,
-                          **kwargs):
-    """Validate the given ``time_points`` and kwargs.
+def _set_annotated_time_points(ax, observable, type_of_plot=None,
+                               first_legend=None, **kwargs):
+    """Set the given ``time_points`` and kwargs.
 
     Warnings
     --------
@@ -701,18 +760,22 @@ def _annotate_time_points(ax, observable, type_of_plot=None, first_legend=None,
             for i, t in enumerate(time_points):
                 plot_function(t, items[i], label="t=" + str(t))
 
+    # Add the legend to the axes.
     if first_legend[0] is not None\
-       and not kwargs.get("annotate_time_points_legend_loc"):
-        ax = _add_annotated_time_points_legend_box(
+       and not kwargs.get("annotate_time_points_legend_loc")\
+       or kwargs.get("annotate_time_points_legend_loc"):
+        items = _get_annotated_time_points_legend_args(
             ax, desired_loc=kwargs.get("annotate_time_points_legend_loc"),
-            first_legend=first_legend[0], taken_loc=first_legend[1])
+            taken_loc=first_legend[1])
+
+        ax = _set_annotated_time_points_legend_box(ax, items, first_legend[0])
 
     return ax
 
 
-def _add_annotated_time_points_legend_box(ax, desired_loc=None,
-                                          first_legend=None, taken_loc=None):
-    """Add a legend box for the annotated time points.
+def _get_annotated_time_points_legend_args(ax, desired_loc=None,
+                                           taken_loc=None):
+    """Get the arguments needed for a legend box of the annotated time points.
 
     Warnings
     --------
@@ -720,24 +783,24 @@ def _add_annotated_time_points_legend_box(ax, desired_loc=None,
 
     """
     points, labels = _get_handles_and_labels(ax, time_points=True)
-
     labels_and_points = {}
     for point, label in zip(points, labels):
         # Only make a legend containing the latest set of time points if there
         # are duplicates.
         labels_and_points[label] = point
-
+    # Get points and labels as list
     points = list(itervalues(labels_and_points))
     labels = list(iterkeys(labels_and_points))
 
+    # Get the taken location (check if it is an outside location too)
     if taken_loc:
-        loc = taken_loc["loc"]
         bbox_to_anchor = taken_loc["bbox_to_anchor"]
+        taken_loc = taken_loc["loc"]
         for k, v in iteritems(OUTSIDE_LEGEND_LOCATION_AND_ANCHORS):
-            if v == (loc, bbox_to_anchor):
-                loc = k
-        taken_loc = loc
-
+            if v == (taken_loc, bbox_to_anchor):
+                taken_loc = k
+                break
+    # Make sure desired location is not alreadytaken
     if desired_loc is not None and desired_loc == taken_loc:
         msg = " location already used, utilizing default value instead"
         _raise_kwarg_warning(
@@ -746,36 +809,44 @@ def _add_annotated_time_points_legend_box(ax, desired_loc=None,
             kwarg_prefix="annotate_time_points")
         desired_loc = None
 
+    # Validate desired location
     elif desired_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
         desired_loc = _validate_kwarg_input("legend_loc", desired_loc)
 
+    # Set default desired location
     if desired_loc is None:
         desired_loc = "right " if taken_loc != "right outside" else "left "
         desired_loc += "outside"
 
+    # Get kwargs for legend location
     if desired_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
         desired_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired_loc]
     else:
         anchor = None
-    for old_legend in ax.get_children():
-        if old_legend.__class__.__name__ == "Legend":
-            old_legend.remove()
-    
-    ax.legend(points, labels, **{"loc": desired_loc, "bbox_to_anchor": anchor})
-    ax.add_artist(first_legend)
 
-    return ax
+    return points, labels, {"loc": desired_loc, "bbox_to_anchor": anchor}
 
 
-def _group_xy_items(xy, iterfunction):
-    """Seperate items in xy, grouping either the keys or the values.
+def _set_annotated_time_points_legend_box(ax, legend_args, first_legend=None):
+    """Set the legend box of the annotated time points.
 
     Warnings
     --------
     This method is intended for internal use only.
 
     """
-    return [i for i in list(iterfunction(xy))]
+    points, labels, legend_kwargs = legend_args
+    # Remove old legends
+    for old_legend in ax.get_children():
+        if old_legend.__class__.__name__ == "Legend":
+            old_legend.remove()
+
+    # Set legend, adding the first legend back if needed
+    ax.legend(points, labels, **legend_kwargs)
+    if first_legend:
+        ax.add_artist(first_legend)
+
+    return ax
 
 
 def _get_default_cycler():
@@ -844,6 +915,17 @@ def _get_handles_and_labels(ax, time_points):
     lines = _get_ax_current(ax, time_points=time_points)
     labels = [line.get_label() for line in lines]
     return (lines, labels)
+
+
+def _group_xy_items(xy, iterfunction):
+    """Seperate items in xy, grouping either the keys or the values.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    return [i for i in list(iterfunction(xy))]
 
 
 def _raise_kwarg_warning(kwarg_name, msg=None, kwarg_prefix=None):

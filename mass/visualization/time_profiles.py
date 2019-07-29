@@ -123,16 +123,15 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     kwargs = _check_kwargs(
         get_time_profile_default_kwargs("plot_time_profile"),
         kwargs)
-
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
 
-    # Make a copy of the MassSolution and validate time input (if any).
+    # Validate the MassSolution input, ensure it is not empty.
     mass_solution = v_util._validate_mass_solution(mass_solution)
     if not mass_solution:
         return ax
 
-    # Get the solutions to be observed.
+    # Get the solutions to be observed and validate time vector.
     observable = v_util._validate_plot_observables(mass_solution, observable,
                                                    kwargs.get("time_vector"))
 
@@ -151,7 +150,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
-    prop_cycler = v_util._get_line_properties(
+    prop_cycler = v_util._get_line_property_cycler(
         n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
         **kwargs)
     if prop_cycler:
@@ -172,10 +171,9 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         legend = ax.legend(*lines_and_labels, **legend_kwargs)
 
     if kwargs.get("annotate_time_points", None):
-        ax = v_util._annotate_time_points(
+        ax = v_util._set_annotated_time_points(
             ax, observable=observable, type_of_plot="time_profile",
             first_legend=(legend, legend_kwargs), **kwargs)
-
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
 
