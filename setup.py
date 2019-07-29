@@ -13,6 +13,7 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
 
 extras = {
     "json": "simplejson",
+    "plotting": "matplotlib>=3.0.0",
 }
 extras["all"] = sorted(list(extras))
 

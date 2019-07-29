@@ -33,10 +33,9 @@ from scipy.interpolate import interp1d
 from six import iteritems, iterkeys, string_types
 
 from mass.core.mass_model import MassModel
-from mass.core.visualization import (
-    plot_simulation, plot_tiled_phase_portrait)
 from mass.util.dict_with_id import DictWithID
 from mass.util.util import ensure_iterable
+from mass.visualization import plot_tiled_phase_portraits, plot_time_profile
 
 # Strings of valid solution types
 _CONC_STR = "Conc"
@@ -197,7 +196,7 @@ class MassSolution(DictWithID):
         setattr(self, "_interpolate", value)
 
     @property
-    def preview_time_profile(self):
+    def view_time_profile(self):
         """Generate a preview of the time profile for the solution.
 
         See :mod:`~mass.core.visualization` documentation for more information.
@@ -209,19 +208,27 @@ class MassSolution(DictWithID):
 
         """
         ax = plt.gca()
-        options = {"plot_function": "semilogx",
-                   "grid": ("major", "x"),
-                   "title": "Time Profile for " + self.id,
-                   "xlabel": "Time",
-                   "ylabel": (self.solution_type + "es"
-                              if self.solution_type[-1] == "x"
-                              else self.solution_type + "s")}
+        solution_type = ""
+        if self.solution_type == _CONC_STR:
+            solution_type += "Concentrations"
+
+        if self.solution_type == _FLUX_STR:
+            solution_type += "Fluxes"
+
+        options = {
+            "plot_function": "semilogx",
+            "grid": ("major", "x"),
+            "title": "TIme Profile for {0} {1}".format(self.id, solution_type),
+            "xlabel": "Time",
+            "ylabel": solution_type,
+        }
+
         ax.cla()
-        ax = plot_simulation(self, ax=ax, legend="right outside", **options)
+        ax = plot_time_profile(self, ax=ax, legend="right outside", **options)
         ax.get_figure().set_size_inches((6, 4))
 
     @property
-    def preview_phase_portraits(self):
+    def view_tiled_phase_portraits(self):
         """Generate a preview of the phase portraits for the solution.
 
         See :mod:`~mass.core.visualization` documentation for more information.
@@ -234,8 +241,16 @@ class MassSolution(DictWithID):
         """
         ax = plt.gca()
         ax.cla()
-        ax = plot_tiled_phase_portrait(self, ax=ax, empty_tiles=None,
-                                       title="Phase portraits for " + self.id)
+        title = ("Tiled Phase portraits for " + self.id, {"size": "large"})
+        ax = plot_tiled_phase_portraits(
+            self, ax=ax, **{
+                "title": title,
+                "annotate_time_points": "endpoints",
+                "annotate_time_points_color": ["r", "b"],
+                "annotate_time_points_marker": ["o", "D"],
+                "tile_xlabel_fontdict": {"size": "large"},
+                "tile_ylabel_fontdict": {"size": "large"},
+                "annotate_time_points_legend_loc": "right outside"})
         ax.get_figure().set_size_inches((7, 7))
 
     def __getattribute__(self, name):
