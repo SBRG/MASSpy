@@ -254,7 +254,7 @@ def _validate_annotate_time_points_input(*args):
     t_max = max(time_vector)
 
     # Get the start and finish points
-    if time_points == "endpoints":
+    if time_points.lower() == "endpoints":
         time_points = [t_min, t_max]
         default_markers = ["o", "D"]
     else:
@@ -664,7 +664,7 @@ def _set_axes_gridlines(ax, **kwargs):
             _raise_kwarg_warning("grid")
 
 
-def _set_axes_margins(ax, x_default=None, y_default=None, **kwargs):
+def _set_axes_margins(ax, x_default=None, y_default=None, tile=False, **kwargs):
     """Set the axes margins.
 
     Warnings
@@ -672,13 +672,18 @@ def _set_axes_margins(ax, x_default=None, y_default=None, **kwargs):
     This method is intended for internal use only.
 
     """
+    if tile:
+        prefix = "tile_"
+    else:
+        prefix = ""
     for arg, margin_default in zip(["x", "y"], [x_default, y_default]):
         margin_arg = arg + "margin"
         # Validate margin value
-        margin_value = kwargs.get("tile_" + margin_arg, None)
+        margin_value = kwargs.get(prefix + margin_arg, None)
         if margin_value is not None:
             margin_value = _validate_kwarg_input(
-                "margin", margin_value, prefix="tile", alt_arg_name=margin_arg)
+                "margin", margin_value, prefix=prefix.rstrip("_"),
+                alt_arg_name=margin_arg)
 
         # Use default value if None
         if margin_value is None:
@@ -937,7 +942,7 @@ def _raise_kwarg_warning(kwarg_name, msg=None, kwarg_prefix=None):
 
     """
     # Prefix kwarg_name if any prefix given
-    if kwarg_prefix is not None:
+    if kwarg_prefix:
         kwarg_name = "_".join((kwarg_prefix, kwarg_name))
 
     # Format warning message

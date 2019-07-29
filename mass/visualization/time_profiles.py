@@ -10,33 +10,6 @@ simulation of models.
 
     * :func:`~.time_profiles.plot_time_profile`
 
-The following are optional ``kwargs`` that can be passed to the functions
-from this module.
-
-    time_vector
-    plot_function
-    title
-    xlabel
-    ylabel
-    xlim
-    ylim
-    grid
-    grid_color
-    grid_linestyle
-    grid_linewidth
-    prop_cycle
-    color
-    linestyle
-    linewidth
-    marker
-    markersize
-    legend_ncol
-    annotate_time_points
-    annotate_time_points_color
-    annotate_time_points_marker
-    annotate_time_points_markersize
-    annotate_time_points_legend_loc
-
 """
 from six import iteritems
 
@@ -107,8 +80,8 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         * annotate_time_points_markersize
         * annotate_time_points_legend_loc
 
-        See :mod:`~mass.visualization.time_profiles` documentation
-        for more information on optional ``kwargs``.
+        See :mod:`~mass.visualization` documentation for more information on
+        optional ``kwargs``.
 
     Returns
     -------
@@ -163,6 +136,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
     v_util._set_axes_limits(ax, **kwargs)
+    v_util._set_axes_margins(ax, **kwargs)
     v_util._set_axes_gridlines(ax, **kwargs)
 
     # Set the legend if desired.
@@ -210,22 +184,24 @@ def get_time_profile_default_kwargs(function_name):
         "ylabel": None,
         "xlim": None,
         "ylim": None,
-        "grid": None,
-        "grid_color": None,
-        "grid_linestyle": None,
-        "grid_linewidth": None,
-        "prop_cycle": None,
+        "xmargin": None,
+        "ymargin": None,
         "color": None,
         "linestyle": None,
         "linewidth": None,
         "marker": None,
         "markersize": None,
+        "grid": None,
+        "grid_color": None,
+        "grid_linestyle": None,
+        "grid_linewidth": None,
         "legend_ncol": None,
         "annotate_time_points": None,
         "annotate_time_points_color": None,
         "annotate_time_points_marker": None,
         "annotate_time_points_markersize": None,
         "annotate_time_points_legend_loc": None,
+        "prop_cycle": None,
     }
 
     return default_kwargs

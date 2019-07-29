@@ -11,33 +11,6 @@ simulation of models.
     * :func:`~.phase_portraits.plot_phase_portrait`
     * :func:`~.phase_portraits.plot_tiled_phase_portrait`
 
-The following are optional ``kwargs`` that can be passed to the functions
-from this module.
-
-    time_vector
-    plot_function
-    title
-    xlabel
-    ylabel
-    xlim
-    ylim
-    grid
-    grid_color
-    grid_linestyle
-    grid_linewidth
-    prop_cycle
-    color
-    linestyle
-    linewidth
-    marker
-    markersize
-    legend_ncol
-    annotate_time_points
-    annotate_time_points_color
-    annotate_time_points_marker
-    annotate_time_points_markersize
-    annotate_time_points_legend_loc
-
 """
 from six import iteritems, iterkeys, itervalues
 
@@ -49,8 +22,8 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     """Plot phase portraits of solutions in a given :class:`.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
-    in the function. See the :mod:`.visualization.phase_portraits` module
-    documentation for more detailed information about the possible ``kwargs``.
+    in the function. See the :mod:`~mass.visualization` module documentation
+    for more detailed information about the possible ``kwargs``.
 
     Notes
     -----
@@ -87,7 +60,6 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         See the :mod:`~mass.visualization` documentation for more information
         about legend and valid legend locations.
     **kwargs
-
         * time_vector
         * plot_function
         * title
@@ -112,8 +84,8 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         * annotate_time_points_markersize
         * annotate_time_points_legend_loc
 
-        See :mod:`~mass.visualization.phase_portraits` documentation
-        for more information on optional ``kwargs``.
+        See :mod:`~mass.visualization` documentation for more information on
+        optional ``kwargs``.
 
     Returns
     -------
@@ -173,6 +145,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
     v_util._set_axes_limits(ax, **kwargs)
+    v_util._set_axes_margins(ax, **kwargs)
     v_util._set_axes_gridlines(ax, **kwargs)
 
     # Set the legend if desired.
@@ -197,8 +170,8 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     """Plot phase portraits of solutions in a given :class:`.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
-    in the function. See the :mod:`.visualization.phase_portraits` module
-    documentation for more detailed information about the possible ``kwargs``.
+    in the function. See the :mod:`~mass.visualization` module documentation
+    for more detailed information about the possible ``kwargs``.
 
     Notes
     -----
@@ -237,7 +210,6 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         be displayed on. All other values are ignored. If ``None`` then no
         data will be displayed and tiles will be left empty.
     **kwargs
-
         * time_vector
         * plot_function
         * title
@@ -258,9 +230,18 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         * annotate_time_points_marker
         * annotate_time_points_markersize
         * annotate_time_points_legend_loc
+        * tile_ticks_on
+        * tile_xmargin
+        * tile_ymargin
+        * tile_xlabel_fontdict
+        * tile_ylabel_fontdict
+        * data_tile_fontsize
+        * data_tile_color
+        * diag_tile_color
+        * empty_tile_color
 
-        See :mod:`~mass.visualization.phase_portraits` documentation
-        for more information on optional ``kwargs``.
+        See :mod:`~mass.visualization` documentation for more information on
+        optional ``kwargs``.
 
     Returns
     -------
@@ -342,6 +323,77 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     return ax
 
 
+def get_phase_portrait_default_kwargs(function_name):
+    """Get default ``kwargs`` for plotting functions in :mod:`phase_portraits`.
+
+    Parameters
+    ----------
+    function_name : str
+        The name of the plotting function to get the ``kwargs`` for.
+        Valid values include the following:
+
+            * ``"plot_phase_portrait"``
+            * ``"plot_tiled_phase_portraits"``
+
+    Returns
+    -------
+    dict
+        Default ``kwarg`` values for the given ``function_name``.
+
+    """
+    if function_name not in __all__[:-1]:
+        raise ValueError(
+            "Invalid 'function_name'. Valid values include the following: "
+            + str(__all__[:-1]))
+
+    default_kwargs = {
+        "time_vector": None,
+        "plot_function": "plot",
+        "title": None,
+        "xlim": None,
+        "ylim": None,
+        "color": None,
+        "linestyle": None,
+        "linewidth": None,
+        "marker": None,
+        "markersize": None,
+        "grid": None,
+        "grid_color": None,
+        "grid_linestyle": None,
+        "grid_linewidth": None,
+        "annotate_time_points": None,
+        "annotate_time_points_color": None,
+        "annotate_time_points_marker": None,
+        "annotate_time_points_markersize": None,
+        "annotate_time_points_legend_loc": None,
+        "prop_cycle": None,
+    }
+
+    if function_name == "plot_phase_portrait":
+        default_kwargs.update({
+            "xlabel": None,
+            "ylabel": None,
+            "xmargin": None,
+            "ymargin": None,
+            "legend_ncol": None,
+        })
+
+    if function_name == "plot_tiled_phase_portraits":
+        default_kwargs.update({
+            "tile_ticks_on": False,
+            "tile_xmargin": None,
+            "tile_ymargin": None,
+            "tile_xlabel_fontdict": None,
+            "tile_ylabel_fontdict": None,
+            "data_tile_fontsize": None,
+            "data_tile_color": None,
+            "diag_tile_color": None,
+            "empty_tile_color": None,
+        })
+
+    return default_kwargs
+
+
 def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
     """Seperate kwargs for tile properties from kwargs for phase portraits.
 
@@ -396,10 +448,6 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
 def _create_tiled_phase_portraits_tile(ax, observable, *args):
     """Create a tile for the tiled phase portrait figure.
 
-    "data_tile_color": None,
-            "diag_tile_color": None,
-            "empty_tile_color": None,
-
     Warnings
     --------
     This method is intended for internal use only.
@@ -444,75 +492,6 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
         ax.set_facecolor(tile_kwargs.get("empty_tile_color"))
 
     return ax
-
-
-def get_phase_portrait_default_kwargs(function_name):
-    """Get default ``kwargs`` for plotting functions in :mod:`phase_portraits`.
-
-    Parameters
-    ----------
-    function_name : str
-        The name of the plotting function to get the ``kwargs`` for.
-        Valid values include the following:
-
-            * ``"plot_phase_portrait"``
-            * ``"plot_tiled_phase_portraits"``
-
-    Returns
-    -------
-    dict
-        Default ``kwarg`` values for the given ``function_name``.
-
-    """
-    if function_name not in __all__[:-1]:
-        raise ValueError(
-            "Invalid 'function_name'. Valid values include the following: "
-            + str(__all__[:-1]))
-
-    default_kwargs = {
-        "time_vector": None,
-        "plot_function": "plot",
-        "title": None,
-        "xlim": None,
-        "ylim": None,
-        "grid": None,
-        "grid_color": None,
-        "grid_linestyle": None,
-        "grid_linewidth": None,
-        "prop_cycle": None,
-        "color": None,
-        "linestyle": None,
-        "linewidth": None,
-        "marker": None,
-        "markersize": None,
-        "annotate_time_points": None,
-        "annotate_time_points_color": None,
-        "annotate_time_points_marker": None,
-        "annotate_time_points_markersize": None,
-        "annotate_time_points_legend_loc": None
-    }
-
-    if function_name == "plot_phase_portrait":
-        default_kwargs.update({
-            "xlabel": None,
-            "ylabel": None,
-            "legend_ncol": None,
-        })
-
-    if function_name == "plot_tiled_phase_portraits":
-        default_kwargs.update({
-            "tile_ticks_on": False,
-            "tile_xmargin": None,
-            "tile_ymargin": None,
-            "tile_xlabel_fontdict": None,
-            "tile_ylabel_fontdict": None,
-            "data_tile_fontsize": None,
-            "data_tile_color": None,
-            "diag_tile_color": None,
-            "empty_tile_color": None,
-        })
-
-    return default_kwargs
 
 
 __all__ = ("plot_phase_portrait", "plot_tiled_phase_portraits",
