@@ -81,8 +81,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_DPGM" value="2300000"/>
             <localParameter id="kf_R_DPGM" value="1824.93653567151"/>
+            <localParameter id="Keq_R_DPGM" value="2300000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -299,8 +299,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_o2_c" value="1"/>
             <localParameter id="kf_R_SK_o2_c" value="509726"/>
+            <localParameter id="Keq_R_SK_o2_c" value="1"/>
             <localParameter id="o2_b" value="0.0200788"/>
           </listOfLocalParameters>
         </kineticLaw>

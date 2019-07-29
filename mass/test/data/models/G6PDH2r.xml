@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -130,8 +130,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r_1" value="41.6666666666667"/>
             <localParameter id="kf_R_G6PDH2r_1" value="1000000"/>
+            <localParameter id="Keq_R_G6PDH2r_1" value="41.6666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -170,8 +170,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_2" value="1000000"/>
             <localParameter id="Keq_R_G6PDH2r_2" value="22.7272727272727"/>
+            <localParameter id="kf_R_G6PDH2r_2" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -210,8 +210,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_3" value="2246662"/>
             <localParameter id="Keq_R_G6PDH2r_3" value="37.037037037037"/>
+            <localParameter id="kf_R_G6PDH2r_3" value="2246662"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -290,8 +290,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_5" value="32233627"/>
             <localParameter id="Keq_R_G6PDH2r_5" value="52.6315789473684"/>
+            <localParameter id="kf_R_G6PDH2r_5" value="32233627"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -366,8 +366,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r_7" value="977.142857142857"/>
             <localParameter id="kf_R_G6PDH2r_7" value="3412567"/>
+            <localParameter id="Keq_R_G6PDH2r_7" value="977.142857142857"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

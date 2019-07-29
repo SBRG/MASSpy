@@ -15,8 +15,8 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
@@ -170,8 +170,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HEX1_2" value="0.015"/>
             <localParameter id="kf_R_HEX1_2" value="1000000"/>
+            <localParameter id="Keq_R_HEX1_2" value="0.015"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -210,8 +210,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
             <localParameter id="kf_HEX1_G" value="57889"/>
+            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -250,8 +250,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
             <localParameter id="kf_HEX1_A" value="2305855"/>
+            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -330,8 +330,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
             <localParameter id="kf_HEX1_A" value="2305855"/>
+            <localParameter id="Keq_HEX1_A" value="0.485436893203884"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -370,8 +370,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
             <localParameter id="kf_HEX1_G" value="57889"/>
+            <localParameter id="Keq_HEX1_G" value="26.3157894736842"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

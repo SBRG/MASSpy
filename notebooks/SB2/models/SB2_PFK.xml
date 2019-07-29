@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -301,8 +301,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
             <localParameter id="Keq_R_HEX1" value="850"/>
+            <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -503,8 +503,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PGM" value="0.147059"/>
             <localParameter id="kf_R_PGM" value="4868.58929925345"/>
+            <localParameter id="Keq_R_PGM" value="0.147059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -533,8 +533,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_ENO" value="1.69492"/>
             <localParameter id="kf_R_ENO" value="1763.74052539353"/>
+            <localParameter id="Keq_R_ENO" value="1.69492"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -668,8 +668,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_ADK1" value="1.65"/>
             <localParameter id="kf_R_ADK1" value="100000"/>
+            <localParameter id="Keq_R_ADK1" value="1.65"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -694,9 +694,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_pyr_c" value="744.186046511621"/>
-            <localParameter id="pyr_b" value="0.06"/>
             <localParameter id="Keq_R_SK_pyr_c" value="1"/>
+            <localParameter id="pyr_b" value="0.06"/>
+            <localParameter id="kf_R_SK_pyr_c" value="744.186046511621"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -721,9 +721,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
             <localParameter id="kf_R_SK_lac__L_c" value="5.6"/>
             <localParameter id="lac__L_b" value="1"/>
-            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -792,8 +792,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
+            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="glc__D_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -846,8 +846,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_h_c" value="100000"/>
             <localParameter id="h_b" value="6.30957e-05"/>
+            <localParameter id="kf_R_SK_h_c" value="100000"/>
             <localParameter id="Keq_R_SK_h_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -873,8 +873,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="h2o_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -900,9 +900,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_pi_c" value="0.26"/>
             <localParameter id="pi_b" value="2.5"/>
             <localParameter id="Keq_R_SK_pi_c" value="1"/>
+            <localParameter id="kf_R_SK_pi_c" value="0.26"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -942,8 +942,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="4240227"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -983,8 +983,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1137,8 +1137,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="4240227"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1178,8 +1178,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1340,8 +1340,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="4240227"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1381,8 +1381,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1543,8 +1543,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="4240227"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1584,8 +1584,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1744,8 +1744,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_A" value="4240227"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
+            <localParameter id="kf_PFK_A" value="4240227"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1785,8 +1785,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5355749"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5355749"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
