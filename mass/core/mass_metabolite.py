@@ -46,10 +46,10 @@ class MassMetabolite(Metabolite):
         metabolite object. If an existing metabolite object is
         provided, a new :class:`MassMetabolite` is instantiated with the same
         properties as the original metabolite.
-    formula : str
-        Chemical formula associated with the metabolite (e.g. H2O).
     name : str
         A human readable name for the metabolite.
+    formula : str
+        Chemical formula associated with the metabolite (e.g. H2O).
     charge : float
         The charge number associated with the metabolite.
     compartment : str
@@ -60,7 +60,7 @@ class MassMetabolite(Metabolite):
 
     """
 
-    def __init__(self, id_or_specie=None, formula=None, name="",
+    def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
         # pylint: disable=too-many-arguments
         """Initialize the MassMetabolite."""

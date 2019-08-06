@@ -1153,12 +1153,12 @@ class MassModel(Model):
             # Create additional matrix for moieties
             for met in self.metabolites:
                 element_dict = met.elements
-                for moiety in moieties:
-                    if moiety in element_dict:
+                for element in moieties:
+                    if element in element_dict:
                         amount = 1
                     else:
                         amount = 0
-                    moiety_mat[moieties.index(moiety), m_ind(met)] = amount
+                    moiety_mat[moieties.index(element), m_ind(met)] = amount
             # Concatenate matrices
             elem_mat = np.concatenate((elem_mat, moiety_mat), axis=0)
             row_ids.extend(moieties)
@@ -1374,7 +1374,7 @@ class MassModel(Model):
         # Add boundary conditions from right to left model.
         existing = [bc for bc in iterkeys(new_model.boundary_conditions)]
         new_model.add_boundary_conditions({
-            met: bc for met, bc in iteritems(right.boundary_conditions)
+            m: bc for m, bc in iteritems(right.boundary_conditions)
             if bc not in existing})
 
         # Add custom parameters from right to left model.
@@ -1383,59 +1383,60 @@ class MassModel(Model):
             cp: v for cp, v in iteritems(right.custom_parameters)
             if cp not in existing})
 
+        def prefix_existing_id(to_prefix):
+            """Prefix the ID and return it."""
+            return '{0}{1}'.format(prefix_existing, to_prefix)
+
         # Add custom rates from right to left model,
         # prefixing any existing reactions if necessary
-        existing = {}
         if prefix_existing is not None:
-            for rxn, rate in iteritems(right.custom_rates):
-                rid = '{0}{1}'.format(prefix_existing, rxn.id)
-                if rid in new_model.reactions:
-                    existing.update({rid: rate})
-                else:
-                    existing.update({rxn.id: rate})
+            existing = dict((prefix_existing_id(r.id), rate)
+                            if prefix_existing_id(r.id) in new_model.reactions
+                            else (r.id, rate)
+                            for r, rate in iteritems(right.custom_rates))
+        else:
+            existing = {}
 
-        for rate_dict in [right.custom_rates, existing]:
-            new_model.custom_rates.update({
-                new_model.reactions.get_by_id(getattr(rxn, "_id", rxn)): rate
-                for rxn, rate in iteritems(rate_dict)})
+        existing.update(right.custom_rates)
+        new_model.custom_rates.update({
+            new_model.reactions.get_by_id(getattr(r, "_id", r)): rate
+            for r, rate in iteritems(existing)})
 
-        new_groups = deepcopy(right.groups)
+        new_items = deepcopy(right.groups)
         if prefix_existing is not None:
-            existing = new_groups.query(
+            existing = new_items.query(
                 lambda group: group.id in self.groups)
             for group in existing:
-                group.id = '{0}{1}'.format(prefix_existing, group.id)
-        new_model.add_groups(new_groups)
+                group.id = prefix_existing_id(group.id)
+        new_model.add_groups(new_items)
 
-        def existing_enzyme_filter(enzyme_module):
+        def existing_enzyme_filter(enzyme):
             """Filter existing EnzymeModules."""
-            if enzyme_module.id in self.enzyme_modules:
+            if enzyme.id in self.enzyme_modules:
                 LOGGER.warning(
                     "Ignoring enzyme module '%s' since it already exists.",
-                    enzyme_module.id)
+                    enzyme.id)
                 return False
             return True
 
         # Add enzyme_modules from right to left model
         if right.enzyme_modules:
-            new_enzyme_modules = deepcopy(right.enzyme_modules)
+            new_items = deepcopy(right.enzyme_modules)
             # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
-                existing = new_enzyme_modules.query(
+                existing = new_items.query(
                     lambda e: e.id in self.enzyme_modules)
                 for enzyme in existing:
-                    enzyme.__dict__["_id"] = prefix_existing + "_" + enzyme.id
+                    enzyme.__dict__["_id"] = prefix_existing_id(enzyme.id)
 
             # Check whether reactions exist in the model.
-            new_enzyme_modules = DictList(filter(existing_enzyme_filter,
-                                                 new_enzyme_modules))
-            new_model.enzyme_modules += new_enzyme_modules
+            new_items = DictList(filter(existing_enzyme_filter, new_items))
+            new_model.enzyme_modules += new_items
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        if right.units:
-            new_model.add_units([
-                u for u in right.units if u not in new_model.units])
+        new_model.add_units([
+            u for u in right.units if u not in new_model.units])
 
         for attr in ["_compartments", "notes", "annotation"]:
             existing = getattr(new_model, attr).copy()
@@ -1977,40 +1978,33 @@ class MassModel(Model):
         replace = True
         if "replace" in additional_notes:
             replace = additional_notes.pop("replace")
-        mml = additional_notes.get("max_line_length", None)
-        if mml is not None:
-            del additional_notes["max_line_length"]
-            if not isinstance(mml, integer_types) or not 50 <= mml < 100:
-                warnings.warn(
-                    "max_line_length not an int between 50 and 100 "
-                    "using default value.")
-                mml = 80
-        else:
+        mml = 80
+        if "max_line_length" in additional_notes:
+            mml = additional_notes.pop("max_line_length")
+        if not isinstance(mml, integer_types) or not 50 <= mml < 100:
+            warnings.warn(
+                "max_line_length not an int between 50 and 100 "
+                "using default value.")
             mml = 80
-
-        warn_str = "{0} '{1}' is not a string, therefore it will be ignored"
-
-        def replace_underscore(string):
-            """Replace underscores with spaces."""
-            return string.replace("_", " ")
 
         def add_to_description(description, key, value, key_newline=False,
                                captialize=True):
             """Add to the description string."""
             if captialize:
                 key = key.capitalize()
-            key = replace_underscore(key)
+            key = key.replace("_", " ")
             display_str = key
             if key_newline:
                 key = "  "
                 display_str += "\n" + key
-            display_str += value[:mml - len(key)] + "\n"
-            if len(value) > mml - len(key):
-                while len(value) > mml - len(key):
-                    value = value[mml - len(key):]
-                    display_str += len(key) * " " + value[:mml - len(key)]
+            n_key = len(key)
+            display_str += value[:mml - n_key] + "\n"
+            if len(value) > mml - n_key:
+                while len(value) > mml - n_key:
+                    value = value[mml - n_key:]
+                    display_str += n_key * " " + value[:mml - n_key]
                     display_str += "\n"
-                display_str += value[mml - len(key):]
+                display_str += value[mml - n_key:]
             else:
                 display_str = key + value
             description = "\n".join((description, display_str))
@@ -2022,21 +2016,25 @@ class MassModel(Model):
         for key in ["organism", "cell_type"]:
             value = additional_notes.get(key, "")
             if not isinstance(key, string_types):
-                warnings.warn(warn_str.format(key, str(value)))
+                warnings.warn(
+                    "{0} '{1}' is not a string, therefore it will "
+                    "be ignored".format(key, str(value)))
                 continue
-            if value:
-                description = add_to_description(
-                    description, key + ":", value)
+
+            description = add_to_description(
+                description, key + ":", value) if value else description
+
             if key in additional_notes:
-                additional_notes.pop(key)
+                del additional_notes[key]
         # Handle assumptions
         if assumptions:
             description += "\n".join((
                 "", "=" * mml, "Assumptions", "-" * mml))
             for assumption in ensure_iterable(assumptions):
                 if not isinstance(assumption, string_types):
-                    warnings.warn(warn_str.format(
-                        "Assumption", str(assumption)))
+                    warnings.warn(
+                        "{0} '{1}' is not a string, therefore it will be "
+                        "ignored".format("Assumption", str(assumption)))
                     continue
                 description = add_to_description(
                     description, " * ", assumption, captialize=False)

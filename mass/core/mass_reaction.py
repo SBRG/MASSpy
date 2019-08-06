@@ -57,7 +57,8 @@ from copy import copy, deepcopy
 from operator import attrgetter
 
 from cobra.core.metabolite import Metabolite
-from cobra.core.reaction import (Reaction, _reverse_arrow_finder)
+from cobra.core.reaction import (
+    Reaction, _reverse_arrow_finder, _reversible_arrow_finder)
 from cobra.util.util import format_long_string
 
 from six import iteritems, itervalues, string_types
@@ -1061,16 +1062,27 @@ class MassReaction(Reaction):
 
         """
         # pylint: disable=too-many-arguments
+        is_reversible = self.reversible
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             super(MassReaction, self).build_reaction_from_string(
                 reaction_str, verbose, fwd_arrow, rev_arrow, reversible_arrow,
                 term_split)
+
+        reversible_arrow_finder = _reversible_arrow_finder \
+            if reversible_arrow is None \
+            else re.compile(re.escape(reversible_arrow))
+
         reverse_arrow_finder = _reverse_arrow_finder if rev_arrow is None \
             else re.compile(re.escape(rev_arrow))
 
-        arrow_match = reverse_arrow_finder.search(reaction_str)
-        if arrow_match:
+        if not is_reversible and reversible_arrow_finder.search(reaction_str):
+            warnings.warn(
+                "Reaction '{0}' was previously set as `reversible=False`, but "
+                "now has `reversible=True` due to the inferred reaction arrow "
+                "in `reaction_str`.".format(self.id))
+
+        if reverse_arrow_finder.search(reaction_str):
             # Reverse the stoichiometry of the reaction
             self.reverse_stoichiometry(inplace=True, reverse_bounds=True)
 

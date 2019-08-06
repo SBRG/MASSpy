@@ -129,7 +129,7 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
     exclude_parent : bool
         If ``True``, only display public attributes and methods specific to
         the current class, excluding those inherited from the parent class.
-        Overridden and extended methods are not excluded. 
+        Overridden and extended methods are not excluded.
 
     """
     all_public = [i.strip("_") for i in obj.__dict__]

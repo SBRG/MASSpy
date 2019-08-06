@@ -653,8 +653,7 @@ def _set_axes_gridlines(ax, **kwargs):
                 _validate_kwarg_input("grid_axis", axis, as_warning=False)
             except ValueError as e:
                 # Format warning message
-                if msg:
-                    msg += " and "
+                msg += " and " if msg else ""
                 msg += str(e).split(":")[-1].strip()
                 msg += " for grid 'which' argument"
                 axis = None

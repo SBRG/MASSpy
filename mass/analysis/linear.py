@@ -604,6 +604,7 @@ def _ensure_dense_matrix(matrix):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     if isinstance(matrix, (np.ndarray, pd.DataFrame)):
         pass

@@ -440,7 +440,8 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     for dictionary in [met_syms, fix_syms, rate_syms, custom_syms]:
         symbol_dict.update(dictionary)
     custom_rate_expr = sym.sympify(custom_rate_expr, locals=symbol_dict)
-
+    custom_rate_expr = _set_fixed_metabolites_in_rate(reaction,
+                                                      custom_rate_expr)
     return custom_rate_expr
 
 
@@ -477,6 +478,7 @@ def _remove_metabolites_from_rate(reaction):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     reaction = reaction.copy()
     # Get exclusion criteria and reaction metabolites
@@ -509,6 +511,7 @@ def _mk_met_func(met):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     return dynamicsymbols(str(met))
 
@@ -519,6 +522,7 @@ def _set_fixed_metabolites_in_rate(reaction, rate):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     to_strip = [str(metabolite) for metabolite in list(reaction.metabolites)
                 if metabolite.fixed]
