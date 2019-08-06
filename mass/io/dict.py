@@ -12,6 +12,7 @@ from collections import OrderedDict
 from operator import attrgetter, itemgetter
 
 from cobra.io.dict import gene_from_dict, gene_to_dict
+from cobra.util.solver import set_objective
 
 import numpy as np
 
@@ -40,7 +41,7 @@ _REQUIRED_REACTION_ATTRIBUTES = [
 _ORDERED_OPTIONAL_REACTION_KEYS = [
     "subsystem", "steady_state_flux", "_forward_rate_constant",
     "_reverse_rate_constant", "_equilibrium_constant", "objective_coefficient",
-    "variable_kind", "_rtype", "notes", "annotation"]
+    "_rate", "notes", "annotation"]
 _OPTIONAL_REACTION_ATTRIBUTES = {
     "subsystem": "",
     "steady_state_flux": None,
@@ -48,8 +49,7 @@ _OPTIONAL_REACTION_ATTRIBUTES = {
     "_equilibrium_constant": None,
     "_reverse_rate_constant": None,
     "objective_coefficient": 0,
-    "variable_kind": "continuous",
-    "_rtype": 1,
+    "_rate": None,
     "notes": {},
     "annotation": {}
 }
@@ -60,7 +60,7 @@ _OPTIONAL_ENZYMEMODULEREACTION_ATTRIBUTES = {}
 _REQUIRED_METABOLITE_ATTRIBUTES = ["id", "name"]
 _ORDERED_OPTIONAL_METABOLITE_KEYS = [
     "formula", "charge", "compartment", "fixed", "_initial_condition",
-    "_constraint_sense", "_bound", "notes", "annotation"]
+    "_bound", "notes", "annotation"]
 _OPTIONAL_METABOLITE_ATTRIBUTES = {
     "charge": None,
     "formula": None,
@@ -68,7 +68,6 @@ _OPTIONAL_METABOLITE_ATTRIBUTES = {
     "fixed": False,
     "_initial_condition": None,
     "_bound": 0,
-    "_constraint_sense": "E",
     "notes": {},
     "annotation": {}
 }
@@ -213,6 +212,12 @@ def model_from_dict(obj):
     # Add reactions to the model
     model.add_reactions([
         reaction_from_dict(reaction, model) for reaction in obj["reactions"]])
+
+    # Add objective coefficients to the model
+    set_objective(model, {
+        model.reactions.get_by_id(rxn["id"]): rxn["objective_coefficient"]
+        for rxn in obj["reactions"]
+        if rxn.get("objective_coefficient", 0) != 0})
 
     # Add units to the model
     model.add_units([unit_from_dict(unit_def) for unit_def in obj["units"]])
@@ -400,7 +405,7 @@ def reaction_from_dict(reaction, model):
         # Change infinity type from a string to a float
         if isinstance(v, string_types) and v == "inf":
             v = _INF
-        if k in {"objective_coefficient", "reaction"}:
+        if k in {"objective_coefficient", "reaction", "_rate"}:
             continue
         elif k == "metabolites":
             new_reaction.add_metabolites(OrderedDict(
@@ -408,6 +413,12 @@ def reaction_from_dict(reaction, model):
                 for met, coeff in iteritems(v)))
         else:
             setattr(new_reaction, k, v)
+
+    for rate_type in [1, 2, 3]:
+        rate = new_reaction.get_mass_action_rate(rate_type)
+        if str(rate) == new_reaction._rate:
+            setattr(new_reaction, "_rate", rate)
+            break
 
     return new_reaction
 
@@ -447,8 +458,7 @@ def enzyme_to_dict(enzyme):
         key += "_categorized"
         if getattr(enzyme, key) != _OPTIONAL_ENZYMEMODULE_ATTRIBUTES[key]:
             new_enzyme[key] = {
-                category: [i.id for i in old_dictlist]
-                for category, old_dictlist in iteritems(getattr(enzyme, key))}
+                g.id: [i.id for i in g.members] for g in getattr(enzyme, key)}
 
     for key in ["enzyme_concentration_total_equation",
                 "enzyme_net_flux_equation"]:
@@ -639,6 +649,7 @@ def _fix_type(value):
     This method is intended for internal use only.
 
     """
+    # pylint: disable=too-many-return-statements
     if isinstance(value, (string_types, Basic)):
         return str(value)
     if isinstance(value, np.float_):

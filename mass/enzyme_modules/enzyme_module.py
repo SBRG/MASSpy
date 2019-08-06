@@ -49,17 +49,17 @@ a later time. See the :mod:`~.enzyme_module_dict` documentation for more
 information about the :class:`~.EnzymeModuleDict`.
 """
 import re
-from collections import defaultdict
-from copy import deepcopy
+from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
 
 from cobra.core.dictlist import DictList
+from cobra.core.group import Group
 from cobra.util.context import get_context
 
 import numpy as np
 
-from six import integer_types, iteritems, iterkeys, itervalues, string_types
+from six import integer_types, iteritems, iterkeys, string_types
 
 import sympy as sym
 
@@ -114,20 +114,18 @@ class EnzymeModule(MassModel):
         A :class:`~cobra.core.dictlist.DictList` where keys are the
         reaction identifiers and the values are the associated
         :class:`~.EnzymeModuleReaction`\ s.
-    enzyme_module_ligands_categorized : dict
-        A dictionary of user-categorized ligands where keys are categories and
-        values are :class:`~cobra.core.dictlist.DictList` of corresponding
-        :class:`~.MassMetabolite`\ s.
-    enzyme_module_species_categorized : dict
-        A dictionary of user-categorized :class:`~.EnzymeModuleSpecies` where
-        keys are categories and values are
-        :class:`~cobra.core.dictlist.DictList` of the corresponding
-        :class:`~.EnzymeModuleSpecies`.
-    enzyme_module_reactions_categorized : dict
-        A dictionary of user-categorized enzymatic binding reactions where
-        keys are categories and values are
-        :class:`~cobra.core.dictlist.DictList` of the corresponding
-        :class:`~.EnzymeModuleReaction`\ s.
+    enzyme_module_ligands_categorized : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where keys are the
+        group identifiers and the values are the associated categorized groups
+        containing :class:`~.MassMetabolite`\ s.
+    enzyme_module_species_categorized : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where keys are the
+        group identifiers and the values are the associated categorized groups
+        containing :class:`~.EnzymeModuleSpecies`\ s.
+    enzyme_module_reactions_categorized : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where keys are the
+        group identifiers and the values are the associated categorized groups
+        containing :class:`~.EnzymeModuleReaction`\ s.
     enzyme_concentration_total : float
         A non-negative value representing the total enzyme concentration.
     enzyme_net_flux : float
@@ -145,6 +143,7 @@ class EnzymeModule(MassModel):
     def __init__(self, id_or_model=None, name=None, subsystem="",
                  matrix_type="dense", dtype=np.float64):
         """Initialize the EnzymeModule."""
+        # pylint: disable=too-many-arguments
         super(EnzymeModule, self).__init__(
             id_or_model=id_or_model, name=name, matrix_type=matrix_type,
             dtype=dtype)
@@ -156,9 +155,9 @@ class EnzymeModule(MassModel):
         self.enzyme_module_reactions = DictList()
 
         # Initialize a dict of DictLists for storing categorized objects
-        self._enzyme_module_ligands_categorized = {"Undefined": DictList()}
-        self._enzyme_module_species_categorized = {"Undefined": DictList()}
-        self._enzyme_module_reactions_categorized = {"Undefined": DictList()}
+        self._enzyme_module_ligands_categorized = DictList()
+        self._enzyme_module_species_categorized = DictList()
+        self._enzyme_module_reactions_categorized = DictList()
 
         # Initialize EnzymeModule attributes
         self._enzyme_concentration_total = None
@@ -169,7 +168,7 @@ class EnzymeModule(MassModel):
     def enzyme_total_symbol(self):
         """Get the symbol for the total enzyme concentration."""
         if self.id is None:
-            return sym.Symbol("Enzyme_Total")
+            return None
 
         return sym.Symbol(self.id + "_Total")
 
@@ -177,7 +176,7 @@ class EnzymeModule(MassModel):
     def enzyme_flux_symbol(self):
         """Get the symbol for the net flux through the enzyme."""
         if self.id is None:
-            return sym.Symbol("v")
+            return None
 
         return sym.Symbol("v_" + self.id)
 
@@ -251,7 +250,12 @@ class EnzymeModule(MassModel):
             containing the sum of the :class:`~.EnzymeModuleSpecies`.
 
         """
+        if self.enzyme_total_symbol is None:
+            warn("No enzyme total symbol. Define the EnzymeModule ID first.")
+            return None
+
         if not self.enzyme_module_species:
+            warn("No EnzymeModuleSpecies found in EnzymeModule.")
             return None
 
         # First try only using enzyme module species that reference this module
@@ -287,6 +291,10 @@ class EnzymeModule(MassModel):
             enzyme.
 
         """
+        if self.enzyme_flux_symbol is None:
+            warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
+            return None
+
         value = getattr(self, "_enzyme_net_flux_equation", None)
         if value is not None:
             value = sym.Eq(self.enzyme_flux_symbol, value)
@@ -295,7 +303,8 @@ class EnzymeModule(MassModel):
     @enzyme_net_flux_equation.setter
     def enzyme_net_flux_equation(self, equation_rhs):
         """Set the net rate equation of the enzyme."""
-        if equation_rhs is not None:
+        # Set the equation RHS
+        if equation_rhs is not None and self.enzyme_flux_symbol is not None:
             if not isinstance(equation_rhs, (sym.Basic, string_types)):
                 raise TypeError("equation_rhs must be a sympy expression.")
             if isinstance(equation_rhs, string_types):
@@ -317,171 +326,116 @@ class EnzymeModule(MassModel):
         -----
         * A ligand must already exist in the :class:`EnzymeModule` as a
           :class:`~.MassMetabolite` in order to set its category.
-        * If categories already exists, their existing contents are replaced.
-        * Categories with empty :class:`~cobra.core.dictlist.DictList`\ s
-          are removed.
+        * If categories already exists, their existing contents are updated.
+        * Setting an empty ``list`` for a category in the dict will cause that
+          particular category group to be removed completely from the model.
+        * Setting an empty ``dict`` will cause ALL category groups to be
+          removed completely from the model.
 
         Parameters
         ----------
-        value : dict
-            A dictionary where keys are the strings representing the
-            categories of the ligands, and values are ``list``\ s containing
-            the corresponding :class:`~.MassMetabolite`\ s.
-            An empty ``dict`` will cause a reset, placing all ligands into an
-            ``"Undefined"`` category.
+        value : ~cobra.core.group.Group or dict
+            Either a :class:`cobra.Group <cobra.core.group.Group>` to add
+            to the categorized ligands, or a ``dict`` where keys are strings
+            representing categories for the ligands, and values are ``lists``
+            containing the corresponding :class:`~.MassMetabolite`\ s or
+            their identifiers.
 
-        See Also
-        --------
-        set_enzyme_object_category
-            Method to categorize ligands as :class:`~.MassMetabolite`\ s
-            without replacing existing category contents.
+            An empty ``list`` will remove the corresponding category from the
+            model and attribute.
+
+            An empty ``dict`` will remove all categories from the attribute
+            and the model.
 
         """
-        return self._remove_empty_categories(
-            "_enzyme_module_ligands_categorized")
+        return getattr(self, "_enzyme_module_ligands_categorized")
 
     @enzyme_module_ligands_categorized.setter
     def enzyme_module_ligands_categorized(self, value):
-        """Set categories(s) for ligands using a ``dict``."""
-        if not isinstance(value, dict):
-            raise TypeError("value must be a dict")
-
-        self._set_category_attribute_dict(
-            value, "_enzyme_module_ligands_categorized")
+        """Create category group(s) for ligands."""
+        self._set_category_attribute(value, attr="enzyme_module_ligands",
+                                     to_filter="MassMetabilite")
 
     @property
     def enzyme_module_species_categorized(self):
-        r"""Get or set categories for :class:`~.EnzymeModuleSpecies`.
+        r"""Get or set categories for enzyme module species.
 
         Notes
         -----
-        * An enzymatic species must already exist in the :class:`EnzymeModule`
-          as a :class:`~.EnzymeModuleSpecies` in order to set its category.
-        * If categories already exists, their existing contents are replaced.
-        * Categories with empty :class:`~cobra.core.dictlist.DictList`\ s
-          are removed.
+        * An enzyme module specie must already exist in the
+          :class:`EnzymeModule` as an :class:`~.EnzymeModuleSpecies` in order
+          to set its category.
+        * If categories already exists, their existing contents are updated.
+        * Setting an empty ``list`` for a category in the dict will cause that
+          particular category group to be removed completely from the model.
+        * Setting an empty ``dict`` will cause ALL category groups to be
+          removed completely from the model.
 
         Parameters
         ----------
-        value : dict
-            A dictionary where keys are the strings representing the
-            categories of the enzymatic species, and values are ``list``\ s
-            containing the corresponding :class:`~.EnzymeModuleSpecies`\ s.
-            An empty ``dict`` will cause a reset, placing all enzymatic species
-            into an ``"Undefined"`` category.
+        value : ~cobra.core.group.Group or dict
+            Either a :class:`cobra.Group <cobra.core.group.Group>` to add
+            to the categorized enzyme module species, or a ``dict`` where keys
+            are strings representing categories for the enzyme module species,
+            and values are ``lists`` containing the corresponding
+            :class:`~.EnzymeModuleSpecies`\ s or their identifiers.
 
-        See Also
-        --------
-        set_enzyme_object_category
-            Method to categorize :class:`~.EnzymeModuleSpecies`\ s without
-            replacing existing category contents.
+            An empty ``list`` will remove the corresponding category from the
+            model and attribute.
+
+            An empty ``dict`` will remove all categories from the attribute
+            and the model.
 
         """
-        return self._remove_empty_categories(
-            "_enzyme_module_species_categorized")
+        return getattr(self, "_enzyme_module_species_categorized")
 
     @enzyme_module_species_categorized.setter
     def enzyme_module_species_categorized(self, value):
-        """Set categories(s) for enzymatic species using a ``dict``."""
-        if not isinstance(value, dict):
-            raise TypeError("value must be a dict")
-
-        self._set_category_attribute_dict(
-            value, "_enzyme_module_species_categorized")
+        """Create category group(s) for enzyme module species."""
+        self._set_category_attribute(value, attr="enzyme_module_species",
+                                     to_filter="EnzymeModuleSpecies")
 
     @property
     def enzyme_module_reactions_categorized(self):
-        r"""Get or set categories for :class:`~.EnzymeModuleReaction`\ s.
+        r"""Get or set categories for enzyme module reactions.
 
         Notes
         -----
-        * An enzymatic binding reaction must already exist in the
-          :class:`EnzymeModule` as a :class:`~.EnzymeModuleReaction` in order
+        * An enzyme module reaction must already exist in the
+          :class:`EnzymeModule` as an :class:`~.EnzymeModuleReaction` in order
           to set its category.
-        * If categories already exists, their existing contents are replaced.
-        * Categories with empty :class:`~cobra.core.dictlist.DictList`\ s
-          are removed.
+        * If categories already exists, their existing contents are updated.
+        * Setting an empty ``list`` for a category in the dict will cause that
+          particular category group to be removed completely from the model.
+        * Setting an empty ``dict`` will cause ALL category groups to be
+          removed completely from the model.
 
         Parameters
         ----------
-        value : dict
-            A dictionary where keys are the strings representing the
-            categories of the enzymatic binding reactions, and values are
-            ``list``\ s containing the corresponding
-            :class:`~.EnzymeModuleReaction`\ s. An empty ``dict`` will cause
-            a reset, placing all enzymatic binding reactions into
-            an ``"Undefined"`` category.
+        value : ~cobra.core.group.Group or dict
+            Either a :class:`cobra.Group <cobra.core.group.Group>` to add
+            to the categorized enzyme module reaction, or a ``dict`` where keys
+            are strings representing categories for the enzyme module
+            reactions, and values are ``lists`` containing the corresponding
+            :class:`~.EnzymeModuleReactions`\ s or their identifiers.
 
-        See Also
-        --------
-        set_enzyme_object_category
-            Method to categorize :class:`~.EnzymeModuleReaction`\ s without
-            replacing existing category contents.
+            An empty ``list`` will remove the corresponding category from the
+            model and attribute.
+
+            An empty ``dict`` will remove all categories from the attribute
+            and the model.
 
         """
-        return self._remove_empty_categories(
-            "_enzyme_module_reactions_categorized")
+        return getattr(self, "_enzyme_module_reactions_categorized")
 
     @enzyme_module_reactions_categorized.setter
     def enzyme_module_reactions_categorized(self, value):
-        """Set categories(s) for enzyme module reactions using a ``dict``."""
-        if not isinstance(value, dict):
-            raise TypeError("value must be a dict")
-
-        self._set_category_attribute_dict(
-            value, "_enzyme_module_reactions_categorized")
-
-    def set_enzyme_object_category(self, category, object_list):
-        r"""Add a list of objects to a new or existing category.
-
-        Notes
-        -----
-        * If a category already exists, the objects will be added to the
-          existing list. If an object is categorized as ``"Undefined"``, it
-          will be removed from all other existing categories.
-        * The objects to be categorized must already exist in the
-          :class:`EnzymeModule`.
-
-        Parameters
-        ----------
-        category : str
-            A string representing the category for the list of objects to be
-            categorized.
-        object_list : list
-            A ``list`` containing the objects or their identifiers to be
-            categorized. The ``list`` must contain ONLY one of the following
-            :mod:`mass` object types:
-
-                * :class:`~.MassMetabolite`\ s representing enzyme ligands.
-                * :class:`~.EnzymeModuleSpecies`\ s representing enzymatic
-                  species.
-                * :class:`~.EnzymeModuleReaction`\ s representing enzymatic
-                  binding reactions ligands.
-
-        """
-        if not isinstance(category, string_types):
-            raise TypeError("category must be a str")
-        object_list = ensure_iterable(object_list)
-        sep_objs = defaultdict(list)
-        for obj in object_list:
-            if isinstance(obj, EnzymeModuleSpecies.__base__)\
-               and not isinstance(obj, EnzymeModuleSpecies):
-                sep_objs["_enzyme_module_ligands_categorized"].append(obj)
-            if isinstance(obj, EnzymeModuleSpecies):
-                sep_objs["_enzyme_module_species_categorized"].append(obj)
-            if isinstance(obj, EnzymeModuleReaction):
-                sep_objs["_enzyme_module_reactions_categorized"].append(obj)
-
-        for key, object_list in iteritems(sep_objs):
-            if category in getattr(self, key):
-                object_list = set(
-                    getattr(self, key)[category]).union(set(object_list))
-
-            self.__class__.__dict__[key[1:]].fset(
-                self, {category: object_list})
+        """Create category group(s) for enzyme module reactions."""
+        self._set_category_attribute(value, attr="enzyme_module_reactions",
+                                     to_filter="EnzymeModuleReactions")
 
     def make_enzyme_module_species(self, id=None, name="automatic",
-                                   categories="Undefined",
+                                   categories=None,
                                    bound_catalytic=None, bound_effectors=None,
                                    compartment=None):
         r"""Create and add an :class:`~.EnzymeModuleSpecies` to the module.
@@ -529,6 +483,7 @@ class EnzymeModule(MassModel):
             :class:`~.EnzymeModuleSpecies`.
 
         """
+        # pylint: disable=too-many-arguments
         # Ensure metabolites for EnzymeModuleSpecies exist in the EnzymeModule.
         for bound_dict in [bound_catalytic, bound_effectors]:
             if bound_dict is None:
@@ -553,16 +508,18 @@ class EnzymeModule(MassModel):
             enzyme_module_species.generate_enzyme_module_species_name(True)
 
         # Add the enzyme species to the module and place in respective
-        # categories
-        self.add_metabolites(enzyme_module_species)
-        categories = ensure_iterable(categories)
-        for category in categories:
-            self.set_enzyme_object_category(category, enzyme_module_species)
+        # categories if desired.
+        self.add_metabolites([enzyme_module_species])
+        if categories is not None:
+            categories = ensure_iterable(categories)
+            for category in categories:
+                self.enzyme_module_species_categorized = {
+                    category: enzyme_module_species}
 
         return enzyme_module_species
 
     def make_enzyme_module_reaction(self, id=None, name="", subsystem=None,
-                                    reversible=True, categories="Undefined",
+                                    reversible=True, categories=None,
                                     metabolites_to_add=None):
         r"""Create and add an :class:`~.EnzymeModuleReaction` to the module.
 
@@ -610,6 +567,7 @@ class EnzymeModule(MassModel):
 
 
         """
+        # pylint: disable=too-many-arguments
         # Make EnzymeModuleReaction object
         new_reaction = EnzymeModuleReaction(
             id_or_reaction=id, name=name, subsystem=subsystem,
@@ -627,12 +585,13 @@ class EnzymeModule(MassModel):
             new_reaction.add_metabolites(metabolites_to_add)
 
         # Add reaction to EnzymeModule
-        self.add_reactions(new_reaction)
+        self.add_reactions([new_reaction])
 
-        # Add categories for reaction
-        categories = ensure_iterable(categories)
-        for category in categories:
-            self.set_enzyme_object_category(category, new_reaction)
+        if categories is not None:
+            categories = ensure_iterable(categories)
+            for category in categories:
+                self.enzyme_module_reactions_categorized = {
+                    category: new_reaction}
 
         # Set enzyme name if set to Automatic
         if _AUTOMATIC_RE.match(name):
@@ -641,7 +600,7 @@ class EnzymeModule(MassModel):
         return new_reaction
 
     def unify_rate_parameters(self, reaction_list, new_parameter_id,
-                              rtype=1, enzyme_prefix=False):
+                              rate_type=1, enzyme_prefix=False):
         r"""Unify rate law parameters for a list of enzyme module reactions.
 
         After unification, the new parameters and rate laws are placed into the
@@ -658,8 +617,8 @@ class EnzymeModule(MassModel):
             The forward rate, reverse rate, and/or equilibrium constants in
             the current rate law will have the reaction ID component replaced
             with the ``new_parameter_id`` in the parameter ID.
-        rtype : int
-            The type of rate law to display. Must be 1, 2, or 3.
+        rate_type : int
+            The type of rate law to utilize in unification. Must be 1, 2, or 3.
 
                 * Type 1 will utilize the :attr:`forward_rate_constant` and the
                   :attr:`equilibrium_constant`.
@@ -694,7 +653,7 @@ class EnzymeModule(MassModel):
             # Create a string representation of the rate and replace the
             # reaction id portions of the parameters with new_parameter_id
             custom_rate = str(
-                strip_time(reaction.get_mass_action_rate(rtype)))
+                strip_time(reaction.get_mass_action_rate(rate_type)))
             custom_rate = custom_rate.replace(reaction.id, new_parameter_id)
             self.add_custom_rate(reaction, custom_rate)
 
@@ -727,6 +686,10 @@ class EnzymeModule(MassModel):
             A :mod:`sympy` expression of the net flux equation.
 
         """
+        if self.enzyme_flux_symbol is None:
+            warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
+            return None
+
         # Ensure enzyme_module_reactions are iterable and exist in model
         enzyme_rxns = ensure_iterable(enzyme_module_reactions)
         enzyme_rxns = [
@@ -850,6 +813,10 @@ class EnzymeModule(MassModel):
 
 
         """
+        if self.enzyme_total_symbol is None:
+            warn("No enzyme total symbol. Define the EnzymeModule ID first.")
+            return None
+
         if self.enzyme_concentration_total_equation is None:
             warn("No enzyme total concentration equation found. Ensure that "
                  "the model contains EnzymeModuleSpecies and an equation for "
@@ -898,10 +865,15 @@ class EnzymeModule(MassModel):
             a :mod:`sympy` expression representing the error.
 
         """
+        if self.enzyme_flux_symbol is None:
+            warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
+            return None
+
         if self.enzyme_net_flux_equation is None:
             warn("No net flux equation found. Ensure that an equation for the "
                  "enzyme_net_flux_equation attribute has been set.")
             return None
+
         # Make error expression
         error = (self.enzyme_net_flux_equation.lhs
                  - self.enzyme_net_flux_equation.rhs)
@@ -913,7 +885,7 @@ class EnzymeModule(MassModel):
 
         return error
 
-    def make_enzyme_fraction(self, categorized_attr, top, bottom="Equation",
+    def make_enzyme_fraction(self, categorized_attr, top, bottom,
                              use_values=False):
         """Make the expression for a ratio of categorized enzyme objects.
 
@@ -926,26 +898,25 @@ class EnzymeModule(MassModel):
 
         Parameters
         ----------
-        categorized_attr: str or dict
-            Either a string representing which categorized ``dict`` attribute
-            to use or the attribute ``dict`` itself to use in making the
+        categorized_attr: str
+            Either a string representing which categorized attribute
+            to use or the attribute  itself to use in making the
             enzyme ratio expression. Use the string ``'species'`` for
             :attr:`enzyme_module_species_categorized`, or ``'reactions'`` for
             :attr:`enzyme_module_reactions_categorized`.
         top : str
-            A string representing a category in the ``dict`` corresponding
-            to the given categorized attribute. The summation expression of
+            A string representing a category in the categorized attribute.
+            The summation expression of
             the objects in the corresponding list is used as the top
             (numerator) of the fraction to be made. Alternatively, the
             string ``"Equation"`` can be provided to utilize an
             equation attribute.
         bottom : str
-            A string representing a category in the ``dict`` corresponding
-            to the given categorized attribute. The summation expression of
-            the objects in the corresponding list is used as the top
-            (numerator) of the fraction to be made. Alternatively, the
-            string ``"Equation"`` can be provided to utilize an
-            equation attribute. Default is ``'Equation'``.
+            A string representing a category in the categorized attribute.
+            The summation expression of the objects in the corresponding list
+            is used as the bottom (denominator) of the fraction to be made.
+            Alternatively, the string ``"Equation"`` can be provided to
+            utilize an equation attribute.
         use_values : bool
             If ``True``, then numerical values are substituted into the
             expression. Otherwise arguments in the expression are left as
@@ -960,37 +931,38 @@ class EnzymeModule(MassModel):
             for the fraction.
 
         """
-        # Check categorized_attr input, and get corresponding categorized dict
-        if isinstance(categorized_attr, dict):
+        if isinstance(categorized_attr, DictList):
             if categorized_attr == self.enzyme_module_species_categorized:
                 categorized_attr = "species"
             elif categorized_attr == self.enzyme_module_reactions_categorized:
                 categorized_attr = "reactions"
             else:
                 raise ValueError(
-                    "Must be the dict accessible through '"
+                    "Must be the attribute accessible through '"
                     "EnzymeModule.enzyme_module_species_categorized' or "
                     "'EnzymeModule.enzyme_module_reactions_categorized'.")
 
-        if categorized_attr.lower() in {"species", "reactions"}:
-            categorized_attr = categorized_attr.lower()
-            item_dict = self.__class__.__dict__[
-                "enzyme_module_" + categorized_attr + "_categorized"].fget(
-                    self)
-        else:
+        if not categorized_attr.lower() in {"species", "reactions"}:
             raise ValueError("Must be a string of the following: "
                              "{'species', 'reactions'}.")
 
+        categorized_attr = categorized_attr.lower()
         # Get object_type for summation expression
-        object_type = {"species": EnzymeModuleSpecies,
-                       "reactions": EnzymeModuleReaction}[categorized_attr]
+        object_type = {
+            "species": EnzymeModuleSpecies,
+            "reactions": EnzymeModuleReaction}[categorized_attr]
+
+        attr_dictlist = self.__class__.__dict__[
+            "enzyme_module_" + categorized_attr + "_categorized"].fget(self)
+
         # Check top & bottom inputs
         expr = sym.S.One
         for category, coeff in zip([top, bottom], [1, -1]):
-            if category in item_dict:
+            if category in attr_dictlist:
                 # Get sum of items if category is not "equation"
                 summation_expr = self._make_summation_expr(
-                    item_dict[category], object_type)
+                    attr_dictlist.get_by_id(category).members,
+                    object_type)
             elif _EQUATION_RE.match(category):
                 # Get equation if category is "Equation"
                 summation_expr = {
@@ -1003,12 +975,13 @@ class EnzymeModule(MassModel):
                     raise ValueError(
                         "No equation found for '{0}' attribute".format({
                             "species": "enzyme_concentration_total_equation",
-                            "reactions": "enzyme_net_flux_equation"
-                        }[categorized_attr]))
+                            "reactions": "enzyme_net_flux_equation"}.get(
+                                categorized_attr)))
             else:
-                raise ValueError(
-                    "Unrecognized category: '{0}' provided for '{1}' argument"
-                    .format(category, {1: "top", -1: "bottom"}))
+                raise ValueError("Unrecognized category: '{0}' provided for "
+                                 "'{1}' argument.".format(
+                                     category, {1: "top", -1: "bottom"}.get(
+                                         coeff)))
             # Get object type and make expression
             expr = sym.Mul(sym.Pow(summation_expr, coeff), expr)
 
@@ -1056,12 +1029,9 @@ class EnzymeModule(MassModel):
         # Add ligands to the ligand DictList
         if ligands:
             self.enzyme_module_ligands += ligands
-        # Add ligands to the ligand dict as "Undefined"
-        self.set_enzyme_object_category("Undefined", ligands)
 
-        # Get items that are EnzymeModuleSpecies objects, and check if the
-        # enzyme species already exist in the EnzymeModule, ignoring those that
-        # do.
+        # Get items that are EnzymeModuleSpecies, and check if the enzyme
+        # species already exist in the EnzymeModule, ignoring those that do.
         enzyme_module_species = [
             enzyme_module_species for enzyme_module_species in metabolite_list
             if isinstance(enzyme_module_species, EnzymeModuleSpecies)
@@ -1070,12 +1040,11 @@ class EnzymeModule(MassModel):
         if enzyme_module_species:
             # Add the enzyme species to the model
             self.enzyme_module_species += enzyme_module_species
-        # Add enzyme species to the enzyme_module_species dict as "Undefined".
-        self.set_enzyme_object_category("Undefined", enzyme_module_species)
 
+        # Context manager
         context = get_context(self)
         if context:
-            context(partial(self.enzyme_module_species.__isub__, ligands))
+            context(partial(self.enzyme_module_ligands.__isub__, ligands))
             context(partial(self.enzyme_module_species.__isub__,
                             enzyme_module_species))
 
@@ -1112,7 +1081,6 @@ class EnzymeModule(MassModel):
                    if not isinstance(met, EnzymeModuleSpecies)
                    and met in self.metabolites
                    and met in self.enzyme_module_ligands]
-        self.set_enzyme_object_category("Undefined", ligands)
 
         # Remove metabolites from model using inherited method
         super(EnzymeModule, self).remove_metabolites(
@@ -1121,11 +1089,8 @@ class EnzymeModule(MassModel):
         # Remove ligands from the enzyme_module_ligands DictList.
         if ligands:
             self.enzyme_module_ligands -= ligands
-        # Remove ligands from the "Undefined" category
-        for met in ligands:
-            self._enzyme_module_ligands_categorized["Undefined"].remove(met)
 
-        # Get items that are EnzymeModuleSpecies objects, and check if the
+        # Get items that are EnzymeModuleSpecies and check if the
         # enzyme species already exists in the EnzymeModule, ignoring those
         # that do not.
         enzyme_module_species = [
@@ -1133,20 +1098,14 @@ class EnzymeModule(MassModel):
             if isinstance(enzyme_module_species, EnzymeModuleSpecies)
             and enzyme_module_species in self.enzyme_module_species]
 
-        self.set_enzyme_object_category("Undefined", enzyme_module_species)
         # Remove the enzyme species to the model
         if enzyme_module_species:
             self.enzyme_module_species -= enzyme_module_species
 
-        # Remove enzyme species from the "Undefined" category
-        for enzyme_module_specie in enzyme_module_species:
-            self._enzyme_module_species_categorized.get(
-                "Undefined").remove(enzyme_module_specie)
-
+        # Context manager
         context = get_context(self)
         if context:
-            context(partial(self.enzyme_module_ligands.__iadd__,
-                            enzyme_module_species))
+            context(partial(self.enzyme_module_ligands.__iadd__, ligands))
             context(partial(self.enzyme_module_species.__iadd__,
                             enzyme_module_species))
 
@@ -1176,8 +1135,7 @@ class EnzymeModule(MassModel):
         # Add reactions using inherited method
         super(EnzymeModule, self).add_reactions(reaction_list)
 
-        # Get the enzyme module reactions by checking if an
-        # EnzymeModuleSpecies(s) are involved, and check whether reaction
+        # Get the enzyme module reactions and check whether reaction
         # exists, ignoring those that do.
         enzyme_module_reactions = [
             r for r in reaction_list if isinstance(r, EnzymeModuleReaction)
@@ -1186,10 +1144,14 @@ class EnzymeModule(MassModel):
         # Add enzyme module reactions to the enzyme reaction DictList
         if enzyme_module_reactions:
             self.enzyme_module_reactions += enzyme_module_reactions
-        # Add enzyme module reactions to the categorized attr as "Undefined".
-        self.set_enzyme_object_category("Undefined", enzyme_module_reactions)
 
-    def remove_reactions(self, reaction_list, remove_orphans=False):
+        # Context manager
+        context = get_context(self)
+        if context:
+            context(partial(self.enzyme_module_reactions.__isub__,
+                            enzyme_module_reactions))
+
+    def remove_reactions(self, reactions, remove_orphans=False):
         r"""Remove reactions from the :class:`EnzymeModule`.
 
         The change is reverted upon exit when using the :class:`EnzymeModule`
@@ -1201,7 +1163,7 @@ class EnzymeModule(MassModel):
 
         Parameters
         ----------
-        reaction_list : list
+        reactions : list
             A list of :class:`~.MassReaction` and
             :class:`~.EnzymeModuleReaction` to remove from the
             :class:`EnzymeModule`.
@@ -1212,28 +1174,25 @@ class EnzymeModule(MassModel):
 
         """
         # Ensure list is iterable.
-        reaction_list = ensure_iterable(reaction_list)
-        # Get the enzyme module reactions by checking if EnzymeModuleSpecies(s)
-        # are involved, then check whether reaction exists,
-        # ignoring those that do not.
+        reactions = ensure_iterable(reactions)
+        # Get the enzyme module reactions and then check whether reaction
+        # exists, ignoring those that do not.
         enzyme_module_reactions = [
-            r for r in reaction_list if isinstance(r, EnzymeModuleReaction)
+            r for r in reactions if isinstance(r, EnzymeModuleReaction)
             and r in self.reactions and r in self.enzyme_module_reactions]
 
-        # Set enzyme module reactions as "Undefined" to reset their categories.
-        self.set_enzyme_object_category("Undefined", enzyme_module_reactions)
-
         # Remove reactions using inherited method
-        super(EnzymeModule, self).remove_reactions(reaction_list)
+        super(EnzymeModule, self).remove_reactions(reactions)
 
         # Remove enzyme module reactions from DictList
         if self.enzyme_module_reactions:
             self.enzyme_module_reactions -= enzyme_module_reactions
 
-        # Remove enzyme module reactions from the "Undefined" category
-        for reaction in enzyme_module_reactions:
-            self._enzyme_module_reactions_categorized.get(
-                "Undefined").remove(reaction)
+        # Context manager
+        context = get_context(self)
+        if context:
+            context(partial(self.enzyme_module_reactions.__iadd__,
+                            enzyme_module_reactions))
 
     def repair(self, rebuild_index=True, rebuild_relationships=True):
         """Update all indicies and pointers in the model.
@@ -1259,21 +1218,19 @@ class EnzymeModule(MassModel):
         """
         # Repair using inherited method
         super(EnzymeModule, self).repair(rebuild_index, rebuild_relationships)
-        # Repair enzyme_module_reactions DictList
+        # # Repair enzyme_module_reactions DictList
         self._get_current_enzyme_module_objs("reactions", update_enzyme=True)
         self._update_object_pointers()
-        # Rebuild DictList indices
+        # # Rebuild DictList indices
         if rebuild_index:
             for attr in ["enzyme_module_ligands", "enzyme_module_species",
                          "enzyme_module_reactions"]:
                 getattr(self, attr)._generate_index()
-                for value in itervalues(getattr(self, attr + "_categorized")):
-                    value._generate_index()
+                getattr(self, attr + "_categorized")._generate_index()
 
         for enzyme_module_specie in self.enzyme_module_species:
             enzyme_module_specie._repair_bound_obj_pointers()
 
-    # Overridden methods
     def copy(self):
         r"""Create a partial "deepcopy" of the EnzymeModule.
 
@@ -1286,7 +1243,8 @@ class EnzymeModule(MassModel):
 
         Notes
         -----
-        Overrides :meth:`.MassModel.copy`.
+        * Overrides :meth:`.MassModel.copy` in order to exclude more items
+          to not copy by ref.
 
         """
         # Define a new model
@@ -1298,8 +1256,7 @@ class EnzymeModule(MassModel):
             "enzyme_module_reactions", "_enzyme_module_ligands_categorized",
             "_enzyme_module_species_categorized",
             "_enzyme_module_reactions_categorized", "boundary_conditions",
-            "custom_rates", "custom_parameters", "notes", "annotation",
-            "modules"]
+            "custom_rates", "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
@@ -1307,36 +1264,55 @@ class EnzymeModule(MassModel):
         new_model.annotation = deepcopy(self.annotation)
 
         # Copy the metabolites
-        new_model = self._copy_model_metabolites(new_model)
+        new_model.metabolites += self._copy_model_metabolites(new_model)
         # Copy the genes
-        new_model = self._copy_model_genes(new_model)
-        # Copy the reactions and rates
-        new_model = self._copy_model_reactions(new_model)
+        new_model.genes += self._copy_model_genes(new_model)
+        # Copy the reactions and rates (including custom rates)
+        new_model.reactions += self._copy_model_reactions(new_model)
+        # Copy the custom rate for the reaction:
+        if self.custom_rates:
+            new_model.custom_rates.update({
+                new_model.reactions.get_by_id(reaction.id): custom_rate
+                for reaction, custom_rate in iteritems(self.custom_rates)})
+        # Copy custom parameters
+        if self.custom_parameters:
+            new_model.custom_parameters.update(self.custom_parameters)
+
+        # Copy any existing groups
+        new_model.groups += self._copy_model_groups(new_model)
+
         # Copy any existing enzyme_modules
-        new_model = self._copy_model_enzyme_modules(new_model)
+        new_model.enzyme_modules += self._copy_model_enzyme_modules(new_model)
+
+        # Add the newly copied objects to their appropriate DictLists
+        # in the enzyme_module_ligands, enzyme_module_species and
+        # enzyme_module_reactions attributes
+        for attr in ["ligands", "species", "reactions"]:
+            new_model._get_current_enzyme_module_objs(attr, update_enzyme=True)
+            # Update categorized dict attributes
+            attr = "enzyme_module_" + attr + "_categorized"
+            new_model_categorized_attr = getattr(new_model, attr)
+            new_model_categorized_attr = _mk_new_dictlist(
+                new_model_categorized_attr, getattr(self, attr))
+
         # Create the new stoichiometric matrix for the model.
         new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                               dtype=self._dtype,
                                               update_model=True)
-        # Add the newly copied objects to their appropriate DictLists
-        # in the enzyme_module_ligands, enzyme_module_species and
-        # enzyme_module_reactions attributes
-        for metabolite in new_model.metabolites:
-            if isinstance(metabolite, EnzymeModuleSpecies):
-                new_model.enzyme_module_species.append(metabolite)
-            else:
-                new_model.enzyme_module_ligands.append(metabolite)
-        new_model._get_current_enzyme_module_objs(attr="reactions",
-                                                  update_enzyme=True)
-        new_model._update_object_pointers()
+        try:
+            new_model._solver = deepcopy(self.solver)
+            # Cplex has an issue with deep copies
+        # pylint: disable=broad-except
+        except Exception:
+            new_model._solver = copy(self.solver)
 
         # Doesn't make sense to retain the context of a copied model so
         # assign a new empty context
         new_model._contexts = []
         return new_model
 
-    def merge(self, right, prefix_existing=None, inplace=False,
-              new_model_id=None):
+    def merge(self, right, prefix_existing=None, inplace=True,
+              objective='left'):
         """Merge two models into one model with the objects from both.
 
         The reactions, metabolites, genes, enzyme modules, boundary conditions,
@@ -1364,20 +1340,27 @@ class EnzymeModule(MassModel):
         Parameters
         ----------
         right : MassModel
-            The model to merge into the left model.
+            The model to merge into the left model. If a :class:`.MassModel`
+            then the first model refers to the ``right`` model and the second
+            model refers to the ``left`` model. Otherwise the first model
+            refers to the ``left`` model and the second model refers to the
+            ``right`` model.
         prefix_existing : str
             If provided, the string is used to prefix the reaction identifier
             of a reaction in the second model if that reaction already exists
-            within the left model. Will also apply prefix to enzyme identifiers
-            of an enzyme in the second model.
+            within the first model. Will also apply prefix to identifiers
+            of enzyme modules in the second model.
         inplace : bool
-            Add reactions from ``right`` directly to left model. Otherwise,
-            create a new model leaving the left model untouched.
-        new_model_id : str
-            If provided, the string is used as the identifier for the merged
-            model. If ``None`` and ``inplace=True``, the model ID of the
-            first model will be used. If ``None`` and ``inplace=False``, a
-            new combined ID will be used for the new model.
+            If ``True`` then add reactions from second model directly to the
+            first model. Otherwise, create a new model leaving the first model
+            untouched. When done within the model as context, changes to the
+            models are reverted upon exit.
+        objective : str
+            One of ``"left"``, ``"right"`` or ``"sum"`` for setting the
+            objective of the resulting model to that of the corresponding
+            model or the sum of both. Default is ``"left"``. Note that when
+            merging a :class:`.MassModel` with an :class:`EnzymeModule`,
+            ``"left"`` will refer to the :class:`.MassModel`.
 
         Returns
         -------
@@ -1388,45 +1371,169 @@ class EnzymeModule(MassModel):
         """
         if not isinstance(right, EnzymeModule):
             # Always merge the EnzymeModule into the MassModel
-            new_model = right.merge(self, prefix_existing=prefix_existing,
-                                    inplace=inplace, new_model_id=new_model_id)
-        else:
-            # Merge the two EnzymeModules together if right is an EnzymeModule
-            new_model = MassModel(self).merge(
-                right, prefix_existing=prefix_existing, inplace=inplace,
-                new_model_id=new_model_id)
-            if inplace:
-                new_model = self
-                enzyme_modules_attrs_to_add = [right]
-            else:
-                # Reclassify as an EnzymeModule
-                new_model = EnzymeModule(new_model)
-                enzyme_modules_attrs_to_add = [self, right]
-                # Set EnzymeModule attributes in the new model
-                for attr in ["subsystem", "_enzyme_concentration_total",
-                             "_enzyme_net_flux", "enzyme_net_flux_equation"]:
-                    setattr(new_model, attr, getattr(self, attr))
+            return right.merge(self, prefix_existing, inplace, objective)
 
-            # Fix enzyme module ligands, species, and reactions
-            for attr in ["ligands", "species", "reactions"]:
-                # Update DictList attributes
-                new_model._get_current_enzyme_module_objs(attr=attr,
-                                                          update_enzyme=True)
-                # Update categorized dict attributes
-                attr = "enzyme_module_" + attr + "_categorized"
-                new_categorized_dict = {}
-                for enzyme_module in enzyme_modules_attrs_to_add:
-                    old_categorized_dict = getattr(enzyme_module, attr)
-                    # Add the old categorized dict to the new one to set
-                    new_categorized_dict.update({
-                        enzyme_module.id + " " + cat: values
-                        for cat, values in iteritems(old_categorized_dict)})
-                # Add new categorized dict attributes
-                setattr(new_model, attr, new_categorized_dict)
+        # Merge the two EnzymeModules together if right is an EnzymeModule
+        new_model = MassModel(self).merge(right, prefix_existing, inplace,
+                                          objective)
+        if inplace:
+            new_model = self
+        else:
+            # Reclassify as an EnzymeModule
+            new_model = EnzymeModule(new_model)
+            # Set EnzymeModule attributes in the new model
+            for attr in ["subsystem", "_enzyme_concentration_total",
+                         "_enzyme_net_flux", "enzyme_net_flux_equation"]:
+                setattr(new_model, attr, getattr(self, attr))
+
+        # Fix enzyme module ligands, species, and reactions
+        for attr in ["ligands", "species", "reactions"]:
+            # Update DictList attributes
+            new_model._get_current_enzyme_module_objs(attr=attr,
+                                                      update_enzyme=True)
+            # Update categorized dict attributes
+            attr = "_enzyme_module_" + attr + "_categorized"
+            new_categorized_attr_ids = [g.id for g in getattr(new_model, attr)]
+            for g in getattr(right, attr):
+                if prefix_existing is not None:
+                    gid = "{0}{1}".format(prefix_existing, g.id)
+                else:
+                    gid = g.id
+                if gid in new_model.groups and\
+                   gid not in new_categorized_attr_ids:
+                    new_categorized_attr_ids += [gid]
+
+            print(new_categorized_attr_ids)
+            setattr(new_model, attr,
+                    DictList([new_model.groups.get_by_id(gid)
+                              for gid in new_categorized_attr_ids]))
+            print(getattr(new_model, attr))
+            print()
+
+        # setattr(self, attr,
+        #         _mk_new_dictlist(self.groups, getattr(self, attr)))
 
         return new_model
 
     # Internal
+    def _set_category_attribute(self, item, attr, to_filter):
+        """Set the categorized attribute after ensuring it is valid.
+
+         Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        categorized_attr = getattr(self, "_" + attr + "_categorized")
+        # If a group is provided, ensure all members are of the correct type
+        # before adding to the attribute and model if not already existing.
+        if isinstance(item, Group):
+            filter_func = _make_category_filter(to_filter)
+            if list(filter(filter_func, item.members)) != len(item.members):
+                raise ValueError(
+                    "Not all Group members are {0}s. Cannot add the"
+                    " Group to {1}_categorized attribute.".format(
+                        to_filter, attr))
+            # Add to the model and the attribute
+            if item.id not in self.groups:
+                self.add_groups([item])
+            categorized_attr += [item]
+
+        # If a dict is provided, either create new groups or remove categories
+        elif isinstance(item, dict):
+            # An empty dict means to remove ALL categories from the attribute.
+            if not item:
+                item = {k.id: [] for k in categorized_attr}
+            else:
+                item = {k: ensure_iterable(v)
+                        for k, v in iteritems(item)}
+
+            for key, value in iteritems(item):
+                # Ensure objects exist before adding them.
+                for i, v in enumerate(value):
+                    invalid = []
+                    try:
+                        v = getattr(self, attr).get_by_id(getattr(v, "_id", v))
+                    except KeyError as e:
+                        invalid += [str(e)]
+                    else:
+                        value[i] = v
+                    if invalid:
+                        raise ValueError("Could not find the following in the "
+                                         "model '{0}': {1}".format(
+                                             attr, str(invalid)))
+                self._set_enzyme_object_category("_" + attr, key, value)
+
+        else:
+            raise TypeError(
+                "Unrecognized input value. Must be a cobra.Group or a dict.")
+
+    def _set_enzyme_object_category(self, attr, category, object_list):
+        r"""Add a list of objects to a new or existing category.
+
+        Notes
+        -----
+        * If a category already exists, the objects will be added to the
+          corresponding :class:`cobra.Group <cobra.core.group.Group>`.
+        * The objects to be categorized must already exist in the
+          :class:`EnzymeModule`.
+        * An empty ``object_list`` will cause the group representing the
+          category to be removed.
+
+        Parameters
+        ----------
+        category : str
+            A string representing the category for the list of objects to be
+            categorized.
+        object_list : list
+            A ``list`` containing the objects to be categorized.
+            The ``list`` must contain ONLY one of the following :mod:`mass`
+            object types:
+
+                * :class:`~.MassMetabolite`\ s representing enzyme ligands.
+                * :class:`~.EnzymeModuleSpecies`\ s representing enzymatic
+                  species.
+                * :class:`~.EnzymeModuleReaction`\ s representing enzymatic
+                  binding reactions ligands.
+
+        """
+        if not isinstance(category, string_types):
+            raise TypeError("category must be a str")
+
+        # Ensure object list is iterable
+        object_list = ensure_iterable(object_list)
+        # Seperate objects and ensure all are of the same type
+        filter_for = {
+            "_enzyme_module_ligands": "MassMetabolite",
+            "_enzyme_module_species": "EnzymeModuleSpecies",
+            "_enzyme_module_reactions": "EnzymeModuleReaction",
+        }[attr]
+        pruned = list(filter(_make_category_filter(filter_for), object_list))
+        # Raise error if more than one tyoe found.
+        if len(object_list) != len(pruned):
+            raise TypeError("Objects of different types found. Only one object"
+                            " type is allowed.")
+
+        categorized_attr = getattr(self, attr + "_categorized")
+        if category in categorized_attr:
+            # Get existing Group and add additional members
+            group = categorized_attr.get_by_id(category)
+            if object_list:
+                group.add_members(object_list)
+            else:
+                # Remove group if category value is empty
+                categorized_attr.remove(group)
+                self.remove_groups([group])
+
+        else:
+            # Otherwise create a new group with new members.
+            if object_list:
+                group = Group(id=category, members=object_list)
+                self.add_groups([group])
+                categorized_attr += [group]
+            else:
+                warn("No existing group '{0}' to be removed.".format(category))
+
     def _update_object_pointers(self):
         """Update objects in the attributes to be the objects from the model.
 
@@ -1443,10 +1550,9 @@ class EnzymeModule(MassModel):
                 "enzyme_module_reactions": self.reactions}.get(attr)
             setattr(self, attr,
                     _mk_new_dictlist(model_dictlist, getattr(self, attr)))
-            attr += "_categorized"
-            setattr(self, attr, {
-                key: _mk_new_dictlist(model_dictlist, old_dictlist)
-                for key, old_dictlist in iteritems(getattr(self, attr))})
+            attr = "_" + attr + "_categorized"
+            setattr(self, attr,
+                    _mk_new_dictlist(self.groups, getattr(self, attr)))
 
     def _get_current_enzyme_module_objs(self, attr, update_enzyme=True):
         """Get the enzyme module objects for 'attr' that exist in the model.
@@ -1546,90 +1652,7 @@ class EnzymeModule(MassModel):
 
         return expr
 
-    def _remove_empty_categories(self, attribute):
-        """Remove categories with empty lists from an attribute dict.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        # Get the attribute to modify
-        attr_dict = getattr(self, attribute)
-        # Remove categorizies with empty lists
-        to_remove = [c for c, items in iteritems(attr_dict) if not items]
-        for category in to_remove:
-            del attr_dict[category]
-
-        return attr_dict
-
-    def _set_category_attribute_dict(self, value, attribute):
-        """Set the a categorized attribute dictionary.
-
-        Applies to categorized attributes for enzyme_module_ligands,
-        enzyme_module_species, and enzyme_module_reactions
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        if not isinstance(value, dict):
-            raise TypeError("value must be a dict")
-
-        # Get the attribute to modify
-        attr_dict = getattr(self, attribute)
-        # Reset items to the undefined category if given an empty dict
-        if not value:
-            items = [item for lst in itervalues(attr_dict) for item in lst]
-            setattr(self, attribute, {"Undefined": DictList()})
-            self._set_category_attribute_dict({"Undefined": items}, attribute)
-
-        # Add items into their category lists
-        undefined = []
-        for category, items in iteritems(value):
-            if not items:
-                continue
-            items = ensure_iterable(items)
-            dictlist_dict = {
-                "_enzyme_module_ligands_categorized": "enzyme_module_ligands",
-                "_enzyme_module_species_categorized": "enzyme_module_species",
-                "_enzyme_module_reactions_categorized": "reactions"}
-            dictlist = getattr(self, dictlist_dict[attribute])
-            # Try to make a new DictList with correct references.
-            try:
-                items = _mk_new_dictlist(dictlist, items, ensure_unique=True)
-            except KeyError as e:
-                raise KeyError(str(e) + " not in model "
-                               + dictlist_dict[attribute])
-            items.sort()
-            if _UNDEFINED_RE.match(category):
-                undefined += items
-            attr_dict[category] = items
-
-        # Set the categorized items if not being reset as undefined.
-        categorized = []
-        for category, items in iteritems(attr_dict):
-            if not _UNDEFINED_RE.match(category):
-                categorized += [x for x in items if x not in undefined]
-                attr_dict[category] = DictList([
-                    item for item in attr_dict[category]
-                    if item not in undefined])
-
-        # Add metabolites without a role into the "Undefined" role
-        if "Undefined" in attr_dict:
-            categorized = list(set(categorized))  # Only unique necessary
-            # Set undefined metabolites
-            undefined += [x for x in attr_dict["Undefined"]
-                          if x not in categorized]
-            undefined = DictList(set(undefined))
-            undefined.sort()
-            attr_dict["Undefined"] = undefined
-
-        self._remove_empty_categories(attribute)
-
-    def _add_self_to_model(self, model, prefix_existing=None, inplace=False,
-                           new_model_id=None):
+    def _add_self_to_model(self, model, prefix_existing, inplace, objective):
         """Add self to the model and return the MassModel object.
 
         Warnings
@@ -1637,9 +1660,18 @@ class EnzymeModule(MassModel):
         This method is intended for internal use only.
 
         """
+        # Switch the objective to match the switch in the merge order.
+        if objective == "left":
+            objective = "right"
+        elif objective == "right":
+            objective = "left"
+        else:
+            # No need to switch for sum.
+            pass
+
         # Create a MassModel instance of self to merge normally
         model = model.merge(MassModel(self), prefix_existing=prefix_existing,
-                            inplace=inplace, new_model_id=new_model_id)
+                            inplace=inplace, objective=objective)
         # Turn EnzymeModule into an EnzymeModuleDict
         # to store in MassModel.enzyme_modules
         enzyme_dict = EnzymeModuleDict(self)
@@ -1681,63 +1713,89 @@ class EnzymeModule(MassModel):
                     <td><strong>Matrix Rank</strong></td>
                     <td>{mat_rank}</td>
                 </tr><tr>
-                    <td><strong>Matrix Type</strong></td>
-                    <td>{S_type}</td>
-                </tr><tr>
                     <td><strong>Subsystem</strong></td>
                     <td>{subsystem}</td>
                 </tr><tr>
-                    <td><strong>Number of Ligands</strong></td>
+                    <td><strong>Number of ligands</strong></td>
                     <td>{num_enzyme_module_ligands}</td>
                 </tr><tr>
-                    <td><strong>Number of EnzymeModuleSpecies</strong></td>
+                    <td><strong>Number of enzyme module species</strong></td>
                     <td>{num_enz_species}</td>
                 </tr><tr>
-                    <td><strong>Number of Enzyme Reactions</strong></td>
+                    <td><strong>Initial conditions defined</strong></td>
+                    <td>{num_ic}/{num_metabolites}</td>
+                </tr><tr>
+                    <td><strong>Number of enzyme module reactions</strong></td>
                     <td>{num_enz_reactions}</td>
                 </tr><tr>
-                    <td><strong>Total Enzyme Concentration</strong></td>
+                    <td><strong>Total enzyme concentration</strong></td>
                     <td>{enz_conc}</td>
                 </tr><tr>
-                    <td><strong>Enzyme Net Flux</strong></td>
+                    <td><strong>Enzyme net flux</strong></td>
                     <td>{enz_flux}</td>
                 </tr><tr>
-                    <td><strong>Number of Initial Conditions</strong></td>
-                    <td>{num_ic}</td>
-                </tr><tr>
-                    <td><strong>Number of Parameters</strong></td>
-                    <td>{num_parameters}</td>
-                </tr><tr>
-                    <td><strong>Number of Irreversible Reactions</strong></td>
-                    <td>{num_irreversible}</td>
-                </tr><tr>
-                    <td><strong>Number of Custom Rates</strong></td>
-                    <td>{num_custom_rates}</td>
+                    <td><strong>Number of groups</strong></td>
+                    <td>{num_groups}</td>
                 </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
-                </tr><tr>
-                    <td><strong>Units</strong></td>
-                    <td>{units}</td>
                 </tr>
             </table>
         """.format(name=self.id, address='0x0%x' % id(self),
                    dim_stoich_mat=dim_S, mat_rank=rank,
-                   S_type="{}, {}".format(self._matrix_type,
-                                          self._dtype.__name__),
                    subsystem=self.subsystem,
                    num_enzyme_module_ligands=len(self.enzyme_module_ligands),
                    num_enz_species=len(self.enzyme_module_species),
+                   num_ic=len(self.initial_conditions),
+                   num_metabolites=len(self.metabolites),
                    num_enz_reactions=len(self.enzyme_module_reactions),
                    enz_conc=self.enzyme_concentration_total,
                    enz_flux=self.enzyme_net_flux,
-                   num_ic=len(self.initial_conditions),
-                   num_parameters=len(self._get_all_parameters()),
-                   num_irreversible=len(self.irreversible_reactions),
-                   num_custom_rates=len(self.custom_rates),
+                   num_groups=len(self.groups),
                    compartments=", ".join(v if v else k for k, v in
-                                          iteritems(self.compartments)),
-                   units=", ".join([u.id for u in self.units]))
+                                          iteritems(self.compartments)))
+
+
+def _make_category_filter(filter_for):
+    """Make a filter function for one of the categorized attributes.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if filter_for in "MassMetabolite":
+        def ligand_filter_function(obj):
+            """Make type filter for MassMetabolites."""
+            if isinstance(obj, EnzymeModuleSpecies.__base__)\
+               and not isinstance(obj, EnzymeModuleSpecies):
+                return True
+
+            return False
+
+        type_filter_function = ligand_filter_function
+
+    if filter_for == "EnzymeModuleSpecies":
+        def enzyme_species_filter_function(obj):
+            """Make type filter for EnzymeModuleSpecies."""
+            if isinstance(obj, EnzymeModuleSpecies):
+                return True
+
+            return False
+
+        type_filter_function = enzyme_species_filter_function
+
+    if filter_for == "EnzymeModuleReaction":
+        def enzyme_reaction_filter_function(obj):
+            """Make type filter for EnzymeModuleReaction."""
+            if isinstance(obj, EnzymeModuleReaction):
+                return True
+
+            return False
+
+        type_filter_function = enzyme_reaction_filter_function
+
+    return type_filter_function
 
 
 __all__ = ("EnzymeModule",)

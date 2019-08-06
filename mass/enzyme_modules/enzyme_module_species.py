@@ -25,12 +25,14 @@ Some other important points about the :class:`EnzymeModuleSpecies` include:
 
     * If the :attr:`name` attribute is not set upon initializing, it is
       automatically generated using the enzyme specific attributes.
+
     * If the :attr:`formula` or charge attributes are not set upon
       initialization, it is inferred using the formulas and charges set on the
       :class:`~.MassMetabolite`\ (s) found in
       :attr:`~EnzymeModuleSpecies.bound_catalytic` and
       :attr:`~EnzymeModuleSpecies.bound_effectors`. A moiety is also included
       for the formula using the :attr:`~EnzymeModuleSpecies.enzyme_module_id`.
+
     * The purpose of the generated formula and charge is to ensure reactions
       remained mass and charge balanaced as metabolite species are bound and
       altered by the :class:`~.EnzymeModuleReaction`\ s of the
@@ -49,6 +51,9 @@ from mass.core.mass_metabolite import MassMetabolite
 class EnzymeModuleSpecies(MassMetabolite):
     r"""Class representing an enzyme species of an :class:`~.EnzymeModule`.
 
+    Accepted ``kwargs`` are passed to the initialization method of the base
+    class, :class:`.MassMetabolite`.
+
     Parameters
     ----------
     id_or_specie : str, MassMetabolite, EnzymeModuleSpecies
@@ -56,20 +61,6 @@ class EnzymeModuleSpecies(MassMetabolite):
         existing metabolite object. If an existing metabolite object is
         provided, a new :class:`EnzymeModuleSpecies` is instantiated with the
         same properties as the original metabolite.
-    name : str
-        A human readable name for the enzyme module species.
-    formula : str
-        Chemical formula associated with the enzyme module species.
-    charge : float
-        The charge number associated with the enzyme module species.
-    compartment : str
-        The compartment where the enzyme module species is located.
-    fixed : bool
-        Whether the enzyme module species concentration should remain at a
-        fixed value. Default is ``False``.
-
-    Attributes
-    ----------
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
     bound_catalytic : dict
@@ -81,17 +72,36 @@ class EnzymeModuleSpecies(MassMetabolite):
         regulatory site(s), with :class:`~.MassMetabolite`\ s as keys and
         number bound as values. If the final coefficient for a metabolite
         is 0, it is removed.
+    **kwargs
+        name :
+            ``str`` representing a human readable name for the enzyme module
+            species.
+        formula :
+            ``str`` representing a chemical formula associated with the
+            enzyme module species.
+        charge :
+            ``float`` representing the charge number associated with the
+            enzyme module species.
+        compartment :
+            ``str`` representing the compartment where the enzyme module
+            species is located.
+        fixed :
+            ``bool`` indicating whether the enzyme module species
+            concentration should remain at a fixed value. Default is ``False``.
 
     """
 
-    def __init__(self, id_or_specie=None, name="", formula=None, charge=None,
-                 compartment=None, fixed=False, enzyme_module_id="",
-                 bound_catalytic=None, bound_effectors=None):
+    def __init__(self, id_or_specie=None, enzyme_module_id="",
+                 bound_catalytic=None, bound_effectors=None, **kwargs):
         """Initialize the EnzymeModuleSpecies."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleSpecies, self).__init__(
-            id_or_specie=id_or_specie, name=name, formula=formula,
-            charge=charge, compartment=compartment, fixed=fixed)
+            id_or_specie=id_or_specie,
+            name=kwargs.get("name", ""),
+            formula=kwargs.get("formula", None),
+            charge=kwargs.get("charge", None),
+            compartment=kwargs.get("compartment", None),
+            fixed=kwargs.get("fixed", False))
         if isinstance(id_or_specie, EnzymeModuleSpecies):
             # Instiantiate a new EnzymeModuleSpecies with state identical to
             # the provided EnzymeModuleSpecies object.
@@ -111,7 +121,8 @@ class EnzymeModuleSpecies(MassMetabolite):
             if not isinstance(id_or_specie, MassMetabolite):
                 # Set formula, charge, and compartment attributes if
                 # if a MassMetabolite was not used to initialize object.
-                for attr, val in zip(["formula", "charge"], [formula, charge]):
+                for attr in ["formula", "charge"]:
+                    val = kwargs.get(attr, None)
                     if val is None:
                         val = self.__class__.__dict__[
                             "generate_species_" + attr](self)

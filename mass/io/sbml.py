@@ -18,8 +18,9 @@ Parsing of models using the
 was implemented as efficiently as possible, whereas (discouraged) fallback
 solutions are not optimized for efficiency. Futhermore, because the SBML
 kinetic law is used for the reaction kinetic laws, fbc information will NOT
-be written into the SBML kinetic laws, even when the fbc package extension is
-disbaled.
+be written into or read from the SBML kinetic laws. Whether the fbc package
+extension is disabled or enabled will not change this behavior with kinetic
+laws.
 
 Notes are only supported in a minimal way relevant for kinetic models, i.e.
 structured information from notes in the form::
@@ -71,12 +72,15 @@ from io import StringIO
 
 from cobra.core.dictlist import DictList
 from cobra.core.gene import Gene
+from cobra.core.group import Group
 from cobra.io.sbml import (
-    BOUND_MINUS_INF, BOUND_PLUS_INF, CobraSBMLError, LOWER_BOUND_ID,
-    SBO_DEFAULT_FLUX_BOUND, SBO_FLUX_BOUND, UPPER_BOUND_ID, ZERO_BOUND_ID,
-    _create_bound, _error_string,
-    _get_doc_from_filename as _cobra_get_doc_from_filename, _parse_annotations,
-    _sbase_annotations as _cobra_sbase_annotations, _sbase_notes_dict)
+    BOUND_MINUS_INF, BOUND_PLUS_INF, CobraSBMLError, LONG_SHORT_DIRECTION,
+    LOWER_BOUND_ID, SBO_DEFAULT_FLUX_BOUND, SBO_FLUX_BOUND,
+    SHORT_LONG_DIRECTION, UPPER_BOUND_ID, ZERO_BOUND_ID, _create_bound,
+    _error_string, _get_doc_from_filename as _cobra_get_doc_from_filename,
+    _parse_annotations, _sbase_annotations as _cobra_sbase_annotations,
+    _sbase_notes_dict)
+from cobra.util.solver import linear_reaction_coefficients, set_objective
 
 import libsbml
 
@@ -97,8 +101,7 @@ from mass.enzyme_modules.enzyme_module_species import (
     EnzymeModuleSpecies, _make_bound_attr_str_repr)
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
-from mass.util.util import (
-    _check_kwargs, _make_logger, get_subclass_specific_attributes)
+from mass.util.util import (_check_kwargs, _make_logger)
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for the :mod:`~mass.io.sbml` submodule."""
@@ -132,9 +135,6 @@ RATE_CONSTANT_RE = re.compile(r"k_(\S*)_(fwd|rev)\Z")
 
 _NOTES_RE = re.compile(r"\s*(\w+\s*\w*)\s*:\s*(.+)", re.DOTALL)
 """:class:`re.Pattern`: Regex for basic parsing of notes on SBML objects."""
-
-_CATEGORY_GROUP_RE = re.compile(r"_Category\d$")
-""":class:`re.Pattern`: Regex for enzyme module category groups."""
 
 # For parsing rate laws
 _KLAW_POW_RE = re.compile(
@@ -629,7 +629,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     mass_model.add_units(_read_model_units_from_sbml(model))
 
     # Read the MassModel compartment information from the SBMLDocument
-    # TODO Revisit based on new cobra compartment implementation
+    # FIXME Revisit based on new cobra compartment implementation
     mass_model.compartments = _read_model_compartments_from_sbml(model)
 
     # Read the MassModel species information from the SBMLDocument
@@ -648,6 +648,13 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     reactions, local_params, custom_rates = _read_model_reactions_from_sbml(
         model, mass_model.metabolites, f_replace, **kwargs)
     mass_model.add_reactions(reactions)
+    if model_fbc:
+        coefficients, direction = _read_model_objectives_from_sbml(model_fbc,
+                                                                   mass_model,
+                                                                   f_replace,
+                                                                   **kwargs)
+        set_objective(mass_model, coefficients)
+        mass_model.solver.objective.direction = direction
     # Add the parameters and boundary conditions to the model
     # Read the MassModel parameter information from the SBMLDocument
     parameters = _read_global_parameters_from_sbml(model, DictList(reactions),
@@ -658,29 +665,34 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     # Add custom rates
     mass_model.update_custom_rates(custom_rates)
 
-    # Add enzyme groups and other parsed groups to the model.
-    # TODO Revisit when cobra groups implemented, store in mass_groups
+    # Add groups to the model.
     if model_groups:
-        enzyme_groups, mass_groups = _read_model_groups_from_sbml(model_groups)
+        # Seperate enzyme groups from other groups
+        mass_groups, enzyme_groups = _read_model_groups_from_sbml(
+            model, model_groups, mass_model, f_replace, **kwargs)
+        # Add groups to model
+        if mass_groups:
+            mass_model.add_groups(mass_groups)
+
         # Read the enzyme groups into EnzymeModuleDicts
         enzyme_module_dicts_list = _read_enzyme_modules_from_sbml(
             enzyme_groups, f_replace, **kwargs)
-
         # Add enzyme modules to model
         for enzyme_module_dict in enzyme_module_dicts_list:
             enzyme_module_dict._update_object_pointers(mass_model)
-            if enzyme_module_dict["model"] == "EnzymeModule":
+            if enzyme_module_dict["model"] != "EnzymeModule":
+                # The dict is an EnzymeModuleDict to add to the model.
+                mass_model.enzyme_modules.append(enzyme_module_dict)
+                enzyme_module_dict["model"] = mass_model
+                enzyme_module_dict._make_enzyme_stoichiometric_matrix(True)
+            else:
                 mass_model = EnzymeModule(mass_model)
                 for attr, value in iteritems(enzyme_module_dict):
                     if attr in ["id", "name", "description", "S", "model",
                                 "enzyme_concentration_total_equation"]:
                         continue
+                    attr = "_" + attr if "_categorized" in attr else attr
                     setattr(mass_model, attr, value)
-            else:
-                # The dict is an EnzymeModuleDict to add to the model.
-                mass_model.enzyme_modules.append(enzyme_module_dict)
-                enzyme_module_dict["model"] = mass_model
-                enzyme_module_dict._make_enzyme_stoichiometric_matrix(True)
 
     return mass_model
 
@@ -892,7 +904,7 @@ def _read_model_compartments_from_sbml(model):
     This method is intended for internal use only.
 
     """
-    # TODO Revisit based on new cobra compartment implementation
+    # FIXME Revisit based on new cobra compartment implementation
     compartments = {}
     for compartment in model.getListOfCompartments():
         cid = _check_required(compartment, compartment.getIdAttribute(), "id")
@@ -1188,11 +1200,11 @@ def _read_model_reactions_from_sbml(model, metabolites, f_replace, **kwargs):
         if rate_eq in mass_action_rates:
             # Rate law is a mass action rate law identical to the one
             # automatically generated when reaction rate type is 1, 2, or 3
-            for x, rate in enumerate(mass_action_rates):
-                if rate_eq == rate:
-                    mass_reaction._rtype = int(x + 1)
+            mass_reaction._rate = rate_eq
         else:
             custom_rates_dict[mass_reaction] = str(rate_eq)
+            mass_reaction.get_mass_action_rate(rate_type=1,
+                                               update_reaction=True)
 
         # Parse the notes dict for fall back solutions
         mass_notes = _parse_notes_dict(reaction)
@@ -1220,6 +1232,49 @@ def _read_model_reactions_from_sbml(model, metabolites, f_replace, **kwargs):
         reaction_list.append(mass_reaction)
 
     return reaction_list, local_parameters_dict, custom_rates_dict
+
+
+def _read_model_objectives_from_sbml(model_fbc, mass_model, f_replace,
+                                     **kwargs):
+    """Read the model objective functions from SBML and return it.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    number = kwargs.get("number")
+
+    objective_direction = "max"
+    objective_coefficients = {}
+    objective_list = model_fbc.getListOfObjectives()
+    # Return defaults if no objectives found or set.
+    if not objective_list or not objective_list.getActiveObjective():
+        return objective_coefficients, objective_direction
+
+    # Get active objectives
+    objective_id = objective_list.getActiveObjective()
+    objective = model_fbc.getObjective(objective_id)
+    # Set objective direction
+    objective_direction = LONG_SHORT_DIRECTION[objective.getType()]
+    for flux_objective in objective.getListOfFluxObjectives():
+        rid = flux_objective.getReaction()
+        rid = _get_corrected_id(rid, (f_replace, F_REACTION),
+                                None, kwargs.get("remove_char"))
+        try:
+            objective_reaction = mass_model.reactions.get_by_id(rid)
+        except KeyError as e:
+            raise MassSBMLError(
+                "Objective reaction '{0}' not found".format(str(e)))
+        try:
+            objective_coefficients[objective_reaction] = number(
+                flux_objective.getCoefficient())
+        except ValueError as e:
+            LOGGER.warning(str(e))
+    if not objective_coefficients:
+        LOGGER.info("No objective coefficients found in the model.")
+
+    return objective_coefficients, objective_direction
 
 
 def _read_reaction_species_from_sbml(reaction, f_replace, **kwargs):
@@ -1425,7 +1480,8 @@ def _read_reaction_flux_bounds_from_sbml(model, reaction, set_missing_bounds):
     return (lower_bound, upper_bound)
 
 
-def _read_model_groups_from_sbml(model_groups):
+def _read_model_groups_from_sbml(model, model_groups, mass_model, f_replace,
+                                 **kwargs):
     """Read the SBML groups, returning enzymes and mass groups seperately.
 
     Warnings
@@ -1433,9 +1489,22 @@ def _read_model_groups_from_sbml(model_groups):
     This method is intended for internal use only.
 
     """
+    sid_map = {}
+    metaid_map = {}
+    # Calculate hashmaps to lookup objects in O(1)
+    for obj_list in [model.getListOfCompartments(),
+                     model.getListOfSpecies(),
+                     model.getListOfReactions(),
+                     model_groups.getListOfGroups()]:
+        for sbase in obj_list:
+            if sbase.isSetId():
+                sid_map[sbase.getIdAttribute()] = sbase
+            if sbase.isSetMetaId():
+                metaid_map[sbase.getMetaId()] = sbase
+
     # Read the MassModel enzyme modules information from the SBMLDocument
     # Also determine whether the MassModel should be an EnzymeModule
-    other_groups = []
+    mass_groups = []
     enzyme_groups = defaultdict(list)
     for group in model_groups.getListOfGroups():
         # Get the group ID
@@ -1443,20 +1512,68 @@ def _read_model_groups_from_sbml(model_groups):
         # Determine whether the group represents an enzyme
         try:
             enzyme_module_id, attr = group_id.split("_", 1)
-            if _CATEGORY_GROUP_RE.search(attr):
-                attr = attr[:_CATEGORY_GROUP_RE.search(attr).start()]
             if attr not in list(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS)\
                and "EnzymeModule" not in attr:
                 raise ValueError
+        # Parse group as a regular group object.
         except ValueError:
-            # TODO revisit for other groups
-            other_groups.append(group)
-            LOGGER.warning("Group '%s' not parsed.", group_id)
+            # Parse group
+            gid = _check_required(group, group.getIdAttribute(), "id")
+            mass_group = Group(gid)
+            mass_group.name = group.getName() if group.isSetName() else ""
+            if group.isSetKind():
+                mass_group.kind = group.getKindAsString()
+            mass_group.annotation = _parse_annotations(group)
+            mass_group.notes = _parse_notes_dict(group)
+            # Get list of members
+            mass_members = []
+            for member in group.getListOfMembers():
+                if member.isSetIdRef():
+                    obj = sid_map[member.getIdRef()]
+                elif member.isSetMetaIdRef():
+                    obj = metaid_map[member.getMetaIdRef()]
+
+                # Get typecode of object
+                typecode = obj.getTypeCode()
+                obj_id = _check_required(obj, obj.getIdAttribute(), "id")
+
+                mass_member = None
+                # Perform ID replacements
+                if typecode == libsbml.SBML_SPECIES:
+                    # For Species
+                    obj_id = _get_corrected_id(
+                        obj_id, (f_replace, F_SPECIE), None,
+                        kwargs.get("remove_char"))
+                    mass_member = mass_model.metabolites.get_by_id(obj_id)
+
+                elif typecode == libsbml.SBML_REACTION:
+                    # For Reactions
+                    obj_id = _get_corrected_id(
+                        obj_id, (f_replace, F_REACTION), None,
+                        kwargs.get("remove_char"))
+                    mass_member = mass_model.reactions.get_by_id(obj_id)
+
+                elif typecode == libsbml.SBML_FBC_GENEPRODUCT:
+                    # For genes
+                    obj_id = _get_corrected_id(
+                        obj_id, (f_replace, F_GENE), None,
+                        kwargs.get("remove_char"))
+                    mass_member = mass_model.metabolites.get_by_id(obj_id)
+                else:
+                    # Not recognized.
+                    LOGGER.warning("Member %s could not be added to group %s,"
+                                   "unsupported type code: "
+                                   "%s", member, group, typecode)
+                if mass_member:
+                    mass_members.append(mass_member)
+            # Add members to group, add group to the list to be added to model.
+            mass_group.add_members(mass_members)
+            mass_groups.append(mass_group)
         else:
             # Add enzyme group to the dictionary
             enzyme_groups[enzyme_module_id].append(group)
 
-    return enzyme_groups, other_groups
+    return mass_groups, enzyme_groups
 
 
 def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
@@ -1469,7 +1586,11 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
     This method is intended for internal use only.
 
     """
-    def _get_group_members(group, gid=None, **kwargs):
+    enzyme_module_dicts = []
+    if not enzyme_group_dict:
+        return enzyme_module_dicts
+
+    def _get_group_members(group, gid, **kwargs):
         """Get the group members of a group and performn ID corrections."""
         member_list = []
         for member in group.getListOfMembers():
@@ -1477,66 +1598,44 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
                 obj_id = member.getIdRef()
             elif member.isSetMetaIdRef():
                 obj_id = member.getMetaIdRef()
-            # Correct object ID if necessary.
-            replace_key = {
-                "enzyme_module_ligands": F_SPECIE,
-                "enzyme_module_species": F_SPECIE,
-                "enzyme_module_reactions": F_REACTION}.get(gid)
-            obj_id = _get_corrected_id(obj_id, (f_replace, replace_key),
-                                       None, kwargs.get("remove_char"))
+            if "_categorized" not in gid:
+                # Correct object ID if necessary.
+                replace_key = {
+                    "enzyme_module_ligands": F_SPECIE,
+                    "enzyme_module_species": F_SPECIE,
+                    "enzyme_module_reactions": F_REACTION}.get(
+                        gid)
+                obj_id = _get_corrected_id(obj_id, (f_replace, replace_key),
+                                           None, kwargs.get("remove_char"))
             # Add object to member list
             member_list.append(obj_id)
 
         return member_list
 
-    def _parse_enzyme_group(gid, gname, group, enzyme_module_dict, **kwargs):
-        """Parse the various enzyme groups and add to the EnzymeModuleDict."""
-        if "_categorized" in gid and _CATEGORY_GROUP_RE.search(gid):
-            attr = gid[:_CATEGORY_GROUP_RE.search(gid).start()]
-            gid = attr[:-len("_categorized")]
-            member_list = _get_group_members(group, gid, **kwargs)
-            categorized_dicts[attr][gname].extend(member_list)
-        elif "EnzymeModule" in gid:
-            # Set attributes stored in the group notes
-            group_notes = _parse_notes_dict(group)
-            for attr, value in iteritems(group_notes):
-                try:
-                    value = float(value)
-                except ValueError:
-                    if attr in ["enzyme_concentration_total_equation",
-                                "enzyme_net_flux_equation"]:
-                        value = sympify(value)
-                finally:
-                    enzyme_module_dict[attr] = value
-            # Set the name for the EnzymeModuleDict
-            enzyme_module_dict["name"] = gname
-            # Temporary store object class
-            enzyme_module_dict["model"] = gid
-        else:
-            # Get members for DictList attribute
-            member_list = _get_group_members(group, gid, **kwargs)
-            # Set enzyme module ligands, species, or reactions attribute list
-            enzyme_module_dict[gid] = member_list
-
-    enzyme_module_dicts = []
     for enzyme_module_id, group_list in iteritems(enzyme_group_dict):
         # Make EnzymeModuleDict
-        enzyme_module_dict = EnzymeModuleDict(id_or_enzyme=enzyme_module_id)
-        categorized_dicts = defaultdict(lambda: defaultdict(list))
+        e_dict = EnzymeModuleDict(id_or_enzyme=enzyme_module_id)
         for group in group_list:
             # Get the group ID and name
             gid = _check_required(group, group.getIdAttribute(), "id")
             gid = gid.replace(enzyme_module_id + "_", "")
-            gname = group.getName() if group.isSetName() else ""
-            # Parse enzyme group
-            _parse_enzyme_group(gid, gname, group, enzyme_module_dict,
-                                **kwargs)
+            # Parse EnzymeModule attributes
+            if "EnzymeModule" not in gid:
+                e_dict[gid] = _get_group_members(group, gid, **kwargs)
+                continue
+            for attr, val in iteritems(_parse_notes_dict(group)):
+                try:
+                    val = float(val)
+                except ValueError:
+                    val = sympify(val) if "equation" in attr else val
+                finally:
+                    e_dict[attr] = val
+            # Set the name for the EnzymeModuleDict
+            e_dict["name"] = group.getName() if group.isSetName() else ""
+            # Temporary store object class
+            e_dict["model"] = gid
 
-        for attr in ["ligands", "species", "reactions"]:
-            attr = "enzyme_module_" + attr + "_categorized"
-            enzyme_module_dict[attr] = categorized_dicts[attr]
-
-        enzyme_module_dicts.append(enzyme_module_dict)
+        enzyme_module_dicts.append(e_dict)
 
     return enzyme_module_dicts
 
@@ -1551,7 +1650,13 @@ def _read_enzyme_attr_info_from_notes(mass_obj, notes, f_replace, **kwargs):
     This method is intended for internal use only.
 
     """
-    for enz_attr in get_subclass_specific_attributes(mass_obj):
+    subclass_specific_attributes = {
+        "EnzymeModuleSpecies": [
+            "enzyme_module_id", "bound_catalytic", "bound_effectors"],
+        "EnzymeModuleReaction": [
+            "enzyme_module_id"],
+    }.get(mass_obj.__class__.__name__)
+    for enz_attr in subclass_specific_attributes:
         if enz_attr not in notes:
             continue
         # Handle bound dict attributes
@@ -1723,6 +1828,11 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
             or as global model parameters in the SBML model file.
 
             Default is ``True`` to write parameters as local parameters.
+        write_objective :
+            ``bool`` indicating whether the model objective(s) should also be
+            written into the SBML model file.
+
+            Default is ``False``.
 
     Returns
     -------
@@ -1739,7 +1849,8 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
         "use_fbc_package": True,
         "use_groups_package": True,
         "units": True,
-        "local_parameters": True}, kwargs)
+        "local_parameters": True,
+        "write_objective": False}, kwargs)
 
     if f_replace is None:
         f_replace = F_REPLACE
@@ -1773,17 +1884,27 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
         _write_global_flux_bounds_to_sbml(model, mass_model, **kwargs)
         # Write the gene information into the SBMLDocument
         _write_model_genes_to_sbml(model_fbc, mass_model, f_replace)
-
+        # Write the objective information into the SBMLDocument
+        objective = _write_model_objectives_to_sbml(model_fbc, mass_model,
+                                                    **kwargs)
+    else:
+        objective = None
     # Write the reaction information into the SBMLDocument
     # Includes MassReactions, EnzymeModuleReactions, kinetic laws,
     # GPR, reaction flux bounds, and kinetic parameters as local parameters
-    _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs)
+    _write_model_reactions_to_sbml(model, mass_model, f_replace, objective,
+                                   **kwargs)
     # Write kinetic parameters into the SBMLDocument as global parameters
     # if they are not already written as kinetic law local parameters
     _write_model_kinetic_parameters_to_sbml(model, mass_model, f_replace,
                                             **kwargs)
-    # Write the EnzymeModule specific information into the SBMLDocument
+
     if kwargs.get("use_groups_package"):
+        # Write groups to SBML
+        for mass_group in mass_model.groups:
+            _write_group_to_sbml(model_groups, mass_group, f_replace)
+
+        # Write the EnzymeModule specific information into the SBMLDocument
         if isinstance(mass_model, EnzymeModule):
             _write_enzyme_modules_to_sbml(model_groups, mass_model, f_replace)
         # Write the EnzymeModuleDict specific information into the SBMLDocument
@@ -1984,7 +2105,7 @@ def _write_model_compartments_to_sbml(model, mass_model):
     This method is intended for internal use only.
 
     """
-    # TODO Revisit based on new cobra compartment implementation
+    # FIXME Revisit based on new cobra compartment implementation
     if not mass_model.compartments:
         default_compartment_dict = MASSCONFIGURATION.default_compartment
         LOGGER.warning(
@@ -2262,7 +2383,32 @@ def _write_model_genes_to_sbml(model_fbc, mass_model, f_replace):
         _sbase_notes_dict(gp, gene.notes)
 
 
-def _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs):
+def _write_model_objectives_to_sbml(model_fbc, mass_model, **kwargs):
+    """Write model objectives information into SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if kwargs.get("write_objective"):
+        objective = model_fbc.createObjective()
+        _check(objective, "create model objective")
+        _check(objective.setIdAttribute("obj"), "set objective id")
+        _check(
+            objective.setType(
+                SHORT_LONG_DIRECTION[mass_model.objective.direction]),
+            "set objective type")
+        _check(model_fbc.setActiveObjectiveId("obj"),
+               "set model active objective id")
+    else:
+        objective = None
+
+    return objective
+
+
+def _write_model_reactions_to_sbml(model, mass_model, f_replace, objective,
+                                   **kwargs):
     """Write model reaction information into SBMLDocument.
 
     Warnings
@@ -2271,6 +2417,9 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs):
 
     """
     additional_notes = {}
+    use_fbc_package = kwargs.get("use_fbc_package")
+    if use_fbc_package:
+        reaction_coefficients = linear_reaction_coefficients(mass_model)
     for mass_reaction in mass_model.reactions:
         # Create reaction and set ID, name, and reversible
         rid = mass_reaction.id
@@ -2293,7 +2442,7 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs):
                                             **kwargs)
 
         # Write bouns and GPR if FBC package enabled.
-        if kwargs.get("use_fbc_package"):
+        if use_fbc_package:
             # Get plugin for reaction
             reaction_fbc = reaction.getPlugin("fbc")
             _check(reaction_fbc, "get fbc plugin for reaction" + _for_id(rid))
@@ -2313,6 +2462,17 @@ def _write_model_reactions_to_sbml(model, mass_model, f_replace, **kwargs):
 
             # Set the reaction GPR
             _write_reaction_gpr_to_sbml(reaction_fbc, mass_reaction, f_replace)
+
+            # Set flux objectives
+            if reaction_coefficients.get(mass_reaction, 0) != 0:
+                flux_objective = objective.createFluxObjective()
+                _check(flux_objective, "create flux objective" + _for_id(rid))
+                _check(flux_objective.setReaction(rid),
+                       "set flux objective reaction id" + _for_id(rid))
+                _check(
+                    flux_objective.setCoefficient(
+                        mass_reaction.objective_coefficient),
+                    "set flux objective reaction coefficient" + _for_id(rid))
 
         # Write the subsystem attribute into the notes.
         if mass_reaction.subsystem:
@@ -2521,6 +2681,53 @@ def _create_parameter(sbml_obj, pid, value, constant=True, sbo=None, udef=None,
                "set" + p_type + "parameter units" + _for_id(pid))
 
 
+def _write_group_to_sbml(model_groups, mass_group, f_replace):
+    """Write a Group into the SBMLDocument.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Create group and set ID, name, and kind
+    group = model_groups.createGroup()
+    gid = mass_group.id
+    _check(group, "create group" + _for_id(gid))
+    _check(group.setIdAttribute(gid), "set group id" + _for_id(gid))
+    _check(group.setName(mass_group.name), "set group name" + _for_id(gid))
+    _check(group.setKind(mass_group.kind), "set group kind" + _for_id(gid))
+
+    # Set notes and annotations
+    _sbase_notes_dict(group, mass_group.notes)
+    _sbase_annotations(group, mass_group.annotation)
+
+    # Iterate through members and create correspondning SBML group members
+    for mass_member in list(mass_group.members):
+        mid = mass_member.id
+        m_type = str(type(mass_member))
+
+        # ID replacements
+        replacement_key = None
+        m_type = str(mass_member.__class__.__name__)
+        if m_type in ["MassReaction", "EnzymeModuleReaction"]:
+            replacement_key = F_REACTION_REV
+        if m_type in ["MassMetabolite", "EnzymeModuleSpecies"]:
+            replacement_key = F_SPECIE_REV
+        if m_type in ["Gene"]:
+            replacement_key = F_GENE_REV
+        if f_replace and replacement_key in f_replace:
+            mid = f_replace[replacement_key](mid)
+
+        # Create member, set ID and name, if any
+        member = group.createMember()
+        _check(member, "create group member " + mid + _for_id(gid))
+        _check(member.setIdRef(mid), "set group member id ref" + _for_id(mid))
+        member.setIdRef(mid)
+        if mass_member.name:
+            _check(member.setName(mass_member.name),
+                   "set group member name" + _for_id(mid))
+
+
 def _write_enzyme_modules_to_sbml(model_groups, mass_obj, f_replace):
     """Write EnzymeModule and EnzymeModuleDict information into SBMLDocument.
 
@@ -2531,11 +2738,10 @@ def _write_enzyme_modules_to_sbml(model_groups, mass_obj, f_replace):
     This method is intended for internal use only.
 
     """
-    # Create group to represent EnzymeModule/EnzymeModuleDict information
-    notes = {}
-    # Create groups for attributes, add them to enzyme group members list
     enzyme_group_members = []
+    notes = {}
     for attr_name, default in iteritems(_ORDERED_ENZYMEMODULE_DICT_DEFAULTS):
+        attr_value = getattr(mass_obj, attr_name, None)
         attr_value = getattr(mass_obj, attr_name, None)
         # Ignore attributes set at default and the id, name, and S matrix.
         gid = "_".join((mass_obj.id, attr_name))
@@ -2543,23 +2749,10 @@ def _write_enzyme_modules_to_sbml(model_groups, mass_obj, f_replace):
             continue
         elif isinstance(attr_value, list):
             # Write attribute with list value as a group.
-            enzyme_group_members += [
-                _write_group_to_sbml(
-                    model_groups, gid=gid, members=attr_value,
-                    f_replace=f_replace)]
-        elif isinstance(attr_value, dict):
-            # Write attribute with dict containing lists as a group of groups.
-            members = []
-            # Create enzyme group members (as groups) and add to list
-            for i, (category, values) in enumerate(iteritems(attr_value)):
-                members += [
-                    _write_group_to_sbml(
-                        model_groups, gid=gid + "_Category" + str(i),
-                        gname=category, members=values, f_replace=f_replace)]
-            enzyme_group_members += [
-                _write_group_to_sbml(
-                    model_groups, gid=gid, members=members,
-                    f_replace=f_replace)]
+            new_group = Group(id=gid, members=attr_value)
+            enzyme_group_members += [new_group]
+            _write_group_to_sbml(model_groups, new_group, f_replace)
+
         elif isinstance(attr_value, Basic):
             # Write attribute with sympy equation to the group notes.
             notes.update({attr_name: str(attr_value.rhs)})
@@ -2568,10 +2761,9 @@ def _write_enzyme_modules_to_sbml(model_groups, mass_obj, f_replace):
             notes.update({attr_name: str(attr_value)})
     # Create enzyme group
     gid = "_".join((mass_obj.id, mass_obj.__class__.__name__))
-    enzyme_group = _write_group_to_sbml(
-        model_groups, gid=gid, gname=mass_obj.name, kind="collection",
-        members=enzyme_group_members, f_replace=f_replace)
-    _sbase_notes_dict(enzyme_group, notes)
+    enzyme_group = Group(id=gid, members=enzyme_group_members)
+    enzyme_group.notes.update(notes)
+    _write_group_to_sbml(model_groups, enzyme_group, f_replace)
 
 
 def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
@@ -2590,7 +2782,12 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
     if additional_notes:
         notes.update(additional_notes)
     # Get the subclass specific attributes to write into the notes.
-    attributes = get_subclass_specific_attributes(mass_obj)
+    attributes = {
+        "EnzymeModuleSpecies": [
+            "enzyme_module_id", "bound_catalytic", "bound_effectors"],
+        "EnzymeModuleReaction": [
+            "enzyme_module_id"],
+    }.get(mass_obj.__class__.__name__)
     default_values = [{} if "bound" in attr_name else ""
                       for attr_name in attributes]
 
@@ -2617,60 +2814,6 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
 
     # Write the notes to the SBML object.
     _sbase_notes_dict(sbml_obj, notes)
-
-
-def _write_group_to_sbml(model_groups, gid, gname="", kind="collection",
-                         members=None, f_replace=None):
-    """Write an SBML group into SBMLDocument, and return the group.
-
-    Additional group information is written into the notes attribute of the
-    SBML object.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    group = model_groups.createGroup()
-    _check(group, "create group" + _for_id(gid))
-    _check(group.setIdAttribute(gid), "set group id" + _for_id(gid))
-    _check(group.setName(gname), "set group name" + _for_id(gid))
-    _check(group.setKind(kind), "set group kind" + _for_id(gid))
-
-    if members:
-        for member in members:
-            # Get member ID and name
-            if not isinstance(member, libsbml.SBase):
-                mid = member.id
-                mname = member.name
-            else:
-                mid = member.getIdAttribute()
-                mname = ""
-                if member.isSetName():
-                    mname = member.getName()
-
-            # ID replacements
-            m_type = str(member.__class__.__name__)
-            if m_type in ["MassReaction", "EnzymeModuleReaction"]:
-                if f_replace and F_REACTION_REV in f_replace:
-                    mid = f_replace[F_REACTION_REV](mid)
-            if m_type in ["MassMetabolite", "EnzymeModuleSpecies"]:
-                if f_replace and F_SPECIE_REV in f_replace:
-                    mid = f_replace[F_SPECIE_REV](mid)
-            if m_type in ["Gene"]:
-                if f_replace and F_GENE_REV in f_replace:
-                    mid = f_replace[F_GENE_REV](mid)
-
-            # Create member
-            member = group.createMember()
-            _check(member, "create group member " + mid + _for_id(gid))
-            _check(member.setIdRef(mid),
-                   "set group member id ref" + _for_id(mid))
-            if mname:
-                _check(member.setName(mname),
-                       "set group member name" + _for_id(mid))
-
-    return group
 
 
 def _check(value, message):
@@ -2974,6 +3117,11 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
             or as global model parameters in the SBML model file.
 
             Default is ``True`` to write parameters as local parameters.
+        write_objective :
+            ``bool`` indicating whether the model objective(s) should also be
+            written into the SBML model file.
+
+            Default is ``False``.
         check_model : bool
             ``bool`` indicating whether to check some basic model properties.
 
@@ -3028,6 +3176,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         "use_groups_package": True,
         "units": True,
         "local_parameters": True,
+        "write_objective": False,
         "number": float,
         "set_missing_bounds": True,
         "remove_char": True,
@@ -3040,7 +3189,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
     all_kwargs = {"export": {}, "validate": {}}
     for k, v in iteritems(kwargs):
         if k in ["use_fbc_package", "use_groups_package", "units",
-                 "local_parameters"]:
+                 "local_parameters", "write_objective"]:
             all_kwargs["export"][k] = v
         else:
             all_kwargs["validate"][k] = v

@@ -114,11 +114,13 @@
             "name": "H2O"
         }
     ],
+    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
             "_forward_rate_constant": 1824.9365356715123,
             "_lower_bound": -1000.0,
+            "_rate": "kf_DPGM*(_13dpg_c(t) - _23dpg_c(t)/Keq_DPGM)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -135,7 +137,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.14225806451612902,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_DPGase*_23dpg_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -155,6 +158,7 @@
             "_equilibrium_constant": 41.8352,
             "_forward_rate_constant": 506935,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO1*(hb_c(t)*o2_c(t) - hb_1o2_c(t)/Keq_HBO1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -172,6 +176,7 @@
             "_equilibrium_constant": 73.2115,
             "_forward_rate_constant": 511077,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO2*(hb_1o2_c(t)*o2_c(t) - hb_2o2_c(t)/Keq_HBO2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -189,6 +194,7 @@
             "_equilibrium_constant": 177.799,
             "_forward_rate_constant": 509243,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO3*(hb_2o2_c(t)*o2_c(t) - hb_3o2_c(t)/Keq_HBO3)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -206,6 +212,7 @@
             "_equilibrium_constant": 1289.92,
             "_forward_rate_constant": 501595,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO4*(hb_3o2_c(t)*o2_c(t) - hb_4o2_c(t)/Keq_HBO4)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -223,6 +230,7 @@
             "_equilibrium_constant": 0.25,
             "_forward_rate_constant": 519613,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBDPG*(_23dpg_c(t)*hb_c(t) - dhb_c(t)/Keq_HBDPG)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -240,6 +248,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 509726,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_o2_c*(o2_c(t) - o2_b/Keq_SK_o2_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -250,7 +259,7 @@
             "metabolites": {
                 "o2_c": -1
             },
-            "name": "Oxygen_sink",
+            "name": "Oxygen sink",
             "steady_state_flux": 0,
             "subsystem": "Pseudoreaction"
         }

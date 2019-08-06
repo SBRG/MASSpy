@@ -161,9 +161,7 @@ class EnzymeModuleDict(OrderedDictWithID):
                 "enzyme_module_reactions": model.reactions}.get(attr)
             self[attr] = _mk_new_dictlist(model_dictlist, getattr(self, attr))
             attr += "_categorized"
-            self[attr] = {
-                key: _mk_new_dictlist(model_dictlist, old_dictlist)
-                for key, old_dictlist in iteritems(getattr(self, attr))}
+            self[attr] = _mk_new_dictlist(model.groups, getattr(self, attr))
 
         for enzyme_module_specie in self.enzyme_module_species:
             enzyme_module_specie._repair_bound_obj_pointers()

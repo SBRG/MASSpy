@@ -22,36 +22,36 @@
         "Keq_PFK_ACT": 30.3030303030303,
         "Keq_PFK_F": 10.0,
         "Keq_PFK_I": 10.0,
-        "kf_PFK": 18791158.0,
-        "kf_PFK_A": 4240227.0,
+        "kf_PFK": 14139560.0,
+        "kf_PFK_A": 5062588.0,
         "kf_PFK_ACT": 1000000.0,
-        "kf_PFK_F": 5355749.0,
+        "kf_PFK_F": 5072144.0,
         "kf_PFK_I": 1000000.0
     },
     "custom_rates": {
         "PFK_R01": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R0_c(t) - pfk_R0_A_c(t))/Keq_PFK_A",
         "PFK_R02": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R0_A_c(t) - pfk_R0_AF_c(t))/Keq_PFK_F",
         "PFK_R03": "kf_PFK*pfk_R0_AF_c(t)",
-        "PFK_R10": "kf_PFK_ACT*(4*Keq_PFK_ACT*amp_c(t)*pfk_R0_c(t) - pfk_R1_c(t))/Keq_PFK_ACT",
+        "PFK_R10": "kf_PFK_ACT*(3*Keq_PFK_ACT*amp_c(t)*pfk_R0_c(t) - 2*pfk_R1_c(t))/Keq_PFK_ACT",
         "PFK_R11": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R1_c(t) - pfk_R1_A_c(t))/Keq_PFK_A",
         "PFK_R12": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R1_A_c(t) - pfk_R1_AF_c(t))/Keq_PFK_F",
         "PFK_R13": "kf_PFK*pfk_R1_AF_c(t)",
-        "PFK_R20": "kf_PFK_ACT*(3*Keq_PFK_ACT*amp_c(t)*pfk_R1_c(t) - 2*pfk_R2_c(t))/Keq_PFK_ACT",
+        "PFK_R20": "kf_PFK_ACT*(Keq_PFK_ACT*amp_c(t)*pfk_R1_c(t) - 4*pfk_R2_c(t))/Keq_PFK_ACT",
         "PFK_R21": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R2_c(t) - pfk_R2_A_c(t))/Keq_PFK_A",
         "PFK_R22": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R2_A_c(t) - pfk_R2_AF_c(t))/Keq_PFK_F",
         "PFK_R23": "kf_PFK*pfk_R2_AF_c(t)",
-        "PFK_R30": "kf_PFK_ACT*(2*Keq_PFK_ACT*amp_c(t)*pfk_R2_c(t) - 3*pfk_R3_c(t))/Keq_PFK_ACT",
+        "PFK_R30": "kf_PFK_ACT*(4*Keq_PFK_ACT*amp_c(t)*pfk_R2_c(t) - pfk_R3_c(t))/Keq_PFK_ACT",
         "PFK_R31": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R3_c(t) - pfk_R3_A_c(t))/Keq_PFK_A",
         "PFK_R32": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R3_A_c(t) - pfk_R3_AF_c(t))/Keq_PFK_F",
         "PFK_R33": "kf_PFK*pfk_R3_AF_c(t)",
-        "PFK_R40": "kf_PFK_ACT*(Keq_PFK_ACT*amp_c(t)*pfk_R3_c(t) - 4*pfk_R4_c(t))/Keq_PFK_ACT",
+        "PFK_R40": "kf_PFK_ACT*(2*Keq_PFK_ACT*amp_c(t)*pfk_R3_c(t) - 3*pfk_R4_c(t))/Keq_PFK_ACT",
         "PFK_R41": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R4_c(t) - pfk_R4_A_c(t))/Keq_PFK_A",
         "PFK_R42": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R4_A_c(t) - pfk_R4_AF_c(t))/Keq_PFK_F",
         "PFK_R43": "kf_PFK*pfk_R4_AF_c(t)",
         "PFK_T1": "kf_PFK_I*(4*Keq_PFK_I*atp_c(t)*pfk_T0_c(t) - pfk_T1_c(t))/Keq_PFK_I",
-        "PFK_T2": "kf_PFK_I*(3*Keq_PFK_I*atp_c(t)*pfk_T1_c(t) - 2*pfk_T2_c(t))/Keq_PFK_I",
+        "PFK_T2": "kf_PFK_I*(Keq_PFK_I*atp_c(t)*pfk_T1_c(t) - 4*pfk_T2_c(t))/Keq_PFK_I",
         "PFK_T3": "kf_PFK_I*(2*Keq_PFK_I*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t))/Keq_PFK_I",
-        "PFK_T4": "kf_PFK_I*(Keq_PFK_I*atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t))/Keq_PFK_I"
+        "PFK_T4": "kf_PFK_I*(3*Keq_PFK_I*atp_c(t)*pfk_T3_c(t) - 2*pfk_T4_c(t))/Keq_PFK_I"
     },
     "enzyme_modules": [
         {
@@ -76,8 +76,8 @@
                     "atp_c"
                 ],
                 "Products": [
-                    "adp_c",
                     "fdp_c",
+                    "adp_c",
                     "h_c"
                 ],
                 "Substrates": [
@@ -111,41 +111,41 @@
                 "PFK_L"
             ],
             "enzyme_module_reactions_categorized": {
-                "R/T transition": [
+                "RT_transition": [
                     "PFK_L"
                 ],
-                "amp_c activation": [
-                    "PFK_R10",
+                "amp_c_activation": [
                     "PFK_R20",
-                    "PFK_R30",
-                    "PFK_R40"
+                    "PFK_R10",
+                    "PFK_R40",
+                    "PFK_R30"
                 ],
-                "atp_c binding": [
+                "atp_c_binding": [
                     "PFK_R01",
                     "PFK_R11",
-                    "PFK_R21",
                     "PFK_R31",
+                    "PFK_R21",
                     "PFK_R41"
                 ],
-                "atp_c inhibition": [
-                    "PFK_T1",
-                    "PFK_T2",
+                "atp_c_inhibition": [
                     "PFK_T3",
-                    "PFK_T4"
+                    "PFK_T4",
+                    "PFK_T2",
+                    "PFK_T1"
                 ],
                 "catalyzation": [
                     "PFK_R03",
                     "PFK_R13",
-                    "PFK_R23",
                     "PFK_R33",
+                    "PFK_R23",
                     "PFK_R43"
                 ],
-                "f6p_c binding": [
-                    "PFK_R02",
+                "f6p_c_binding": [
                     "PFK_R12",
+                    "PFK_R42",
                     "PFK_R22",
-                    "PFK_R32",
-                    "PFK_R42"
+                    "PFK_R02",
+                    "PFK_R32"
                 ]
             },
             "enzyme_module_species": [
@@ -171,56 +171,56 @@
                 "pfk_T4_c"
             ],
             "enzyme_module_species_categorized": {
-                "Complexed ATP": [
+                "Complexed_ATP": [
+                    "pfk_R4_A_c",
                     "pfk_R0_A_c",
-                    "pfk_R1_A_c",
-                    "pfk_R2_A_c",
                     "pfk_R3_A_c",
-                    "pfk_R4_A_c"
+                    "pfk_R1_A_c",
+                    "pfk_R2_A_c"
                 ],
-                "Complexed ATP & F6P": [
+                "Complexed_ATP_F6P": [
+                    "pfk_R4_AF_c",
                     "pfk_R0_AF_c",
                     "pfk_R1_AF_c",
-                    "pfk_R2_AF_c",
                     "pfk_R3_AF_c",
-                    "pfk_R4_AF_c"
+                    "pfk_R2_AF_c"
                 ],
-                "Free Catalytic": [
-                    "pfk_R0_c",
+                "Free_Catalytic": [
                     "pfk_R1_c",
+                    "pfk_R4_c",
                     "pfk_R2_c",
                     "pfk_R3_c",
-                    "pfk_R4_c"
+                    "pfk_R0_c"
                 ],
                 "Relaxed": [
-                    "pfk_R0_AF_c",
-                    "pfk_R0_A_c",
-                    "pfk_R0_c",
-                    "pfk_R1_AF_c",
-                    "pfk_R1_A_c",
                     "pfk_R1_c",
-                    "pfk_R2_AF_c",
-                    "pfk_R2_A_c",
+                    "pfk_R0_c",
+                    "pfk_R4_c",
+                    "pfk_R4_A_c",
+                    "pfk_R4_AF_c",
                     "pfk_R2_c",
-                    "pfk_R3_AF_c",
+                    "pfk_R0_AF_c",
+                    "pfk_R1_AF_c",
+                    "pfk_R0_A_c",
                     "pfk_R3_A_c",
                     "pfk_R3_c",
-                    "pfk_R4_AF_c",
-                    "pfk_R4_A_c",
-                    "pfk_R4_c"
+                    "pfk_R1_A_c",
+                    "pfk_R3_AF_c",
+                    "pfk_R2_A_c",
+                    "pfk_R2_AF_c"
                 ],
                 "Tense": [
+                    "pfk_T4_c",
                     "pfk_T0_c",
                     "pfk_T1_c",
                     "pfk_T2_c",
-                    "pfk_T3_c",
-                    "pfk_T4_c"
+                    "pfk_T3_c"
                 ]
             },
             "enzyme_net_flux": 1.12,
             "enzyme_net_flux_equation": "kf_PFK*(pfk_R0_AF_c(t) + pfk_R1_AF_c(t) + pfk_R2_AF_c(t) + pfk_R3_AF_c(t) + pfk_R4_AF_c(t))",
             "id": "PFK",
-            "name": "Phosphofructokinase",
+            "name": "",
             "subsystem": "Glycolysis"
         }
     ],
@@ -228,7 +228,7 @@
     "id": "RBC_PFK",
     "metabolites": [
         {
-            "_initial_condition": 1.3046096105455738,
+            "_initial_condition": 1.3026305332754011,
             "charge": 0,
             "compartment": "c",
             "formula": "C6H12O6",
@@ -236,7 +236,7 @@
             "name": "D-Glucose"
         },
         {
-            "_initial_condition": 0.7942113610554835,
+            "_initial_condition": 0.6964547863661713,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -244,7 +244,7 @@
             "name": "D-Glucose 6-phosphate"
         },
         {
-            "_initial_condition": 0.32550067882547734,
+            "_initial_condition": 0.28542048301290757,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -252,7 +252,7 @@
             "name": "D-Fructose 6-phosphate"
         },
         {
-            "_initial_condition": 0.014398040837731772,
+            "_initial_condition": 0.014644173669682927,
             "charge": -4,
             "compartment": "c",
             "formula": "C6H10O12P2",
@@ -260,7 +260,7 @@
             "name": "D-Fructose 1,6-bisphosphate"
         },
         {
-            "_initial_condition": 0.1587879719239775,
+            "_initial_condition": 0.1600436525616706,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -268,7 +268,7 @@
             "name": "Dihydroxyacetone phosphate"
         },
         {
-            "_initial_condition": 0.007233799782603727,
+            "_initial_condition": 0.007302860434501306,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -276,7 +276,7 @@
             "name": "Glyceraldehyde 3-phosphate"
         },
         {
-            "_initial_condition": 0.00025326415443094026,
+            "_initial_condition": 0.00025773528356279064,
             "charge": -4,
             "compartment": "c",
             "formula": "C3H4O10P2",
@@ -284,7 +284,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.08852193842079387,
+            "_initial_condition": 0.0892918878473104,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -292,7 +292,7 @@
             "name": "3-Phospho-D-glycerate"
         },
         {
-            "_initial_condition": 0.012951287429787803,
+            "_initial_condition": 0.013064398369026783,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -300,7 +300,7 @@
             "name": "D-Glycerate 2-phosphate"
         },
         {
-            "_initial_condition": 0.019830626989557277,
+            "_initial_condition": 0.02001861697684659,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H2O6P",
@@ -308,7 +308,7 @@
             "name": "Phosphoenolpyruvate"
         },
         {
-            "_initial_condition": 0.06029657762024713,
+            "_initial_condition": 0.060297095106110185,
             "charge": -1,
             "compartment": "c",
             "formula": "C3H3O3",
@@ -316,7 +316,7 @@
             "name": "Pyruvate"
         },
         {
-            "_initial_condition": 1.3546736711410345,
+            "_initial_condition": 1.355296890856605,
             "charge": -1,
             "compartment": "c",
             "formula": "C3H5O3",
@@ -324,7 +324,7 @@
             "name": "L-Lactate"
         },
         {
-            "_initial_condition": 0.00238195363825119,
+            "_initial_condition": 0.002295651450836873,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H9O9P",
@@ -332,7 +332,7 @@
             "name": "6-Phospho-D-gluco-1,5-lactone"
         },
         {
-            "_initial_condition": 0.6639612903107037,
+            "_initial_condition": 0.5776703181341869,
             "charge": -3,
             "compartment": "c",
             "formula": "C6H10O10P",
@@ -340,7 +340,7 @@
             "name": "6-Phospho-D-gluconate"
         },
         {
-            "_initial_condition": 0.015021343928609964,
+            "_initial_condition": 0.013979373891947667,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -348,7 +348,7 @@
             "name": "D-Ribulose 5-phosphate"
         },
         {
-            "_initial_condition": 0.04503967470721904,
+            "_initial_condition": 0.04191355073445039,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -356,7 +356,7 @@
             "name": "D-Xylulose 5-phosphate"
         },
         {
-            "_initial_condition": 0.038568805605200686,
+            "_initial_condition": 0.03589297419756753,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -364,7 +364,7 @@
             "name": "Alpha-D-Ribose 5-phosphate"
         },
         {
-            "_initial_condition": 0.2817188105101114,
+            "_initial_condition": 0.24075750740148605,
             "charge": -2,
             "compartment": "c",
             "formula": "C7H13O10P",
@@ -372,7 +372,7 @@
             "name": "Sedoheptulose 7-phosphate"
         },
         {
-            "_initial_condition": 0.00633687092853399,
+            "_initial_condition": 0.006195475328944942,
             "charge": -2,
             "compartment": "c",
             "formula": "C4H7O7P",
@@ -380,7 +380,7 @@
             "name": "D-Erythrose 4-phosphate"
         },
         {
-            "_initial_condition": 0.0009996732394727279,
+            "_initial_condition": 0.0009996954531561002,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H5N5",
@@ -388,7 +388,7 @@
             "name": "Adenine"
         },
         {
-            "_initial_condition": 0.0012000963638609933,
+            "_initial_condition": 0.0012000763508375378,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H13N5O4",
@@ -396,7 +396,7 @@
             "name": "Adenosine"
         },
         {
-            "_initial_condition": 0.009304686075582812,
+            "_initial_condition": 0.009149112349687847,
             "charge": -2,
             "compartment": "c",
             "formula": "C10H11N4O8P",
@@ -404,7 +404,7 @@
             "name": "Inosine monophosphate"
         },
         {
-            "_initial_condition": 0.0009992780187693979,
+            "_initial_condition": 0.0009992740935083752,
             "charge": 0,
             "compartment": "c",
             "formula": "C10H12N4O5",
@@ -412,7 +412,7 @@
             "name": "Inosine"
         },
         {
-            "_initial_condition": 0.0020001374486663254,
+            "_initial_condition": 0.0020001377006187565,
             "charge": 0,
             "compartment": "c",
             "formula": "C5H4N4O",
@@ -420,7 +420,7 @@
             "name": "Hypoxanthine"
         },
         {
-            "_initial_condition": 0.060871343900582985,
+            "_initial_condition": 0.060776419014134844,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -428,7 +428,7 @@
             "name": "Alpha-D-Ribose 1-phosphate"
         },
         {
-            "_initial_condition": 0.011673833379089563,
+            "_initial_condition": 0.01087998646195262,
             "charge": -5,
             "compartment": "c",
             "formula": "C5H8O14P3",
@@ -436,7 +436,7 @@
             "name": "5-Phospho-alpha-D-ribose 1-diphosphate"
         },
         {
-            "_initial_condition": 3.2309410214816827,
+            "_initial_condition": 3.2879801021549784,
             "charge": -5,
             "compartment": "c",
             "formula": "C3H3O10P2",
@@ -444,7 +444,7 @@
             "name": "2,3-Disphospho-D-glycerate"
         },
         {
-            "_initial_condition": 0.05960936255837876,
+            "_initial_condition": 0.05960242242120495,
             "charge": 0,
             "compartment": "c",
             "formula": "[HB]",
@@ -452,7 +452,7 @@
             "name": "Hemoglobin"
         },
         {
-            "_initial_condition": 0.05007190113488053,
+            "_initial_condition": 0.05006607141539493,
             "charge": 0,
             "compartment": "c",
             "formula": "[HB]-O2",
@@ -460,7 +460,7 @@
             "name": "Oxyhemoglobin (1)"
         },
         {
-            "_initial_condition": 0.07360564791113311,
+            "_initial_condition": 0.07359707822893306,
             "charge": 0,
             "compartment": "c",
             "formula": "[HB]-O4",
@@ -468,7 +468,7 @@
             "name": "Oxyhemoglobin (2)"
         },
         {
-            "_initial_condition": 0.26277146829375575,
+            "_initial_condition": 0.26274087460918905,
             "charge": 0,
             "compartment": "c",
             "formula": "[HB]-O6",
@@ -476,7 +476,7 @@
             "name": "Oxyhemoglobin (3)"
         },
         {
-            "_initial_condition": 6.805793036413291,
+            "_initial_condition": 6.805000658585002,
             "charge": 0,
             "compartment": "c",
             "formula": "[HB]-O8",
@@ -484,7 +484,7 @@
             "name": "Oxyhemoglobin (4)"
         },
         {
-            "_initial_condition": 0.048148583688560065,
+            "_initial_condition": 0.04899289474028941,
             "charge": -5,
             "compartment": "c",
             "formula": "[HB]-C3H3O10P2",
@@ -492,7 +492,7 @@
             "name": "Deoxyhemoglobin"
         },
         {
-            "_initial_condition": 0.05934223797467387,
+            "_initial_condition": 0.05929048938926946,
             "charge": -1,
             "compartment": "c",
             "formula": "C21H26N7O14P2",
@@ -500,7 +500,7 @@
             "name": "Nicotinamide adenine dinucleotide"
         },
         {
-            "_initial_condition": 0.029657762025325978,
+            "_initial_condition": 0.029709510610730853,
             "charge": -2,
             "compartment": "c",
             "formula": "C21H27N7O14P2",
@@ -508,7 +508,7 @@
             "name": "Nicotinamide adenine dinucleotide - reduced"
         },
         {
-            "_initial_condition": 0.08069777451806918,
+            "_initial_condition": 0.07934851315124736,
             "charge": -2,
             "compartment": "c",
             "formula": "C10H12N5O7P",
@@ -516,7 +516,7 @@
             "name": "AMP"
         },
         {
-            "_initial_condition": 0.24492670246385329,
+            "_initial_condition": 0.24305269757041162,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -524,7 +524,7 @@
             "name": "ADP"
         },
         {
-            "_initial_condition": 1.2265832300691288,
+            "_initial_condition": 1.2284239661656817,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -532,7 +532,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 1.2299772201446922e-05,
+            "_initial_condition": 1.4017934028489314e-05,
             "charge": -3,
             "compartment": "c",
             "formula": "C21H25N7O17P3",
@@ -540,7 +540,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate"
         },
         {
-            "_initial_condition": 0.06598770022779835,
+            "_initial_condition": 0.06598598206597149,
             "charge": -4,
             "compartment": "c",
             "formula": "C21H26N7O17P3",
@@ -548,7 +548,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate - reduced"
         },
         {
-            "_initial_condition": 3.201094504960223,
+            "_initial_condition": 3.201084507650873,
             "charge": -1,
             "compartment": "c",
             "formula": "C10H16N3O6S",
@@ -556,7 +556,7 @@
             "name": "Reduced glutathione"
         },
         {
-            "_initial_condition": 0.1194527475198909,
+            "_initial_condition": 0.11945774617456217,
             "charge": -2,
             "compartment": "c",
             "formula": "C20H30N6O12S2",
@@ -572,7 +572,7 @@
             "name": "Phosphate"
         },
         {
-            "_initial_condition": 8.967589918987924e-05,
+            "_initial_condition": 8.971146298046767e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -580,7 +580,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 0.9999970426931877,
+            "_initial_condition": 0.9999970209287552,
             "charge": 0,
             "compartment": "c",
             "formula": "H2O",
@@ -588,7 +588,7 @@
             "name": "H2O"
         },
         {
-            "_initial_condition": 1.0000021015016969,
+            "_initial_condition": 1.0000021014879783,
             "charge": 0,
             "compartment": "c",
             "formula": "CO2",
@@ -596,7 +596,7 @@
             "name": "CO2"
         },
         {
-            "_initial_condition": 0.09100223027397383,
+            "_initial_condition": 0.09100222809434938,
             "charge": 0,
             "compartment": "c",
             "formula": "H3N",
@@ -616,7 +616,7 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 4.570510389322566e-09,
+            "_initial_condition": 1.281233024861095e-08,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -627,7 +627,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.7429005822245986e-09,
+            "_initial_condition": 3.588472745358654e-09,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -641,7 +641,7 @@
                 "f6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 4.1226680714174917e-10,
+            "_initial_condition": 1.2663765027577193e-09,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -654,7 +654,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 1.7048266447487387e-08,
+            "_initial_condition": 1.2942726219453813e-08,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -665,7 +665,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.917190640447057e-12,
+            "_initial_condition": 3.947320019894519e-12,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -678,7 +678,7 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 9.406375553671109e-11,
+            "_initial_condition": 1.93959300582564e-10,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -693,7 +693,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 4.47066687066709e-08,
+            "_initial_condition": 4.621087978318329e-08,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -709,7 +709,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 4.032607738667751e-09,
+            "_initial_condition": 4.567504208340984e-09,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -722,7 +722,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 6.253441644105867e-08,
+            "_initial_condition": 7.780197588161528e-09,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -735,7 +735,7 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 1.7306553764797784e-09,
+            "_initial_condition": 5.95660633240888e-10,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -750,7 +750,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 1.6398766685203868e-07,
+            "_initial_condition": 2.7778519713686545e-08,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -766,7 +766,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 1.4791930455219552e-08,
+            "_initial_condition": 2.7456414223024342e-09,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -779,7 +779,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 1.0194723712281953e-07,
+            "_initial_condition": 7.482995280527727e-08,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -792,7 +792,7 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 1.4151952412127156e-08,
+            "_initial_condition": 4.878158650496888e-09,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -807,7 +807,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 2.673422174418145e-07,
+            "_initial_condition": 2.671738468877142e-07,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -823,7 +823,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 2.4114664011358924e-08,
+            "_initial_condition": 2.6407583576505933e-08,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -836,7 +836,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 6.23251148036166e-08,
+            "_initial_condition": 1.1995243422781327e-07,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -849,7 +849,7 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 4.339636875362879e-08,
+            "_initial_condition": 8.988670495543227e-08,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -864,7 +864,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 1.634388028960569e-07,
+            "_initial_condition": 4.2827974754422423e-07,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -880,7 +880,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 1.4742422113391162e-08,
+            "_initial_condition": 4.233136348915235e-08,
             "charge": -14,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -889,11 +889,13 @@
             "name": "PFK-atp-f6p complex; 4 amp_c"
         }
     ],
+    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": 850,
             "_forward_rate_constant": 0.7000072543398841,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HEX1*(atp_c(t)*glc__D_c(t) - adp_c(t)*g6p_c(t)/Keq_HEX1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -906,13 +908,14 @@
                 "h_c": 1
             },
             "name": "Hexokinase (D-glucose:ATP)",
-            "steady_state_flux": 1.1200000000001338,
+            "steady_state_flux": 1.1199999999999342,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.41,
             "_forward_rate_constant": 2961.1111111111486,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PGI*(g6p_c(t) - f6p_c(t)/Keq_PGI)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -922,13 +925,14 @@
                 "g6p_c": -1
             },
             "name": "Glucose-6-phosphate isomerase",
-            "steady_state_flux": 0.9098498302898277,
+            "steady_state_flux": 0.9098512021635928,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.082,
             "_forward_rate_constant": 2797.4485596708137,
             "_lower_bound": -1000.0,
+            "_rate": "kf_FBA*(fdp_c(t) - dhap_c(t)*g3p_c(t)/Keq_FBA)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -939,13 +943,14 @@
                 "g3p_c": 1
             },
             "name": "Fructose-bisphosphate aldolase",
-            "steady_state_flux": 1.0916514869793295,
+            "steady_state_flux": 1.0932491343482609,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.0571429,
             "_forward_rate_constant": 33.90583109305524,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TPI*(dhap_c(t) - g3p_c(t)/Keq_TPI)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -955,13 +960,14 @@
                 "g3p_c": 1
             },
             "name": "Triose-phosphate isomerase",
-            "steady_state_flux": 1.0916514869792018,
+            "steady_state_flux": 1.0932491343483066,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.0179,
             "_forward_rate_constant": 3479.760193761086,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GAPD*(g3p_c(t)*nad_c(t)*pi_c(t) - _13dpg_c(t)*nadh_c(t)/Keq_GAPD)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -975,13 +981,14 @@
                 "pi_c": -1
             },
             "name": "Glyceraldehyde-3-phosphate dehydrogenase",
-            "steady_state_flux": 2.2742038022972704,
+            "steady_state_flux": 2.2781972347911394,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 1800,
             "_forward_rate_constant": 1061655.085281118,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PGK*(_13dpg_c(t)*adp_c(t) - _3pg_c(t)*atp_c(t)/Keq_PGK)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -993,13 +1000,14 @@
                 "atp_c": 1
             },
             "name": "Phosphoglycerate kinase",
-            "steady_state_flux": 1.8145763860111022,
+            "steady_state_flux": 1.8104555492931331,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.147059,
             "_forward_rate_constant": 5017.110252578886,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PGM*(_3pg_c(t) - _2pg_c(t)/Keq_PGM)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1009,13 +1017,14 @@
                 "_3pg_c": -1
             },
             "name": "Phosphoglycerate mutase",
-            "steady_state_flux": 2.274203802292769,
+            "steady_state_flux": 2.27819723479335,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 1.69492,
             "_forward_rate_constant": 1817.5451098735368,
             "_lower_bound": -1000.0,
+            "_rate": "kf_ENO*(_2pg_c(t) - pep_c(t)/Keq_ENO)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1026,13 +1035,14 @@
                 "pep_c": 1
             },
             "name": "Enolase",
-            "steady_state_flux": 2.2742038022927145,
+            "steady_state_flux": 2.278197234793274,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 363000,
             "_forward_rate_constant": 468.24701592056914,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PYK*(adp_c(t)*pep_c(t) - atp_c(t)*pyr_c(t)/Keq_PYK)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1045,13 +1055,14 @@
                 "pyr_c": 1
             },
             "name": "Pyruvate kinase",
-            "steady_state_flux": 2.2742038022926976,
+            "steady_state_flux": 2.27819723479328,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 26300,
             "_forward_rate_constant": 1150.2852431767838,
             "_lower_bound": -1000.0,
+            "_rate": "kf_LDH_L*(nadh_c(t)*pyr_c(t) - lac__L_c(t)*nad_c(t)/Keq_LDH_L)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1064,13 +1075,14 @@
                 "pyr_c": -1
             },
             "name": "L-lactate dehydrogenase",
-            "steady_state_flux": 2.053494875597163,
+            "steady_state_flux": 2.057103202339191,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 21864.589248392116,
             "_lower_bound": -1000.0,
+            "_rate": "kf_G6PDH2r*(g6p_c(t)*nadp_c(t) - _6pgl_c(t)*nadph_c(t)/Keq_G6PDH2r)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1083,13 +1095,14 @@
                 "nadph_c": 1
             },
             "name": "Glucose 6-phosphate dehydrogenase",
-            "steady_state_flux": 0.21015016971606862,
+            "steady_state_flux": 0.21014879783325746,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 122.32311160638584,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PGL*(_6pgl_c(t) - _6pgc_c(t)/Keq_PGL)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1101,13 +1114,14 @@
                 "h_c": 1
             },
             "name": "6-phosphogluconolactonase",
-            "steady_state_flux": 0.21015016971604097,
+            "steady_state_flux": 0.21014879783325585,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 29287.807473559937,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GND*(_6pgc_c(t)*nadp_c(t) - co2_c(t)*nadph_c(t)*ru5p__D_c(t)/Keq_GND)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1120,13 +1134,14 @@
                 "ru5p__D_c": 1
             },
             "name": "Phosphogluconate dehydrogenase",
-            "steady_state_flux": 0.21015016972302775,
+            "steady_state_flux": 0.2101487978302793,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 3,
             "_forward_rate_constant": 22392.05196790157,
             "_lower_bound": -1000.0,
+            "_rate": "kf_RPE*(ru5p__D_c(t) - xu5p__D_c(t)/Keq_RPE)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1136,13 +1151,14 @@
                 "xu5p__D_c": 1
             },
             "name": "Ribulose 5-phosphate 3-epimerase",
-            "steady_state_flux": 0.1818016566801362,
+            "steady_state_flux": 0.18339793218785858,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 2.57,
             "_forward_rate_constant": 2021.0577488476267,
             "_lower_bound": -1000.0,
+            "_rate": "kf_RPI*(ru5p__D_c(t) - r5p_c(t)/Keq_RPI)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1152,13 +1168,14 @@
                 "ru5p__D_c": -1
             },
             "name": "Ribulose 5-Phosphate Isomerase",
-            "steady_state_flux": 0.02834851304240731,
+            "steady_state_flux": 0.026750865642384748,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 1.2,
             "_forward_rate_constant": 2338.070475212839,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TKT1*(r5p_c(t)*xu5p__D_c(t) - g3p_c(t)*s7p_c(t)/Keq_TKT1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1170,13 +1187,14 @@
                 "xu5p__D_c": -1
             },
             "name": "Transketolase",
-            "steady_state_flux": 0.09090082833850593,
+            "steady_state_flux": 0.09169896609458363,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 10.3,
             "_forward_rate_constant": 1600.1410652024547,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TKT2*(e4p_c(t)*xu5p__D_c(t) - f6p_c(t)*g3p_c(t)/Keq_TKT2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1188,13 +1206,14 @@
                 "xu5p__D_c": -1
             },
             "name": "Transketolase",
-            "steady_state_flux": 0.09090082834209882,
+            "steady_state_flux": 0.09169896609317738,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": 1.05,
             "_forward_rate_constant": 1237.3623624164031,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TALA*(g3p_c(t)*s7p_c(t) - e4p_c(t)*f6p_c(t)/Keq_TALA)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1206,13 +1225,14 @@
                 "s7p_c": -1
             },
             "name": "Transaldolase",
-            "steady_state_flux": 0.09090082834221482,
+            "steady_state_flux": 0.09169896609317685,
             "subsystem": "PentosePhosphatePathway"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 62.50520367924413,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADNK1*adn_c(t)*atp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1226,13 +1246,14 @@
                 "h_c": 1
             },
             "name": "Adenosine kinase",
-            "steady_state_flux": 0.09200878955857773,
+            "steady_state_flux": 0.09214533068955709,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.383634600550456,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_NTD7*amp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1245,13 +1266,14 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (AMP)",
-            "steady_state_flux": 0.11165623301061943,
+            "steady_state_flux": 0.10978934829829874,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 8.334027157232544,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADA*adn_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1264,13 +1286,14 @@
                 "nh3_c": 1
             },
             "name": "Adenosine deaminase",
-            "steady_state_flux": 0.010001635687713548,
+            "steady_state_flux": 0.01000146889863257,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.16142403673088654,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_AMPDA*amp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1283,13 +1306,14 @@
                 "nh3_c": 1
             },
             "name": "Adenosine monophosphate deaminase",
-            "steady_state_flux": 0.0130265605179056,
+            "steady_state_flux": 0.012808757301468188,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.400000001300634,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_NTD11*imp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1302,13 +1326,14 @@
                 "pi_c": 1
             },
             "name": "5'-nucleotidase (IMP)",
-            "steady_state_flux": 0.013026560517917927,
+            "steady_state_flux": 0.012808757301462633,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": 0.09,
             "_forward_rate_constant": 83.1376441706749,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PUNP5*(ins_c(t)*pi_c(t) - hxan_c(t)*r1p_c(t)/Keq_PUNP5)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1320,13 +1345,14 @@
                 "r1p_c": 1
             },
             "name": "Purine-nucleoside phosphorylase (Inosine)",
-            "steady_state_flux": 0.09522631926586399,
+            "steady_state_flux": 0.09540087536258193,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": 13.3,
             "_forward_rate_constant": 1.6426421287239206,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PPM*(r1p_c(t) - r5p_c(t)/Keq_PPM)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1336,13 +1362,14 @@
                 "r5p_c": 1
             },
             "name": "Phosphopentomutase",
-            "steady_state_flux": 0.09522631926587136,
+            "steady_state_flux": 0.0954008753625785,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.6906676980637697,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_PRPPS*atp_c(t)*r5p_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1356,13 +1383,14 @@
                 "r5p_c": -1
             },
             "name": "Phosphoribosylpyrophosphate synthetase",
-            "steady_state_flux": 0.032674003969755776,
+            "steady_state_flux": 0.030452774910293315,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 2799.8244426678443,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADPT*ade_c(t)*prpp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1377,13 +1405,14 @@
                 "prpp_c": -1
             },
             "name": "",
-            "steady_state_flux": 0.03267400396981791,
+            "steady_state_flux": 0.030452774910265105,
             "subsystem": "AMPSalvageNetwork"
         },
         {
             "_equilibrium_constant": 1.65,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_ADK1*(adp_c(t)**2 - amp_c(t)*atp_c(t)/Keq_ADK1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1394,13 +1423,14 @@
                 "atp_c": 1
             },
             "name": "Adenylate kinase",
-            "steady_state_flux": -0.03267400397813369,
+            "steady_state_flux": -0.030452774907319125,
             "subsystem": "Misc."
         },
         {
             "_equilibrium_constant": 2300000.0,
             "_forward_rate_constant": 1824.9365356715123,
             "_lower_bound": -1000.0,
+            "_rate": "kf_DPGM*(_13dpg_c(t) - _23dpg_c(t)/Keq_DPGM)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1411,13 +1441,14 @@
                 "h_c": 1
             },
             "name": "Diphosphoglyceromutase",
-            "steady_state_flux": 0.4596274162862351,
+            "steady_state_flux": 0.4677416854980099,
             "subsystem": "Hemoglobin"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.14225806451612902,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_DPGase*_23dpg_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1430,13 +1461,14 @@
                 "pi_c": 1
             },
             "name": "Diphosphoglycerate phosphatase",
-            "steady_state_flux": 0.459627416281749,
+            "steady_state_flux": 0.4677416855001114,
             "subsystem": "Hemoglobin"
         },
         {
             "_equilibrium_constant": 0.25,
             "_forward_rate_constant": 519613,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBDPG*(_23dpg_c(t)*hb_c(t) - dhb_c(t)/Keq_HBDPG)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1454,6 +1486,7 @@
             "_equilibrium_constant": 41.8352,
             "_forward_rate_constant": 506935,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO1*(hb_c(t)*o2_c(t) - hb_1o2_c(t)/Keq_HBO1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1464,13 +1497,14 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (1)",
-            "steady_state_flux": -1.0992400566178784e-13,
+            "steady_state_flux": 1.0992400566178784e-13,
             "subsystem": "Hemoglobin"
         },
         {
             "_equilibrium_constant": 73.2115,
             "_forward_rate_constant": 511077,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO2*(hb_1o2_c(t)*o2_c(t) - hb_2o2_c(t)/Keq_HBO2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1488,6 +1522,7 @@
             "_equilibrium_constant": 177.799,
             "_forward_rate_constant": 509243,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO3*(hb_2o2_c(t)*o2_c(t) - hb_3o2_c(t)/Keq_HBO3)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1498,13 +1533,14 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (3)",
-            "steady_state_flux": -1.1042447338460715e-13,
+            "steady_state_flux": 0.0,
             "subsystem": "Hemoglobin"
         },
         {
             "_equilibrium_constant": 1289.92,
             "_forward_rate_constant": 501595,
             "_lower_bound": -1000.0,
+            "_rate": "kf_HBO4*(hb_3o2_c(t)*o2_c(t) - hb_4o2_c(t)/Keq_HBO4)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1515,13 +1551,14 @@
                 "o2_c": -1
             },
             "name": "Oxygen Loading (4)",
-            "steady_state_flux": -4.350643109662933e-13,
+            "steady_state_flux": 4.350643109662933e-13,
             "subsystem": "Hemoglobin"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4020833333333336,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ATPM*atp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1535,13 +1572,14 @@
                 "pi_c": 1
             },
             "name": "ATP maintenance requirement",
-            "steady_state_flux": 1.7197719038260912,
+            "steady_state_flux": 1.7223527692281333,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 7.441860465116281,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_DM_nadh*nadh_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1553,13 +1591,14 @@
                 "nadh_c": -1
             },
             "name": "Demand NADH",
-            "steady_state_flux": 0.22070892670010034,
+            "steady_state_flux": 0.22109403245195058,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 100,
             "_forward_rate_constant": 53.32981187274072,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GTHOr*(gthox_c(t)*nadph_c(t) - gthrd_c(t)**2*nadp_c(t)/Keq_GTHOr)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1572,13 +1611,14 @@
                 "nadph_c": -1
             },
             "name": "Glutathione oxidoreductase",
-            "steady_state_flux": 0.42030033943901995,
+            "steady_state_flux": 0.4202975956635399,
             "subsystem": "Misc."
         },
         {
             "_equilibrium_constant": 2,
             "_forward_rate_constant": 0.04125736738703409,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GSHR*(gthrd_c(t)**2 - gthox_c(t)/Keq_GSHR)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1589,13 +1629,14 @@
                 "h_c": 2
             },
             "name": "Glutathione-disulfide reductase",
-            "steady_state_flux": 0.4203003394390215,
+            "steady_state_flux": 0.42029759566353986,
             "subsystem": "Misc."
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.1199999999999999,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_glc__D_c*(glc__D_b - glc__D_c(t)/Keq_SK_glc__D_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1606,7 +1647,7 @@
             "metabolites": {
                 "glc__D_c": 1
             },
-            "name": "D-Glucose_sink",
+            "name": "D-Glucose sink",
             "steady_state_flux": 1.1199999999999999,
             "subsystem": "Pseudoreaction"
         },
@@ -1614,6 +1655,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 744.1860465116215,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_pyr_c*(pyr_c(t) - pyr_b/Keq_SK_pyr_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1624,14 +1666,15 @@
             "metabolites": {
                 "pyr_c": -1
             },
-            "name": "Pyruvate_sink",
-            "steady_state_flux": 0.2207089266955372,
+            "name": "Pyruvate sink",
+            "steady_state_flux": 0.22109403245409098,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 5.789814814814814,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_lac__L_c*(lac__L_c(t) - lac__L_b/Keq_SK_lac__L_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1642,14 +1685,15 @@
             "metabolites": {
                 "lac__L_c": -1
             },
-            "name": "L-Lactate_sink",
-            "steady_state_flux": 2.053494875597119,
+            "name": "L-Lactate sink",
+            "steady_state_flux": 2.0571032023392135,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 99993.73009525,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_ade_c*(ade_c(t) - ade_b/Keq_SK_ade_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1660,14 +1704,15 @@
             "metabolites": {
                 "ade_c": -1
             },
-            "name": "Adenine_sink",
-            "steady_state_flux": -0.032674003969834345,
+            "name": "Adenine sink",
+            "steady_state_flux": -0.03045277491027909,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100097.77176722106,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_adn_c*(adn_c(t) - adn_b/Keq_SK_adn_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1678,14 +1723,15 @@
             "metabolites": {
                 "adn_c": -1
             },
-            "name": "Adenosine_sink",
-            "steady_state_flux": 0.009645807764326804,
+            "name": "Adenosine sink",
+            "steady_state_flux": 0.007642548710110219,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_ins_c*(ins_c(t) - ins_b/Keq_SK_ins_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1696,14 +1742,15 @@
             "metabolites": {
                 "ins_c": -1
             },
-            "name": "Inosine_sink",
-            "steady_state_flux": -0.07219812306021642,
+            "name": "Inosine sink",
+            "steady_state_flux": -0.07259064916248503,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 692813.7013753054,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_hxan_c*(hxan_c(t) - hxan_b/Keq_SK_hxan_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1714,14 +1761,15 @@
             "metabolites": {
                 "hxan_c": -1
             },
-            "name": "Hypoxanthine_sink",
-            "steady_state_flux": 0.09522631926594882,
+            "name": "Hypoxanthine sink",
+            "steady_state_flux": 0.09540087536233786,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_pi_c*(pi_c(t) - pi_b/Keq_SK_pi_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1732,7 +1780,7 @@
             "metabolites": {
                 "pi_c": -1
             },
-            "name": "Phosphate_sink",
+            "name": "Phosphate sink",
             "steady_state_flux": 0.0,
             "subsystem": "Pseudoreaction"
         },
@@ -1740,6 +1788,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 133792.1626984127,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h_c*(h_c(t) - h_b/Keq_SK_h_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1750,14 +1799,15 @@
             "metabolites": {
                 "h_c": -1
             },
-            "name": "H+_sink",
-            "steady_state_flux": 3.55622233456854,
+            "name": "H+ sink",
+            "steady_state_flux": 3.5609804910251195,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h2o_c*(h2o_c(t) - h2o_b/Keq_SK_h2o_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1768,14 +1818,15 @@
             "metabolites": {
                 "h2o_c": -1
             },
-            "name": "H2O_sink",
-            "steady_state_flux": -0.29573068123234236,
+            "name": "H2O sink",
+            "steady_state_flux": -0.2979071244801901,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0000156281,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_co2_c*(co2_c(t) - co2_b/Keq_SK_co2_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1786,14 +1837,15 @@
             "metabolites": {
                 "co2_c": -1
             },
-            "name": "CO2_sink",
-            "steady_state_flux": 0.21015016972112596,
+            "name": "CO2 sink",
+            "steady_state_flux": 0.21014879786294313,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100003.4690069878,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_nh3_c*(nh3_c(t) - nh3_b/Keq_SK_nh3_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1804,14 +1856,15 @@
             "metabolites": {
                 "nh3_c": -1
             },
-            "name": "Ammonia_sink",
-            "steady_state_flux": 0.023028196205381577,
+            "name": "Ammonia sink",
+            "steady_state_flux": 0.022810226198934427,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 509726,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_o2_c*(o2_c(t) - o2_b/Keq_SK_o2_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -1822,7 +1875,7 @@
             "metabolites": {
                 "o2_c": -1
             },
-            "name": "Oxygen_sink",
+            "name": "Oxygen sink",
             "steady_state_flux": 0.0,
             "subsystem": "Pseudoreaction"
         },
@@ -1838,8 +1891,8 @@
                 "pfk_R0_A_c": 1,
                 "pfk_R0_c": -1
             },
-            "name": "pfk_R0-pfk_R0_A transition",
-            "steady_state_flux": 0.007746970711156127,
+            "name": "pfk_R0-atp binding",
+            "steady_state_flux": 0.017906006543332978,
             "subsystem": "Glycolysis"
         },
         {
@@ -1854,13 +1907,13 @@
                 "pfk_R0_AF_c": 1,
                 "pfk_R0_A_c": -1
             },
-            "name": "pfk_R0_A-pfk_R0_AF transition",
-            "steady_state_flux": 0.007746970711157895,
+            "name": "pfk_R0_A-f6p binding",
+            "steady_state_flux": 0.017906006543332766,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1874,8 +1927,8 @@
                 "pfk_R0_AF_c": -1,
                 "pfk_R0_c": 1
             },
-            "name": "pfk_R0_AF-pfk_R0 transition",
-            "steady_state_flux": 0.007746970711156137,
+            "name": "pfk_R0_AF catalyzation",
+            "steady_state_flux": 0.017906006543332936,
             "subsystem": "Glycolysis"
         },
         {
@@ -1891,7 +1944,7 @@
                 "pfk_R1_c": 1
             },
             "name": "pfk_R0-amp binding",
-            "steady_state_flux": 4.804264997707985e-18,
+            "steady_state_flux": -1.0918784085699965e-19,
             "subsystem": "Glycolysis"
         },
         {
@@ -1907,7 +1960,7 @@
                 "pfk_T1_c": 1
             },
             "name": "pfk_T0-atp binding",
-            "steady_state_flux": 3.0243791146470074e-19,
+            "steady_state_flux": -3.0760779029315717e-19,
             "subsystem": "Glycolysis"
         },
         {
@@ -1922,8 +1975,8 @@
                 "pfk_R1_A_c": 1,
                 "pfk_R1_c": -1
             },
-            "name": "pfk_R1-pfk_R1_A transition",
-            "steady_state_flux": 0.07577736916932845,
+            "name": "pfk_R1-atp binding",
+            "steady_state_flux": 0.06458249980408987,
             "subsystem": "Glycolysis"
         },
         {
@@ -1938,13 +1991,13 @@
                 "pfk_R1_AF_c": 1,
                 "pfk_R1_A_c": -1
             },
-            "name": "pfk_R1_A-pfk_R1_AF transition",
-            "steady_state_flux": 0.07577736916934405,
+            "name": "pfk_R1_A-f6p binding",
+            "steady_state_flux": 0.06458249980408928,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1958,8 +2011,8 @@
                 "pfk_R1_AF_c": -1,
                 "pfk_R1_c": 1
             },
-            "name": "pfk_R1_AF-pfk_R1 transition",
-            "steady_state_flux": 0.07577736916932841,
+            "name": "pfk_R1_AF catalyzation",
+            "steady_state_flux": 0.06458249980408984,
             "subsystem": "Glycolysis"
         },
         {
@@ -1975,7 +2028,7 @@
                 "pfk_R2_c": 1
             },
             "name": "pfk_R1-amp binding",
-            "steady_state_flux": 3.23196008936719e-17,
+            "steady_state_flux": 3.0572595439959907e-18,
             "subsystem": "Glycolysis"
         },
         {
@@ -1991,7 +2044,7 @@
                 "pfk_T2_c": 1
             },
             "name": "pfk_T1-atp binding",
-            "steady_state_flux": 2.895132143935597e-19,
+            "steady_state_flux": -2.895132143935597e-19,
             "subsystem": "Glycolysis"
         },
         {
@@ -2006,8 +2059,8 @@
                 "pfk_R2_A_c": 1,
                 "pfk_R2_c": -1
             },
-            "name": "pfk_R2-pfk_R2_A transition",
-            "steady_state_flux": 0.2779575023090421,
+            "name": "pfk_R2-atp binding",
+            "steady_state_flux": 0.03882216162913058,
             "subsystem": "Glycolysis"
         },
         {
@@ -2022,13 +2075,13 @@
                 "pfk_R2_AF_c": 1,
                 "pfk_R2_A_c": -1
             },
-            "name": "pfk_R2_A-pfk_R2_AF transition",
-            "steady_state_flux": 0.27795750230909294,
+            "name": "pfk_R2_A-f6p binding",
+            "steady_state_flux": 0.0388221616291303,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -2042,8 +2095,8 @@
                 "pfk_R2_AF_c": -1,
                 "pfk_R2_c": 1
             },
-            "name": "pfk_R2_AF-pfk_R2 transition",
-            "steady_state_flux": 0.27795750230904254,
+            "name": "pfk_R2_AF catalyzation",
+            "steady_state_flux": 0.03882216162913061,
             "subsystem": "Glycolysis"
         },
         {
@@ -2059,7 +2112,7 @@
                 "pfk_R3_c": 1
             },
             "name": "pfk_R2-amp binding",
-            "steady_state_flux": 4.7169147250223856e-17,
+            "steady_state_flux": 1.7470054537119944e-18,
             "subsystem": "Glycolysis"
         },
         {
@@ -2075,7 +2128,7 @@
                 "pfk_T3_c": 1
             },
             "name": "pfk_T2-atp binding",
-            "steady_state_flux": -5.293955920339377e-18,
+            "steady_state_flux": -1.6543612251060553e-19,
             "subsystem": "Glycolysis"
         },
         {
@@ -2090,8 +2143,8 @@
                 "pfk_R3_A_c": 1,
                 "pfk_R3_c": -1
             },
-            "name": "pfk_R3-pfk_R3_A transition",
-            "steady_state_flux": 0.453142461554358,
+            "name": "pfk_R3-atp binding",
+            "steady_state_flux": 0.37339161243502,
             "subsystem": "Glycolysis"
         },
         {
@@ -2106,13 +2159,13 @@
                 "pfk_R3_AF_c": 1,
                 "pfk_R3_A_c": -1
             },
-            "name": "pfk_R3_A-pfk_R3_AF transition",
-            "steady_state_flux": 0.4531424615544332,
+            "name": "pfk_R3_A-f6p binding",
+            "steady_state_flux": 0.37339161243501795,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -2126,8 +2179,8 @@
                 "pfk_R3_AF_c": -1,
                 "pfk_R3_c": 1
             },
-            "name": "pfk_R3_AF-pfk_R3 transition",
-            "steady_state_flux": 0.45314246155435933,
+            "name": "pfk_R3_AF catalyzation",
+            "steady_state_flux": 0.3733916124350202,
             "subsystem": "Glycolysis"
         },
         {
@@ -2143,7 +2196,7 @@
                 "pfk_R4_c": 1
             },
             "name": "pfk_R3-amp binding",
-            "steady_state_flux": 2.9699092713103906e-17,
+            "steady_state_flux": 1.0482032722271967e-17,
             "subsystem": "Glycolysis"
         },
         {
@@ -2159,7 +2212,7 @@
                 "pfk_T4_c": 1
             },
             "name": "pfk_T3-atp binding",
-            "steady_state_flux": 1.0587911840678754e-17,
+            "steady_state_flux": -2.6469779601696886e-18,
             "subsystem": "Glycolysis"
         },
         {
@@ -2174,8 +2227,8 @@
                 "pfk_R4_A_c": 1,
                 "pfk_R4_c": -1
             },
-            "name": "pfk_R4-pfk_R4_A transition",
-            "steady_state_flux": 0.2770271832354277,
+            "name": "pfk_R4-atp binding",
+            "steady_state_flux": 0.5985468539366792,
             "subsystem": "Glycolysis"
         },
         {
@@ -2190,13 +2243,13 @@
                 "pfk_R4_AF_c": 1,
                 "pfk_R4_A_c": -1
             },
-            "name": "pfk_R4_A-pfk_R4_AF transition",
-            "steady_state_flux": 0.27702718323546477,
+            "name": "pfk_R4_A-f6p binding",
+            "steady_state_flux": 0.5985468539366753,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -2210,14 +2263,15 @@
                 "pfk_R4_AF_c": -1,
                 "pfk_R4_c": 1
             },
-            "name": "pfk_R4_AF-pfk_R4 transition",
-            "steady_state_flux": 0.27702718323542724,
+            "name": "pfk_R4_AF catalyzation",
+            "steady_state_flux": 0.5985468539366791,
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.0011,
             "_forward_rate_constant": 1000000000000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PFK_L*(pfk_R0_c(t) - pfk_T0_c(t)/Keq_PFK_L)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -2228,7 +2282,7 @@
                 "pfk_T0_c": 1
             },
             "name": "pfk_R0-pfk_T0 transition",
-            "steady_state_flux": 1.4475660719677984e-12,
+            "steady_state_flux": 8.271806125530277e-13,
             "subsystem": "Glycolysis"
         }
     ],

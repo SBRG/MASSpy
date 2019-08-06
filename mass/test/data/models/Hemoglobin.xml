@@ -15,8 +15,8 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
@@ -86,7 +86,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_DPGase" name="Diphosphoglycerate phosphatase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_DPGase" name="Diphosphoglycerate phosphatase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
           <speciesReference species="M_h2o_c" stoichiometry="1" constant="true"/>
           <speciesReference species="M__23dpg_c" stoichiometry="1" constant="true"/>
@@ -171,8 +171,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO2" value="73.2115"/>
             <localParameter id="kf_R_HBO2" value="511077"/>
+            <localParameter id="Keq_R_HBO2" value="73.2115"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -273,12 +273,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HBDPG" value="519613"/>
             <localParameter id="Keq_R_HBDPG" value="0.25"/>
+            <localParameter id="kf_R_HBDPG" value="519613"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction metaid="meta_R_SK_o2_c" sboTerm="SBO:0000632" id="R_SK_o2_c" name="Oxygen_sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction metaid="meta_R_SK_o2_c" sboTerm="SBO:0000632" id="R_SK_o2_c" name="Oxygen sink" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <listOfReactants>
           <speciesReference species="M_o2_c" stoichiometry="1" constant="true"/>
         </listOfReactants>
@@ -300,8 +300,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="o2_b" value="0.0200788"/>
-            <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="Keq_R_SK_o2_c" value="1"/>
+            <localParameter id="kf_R_SK_o2_c" value="509726"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

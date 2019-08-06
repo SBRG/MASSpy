@@ -4,7 +4,6 @@ import colorsys
 import warnings
 
 from mass.analysis import linear
-from mass.core.visualization import plot_tiled_phase_portrait
 
 import matplotlib as mpl
 

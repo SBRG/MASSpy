@@ -152,11 +152,13 @@
             "name": "H2O"
         }
     ],
+    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 21864.589248711192,
             "_lower_bound": -1000.0,
+            "_rate": "kf_G6PDH2r*(g6p_c(t)*nadp_c(t) - _6pgl_c(t)*nadph_c(t)/Keq_G6PDH2r)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -176,6 +178,7 @@
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 122.32311160638379,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PGL*(_6pgl_c(t) - _6pgc_c(t)/Keq_PGL)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -194,6 +197,7 @@
             "_equilibrium_constant": 1000,
             "_forward_rate_constant": 29287.807473559445,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GND*(_6pgc_c(t)*nadp_c(t) - co2_c(t)*nadph_c(t)*ru5p__D_c(t)/Keq_GND)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -213,6 +217,7 @@
             "_equilibrium_constant": 3,
             "_forward_rate_constant": 15284.67711119561,
             "_lower_bound": -1000.0,
+            "_rate": "kf_RPE*(ru5p__D_c(t) - xu5p__D_c(t)/Keq_RPE)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -229,6 +234,7 @@
             "_equilibrium_constant": 2.57,
             "_forward_rate_constant": 10564.620050794425,
             "_lower_bound": -1000.0,
+            "_rate": "kf_RPI*(ru5p__D_c(t) - r5p_c(t)/Keq_RPI)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -245,6 +251,7 @@
             "_equilibrium_constant": 1.2,
             "_forward_rate_constant": 1595.951974553812,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TKT1*(r5p_c(t)*xu5p__D_c(t) - g3p_c(t)*s7p_c(t)/Keq_TKT1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -263,6 +270,7 @@
             "_equilibrium_constant": 10.3,
             "_forward_rate_constant": 1092.2464352900831,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TKT2*(e4p_c(t)*xu5p__D_c(t) - f6p_c(t)*g3p_c(t)/Keq_TKT2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -281,6 +289,7 @@
             "_equilibrium_constant": 1.05,
             "_forward_rate_constant": 844.6161380129796,
             "_lower_bound": -1000.0,
+            "_rate": "kf_TALA*(g3p_c(t)*s7p_c(t) - e4p_c(t)*f6p_c(t)/Keq_TALA)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -299,6 +308,7 @@
             "_equilibrium_constant": 100,
             "_forward_rate_constant": 53.329811872739825,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GTHOr*(gthox_c(t)*nadph_c(t) - gthrd_c(t)**2*nadp_c(t)/Keq_GTHOr)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -318,6 +328,7 @@
             "_equilibrium_constant": 2,
             "_forward_rate_constant": 0.041257367387033395,
             "_lower_bound": -1000.0,
+            "_rate": "kf_GSHR*(gthrd_c(t)**2 - gthox_c(t)/Keq_GSHR)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -335,6 +346,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 0.22072734916964473,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_g6p_c*(g6p_b - g6p_c(t)/Keq_SK_g6p_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -345,14 +357,15 @@
             "metabolites": {
                 "g6p_c": 1
             },
-            "name": "D-Glucose 6-phosphate_sink",
+            "name": "D-Glucose 6-phosphate sink",
             "steady_state_flux": 0.20999999999999638,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 6.734006734006732,
-            "_lower_bound": 0.0,
+            "_lower_bound": 0,
+            "_rate": "kf_DM_f6p_c*f6p_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -364,14 +377,15 @@
             "metabolites": {
                 "f6p_c": -1
             },
-            "name": "D-Fructose 6-phosphate_demand",
+            "name": "D-Fructose 6-phosphate demand",
             "steady_state_flux": 0.133333333333331,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 9.157509157509155,
-            "_lower_bound": 0.0,
+            "_lower_bound": 0,
+            "_rate": "kf_DM_g3p_c*g3p_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -383,14 +397,15 @@
             "metabolites": {
                 "g3p_c": -1
             },
-            "name": "Glyceraldehyde 3-phosphate_demand",
+            "name": "Glyceraldehyde 3-phosphate demand",
             "steady_state_flux": 0.06666666666666549,
             "subsystem": "Pseudoreaction"
         },
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.7893345120728713,
-            "_lower_bound": 0.0,
+            "_lower_bound": 0,
+            "_rate": "kf_DM_r5p_c*r5p_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -402,7 +417,7 @@
             "metabolites": {
                 "r5p_c": -1
             },
-            "name": "Alpha-D-Ribose 5-phosphate_demand",
+            "name": "Alpha-D-Ribose 5-phosphate demand",
             "steady_state_flux": 0.009999999999999891,
             "subsystem": "Pseudoreaction"
         },
@@ -410,6 +425,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_co2_c*(co2_c(t) - co2_b/Keq_SK_co2_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -420,7 +436,7 @@
             "metabolites": {
                 "co2_c": -1
             },
-            "name": "CO2_sink",
+            "name": "CO2 sink",
             "steady_state_flux": 0.20999999996718088,
             "subsystem": "Pseudoreaction"
         },
@@ -428,6 +444,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 99999.99999999999,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h_c*(h_c(t) - h_b/Keq_SK_h_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -438,7 +455,7 @@
             "metabolites": {
                 "h_c": -1
             },
-            "name": "H+_sink",
+            "name": "H+ sink",
             "steady_state_flux": 0.8399999999999836,
             "subsystem": "Pseudoreaction"
         },
@@ -446,6 +463,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h2o_c*(h2o_c(t) - h2o_b/Keq_SK_h2o_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -456,7 +474,7 @@
             "metabolites": {
                 "h2o_c": -1
             },
-            "name": "H2O_sink",
+            "name": "H2O sink",
             "steady_state_flux": -0.21000000000048757,
             "subsystem": "Pseudoreaction"
         }
