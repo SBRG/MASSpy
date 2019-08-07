@@ -272,6 +272,8 @@ PREDEFINED_UNITS_DICT = DictWithID(
             kind="second", exponent=1, scale=0, multiplier=3600),
         "per_hour": Unit(
             kind="second", exponent=-1, scale=0, multiplier=3600),
+        "per_gDW": Unit(
+            kind="gram", exponent=-1, scale=0, multiplier=1),
     }
 )
 r""":class:`~.DictWithID`: Contains pre-built :class:`Unit`\ s."""
