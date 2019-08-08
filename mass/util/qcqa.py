@@ -190,7 +190,8 @@ def get_missing_custom_parameters(model, reaction_list=None):
                      if reaction in model.custom_rates]
     for rxn in reaction_list:
         rate = model.custom_rates[rxn]
-        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))]
+        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))
+                   if str(symbol) not in model.metabolites]
         customs = []
         for parameter in symbols:
             if parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str] \
