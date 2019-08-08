@@ -2285,7 +2285,8 @@ def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
         else:
             cid = metabolite.compartment
             is_boundary_condition = bool(
-                cid == next(iter(MASSCONFIGURATION.boundary_compartment)))
+                cid == next(iter(MASSCONFIGURATION.boundary_compartment))
+                or metabolite.fixed)
         _check(specie.setCompartment(cid),
                "set specie compartment" + _for_id(mid))
 
