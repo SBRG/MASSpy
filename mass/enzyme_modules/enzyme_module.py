@@ -68,6 +68,7 @@ from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 from mass.util.expressions import _mk_met_func, strip_time
+from mass.util.matrix import matrix_rank
 from mass.util.util import (
     _mk_new_dictlist, ensure_iterable, ensure_non_negative_value)
 
@@ -94,7 +95,7 @@ class EnzymeModule(MassModel):
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
-        See the :mod:`~.linear` module documentation for more information
+        See the :mod:`~.matrix` module documentation for more information
         on the ``matrix_type``.
     dtype : data-type
         The desired array data-type for the stoichiometric matrix. If ``None``
@@ -1695,8 +1696,8 @@ class EnzymeModule(MassModel):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+            rank = matrix_rank(self.S)
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
 

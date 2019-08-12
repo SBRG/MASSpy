@@ -55,8 +55,9 @@ import pandas as pd
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID
-from mass.util.util import (
-    _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
+from mass.util.matrix import (
+    _get_matrix_constructor, matrix_rank, convert_matrix)
+from mass.util.util import _mk_new_dictlist
 
 
 class EnzymeModuleDict(OrderedDictWithID):
@@ -226,10 +227,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>

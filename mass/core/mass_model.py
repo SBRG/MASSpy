@@ -57,9 +57,11 @@ from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
+from mass.util.matrix import (
+    _get_matrix_constructor, convert_matrix, matrix_rank)
 from mass.util.util import (
-    _check_kwargs, _get_matrix_constructor, _make_logger, convert_matrix,
-    ensure_iterable, get_public_attributes_and_methods)
+    _check_kwargs, _make_logger, ensure_iterable,
+    get_public_attributes_and_methods)
 
 # Set the logger
 LOGGER = _make_logger(__name__)
@@ -87,7 +89,7 @@ class MassModel(Model):
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
-        See the :mod:`~.linear` module documentation for more information
+        See the :mod:`~.matrix` module documentation for more information
         on the ``matrix_type``.
     dtype : data-type
         The desired array data-type for the stoichiometric matrix. If ``None``
@@ -183,7 +185,6 @@ class MassModel(Model):
             self._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                              dtype=self._dtype,
                                              update_model=True)
-
     # Public
     @property
     def stoichiometric_matrix(self):
@@ -352,6 +353,7 @@ class MassModel(Model):
         else:
             setattr(self, "_compartments", {})
 
+
     def update_S(self, matrix_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.
 
@@ -361,7 +363,7 @@ class MassModel(Model):
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is the current ``matrix_type``. See the :mod:`~.linear`
+            Default is the current ``matrix_type``. See the :mod:`~.matrix`
             module documentation for more information on the ``matrix_type``.
         dtype : data-type
             The desired array data-type for the stoichiometric matrix.
@@ -1104,7 +1106,7 @@ class MassModel(Model):
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
+            Default is ``'dense'``. See the :mod:`~.matrix` module
             documentation for more information on the ``matrix_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
@@ -1179,7 +1181,7 @@ class MassModel(Model):
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
+            Default is ``'dense'``. See the :mod:`~.matrix` module
             documentation for more information on the ``matrix_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
@@ -2296,10 +2298,11 @@ class MassModel(Model):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>
