@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" xmlns:groups="http://www.sbml.org/sbml/level3/version1/groups/version1" sboTerm="SBO:0000062" level="3" version="1" fbc:required="false" groups:required="false">
-  <model metaid="meta_G6PDH2r" id="G6PDH2r" name="Glucose 6-phosphate dehydrogenase" fbc:strict="false">
+  <model metaid="meta_G6PDH2r" id="G6PDH2r" fbc:strict="false">
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -31,58 +31,58 @@
       <species id="M_nadp_c" name="Nicotinamide adenine dinucleotide phosphate" compartment="c" initialConcentration="0.000200000000004546" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C21H25N7O17P3"/>
       <species id="M_nadph_c" name="Nicotinamide adenine dinucleotide phosphate - reduced" compartment="c" initialConcentration="0.0657999999999954" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
-      <species id="M_g6pdh2r_c" name="G6PDH2r" compartment="c" initialConcentration="2.3718133e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietygpdhr">
+      <species id="M_g6pdh2r_c" name="G6PDH2r" compartment="c" initialConcentration="3.2539871e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_G_c" name="G6PDH2r-g6p complex" compartment="c" initialConcentration="3.9230714e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P1Moietygpdhr">
+      <species id="M_g6pdh2r_G_c" name="G6PDH2r-g6p complex" compartment="c" initialConcentration="5.381805e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P1Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: G6PDH2r</p>
             <p>bound_catalytic: 1 M_g6p_c</p>
-            <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_GN_c" name="G6PDH2r-g6p-nadp complex" compartment="c" initialConcentration="7.0064e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C27H36O26P4N7Moietygpdhr">
+      <species id="M_g6pdh2r_GN_c" name="G6PDH2r-g6p-nadp complex" compartment="c" initialConcentration="9.6091e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C27H36O26P4N7Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: G6PDH2r</p>
             <p>bound_catalytic: 1 M_g6p_c; 1 M_nadp_c</p>
-            <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_GN_P_c" name="G6PDH2r-_6pgl-nadph complex" compartment="c" initialConcentration="8.331401e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C27H35O26P4N7Moietygpdhr">
+      <species id="M_g6pdh2r_GN_P_c" name="G6PDH2r-_6pgl-nadph complex" compartment="c" initialConcentration="1.1399706e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C27H35O26P4N7Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: G6PDH2r</p>
             <p>bound_catalytic: 1 M__6pgl_c; 1 M_nadph_c</p>
-            <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_G_P_c" name="G6PDH2r-_6pgl complex" compartment="c" initialConcentration="1.144911e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P1Moietygpdhr">
+      <species id="M_g6pdh2r_G_P_c" name="G6PDH2r-_6pgl complex" compartment="c" initialConcentration="1.570313e-06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H9O9P1Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: G6PDH2r</p>
             <p>bound_catalytic: 1 M__6pgl_c</p>
-            <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_A_CI_c" name="G6PDH2r-atp complex" compartment="c" initialConcentration="0.000862477572" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietygpdhr">
+      <species id="M_g6pdh2r_A_CI_c" name="G6PDH2r-atp complex" compartment="c" initialConcentration="0.001183268051" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
+            <p>enzyme_module_id: G6PDH2r</p>
             <p>bound_catalytic: 1 M_atp_c</p>
-            <p>enzyme_module_id: G6PDH2r</p>
           </html>
         </notes>
       </species>
-      <species id="M_g6pdh2r_N_PI_c" name="G6PDH2r-nadph complex" compartment="c" initialConcentration="6.5027215e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3Moietygpdhr">
+      <species id="M_g6pdh2r_N_PI_c" name="G6PDH2r-nadph complex" compartment="c" initialConcentration="8.9213481e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C21H26N7O17P3Moietygpdhr">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
-            <p>bound_catalytic: 1 M_nadph_c</p>
             <p>enzyme_module_id: G6PDH2r</p>
+            <p>bound_catalytic: 1 M_nadph_c</p>
           </html>
         </notes>
       </species>
@@ -95,7 +95,7 @@
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
     </listOfParameters>
     <listOfReactions>
-      <reaction id="R_G6PDH2r_1" name="g6pdh2r-g6pdh2r_N_PI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_1" name="g6pdh2r-nadph binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -130,12 +130,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r_1" value="41.6666666666667"/>
             <localParameter id="kf_R_G6PDH2r_1" value="1000000"/>
+            <localParameter id="Keq_R_G6PDH2r_1" value="41.6666666666667"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_2" name="g6pdh2r-g6pdh2r_A_CI transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_2" name="g6pdh2r-atp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -175,7 +175,7 @@
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_3" name="g6pdh2r-g6pdh2r_G transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_3" name="g6pdh2r-g6p binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -210,12 +210,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_3" value="2246662"/>
             <localParameter id="Keq_R_G6PDH2r_3" value="37.037037037037"/>
+            <localParameter id="kf_R_G6PDH2r_3" value="1636146"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_4" name="g6pdh2r_G_P-g6pdh2r transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_4" name="g6pdh2r_G_P-_6pgl release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -250,12 +250,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_R_G6PDH2r_4" value="489901"/>
             <localParameter id="Keq_R_G6PDH2r_4" value="0.05"/>
-            <localParameter id="kf_R_G6PDH2r_4" value="671430"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_5" name="g6pdh2r_G-g6pdh2r_GN transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_5" name="g6pdh2r_G-nadp binding" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -290,12 +290,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_5" value="32233627"/>
+            <localParameter id="kf_R_G6PDH2r_5" value="23495520"/>
             <localParameter id="Keq_R_G6PDH2r_5" value="52.6315789473684"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_6" name="g6pdh2r_GN_P-g6pdh2r_G_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_6" name="g6pdh2r_GN_P-nadph release" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -330,12 +330,12 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_R_G6PDH2r_6" value="134695"/>
             <localParameter id="Keq_R_G6PDH2r_6" value="0.0105"/>
-            <localParameter id="kf_R_G6PDH2r_6" value="181563"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
-      <reaction id="R_G6PDH2r_7" name="g6pdh2r_GN-g6pdh2r_GN_P transition" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
+      <reaction id="R_G6PDH2r_7" name="g6pdh2r_GN catalyzation" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>SUBSYSTEM: Pentose Phosphate Pathway</p>
@@ -366,138 +366,138 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_R_G6PDH2r_7" value="2487415"/>
             <localParameter id="Keq_R_G6PDH2r_7" value="977.142857142857"/>
-            <localParameter id="kf_R_G6PDH2r_7" value="3412567"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
     </listOfReactions>
     <groups:listOfGroups>
-      <groups:group groups:id="G6PDH2r_enzyme_module_ligands" groups:kind="collection">
+      <groups:group groups:id="Substrates" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
-          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="Cofactors" groups:kind="collection">
+        <groups:listOfMembers>
           <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate" groups:idRef="M_nadp_c"/>
-          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="Inhibitors" groups:kind="collection">
+        <groups:listOfMembers>
           <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="Products" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
+          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="Free" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
+          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
+          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="Inhibited" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
+          <groups:member groups:name="G6PDH2r-atp complex" groups:idRef="M_g6pdh2r_A_CI_c"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="product_inhibition" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
+          <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="g6p_c_binding" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="_6pgl_c_release" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r_G_P-_6pgl release" groups:idRef="R_G6PDH2r_4"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="nadp_c_binding" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="nadph_c_release" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="catalyzation" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
+        </groups:listOfMembers>
+      </groups:group>
+      <groups:group groups:id="G6PDH2r_enzyme_module_ligands" groups:kind="collection">
+        <groups:listOfMembers>
+          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate" groups:idRef="M_nadp_c"/>
+          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
+          <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
-          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
           <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
-          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
-          <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
+          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
           <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
+          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
           <groups:member groups:name="G6PDH2r-atp complex" groups:idRef="M_g6pdh2r_A_CI_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_N_PI transition" groups:idRef="R_G6PDH2r_1"/>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_A_CI transition" groups:idRef="R_G6PDH2r_2"/>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_G transition" groups:idRef="R_G6PDH2r_3"/>
-          <groups:member groups:name="g6pdh2r_G_P-g6pdh2r transition" groups:idRef="R_G6PDH2r_4"/>
-          <groups:member groups:name="g6pdh2r_G-g6pdh2r_GN transition" groups:idRef="R_G6PDH2r_5"/>
-          <groups:member groups:name="g6pdh2r_GN_P-g6pdh2r_G_P transition" groups:idRef="R_G6PDH2r_6"/>
-          <groups:member groups:name="g6pdh2r_GN-g6pdh2r_GN_P transition" groups:idRef="R_G6PDH2r_7"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized_Category0" groups:name="Substrates" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized_Category1" groups:name="Cofactors" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate" groups:idRef="M_nadp_c"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized_Category2" groups:name="Inhibitors" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized_Category3" groups:name="Products" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
-          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
-          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
+          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
+          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
+          <groups:member groups:name="g6pdh2r_G_P-_6pgl release" groups:idRef="R_G6PDH2r_4"/>
+          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
+          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
+          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
+          <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Substrates" groups:idRef="G6PDH2r_enzyme_module_ligands_categorized_Category0"/>
-          <groups:member groups:name="Cofactors" groups:idRef="G6PDH2r_enzyme_module_ligands_categorized_Category1"/>
-          <groups:member groups:name="Inhibitors" groups:idRef="G6PDH2r_enzyme_module_ligands_categorized_Category2"/>
-          <groups:member groups:name="Products" groups:idRef="G6PDH2r_enzyme_module_ligands_categorized_Category3"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_species_categorized_Category0" groups:name="Free" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
-          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
-          <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
-          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
-          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_species_categorized_Category1" groups:name="Inhibited" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r-atp complex" groups:idRef="M_g6pdh2r_A_CI_c"/>
-          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
+          <groups:member groups:idRef="Inhibitors"/>
+          <groups:member groups:idRef="Cofactors"/>
+          <groups:member groups:idRef="Products"/>
+          <groups:member groups:idRef="Substrates"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Free" groups:idRef="G6PDH2r_enzyme_module_species_categorized_Category0"/>
-          <groups:member groups:name="Inhibited" groups:idRef="G6PDH2r_enzyme_module_species_categorized_Category1"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category0" groups:name="product inhibition" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_N_PI transition" groups:idRef="R_G6PDH2r_1"/>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_A_CI transition" groups:idRef="R_G6PDH2r_2"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category1" groups:name="g6p_c binding" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-g6pdh2r_G transition" groups:idRef="R_G6PDH2r_3"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category2" groups:name="_6pgl_c release" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_G_P-g6pdh2r transition" groups:idRef="R_G6PDH2r_4"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category3" groups:name="nadp_c binding" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_G-g6pdh2r_GN transition" groups:idRef="R_G6PDH2r_5"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category4" groups:name="nadph_c release" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_GN_P-g6pdh2r_G_P transition" groups:idRef="R_G6PDH2r_6"/>
-        </groups:listOfMembers>
-      </groups:group>
-      <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized_Category5" groups:name="catalyzation" groups:kind="collection">
-        <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r_GN-g6pdh2r_GN_P transition" groups:idRef="R_G6PDH2r_7"/>
+          <groups:member groups:idRef="Inhibited"/>
+          <groups:member groups:idRef="Free"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="product inhibition" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category0"/>
-          <groups:member groups:name="g6p_c binding" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category1"/>
-          <groups:member groups:name="_6pgl_c release" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category2"/>
-          <groups:member groups:name="nadp_c binding" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category3"/>
-          <groups:member groups:name="nadph_c release" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category4"/>
-          <groups:member groups:name="catalyzation" groups:idRef="G6PDH2r_enzyme_module_reactions_categorized_Category5"/>
+          <groups:member groups:idRef="catalyzation"/>
+          <groups:member groups:idRef="g6p_c_binding"/>
+          <groups:member groups:idRef="nadph_c_release"/>
+          <groups:member groups:idRef="_6pgl_c_release"/>
+          <groups:member groups:idRef="product_inhibition"/>
+          <groups:member groups:idRef="nadp_c_binding"/>
         </groups:listOfMembers>
       </groups:group>
-      <groups:group groups:id="G6PDH2r_EnzymeModule" groups:name="Glucose 6-phosphate dehydrogenase" groups:kind="collection">
+      <groups:group groups:id="G6PDH2r_EnzymeModule" groups:kind="collection">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>subsystem: PentosePhosphatePathway</p>
@@ -508,12 +508,12 @@
           </html>
         </notes>
         <groups:listOfMembers>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands"/>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_species"/>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions"/>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands_categorized"/>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_species_categorized"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_species"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands"/>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions_categorized"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>

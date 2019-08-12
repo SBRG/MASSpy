@@ -146,16 +146,15 @@ def strip_time(sympy_expr):
     return new_expr
 
 
-def generate_mass_action_rate_expression(reaction, rtype=1,
-                                         update_reaction=False):
+def generate_mass_action_rate_expression(reaction, rate_type=1):
     """Generate the mass action rate law for the reaction.
 
     Parameters
     ----------
     reaction : MassReaction
         The reaction to generate the rate expression for.
-    rtype : int
-        The type of rate law to display. Must be 1, 2, or 3.
+    rate_type : int
+        The type of rate law to return. Must be 1, 2, or 3.
 
             * Type 1 will utilize the
               :attr:`~.MassReaction.forward_rate_constant` and the
@@ -168,9 +167,6 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
               :attr:`~.MassReaction.reverse_rate_constant`.
 
         Default is ``1``.
-    update_reaction : bool
-        Whether to update the reaction in addition to returning the
-        rate law. Default is ``False``.
 
     Returns
     -------
@@ -184,8 +180,10 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
         return None
 
     # Generate forward and reverse rate expressions
-    fwd_rate = generate_foward_mass_action_rate_expression(reaction, rtype)
-    rev_rate = generate_reverse_mass_action_rate_expression(reaction, rtype)
+    fwd_rate = generate_foward_mass_action_rate_expression(reaction,
+                                                           rate_type)
+    rev_rate = generate_reverse_mass_action_rate_expression(reaction,
+                                                            rate_type)
 
     # Ignore reverse rate if it is mathematically equal to 0.
     if reaction.Keq == float("inf") and reaction.kr == 0:
@@ -194,7 +192,7 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
         rate_expression = sym.Add(fwd_rate, sym.Mul(-sym.S.One, rev_rate))
 
     # Try to group the forward rate constants
-    if rtype == 1:
+    if rate_type == 1:
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
 
     # Try to group compartments in the rate
@@ -203,21 +201,18 @@ def generate_mass_action_rate_expression(reaction, rtype=1,
         c = list(reaction.compartments)[0]
         rate_expression = sym.collect(rate_expression, c)
 
-    if update_reaction:
-        reaction._rtype = rtype
-
     return rate_expression
 
 
-def generate_foward_mass_action_rate_expression(reaction, rtype=1):
+def generate_foward_mass_action_rate_expression(reaction, rate_type=1):
     """Generate the foward mass action rate expression for the reaction.
 
     Parameters
     ----------
     reaction : MassReaction
         The reaction to generate the rate expression for.
-    rtype : int
-        The type of rate law to display. Must be 1, 2, or 3.
+    rate_type : int
+        The type of rate law to return. Must be 1, 2, or 3.
 
             * Type 1 and 2 will utilize the
               :attr:`~.MassReaction.`forward_rate_constant`.
@@ -243,7 +238,7 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
         reaction = _remove_metabolites_from_rate(reaction)
 
     fwd_rate = _format_metabs_sym(sym.S.One, reaction, reaction.reactants)
-    if rtype == 3:
+    if rate_type == 3:
         fwd_rate = sym.Mul(
             sym.Mul(sym.var(reaction.kr_str), sym.var(reaction.Keq_str)),
             fwd_rate)
@@ -260,15 +255,15 @@ def generate_foward_mass_action_rate_expression(reaction, rtype=1):
     return fwd_rate
 
 
-def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
+def generate_reverse_mass_action_rate_expression(reaction, rate_type=1):
     """Generate the reverse mass action rate expression for the reaction.
 
     Parameters
     ----------
     reaction : MassReaction
         The reaction to generate the rate expression for.
-    rtype : int
-        The type of rate law to display. Must be 1, 2, or 3.
+    rate_type : int
+        The type of rate law to return. Must be 1, 2, or 3.
 
             * Type 1 will utilize the
               :attr:`~.MassReaction.forward_rate_constant` and the
@@ -294,7 +289,7 @@ def generate_reverse_mass_action_rate_expression(reaction, rtype=1):
         reaction = _remove_metabolites_from_rate(reaction)
 
     rev_rate = _format_metabs_sym(sym.S.One, reaction, reaction.products)
-    if rtype == 1:
+    if rate_type == 1:
         rev_rate = sym.Mul(
             sym.Mul(sym.var(reaction.kf_str),
                     sym.Pow(sym.var(reaction.Keq_str), -1)),
@@ -445,7 +440,8 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     for dictionary in [met_syms, fix_syms, rate_syms, custom_syms]:
         symbol_dict.update(dictionary)
     custom_rate_expr = sym.sympify(custom_rate_expr, locals=symbol_dict)
-
+    custom_rate_expr = _set_fixed_metabolites_in_rate(reaction,
+                                                      custom_rate_expr)
     return custom_rate_expr
 
 
@@ -482,6 +478,7 @@ def _remove_metabolites_from_rate(reaction):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     reaction = reaction.copy()
     # Get exclusion criteria and reaction metabolites
@@ -514,6 +511,7 @@ def _mk_met_func(met):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     return dynamicsymbols(str(met))
 
@@ -524,6 +522,7 @@ def _set_fixed_metabolites_in_rate(reaction, rate):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     to_strip = [str(metabolite) for metabolite in list(reaction.metabolites)
                 if metabolite.fixed]

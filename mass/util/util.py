@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Contains utility functions to assist in various :mod:`mass` functions."""
-import inspect
 import logging
 import re
 import warnings
@@ -26,60 +25,6 @@ _MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 def show_versions():
     """Print dependency information."""
     print_dependencies("masspy")
-
-
-def get_object_attributes(obj):
-    """Get the public attributes for an object, including properties.
-
-    Parameters
-    ----------
-    obj : object
-        Any object in :mod:`mass` package.
-
-    Returns
-    -------
-    list
-        List of strings corresponding to public attributes for the object.
-
-    """
-    def filter_function(item):
-        """Filter for non-routine and non-class methods."""
-        return not inspect.isroutine(item) and not inspect.ismethod(item)
-
-    # Sometimes raises logger warnings, therefore temporary disabled
-    logging.disable(logging.WARNING)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        attributes = sorted([
-            k for k, _ in inspect.getmembers(obj, filter_function)
-            if not k.startswith("_")], key=str.lower)
-
-    # Reenable logger warnings
-    logging.disable(logging.NOTSET)
-    return attributes
-
-
-def get_subclass_specific_attributes(obj):
-    """Get the subclass specific public attributes, including properties.
-
-    Parameters
-    ----------
-    obj : object
-        Any object in :mod:`mass` package.
-
-    Returns
-    -------
-    list
-        List of strings corresponding to the subclass specific-attributes
-        for the object.
-
-    """
-    attributes = get_object_attributes(obj)
-    attributes = [
-        attr for attr in attributes
-        if attr not in get_object_attributes(obj.__class__.__base__())]
-
-    return attributes
 
 
 def ensure_iterable(item):
@@ -174,6 +119,28 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
         warnings.warn("Could not cast matrix as the given matrix_type")
 
     return matrix
+
+
+def get_public_attributes_and_methods(obj, exclude_parent=False):
+    """Return a list of public attributes and methods for an object.
+
+    Parameters
+    ----------
+    exclude_parent : bool
+        If ``True``, only display public attributes and methods specific to
+        the current class, excluding those inherited from the parent class.
+        Overridden and extended methods are not excluded.
+
+    """
+    all_public = [i.strip("_") for i in obj.__dict__]
+    all_public += [i for i in obj.__class__.__dict__
+                   if i not in all_public and not i.startswith("_")]
+    if not exclude_parent:
+        parent_public = get_public_attributes_and_methods(
+            obj.__class__.__base__(), exclude_parent=True)
+        all_public += [i for i in parent_public if i not in all_public]
+
+    return sorted(all_public, key=str.lower)
 
 
 # Internal
@@ -293,6 +260,5 @@ def _make_logger(name):
 
 
 __all__ = (
-    "show_versions", "get_object_attributes",
-    "get_subclass_specific_attributes", "ensure_iterable",
-    "ensure_non_negative_value", "convert_matrix")
+    "show_versions", "ensure_iterable", "ensure_non_negative_value",
+    "convert_matrix")

@@ -6,25 +6,37 @@ The :class:`MassMetabolite` class inherits and extends the
 :class:`~cobra.core.metabolite.Metabolite` class in :mod:`cobra`. It contains
 additional information required for simulations and other :mod:`mass`
 functions and workflows.
+
+Some key differences between the
+:class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>` and the
+:class:`mass.MassMetabolite <mass.core.mass_metabolite.MassMetabolite>` are
+listed below:
+
+    * Unlike the :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
+      the ``id`` initialization argument has been replaced with
+      ``id_or_specie`` to be clear in that a new :class:`MassMetabolite` can
+      be instantiated with the same properties of a previously created
+      metabolite by passing the metabolite object to this argument.
+
+    * The :attr:`formula`\ s can have moieties by placing them within square
+      brackets (e.g. ``"[ENZYME]"``)
+
 """
 import re
 from warnings import warn
 
-from cobra.core.species import Species
+from cobra.core.metabolite import (
+    Metabolite, element_re, elements_and_molecular_weights)
+from cobra.util.util import format_long_string
 
 from six import iteritems
 
 from mass.util.expressions import generate_ode
 from mass.util.util import (
-    ensure_non_negative_value, get_object_attributes,
-    get_subclass_specific_attributes)
+    ensure_non_negative_value, get_public_attributes_and_methods)
 
 
-ELEMENT_RE = re.compile("([A-Z][a-z]?)([0-9.]+[0-9.]?|(?=[A-Z])?)")
-""":class:`re.Pattern`: Precompiled regular expression for element parsing"""
-
-
-class MassMetabolite(Species):
+class MassMetabolite(Metabolite):
     """Class for holding information regarding a metabolite.
 
     Parameters
@@ -37,11 +49,11 @@ class MassMetabolite(Species):
     name : str
         A human readable name for the metabolite.
     formula : str
-        Chemical formula associated with the metabolite.
+        Chemical formula associated with the metabolite (e.g. H2O).
     charge : float
         The charge number associated with the metabolite.
     compartment : str
-        The compartment where the metabolite is located.
+        Compartment of the metabolite.
     fixed : bool
         Whether the metabolite concentration should remain at a fixed value.
         Default is ``False``.
@@ -50,31 +62,27 @@ class MassMetabolite(Species):
 
     def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
+        # pylint: disable=too-many-arguments
         """Initialize the MassMetabolite."""
-        super(MassMetabolite, self).__init__(str(id_or_specie), name)
-        if isinstance(id_or_specie, MassMetabolite):
+        super(MassMetabolite, self).__init__(
+            id=str(id_or_specie), formula=formula, name=name, charge=charge,
+            compartment=compartment)
+        if isinstance(id_or_specie, (Metabolite, MassMetabolite)):
             # Instiantiate a new MassMetabolite with state identical to
-            # the provided MassMetabolite object.
+            # the provided Metabolite/MassMetabolite object.
             self.__dict__.update(id_or_specie.__dict__)
-        else:
-            # Chemical formula and charge number of the metabolite
-            self.formula = formula
-            self.charge = charge
-            # Compartment where the metabolite is located
-            self.compartment = compartment
+
+        # If is not a MassMetabolite object, initialize additional attributes
+        if not isinstance(id_or_specie, MassMetabolite):
             # Whether the concentration of the metabolite is fixed.
             self.fixed = fixed
             # The initial condition of the metabolite.
             self._initial_condition = None
 
-            # For cobra compatibility
-            self._constraint_sense = "E"
-            self._bound = 0.
-
     # Public
     @property
     def elements(self):
-        """Get or set ``dict`` of elements in the metabolite :attr:`~.formula`.
+        """Get or set ``dict`` of elements in the :attr:`formula`.
 
         Parameters
         ----------
@@ -84,11 +92,15 @@ class MassMetabolite(Species):
 
         Notes
         -----
-        Enzyme and macromolecule moieties can be recognized by enclosing them
-        in brackets (e.g. [ENZYME]) when defining the chemical formula.
-        They are treated as one entity and therefore are only counted once.
+        * Enzyme and macromolecule moieties can be recognized by enclosing them
+          in brackets (e.g. [ENZYME]) when defining the chemical formula.
+          They are treated as one entity and therefore are only counted once.
+        * Overrides
+          :meth:`~cobra.core.metabolite.Metabolite.elements` of the
+          :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
+          to allow for the use of moieties.
 
-        """
+        """  # noqa: E501
         tmp_formula = self.formula
         if tmp_formula is None:
             return {}
@@ -105,7 +117,7 @@ class MassMetabolite(Species):
             composition[moiety] = 1
             tmp_formula = tmp_formula.replace(tmp_formula[s:e], "")
 
-        for (element, count) in ELEMENT_RE.findall(tmp_formula):
+        for (element, count) in element_re.findall(tmp_formula):
             if count == "":
                 count = 1
             else:
@@ -129,7 +141,7 @@ class MassMetabolite(Species):
 
     @elements.setter
     def elements(self, elements_dict):
-        """Set the :attr:`~.formula` using a ``dict`` of elements."""
+        """Set the formula using a ``dict`` of elements."""
         def stringify(element, number):
             return element if number == 1 else element + str(number)
 
@@ -177,11 +189,20 @@ class MassMetabolite(Species):
     def formula_weight(self):
         """Calculate and return the formula weight of the metabolite.
 
-        Does not consider any moeties enclosed in brackets.
-        """
+        Does not consider any moieties enclosed in brackets.
+
+        Notes
+        -----
+        Overrides :meth:`~cobra.core.metabolite.Metabolite.formula_weight`
+        of the :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
+        to allow for the use of moieties.
+
+        """  # noqa: E501
+        element_dict = {k: v for k, v in iteritems(self.elements)
+                        if not (k.startswith("[") and k.endswith("]"))}
         try:
-            return sum([count * ELEMENTS_AND_MOLECULAR_WEIGHTS[element]
-                        for element, count in self.elements.items()])
+            return sum([count * elements_and_molecular_weights[element]
+                        for element, count in sorted(iteritems(element_dict))])
         except KeyError as e:
             warn("The element {0} does not appear in the periodic table"
                  .format(e))
@@ -193,56 +214,19 @@ class MassMetabolite(Species):
 
     @property
     def ic(self):
-        """Shorthand getter or setter for the :attr:`initial_condition`."""
+        """Alias for the :attr:`initial_condition`."""
         return self.initial_condition
 
     @ic.setter
     def ic(self, value):
-        """Shorthand setter for the :attr:`initial_condition`."""
+        """Alias for the :attr:`initial_condition`."""
         self.initial_condition = value
 
     @property
     def ode(self):
-        """Shorthand getter for the :attr:`ordinary_differential_equation`."""
+        """Alias for the :attr:`ordinary_differential_equation`."""
         return self.ordinary_differential_equation
 
-    def print_attributes(self, sep=r"\n", exclude_parent=False):
-        r"""Print the attributes and properties of the :class:`MassMetabolite`.
-
-        Parameters
-        ----------
-        sep : str
-            The string used to seperate different attrubutes. Affects how the
-            final string is printed. Default is ``'\n'``.
-        exclude_parent : bool
-            If ``True``, only display attributes specific to the current class,
-            excluding attributes from the parent class.
-
-        """
-        if not isinstance(sep, str):
-            raise TypeError("sep must be a string")
-
-        if exclude_parent:
-            attributes = get_subclass_specific_attributes(self)
-        else:
-            attributes = get_object_attributes(self)
-
-        print(sep.join(attributes))
-
-    def remove_from_model(self, destructive=False):
-        """Remove the metabolite's association from its model.
-
-        Parameters
-        ----------
-        destructive : bool
-            If ``False``, the metabolite is removed from all associated
-            reactions. If ``True``, all associated reactions are remove from
-            the model.
-
-        """
-        return self._model.remove_metabolites(self, destructive)
-
-    # Internal
     def _remove_compartment_from_id_str(self):
         """Remove the compartment from the ID str of the metabolite.
 
@@ -256,20 +240,6 @@ class MassMetabolite(Species):
             met_id_str = re.sub("_" + self.compartment + "$", "", met_id_str)
 
         return met_id_str
-
-    def _set_id_with_model(self, value):
-        """Set the id of the MassMetabolite to the associated MassModel.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        if value in self.model.metabolites:
-            raise ValueError("The model already contains a metabolite with "
-                             "the id: ", value)
-        self._id = value
-        self.model.metabolites._generate_index()
 
     def _repr_html_(self):
         """HTML representation of the overview for the MassMetabolite.
@@ -303,134 +273,24 @@ class MassMetabolite(Species):
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
-        <table>""".format(id=self.id, name=self.name, formula=self.formula,
+        <table>""".format(id=self.id, name=format_long_string(self.name),
+                          formula=self.formula,
                           address='0x0%x' % id(self),
                           compartment=self.compartment,
                           ic=self._initial_condition,
                           n_reactions=len(self.reactions),
-                          reactions=', '.join(r.id for r in self.reactions))
+                          reactions=format_long_string(
+                              ', '.join(r.id for r in self.reactions), 200))
+
+    def __dir__(self):
+        """Override default dir() implementation to list only public items.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        return get_public_attributes_and_methods(self)
 
 
-ELEMENTS_AND_MOLECULAR_WEIGHTS = {
-    'H': 1.007940,
-    'He': 4.002602,
-    'Li': 6.941000,
-    'Be': 9.012182,
-    'B': 10.811000,
-    'C': 12.010700,
-    'N': 14.006700,
-    'O': 15.999400,
-    'F': 18.998403,
-    'Ne': 20.179700,
-    'Na': 22.989770,
-    'Mg': 24.305000,
-    'Al': 26.981538,
-    'Si': 28.085500,
-    'P': 30.973761,
-    'S': 32.065000,
-    'Cl': 35.453000,
-    'Ar': 39.948000,
-    'K': 39.098300,
-    'Ca': 40.078000,
-    'Sc': 44.955910,
-    'Ti': 47.867000,
-    'V': 50.941500,
-    'Cr': 51.996100,
-    'Mn': 54.938049,
-    'Fe': 55.845000,
-    'Co': 58.933200,
-    'Ni': 58.693400,
-    'Cu': 63.546000,
-    'Zn': 65.409000,
-    'Ga': 69.723000,
-    'Ge': 72.640000,
-    'As': 74.921600,
-    'Se': 78.960000,
-    'Br': 79.904000,
-    'Kr': 83.798000,
-    'Rb': 85.467800,
-    'Sr': 87.620000,
-    'Y': 88.905850,
-    'Zr': 91.224000,
-    'Nb': 92.906380,
-    'Mo': 95.940000,
-    'Tc': 98.000000,
-    'Ru': 101.070000,
-    'Rh': 102.905500,
-    'Pd': 106.420000,
-    'Ag': 107.868200,
-    'Cd': 112.411000,
-    'In': 114.818000,
-    'Sn': 118.710000,
-    'Sb': 121.760000,
-    'Te': 127.600000,
-    'I': 126.904470,
-    'Xe': 131.293000,
-    'Cs': 132.905450,
-    'Ba': 137.327000,
-    'La': 138.905500,
-    'Ce': 140.116000,
-    'Pr': 140.907650,
-    'Nd': 144.240000,
-    'Pm': 145.000000,
-    'Sm': 150.360000,
-    'Eu': 151.964000,
-    'Gd': 157.250000,
-    'Tb': 158.925340,
-    'Dy': 162.500000,
-    'Ho': 164.930320,
-    'Er': 167.259000,
-    'Tm': 168.934210,
-    'Yb': 173.040000,
-    'Lu': 174.967000,
-    'Hf': 178.490000,
-    'Ta': 180.947900,
-    'W': 183.840000,
-    'Re': 186.207000,
-    'Os': 190.230000,
-    'Ir': 192.217000,
-    'Pt': 195.078000,
-    'Au': 196.966550,
-    'Hg': 200.590000,
-    'Tl': 204.383300,
-    'Pb': 207.200000,
-    'Bi': 208.980380,
-    'Po': 209.000000,
-    'At': 210.000000,
-    'Rn': 222.000000,
-    'Fr': 223.000000,
-    'Ra': 226.000000,
-    'Ac': 227.000000,
-    'Th': 232.038100,
-    'Pa': 231.035880,
-    'U': 238.028910,
-    'Np': 237.000000,
-    'Pu': 244.000000,
-    'Am': 243.000000,
-    'Cm': 247.000000,
-    'Bk': 247.000000,
-    'Cf': 251.000000,
-    'Es': 252.000000,
-    'Fm': 257.000000,
-    'Md': 258.000000,
-    'No': 259.000000,
-    'Lr': 262.000000,
-    'Rf': 261.000000,
-    'Db': 262.000000,
-    'Sg': 266.000000,
-    'Bh': 264.000000,
-    'Hs': 277.000000,
-    'Mt': 268.000000,
-    'Ds': 281.000000,
-    'Rg': 272.000000,
-    'Cn': 285.000000,
-    'Nh': 286.000000,
-    'Fl': 289.000000,
-    'Mc': 290.000000,
-    'Lv': 293.000000,
-    'Ts': 294.000000,
-    'Og': 294.000000,
-}
-"""A ``dict`` containing element abbreviations and their molecular weights."""
-
-__all__ = ("MassMetabolite", "ELEMENT_RE", "ELEMENTS_AND_MOLECULAR_WEIGHTS")
+__all__ = ("MassMetabolite",)

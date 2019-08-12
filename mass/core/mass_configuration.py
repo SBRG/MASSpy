@@ -15,8 +15,8 @@ Attributes for model simulation:
     * :attr:`~MassBaseConfiguration.steady_state_threshold`
 
 Attributes for flux balance analysis (FBA):
-    * :attr:`~MassBaseConfiguration.optimization_solver`
-    * :attr:`~MassBaseConfiguration.optimization_tolerance`
+    * :attr:`~MassBaseConfiguration.solver`
+    * :attr:`~MassBaseConfiguration.tolerance`
     * :attr:`~MassBaseConfiguration.processes`
     * :attr:`~MassBaseConfiguration.lower_bound`
     * :attr:`~MassBaseConfiguration.upper_bound`
@@ -25,17 +25,7 @@ Attributes for flux balance analysis (FBA):
 Notes
 -----
 The :class:`MassConfiguration` is synchronized with the
-:class:`~.Configuration`. However, in addition to the optimization solvers
-from cobrapy, masspy utilizes ODE solvers. This may lead to confusion when
-trying to change solver options such as tolerances, since an optimization
-solver may need to utilize a different tolerance than the ODE solver.
-
-Therefore, the :attr:`~.BaseConfiguration.solver` and
-:attr:`~.BaseConfiguration.tolerance` attributes of the
-:class:`~.Configuration` class are renamed to
-:attr:`~MassBaseConfiguration.optimization_solver` and
-:attr:`~MassBaseConfiguration.optimization_tolerance` in the
-:class:`MassConfiguration` class to help prevent confusion.
+:class:`~.Configuration`.
 
 """
 from cobra.core.configuration import Configuration
@@ -121,11 +111,11 @@ class MassBaseConfiguration:
         are better. Values less than the threshold indicate steady state.
 
         Default is ``1e-6``.
-    optimization_solver : str
+    solver : str
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
         Valid solvers typically include: ``"glpk"``, ``"cplex"``, ``"gurobi"``
-    optimization_tolerance : float
+    tolerance : float
         The default tolerance for the optimization solver being used.
 
         Default value is ``1e-7``.
@@ -371,7 +361,7 @@ class MassBaseConfiguration:
         setattr(self, "_steady_state_threshold", threshold)
 
     @property
-    def optimization_solver(self):
+    def solver(self):
         """Get or set the solver utilized for optimization.
 
         Parameters
@@ -392,14 +382,14 @@ class MassBaseConfiguration:
         """
         return COBRA_CONFIGURATION.solver
 
-    @optimization_solver.setter
-    def optimization_solver(self, solver):
+    @solver.setter
+    def solver(self, solver):
         """Set the solver utilized for optimization."""
         # pylint: disable=no-self-use
         COBRA_CONFIGURATION.solver = solver
 
     @property
-    def optimization_tolerance(self):
+    def tolerance(self):
         """Get or set the tolerance value utilized by the optimization solver.
 
         Parameters
@@ -410,8 +400,8 @@ class MassBaseConfiguration:
         """
         return COBRA_CONFIGURATION.tolerance
 
-    @optimization_tolerance.setter
-    def optimization_tolerance(self, tol):
+    @tolerance.setter
+    def tolerance(self, tol):
         """Set the tolerance value utilized by the optimization solver."""
         # pylint: disable=no-self-use
         COBRA_CONFIGURATION.tolerance = tol
@@ -484,13 +474,7 @@ class MassBaseConfiguration:
     @property
     def shared_state(self):
         """Return a read-only ``dict`` for shared configuration attributes."""
-        shared_state = {}
-        for k, v in iteritems(self._shared_state):
-            if k in ["_solver", "tolerance"]:
-                k = "optimization_" + k.strip("_")
-            shared_state[k] = v
-
-        return shared_state
+        return getattr(self, "_shared_state").copy()
 
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
@@ -525,10 +509,10 @@ class MassBaseConfiguration:
                 <td>{steady_state_threshold}</td>
             </tr>
                 <td><strong>Optimization solver</strong></td>
-                <td>{optimization_solver}</td>
+                <td>{solver}</td>
             </tr><tr>
                 <td><strong>Optimization solver tolerance</strong></td>
-                <td>{optimization_tolerance}</td>
+                <td>{tolerance}</td>
             </tr><tr>
                 <td><strong>Lower bound</strong></td>
                 <td>{lower_bound}</td>
@@ -551,8 +535,8 @@ class MassBaseConfiguration:
             include_compartments_in_rates=self.include_compartments_in_rates,
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
-            optimization_solver=interface_to_str(self.optimization_solver),
-            optimization_tolerance=self.optimization_tolerance,
+            solver=interface_to_str(self.solver),
+            tolerance=self.tolerance,
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound,
             processes=self.processes)
@@ -573,8 +557,8 @@ class MassBaseConfiguration:
         include_compartments_in_rates: {include_compartments_in_rates}
         decimal_precision: {decimal_precision}
         steady_state_threshold: {steady_state_threshold}
-        optimization solver: {optimization_solver}
-        optimization solver tolerance: {optimization_tolerance}
+        optimization solver: {solver}
+        optimization solver tolerance: {tolerance}
         lower_bound: {lower_bound}
         upper_bound: {upper_bound}
         processes: {processes}""".format(
@@ -589,8 +573,8 @@ class MassBaseConfiguration:
             include_compartments_in_rates=self.include_compartments_in_rates,
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
-            optimization_solver=interface_to_str(self.optimization_solver),
-            optimization_tolerance=self.optimization_tolerance,
+            solver=interface_to_str(self.solver),
+            tolerance=self.tolerance,
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound,
             processes=self.processes)

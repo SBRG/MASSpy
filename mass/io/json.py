@@ -194,9 +194,8 @@ JSON_SCHEMA = {
                         "pattern": "integer|continuous",
                         "default": "continuous"
                     },
-                    "_rtype": {
-                        "type": "integer",
-                        "enum": [1, 2, 3]
+                    "_rate": {
+                        "type": "string",
                     },
                     "notes": {"type": "object"},
                     "annotation": {"type": "object"},

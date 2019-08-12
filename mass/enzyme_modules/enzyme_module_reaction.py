@@ -17,6 +17,7 @@ Some other important points about the :class:`EnzymeModuleReaction` include:
     * If the :attr:`name` attribute is not set upon initializing, it is
       automatically generated using the enzyme specific attributes of the
       associated :class:`~.EnzymeModuleSpecies`\ s.
+
     * Even though :class:`~.MassReaction`\ s are also catalyzed by enzymes, an
       enzyme module reaction in the context of this module will refer to
       reactions that involve :class:`~.EnzymeModuleSpecies`\ (s) and are
@@ -32,6 +33,9 @@ from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 class EnzymeModuleReaction(MassReaction):
     """Class representing an enzyme reaction in an :class:`~.EnzymeModule`.
 
+    Accepted ``kwargs`` are passed to the initialization method of the base
+    class, :class:`.MassReaction`.
+
     Parameters
     ----------
     id_or_reaction : str, MassReaction, EnzymeModuleReaction
@@ -39,30 +43,36 @@ class EnzymeModuleReaction(MassReaction):
         or an existing reaction object. If an existing reaction object is
         provided, a new :class:`EnzymeModuleReaction` is instantiated with the
         same properties as the original reaction.
-    name : str
-        A human readable name for the enzyme module reaction.
-    subsystem : str
-        The subsystem where the enzyme module reaction is meant to occur.
-    reversible : bool
-        The kinetic reversibility of the reaction. Irreversible reactions have
-        an equilibrium constant and a reverse rate constant as set in the
-        :attr:`~.MassBaseConfiguration.irreversible_Keq` and
-        :attr:`~.MassBaseConfiguration.irreversible_kr` attributes of the
-        :class:`~.MassConfiguration`. Default is ``True``.
-
-    Attributes
-    ----------
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
+    **kwargs
+        name : str
+            ``str`` representing a human readable name for the enzyme
+            module reaction.
+        subsystem : str
+            ``str`` representing the subsystem where the enzyme
+            module reaction is meant to occur.
+        reversible : bool
+            ``bool indicating the the kinetic reversibility of the reaction.
+            Irreversible reactions have an equilibrium constant and a
+            reverse rate constant as set in the
+            :attr:`~.MassBaseConfiguration.irreversible_Keq` and
+            :attr:`~.MassBaseConfiguration.irreversible_kr` attributes of the
+            :class:`~.MassConfiguration`. Default is ``True``.
+        steady_state_flux :
+            ``float`` representing the stored (typically steady state) flux
+            for the reaction.
 
     """
 
-    def __init__(self, id_or_reaction=None, name="", subsystem="",
-                 reversible=True, steady_state_flux=None, enzyme_module_id=""):
+    def __init__(self, id_or_reaction=None, enzyme_module_id="", **kwargs):
         """Initialize the EnzymeModuleReaction."""
         super(EnzymeModuleReaction, self).__init__(
-            id_or_reaction=id_or_reaction, name=name, subsystem=subsystem,
-            reversible=reversible, steady_state_flux=steady_state_flux)
+            id_or_reaction=id_or_reaction,
+            name=kwargs.get("name", ""),
+            subsystem=kwargs.get("subsystem", ""),
+            reversible=kwargs.get("reversible", True),
+            steady_state_flux=kwargs.get("steady_state_flux", None))
         if isinstance(id_or_reaction, EnzymeModuleReaction):
             self.__dict__.update(id_or_reaction.__dict__)
         else:
@@ -101,28 +111,33 @@ class EnzymeModuleReaction(MassReaction):
 
         for attr in ["bound_catalytic", "bound_effectors"]:
             for enz_r, enz_p in zip(items["Enz React"], items["Enz Prod"]):
-                enz_dicts = (getattr(enz_r, attr), getattr(enz_p, attr))
+                r_dict, p_dict = (getattr(enz_r, attr), getattr(enz_p, attr))
                 diff = {}
-                for key in list(set(enz_dicts[1]).union(set(enz_dicts[0]))):
-                    if key in enz_dicts[1] and key in enz_dicts[0]:
-                        coeff = abs(enz_dicts[1][key] - enz_dicts[0][key])
-                    elif key in enz_dicts[1] or key in enz_dicts[0]:
-                        coeff = [d[key] for d in enz_dicts if key in d].pop()
+                for key in list(set(p_dict).union(set(r_dict))):
+                    if key in p_dict and key in r_dict:
+                        coeff = abs(p_dict[key] - r_dict[key])
+                    elif key in p_dict or key in r_dict:
+                        coeff = [d[key] for d in [r_dict, p_dict]
+                                 if key in d].pop()
                     if coeff != 0:
                         diff[key] = coeff
 
-                if diff and list(diff) == list(items["Lig React"]):
-                    name = "-".join([m._remove_compartment_from_id_str()
-                                     for m in [enz_r] + list(diff)])
-                    name += " binding"
-                elif diff and list(diff) == list(items["Lig Prod"]):
-                    name = "-".join([m._remove_compartment_from_id_str()
-                                     for m in [enz_r] + list(diff)])
-                    name += " release"
-                elif diff:
-                    name = enz_r._remove_compartment_from_id_str()
-                    name += " catalyzation"
-                else:
+                if diff:
+                    if list(diff) != list(items["Lig React"]) and \
+                       list(diff) != list(items["Lig Prod"]):
+                        name_str = enz_r._remove_compartment_from_id_str()
+                        name_str += " catalyzation"
+                    else:
+                        name_str = "-".join([
+                            m._remove_compartment_from_id_str()
+                            for m in [enz_r] + list(diff)])
+                        name_str += str(
+                            " binding"
+                            if list(diff) == list(items["Lig React"])
+                            else " release")
+                    name = name_str
+
+                if not name:
                     name = "-".join([enz_form._remove_compartment_from_id_str()
                                      for enz_form in [enz_r, enz_p]])
                     name += " transition"

@@ -2,6 +2,8 @@
 """Module containing functions to assess the quality of a model."""
 from math import ceil, floor
 
+from cobra.util.util import format_long_string
+
 from six import iteritems, itervalues, string_types
 
 import sympy as sym
@@ -190,7 +192,8 @@ def get_missing_custom_parameters(model, reaction_list=None):
                      if reaction in model.custom_rates]
     for rxn in reaction_list:
         rate = model.custom_rates[rxn]
-        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))]
+        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))
+                   if str(symbol) not in model.metabolites]
         customs = []
         for parameter in symbols:
             if parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str] \
@@ -541,12 +544,25 @@ def _mk_concentration_content(model):
 
     """
     missing = []
-    for function in [get_missing_initial_conditions,
-                     get_missing_boundary_conditions]:
-        missing_conc = [str(m) for m in function(model)]
+    for i, function in enumerate([get_missing_initial_conditions,
+                                  get_missing_boundary_conditions]):
+        missing_conc = [m for m in function(model)]
+        for j, met in enumerate(missing_conc):
+            if i == 0:
+                # Identify reactions for missing initial conditions
+                associated_rxns = sorted([r.id for r in met.reactions])
+            else:
+                # Identify reactions for missing boundary conditions
+                associated_rxns = sorted([r.id for r in model.boundary
+                                          if r.boundary_metabolite == met])
+            # Format string
+            associated_rxn_str = ", ".join(associated_rxns)
+            missing_conc[j] = "{0} (in {1})".format(
+                str(met), format_long_string(associated_rxn_str, 30))
+        # Join all strings together.
         missing.append("\n".join(missing_conc))
 
-    headers = ["Initial Conditions", "Fixed Concentrations"]
+    headers = ["Initial Conditions", "Boundary Conditions"]
     section = "MISSING CONCENTRATIONS"
     content_lists, columns, sections = _mk_content(missing, headers, section)
     return content_lists, columns, sections

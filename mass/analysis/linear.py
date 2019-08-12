@@ -25,7 +25,6 @@ These methods include:
 * :func:`~mass.analysis.linear.eig`
 
 """
-
 import numpy as np
 
 import pandas as pd
@@ -37,8 +36,11 @@ from six import iteritems
 
 import sympy as sym
 
+from mass.core.mass_configuration import MassConfiguration
 from mass.util.expressions import _mk_met_func
 from mass.util.util import convert_matrix
+
+MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
@@ -258,7 +260,7 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
     return jacobian_matrix
 
 
-def nullspace(matrix, atol=1e-13, rtol=0):
+def nullspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     """Compute an approximate basis for the nullspace of a matrix.
 
     The algorithm used by this function is based on singular value
@@ -266,12 +268,18 @@ def nullspace(matrix, atol=1e-13, rtol=0):
 
     Notes
     -----
-    If both ``atol`` and ``rtol`` are positive, the combined tolerance is the
-    maximum of the two; that is::
+    * If both ``atol`` and ``rtol`` are positive, the combined tolerance
+      is the maximum of the two; that is::
 
         tol = max(atol, rtol * smax)
 
-    Singular values smaller than ``tol`` are considered to be zero.
+      Singular values smaller than ``tol`` are considered to be zero.
+
+    * Similar to the :class:`cobra.util.array.nullspace` function, but includes
+      utlization of the  :attr:`~.MassBaseConfiguration.decimal_precision` in
+      the :class:`.MassConfiguration` and sets values below the tolerance to 0.
+
+    * Taken from the numpy cookbook and extended.
 
     Parameters
     ----------
@@ -284,6 +292,10 @@ def nullspace(matrix, atol=1e-13, rtol=0):
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
         considered to be zero, where ``smax`` is the largest singular value.
+    decimal_precision : bool
+        Whether to apply the :attr:`~.MassBaseConfiguration.decimal_precision`
+        set in the :class:`.MassConfiguration` to the nullspace values
+        before comparing to the tolerance. Default is ``False``.
 
     Returns
     -------
@@ -304,12 +316,15 @@ def nullspace(matrix, atol=1e-13, rtol=0):
     # Apply zero singular value tolerance
     for i, row in enumerate(ns):
         for j, val in enumerate(row):
+            if decimal_precision\
+               and MASSCONFIGURATION.decimal_precision is not None:
+                val = round(val, MASSCONFIGURATION.decimal_precision)
             if abs(val) <= tol:
                 ns[i, j] = 0.
     return ns
 
 
-def left_nullspace(matrix, atol=1e-13, rtol=0):
+def left_nullspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     """Compute an approximate basis for the left nullspace of a matrix.
 
     The algorithm used by this function is based on singular value
@@ -335,6 +350,10 @@ def left_nullspace(matrix, atol=1e-13, rtol=0):
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
         considered to be zero, where ``smax`` is the largest singular value.
+    decimal_precision : bool
+        Whether to apply the :attr:`~.MassBaseConfiguration.decimal_precision`
+        set in the :class:`.MassConfiguration` to the left nullspace values
+        before comparing to the tolerance. Default is ``False``.
 
     Returns
     -------
@@ -350,11 +369,11 @@ def left_nullspace(matrix, atol=1e-13, rtol=0):
     :func:`nullspace` : Base function.
 
     """
-    lns = nullspace(matrix.T, atol, rtol).T
+    lns = nullspace(matrix.T, atol, rtol, decimal_precision).T
     return lns
 
 
-def columnspace(matrix, atol=1e-13, rtol=0):
+def columnspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     """Compute an approximate basis for the columnspace of a matrix.
 
     This function utilizes the :func:`scipy.linalg.qr` function to obtain an
@@ -380,6 +399,10 @@ def columnspace(matrix, atol=1e-13, rtol=0):
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
         considered to be zero, where ``smax`` is the largest singular value.
+    decimal_precision : bool
+        Whether to apply the :attr:`~.MassBaseConfiguration.decimal_precision`
+        set in the :class:`.MassConfiguration` to the columnspace values
+        before comparing to the tolerance. Default is ``False``.
 
     Returns
     -------
@@ -397,15 +420,20 @@ def columnspace(matrix, atol=1e-13, rtol=0):
     # Apply zero singular value tolerance
     s = linalg.svd(matrix, compute_uv=False)
     tol = max(atol, rtol * s[0])
+
+    # Apply zero singular value tolerance
     for i, row in enumerate(cs):
         for j, val in enumerate(row):
+            if decimal_precision\
+               and MASSCONFIGURATION.decimal_precision is not None:
+                val = round(val, MASSCONFIGURATION.decimal_precision)
             if abs(val) <= tol:
                 cs[i, j] = 0.
 
     return cs
 
 
-def rowspace(matrix, atol=1e-13, rtol=0):
+def rowspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     """Compute an approximate basis for the rowspace of a matrix.
 
     This function utilizes the :func:`scipy.linalg.qr` function to obtain an
@@ -431,6 +459,10 @@ def rowspace(matrix, atol=1e-13, rtol=0):
     rtol : float
         The relative tolerance.  Singular values less than ``rtol * smax`` are
         considered to be zero, where ``smax`` is the largest singular value.
+    decimal_precision : bool
+        Whether to apply the :attr:`~.MassBaseConfiguration.decimal_precision`
+        set in the :class:`.MassConfiguration` to the rowspace values
+        before comparing to the tolerance. Default is ``False``.
 
     Returns
     -------
@@ -445,7 +477,7 @@ def rowspace(matrix, atol=1e-13, rtol=0):
     :func:`columnspace` : Base function.
 
     """
-    rs = columnspace(matrix.T, atol, rtol)
+    rs = columnspace(matrix.T, atol, rtol, decimal_precision)
     return rs
 
 
@@ -572,6 +604,7 @@ def _ensure_dense_matrix(matrix):
     Warnings
     --------
     This method is intended for internal use only.
+
     """
     if isinstance(matrix, (np.ndarray, pd.DataFrame)):
         pass

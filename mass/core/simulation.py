@@ -110,7 +110,8 @@ RR_LOGGER.setFormattingPattern("'roadrunner %p: %t'")
 
 # SBML writing kwargs
 _SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
-                "units": False, "local_parameters": False}
+                "units": False, "local_parameters": False,
+                "write_objective": False}
 
 
 class Simulation(Object):

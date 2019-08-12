@@ -6,6 +6,30 @@ The :class:`MassModel` class inherits and extends the
 :class:`~cobra.core.model.Model` class in :mod:`cobra`. It contains additional
 information required for simulations and other :mod:`mass` functions and
 workflows.
+
+Some key differences between the
+:class:`cobra.Model <cobra.core.model.Model>` and the
+:class:`mass.MassModel <mass.core.mass_model.MassModel>` are
+listed below:
+
+    * When instantiating a :class:`MassModel` from a
+      :class:`cobra.Model <cobra.core.model.Model>`, any associated
+      :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>` will also
+      be converted into a :class:`.MassMetabolite`, and any associated
+      :class:`cobra.Reaction <cobra.core.reaction.Reaction>` will also
+      be converted into a :class:`.MassReaction`.
+
+      Additionally, any groups associated with the model containing
+      :class:`cobra.Metabolites <cobra.core.metabolite.Metabolite>` or
+      :class:`cobra.Reactions <cobra.core.reaction.Reaction>` will be updated
+      with the correspondining :mod:`mass` objects.
+
+    * No :mod:`cobra` object can be directly added to the :class:`MassModel`
+      with the exception of :class:`~cobra.core.gene.Gene` and
+      :class:`~cobra.core.group.Group` objects. Any :mod:`cobra` object will
+      first be instantiated into its equivalent :mod:`mass` object before
+      beimg added to the :class:`MassModel`.
+
 """
 import re
 import warnings
@@ -13,10 +37,14 @@ from copy import copy, deepcopy
 from functools import partial
 
 from cobra.core.dictlist import DictList
-from cobra.core.object import Object
-from cobra.medium import (
-    find_boundary_types, find_external_compartment, sbo_terms)
-from cobra.util.context import HistoryManager, get_context
+from cobra.core.gene import Gene
+from cobra.core.group import Group
+from cobra.core.metabolite import Metabolite
+from cobra.core.model import Model
+from cobra.core.reaction import Reaction
+from cobra.util.array import create_stoichiometric_matrix
+from cobra.util.context import get_context
+from cobra.util.util import format_long_string
 
 import numpy as np
 
@@ -24,13 +52,14 @@ from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 import sympy as sym
 
+from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
 from mass.util.util import (
-    _get_matrix_constructor, _make_logger, convert_matrix, ensure_iterable,
-    get_object_attributes, get_subclass_specific_attributes)
+    _check_kwargs, _get_matrix_constructor, _make_logger, convert_matrix,
+    ensure_iterable, get_public_attributes_and_methods)
 
 # Set the logger
 LOGGER = _make_logger(__name__)
@@ -39,8 +68,10 @@ LOGGER = _make_logger(__name__)
 CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
 """list: Contains the six most abundant elements and charge for molecules."""
 
+MASSCONFIGURATION = MassConfiguration()
 
-class MassModel(Object):
+
+class MassModel(Model):
     r"""Class representation of a model.
 
     Parameters
@@ -78,6 +109,10 @@ class MassModel(Object):
         A :class:`~cobra.core.dictlist.DictList` where the keys are gene
         identifiers and the values are the associated
         :class:`~cobra.core.gene.Gene`\ s.
+    groups : ~cobra.core.dictlist.DictList
+        A :class:`~cobra.core.dictlist.DictList` where the keys are group
+        identifiers and the values are the associated
+        :class:`~cobra.core.group.Group`\ s.
     enzyme_modules : ~cobra.core.dictlist.DictList
         A :class:`~cobra.core.dictlist.DictList` where the keys are enzyme
         module identifiers and the values are the associated
@@ -109,45 +144,45 @@ class MassModel(Object):
     --------
     * Note that the :class:`MassModel` does NOT track units, and it is
       therefore incumbent upon the user to maintain unit consistency the model.
+
     * Note that boundary conditions are considered parameters and NOT as
       species in a reaction.
 
-
     """
 
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, id_or_model=None, name=None, matrix_type="DataFrame",
                  dtype=np.float64):
         """Initialize the MassModel."""
+        # Instiantiate a new MassModel with state identical to
+        # the provided Model or MassModel object via cobra model initialization
+        # and its call to the __setstate__ method.
         super(MassModel, self).__init__(id_or_model, name)
-        if isinstance(id_or_model, MassModel):
-            # Instiantiate a new MassModel with state identical to
-            # the provided MassModel object.
-            self.__setstate__(id_or_model.__dict__)
-            if not hasattr(self, "name"):
-                self.name = None
-        else:
+        if isinstance(id_or_model, Model)\
+           and not isinstance(id_or_model, MassModel):
+            # Turn cobra objects into mass objects and fix groups.
+            self._cobra_to_mass_repair()
+
+        if not isinstance(id_or_model, MassModel):
             self.description = ''
-            # Initialize DictLists for storing
-            # reactions, metabolites, genes, and enzyme_modules
-            self.reactions = DictList()
-            self.metabolites = DictList()
-            self.genes = DictList()
+            # Initialize DictLists for storing enzyme modules and units.
+            # Reactions, metabolites, genes, and groups are initialized with
+            # the model
             self.enzyme_modules = DictList()
+            self.units = DictList()
             # Initialize dictionaries for custom rates, custom parameters,
             # boundary conditions, compartments, and units.
             self.boundary_conditions = {}
             self.custom_rates = {}
             self.custom_parameters = {}
-            self._compartments = {}
-            self.units = DictList()
+
             # Store the stoichiometric matrix, its matrix type, and data type
             self._matrix_type = matrix_type
             self._dtype = dtype
             self._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                              dtype=self._dtype,
                                              update_model=True)
-        # Store the HistoryManager contexts for context management
-        self._contexts = []
 
     # Public
     @property
@@ -158,66 +193,66 @@ class MassModel(Object):
 
     @property
     def S(self):
-        """Shorthand method to get the stoichiometric matrix."""
+        """Alias for the :attr:`stoichiometric_matrix`."""
         return self.stoichiometric_matrix
 
     @property
     def ordinary_differential_equations(self):
-        """Return a dict of ODEs for the metabolites."""
+        """Return a ``dict`` of ODEs for the metabolites."""
         return {met: met.ode for met in self.metabolites}
 
     @property
     def odes(self):
-        """Shorthand method to get ODEs for the metabolites."""
+        """Alias for the :attr:`ordinary_differential_equations`."""
         return self.ordinary_differential_equations
 
     @property
     def initial_conditions(self):
-        """Return a dict of all metabolite initial conditions."""
+        r"""Get ``dict`` of :attr:`.MassMetabolite.initial_condition`\ s."""
         return {met: met.initial_condition for met in self.metabolites
                 if met.initial_condition is not None}
 
     @property
     def ics(self):
-        """Shorthand method to get all metabolite initial conditions."""
+        """Alias for the :attr:`initial_conditions`."""
         return self.initial_conditions
 
     @property
     def fixed(self):
-        """Return a dict of all metabolite fixed conditions."""
+        """Return a ``dict`` of all metabolite fixed conditions."""
         return {met: ic for met, ic in iteritems(self.initial_conditions)
                 if met.fixed}
 
     @property
     def rates(self):
-        """Return a dict of reaction rate expressions.
+        """Return a ``dict`` of reaction rate expressions.
 
         If a reaction has an associated custom rate expression, the custom rate
         will be prioritized and returned in the ``dict`` instead of the
-        automatically generated mass action rate law expression.
+        automatically generated rate law expression.
         """
-        return self.get_rate_expressions(
-            self.reactions, rtype=0, update_reactions=True)
+        return self.get_rate_expressions(self.reactions, rate_type=0)
 
     @property
     def steady_state_fluxes(self):
-        """Return a dict of all reaction steady state fluxes."""
+        """Return a ``dict`` of all reaction steady state fluxes."""
         return {rxn: rxn.steady_state_flux for rxn in self.reactions
                 if rxn.steady_state_flux is not None}
 
     @property
     def v(self):
-        """Shorthand method to get all reaction steady state fluxes."""
+        """Alias for the :attr:`steady_state_fluxes`."""
         return self.steady_state_fluxes
 
     @property
     def boundary(self):
-        """Return a list of boundary reactions in the model."""
-        return [rxn for rxn in self.reactions if rxn.boundary]
+        """Return a ``list`` of boundary reactions in the model."""
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).boundary
 
     @property
     def boundary_metabolites(self):
-        """Return a sorted list of all 'boundary metabolites' in the model.
+        """Return a sorted ``list`` of all 'boundary metabolites' in the model.
 
         See Also
         --------
@@ -235,7 +270,8 @@ class MassModel(Object):
         Uses annotations and heuristics to exclude non-exchanges such as sink
         and demand reactions.
         """
-        return find_boundary_types(self, "exchange", None)
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).exchanges
 
     @property
     def demands(self):
@@ -244,7 +280,8 @@ class MassModel(Object):
         Demands are irreversible reactions that accumulate or consume a
         metabolite in the inside of the model.
         """
-        return find_boundary_types(self, "demand", None)
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).demands
 
     @property
     def sinks(self):
@@ -253,11 +290,12 @@ class MassModel(Object):
         Sinks are reversible reactions that accumulate or consume a metabolite
         in the inside of the model.
         """
-        return find_boundary_types(self, "sink", None)
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).sinks
 
     @property
     def irreversible_reactions(self):
-        """Return a list of all irreversible reactions in the model."""
+        """Return a ``list`` of all irreversible reactions in the model."""
         return [rxn for rxn in self.reactions if not rxn.reversible]
 
     @property
@@ -289,62 +327,36 @@ class MassModel(Object):
         Assigning a ``dict`` to this property updates the model's
         ``dict`` of compartment descriptions with the new values.
 
+        Notes
+        -----
+        * Setter extends :meth:`~cobra.core.model.Model.compartments` of
+          the :class:`cobra.Model <cobra.core.model.Model>` to enable
+          resetting the attribute by setting an empty ``dict``
+
         Parameters
         ----------
         compartment_dict : dict
-            Dictionary mapping compartments abbreviations to full names.
+            A ``dict`` mapping compartments abbreviations to full names.
             An empty ``dict`` will reset the compartments.
 
         """
-        return {met.compartment: self._compartments.get(met.compartment, '')
-                for met in self.metabolites if met.compartment is not None}
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).compartments
 
     @compartments.setter
     def compartments(self, compartment_dict):
         """Set the ``dict`` of current compartment descriptions."""
         if compartment_dict:
-            self._compartments.update(compartment_dict)
+            super(MassModel, self.__class__).compartments.fset(
+                self, compartment_dict)
         else:
             setattr(self, "_compartments", {})
 
-    def print_attributes(self, sep=r"\n", exclude_parent=False):
-        r"""Print the attributes and properties of the MassModel.
-
-        Parameters
-        ----------
-        sep : str
-            The string used to seperate different attrubutes. Affects how the
-            final string is printed. Default is ``'\n'``.
-        exclude_parent : bool
-            If ``True``, only display attributes specific to the current class,
-            excluding attributes from the parent class.
-
-        """
-        if not isinstance(sep, str):
-            raise TypeError("sep must be a string")
-
-        if exclude_parent:
-            attributes = get_subclass_specific_attributes(self)
-        else:
-            attributes = get_object_attributes(self)
-
-        print(sep.join(attributes))
-
-    def update_S(self, reaction_list=None, matrix_type=None, dtype=None,
-                 update_model=True):
+    def update_S(self, matrix_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.
 
-        Notes
-        -----
-        ``reaction_list`` is assumed to be at the end of :attr:`reactions`.
-
         Parameters
         ----------
-        reaction_list : list
-            A list containing :class:`~.MassReaction`\ s to add to
-            the stoichiometric matrix. The reactions must already exist in
-            the model in order to update. If ``None``, the entire
-            stoichiometric matrix is reconstructed.
         matrix_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
@@ -379,23 +391,18 @@ class MassModel(Object):
 
         # If a matrix has not been constructed yet, or if there are no changes
         # to the reactions, return a newly constructed stoichiometric matrix.
-        if self._S is None or reaction_list is None:
-            stoich_mat = self._mk_stoich_matrix(matrix_type=matrix_type,
-                                                dtype=dtype,
-                                                update_model=update_model)
-        # Update the current matrix if changes were made to the reactions.
-        else:
-            stoich_mat = self._update_stoichiometry(reaction_list,
-                                                    matrix_type=matrix_type,
-                                                    dtype=dtype)
+        stoich_mat = self._mk_stoich_matrix(
+            matrix_type=matrix_type, dtype=dtype, update_model=update_model)
         # Internally update the model if desired
         if update_model:
-            self._update_model_s(stoich_mat, matrix_type=matrix_type,
-                                 dtype=dtype)
+            self._S = stoich_mat
+            self._matrix_type = matrix_type
+            self._dtype = dtype
+
         return stoich_mat
 
     def add_metabolites(self, metabolite_list):
-        r"""Add a list of metabolites to the model.
+        r"""Add a ``list`` of metabolites to the model.
 
         The change is reverted upon exit when using the :class:`~.MassModel`
         as a context.
@@ -403,42 +410,15 @@ class MassModel(Object):
         Parameters
         ----------
         metabolite_list : list
-            A list containing :class:`~.MassMetabolite`\ s to add to
+            A ``list`` containing :class:`~.MassMetabolite`\ s to add to
             the model.
 
         """
-        # Ensure list is iterable.
-        metabolite_list = ensure_iterable(metabolite_list)
-
-        # Check whether a metabolite is a MassMetabolite object, then check if
-        # the metabolite already exists in the model, ignoring those that do.
-        for met in metabolite_list:
-            if not isinstance(met, MassMetabolite):
-                warnings.warn("Skipping {0}, not a MassMetabolite".format(met))
-                metabolite_list.remove(met)
-
-        existing_mets = [met for met in metabolite_list
-                         if met.id in self.metabolites]
-        for met in existing_mets:
-            LOGGER.info("Skipped adding MassMetabolite %s as it already exists"
-                        " in the MassModel.", met.id)
-        metabolite_list = [met for met in metabolite_list
-                           if met not in self.metabolites]
-
-        # Have metabolites point to the model object.
-        for met in metabolite_list:
-            met._model = self
-        # Add metabolites to the model
-        self.metabolites += metabolite_list
-
-        context = get_context(self)
-        if context:
-            context(partial(self.metabolites.__isub__, metabolite_list))
-            context(partial(setattr, met, "_model", None)
-                    for met in metabolite_list)
+        # pylint: disable=useless-super-delegation
+        super(MassModel, self).add_metabolites(metabolite_list)
 
     def remove_metabolites(self, metabolite_list, destructive=False):
-        r"""Remove a list of metabolites from the model.
+        r"""Remove a ``list`` of metabolites from the model.
 
         The change is reverted upon exit when using the :class:`~.MassModel`
         as a context.
@@ -454,34 +434,9 @@ class MassModel(Object):
             :class:`~.MassReaction`\ s from the model.
 
         """
-        # Ensure list is iterable.
-        metabolite_list = ensure_iterable(metabolite_list)
-
-        # Check whether a metabolite already exists in the model,
-        # ignoring those that do not.
-        metabolite_list = [met for met in metabolite_list
-                           if met in self.metabolites]
-
-        # Remove association to model
-        for met in metabolite_list:
-            met._model = None
-            if not destructive:
-                # Remove metabolites from reactions
-                for rxn in list(met._reaction):
-                    coeff = rxn._metabolites[met]
-                    rxn.subtract_metabolites({met: coeff})
-            else:
-                # Remove associated reactions if destructive
-                for rxn in list(met._reaction):
-                    rxn.remove_from_model()
-        # Remove the metabolites
-        self.metabolites -= metabolite_list
-
-        context = get_context(self)
-        if context:
-            context(partial(self.metabolites.__iadd__, metabolite_list))
-            context(partial(setattr, met, "_model", self)
-                    for met in metabolite_list)
+        # pylint: disable=useless-super-delegation
+        super(MassModel, self).remove_metabolites(metabolite_list,
+                                                  destructive)
 
     def add_boundary_conditions(self, boundary_conditions):
         """Add boundary conditions values for the given boundary metabolites.
@@ -493,10 +448,10 @@ class MassModel(Object):
         Parameters
         ----------
         boundary_conditions : dict
-            A dict of boundary conditions containing the 'boundary metabolites'
-            and their corresponding value. The string representing the
-            'boundary_metabolite' must exist the list returned by
-            :attr:`MassModel.boundary_metabolites`.
+            A ``dict`` of boundary conditions containing the
+            'boundary metabolites' and their corresponding value. The string
+            representing the 'boundary_metabolite' must exist in the ``list``
+            returned by :attr:`MassModel.boundary_metabolites`.
 
         See Also
         --------
@@ -553,7 +508,7 @@ class MassModel(Object):
         Parameters
         ----------
         metabolite_list : list
-            A list of metabolites to remove the boundary conditions for.
+            A ``list`` of metabolites to remove the boundary conditions for.
             Boundary metabolites must already exist in the model in order
             for them to be removed.
 
@@ -585,138 +540,93 @@ class MassModel(Object):
     def add_reactions(self, reaction_list):
         r"""Add reactions to the model.
 
-        :class:`~.MassReaction`\ s with identifiers identical to an
-        existing reaction are ignored.
-
         The change is reverted upon exit when using the :class:`~.MassModel`
         as a context.
+
+        Notes
+        -----
+        * :class:`~.MassReaction`\ s with identifiers identical to an
+          existing reaction are ignored.
+
+        * Extends :meth:`cobra.core.model.Model.add_reactions` by
+          first ensuring that the reactions to be added are
+          :class:`.MassReactions`\ s and not
+          :class:`cobra.Reactions <cobra.core.reaction.Reaction>`.
+          and error message raised reflects the :mod:`mass` object.
+
+        * If a :class:`cobra.Reaction <cobra.core.reaction.Reaction>` is
+          provided. a warning is raised and a :class:`.MassReaction`
+          will be instantiated using the
+          :class:`cobra.Reaction <cobra.core.reaction.Reaction>`.
 
         Parameters
         ----------
         reaction_list : list
-            A list of :class:`~.MassReaction`\ s to add to the model.
+            A ``list`` of :class:`~.MassReaction`\ s to add to the model.
 
         """
-        # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
-
-        # Check whether a metabolite is a MassReaction object, then check if
-        # the reaction already exists in the model, ignoring those that do.
-        for rxn in reaction_list:
-            if not isinstance(rxn, MassReaction):
+        for i, reaction in enumerate(reaction_list):
+            if isinstance(reaction, MassReaction):
+                # No need to change MassReaction objects
+                continue
+            elif isinstance(reaction, Reaction):
+                # Convert reaction to a MassReaction and raise a warning
                 warnings.warn(
-                    "Skipping {0}, not a MassReaction object".format(rxn))
-                reaction_list.remove(rxn)
+                    "'{0}' is a not a mass.MassReaction, therefore "
+                    "converting reaction before adding.".format(reaction.id))
+                mass_reaction = MassReaction(reaction)
+                reaction_list[i] = mass_reaction
+            else:
+                # Input not recognized.
+                raise TypeError("Unrecognized input {0}".format(str(reaction)))
+        super(MassModel, self).add_reactions(reaction_list)
 
-        # Check whether reactions exist in the model.
-        pruned = self._existing_obj_filter("reactions", reaction_list)
-        context = get_context(self)
-        # Add reactions, and have reactions point to the model.
-        for rxn in pruned:
-            rxn._model = self
-            # Loop through metabolites associated with a reaction.
-            for met in list(rxn._metabolites):
-                # If a metabolite doesn't exist in the model,
-                # add it with its associated initial condition.
-                if met not in self.metabolites:
-                    self.add_metabolites(met)
-                # Otherwise have reactions point to the metabolite in the model
-                else:
-                    coeff = rxn._metabolites.pop(met)
-                    met = self.metabolites.get_by_id(met.id)
-                    rxn._metabolites[met] = coeff
-                met._reaction.add(rxn)
-                if context:
-                    context(partial(met._reaction.remove, rxn))
-
-            # Loop through genes associated with a reaction.
-            for gene in list(rxn._genes):
-                # If the gene is not in the model, add it and point to model.
-                if not self.genes.has_id(gene.id):
-                    self.genes += [gene]
-                    gene._model = self
-                    if context:
-                        context(partial(self.genes.__isub__, [gene]))
-                        context(partial(setattr, gene, "_model", None))
-                # Otherwise, make the gene point to the one in the model.
-                else:
-                    model_gene = self.genes.get_by_id(gene.id)
-                    if model_gene is not gene:
-                        rxn._dissociate_gene(gene)
-                        rxn._associate_gene(model_gene)
-        # Add reactions to the model
-        self.reactions += pruned
-
-        if context:
-            context(partial(self.reactions.__isub__, pruned))
-            for rxn in reaction_list:
-                context(partial(setattr, rxn, "_model", None))
-
-    def remove_reactions(self, reaction_list, remove_orphans=False):
+    def remove_reactions(self, reactions, remove_orphans=False):
         r"""Remove reactions from the model.
 
         The change is reverted upon exit when using the :class:`~.MassModel`
         as a context.
 
+        Notes
+        -----
+        Extends :meth:`cobra.core.model.Model.remove_reactions` by also
+        removing any custom rates along with the reaction (and custom
+        parameters if ``remove_orphans=True``). Also removes
+        the boundary condition if the reaction is a boundary reaction with
+        a defined boundary condition.
+
         Parameters
         ----------
         reaction_list : list
-            A list of :class:`~.MassReaction`\ s to be removed
+            A ``list`` of :class:`~.MassReaction`\ s to be removed
             from the model.
         remove_orphans : bool
             If ``True``, will also remove orphaned genes and metabolites from
-            the model.
+            the model. If a custom rate is removed, the orphaned custom
+            parameters will also be removed.
 
         """
-        # Ensure list is iterable.
-        reaction_list = ensure_iterable(reaction_list)
-
-        # Check whether a reaction already exists in the model,
-        # ignoring those that do not.
-        reaction_list = [rxn for rxn in reaction_list
-                         if rxn.id in self.reactions]
-
-        context = get_context(self)
-        # Remove model association
-        for rxn in reaction_list:
-            rxn._model = None
-            # Remove metabolite association
-            for met in rxn._metabolites:
-                if rxn in met._reaction:
-                    met._reaction.remove(rxn)
-                    # Remove orphaned metabolites and their initial conditions.
-                    if remove_orphans and not met._reaction:
-                        self.remove_metabolites(met)
-                    if context:
-                        context(partial(met._reaction.add, rxn))
-            # Remove gene association
-            for gene in rxn._genes:
-                if rxn in gene._reaction:
-                    gene._reaction.remove(rxn)
-                    # Remove orphaned genes
-                    if remove_orphans and not gene._reaction:
-                        self.genes.remove(gene)
-                        if context:
-                            context(partial(self.genes.add, gene))
-                    if context:
-                        context(partial(gene._reaction.add, rxn))
-            if rxn in self.custom_rates:
-                self.remove_custom_rate(rxn)
-
-            if context:
-                context(partial(setattr, rxn, "_model", self))
-        # Remove reactions from the model
-        self.reactions -= reaction_list
-
-        if context:
-            context(partial(self.reactions.__iadd__, reaction_list))
-            context(partial(setattr, rxn, "_model", self)
-                    for rxn in reaction_list)
+        super(MassModel, self).remove_reactions(reactions, remove_orphans)
+        reactions = ensure_iterable(reactions)
+        # Remove reaction from the custom rates and
+        # the orphaned custom parameters if set
+        for reaction in reactions:
+            if reaction in self.custom_rates:
+                self.remove_custom_rate(
+                    reaction, remove_orphans=remove_orphans)
+            if reaction.boundary\
+               and reaction.boundary_metabolite in self.boundary_conditions:
+                self.remove_boundary_conditions([reaction.boundary_metabolite])
 
     def add_boundary(self, metabolite, boundary_type="exchange",
-                     reaction_id=None, subsystem="", boundary_condition=0.,
-                     sbo_term=None):
+                     reaction_id=None, boundary_condition=0., **kwargs):
         """Add a boundary reaction for a given metabolite.
+
+        Accepted ``kwargs`` are passed to the underlying function for boundary
+        reaction creation,
+        :func:`cobra.Model.add_boundary <cobra.core.model.Model.add_boundary>`,
+        and initialization of the :class:`.MassReaction`.
 
         There are three different types of pre-defined boundary reactions:
         exchange, demand, and sink reactions.
@@ -731,14 +641,23 @@ class MassModel(Object):
 
         Notes
         ------
-        To set the reaction ``boundary_type`` to something else, the desired
-        identifier of the created reaction must be specified. The name will
-        be given by the metabolite name and the given ``boundary_type``, and
-        the reaction will be set its reversible attribute to ``True``.
+        * Extends :func:`cobra.core.model.Model.add_boundary` by allowing
+          for metabolite identifers of existing metabolites in the model,
+          boundary conditions and reaction subsystem to be set, and
+          utilizes default bounds from the :class:`.MassConfiguration`. for
+          creation of custom boundary reaction types.
+
+        * To set the reaction ``boundary_type`` to something else, the desired
+          identifier of the created reaction must be specified. The name will
+          be given by the metabolite name and the given ``boundary_type``, and
+          the reaction will be set its reversible attribute to ``True``.
+
+          Bounds will be set to the defaults specified in the
+          :class:`.MassConfiguration`.
 
         Parameters
         ----------
-        metabolite : MassMetabolite
+        metabolite : MassMetabolite or str
             Any :class:`~.MassMetabolite`, or an identifier of a metabolite
             that already exists in the model. The metabolite compartment is
             not checked but it is encouraged to stick to the definition of
@@ -755,15 +674,25 @@ class MassModel(Object):
             reactions harder to identify afterwards when using
             :attr:`~.MassModel.boundary` or specifically
             :attr:`~.MassModel.exchanges` etc.
-        subsystem : str
-            The subsystem where the reaction is meant to occur.
         boundary_condition : float, str, ~sympy.core.basic.Basic
             The boundary condition value to set. Must be an ``int``,
             ``float``, or a :mod:`sympy` expression dependent only on time.
-            Default value is ``0.``
-        sbo_term : str
-            A correct SBO term is set for the available types. If a custom
-            type is chosen, a suitable SBO term should also be set.
+            Default value is 0.
+        **kwargs
+            subsystem :
+                ``str`` for subsystem where the reaction is meant to occur.
+            lb :
+                ``float`` for the lower bound of the resulting reaction, or
+                ``None`` to use the default specified in the
+                :class:`.MassConfiguration`.
+            ub :
+                ``float`` for the upper bound of the resulting reaction, or
+                ``None`` to use the default specified in the
+                :class:`.MassConfiguration`.
+            sbo_term :
+                ``str`` for the SBO term. A correct SBO term is set for the
+                available boundary types. If a custom boundary type is chosen,
+                a suitable SBO term should also be set.
 
         Returns
         -------
@@ -771,73 +700,58 @@ class MassModel(Object):
             The :class:`~.MassReaction` of the new boundary reaction.
 
         """
-        # Check whether a metabolite is a MassMetabolite object:
-        if isinstance(metabolite, string_types):
-            try:
-                metabolite = self.metabolites.get_by_id(metabolite)
-            except KeyError:
-                raise ValueError("metabolite must exist in the model")
-        elif not isinstance(metabolite, MassMetabolite):
-            raise TypeError("metabolite must be a MassMetabolite object")
-
-        boundary_types = {
-            "exchange": ("EX", True, sbo_terms["exchange"]),
-            "demand": ("DM", False, sbo_terms["demand"]),
-            "sink": ("SK", True, sbo_terms["sink"])}
-
-        if boundary_type == "exchange":
-            external = find_external_compartment(self)
-            if metabolite.compartment != external:
-                raise ValueError("The metabolite is not an external metabolite"
-                                 " (compartment is `{0}` but should be `{1}`)."
-                                 " Did you mean to add a demand or sink? "
-                                 "If not, either change its compartment or "
-                                 "rename the model compartments to fix this."
-                                 .format(metabolite.compartment, external))
-
-        if boundary_type in boundary_types:
-            prefix, reversible, default_term = boundary_types[boundary_type]
-            if reaction_id is None:
-                reaction_id = "{0}_{1}".format(prefix, metabolite.id)
-            if sbo_term is None:
-                sbo_term = default_term
-        if reaction_id is None:
+        # pylint: disable=arguments-differ
+        kwargs = _check_kwargs({
+            "subsystem": "",
+            "lb": MASSCONFIGURATION.lower_bound,
+            "ub": MASSCONFIGURATION.upper_bound,
+            "sbo_term": None,
+        }, kwargs)
+        # Check for existance of the metabolite
+        try:
+            metabolite = self.metabolites.get_by_id(str(metabolite))
+        except KeyError as e:
             raise ValueError(
-                "Custom types of boundary reactions require a custom "
-                "identifier. Please set the `reaction_id`.")
-        # Return the existing reaction if the reaction already exists
-        if reaction_id in self.reactions:
-            raise ValueError(
-                "Boundary reaction '{0}' already exists.".format(reaction_id))
-        # Set reaction name, subsystem, and reversible attributes
-        name = "{0}_{1}".format(metabolite.name, boundary_type)
-        rxn = MassReaction(reaction_id, name=name, subsystem=subsystem,
-                           reversible=reversible)
-        # Always add metabolite as a reactant
-        rxn.add_metabolites({metabolite: -1})
-        # Add SBO annotation
-        if sbo_term:
-            rxn.annotation["sbo"] = sbo_term
-        self.boundary_conditions.update({
-            rxn.boundary_metabolite: boundary_condition})
-        self.add_reactions(rxn)
+                "'{0}' does not exist in the model.".format(str(e)))
 
-        return rxn
+        # Create boundary reaction
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            reaction = super(MassModel, self).add_boundary(
+                metabolite, type=boundary_type, reaction_id=reaction_id,
+                lb=kwargs.get("lb", None), ub=kwargs.get("ub", None),
+                sbo_term=kwargs.get("sbo_term", None))
+        # Get the added MassReaction
+        reaction = self.reactions.get_by_id(reaction.id)
+        # Add subsystem or boundary condition
+        reaction.subsystem = kwargs.get("subsystem")
+        self.add_boundary_conditions({
+            reaction.boundary_metabolite: boundary_condition})
 
-    def get_rate_expressions(self, reaction_list=None, rtype=0,
+        if boundary_type == "demand":
+            reaction.reversible = False
+
+        return reaction
+
+    def get_rate_expressions(self, reaction_list=None, rate_type=0,
                              update_reactions=False):
-        r"""Get the rate expressions for a list of reactions in the model.
+        r"""Get the rate expressions for a ``list`` of reactions in the model.
+
+        Notes
+        -----
+        If a reaction has a custom rate in the :attr:`MassModel.custom_rates`
+        attribute, it will be returned only when the ``rate_type=0``.
 
         Parameters
         ----------
         reaction_list : list
-            A list of :class:`~.MassReaction`\ s to get the rate
+            A ``list`` of :class:`~.MassReaction`\ s to get the rate
             expressions for. Reactions must already exist in the model.
             If ``None``, then return the rates for all reactions in the model.
-        rtype : int
-            The type of rate law to display. Must be 0, 1, 2, or 3.
+        rate_type : int
+            The type of rate law to return. Must be 0, 1, 2, or 3.
 
-                * If 0, the currrent default rate law type is used.
+                * If 0, the currrent rate expression is returned.
                 * Type 1 will utilize the :attr:`forward_rate_constant` and the
                   :attr:`equilibrium_constant`.
                 * Type 2 will utilize the :attr:`forward_rate_constant` and the
@@ -847,18 +761,19 @@ class MassModel(Object):
 
             Default is `` 0.``
         update_reactions : bool
-            If ``True``, update the :class:`~.MassReaction` default rate type
-            in addition to returning the rate expressions.
+            If ``True``, update the :class:`~.MassReaction` rate in addition
+            to returning the rate expressions. Will not remove a custom
+            rate.
 
         Returns
         -------
         dict
-            Dictionary of reaction rates where keys are the reaction ids
+            A ``dict`` of reaction rates where keys are the reaction ids
             and values are the rate law expressions.
 
         """
         # Check the inputs
-        if rtype not in {0, 1, 2, 3}:
+        if rate_type not in {0, 1, 2, 3}:
             raise ValueError("rate_type must be 0, 1, 2, or 3")
 
         # Use the MassModel reactions if no reaction list is given
@@ -867,28 +782,23 @@ class MassModel(Object):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        if rtype == 0:
-            rate_dict = {
-                rxn: rxn.get_mass_action_rate(rxn._rtype, update_reactions)
-                for rxn in reaction_list}
+        if rate_type == 0:
+            rate_dict = {rxn: rxn.rate for rxn in reaction_list}
 
         else:
             rate_dict = {
-                rxn: rxn.get_mass_action_rate(rtype, update_reactions)
+                rxn: rxn.get_mass_action_rate(rate_type, update_reactions)
                 for rxn in reaction_list}
-
-        if self.custom_rates:
-            rate_dict.update(self.custom_rates)
 
         return rate_dict
 
     def get_mass_action_ratios(self, reaction_list=None, sympy_expr=True):
-        r"""Get the mass action ratios for a list of reactions in the model.
+        r"""Get mass action ratios for a ``list`` of reactions in the model.
 
         Parameters
         ----------
         reaction_list : list
-            A list of :class:`~.MassReaction`\ s to get the mass action
+            A ``list`` of :class:`~.MassReaction`\ s to get the mass action
             ratios for. Reactions must already exist in the model.
             If ``None``, then return the ratios for all reactions in the model.
         sympy_expr : bool
@@ -898,7 +808,7 @@ class MassModel(Object):
         Returns
         -------
         dict
-            Dictionary of mass action ratios where keys are the
+            A ``dict`` of mass action ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -914,12 +824,12 @@ class MassModel(Object):
         return ratio_dict
 
     def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=True):
-        r"""Get the disequilibrium ratios for a list of reactions in the model.
+        r"""Get disequilibrium ratios for a ``list`` of reactions in the model.
 
         Parameters
         ----------
         reaction_list : list
-            A list of :class:`~.MassReaction`\ s to get the disequilibrium
+            A ``list`` of :class:`~.MassReaction`\ s to get the disequilibrium
             ratios for. Reactions must already exist in the model.
             If ``None``, then return the ratios for all reactions in the model.
         sympy_expr : bool
@@ -929,7 +839,7 @@ class MassModel(Object):
         Returns
         -------
         dict
-            Dictionary of mass action ratios where keys are the
+            A ``dict`` of mass action ratios where keys are the
             reaction ids and values are the ratios.
 
         """
@@ -953,6 +863,7 @@ class MassModel(Object):
         Notes
         -----
         * Metabolites must already exist in the :class:`MassModel`.
+
         * Default parameters of a :class:`~.MassReaction` are automatically
           taken into account and do not need to be defined as additional
           custom parameters.
@@ -976,7 +887,7 @@ class MassModel(Object):
         See Also
         --------
         ~MassReaction.all_parameter_ids
-            List of default reaction parameters automatically accounted for.
+            Lists the default reaction parameters automatically accounted for.
 
         """
         if custom_parameters is not None:
@@ -1068,6 +979,9 @@ class MassModel(Object):
     def reset_custom_rates(self):
         """Reset all custom rate expressions and parameters in a model.
 
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
+
         Warnings
         --------
         Using this method will remove all custom rates and custom rate
@@ -1076,12 +990,27 @@ class MassModel(Object):
         instead.
 
         """
+        context = get_context(self)
+        if context:
+            existing_customs = self.custom_rates.copy()
+            existing_parameters = self.parameters.copy()
+
         self.custom_rates = {}
         self.custom_parameters = {}
-        print("All custom rate expressions and parameters have been reset")
+        LOGGER.info(
+            "All custom rate expressions and parameters have been reset")
+
+        if context:
+            context(partial(self.custom_parameters.update,
+                            existing_parameters))
+            context(partial(self.custom_parameters.update,
+                            existing_customs))
 
     def add_units(self, unit_defs):
         r"""Add a :class:`~.UnitDefinition` to the model :attr:`units`.
+
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Notes
         -----
@@ -1091,7 +1020,7 @@ class MassModel(Object):
         Parameters
         ----------
         unit_defs : list
-            A list of :class:`~.UnitDefinition`\ s to add to the model.
+            A ``list`` of :class:`~.UnitDefinition`\ s to add to the model.
 
         """
         # Ensure iterable input and units are valid Unit objects.
@@ -1107,9 +1036,15 @@ class MassModel(Object):
                 unit_defs.remove(unit)
         # Add new unit definitions to the units attribute
         self.units += unit_defs
+        context = get_context(self)
+        if context:
+            context(partial(self.units.__isub__, unit_defs))
 
     def remove_units(self, unit_defs):
         r"""Remove a :class:`~.UnitDefinition` from the model :attr:`units`.
+
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Notes
         -----
@@ -1119,8 +1054,8 @@ class MassModel(Object):
         Parameters
         ----------
         unit_defs : list
-            A list of :class:`~.UnitDefinition`\ s or their string identifiers
-            to remove from the model.
+            A ``list`` of :class:`~.UnitDefinition`\ s or their string
+            identifiers to remove from the model.
 
         """
         unit_defs = ensure_iterable(unit_defs)
@@ -1133,9 +1068,15 @@ class MassModel(Object):
                     "'{0}' does not exist in the model.".format(str(e)))
         # Remove unit definitions to the units attribute
         self.units -= unit_defs
+        context = get_context(self)
+        if context:
+            context(partial(self.units.__iadd__, unit_defs))
 
     def reset_units(self):
         r"""Reset all unit definitions in a model.
+
+        The change is reverted upon exit when using the :class:`~.MassModel`
+        as a context.
 
         Warnings
         --------
@@ -1144,8 +1085,15 @@ class MassModel(Object):
         other units, use :meth:`remove_units` instead.
 
         """
+        context = get_context(self)
+        if context:
+            existing_units = list(self.units)
+
         self.units = DictList()
-        print("All unit definitions have been reset")
+        LOGGER.info("All unit definitions have been reset.")
+
+        if context:
+            context(partial(self.units.__iadd__, existing_units))
 
     def get_elemental_matrix(self, matrix_type=None, dtype=None):
         """Get the elemental matrix for a model.
@@ -1205,12 +1153,12 @@ class MassModel(Object):
             # Create additional matrix for moieties
             for met in self.metabolites:
                 element_dict = met.elements
-                for moiety in moieties:
-                    if moiety in element_dict:
+                for element in moieties:
+                    if element in element_dict:
                         amount = 1
                     else:
                         amount = 0
-                    moiety_mat[moieties.index(moiety), m_ind(met)] = amount
+                    moiety_mat[moieties.index(element), m_ind(met)] = amount
             # Concatenate matrices
             elem_mat = np.concatenate((elem_mat, moiety_mat), axis=0)
             row_ids.extend(moieties)
@@ -1263,6 +1211,12 @@ class MassModel(Object):
     def repair(self, rebuild_index=True, rebuild_relationships=True):
         """Update all indicies and pointers in the model.
 
+        Notes
+        -----
+        Extends :meth:`~cobra.core.model.Model.repair` of the
+        :class:`cobra.Model <cobra.core.model.Model>` to include the
+        :attr:`MassModel.enzyme_modules` and :attr:`MassModel.units`.
+
         Parameters
         ----------
         rebuild_index: bool
@@ -1274,34 +1228,15 @@ class MassModel(Object):
             and rebuilds them.
 
         """
-        if not isinstance(rebuild_index, bool) or \
-           not isinstance(rebuild_relationships, bool):
-            raise TypeError("rebuild_index and rebuild_relationships "
-                            "must be bools.")
+        super(MassModel, self).repair(rebuild_index, rebuild_relationships)
         # Rebuild the DictList indices
         if rebuild_index:
-            self.reactions._generate_index()
-            self.metabolites._generate_index()
-            self.genes._generate_index()
             self.enzyme_modules._generate_index()
             self.units._generate_index()
-        # Rebuild the relationships between reactions and their associated
-        # genes and metabolites
-        if rebuild_relationships:
-            for met in self.metabolites:
-                met._reaction.clear()
-            for gene in self.genes:
-                gene._reaction.clear()
-            for rxn in self.reactions:
-                for met in rxn.metabolites:
-                    met._reaction.add(rxn)
-                for gene in rxn.genes:
-                    gene._reaction.add(rxn)
 
         # Make all objects point to the model.
-        for attr in ["reactions", "metabolites", "genes", "enzyme_modules"]:
-            for item in getattr(self, attr):
-                item._model = self
+        for e in self.enzyme_modules:
+            e._model = self
 
     def copy(self):
         r"""Create a partial "deepcopy" of the :class:`MassModel`.
@@ -1311,6 +1246,13 @@ class MassModel(Object):
         the boundary conditions, custom_rates, custom_parameters, and the
         stoichiometric matrix are created anew, but in a faster fashion
         than ``deepcopy``.
+
+        Notes
+        -----
+        Overrides :meth:`~cobra.core.model.Model.copy` of the
+        :class:`cobra.Model <cobra.core.model.Model>` so that all objects
+        are :mod:`mass` objects and additional attributes of specific to the
+        :class:`MassModel`.
 
         """
         # Define a new model
@@ -1328,41 +1270,69 @@ class MassModel(Object):
             setattr(new_model, attr, deepcopy(getattr(self, attr)))
 
         # Copy the metabolites
-        new_model = self._copy_model_metabolites(new_model)
+        new_model.metabolites += self._copy_model_metabolites(new_model)
         # Copy the genes
-        new_model = self._copy_model_genes(new_model)
+        new_model.genes += self._copy_model_genes(new_model)
         # Copy the reactions and rates (including custom rates)
-        new_model = self._copy_model_reactions(new_model)
+        new_model.reactions += self._copy_model_reactions(new_model)
+        # Copy the custom rate for the reaction:
+        if self.custom_rates:
+            new_model.custom_rates.update({
+                new_model.reactions.get_by_id(reaction.id): custom_rate
+                for reaction, custom_rate in iteritems(self.custom_rates)})
+        # Copy custom parameters
+        if self.custom_parameters:
+            new_model.custom_parameters.update(self.custom_parameters)
+
+        # Copy any existing groups
+        new_model.groups += self._copy_model_groups(new_model)
+
         # Copy any existing enzyme_modules
-        new_model = self._copy_model_enzyme_modules(new_model)
+        new_model.enzyme_modules += self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
         new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
                                               dtype=self._dtype,
                                               update_model=True)
+
+        try:
+            new_model._solver = deepcopy(self.solver)
+            # Cplex has an issue with deep copies
+        # pylint: disable=broad-except
+        except Exception:
+            new_model._solver = copy(self.solver)
+
         # Doesn't make sense to retain the context of a copied model so
         # assign a new empty context
         new_model._contexts = []
 
         return new_model
 
-    def merge(self, right, prefix_existing=None, inplace=False,
-              new_model_id=None):
+    def merge(self, right, prefix_existing=None, inplace=True,
+              objective='left'):
         """Merge two models into one model with the objects from both.
 
         The reactions, metabolites, genes, enzyme modules, boundary conditions,
         custom rate expressions, rate parameters, compartments, units, notes,
         and annotations from the right model are also copied to left model.
         However, note that in cases where identifiers for objects are identical
-        or a dict item has an identical key(s), priority will be given to what
-        already exists in the left model.
+        or a ``dict`` item has an identical key(s), priority will be given
+        to what already exists in the left model.
+
+        Custom constraints and variables from right models are also copied
+        to left model, however note that, constraints and variables are
+        assumed to be the same if they have the same name.
 
         Notes
         -----
-        When merging an :class:`.~EnzymeModule` into a :class:`MassModel`,
-        the enzyme module` is converted to an :class:`.~EnzymeModuleDict` and
-        stored in a :class:`~cobra.core.dictlist.DictList` accessible via the
-        :attr:`enzyme_modules` attribute. If an :class:`.~EnzymeModuleDict`
-        already exists in the model, it will be replaced.
+        * When merging an :class:`.~EnzymeModule` into a :class:`MassModel`,
+          the enzyme module is converted to an :class:`.~EnzymeModuleDict` and
+          stored in a :class:`~cobra.core.dictlist.DictList` accessible via the
+          :attr:`enzyme_modules` attribute. If an :class:`.~EnzymeModuleDict`
+          already exists in the model, it will be replaced.
+
+        * Extends :meth:`~cobra.core.model.Model.merge` of the
+          :class:`cobra.Model <cobra.core.model.Model>` by including
+          additional :class:`MassModel` attributes.
 
         Parameters
         ----------
@@ -1371,18 +1341,17 @@ class MassModel(Object):
         prefix_existing : str
             If provided, the string is used to prefix the reaction identifier
             of a reaction in the second model if that reaction already exists
-            within the left model. Will also apply prefix to enzyme identifiers
+            within the first model. Will also apply prefix to identifiers
             of enzyme modules in the second model.
         inplace : bool
-            If ``True`` then add reactions from right model directly to the
-            left model. Otherwise, create a new model leaving the left model
-            untouched. When done within the model as context, changes to the
-            models are reverted upon exit.
-        new_model_id : str
-            If provided, the string is used as the identifier for the merged
-            model. If ``None`` and inplace is ``True``, the model ID of the
-            first model will be used. If ``None`` and inplace is ``False``,
-            a new combined ID will be used for the new :class:`MassModel`.
+            If ``True`` then add reactions from second (right) model directly
+            to the first (left) model. Otherwise, create a new model leaving
+            the left model untouched. When done within the model as context,
+            changes to the models are reverted upon exit.
+        objective : str
+            One of ``"left"``, ``"right"`` or ``"sum"`` for setting the
+            objective of the resulting model to that of the corresponding
+            model or the sum of both. Default is ``"left"``.
 
         Returns
         -------
@@ -1395,32 +1364,17 @@ class MassModel(Object):
         # or if a MassModel and a MassModel subclass are being merged.
         if right.__class__ is not MassModel \
            and issubclass(right.__class__, MassModel):
-            return right._add_self_to_model(self, prefix_existing,
-                                            inplace, new_model_id)
+            return right._add_self_to_model(self, prefix_existing, inplace,
+                                            objective)
         # Set the merged model object and its ID,
         # then add the module attribute of the right model into the left
-        if not inplace:
-            new_model = self.copy()
-        else:
-            new_model = self
-        if new_model_id is None:
-            new_model_id = {True: self.id,
-                            False: self.id + "_" + right.id}.get(inplace)
-        new_model.id = new_model_id
-
-        # Add the reactions from right to left model.
-        new_reactions = deepcopy(right.reactions)
-        if prefix_existing is not None:
-            existing = new_reactions.query(lambda r: r.id in self.reactions)
-            for reaction in existing:
-                reaction.id = prefix_existing + "_" + reaction.id
-        new_model.add_reactions(new_reactions)
-        new_model.repair()
+        new_model = super(MassModel, self).merge(
+            right, prefix_existing, inplace, objective)
 
         # Add boundary conditions from right to left model.
         existing = [bc for bc in iterkeys(new_model.boundary_conditions)]
         new_model.add_boundary_conditions({
-            met: bc for met, bc in iteritems(right.boundary_conditions)
+            m: bc for m, bc in iteritems(right.boundary_conditions)
             if bc not in existing})
 
         # Add custom parameters from right to left model.
@@ -1429,34 +1383,60 @@ class MassModel(Object):
             cp: v for cp, v in iteritems(right.custom_parameters)
             if cp not in existing})
 
+        def prefix_existing_id(to_prefix):
+            """Prefix the ID and return it."""
+            return '{0}{1}'.format(prefix_existing, to_prefix)
+
         # Add custom rates from right to left model,
         # prefixing any existing reactions if necessary
-        existing = dict((prefix_existing + "_" + rxn.id, rate)
-                        if prefix_existing is not None else (rxn.id, rate)
-                        for rxn, rate in iteritems(new_model.custom_rates))
-        for rate_dict in [right.custom_rates, existing]:
-            new_model.custom_rates.update({
-                new_model.reactions.get_by_id(getattr(rxn, "_id", rxn)): rate
-                for rxn, rate in iteritems(rate_dict)})
+        if prefix_existing is not None:
+            existing = dict((prefix_existing_id(r.id), rate)
+                            if prefix_existing_id(r.id) in new_model.reactions
+                            else (r.id, rate)
+                            for r, rate in iteritems(right.custom_rates))
+        else:
+            existing = {}
+
+        existing.update(right.custom_rates)
+        new_model.custom_rates.update({
+            new_model.reactions.get_by_id(getattr(r, "_id", r)): rate
+            for r, rate in iteritems(existing)})
+
+        new_items = deepcopy(right.groups)
+        if prefix_existing is not None:
+            existing = new_items.query(
+                lambda group: group.id in self.groups)
+            for group in existing:
+                group.id = prefix_existing_id(group.id)
+        new_model.add_groups(new_items)
+
+        def existing_enzyme_filter(enzyme):
+            """Filter existing EnzymeModules."""
+            if enzyme.id in self.enzyme_modules:
+                LOGGER.warning(
+                    "Ignoring enzyme module '%s' since it already exists.",
+                    enzyme.id)
+                return False
+            return True
 
         # Add enzyme_modules from right to left model
         if right.enzyme_modules:
-            new_enzyme_modules = deepcopy(right.enzyme_modules)
+            new_items = deepcopy(right.enzyme_modules)
             # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
-                existing = new_enzyme_modules.query(
+                existing = new_items.query(
                     lambda e: e.id in self.enzyme_modules)
                 for enzyme in existing:
-                    enzyme.__dict__["_id"] = prefix_existing + "_" + enzyme.id
+                    enzyme.__dict__["_id"] = prefix_existing_id(enzyme.id)
+
             # Check whether reactions exist in the model.
-            new_enzyme_modules = self._existing_obj_filter(
-                "enzyme_modules", new_enzyme_modules)
-            new_model.enzyme_modules += new_enzyme_modules
+            new_items = DictList(filter(existing_enzyme_filter, new_items))
+            new_model.enzyme_modules += new_items
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        if right.units:
-            new_model.add_units(right.units)
+        new_model.add_units([
+            u for u in right.units if u not in new_model.units])
 
         for attr in ["_compartments", "notes", "annotation"]:
             existing = getattr(new_model, attr).copy()
@@ -1491,18 +1471,18 @@ class MassModel(Object):
             values in the pathway vector corresponding to the indicies of
             reactions in the :attr:`reactions` attribute.
         independent_fluxes : dict
-            A dict of steady state fluxes where :class:`~.MassReaction`\ s are
-            keys and fluxes are values to utilize in order to calculate all
-            other steady state fluxes. Must be the same length as the number
-            of specified pathways.
+            A ``dict`` of steady state fluxes where :class:`~.MassReaction`\ s
+            are keys and fluxes are values to utilize in order to calculate
+            all other steady state fluxes. Must be the same length as the
+            number of specified pathways.
         update_reactions : bool
-            If True, then update the :attr:`.MassReaction.steady_state_flux`
+            If ``True`` then update the :attr:`.MassReaction.steady_state_flux`
             with the calculated steady state flux value for each reaction.
 
         Return
         ------
         dict
-            A dict where key:value pairs are the :class:`~.MassReaction`\ s
+            A ``dict`` where key:value pairs are the :class:`~.MassReaction`\ s
             with their corresponding calculated steady state fluxes.
 
         Warnings
@@ -1559,13 +1539,13 @@ class MassModel(Object):
         Parameters
         ----------
         steady_state_fluxes : dict
-            A dict of steady state fluxes where :class:`~MassReaction`\ s
+            A ``dict`` of steady state fluxes where :class:`~MassReaction`\ s
             are keys and fluxes are the values. All reactions provided will
             have their PERCs calculated. If ``None``, PERCs are calculated
             using the current steady state fluxes for all reactions that
             exist in the model.
         steady_state_concentrations : dict
-            A dict of all steady state concentrations necessary for the PERC
+            A ``dict`` of all steady state concentrations necessary for the PERC
             calculations, where :class:`~.MassMetabolite`\ s are keys and
             concentrations are the values. If ``None``, the relevant
             concentrations that exist in the model are used. All
@@ -1582,9 +1562,9 @@ class MassModel(Object):
         Returns
         -------
         dict
-            A dict where keys are strings identifers of the pseudo-order rate
-            constants (as given by :attr:`.MassReaction.kf_str`) and values
-            are the calculated PERC values.
+            A ``dict`` where keys are strings identifers of the pseudo-order
+            rate constants (as given by :attr:`.MassReaction.kf_str`) and
+            values are the calculated PERC values.
 
         """
         # Get the model steady state concentrations if None are provided.
@@ -1651,11 +1631,13 @@ class MassModel(Object):
 
         return percs_dict
 
-    def build_model_from_string(self, model_str, verbose=True, fwd_arrow=None,
-                                rev_arrow=None, reversible_arrow=None,
-                                term_split="+", reaction_split=";",
-                                reaction_id_split=":"):
+    def build_model_from_string(self, model_str, verbose=True,
+                                reaction_split=";", reaction_id_split=":",
+                                **kwargs):
         """Create a :class:`MassModel` from strings of reaction equations.
+
+        Accepted ``kwargs`` are passed to the underlying function for reaction
+        creation, :func:`.MassReaction.build_reaction_from_string`.
 
         Takes a string representation of the reactions and uses the
         specifications supplied in the optional arguments to first infer a set
@@ -1680,22 +1662,26 @@ class MassModel(Object):
             model.
         verbose : bool
             Setting the verbosity of the function.
-        fwd_arrow: re.compile, None
-            For forward irreversible reaction arrows. If ``None``, the
-            arrow is expected to be ``'-->'`` or ``'==>'``.
-        rev_arrow: re.compile, None
-            For backward irreversible reaction arrows. If ``None``, the
-            arrow is expected to be ``'<--'`` or ``'<=='``.
-        reversible_arrow: re.compile, None
-            For reversible reaction arrows. If ``None``, the arrow is expected
-            to be ``'<=>'`` or ``'<->'``.
-        term_split : str
-            Dividing individual metabolite entries. Default is ``"+"``.
         reaction_split : str
             Dividing individual reaction entries. Default is ``";"``.
         reaction_id_split : str
             Dividing individual reaction entries from their identifiers.
             Default is ``":"``.
+        **kwargs
+            fwd_arrow :
+                :func:`re.compile` or ``None`` for forward irreversible
+                reaction arrows. If ``None``, the arrow is expected to
+                be ``'-->'`` or ``'==>'``.
+            rev_arrow :
+                :func:`re.compile` or ``None`` for backward irreversible
+                reaction arrows. If ``None``, the arrow is expected to
+                be ``'<--'`` or ``'<=='``.
+            reversible_arrow :
+                :func:`re.compile` or ``None`` for reversible reaction arrows.
+                If ``None``, the arrow is expected to
+                be ``'<=>'`` or ``'<->'``.
+            term_split : str
+                Dividing individual metabolite entries. Default is ``"+"``.
 
         See Also
         --------
@@ -1732,9 +1718,7 @@ class MassModel(Object):
                 self.add_reactions(reaction)
                 # Build the reaction from the reaction string
                 reaction.build_reaction_from_string(
-                    reaction_str, verbose=verbose, fwd_arrow=fwd_arrow,
-                    rev_arrow=rev_arrow, reversible_arrow=reversible_arrow,
-                    term_split=term_split)
+                    reaction_str, verbose=verbose, **kwargs)
             except ValueError as e:
                 # Log reactions that could not be built.
                 warnings.warn(
@@ -1770,8 +1754,8 @@ class MassModel(Object):
         Parameters
         ----------
         parameters : dict
-            A dict containing the parameter identifiers as strings and their
-            corresponding values to set in the model.
+            A ``dict`` containing the parameter identifiers as strings and
+            their corresponding values to set in the model.
         verbose : bool
             If ``True`` then display the warnings that may be raised when
             setting reaction parameters. Default is ``True``.
@@ -1779,9 +1763,9 @@ class MassModel(Object):
         See Also
         --------
         :attr:`.MassReaction.all_parameter_ids`
-            List of default reaction parameter identifiers.
+            Lists the default reaction parameter identifiers.
         :attr:`MassModel.boundary_metabolites`
-            List of 'boundary metabolites' found in the model.
+            Lists the 'boundary metabolites' found in the model.
 
         """
         if not isinstance(parameters, dict):
@@ -1889,7 +1873,6 @@ class MassModel(Object):
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
-                print(custom_rate, "uh oh")
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 
@@ -1920,16 +1903,20 @@ class MassModel(Object):
         """
         equivalent = True
         # Determine whether ODE dicts have the same ODEs
-        l_odes = {met.id: ode for met, ode in iteritems(self.odes)}
-        r_odes = {met.id: ode for met, ode in iteritems(right.odes)}
-        if l_odes != r_odes:
+        l_odes_and_rates = [
+            {met.id: ode for met, ode in iteritems(self.odes)},
+            {r.id: rate for r, rate in iteritems(self.rates)},
+        ]
+        r_odes_and_rates = [
+            {met.id: ode for met, ode in iteritems(right.odes)},
+            {r.id: rate for r, rate in iteritems(right.rates)},
+        ]
+        if l_odes_and_rates[0] != r_odes_and_rates[0]:
             equivalent = False
 
         if not equivalent and verbose:
-            l_rates = {r.id: rate for r, rate in iteritems(self.rates)}
-            r_rates = {r.id: rate for r, rate in iteritems(right.rates)}
-            for i, (l_dict, r_dict) in enumerate(zip([l_odes, l_rates],
-                                                     [r_odes, r_rates])):
+            for i, (l_dict, r_dict) in enumerate(zip(l_odes_and_rates,
+                                                     r_odes_and_rates)):
                 # Determine which metabolites do not exist in both models
                 missing = set(l_dict)
                 missing.symmetric_difference_update(set(r_dict))
@@ -1951,7 +1938,156 @@ class MassModel(Object):
 
         return equivalent
 
+    def set_model_description(self, *assumptions, **additional_notes):
+        """Set the model :attr:`MassModel.description` in a readable format.
+
+        This is a convenience method to help set the description in a human
+        legible format.
+
+        Parameters
+        ----------
+        organism : str
+            The organism represented by the model
+        *assumptions
+            Any number of assumptions as strings to add to the description.
+        **additional_notes
+            Recognized ``kwargs`` are the following:
+
+                replace :
+                    ``bool`` indicating whether to replace the current
+                    description or to add it to the additional notes.
+
+                    Default is ``True`` to replace the current description.
+                max_line_length :
+                    ``int`` between 50 and 100 indicating the maximum line
+                    length before wrapping. Default is 80.
+                organism :
+                    ``str`` indicating the organism represented by the model.
+                    Can be used in addition or instead of the ``cell_type``
+                    kwarg.
+                cell_type :
+                    ``str`` indicating the cell type represented by the model.
+                    Can be used in addition or instead of the ``organism``
+                    kwarg
+
+            All remaining ``kwargs`` are considered additional notes to be
+            added to the description. Use an underscore ``"_"`` in the kwarg
+            to represent a space ``" "``. (e.g. cell_type for cell type)
+
+        """
+        replace = True
+        if "replace" in additional_notes:
+            replace = additional_notes.pop("replace")
+        mml = 80
+        if "max_line_length" in additional_notes:
+            mml = additional_notes.pop("max_line_length")
+        if not isinstance(mml, integer_types) or not 50 <= mml < 100:
+            warnings.warn(
+                "max_line_length not an int between 50 and 100 "
+                "using default value.")
+            mml = 80
+
+        def add_to_description(description, key, value, key_newline=False,
+                               captialize=True):
+            """Add to the description string."""
+            if captialize:
+                key = key.capitalize()
+            key = key.replace("_", " ")
+            display_str = key
+            if key_newline:
+                key = "  "
+                display_str += "\n" + key
+            n_key = len(key)
+            display_str += value[:mml - n_key] + "\n"
+            if len(value) > mml - n_key:
+                while len(value) > mml - n_key:
+                    value = value[mml - n_key:]
+                    display_str += n_key * " " + value[:mml - n_key]
+                    display_str += "\n"
+                display_str += value[mml - n_key:]
+            else:
+                display_str = key + value
+            description = "\n".join((description, display_str))
+            return description
+
+        description = "Model ID: " + str(self.id)
+
+        # Handle recognized kwargs
+        for key in ["organism", "cell_type"]:
+            value = additional_notes.get(key, "")
+            if not isinstance(key, string_types):
+                warnings.warn(
+                    "{0} '{1}' is not a string, therefore it will "
+                    "be ignored".format(key, str(value)))
+                continue
+
+            description = add_to_description(
+                description, key + ":", value) if value else description
+
+            if key in additional_notes:
+                del additional_notes[key]
+        # Handle assumptions
+        if assumptions:
+            description += "\n".join((
+                "", "=" * mml, "Assumptions", "-" * mml))
+            for assumption in ensure_iterable(assumptions):
+                if not isinstance(assumption, string_types):
+                    warnings.warn(
+                        "{0} '{1}' is not a string, therefore it will be "
+                        "ignored".format("Assumption", str(assumption)))
+                    continue
+                description = add_to_description(
+                    description, " * ", assumption, captialize=False)
+            description += "\n"
+
+        if not replace:
+            additional_notes["Old Description"] = self.description
+
+        if additional_notes:
+            description += "\n".join((
+                "", "=" * mml, "Additional Notes", "-" * mml))
+            for key, value in iteritems(additional_notes):
+                description = add_to_description(
+                    description, key.capitalize() + ":", value,
+                    key_newline=True, captialize=False)
+
+        self.description = description
+
     # Internal
+    def _cobra_to_mass_repair(self):
+        """Convert associated cobra objects to mass objects for self.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        # Convert Metabolites into MassMetabolites
+        if self.metabolites:
+            self.metabolites = DictList([
+                MassMetabolite(metabolite) for metabolite in self.metabolites])
+        # Convert Reactions into MassReactions
+        if self.reactions:
+            self.reactions = DictList([
+                MassReaction(reaction) for reaction in self.reactions])
+        # Convert groups containing metabolites and reactions
+        # into groups containing MassMetabolites and MassReactions
+        if self.groups:
+            for group in self.groups:
+                old_members = list(group.members)
+                new_members = []
+                for member in old_members:
+                    if isinstance(member, Metabolite)\
+                       and not isinstance(member, MassMetabolite):
+                        new_members.append(MassMetabolite(member))
+                    if isinstance(member, Reaction)\
+                       and not isinstance(member, MassReaction):
+                        new_members.append(MassReaction(member))
+                    if not isinstance(member, (Metabolite, Reaction)):
+                        new_members.append(member)
+                group.remove_members(old_members)
+                group.add_members(new_members)
+
     def _mk_stoich_matrix(self, matrix_type=None, dtype=None,
                           update_model=True):
         """Return the stoichiometric matrix for a given MassModel.
@@ -1969,21 +2105,13 @@ class MassModel(Object):
         if not isinstance(update_model, bool):
             raise TypeError("update_model must be a bool")
 
-        # Set up for matrix construction if matrix types are correct.
-        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type=matrix_type, dtype=dtype,
-            matrix_type_default=self._matrix_type, dtype_default=self._dtype)
+        if matrix_type is None:
+            matrix_type = self._matrix_type
 
-        stoich_mat = matrix_constructor((len(self.metabolites),
-                                         len(self.reactions)))
-        # Get the indicies for the species and reactions
-        m_ind = self.metabolites.index
-        r_ind = self.reactions.index
+        if dtype is None:
+            dtype = self._dtype
 
-        # Build the matrix
-        for rxn in self.reactions:
-            for met, stoich in iteritems(rxn.metabolites):
-                stoich_mat[m_ind(met), r_ind(rxn)] = stoich
+        stoich_mat = create_stoichiometric_matrix(self)
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
@@ -1992,64 +2120,11 @@ class MassModel(Object):
             col_ids=[r.id for r in self.reactions])
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
-            self._update_model_s(stoich_mat, matrix_type, dtype)
+            self._S = stoich_mat
+            self._matrix_type = matrix_type
+            self._dtype = dtype
 
         return stoich_mat
-
-    def _update_stoichiometry(self, reaction_list, matrix_type=None,
-                              dtype=None):
-        """Update the stoichiometric matrix.
-
-        To efficiently update the stoichiometric matrix with additional
-        metabolites and reactions, the matrix is first converted into a 'dok'
-        matrix, updated with the new objects, and lastly converted back into
-        the desired matrix type.
-
-        Warnings
-        --------
-        This method is intended for internal use only. To safely update the
-        stoichiometric matrix, use :meth:`~MassModel.update_S` instead.
-
-        """
-        shape = (len(self.metabolites), len(self.reactions))
-        # Check the matrix input type to ensure it is valid matrix.
-        if matrix_type is None:
-            matrix_type = self._matrix_type
-        if dtype is None:
-            dtype = self._dtype
-
-        # Get the S matrix as a dok matrix
-        stoich_mat = convert_matrix(self._S, matrix_type="dok", dtype=dtype)
-        # Resize the matrix
-        stoich_mat.resize(shape)
-
-        # Update the matrix
-        coefficient_dictionary = {}
-        for rxn in reaction_list:
-            for metab, coeff in rxn._metabolites.items():
-                coefficient_dictionary[(self.metabolites.index(metab.id),
-                                        self.reactions.index(rxn.id))] = coeff
-        stoich_mat.update(coefficient_dictionary)
-
-        # Convert the matrix to the desired type
-        stoich_mat = convert_matrix(stoich_mat, matrix_type=matrix_type,
-                                    dtype=dtype,
-                                    row_ids=[m.id for m in self.metabolites],
-                                    col_ids=[r.id for r in self.reactions])
-        return stoich_mat
-
-    def _update_model_s(self, stoich_mat, matrix_type, dtype):
-        """Update the model stoichiometric matrix and its properties.
-
-        Warnings
-        --------
-        This method is intended for internal use only. To safely update the
-        stoichiometric matrix, use :meth:`~MassModel.update_S` instead.
-
-        """
-        self._S = stoich_mat
-        self._matrix_type = matrix_type
-        self._dtype = dtype
 
     def _get_all_parameters(self):
         """Get a dict containing all of defined model parameters in the model.
@@ -2071,7 +2146,7 @@ class MassModel(Object):
 
         """
         # Initialize DictList and set attributes to not copy by ref.
-        new_model.metabolites = DictList()
+        new_metabolites = DictList()
         do_not_copy_by_ref = {"_reaction", "_model"}
         # Copy the metabolites
         for metabolite in self.metabolites:
@@ -2081,9 +2156,9 @@ class MassModel(Object):
                     new_metabolite.__dict__[attr] = copy(
                         value) if attr == "formula" else value
             new_metabolite._model = new_model
-            new_model.metabolites.append(new_metabolite)
+            new_metabolites.append(new_metabolite)
 
-        return new_model
+        return new_metabolites
 
     def _copy_model_genes(self, new_model):
         """Copy the genes in creating a partial "deepcopy" of model.
@@ -2094,7 +2169,7 @@ class MassModel(Object):
 
         """
         # Initialize DictList and set attributes to not copy by ref.
-        new_model.genes = DictList()
+        new_genes = DictList()
         do_not_copy_by_ref = {"_reaction", "_model"}
         # Copy the genes
         for gene in self.genes:
@@ -2104,9 +2179,9 @@ class MassModel(Object):
                     new_gene.__dict__[attr] = copy(
                         value) if attr == "formula" else value
             new_gene._model = new_model
-            new_model.genes.append(new_gene)
+            new_genes.append(new_gene)
 
-        return new_model
+        return new_genes
 
     def _copy_model_reactions(self, new_model):
         """Copy the reactions in creating a partial "deepcopy" of model.
@@ -2117,7 +2192,7 @@ class MassModel(Object):
 
         """
         # Initialize DictList and set attributes to not copy by ref.
-        new_model.reactions = DictList()
+        new_reactions = DictList()
         do_not_copy_by_ref = {"_model", "_metabolites", "_genes"}
         # Copy the reactions
         for reaction in self.reactions:
@@ -2126,7 +2201,7 @@ class MassModel(Object):
                 if attr not in do_not_copy_by_ref:
                     new_reaction.__dict__[attr] = copy(value)
             new_reaction._model = new_model
-            new_model.reactions.append(new_reaction)
+            new_reactions.append(new_reaction)
             # Update awareness for metabolites and genes
             for metabolite, stoich in iteritems(reaction._metabolites):
                 new_metabolite = new_model.metabolites.get_by_id(metabolite.id)
@@ -2136,15 +2211,8 @@ class MassModel(Object):
                 new_gene = new_model.genes.get_by_id(gene.id)
                 new_reaction._genes.add(new_gene)
                 new_gene._reaction.add(new_reaction)
-            # Copy the custom rate for the reaction:
-            if reaction in iterkeys(self.custom_rates):
-                new_model.custom_rates.update({
-                    new_reaction: self.custom_rates[reaction]})
-            # Copy custom parameters if there are custom rates
-        if self.custom_parameters:
-            new_model.custom_parameters.update(self.custom_parameters)
 
-        return new_model
+        return new_reactions
 
     def _copy_model_enzyme_modules(self, new_model):
         """Copy the enzyme_modules in creating a partial "deepcopy" of model.
@@ -2154,11 +2222,12 @@ class MassModel(Object):
         This method is intended for internal use only.
 
         """
-        new_model.enzyme_modules = DictList()
+        new_enzyme_modules = DictList()
         do_not_copy_by_ref = {
-            "ligands", "enzyme_forms", "enzyme_reactions",
-            "categorized_ligands", "categorized_enzyme_forms",
-            "categorized_enzyme_reactions", "model"}
+            "ligands", "enzyme_module_species", "enzyme_module_reactions",
+            "enzyme_module_ligands_categorized",
+            "enzyme_module_species_categorized",
+            "enzyme_module_reactions_categortized", "model"}
         # Copy the enzyme_modules
         for enzyme in self.enzyme_modules:
             new_enzyme = enzyme.__class__()
@@ -2168,26 +2237,54 @@ class MassModel(Object):
             # Update associated model and object pointers for enzyme
             new_enzyme["model"] = new_model
             new_enzyme._update_object_pointers(new_model)
-            new_model.enzyme_modules.append(new_enzyme)
+            new_enzyme_modules.append(new_enzyme)
 
-        return new_model
+        return new_enzyme_modules
 
-    def _existing_obj_filter(self, attr, item_list):
-        """Filter for existing items and return a new DictList.
+    def _copy_model_groups(self, new_model):
+        """Copy the groups in creating a partial "deepcopy" of model.
 
         Warnings
         --------
         This method is intended for internal use only.
 
         """
-        def existing_filter(item):
-            if item.id in getattr(self, attr):
-                LOGGER.warning("Ignoring %s '%s' since it already exists.",
-                               attr[:-1], item.id)
-                return False
-            return True
+        new_groups = DictList()
+        do_not_copy_by_ref = {"_model", "_members"}
+        # Groups can be members of other groups. We initialize them first and
+        # then update their members.
+        for group in self.groups:
+            new_group = group.__class__(group.id)
+            for attr, value in iteritems(group.__dict__):
+                if attr not in do_not_copy_by_ref:
+                    new_group.__dict__[attr] = copy(value)
+            new_group._model = new_model
+            new_groups.append(new_group)
+        # Iterate through groups
+        for group in self.groups:
+            new_group = new_groups.get_by_id(group.id)
+            # Update awareness
+            new_objects = []
+            for member in group.members:
+                if isinstance(member, MassMetabolite):
+                    new_object = new_model.metabolites.get_by_id(member.id)
+                elif isinstance(member, MassReaction):
+                    new_object = new_model.reactions.get_by_id(member.id)
+                elif isinstance(member, Gene):
+                    new_object = new_model.genes.get_by_id(member.id)
+                elif isinstance(member, Group):
+                    new_object = new_model.genes.get_by_id(member.id)
+                elif member.__class__.__name__ == "EnzymeModuleDict":
+                    new_object = new_model.enzyme_modules.get_by_id(member.id)
+                else:
+                    raise TypeError(
+                        "The group member {!r} is unexpectedly not a "
+                        "metabolite, reaction, gene, enzyme module, nor "
+                        "another group.".format(member))
+                new_objects.append(new_object)
+            new_group.add_members(new_objects)
 
-        return DictList(filter(existing_filter, item_list))
+        return new_groups
 
     def _repr_html_(self):
         """HTML representation of the overview for the MassModel.
@@ -2225,70 +2322,53 @@ class MassModel(Object):
                     <td><strong>Number of reactions</strong></td>
                     <td>{num_reactions}</td>
                 </tr><tr>
-                    <td><strong>Number of Genes</strong></td>
+                    <td><strong>Number of genes</strong></td>
                     <td>{num_genes}</td>
                 </tr><tr>
-                    <td><strong>Number of Enzyme Modules</strong></td>
+                    <td><strong>Number of enzyme modules</strong></td>
                     <td>{num_enzyme_modules}</td>
+                </tr><tr>
+                    <td><strong>Number of groups</strong></td>
+                    <td>{num_groups}</td>
+                </tr><tr>
+                    <td><strong>Objective expression</strong></td>
+                    <td>{objective}</td>
                 </tr><tr>
                     <td><strong>Compartments</strong></td>
                     <td>{compartments}</td>
                 </tr>
             </table>
         """.format(name=self.id, address='0x0%x' % id(self),
-                   dim_stoich_mat=dim_S,
-                   mat_rank=rank,
+                   dim_stoich_mat=dim_S, mat_rank=rank,
                    num_metabolites=len(self.metabolites),
                    num_ic=len(self.initial_conditions),
                    num_reactions=len(self.reactions),
                    num_genes=len(self.genes),
                    num_enzyme_modules=len(self.enzyme_modules),
+                   num_groups=len(self.groups),
+                   objective=format_long_string(
+                       str(self.objective.expression), 100),
                    compartments=", ".join(v if v else k for k, v in
-                                          iteritems(self.compartments)),)
-
-    # Dunders
-    def __enter__(self):
-        """Record all future changes for context management of the MassModel.
-
-        Changes are undone when a call to __exit__ is received.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        # Create a new context and add it to the stack
-        try:
-            self._contexts.append(HistoryManager())
-        except AttributeError:
-            self._contexts = [HistoryManager()]
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        """Pop the top context manager and trigger the undo functions.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        context = self._contexts.pop()
-        context.reset()
+                                          iteritems(self.compartments)))
 
     def __setstate__(self, state):
         """Ensure all objects in the model point to the MassModel.
 
+        Extends
+        :meth:`Model.__setstate__ <cobra.core.model.Model.__setstate__>`
+        to include enzyme_modules
+
         Warnings
         --------
         This method is intended for internal use only.
 
         """
-        self.__dict__.update(state)
-        for attr in ['reactions', 'metabolites', 'genes', 'enzyme_modules']:
-            for x in getattr(self, attr):
-                x._model = self
-        if not hasattr(self, "name"):
-            self.name = ""
+        super(MassModel, self).__setstate__(state)
+        for attr in ["enzyme_modules"]:
+            # Ensure attribute exists, needed for preventing inheritance issues
+            if hasattr(self, attr):
+                for x in getattr(self, attr):
+                    x._model = self
 
     def __getstate__(self):
         """Get the state for serialization.
@@ -2301,9 +2381,18 @@ class MassModel(Object):
         This method is intended for internal use only.
 
         """
-        odict = self.__dict__.copy()
-        odict['_contexts'] = []
-        return odict
+        # pylint: disable=useless-super-delegation
+        return super(MassModel, self).__getstate__()
+
+    def __dir__(self):
+        """Override default dir() implementation to list only public items.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        return get_public_attributes_and_methods(self)
 
 
 __all__ = ("MassModel", "LOGGER", "CHOPNSQ")

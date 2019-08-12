@@ -11,76 +11,76 @@
             "atp_c"
         ],
         "Products": [
-            "adp_c",
             "fdp_c",
-            "h_c"
+            "h_c",
+            "adp_c"
         ],
         "Substrates": [
             "f6p_c"
         ]
     },
     "_enzyme_module_reactions_categorized": {
-        "R/T transition": [
+        "RT_transition": [
             "PFK_L"
         ],
-        "amp_c activation": [
-            "PFK_R10",
+        "amp_c_activation": [
             "PFK_R20",
             "PFK_R30",
+            "PFK_R10",
             "PFK_R40"
         ],
-        "atp_c binding": [
-            "PFK_R01",
-            "PFK_R11",
+        "atp_c_binding": [
             "PFK_R21",
+            "PFK_R41",
+            "PFK_R01",
             "PFK_R31",
-            "PFK_R41"
+            "PFK_R11"
         ],
-        "atp_c inhibition": [
-            "PFK_T1",
+        "atp_c_inhibition": [
+            "PFK_T4",
             "PFK_T2",
-            "PFK_T3",
-            "PFK_T4"
+            "PFK_T1",
+            "PFK_T3"
         ],
         "catalyzation": [
-            "PFK_R03",
-            "PFK_R13",
-            "PFK_R23",
             "PFK_R33",
-            "PFK_R43"
+            "PFK_R23",
+            "PFK_R13",
+            "PFK_R43",
+            "PFK_R03"
         ],
-        "f6p_c binding": [
-            "PFK_R02",
+        "f6p_c_binding": [
             "PFK_R12",
-            "PFK_R22",
+            "PFK_R42",
+            "PFK_R02",
             "PFK_R32",
-            "PFK_R42"
+            "PFK_R22"
         ]
     },
     "_enzyme_module_species_categorized": {
         "Relaxed": [
-            "pfk_R0_AF_c",
-            "pfk_R0_A_c",
-            "pfk_R0_c",
             "pfk_R1_AF_c",
-            "pfk_R1_A_c",
-            "pfk_R1_c",
-            "pfk_R2_AF_c",
+            "pfk_R0_A_c",
+            "pfk_R3_A_c",
             "pfk_R2_A_c",
+            "pfk_R1_A_c",
+            "pfk_R3_c",
+            "pfk_R1_c",
+            "pfk_R4_A_c",
             "pfk_R2_c",
             "pfk_R3_AF_c",
-            "pfk_R3_A_c",
-            "pfk_R3_c",
             "pfk_R4_AF_c",
-            "pfk_R4_A_c",
-            "pfk_R4_c"
+            "pfk_R2_AF_c",
+            "pfk_R0_c",
+            "pfk_R4_c",
+            "pfk_R0_AF_c"
         ],
         "Tense": [
-            "pfk_T0_c",
             "pfk_T1_c",
-            "pfk_T2_c",
+            "pfk_T0_c",
+            "pfk_T4_c",
             "pfk_T3_c",
-            "pfk_T4_c"
+            "pfk_T2_c"
         ]
     },
     "_enzyme_net_flux": 1.12,
@@ -93,25 +93,25 @@
         "Keq_PFK_ACT": 30.3030303030303,
         "Keq_PFK_F": 10.0,
         "Keq_PFK_I": 10.0,
-        "kf_PFK": 2000064.0,
-        "kf_PFK_A": 61635.0,
+        "kf_PFK": 20000040.0,
+        "kf_PFK_A": 77272.0,
         "kf_PFK_ACT": 1000000.0,
-        "kf_PFK_F": 5000028.0,
+        "kf_PFK_F": 3000189.0,
         "kf_PFK_I": 1000000.0
     },
     "custom_rates": {
         "PFK_R01": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R0_c(t) - pfk_R0_A_c(t))/Keq_PFK_A",
         "PFK_R02": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R0_A_c(t) - pfk_R0_AF_c(t))/Keq_PFK_F",
         "PFK_R03": "kf_PFK*pfk_R0_AF_c(t)",
-        "PFK_R10": "kf_PFK_ACT*(4*Keq_PFK_ACT*amp_c(t)*pfk_R0_c(t) - pfk_R1_c(t))/Keq_PFK_ACT",
+        "PFK_R10": "kf_PFK_ACT*(2*Keq_PFK_ACT*amp_c(t)*pfk_R0_c(t) - 3*pfk_R1_c(t))/Keq_PFK_ACT",
         "PFK_R11": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R1_c(t) - pfk_R1_A_c(t))/Keq_PFK_A",
         "PFK_R12": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R1_A_c(t) - pfk_R1_AF_c(t))/Keq_PFK_F",
         "PFK_R13": "kf_PFK*pfk_R1_AF_c(t)",
-        "PFK_R20": "kf_PFK_ACT*(3*Keq_PFK_ACT*amp_c(t)*pfk_R1_c(t) - 2*pfk_R2_c(t))/Keq_PFK_ACT",
+        "PFK_R20": "kf_PFK_ACT*(4*Keq_PFK_ACT*amp_c(t)*pfk_R1_c(t) - pfk_R2_c(t))/Keq_PFK_ACT",
         "PFK_R21": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R2_c(t) - pfk_R2_A_c(t))/Keq_PFK_A",
         "PFK_R22": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R2_A_c(t) - pfk_R2_AF_c(t))/Keq_PFK_F",
         "PFK_R23": "kf_PFK*pfk_R2_AF_c(t)",
-        "PFK_R30": "kf_PFK_ACT*(2*Keq_PFK_ACT*amp_c(t)*pfk_R2_c(t) - 3*pfk_R3_c(t))/Keq_PFK_ACT",
+        "PFK_R30": "kf_PFK_ACT*(3*Keq_PFK_ACT*amp_c(t)*pfk_R2_c(t) - 2*pfk_R3_c(t))/Keq_PFK_ACT",
         "PFK_R31": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R3_c(t) - pfk_R3_A_c(t))/Keq_PFK_A",
         "PFK_R32": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R3_A_c(t) - pfk_R3_AF_c(t))/Keq_PFK_F",
         "PFK_R33": "kf_PFK*pfk_R3_AF_c(t)",
@@ -119,10 +119,10 @@
         "PFK_R41": "kf_PFK_A*(Keq_PFK_A*atp_c(t)*pfk_R4_c(t) - pfk_R4_A_c(t))/Keq_PFK_A",
         "PFK_R42": "kf_PFK_F*(Keq_PFK_F*f6p_c(t)*pfk_R4_A_c(t) - pfk_R4_AF_c(t))/Keq_PFK_F",
         "PFK_R43": "kf_PFK*pfk_R4_AF_c(t)",
-        "PFK_T1": "kf_PFK_I*(4*Keq_PFK_I*atp_c(t)*pfk_T0_c(t) - pfk_T1_c(t))/Keq_PFK_I",
+        "PFK_T1": "kf_PFK_I*(2*Keq_PFK_I*atp_c(t)*pfk_T0_c(t) - 3*pfk_T1_c(t))/Keq_PFK_I",
         "PFK_T2": "kf_PFK_I*(3*Keq_PFK_I*atp_c(t)*pfk_T1_c(t) - 2*pfk_T2_c(t))/Keq_PFK_I",
-        "PFK_T3": "kf_PFK_I*(2*Keq_PFK_I*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t))/Keq_PFK_I",
-        "PFK_T4": "kf_PFK_I*(Keq_PFK_I*atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t))/Keq_PFK_I"
+        "PFK_T3": "kf_PFK_I*(Keq_PFK_I*atp_c(t)*pfk_T2_c(t) - 4*pfk_T3_c(t))/Keq_PFK_I",
+        "PFK_T4": "kf_PFK_I*(4*Keq_PFK_I*atp_c(t)*pfk_T3_c(t) - pfk_T4_c(t))/Keq_PFK_I"
     },
     "enzyme_concentration_total_equation": "pfk_R0_AF_c(t) + pfk_R0_A_c(t) + pfk_R0_c(t) + pfk_R1_AF_c(t) + pfk_R1_A_c(t) + pfk_R1_c(t) + pfk_R2_AF_c(t) + pfk_R2_A_c(t) + pfk_R2_c(t) + pfk_R3_AF_c(t) + pfk_R3_A_c(t) + pfk_R3_c(t) + pfk_R4_AF_c(t) + pfk_R4_A_c(t) + pfk_R4_c(t) + pfk_T0_c(t) + pfk_T1_c(t) + pfk_T2_c(t) + pfk_T3_c(t) + pfk_T4_c(t)",
     "enzyme_module_ligands": [
@@ -236,7 +236,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 6.9014e-08,
+            "_initial_condition": 6.9774e-08,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -249,7 +249,7 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.1613e-08,
+            "_initial_condition": 1.35254e-07,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -263,7 +263,7 @@
                 "f6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.232e-09,
+            "_initial_condition": 3.96e-10,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -276,7 +276,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 7.25509e-07,
+            "_initial_condition": 1.2225e-07,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -291,7 +291,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 8.57957e-07,
+            "_initial_condition": 2.36976e-07,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -307,7 +307,7 @@
             "_bound_effectors": {
                 "amp_c": 1
             },
-            "_initial_condition": 3.3974e-08,
+            "_initial_condition": 6.93e-10,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -320,7 +320,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 2.86009e-06,
+            "_initial_condition": 1.285154e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -335,7 +335,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 3.382225e-06,
+            "_initial_condition": 2.491213e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -351,7 +351,7 @@
             "_bound_effectors": {
                 "amp_c": 2
             },
-            "_initial_condition": 1.33933e-07,
+            "_initial_condition": 7.29e-09,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -364,7 +364,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 5.011115e-06,
+            "_initial_condition": 5.066318e-06,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -379,7 +379,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 5.925939e-06,
+            "_initial_condition": 9.820827e-06,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -395,7 +395,7 @@
             "_bound_effectors": {
                 "amp_c": 3
             },
-            "_initial_condition": 2.34662e-07,
+            "_initial_condition": 2.8739e-08,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -408,7 +408,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 3.292458e-06,
+            "_initial_condition": 3.328728e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -423,7 +423,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 3.893526e-06,
+            "_initial_condition": 6.452588e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -439,7 +439,7 @@
             "_bound_effectors": {
                 "amp_c": 4
             },
-            "_initial_condition": 1.5418e-07,
+            "_initial_condition": 1.8882e-08,
             "charge": -14,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -450,7 +450,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 7.6e-11,
+            "_initial_condition": 7.7e-11,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -463,7 +463,7 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 4.859e-09,
+            "_initial_condition": 8.19e-10,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -476,7 +476,7 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 1.16606e-07,
+            "_initial_condition": 1.9648e-08,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -489,7 +489,7 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 1.243797e-06,
+            "_initial_condition": 7.8594e-08,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -502,7 +502,7 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 4.975186e-06,
+            "_initial_condition": 5.029993e-06,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PFK",
@@ -511,7 +511,7 @@
             "name": "PFK; 4 atp_c"
         }
     ],
-    "name": "Phosphofructokinase",
+    "name": "",
     "reactions": [
         {
             "_lower_bound": -1000.0,
@@ -525,7 +525,7 @@
                 "pfk_R0_A_c": 1,
                 "pfk_R0_c": -1
             },
-            "name": "pfk_R0-pfk_R0_A transition",
+            "name": "pfk_R0-atp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -540,12 +540,12 @@
                 "pfk_R0_AF_c": 1,
                 "pfk_R0_A_c": -1
             },
-            "name": "pfk_R0_A-pfk_R0_AF transition",
+            "name": "pfk_R0_A-f6p binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -559,7 +559,7 @@
                 "pfk_R0_AF_c": -1,
                 "pfk_R0_c": 1
             },
-            "name": "pfk_R0_AF-pfk_R0 transition",
+            "name": "pfk_R0_AF catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -604,7 +604,7 @@
                 "pfk_R1_A_c": 1,
                 "pfk_R1_c": -1
             },
-            "name": "pfk_R1-pfk_R1_A transition",
+            "name": "pfk_R1-atp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -619,12 +619,12 @@
                 "pfk_R1_AF_c": 1,
                 "pfk_R1_A_c": -1
             },
-            "name": "pfk_R1_A-pfk_R1_AF transition",
+            "name": "pfk_R1_A-f6p binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -638,7 +638,7 @@
                 "pfk_R1_AF_c": -1,
                 "pfk_R1_c": 1
             },
-            "name": "pfk_R1_AF-pfk_R1 transition",
+            "name": "pfk_R1_AF catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -683,7 +683,7 @@
                 "pfk_R2_A_c": 1,
                 "pfk_R2_c": -1
             },
-            "name": "pfk_R2-pfk_R2_A transition",
+            "name": "pfk_R2-atp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -698,12 +698,12 @@
                 "pfk_R2_AF_c": 1,
                 "pfk_R2_A_c": -1
             },
-            "name": "pfk_R2_A-pfk_R2_AF transition",
+            "name": "pfk_R2_A-f6p binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -717,7 +717,7 @@
                 "pfk_R2_AF_c": -1,
                 "pfk_R2_c": 1
             },
-            "name": "pfk_R2_AF-pfk_R2 transition",
+            "name": "pfk_R2_AF catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -762,7 +762,7 @@
                 "pfk_R3_A_c": 1,
                 "pfk_R3_c": -1
             },
-            "name": "pfk_R3-pfk_R3_A transition",
+            "name": "pfk_R3-atp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -777,12 +777,12 @@
                 "pfk_R3_AF_c": 1,
                 "pfk_R3_A_c": -1
             },
-            "name": "pfk_R3_A-pfk_R3_AF transition",
+            "name": "pfk_R3_A-f6p binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -796,7 +796,7 @@
                 "pfk_R3_AF_c": -1,
                 "pfk_R3_c": 1
             },
-            "name": "pfk_R3_AF-pfk_R3 transition",
+            "name": "pfk_R3_AF catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -841,7 +841,7 @@
                 "pfk_R4_A_c": 1,
                 "pfk_R4_c": -1
             },
-            "name": "pfk_R4-pfk_R4_A transition",
+            "name": "pfk_R4-atp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -856,12 +856,12 @@
                 "pfk_R4_AF_c": 1,
                 "pfk_R4_A_c": -1
             },
-            "name": "pfk_R4_A-pfk_R4_AF transition",
+            "name": "pfk_R4_A-f6p binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -875,13 +875,14 @@
                 "pfk_R4_AF_c": -1,
                 "pfk_R4_c": 1
             },
-            "name": "pfk_R4_AF-pfk_R4 transition",
+            "name": "pfk_R4_AF catalyzation",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 0.0011,
             "_forward_rate_constant": 1000000000000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PFK_L*(pfk_R0_c(t) - pfk_T0_c(t)/Keq_PFK_L)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",

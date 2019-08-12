@@ -110,25 +110,18 @@ class Unit:
 
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(self, kind, exponent, scale, multiplier):
         """Initialize the Unit."""
         object.__init__(self)
-        # Set Unit kind
+        # Initialize Unit kind, exponent, scale, and multiplier
         self._kind = None
-        self.kind = kind
-
-        # Set Unit exponent
         self._exponent = None
-        self.exponent = exponent
-
-        # Set Unit scale
         self._scale = None
-        self.scale = scale
-
-        # Set Unit multiplier
         self._multiplier = None
-        self.multiplier = multiplier
+
+        for name, value in zip(["kind", "exponent", "scale", "multiplier"],
+                               [kind, exponent, scale, multiplier]):
+            setattr(self, name, value)
 
     @property
     def kind(self):
@@ -279,6 +272,8 @@ PREDEFINED_UNITS_DICT = DictWithID(
             kind="second", exponent=1, scale=0, multiplier=3600),
         "per_hour": Unit(
             kind="second", exponent=-1, scale=0, multiplier=3600),
+        "per_gDW": Unit(
+            kind="gram", exponent=-1, scale=0, multiplier=1),
     }
 )
 r""":class:`~.DictWithID`: Contains pre-built :class:`Unit`\ s."""

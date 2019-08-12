@@ -138,11 +138,13 @@
             "name": "H2O"
         }
     ],
+    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 62.5,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADNK1*adn_c(t)*atp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -162,7 +164,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.3836346005504558,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_NTD7*amp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -181,7 +184,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.16142403673088654,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_AMPDA*amp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -200,7 +204,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_NTD11*imp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -219,7 +224,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 8.333333333333334,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADA*adn_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -239,6 +245,7 @@
             "_equilibrium_constant": 0.09,
             "_forward_rate_constant": 12.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PUNP5*(ins_c(t)*pi_c(t) - hxan_c(t)*r1p_c(t)/Keq_PUNP5)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -257,6 +264,7 @@
             "_equilibrium_constant": 13.3,
             "_forward_rate_constant": 0.2347867752755151,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PPM*(r1p_c(t) - r5p_c(t)/Keq_PPM)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -272,7 +280,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.1070344129554655,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_PRPPS*atp_c(t)**2*r5p_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -292,7 +301,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 2800.0,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ADPT*ade_c(t)*prpp_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -313,7 +323,8 @@
         {
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.20413793103448274,
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
+            "_rate": "kf_ATPM*adp_c(t)*pi_c(t)",
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -334,6 +345,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_adn_c*(adn_c(t) - adn_b/Keq_SK_adn_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -344,7 +356,7 @@
             "metabolites": {
                 "adn_c": -1
             },
-            "name": "Adenosine_sink",
+            "name": "Adenosine sink",
             "steady_state_flux": -0.009990232373259175,
             "subsystem": "Pseudoreaction"
         },
@@ -352,6 +364,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_ade_c*(ade_c(t) - ade_b/Keq_SK_ade_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -362,7 +375,7 @@
             "metabolites": {
                 "ade_c": -1
             },
-            "name": "Adenine_sink",
+            "name": "Adenine sink",
             "steady_state_flux": -0.014000877841704833,
             "subsystem": "Pseudoreaction"
         },
@@ -370,6 +383,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_ins_c*(ins_c(t) - ins_b/Keq_SK_ins_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -380,7 +394,7 @@
             "metabolites": {
                 "ins_c": -1
             },
-            "name": "Inosine_sink",
+            "name": "Inosine sink",
             "steady_state_flux": 0.00999828962593239,
             "subsystem": "Pseudoreaction"
         },
@@ -388,6 +402,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_hxan_c*(hxan_c(t) - hxan_b/Keq_SK_hxan_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -398,7 +413,7 @@
             "metabolites": {
                 "hxan_c": -1
             },
-            "name": "Hypoxanthine_sink",
+            "name": "Hypoxanthine sink",
             "steady_state_flux": 0.014000877841683149,
             "subsystem": "Pseudoreaction"
         },
@@ -406,6 +421,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_nh3_c*(nh3_c(t) - nh3_b/Keq_SK_nh3_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -416,7 +432,7 @@
             "metabolites": {
                 "nh3_c": -1
             },
-            "name": "Ammonia_sink",
+            "name": "Ammonia sink",
             "steady_state_flux": 0.02399916746720354,
             "subsystem": "Pseudoreaction"
         },
@@ -424,6 +440,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_pi_c*(pi_c(t) - pi_b/Keq_SK_pi_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -434,7 +451,7 @@
             "metabolites": {
                 "pi_c": -1
             },
-            "name": "Phosphate_sink",
+            "name": "Phosphate sink",
             "steady_state_flux": 8.057243761072641e-06,
             "subsystem": "Pseudoreaction"
         },
@@ -442,6 +459,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_amp_c*(amp_c(t) - amp_b/Keq_SK_amp_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -452,7 +470,7 @@
             "metabolites": {
                 "amp_c": -1
             },
-            "name": "AMP_sink",
+            "name": "AMP sink",
             "steady_state_flux": -8.057252087745326e-06,
             "subsystem": "Pseudoreaction"
         },
@@ -460,6 +478,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h_c*(h_c(t) - h_b/Keq_SK_h_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -470,7 +489,7 @@
             "metabolites": {
                 "h_c": -1
             },
-            "name": "H+_sink",
+            "name": "H+ sink",
             "steady_state_flux": 0.0,
             "subsystem": "Pseudoreaction"
         },
@@ -478,6 +497,7 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 100000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_SK_h2o_c*(h2o_c(t) - h2o_b/Keq_SK_h2o_c)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -488,7 +508,7 @@
             "metabolites": {
                 "h2o_c": -1
             },
-            "name": "H2O_sink",
+            "name": "H2O sink",
             "steady_state_flux": -0.024007224719291287,
             "subsystem": "Pseudoreaction"
         }

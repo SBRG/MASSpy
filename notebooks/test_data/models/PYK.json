@@ -12,90 +12,90 @@
             "atp_c"
         ],
         "Products": [
-            "atp_c",
-            "pyr_c"
+            "pyr_c",
+            "atp_c"
         ],
         "Substrates": [
             "pep_c"
         ]
     },
     "_enzyme_module_reactions_categorized": {
-        "R/T transition": [
+        "RT_transition": [
             "PYK_L"
         ],
-        "adp_c binding": [
+        "adp_c_binding": [
             "PYK_R02",
-            "PYK_R04",
+            "PYK_R44",
             "PYK_R12",
             "PYK_R14",
+            "PYK_R42",
             "PYK_R22",
+            "PYK_R04",
             "PYK_R24",
             "PYK_R32",
-            "PYK_R34",
-            "PYK_R42",
-            "PYK_R44"
+            "PYK_R34"
         ],
-        "atp_c inhibition": [
-            "PYK_T1",
-            "PYK_T2",
+        "atp_c_inhibition": [
+            "PYK_T4",
             "PYK_T3",
-            "PYK_T4"
+            "PYK_T2",
+            "PYK_T1"
         ],
         "catalyzation": [
+            "PYK_R45",
             "PYK_R05",
-            "PYK_R15",
-            "PYK_R25",
             "PYK_R35",
-            "PYK_R45"
+            "PYK_R15",
+            "PYK_R25"
         ],
-        "fdp_c activation": [
-            "PYK_R10",
-            "PYK_R20",
+        "fdp_c_activation": [
+            "PYK_R40",
             "PYK_R30",
-            "PYK_R40"
+            "PYK_R10",
+            "PYK_R20"
         ],
-        "pep_c binding": [
-            "PYK_R01",
-            "PYK_R03",
-            "PYK_R11",
-            "PYK_R13",
-            "PYK_R21",
-            "PYK_R23",
-            "PYK_R31",
+        "pep_c_binding": [
             "PYK_R33",
+            "PYK_R21",
+            "PYK_R31",
+            "PYK_R03",
+            "PYK_R13",
+            "PYK_R43",
+            "PYK_R23",
             "PYK_R41",
-            "PYK_R43"
+            "PYK_R11",
+            "PYK_R01"
         ]
     },
     "_enzyme_module_species_categorized": {
         "Relaxed": [
-            "pyk_R0_AP_c",
-            "pyk_R0_A_c",
-            "pyk_R0_P_c",
-            "pyk_R0_c",
-            "pyk_R1_AP_c",
+            "pyk_R4_P_c",
+            "pyk_R1_c",
+            "pyk_R4_AP_c",
             "pyk_R1_A_c",
             "pyk_R1_P_c",
-            "pyk_R1_c",
-            "pyk_R2_AP_c",
+            "pyk_R1_AP_c",
             "pyk_R2_A_c",
-            "pyk_R2_P_c",
             "pyk_R2_c",
-            "pyk_R3_AP_c",
+            "pyk_R2_P_c",
+            "pyk_R2_AP_c",
             "pyk_R3_A_c",
-            "pyk_R3_P_c",
+            "pyk_R0_c",
             "pyk_R3_c",
-            "pyk_R4_AP_c",
+            "pyk_R0_A_c",
+            "pyk_R0_AP_c",
+            "pyk_R3_P_c",
+            "pyk_R3_AP_c",
             "pyk_R4_A_c",
-            "pyk_R4_P_c",
+            "pyk_R0_P_c",
             "pyk_R4_c"
         ],
         "Tense": [
             "pyk_T0_c",
-            "pyk_T1_c",
             "pyk_T2_c",
             "pyk_T3_c",
-            "pyk_T4_c"
+            "pyk_T4_c",
+            "pyk_T1_c"
         ]
     },
     "_enzyme_net_flux": 2.2399999999999998,
@@ -108,11 +108,11 @@
         "Keq_PYK_ACT": 200.0,
         "Keq_PYK_I": 0.2949852507374631,
         "Keq_PYK_P": 4.444444444444445,
-        "kf_PYK": 2202784.0,
-        "kf_PYK_A": 10138015.0,
+        "kf_PYK": 2343052.0,
+        "kf_PYK_A": 291049.0,
         "kf_PYK_ACT": 1000000.0,
         "kf_PYK_I": 1000000.0,
-        "kf_PYK_P": 10133594.0
+        "kf_PYK_P": 1773303.0
     },
     "custom_rates": {
         "PYK_R01": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t))/Keq_PYK_P",
@@ -120,34 +120,34 @@
         "PYK_R03": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R0_A_c(t) - pyk_R0_AP_c(t))/Keq_PYK_P",
         "PYK_R04": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R0_P_c(t) - pyk_R0_AP_c(t))/Keq_PYK_A",
         "PYK_R05": "kf_PYK*pyk_R0_AP_c(t)",
-        "PYK_R10": "kf_PYK_ACT*(4*Keq_PYK_ACT*fdp_c(t)*pyk_R0_c(t) - pyk_R1_c(t))/Keq_PYK_ACT",
+        "PYK_R10": "kf_PYK_ACT*(2*Keq_PYK_ACT*fdp_c(t)*pyk_R0_c(t) - 3*pyk_R1_c(t))/Keq_PYK_ACT",
         "PYK_R11": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R1_c(t) - pyk_R1_P_c(t))/Keq_PYK_P",
         "PYK_R12": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R1_c(t) - pyk_R1_A_c(t))/Keq_PYK_A",
         "PYK_R13": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R1_A_c(t) - pyk_R1_AP_c(t))/Keq_PYK_P",
         "PYK_R14": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R1_P_c(t) - pyk_R1_AP_c(t))/Keq_PYK_A",
         "PYK_R15": "kf_PYK*pyk_R1_AP_c(t)",
-        "PYK_R20": "kf_PYK_ACT*(3*Keq_PYK_ACT*fdp_c(t)*pyk_R1_c(t) - 2*pyk_R2_c(t))/Keq_PYK_ACT",
+        "PYK_R20": "kf_PYK_ACT*(Keq_PYK_ACT*fdp_c(t)*pyk_R1_c(t) - 4*pyk_R2_c(t))/Keq_PYK_ACT",
         "PYK_R21": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R2_c(t) - pyk_R2_P_c(t))/Keq_PYK_P",
         "PYK_R22": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R2_c(t) - pyk_R2_A_c(t))/Keq_PYK_A",
         "PYK_R23": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R2_A_c(t) - pyk_R2_AP_c(t))/Keq_PYK_P",
         "PYK_R24": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R2_P_c(t) - pyk_R2_AP_c(t))/Keq_PYK_A",
         "PYK_R25": "kf_PYK*pyk_R2_AP_c(t)",
-        "PYK_R30": "kf_PYK_ACT*(2*Keq_PYK_ACT*fdp_c(t)*pyk_R2_c(t) - 3*pyk_R3_c(t))/Keq_PYK_ACT",
+        "PYK_R30": "kf_PYK_ACT*(3*Keq_PYK_ACT*fdp_c(t)*pyk_R2_c(t) - 2*pyk_R3_c(t))/Keq_PYK_ACT",
         "PYK_R31": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R3_c(t) - pyk_R3_P_c(t))/Keq_PYK_P",
         "PYK_R32": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R3_c(t) - pyk_R3_A_c(t))/Keq_PYK_A",
         "PYK_R33": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R3_A_c(t) - pyk_R3_AP_c(t))/Keq_PYK_P",
         "PYK_R34": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R3_P_c(t) - pyk_R3_AP_c(t))/Keq_PYK_A",
         "PYK_R35": "kf_PYK*pyk_R3_AP_c(t)",
-        "PYK_R40": "kf_PYK_ACT*(Keq_PYK_ACT*fdp_c(t)*pyk_R3_c(t) - 4*pyk_R4_c(t))/Keq_PYK_ACT",
+        "PYK_R40": "kf_PYK_ACT*(4*Keq_PYK_ACT*fdp_c(t)*pyk_R3_c(t) - pyk_R4_c(t))/Keq_PYK_ACT",
         "PYK_R41": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R4_c(t) - pyk_R4_P_c(t))/Keq_PYK_P",
         "PYK_R42": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R4_c(t) - pyk_R4_A_c(t))/Keq_PYK_A",
         "PYK_R43": "kf_PYK_P*(Keq_PYK_P*pep_c(t)*pyk_R4_A_c(t) - pyk_R4_AP_c(t))/Keq_PYK_P",
         "PYK_R44": "kf_PYK_A*(Keq_PYK_A*adp_c(t)*pyk_R4_P_c(t) - pyk_R4_AP_c(t))/Keq_PYK_A",
         "PYK_R45": "kf_PYK*pyk_R4_AP_c(t)",
-        "PYK_T1": "kf_PYK_I*(4*Keq_PYK_I*atp_c(t)*pyk_T0_c(t) - pyk_T1_c(t))/Keq_PYK_I",
-        "PYK_T2": "kf_PYK_I*(3*Keq_PYK_I*atp_c(t)*pyk_T1_c(t) - 2*pyk_T2_c(t))/Keq_PYK_I",
-        "PYK_T3": "kf_PYK_I*(2*Keq_PYK_I*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t))/Keq_PYK_I",
-        "PYK_T4": "kf_PYK_I*(Keq_PYK_I*atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t))/Keq_PYK_I"
+        "PYK_T1": "kf_PYK_I*(Keq_PYK_I*atp_c(t)*pyk_T0_c(t) - 4*pyk_T1_c(t))/Keq_PYK_I",
+        "PYK_T2": "kf_PYK_I*(2*Keq_PYK_I*atp_c(t)*pyk_T1_c(t) - 3*pyk_T2_c(t))/Keq_PYK_I",
+        "PYK_T3": "kf_PYK_I*(3*Keq_PYK_I*atp_c(t)*pyk_T2_c(t) - 2*pyk_T3_c(t))/Keq_PYK_I",
+        "PYK_T4": "kf_PYK_I*(4*Keq_PYK_I*atp_c(t)*pyk_T3_c(t) - pyk_T4_c(t))/Keq_PYK_I"
     },
     "enzyme_concentration_total_equation": "pyk_R0_AP_c(t) + pyk_R0_A_c(t) + pyk_R0_P_c(t) + pyk_R0_c(t) + pyk_R1_AP_c(t) + pyk_R1_A_c(t) + pyk_R1_P_c(t) + pyk_R1_c(t) + pyk_R2_AP_c(t) + pyk_R2_A_c(t) + pyk_R2_P_c(t) + pyk_R2_c(t) + pyk_R3_AP_c(t) + pyk_R3_A_c(t) + pyk_R3_P_c(t) + pyk_R3_c(t) + pyk_R4_AP_c(t) + pyk_R4_A_c(t) + pyk_R4_P_c(t) + pyk_R4_c(t) + pyk_T0_c(t) + pyk_T1_c(t) + pyk_T2_c(t) + pyk_T3_c(t) + pyk_T4_c(t)",
     "enzyme_module_ligands": [
@@ -276,7 +276,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.40888e-07,
+            "_initial_condition": 1.566609e-06,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -289,7 +289,7 @@
                 "adp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.5187e-08,
+            "_initial_condition": 8.13833e-07,
             "charge": -3,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -302,7 +302,7 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.614e-09,
+            "_initial_condition": 1.00974e-07,
             "charge": -3,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -316,7 +316,7 @@
                 "pep_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 4.307e-09,
+            "_initial_condition": 1.1478e-08,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -327,7 +327,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 2.676868e-06,
+            "_initial_condition": 2.9765576e-05,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -340,7 +340,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 1.64557e-06,
+            "_initial_condition": 3.049667e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -355,7 +355,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 9.9498e-07,
+            "_initial_condition": 1.584261e-06,
             "charge": -7,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -370,7 +370,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 1.00612e-07,
+            "_initial_condition": 1.96563e-07,
             "charge": -7,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -386,7 +386,7 @@
             "_bound_effectors": {
                 "fdp_c": 1
             },
-            "_initial_condition": 5.0301e-08,
+            "_initial_condition": 2.2344e-08,
             "charge": -10,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -399,7 +399,7 @@
             "_bound_effectors": {
                 "atp_c": 1
             },
-            "_initial_condition": 5.053675e-06,
+            "_initial_condition": 3.512162e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -412,7 +412,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 7.207597e-06,
+            "_initial_condition": 2.226257e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -427,7 +427,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 4.358014e-06,
+            "_initial_condition": 1.156511e-06,
             "charge": -11,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -442,7 +442,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 4.40678e-07,
+            "_initial_condition": 1.43491e-07,
             "charge": -11,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -458,7 +458,7 @@
             "_bound_effectors": {
                 "fdp_c": 2
             },
-            "_initial_condition": 2.20317e-07,
+            "_initial_condition": 1.6311e-08,
             "charge": -14,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -471,7 +471,7 @@
             "_bound_effectors": {
                 "atp_c": 2
             },
-            "_initial_condition": 3.577823e-06,
+            "_initial_condition": 1.105105e-06,
             "charge": -8,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -484,7 +484,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 1.4030792e-05,
+            "_initial_condition": 9.751007e-06,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -499,7 +499,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 8.483602e-06,
+            "_initial_condition": 5.065519e-06,
             "charge": -15,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -514,7 +514,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 8.57854e-07,
+            "_initial_condition": 6.28492e-07,
             "charge": -15,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -530,7 +530,7 @@
             "_bound_effectors": {
                 "fdp_c": 3
             },
-            "_initial_condition": 4.28885e-07,
+            "_initial_condition": 7.1442e-08,
             "charge": -18,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -543,7 +543,7 @@
             "_bound_effectors": {
                 "atp_c": 3
             },
-            "_initial_condition": 1.125765e-06,
+            "_initial_condition": 7.82375e-07,
             "charge": -12,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -556,7 +556,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 1.024248e-05,
+            "_initial_condition": 0.000113891786,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -571,7 +571,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 6.193031e-06,
+            "_initial_condition": 5.916527e-05,
             "charge": -19,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -586,7 +586,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 6.26234e-07,
+            "_initial_condition": 7.340787e-06,
             "charge": -19,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -602,7 +602,7 @@
             "_bound_effectors": {
                 "fdp_c": 4
             },
-            "_initial_condition": 3.13086e-07,
+            "_initial_condition": 8.34443e-07,
             "charge": -22,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -615,7 +615,7 @@
             "_bound_effectors": {
                 "atp_c": 4
             },
-            "_initial_condition": 1.32834e-07,
+            "_initial_condition": 1.477051e-06,
             "charge": -16,
             "compartment": "c",
             "enzyme_module_id": "PYK",
@@ -624,7 +624,7 @@
             "name": "PYK; 4 atp_c"
         }
     ],
-    "name": "Pyruvate Kinase",
+    "name": "",
     "reactions": [
         {
             "_lower_bound": -1000.0,
@@ -638,7 +638,7 @@
                 "pyk_R0_P_c": 1,
                 "pyk_R0_c": -1
             },
-            "name": "pyk_R0-pyk_R0_P transition",
+            "name": "pyk_R0-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -653,7 +653,7 @@
                 "pyk_R0_A_c": 1,
                 "pyk_R0_c": -1
             },
-            "name": "pyk_R0-pyk_R0_A transition",
+            "name": "pyk_R0-adp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -668,7 +668,7 @@
                 "pyk_R0_AP_c": 1,
                 "pyk_R0_A_c": -1
             },
-            "name": "pyk_R0_A-pyk_R0_AP transition",
+            "name": "pyk_R0_A-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -683,12 +683,12 @@
                 "pyk_R0_AP_c": 1,
                 "pyk_R0_P_c": -1
             },
-            "name": "pyk_R0_P-pyk_R0_AP transition",
+            "name": "pyk_R0_P-adp binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -702,7 +702,7 @@
                 "pyk_R0_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R0_AP-pyk_R0 transition",
+            "name": "pyk_R0_AP catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -732,7 +732,7 @@
                 "pyk_R1_P_c": 1,
                 "pyk_R1_c": -1
             },
-            "name": "pyk_R1-pyk_R1_P transition",
+            "name": "pyk_R1-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -747,7 +747,7 @@
                 "pyk_R1_A_c": 1,
                 "pyk_R1_c": -1
             },
-            "name": "pyk_R1-pyk_R1_A transition",
+            "name": "pyk_R1-adp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -762,7 +762,7 @@
                 "pyk_R1_AP_c": 1,
                 "pyk_R1_A_c": -1
             },
-            "name": "pyk_R1_A-pyk_R1_AP transition",
+            "name": "pyk_R1_A-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -777,12 +777,12 @@
                 "pyk_R1_AP_c": 1,
                 "pyk_R1_P_c": -1
             },
-            "name": "pyk_R1_P-pyk_R1_AP transition",
+            "name": "pyk_R1_P-adp binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -796,7 +796,7 @@
                 "pyk_R1_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R1_AP-pyk_R1 transition",
+            "name": "pyk_R1_AP catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -826,7 +826,7 @@
                 "pyk_R2_P_c": 1,
                 "pyk_R2_c": -1
             },
-            "name": "pyk_R2-pyk_R2_P transition",
+            "name": "pyk_R2-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -841,7 +841,7 @@
                 "pyk_R2_A_c": 1,
                 "pyk_R2_c": -1
             },
-            "name": "pyk_R2-pyk_R2_A transition",
+            "name": "pyk_R2-adp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -856,7 +856,7 @@
                 "pyk_R2_AP_c": 1,
                 "pyk_R2_A_c": -1
             },
-            "name": "pyk_R2_A-pyk_R2_AP transition",
+            "name": "pyk_R2_A-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -871,12 +871,12 @@
                 "pyk_R2_AP_c": 1,
                 "pyk_R2_P_c": -1
             },
-            "name": "pyk_R2_P-pyk_R2_AP transition",
+            "name": "pyk_R2_P-adp binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -890,7 +890,7 @@
                 "pyk_R2_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R2_AP-pyk_R2 transition",
+            "name": "pyk_R2_AP catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -920,7 +920,7 @@
                 "pyk_R3_P_c": 1,
                 "pyk_R3_c": -1
             },
-            "name": "pyk_R3-pyk_R3_P transition",
+            "name": "pyk_R3-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -935,7 +935,7 @@
                 "pyk_R3_A_c": 1,
                 "pyk_R3_c": -1
             },
-            "name": "pyk_R3-pyk_R3_A transition",
+            "name": "pyk_R3-adp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -950,7 +950,7 @@
                 "pyk_R3_AP_c": 1,
                 "pyk_R3_A_c": -1
             },
-            "name": "pyk_R3_A-pyk_R3_AP transition",
+            "name": "pyk_R3_A-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -965,12 +965,12 @@
                 "pyk_R3_AP_c": 1,
                 "pyk_R3_P_c": -1
             },
-            "name": "pyk_R3_P-pyk_R3_AP transition",
+            "name": "pyk_R3_P-adp binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -984,7 +984,7 @@
                 "pyk_R3_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R3_AP-pyk_R3 transition",
+            "name": "pyk_R3_AP catalyzation",
             "subsystem": "Glycolysis"
         },
         {
@@ -1014,7 +1014,7 @@
                 "pyk_R4_P_c": 1,
                 "pyk_R4_c": -1
             },
-            "name": "pyk_R4-pyk_R4_P transition",
+            "name": "pyk_R4-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -1029,7 +1029,7 @@
                 "pyk_R4_A_c": 1,
                 "pyk_R4_c": -1
             },
-            "name": "pyk_R4-pyk_R4_A transition",
+            "name": "pyk_R4-adp binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -1044,7 +1044,7 @@
                 "pyk_R4_AP_c": 1,
                 "pyk_R4_A_c": -1
             },
-            "name": "pyk_R4_A-pyk_R4_AP transition",
+            "name": "pyk_R4_A-pep binding",
             "subsystem": "Glycolysis"
         },
         {
@@ -1059,12 +1059,12 @@
                 "pyk_R4_AP_c": 1,
                 "pyk_R4_P_c": -1
             },
-            "name": "pyk_R4_P-pyk_R4_AP transition",
+            "name": "pyk_R4_P-adp binding",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": "inf",
-            "_lower_bound": 0.0,
+            "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -1078,13 +1078,14 @@
                 "pyk_R4_c": 1,
                 "pyr_c": 1
             },
-            "name": "pyk_R4_AP-pyk_R4 transition",
+            "name": "pyk_R4_AP catalyzation",
             "subsystem": "Glycolysis"
         },
         {
             "_equilibrium_constant": 19,
             "_forward_rate_constant": 1000000000000.0,
             "_lower_bound": -1000.0,
+            "_rate": "kf_PYK_L*(pyk_R0_c(t) - pyk_T0_c(t)/Keq_PYK_L)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PYK",

@@ -13,8 +13,9 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
 
 extras = {
     "json": "simplejson",
+    "plotting": "matplotlib>=3.0.0",
 }
-extras["all"] = sorted(list(extras))
+extras["all"] = sorted(extras.values())
 
 try:
     with open('README.rst') as handle:
@@ -28,7 +29,7 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.0a40",
+        version="0.1.0a41",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
