@@ -54,11 +54,13 @@ listed below:
 import re
 import warnings
 from copy import copy, deepcopy
+from functools import partial
 from operator import attrgetter
 
 from cobra.core.metabolite import Metabolite
 from cobra.core.reaction import (
     Reaction, _reverse_arrow_finder, _reversible_arrow_finder)
+from cobra.util.context import get_context, resettable
 from cobra.util.util import format_long_string
 
 from six import iteritems, itervalues, string_types
@@ -155,7 +157,7 @@ class MassReaction(Reaction):
         # If is not a MassReaction object, initialize additional attributes
         if not isinstance(id_or_reaction, MassReaction):
             self._reversible = reversible
-            self.steady_state_flux = steady_state_flux
+            self._steady_state_flux = steady_state_flux
             # Rate and equilibrium constant parameters for reactions. The
             # reverse and equilibrium constants for irreversible reactions are
             # set here.  Upper and lower bounds are also set.
@@ -174,6 +176,9 @@ class MassReaction(Reaction):
     @property
     def reversible(self):
         """Get or set the kinetic reversibility of the reaction.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
 
         Parameters
         ----------
@@ -195,8 +200,16 @@ class MassReaction(Reaction):
         if not isinstance(reversible, bool):
             raise TypeError("value must be a bool")
 
+        # No need to do anything if reversible hasn't changed
         if reversible != self.reversible:
-            self._reversible = reversible
+            setattr(self, "_reversible", reversible)
+
+            context = get_context(self)
+            if context:
+                existing = [self._reverse_rate_constant,
+                            self._equilibrium_constant]
+                print(existing)
+
             if reversible:
                 setattr(self, "_reverse_rate_constant", None)
                 setattr(self, "_equilibrium_constant", None)
@@ -206,9 +219,40 @@ class MassReaction(Reaction):
                 setattr(self, "_equilibrium_constant",
                         MASSCONFIGURATION.irreversible_Keq)
 
+            if context:
+                context(partial(setattr,
+                                self, "_reverse_rate_constant", existing[0]))
+                context(partial(setattr,
+                                self, "_equilibrium_constant", existing[1]))
+
+
+    @property
+    def steady_state_flux(self):
+        """Get or set the steady state flux of the reaction.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
+        Parameters
+        ----------
+        flux_value : bool
+            The steady state flux value of the reaction.
+
+        """
+        return getattr(self, "_steady_state_flux")
+
+    @steady_state_flux.setter
+    @resettable
+    def steady_state_flux(self, flux_value):
+        """Set the steady state flux of the reaction."""
+        setattr(self, "_steady_state_flux", flux_value)
+
     @property
     def forward_rate_constant(self):
         """Get or set the forward rate constant (kf) of the reaction.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
 
         Notes
         -----
@@ -229,6 +273,7 @@ class MassReaction(Reaction):
         return getattr(self, "_forward_rate_constant")
 
     @forward_rate_constant.setter
+    @resettable
     def forward_rate_constant(self, value):
         """Set the forward rate constant (kf) of the reaction."""
         value = ensure_non_negative_value(value)
@@ -237,6 +282,9 @@ class MassReaction(Reaction):
     @property
     def reverse_rate_constant(self):
         """Get or set the reverse rate constant (kr) of the reaction.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
 
         Notes
         -----
@@ -260,9 +308,11 @@ class MassReaction(Reaction):
         return getattr(self, "_reverse_rate_constant")
 
     @reverse_rate_constant.setter
+    @resettable
     def reverse_rate_constant(self, value):
         """Set the reverse rate constant (kr) of the reaction."""
-        if self.reversible:
+        if self.reversible or\
+           value in [MASSCONFIGURATION.irreversible_kr, None]:
             value = ensure_non_negative_value(value)
             setattr(self, "_reverse_rate_constant", value)
         else:
@@ -273,6 +323,9 @@ class MassReaction(Reaction):
     @property
     def equilibrium_constant(self):
         """Get or set the equilibrium constant (Keq) of the reaction.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
 
         Notes
         -----
@@ -296,9 +349,11 @@ class MassReaction(Reaction):
         return getattr(self, "_equilibrium_constant")
 
     @equilibrium_constant.setter
+    @resettable
     def equilibrium_constant(self, value):
         """Set the equilibrium constant (Keq) of the reaction."""
-        if self._reversible:
+        if self.reversible or\
+           value in [MASSCONFIGURATION.irreversible_Keq, None]:
             value = ensure_non_negative_value(value)
             setattr(self, "_equilibrium_constant", value)
         else:

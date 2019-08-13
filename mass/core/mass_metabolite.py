@@ -27,6 +27,7 @@ from warnings import warn
 
 from cobra.core.metabolite import (
     Metabolite, element_re, elements_and_molecular_weights)
+from cobra.util.context import resettable
 from cobra.util.util import format_long_string
 
 from six import iteritems
@@ -75,7 +76,7 @@ class MassMetabolite(Metabolite):
         # If is not a MassMetabolite object, initialize additional attributes
         if not isinstance(id_or_specie, MassMetabolite):
             # Whether the concentration of the metabolite is fixed.
-            self.fixed = fixed
+            self._fixed = fixed
             # The initial condition of the metabolite.
             self._initial_condition = None
 
@@ -152,6 +153,9 @@ class MassMetabolite(Metabolite):
     def initial_condition(self):
         """Get or set the initial condition of the metabolite.
 
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
         Notes
         -----
         Initial conditions of metabolites cannot be negative.
@@ -170,10 +174,41 @@ class MassMetabolite(Metabolite):
         return getattr(self, "_initial_condition")
 
     @initial_condition.setter
+    @resettable
     def initial_condition(self, initial_condition):
         """Set the initial condition of the metabolite."""
         initial_condition = ensure_non_negative_value(initial_condition)
         setattr(self, "_initial_condition", initial_condition)
+
+    @property
+    def fixed(self):
+        """Get or set whether the metabolite remains constant.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
+        Parameters
+        ----------
+        value : bool
+            Whether the metabolite should remain constant, meaning that the
+            metabolite ODE is 0.
+
+        """
+        return getattr(self, "_fixed")
+
+    @fixed.setter
+    @resettable
+    def fixed(self, value):
+        """Set whether the metabolite remains constant.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
+        """
+        if not isinstance(value, bool):
+            raise TypeError("value must be a bool")
+
+        setattr(self, "_fixed", value)
 
     @property
     def ordinary_differential_equation(self):
@@ -268,7 +303,7 @@ class MassMetabolite(Metabolite):
                 <td>{compartment}</td>
             </tr><tr>
                 <td><strong>Initial Condition</strong></td>
-                <td>{ic}</td>
+                <td>{fixed}{ic}</td>
             </tr><tr>
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
@@ -277,7 +312,8 @@ class MassMetabolite(Metabolite):
                           formula=self.formula,
                           address='0x0%x' % id(self),
                           compartment=self.compartment,
-                          ic=self._initial_condition,
+                          fixed="Fixed at " if self.fixed else "",
+                          ic=self.initial_condition,
                           n_reactions=len(self.reactions),
                           reactions=format_long_string(
                               ', '.join(r.id for r in self.reactions), 200))
