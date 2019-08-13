@@ -3,7 +3,7 @@
 Containins basic matrix operations that can be applied to a :mod:`mass` model.
 
 To assist with various matrix operations using different packages, the
-following values can be provided to the ``matrix_type`` argument to set the
+following values can be provided to the ``array_type`` argument to set the
 return type of the output. Valid matrix types include:
 
 * ``'dense'`` for a :class:`numpy.ndarray`
@@ -41,14 +41,14 @@ import sympy as sym
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.expressions import _mk_met_func
 
-_MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
+_ARRAY_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 
 MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
 def gradient(model, use_parameter_values=True, use_concentration_values=True,
-             matrix_type="dense"):
+             array_type="dense"):
     """Create the gradient matrix for a given model.
 
     Parameters
@@ -65,14 +65,14 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
         the matrix are left as symbols.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Default is ``'dense'``.  See the :mod:`~.linear` module documentation
-        for more information on the ``matrix_type``
+        for more information on the ``array_type``
 
     Returns
     -------
-    matrix of type ``matrix_type``
+    matrix of type ``array_type``
         The gradient matrix for the model.
 
     """
@@ -110,7 +110,7 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
     else:
         dtype = np.float64
 
-    gradient_mat = convert_matrix(gradient_mat, matrix_type=matrix_type,
+    gradient_mat = convert_matrix(gradient_mat, array_type=array_type,
                                   dtype=dtype,
                                   row_ids=[r.id for r in model.reactions],
                                   col_ids=[m.id for m in model.metabolites])
@@ -118,7 +118,7 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
 
 
 def kappa(model, use_parameter_values=True, use_concentration_values=True,
-          matrix_type="dense"):
+          array_type="dense"):
     """Create the kappa matrix for a given model.
 
     Notes
@@ -140,23 +140,23 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
         the matrix are left as symbols.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Default is ``'dense'``.  See the :mod:`~.linear` module documentation
-        for more information on the ``matrix_type``.
+        for more information on the ``array_type``.
 
     Returns
     -------
-    matrix of type ``matrix_type``
+    matrix of type ``array_type``
         The kappa matrix for the model.
 
     """
     gradient_matrix = gradient(model, use_parameter_values,
-                               use_concentration_values, matrix_type)
+                               use_concentration_values, array_type)
     kappa_matrix = sym.diag(*[gradient_matrix[row, :].norm()
                               for row in range(gradient_matrix.rows)])
     kappa_matrix = kappa_matrix.subs({sym.nan: sym.S.Zero})
-    kappa_matrix = convert_matrix(kappa_matrix, matrix_type=matrix_type,
+    kappa_matrix = convert_matrix(kappa_matrix, array_type=array_type,
                                   dtype=np.float64,
                                   row_ids=[r.id for r in model.reactions],
                                   col_ids=[r.id for r in model.reactions])
@@ -164,7 +164,7 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
 
 
 def gamma(model, use_parameter_values=True, use_concentration_values=True,
-          matrix_type="dense"):
+          array_type="dense"):
     """Create the gamma matrix for a given model.
 
     Notes
@@ -185,23 +185,23 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
         the matrix. If ``True`` then numerical values of the initial
         conditions are substituted into the matrix. Otherwise species
         concentrations in the matrix are left as symbols.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Default is ``'dense'``.  See the :mod:`~.linear` module documentation
-        for more information on the ``matrix_type``.
+        for more information on the ``array_type``.
 
     Returns
     -------
-    matrix of type ``matrix_type``
+    matrix of type ``array_type``
         The gamma matrix for the model.
 
     """
     gradient_matrix = gradient(model, use_parameter_values,
-                               use_concentration_values, matrix_type)
+                               use_concentration_values, array_type)
     gamma_matrix = sym.Matrix([gradient_matrix[row, :].normalized()
                                for row in range(gradient_matrix.rows)])
     gamma_matrix = gamma_matrix.subs({sym.nan: sym.S.Zero})
-    gamma_matrix = convert_matrix(gamma_matrix, matrix_type=matrix_type,
+    gamma_matrix = convert_matrix(gamma_matrix, array_type=array_type,
                                   dtype=np.float64,
                                   row_ids=[r.id for r in model.reactions],
                                   col_ids=[m.id for m in model.metabolites])
@@ -209,7 +209,7 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
 
 
 def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
-             use_concentration_values=True, matrix_type="dense"):
+             use_concentration_values=True, array_type="dense"):
     """Get the jacobian matrix for a given model.
 
     Parameters
@@ -230,14 +230,14 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
         the matrix are left as symbols.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Default is ``'dense'``.  See the :mod:`~.linear` module documentation
-        for more information on the ``matrix_type``.
+        for more information on the ``array_type``.
 
     Returns
     -------
-    matrix of type ``matrix_type``
+    matrix of type ``array_type``
         The jacobian matrix for the model.
 
     """
@@ -246,8 +246,8 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
 
     gradient_matrix = gradient(model, use_parameter_values,
                                use_concentration_values,
-                               matrix_type="symbolic")
-    stoich_matrix = model._mk_stoich_matrix(matrix_type="symbolic",
+                               array_type="symbolic")
+    stoich_matrix = model._mk_stoich_matrix(array_type="symbolic",
                                             update_model=False)
     if jacobian_type == "Jx":
         jacobian_matrix = stoich_matrix * gradient_matrix
@@ -256,7 +256,7 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
         jacobian_matrix = gradient_matrix * stoich_matrix
         identifiers = [r.id for r in model.reactions]
 
-    jacobian_matrix = convert_matrix(jacobian_matrix, matrix_type=matrix_type,
+    jacobian_matrix = convert_matrix(jacobian_matrix, array_type=array_type,
                                      dtype=np.float64,
                                      row_ids=identifiers,
                                      col_ids=identifiers)
@@ -601,18 +601,18 @@ def eig(matrix, left=False, right=False, **kwargs):
     return linalg.eig(matrix, left=left, right=right, **kwargs)
 
 
-def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
+def convert_matrix(matrix, array_type, dtype, row_ids=None, col_ids=None):
     """Convert a matrix to a different type.
 
     Parameters
     ----------
     matrix : array-like
         The matrix to convert.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` See the :mod:`~.linear` module
-        documentation for more information on the ``matrix_type``.
+        documentation for more information on the ``array_type``.
     dtype : data-type
         The desired array data-type for the matrix.
     row_ids : array-like
@@ -623,22 +623,22 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
     Warnings
     --------
     This method is NOT the safest way to convert a matrix to another type.
-    To safely convert a matrix into another type, use the ``'matrix_type'``
+    To safely convert a matrix into another type, use the ``'array_type'``
     argument in the method that returns the desired matrix.
 
     """
-    if matrix_type not in _MATRIX_TYPES:
-        raise ValueError("Unrecognized matrix_type.")
+    if array_type not in _ARRAY_TYPES:
+        raise ValueError("Unrecognized array_type.")
 
     # Convert the matrix type
     conversion_method_dict = dict(zip(
-        _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense]))
+        _ARRAY_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense]))
 
     try:
-        matrix = conversion_method_dict[matrix_type](matrix)
+        matrix = conversion_method_dict[array_type](matrix)
         # Convert the dtype
-        if matrix_type != "symbolic":
-            if matrix_type == "DataFrame":
+        if array_type != "symbolic":
+            if array_type == "DataFrame":
                 matrix = pd.DataFrame(matrix, index=row_ids, columns=col_ids)
             try:
                 matrix = matrix.astype(dtype)
@@ -647,7 +647,7 @@ def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
         else:
             matrix = sym.Matrix(matrix)
     except TypeError:
-        warnings.warn("Could not cast matrix as the given matrix_type")
+        warnings.warn("Could not cast matrix as the given array_type")
 
     return matrix
 
@@ -677,13 +677,13 @@ def _ensure_dense_matrix(matrix):
     return matrix
 
 
-def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
+def _get_matrix_constructor(array_type, dtype, array_type_default="dense",
                             dtype_default=np.float64):
     """Create a matrix constructor for the specified matrix type.
 
     Parameters
     ----------
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
+    array_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
         The desired type after for the matrix. If None, defaults to "dense".
     dtype: data-type, optional
         The desired array data-type for the stoichiometric matrix. If None,
@@ -692,7 +692,7 @@ def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
     Returns
     -------
     matrix: matrix of class 'dtype'
-        The matrix for the MassModel returned as the given matrix_type
+        The matrix for the MassModel returned as the given array_type
         and with a data-type of 'dtype'.
 
     Warnings
@@ -701,23 +701,23 @@ def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
     matrix, use the appropriate MassModel method instead.
 
     """
-    if matrix_type in _MATRIX_TYPES:
+    if array_type in _ARRAY_TYPES:
         pass
-    elif matrix_type is None:
-        matrix_type = matrix_type_default
+    elif array_type is None:
+        array_type = array_type_default
     else:
-        raise ValueError("Unrecognized matrix_type.")
+        raise ValueError("Unrecognized array_type.")
 
     # Use the model's stored data-type if the data-type is not specified.
     if dtype is None:
         dtype = dtype_default
 
     # Dictionary of options for constructing the matrix
-    matrix_constructor = dict(zip(_MATRIX_TYPES,
+    matrix_constructor = dict(zip(_ARRAY_TYPES,
                                   [np.zeros, dok_matrix, lil_matrix,
                                    np.zeros, np.zeros]))
-    constructor = matrix_constructor[matrix_type]
-    return (constructor, matrix_type, dtype)
+    constructor = matrix_constructor[array_type]
+    return (constructor, array_type, dtype)
 
 
 # Define small conversion functions based on the original matrix type.

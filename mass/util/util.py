@@ -99,6 +99,8 @@ def _check_kwargs(default_kwargs, kwargs):
                 if value is None:
                     continue
                 type_ = type(value)
+                if type_ == float:
+                    type_ = (float, integer_types)
                 if not isinstance(kwargs[key], type_):
                     raise TypeError(
                         "'{0}' must be of type: {1}.".format(
