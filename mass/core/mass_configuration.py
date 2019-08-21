@@ -2,19 +2,20 @@
 """
 Define the global configuration values through the :class:`MassConfiguration`.
 
-Attributes for model construction:
+Attributes involved in model construction:
     * :attr:`~MassBaseConfiguration.boundary_compartment`
     * :attr:`~MassBaseConfiguration.default_compartment`
     * :attr:`~MassBaseConfiguration.irreversible_Keq`
     * :attr:`~MassBaseConfiguration.irreversible_kr`
     * :attr:`~MassBaseConfiguration.exclude_metabolites_from_rates`
     * :attr:`~MassBaseConfiguration.model_creator`
+    * :attr:`~MassBaseConfiguration.decimal_precision`
 
-Attributes for model simulation:
+Attributes involved in model simulation:
     * :attr:`~MassBaseConfiguration.decimal_precision`
     * :attr:`~MassBaseConfiguration.steady_state_threshold`
 
-Attributes for flux balance analysis (FBA):
+Attributes involved in flux balance analysis (FBA):
     * :attr:`~MassBaseConfiguration.solver`
     * :attr:`~MassBaseConfiguration.tolerance`
     * :attr:`~MassBaseConfiguration.processes`
@@ -22,10 +23,22 @@ Attributes for flux balance analysis (FBA):
     * :attr:`~MassBaseConfiguration.upper_bound`
     * :attr:`~MassBaseConfiguration.bounds`
 
+# TODO documentation for thermodynamic attributes, creation of setter methods.
+
+Attributes involved in thermodynamics:
+    * :attr:`~MassBaseConfiguration.decimal_precision`
+    * :attr:`~MassBaseConfiguration.solver`
+    * :attr:`~MassBaseConfiguration.tolerance`
+    * :attr:`~MassBaseConfiguration.zero_value_log_substitute`
+
+
 Notes
 -----
-The :class:`MassConfiguration` is synchronized with the
-:class:`~.Configuration`.
+* Some attributes are used in multiple :mod:`mass`submodules, such as
+  :attr:`~MassBaseConfiguration.decimal_precision`.
+
+* The :class:`MassConfiguration` is synchronized with the
+  :class:`~.Configuration`.
 
 """
 from cobra.core.configuration import Configuration
@@ -71,7 +84,7 @@ class MassBaseConfiguration:
 
         Default value is the ``0.``
     exclude_metabolites_from_rates : dict
-        A dict where keys should correspond to a metabolite attrubute to
+        A dict where keys should correspond to a metabolite attribute to
         utilize for filtering, and values are lists that contain the items to
         exclude that would be returned by the metabolite attribute. Does not
         apply to boundary reactions.
@@ -137,6 +150,14 @@ class MassBaseConfiguration:
         possible. The default number corresponds to the number of available
         cores (hyperthreads).
 
+    zero_value_log_substitute : float
+        A value to substitute for 0 when trying to take the logarithm of 0
+        to avoid a domain error. A value of 1e-10 means that whenever
+        instead of attempting ``log(0)`` which causes a :class:`ValueError`,
+        it will be instead calculated as ``log(1e-10)``.
+
+        Default is ``1e-10``.
+
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -162,6 +183,9 @@ class MassBaseConfiguration:
 
         # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
+
+        # For thermodynamics
+        self._zero_value_log_substitute = 1e-10
 
     @property
     def boundary_compartment(self):
@@ -475,6 +499,31 @@ class MassBaseConfiguration:
     def shared_state(self):
         """Return a read-only ``dict`` for shared configuration attributes."""
         return getattr(self, "_shared_state").copy()
+
+    @property
+    def zero_value_log_substitute(self):
+        """Get or set the a value to substitute for 0 when taking the log of 0.
+
+        A value of ``1e-10`` means that instead of attempting ``log(0)`` which
+        causes a :class:`ValueError`, it will be instead calculated as
+        ``log(1e-10)``.
+
+        Parameters
+        ----------
+        value : float
+            A positive value to use instead of 0 when taking the logarithm.
+
+        """
+        return getattr(self, "_zero_value_log_substitute")
+
+    @zero_value_log_substitute.setter
+    def zero_value_log_substitute(self, value):
+        """Set the value to substitute for 0. when taking the log of 0."""
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        if value <= 0.:
+            raise ValueError("Must be a postive number")
+        setattr(self, "_zero_value_log_substitute", value)
 
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
