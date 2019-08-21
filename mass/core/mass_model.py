@@ -31,7 +31,6 @@ listed below:
       beimg added to the :class:`MassModel`.
 
 """
-import types
 import re
 import warnings
 from copy import copy, deepcopy
@@ -45,13 +44,10 @@ from cobra.core.model import Model
 from cobra.core.reaction import Reaction
 from cobra.exceptions import SolverNotFound
 from cobra.util.array import create_stoichiometric_matrix
-from cobra.util.context import get_context, resettable
-from cobra.util.solver import interface_to_str, solvers
+from cobra.util.context import get_context
 from cobra.util.util import format_long_string
 
 import numpy as np
-
-import optlang
 
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
@@ -357,6 +353,16 @@ class MassModel(Model):
                 self, compartment_dict)
         else:
             setattr(self, "_compartments", {})
+
+    @property
+    def conc_solver(self):
+        """The ConcentrationSolver instance associated with the model."""
+        if hasattr(self, "_conc_solver"):
+            return getattr(self, "_conc_solver")
+        
+        raise SolverNotFound(
+            "No ConcentrationSolver is associated with this model.")
+
 
     def update_S(self, array_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.
@@ -1301,6 +1307,8 @@ class MassModel(Model):
                                               update_model=True)
 
         solvers_dict = {"_solver": self.solver}
+        if hasattr(self, "_conc_solver"):
+            solvers_dict["_conc_solver"] = self.conc_solver
 
         for attr, solver in iteritems(solvers_dict):
             try:
