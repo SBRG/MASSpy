@@ -311,10 +311,9 @@ class ConcHRSampler:
         Yields
         ------
         pandas.core.frame.DataFrame
-            A :class:`pandas.DataFrame <pandas.core.frame.DataFrame>` with
-            dimensions ``(batch_size x n_m)`` containing a valid concentration
-            sample for a total of n_m metabolites (or variables if
-            ``concs=False``) in each row.
+            A :class:`pandas.DataFrame` with dimensions ``(batch_size x n_m)``
+            containing a valid concentration sample for a total of
+            ``n_m`` metabolites (or variables if ``concs=False``) in each row.
 
         """
         for _ in range(batch_num):

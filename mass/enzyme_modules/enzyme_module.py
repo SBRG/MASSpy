@@ -1420,7 +1420,7 @@ class EnzymeModule(MassModel):
     def _set_category_attribute(self, item, attr, to_filter):
         """Set the categorized attribute after ensuring it is valid.
 
-         Warnings
+        Warnings
         --------
         This method is intended for internal use only.
 
