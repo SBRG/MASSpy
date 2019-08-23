@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """Contains utility functions to assist in various :mod:`mass` functions."""
 import logging
-from operator import lt, le
 import warnings
+from operator import le, lt
 
 from cobra import DictList
 
 from depinfo import print_dependencies
+
+import numpy as np
 
 from six import integer_types, iteritems, string_types
 
@@ -89,6 +91,23 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
     return sorted(all_public, key=str.lower)
 
 
+def apply_decimal_precision(value, decimal_precision):
+    """Apply the decimal precision to the value by through rounding.
+
+    Parameters
+    ----------
+    value : float
+        The value to be rounded.
+    decimal_precision : int
+        The decimal place right of the decimal to round the value to.
+
+    """
+    if decimal_precision is not None and value is not None:
+        return round(value, decimal_precision)
+
+    return value
+
+
 # Internal
 def _check_kwargs(default_kwargs, kwargs):
     """Check the provided kwargs against the default values for kwargs."""
@@ -101,6 +120,8 @@ def _check_kwargs(default_kwargs, kwargs):
                 type_ = type(value)
                 if type_ == float:
                     type_ = (float, integer_types)
+                if type_ == list:
+                    type_ = (list, np.ndarray)
                 if not isinstance(kwargs[key], type_):
                     raise TypeError(
                         "'{0}' must be of type: {1}.".format(
