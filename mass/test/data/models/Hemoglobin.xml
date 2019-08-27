@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -171,8 +171,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HBO2" value="511077"/>
             <localParameter id="Keq_R_HBO2" value="73.2115"/>
+            <localParameter id="kf_R_HBO2" value="511077"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -205,8 +205,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HBO3" value="509243"/>
             <localParameter id="Keq_R_HBO3" value="177.799"/>
+            <localParameter id="kf_R_HBO3" value="509243"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -239,8 +239,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO4" value="1289.92"/>
             <localParameter id="kf_R_HBO4" value="501595"/>
+            <localParameter id="Keq_R_HBO4" value="1289.92"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -300,8 +300,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="o2_b" value="0.0200788"/>
-            <localParameter id="Keq_R_SK_o2_c" value="1"/>
             <localParameter id="kf_R_SK_o2_c" value="509726"/>
+            <localParameter id="Keq_R_SK_o2_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

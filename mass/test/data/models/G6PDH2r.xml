@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -250,8 +250,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_4" value="489901"/>
             <localParameter id="Keq_R_G6PDH2r_4" value="0.05"/>
+            <localParameter id="kf_R_G6PDH2r_4" value="489901"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -366,8 +366,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_G6PDH2r_7" value="2487415"/>
             <localParameter id="Keq_R_G6PDH2r_7" value="977.142857142857"/>
+            <localParameter id="kf_R_G6PDH2r_7" value="2487415"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -390,30 +390,30 @@
       </groups:group>
       <groups:group groups:id="Products" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
           <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
           <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
-          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Free" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
-          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
-          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
-          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
           <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
+          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
+          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
+          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Inhibited" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
           <groups:member groups:name="G6PDH2r-atp complex" groups:idRef="M_g6pdh2r_A_CI_c"/>
+          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="product_inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
           <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
+          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="g6p_c_binding" groups:kind="collection">
@@ -443,42 +443,42 @@
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_ligands" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate" groups:idRef="M_nadp_c"/>
-          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
           <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
-          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
           <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate - reduced" groups:idRef="M_nadph_c"/>
+          <groups:member groups:name="Nicotinamide adenine dinucleotide phosphate" groups:idRef="M_nadp_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+          <groups:member groups:name="6-Phospho-D-gluco-1,5-lactone" groups:idRef="M__6pgl_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
-          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
-          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
-          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
-          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
           <groups:member groups:name="G6PDH2r-atp complex" groups:idRef="M_g6pdh2r_A_CI_c"/>
+          <groups:member groups:name="G6PDH2r-nadph complex" groups:idRef="M_g6pdh2r_N_PI_c"/>
           <groups:member groups:name="G6PDH2r-_6pgl complex" groups:idRef="M_g6pdh2r_G_P_c"/>
+          <groups:member groups:name="G6PDH2r-g6p complex" groups:idRef="M_g6pdh2r_G_c"/>
+          <groups:member groups:name="G6PDH2r" groups:idRef="M_g6pdh2r_c"/>
+          <groups:member groups:name="G6PDH2r-_6pgl-nadph complex" groups:idRef="M_g6pdh2r_GN_P_c"/>
+          <groups:member groups:name="G6PDH2r-g6p-nadp complex" groups:idRef="M_g6pdh2r_GN_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
-          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
           <groups:member groups:name="g6pdh2r_G_P-_6pgl release" groups:idRef="R_G6PDH2r_4"/>
-          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
-          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
-          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
           <groups:member groups:name="g6pdh2r-atp binding" groups:idRef="R_G6PDH2r_2"/>
+          <groups:member groups:name="g6pdh2r-g6p binding" groups:idRef="R_G6PDH2r_3"/>
+          <groups:member groups:name="g6pdh2r-nadph binding" groups:idRef="R_G6PDH2r_1"/>
+          <groups:member groups:name="g6pdh2r_GN catalyzation" groups:idRef="R_G6PDH2r_7"/>
+          <groups:member groups:name="g6pdh2r_G-nadp binding" groups:idRef="R_G6PDH2r_5"/>
+          <groups:member groups:name="g6pdh2r_GN_P-nadph release" groups:idRef="R_G6PDH2r_6"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="Substrates"/>
           <groups:member groups:idRef="Inhibitors"/>
           <groups:member groups:idRef="Cofactors"/>
           <groups:member groups:idRef="Products"/>
-          <groups:member groups:idRef="Substrates"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_species_categorized" groups:kind="collection">
@@ -489,12 +489,12 @@
       </groups:group>
       <groups:group groups:id="G6PDH2r_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="nadp_c_binding"/>
+          <groups:member groups:idRef="_6pgl_c_release"/>
           <groups:member groups:idRef="catalyzation"/>
           <groups:member groups:idRef="g6p_c_binding"/>
           <groups:member groups:idRef="nadph_c_release"/>
-          <groups:member groups:idRef="_6pgl_c_release"/>
           <groups:member groups:idRef="product_inhibition"/>
-          <groups:member groups:idRef="nadp_c_binding"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="G6PDH2r_EnzymeModule" groups:kind="collection">
@@ -509,11 +509,11 @@
         </notes>
         <groups:listOfMembers>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_species"/>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands"/>
-          <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions_categorized"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_reactions_categorized"/>
+          <groups:member groups:idRef="G6PDH2r_enzyme_module_ligands"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>
