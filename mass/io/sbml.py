@@ -84,7 +84,7 @@ from cobra.util.solver import linear_reaction_coefficients, set_objective
 
 import libsbml
 
-from six import integer_types, iteritems, itervalues, string_types
+from six import integer_types, iteritems, itervalues, raise_from, string_types
 
 from sympy import Basic, Symbol, SympifyError, mathml, sympify
 
@@ -514,10 +514,9 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
         # Raise Import/export error if error not SBML parsing related.
         raise e
 
-    except Exception:
+    except Exception as original_error:
         # Log traceback and raise a MassSBMLError for parsing related errors.
-        LOGGER.error(traceback.print_exc())
-        raise MassSBMLError(
+        mass_error = MassSBMLError(
             "Something went wrong reading the SBML model. Most likely the SBML"
             " model is not valid. Please check that your model is valid using "
             "the `mass.io.sbml.validate_sbml_model` function or via the "
@@ -525,6 +524,7 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
             "\t`(model, errors) = validate_sbml_model(filename)`"
             "\nIf the model is valid and cannot be read please open an issue "
             "at https://github.com/SBRG/masspy/issues .")
+        raise_from(mass_error, original_error)
 
 
 def _get_doc_from_filename(filename):
