@@ -153,8 +153,6 @@ class MassModel(Model):
 
     """
 
-    # pylint: disable=too-many-public-methods
-    # pylint: disable=too-many-instance-attributes
     def __init__(self, id_or_model=None, name=None, array_type="DataFrame",
                  dtype=np.float64):
         """Initialize the MassModel."""
@@ -249,7 +247,6 @@ class MassModel(Model):
     @property
     def boundary(self):
         """Return a ``list`` of boundary reactions in the model."""
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).boundary
 
     @property
@@ -272,7 +269,6 @@ class MassModel(Model):
         Uses annotations and heuristics to exclude non-exchanges such as sink
         and demand reactions.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).exchanges
 
     @property
@@ -282,7 +278,6 @@ class MassModel(Model):
         Demands are irreversible reactions that accumulate or consume a
         metabolite in the inside of the model.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).demands
 
     @property
@@ -292,7 +287,6 @@ class MassModel(Model):
         Sinks are reversible reactions that accumulate or consume a metabolite
         in the inside of the model.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).sinks
 
     @property
@@ -342,7 +336,6 @@ class MassModel(Model):
             An empty ``dict`` will reset the compartments.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).compartments
 
     @compartments.setter
@@ -425,7 +418,6 @@ class MassModel(Model):
             the model.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassModel, self).add_metabolites(metabolite_list)
 
     def remove_metabolites(self, metabolite_list, destructive=False):
@@ -445,7 +437,6 @@ class MassModel(Model):
             :class:`~.MassReaction`\ s from the model.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassModel, self).remove_metabolites(metabolite_list,
                                                   destructive)
 
@@ -711,7 +702,6 @@ class MassModel(Model):
             The :class:`~.MassReaction` of the new boundary reaction.
 
         """
-        # pylint: disable=arguments-differ
         kwargs = _check_kwargs({
             "subsystem": "",
             "lb": MASSCONFIGURATION.lower_bound,
@@ -1313,7 +1303,6 @@ class MassModel(Model):
             try:
                 setattr(new_model, attr, deepcopy(solver))
                 # Cplex has an issue with deep copies
-            # pylint: disable=broad-except
             except Exception:
                 setattr(new_model, attr, copy(solver))
 
@@ -2398,7 +2387,6 @@ class MassModel(Model):
         This method is intended for internal use only.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).__getstate__()
 
     def __dir__(self):

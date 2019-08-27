@@ -140,11 +140,9 @@ class EnzymeModule(MassModel):
 
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(self, id_or_model=None, name=None, subsystem="",
                  array_type="dense", dtype=np.float64):
         """Initialize the EnzymeModule."""
-        # pylint: disable=too-many-arguments
         super(EnzymeModule, self).__init__(
             id_or_model=id_or_model, name=name, array_type=array_type,
             dtype=dtype)
@@ -484,7 +482,6 @@ class EnzymeModule(MassModel):
             :class:`~.EnzymeModuleSpecies`.
 
         """
-        # pylint: disable=too-many-arguments
         # Ensure metabolites for EnzymeModuleSpecies exist in the EnzymeModule.
         for bound_dict in [bound_catalytic, bound_effectors]:
             if bound_dict is None:
@@ -568,7 +565,6 @@ class EnzymeModule(MassModel):
 
 
         """
-        # pylint: disable=too-many-arguments
         # Make EnzymeModuleReaction object
         new_reaction = EnzymeModuleReaction(
             id_or_reaction=id, name=name, subsystem=subsystem,
@@ -1303,7 +1299,6 @@ class EnzymeModule(MassModel):
         try:
             new_model._solver = deepcopy(self.solver)
             # Cplex has an issue with deep copies
-        # pylint: disable=broad-except
         except Exception:
             new_model._solver = copy(self.solver)
 

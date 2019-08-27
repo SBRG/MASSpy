@@ -649,7 +649,6 @@ def _fix_type(value):
     This method is intended for internal use only.
 
     """
-    # pylint: disable=too-many-return-statements
     if isinstance(value, (string_types, Basic)):
         return str(value)
     if isinstance(value, np.float_):

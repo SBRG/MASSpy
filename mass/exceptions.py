@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains Exceptions specific to masspy."""
+"""This module contains Exceptions specific to :mod:`mass` module."""
 
 
 class MassSBMLError(Exception):

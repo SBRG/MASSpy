@@ -129,11 +129,8 @@ class MassReaction(Reaction):
 
     """
 
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable=too-many-public-methods
     def __init__(self, id_or_reaction=None, name="", subsystem="",
                  reversible=True, steady_state_flux=None, **kwargs):
-        # pylint: disable=too-many-arguments
         """Initialize the MassReaction."""
         # Check kwargs
         kwargs = _check_kwargs({
@@ -224,7 +221,6 @@ class MassReaction(Reaction):
                                 self, "_reverse_rate_constant", existing[0]))
                 context(partial(setattr,
                                 self, "_equilibrium_constant", existing[1]))
-
 
     @property
     def steady_state_flux(self):
@@ -394,13 +390,11 @@ class MassReaction(Reaction):
     @property
     def reactants(self):
         """Return a ``list`` of reactants for the reaction."""
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).reactants
 
     @property
     def products(self):
         """Return a ``list`` of products for the reaction."""
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).products
 
     @property
@@ -459,7 +453,6 @@ class MassReaction(Reaction):
     @property
     def compartments(self):
         """Return the set of compartments where the metabolites are located."""
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).compartments
 
     @property
@@ -474,7 +467,6 @@ class MassReaction(Reaction):
         These are reactions with a sink or a source term (e.g. 'A --> ')
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).boundary
 
     @property
@@ -530,13 +522,11 @@ class MassReaction(Reaction):
         dissociated from the reaction.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).gene_reaction_rule
 
     @gene_reaction_rule.setter
     def gene_reaction_rule(self, new_rule):
         """Set the gene reaction rule of a reaction using a string."""
-        # pylint: disable=useless-super-delegation
         super(MassReaction, self.__class__).gene_reaction_rule.fset(
             self, new_rule)
 
@@ -551,7 +541,6 @@ class MassReaction(Reaction):
         of the often cryptic ids.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).gene_name_reaction_rule
 
     @property
@@ -566,7 +555,6 @@ class MassReaction(Reaction):
             assoicated :class:`~.MassModel`. Otherwise returns ``False``.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).functional
 
     @property
@@ -848,7 +836,6 @@ class MassReaction(Reaction):
         The reaction parameters, referenced metabolites, and genes are also
         copied.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).copy()
 
     def get_coefficient(self, metabolite_id):
@@ -861,7 +848,6 @@ class MassReaction(Reaction):
             metabolite whose coefficient is desired.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).get_coefficient(metabolite_id)
 
     def get_coefficients(self, metabolite_ids):
@@ -874,7 +860,6 @@ class MassReaction(Reaction):
             their string identifiers.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).get_coefficient(metabolite_ids)
 
     def add_metabolites(self, metabolites_to_add, combine=True,
@@ -998,7 +983,6 @@ class MassReaction(Reaction):
         :meth:`add_metabolites`
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassReaction, self).subtract_metabolites(metabolites, combine,
                                                        reversibly)
 
@@ -1026,7 +1010,7 @@ class MassReaction(Reaction):
             A string representation of the reaction.
 
         """  # noqa: E501
-        def format(number):
+        def _format(number):
             return "" if number == 1 else str(number).rstrip(".") + " "
 
         id_type = "id"
@@ -1039,9 +1023,9 @@ class MassReaction(Reaction):
             coefficient = self._metabolites[metab]
             metab_name = str(getattr(metab, id_type))
             if coefficient >= 0:
-                product_bits.append(format(coefficient) + metab_name)
+                product_bits.append(_format(coefficient) + metab_name)
             else:
-                reactant_bits.append(format(abs(coefficient)) + metab_name)
+                reactant_bits.append(_format(abs(coefficient)) + metab_name)
 
         # Create reaction string
         reaction_string = " + ".join(reactant_bits)
@@ -1064,7 +1048,6 @@ class MassReaction(Reaction):
             For a balanced reaction, an empty ``dict`` is returned.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassReaction, self).check_mass_balance()
 
     def build_reaction_from_string(self, reaction_str, verbose=True,
@@ -1116,7 +1099,6 @@ class MassReaction(Reaction):
             Dividing individual metabolite entries. Default is ``"+"``.
 
         """
-        # pylint: disable=too-many-arguments
         is_reversible = self.reversible
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -1143,7 +1125,6 @@ class MassReaction(Reaction):
 
     def knock_out(self):
         """Knockout reaction by setting its bounds to zero."""
-        # pylint: disable=useless-super-delegation
         super(MassReaction, self).knock_out()
 
     # Internal
@@ -1184,7 +1165,6 @@ class MassReaction(Reaction):
         This method is intended for internal use only.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassReaction, self)._associate_gene(cobra_gene)
 
     def _dissociate_gene(self, cobra_gene):
@@ -1201,7 +1181,6 @@ class MassReaction(Reaction):
         This method is intended for internal use only.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassReaction, self)._dissociate_gene(cobra_gene)
 
     def _make_boundary_metabolites(self):

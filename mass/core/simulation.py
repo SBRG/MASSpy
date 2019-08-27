@@ -74,7 +74,7 @@ simulating models, the :class:`Simulation` will also utilize the :mod:`roadrunne
 implementation of the Poco logging system. See the :mod:`roadrunner`
 documentation for more information on how to configure the
 `RoadRunner logger <https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging>`_.
-""" # noqa
+"""  # noqa
 import sys
 from warnings import warn
 

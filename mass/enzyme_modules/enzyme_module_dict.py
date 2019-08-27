@@ -56,7 +56,7 @@ from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID
 from mass.util.matrix import (
-    _get_matrix_constructor, matrix_rank, convert_matrix)
+    _get_matrix_constructor, convert_matrix, matrix_rank)
 from mass.util.util import _mk_new_dictlist
 
 

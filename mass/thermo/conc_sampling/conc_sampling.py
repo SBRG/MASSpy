@@ -67,7 +67,6 @@ def sample_concentrations(concentration_solver, n, method="optgp",
         For setup of the sampling problem in the given :class:`.ConcSolver`.
 
     """
-    # pylint: disable=too-many-arguments
     if method == "optgp":
         sampler = ConcOptGPSampler(concentration_solver, processes=processes,
                                    thinning=thinning, seed=seed)

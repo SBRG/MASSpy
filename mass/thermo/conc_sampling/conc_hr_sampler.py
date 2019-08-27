@@ -345,7 +345,7 @@ class ConcHRSampler:
 
         # Don't reproject if the point is feasible
         if np.allclose(equalities.dot(p), self.problem.b,
-                       rtole=0, atol=self.feasibility_tol):
+                       rtol=0, atol=self.feasibility_tol):
             new = p
         else:
             LOGGER.info(

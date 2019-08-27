@@ -161,7 +161,6 @@ class ConcOptGPSampler(ConcHRSampler):
 
     def __init__(self, concentration_solver, processes=None, thinning=100,
                  nproj=None, seed=None):
-        # pylint: disable=too-many-arguments
         """Initialize a new ConcOptGPSampler."""
         super(ConcOptGPSampler, self).__init__(concentration_solver, thinning,
                                                nproj=nproj, seed=seed)

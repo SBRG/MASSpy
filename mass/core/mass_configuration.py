@@ -23,12 +23,11 @@ Attributes involved in flux balance analysis (FBA):
     * :attr:`~MassBaseConfiguration.upper_bound`
     * :attr:`~MassBaseConfiguration.bounds`
 
-# TODO documentation for thermodynamic attributes, creation of setter methods.
-
 Attributes involved in thermodynamics:
     * :attr:`~MassBaseConfiguration.decimal_precision`
     * :attr:`~MassBaseConfiguration.solver`
     * :attr:`~MassBaseConfiguration.tolerance`
+    * :attr:`~MassBaseConfiguration.processes`
     * :attr:`~MassBaseConfiguration.zero_value_log_substitute`
 
 
@@ -160,7 +159,6 @@ class MassBaseConfiguration:
 
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(self):
         """Initialize MassBaseConfiguration."""
         # Model construction configuration options
@@ -409,7 +407,6 @@ class MassBaseConfiguration:
     @solver.setter
     def solver(self, solver):
         """Set the solver utilized for optimization."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.solver = solver
 
     @property
@@ -427,7 +424,6 @@ class MassBaseConfiguration:
     @tolerance.setter
     def tolerance(self, tol):
         """Set the tolerance value utilized by the optimization solver."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.tolerance = tol
 
     @property
@@ -445,7 +441,6 @@ class MassBaseConfiguration:
     @lower_bound.setter
     def lower_bound(self, bound):
         """Set the default value of the lower bound for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.lower_bound = bound
 
     @property
@@ -463,7 +458,6 @@ class MassBaseConfiguration:
     @upper_bound.setter
     def upper_bound(self, bound):
         """Set the default value of the lower bound for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.upper_bound = bound
 
     @property
@@ -487,7 +481,6 @@ class MassBaseConfiguration:
     @bounds.setter
     def bounds(self, bounds):
         """Set the default lower and upper bounds for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.bounds = bounds
 
     @property
