@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Contains utility functions to assist in various :mod:`mass` functions."""
 import logging
-import re
 import warnings
+from operator import le, lt
 
 from cobra import DictList
 
@@ -10,15 +10,7 @@ from depinfo import print_dependencies
 
 import numpy as np
 
-import pandas as pd
-
-from scipy.sparse import dok_matrix, lil_matrix
-
 from six import integer_types, iteritems, string_types
-
-import sympy as sym
-
-_MATRIX_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 
 
 # Public
@@ -47,7 +39,7 @@ def ensure_iterable(item):
     return item
 
 
-def ensure_non_negative_value(value):
+def ensure_non_negative_value(value, exclude_zero=False):
     """Ensure provided value is a non-negative value, or ``None``.
 
     Parameters
@@ -61,64 +53,20 @@ def ensure_non_negative_value(value):
         Occurs if the value is negative.
 
     """
-    if value is None:
-        pass
-    elif not isinstance(value, (integer_types, float)):
-        raise TypeError("Must be an int or float")
-    elif value < 0.:
-        raise ValueError("Must be a non-negative number")
-    return value
-
-
-def convert_matrix(matrix, matrix_type, dtype, row_ids=None, col_ids=None):
-    """Convert a matrix to a different type.
-
-    Parameters
-    ----------
-    matrix : array-like
-        The matrix to convert.
-    matrix_type : str
-        A string identifiying the desired format for the returned matrix.
-        Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
-        ``'DataFrame'``, and ``'symbolic'`` See the :mod:`~.linear` module
-        documentation for more information on the ``matrix_type``.
-    dtype : data-type
-        The desired array data-type for the matrix.
-    row_ids : array-like
-        The idenfifiers for each row. Only used if type is ``'DataFrame'``.
-    col_ids : array-like
-        The idenfifiers for each column. Only used if type is ``'DataFrame'``.
-
-    Warnings
-    --------
-    This method is NOT the safest way to convert a matrix to another type.
-    To safely convert a matrix into another type, use the ``'matrix_type'``
-    argument in the method that returns the desired matrix.
-
-    """
-    if matrix_type not in _MATRIX_TYPES:
-        raise ValueError("Unrecognized matrix_type.")
-
-    # Convert the matrix type
-    conversion_method_dict = dict(zip(
-        _MATRIX_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense]))
-
-    try:
-        matrix = conversion_method_dict[matrix_type](matrix)
-        # Convert the dtype
-        if not re.match("symbolic", matrix_type):
-            if re.match("DataFrame", matrix_type):
-                matrix = pd.DataFrame(matrix, index=row_ids, columns=col_ids)
-            try:
-                matrix = matrix.astype(dtype)
-            except TypeError:
-                warnings.warn("Could not cast matrix as the given dtype")
+    if value is not None:
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        if exclude_zero:
+            comparision = le
+            msg = "Must be a postive number"
         else:
-            matrix = sym.Matrix(matrix)
-    except TypeError:
-        warnings.warn("Could not cast matrix as the given matrix_type")
+            comparision = lt
+            msg = "Must be a non-negative number"
 
-    return matrix
+        if comparision(value, 0.):
+            raise ValueError(msg)
+
+    return value
 
 
 def get_public_attributes_and_methods(obj, exclude_parent=False):
@@ -143,6 +91,23 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
     return sorted(all_public, key=str.lower)
 
 
+def apply_decimal_precision(value, decimal_precision):
+    """Apply the decimal precision to the value by through rounding.
+
+    Parameters
+    ----------
+    value : float
+        The value to be rounded.
+    decimal_precision : int
+        The decimal place right of the decimal to round the value to.
+
+    """
+    if decimal_precision is not None and value is not None:
+        return round(value, decimal_precision)
+
+    return value
+
+
 # Internal
 def _check_kwargs(default_kwargs, kwargs):
     """Check the provided kwargs against the default values for kwargs."""
@@ -153,6 +118,10 @@ def _check_kwargs(default_kwargs, kwargs):
                 if value is None:
                     continue
                 type_ = type(value)
+                if type_ == float:
+                    type_ = (float, integer_types)
+                if type_ == list:
+                    type_ = (list, np.ndarray)
                 if not isinstance(kwargs[key], type_):
                     raise TypeError(
                         "'{0}' must be of type: {1}.".format(
@@ -179,78 +148,6 @@ def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
     return DictList(items)
 
 
-def _get_matrix_constructor(matrix_type, dtype, matrix_type_default="dense",
-                            dtype_default=np.float64):
-    """Create a matrix constructor for the specified matrix type.
-
-    Parameters
-    ----------
-    matrix_type: {'dense', 'dok', 'lil', 'DataFrame', 'symbolic'}, optional
-        The desired type after for the matrix. If None, defaults to "dense".
-    dtype: data-type, optional
-        The desired array data-type for the stoichiometric matrix. If None,
-        defaults to np.float64.
-
-    Returns
-    -------
-    matrix: matrix of class 'dtype'
-        The matrix for the MassModel returned as the given matrix_type
-        and with a data-type of 'dtype'.
-
-    Warnings
-    --------
-    This method is intended for internal use only. To safely create a
-    matrix, use the appropriate MassModel method instead.
-
-    """
-    if matrix_type in _MATRIX_TYPES:
-        pass
-    elif matrix_type is None:
-        matrix_type = matrix_type_default
-    else:
-        raise ValueError("Unrecognized matrix_type.")
-
-    # Use the model's stored data-type if the data-type is not specified.
-    if dtype is None:
-        dtype = dtype_default
-
-    # Dictionary of options for constructing the matrix
-    matrix_constructor = dict(zip(_MATRIX_TYPES,
-                                  [np.zeros, dok_matrix, lil_matrix,
-                                   np.zeros, np.zeros]))
-    constructor = matrix_constructor[matrix_type]
-    return (constructor, matrix_type, dtype)
-
-
-# Define small conversion functions based on the original matrix type.
-def _to_dense(matrix):
-    """Convert matrix to a numpy array."""
-    if isinstance(matrix, np.ndarray):
-        pass
-    elif isinstance(matrix, pd.DataFrame):
-        matrix = matrix.as_matrix()
-    elif isinstance(matrix, sym.Matrix):
-        matrix = np.array(matrix)
-    else:
-        matrix = matrix.toarray()
-
-    return matrix
-
-
-def _to_lil(matrix):
-    """Convert matrix to a scipy lil matrix."""
-    if isinstance(matrix, sym.Matrix):
-        matrix = sym.matrix2numpy(matrix, dtype=float)
-    return lil_matrix(matrix)
-
-
-def _to_dok(matrix):
-    """Convert matrix to a scipy dok matrix."""
-    if isinstance(matrix, sym.Matrix):
-        matrix = sym.matrix2numpy(matrix, dtype=float)
-    return dok_matrix(matrix)
-
-
 def _make_logger(name):
     """Make the logger instance and set the default format."""
     name = name.split(".")[-1]
@@ -260,5 +157,4 @@ def _make_logger(name):
 
 
 __all__ = (
-    "show_versions", "ensure_iterable", "ensure_non_negative_value",
-    "convert_matrix")
+    "show_versions", "ensure_iterable", "ensure_non_negative_value",)

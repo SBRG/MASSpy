@@ -55,8 +55,9 @@ import pandas as pd
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID
-from mass.util.util import (
-    _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
+from mass.util.matrix import (
+    _get_matrix_constructor, matrix_rank, convert_matrix)
+from mass.util.util import _mk_new_dictlist
 
 
 class EnzymeModuleDict(OrderedDictWithID):
@@ -90,7 +91,7 @@ class EnzymeModuleDict(OrderedDictWithID):
                     continue
                 elif nkey == "S":
                     self[nkey] = id_or_enzyme._mk_stoich_matrix(
-                        matrix_type="DataFrame", update_model=False)
+                        array_type="DataFrame", update_model=False)
                 elif "_equation" in nkey:
                     self[nkey] = getattr(id_or_enzyme, nkey, None)
                 else:
@@ -175,8 +176,8 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         """
         # Set up for matrix construction.
-        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type="DataFrame", dtype=np.float_)
+        (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
+            array_type="DataFrame", dtype=np.float_)
 
         metabolites = DictList([
             met for attr in ["enzyme_module_ligands", "enzyme_module_species"]
@@ -195,7 +196,7 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            stoich_mat, array_type=array_type, dtype=dtype,
             row_ids=[m.id for m in metabolites],
             col_ids=[r.id for r in self.enzyme_module_reactions])
 
@@ -226,10 +227,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>

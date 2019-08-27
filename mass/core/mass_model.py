@@ -42,6 +42,7 @@ from cobra.core.group import Group
 from cobra.core.metabolite import Metabolite
 from cobra.core.model import Model
 from cobra.core.reaction import Reaction
+from cobra.exceptions import SolverNotFound
 from cobra.util.array import create_stoichiometric_matrix
 from cobra.util.context import get_context
 from cobra.util.util import format_long_string
@@ -57,9 +58,11 @@ from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
+from mass.util.matrix import (
+    _get_matrix_constructor, convert_matrix, matrix_rank)
 from mass.util.util import (
-    _check_kwargs, _get_matrix_constructor, _make_logger, convert_matrix,
-    ensure_iterable, get_public_attributes_and_methods)
+    _check_kwargs, _make_logger, ensure_iterable,
+    get_public_attributes_and_methods)
 
 # Set the logger
 LOGGER = _make_logger(__name__)
@@ -83,12 +86,12 @@ class MassModel(Model):
         properties as the original model.
     name : str
         A human readable name for the model.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
-        See the :mod:`~.linear` module documentation for more information
-        on the ``matrix_type``.
+        See the :mod:`~.matrix` module documentation for more information
+        on the ``array_type``.
     dtype : data-type
         The desired array data-type for the stoichiometric matrix. If ``None``
         then the data-type will default to ``numpy.float64``.
@@ -152,7 +155,7 @@ class MassModel(Model):
 
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, id_or_model=None, name=None, matrix_type="DataFrame",
+    def __init__(self, id_or_model=None, name=None, array_type="DataFrame",
                  dtype=np.float64):
         """Initialize the MassModel."""
         # Instiantiate a new MassModel with state identical to
@@ -178,17 +181,16 @@ class MassModel(Model):
             self.custom_parameters = {}
 
             # Store the stoichiometric matrix, its matrix type, and data type
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
-            self._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
+            self._S = self._mk_stoich_matrix(array_type=self._array_type,
                                              dtype=self._dtype,
                                              update_model=True)
-
     # Public
     @property
     def stoichiometric_matrix(self):
         """Return the stoichiometric matrix."""
-        return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
+        return self.update_S(array_type=self._array_type, dtype=self._dtype,
                              update_model=False)
 
     @property
@@ -352,17 +354,26 @@ class MassModel(Model):
         else:
             setattr(self, "_compartments", {})
 
-    def update_S(self, matrix_type=None, dtype=None, update_model=True):
+    @property
+    def conc_solver(self):
+        """Return the :class:`.ConcSolver` associated with the model."""
+        if hasattr(self, "_conc_solver"):
+            return getattr(self, "_conc_solver")
+
+        raise SolverNotFound(
+            "No ConcSolver is associated with this model.")
+
+    def update_S(self, array_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is the current ``matrix_type``. See the :mod:`~.linear`
-            module documentation for more information on the ``matrix_type``.
+            Default is the current ``array_type``. See the :mod:`~.matrix`
+            module documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the stoichiometric matrix.
             If ``None`` then the data-type will default to the
@@ -373,14 +384,14 @@ class MassModel(Model):
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The stoichiometric matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
         # Use the model's stored matrix type if the matrix-type is not given.
-        if matrix_type is None:
-            matrix_type = self._matrix_type
+        if array_type is None:
+            array_type = self._array_type
         # Use the model's stored data-type if the data-type is not specified.
         if dtype is None:
             dtype = self._dtype
@@ -392,11 +403,11 @@ class MassModel(Model):
         # If a matrix has not been constructed yet, or if there are no changes
         # to the reactions, return a newly constructed stoichiometric matrix.
         stoich_mat = self._mk_stoich_matrix(
-            matrix_type=matrix_type, dtype=dtype, update_model=update_model)
+            array_type=array_type, dtype=dtype, update_model=update_model)
         # Internally update the model if desired
         if update_model:
             self._S = stoich_mat
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
 
         return stoich_mat
@@ -1095,31 +1106,31 @@ class MassModel(Model):
         if context:
             context(partial(self.units.__iadd__, existing_units))
 
-    def get_elemental_matrix(self, matrix_type=None, dtype=None):
+    def get_elemental_matrix(self, array_type=None, dtype=None):
         """Get the elemental matrix for a model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
-            documentation for more information on the ``matrix_type``.
+            Default is ``'dense'``. See the :mod:`~.matrix` module
+            documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
             the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The elemntal matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
         # Set up for matrix construction if matrix types are correct.
-        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type=matrix_type, dtype=dtype)
+        (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
+            array_type=array_type, dtype=dtype)
 
         # Build the elemental matrix
         elem_mat = matrix_constructor((len(CHOPNSQ), len(self.metabolites)))
@@ -1164,46 +1175,46 @@ class MassModel(Model):
             row_ids.extend(moieties)
 
         # Convert matrix to a dataframe if matrix type is a dataframe
-        elem_mat = convert_matrix(elem_mat, matrix_type=matrix_type,
+        elem_mat = convert_matrix(elem_mat, array_type=array_type,
                                   dtype=dtype, row_ids=row_ids,
                                   col_ids=[m.id for m in self.metabolites])
 
         return elem_mat
 
-    def get_elemental_charge_balancing(self, matrix_type=None, dtype=None):
+    def get_elemental_charge_balancing(self, array_type=None, dtype=None):
         """Get the elemental charge balance as a matrix for a model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
-            documentation for more information on the ``matrix_type``.
+            Default is ``'dense'``. See the :mod:`~.matrix` module
+            documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
             the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The charge balancing matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
-        elem_mat = self.get_elemental_matrix(matrix_type="DataFrame")
+        elem_mat = self.get_elemental_matrix(array_type="DataFrame")
         row_ids = elem_mat.index
 
-        stoich_mat = self.update_S(matrix_type="dense", update_model=False)
+        stoich_mat = self.update_S(array_type="dense", update_model=False)
         charge_mat = np.array(elem_mat).dot(stoich_mat)
 
-        if matrix_type is None:
-            matrix_type = "dense"
+        if array_type is None:
+            array_type = "dense"
         if dtype is None:
             dtype = np.float64
 
-        charge_mat = convert_matrix(charge_mat, matrix_type=matrix_type,
+        charge_mat = convert_matrix(charge_mat, array_type=array_type,
                                     dtype=dtype, row_ids=row_ids,
                                     col_ids=[r.id for r in self.reactions])
         return charge_mat
@@ -1290,16 +1301,21 @@ class MassModel(Model):
         # Copy any existing enzyme_modules
         new_model.enzyme_modules += self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
-        new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
+        new_model._S = self._mk_stoich_matrix(array_type=self._array_type,
                                               dtype=self._dtype,
                                               update_model=True)
 
-        try:
-            new_model._solver = deepcopy(self.solver)
-            # Cplex has an issue with deep copies
-        # pylint: disable=broad-except
-        except Exception:
-            new_model._solver = copy(self.solver)
+        solvers_dict = {"_solver": self.solver}
+        if hasattr(self, "_conc_solver"):
+            solvers_dict["_conc_solver"] = self.conc_solver
+
+        for attr, solver in iteritems(solvers_dict):
+            try:
+                setattr(new_model, attr, deepcopy(solver))
+                # Cplex has an issue with deep copies
+            # pylint: disable=broad-except
+            except Exception:
+                setattr(new_model, attr, copy(solver))
 
         # Doesn't make sense to retain the context of a copied model so
         # assign a new empty context
@@ -2088,7 +2104,7 @@ class MassModel(Model):
                 group.remove_members(old_members)
                 group.add_members(new_members)
 
-    def _mk_stoich_matrix(self, matrix_type=None, dtype=None,
+    def _mk_stoich_matrix(self, array_type=None, dtype=None,
                           update_model=True):
         """Return the stoichiometric matrix for a given MassModel.
 
@@ -2105,8 +2121,8 @@ class MassModel(Model):
         if not isinstance(update_model, bool):
             raise TypeError("update_model must be a bool")
 
-        if matrix_type is None:
-            matrix_type = self._matrix_type
+        if array_type is None:
+            array_type = self._array_type
 
         if dtype is None:
             dtype = self._dtype
@@ -2115,13 +2131,13 @@ class MassModel(Model):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            stoich_mat, array_type=array_type, dtype=dtype,
             row_ids=[m.id for m in self.metabolites],
             col_ids=[r.id for r in self.reactions])
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
             self._S = stoich_mat
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
 
         return stoich_mat
@@ -2296,10 +2312,11 @@ class MassModel(Model):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>

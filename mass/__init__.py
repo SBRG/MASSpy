@@ -4,7 +4,7 @@ from os import name as _name
 from os.path import abspath as _abspath
 from os.path import dirname as _dirname
 
-from mass import (analysis, io, enzyme_modules)
+from mass import (io, enzyme_modules)
 from mass.core import (
     MassConfiguration, MassMetabolite, MassModel, MassReaction, Simulation,
     MassSolution, Unit, UnitDefinition)

@@ -68,6 +68,7 @@ from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.enzyme_modules.enzyme_module_species import EnzymeModuleSpecies
 from mass.util.expressions import _mk_met_func, strip_time
+from mass.util.matrix import matrix_rank
 from mass.util.util import (
     _mk_new_dictlist, ensure_iterable, ensure_non_negative_value)
 
@@ -90,12 +91,12 @@ class EnzymeModule(MassModel):
         A human readable name for the model.
     subsystem : str
         The subsystem in which the enzyme module is a part of.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
-        See the :mod:`~.linear` module documentation for more information
-        on the ``matrix_type``.
+        See the :mod:`~.matrix` module documentation for more information
+        on the ``array_type``.
     dtype : data-type
         The desired array data-type for the stoichiometric matrix. If ``None``
         then the data-type will default to ``numpy.float64``.
@@ -141,11 +142,11 @@ class EnzymeModule(MassModel):
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, id_or_model=None, name=None, subsystem="",
-                 matrix_type="dense", dtype=np.float64):
+                 array_type="dense", dtype=np.float64):
         """Initialize the EnzymeModule."""
         # pylint: disable=too-many-arguments
         super(EnzymeModule, self).__init__(
-            id_or_model=id_or_model, name=name, matrix_type=matrix_type,
+            id_or_model=id_or_model, name=name, array_type=array_type,
             dtype=dtype)
 
         self.subsystem = subsystem
@@ -1296,7 +1297,7 @@ class EnzymeModule(MassModel):
                 new_model_categorized_attr, getattr(self, attr))
 
         # Create the new stoichiometric matrix for the model.
-        new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
+        new_model._S = self._mk_stoich_matrix(array_type=self._array_type,
                                               dtype=self._dtype,
                                               update_model=True)
         try:
@@ -1419,7 +1420,7 @@ class EnzymeModule(MassModel):
     def _set_category_attribute(self, item, attr, to_filter):
         """Set the categorized attribute after ensuring it is valid.
 
-         Warnings
+        Warnings
         --------
         This method is intended for internal use only.
 
@@ -1695,8 +1696,8 @@ class EnzymeModule(MassModel):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
-        except np.linalg.LinAlgError:
+            rank = matrix_rank(self.S)
+        except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
 

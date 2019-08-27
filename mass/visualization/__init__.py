@@ -8,9 +8,9 @@ for visualziation included during the :mod:`mass` installation process as
 follows::
 
     # Installs plotting visualization packages.
-    pip install mass["plotting"]
+    pip install masspy["plotting"]
     # Or to install all additional packages.
-    pip install mass["all"]
+    pip install masspy["all"]
 
 In general, it is recommended to pass an :class:`matplotlib.axes.Axes` instance
 into the visualization function in order to guaruntee more control over the
@@ -308,7 +308,7 @@ of the :mod:`~mass.visualiation` module.
   tile_ticks_on :
       ``bool`` indicating whether to leave tick marks on tiles containing
       phase portraits.
-  
+
       Default is ``False``.
       Only valid for :func:`~.plot_tiled_phase_portraits`.
   tile_xlabel_fontdict :
