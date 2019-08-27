@@ -8,9 +8,9 @@
             "_23dpg_c"
         ],
         "Products": [
-            "g6p_c",
             "h_c",
-            "adp_c"
+            "adp_c",
+            "g6p_c"
         ],
         "Substrates": [
             "glc__D_c"
@@ -28,8 +28,8 @@
             "HEX1_5"
         ],
         "glc__D_c_binding": [
-            "HEX1_3",
-            "HEX1_7"
+            "HEX1_7",
+            "HEX1_3"
         ],
         "product_inhibition": [
             "HEX1_2",
@@ -38,14 +38,14 @@
     },
     "_enzyme_module_species_categorized": {
         "Free": [
-            "hex1_AG_c",
             "hex1_c",
-            "hex1_A_c",
-            "hex1_G_c"
+            "hex1_AG_c",
+            "hex1_G_c",
+            "hex1_A_c"
         ],
         "Inhibited": [
-            "hex1_G_PI_c",
             "hex1_A_PI_c",
+            "hex1_G_PI_c",
             "hex1_G_CI_c"
         ]
     },

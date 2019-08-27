@@ -31,7 +31,7 @@ INSTALLED_VISUALIZATION_PACKAGES = {
     "matplotlib": bool(mpl),
     "cycler": bool(cycler),
 }
-"""dict: Package names and ``bool``\ s indicating if they are installed."""
+r"""dict: Package names and ``bool``\ s indicating if they are installed."""
 
 OUTSIDE_LEGEND_LOCATION_AND_ANCHORS = {
     "right outside": ("center left", (1.2, 0.5)),
@@ -366,7 +366,7 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
     This method is intended for internal use only.
 
     """
-    KWARG_VALIDATION_FUNCTIONS = {
+    kwarg_validation_functions = {
         "cycler": rc.cycler,
         "color": rc.validate_color,
         "linestyle": rc._validate_linestyle,
@@ -384,7 +384,7 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
     # Allow None to be returned
     if arg_value is not None:
         # Check input validity based on the arg_name
-        validator = KWARG_VALIDATION_FUNCTIONS[arg_name]
+        validator = kwarg_validation_functions[arg_name]
         try:
             arg_value = validator(arg_value)
         except (ValueError, RuntimeError) as e:

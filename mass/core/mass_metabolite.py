@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""
-MassMetabolite is a class for holding information regarding metabolites.
+r"""MassMetabolite is a class for holding information regarding metabolites.
 
 The :class:`MassMetabolite` class inherits and extends the
 :class:`~cobra.core.metabolite.Metabolite` class in :mod:`cobra`. It contains
@@ -63,7 +62,6 @@ class MassMetabolite(Metabolite):
 
     def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
-        # pylint: disable=too-many-arguments
         """Initialize the MassMetabolite."""
         super(MassMetabolite, self).__init__(
             id=str(id_or_specie), formula=formula, name=name, charge=charge,
@@ -101,7 +99,7 @@ class MassMetabolite(Metabolite):
           :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
           to allow for the use of moieties.
 
-        """  # noqa: E501
+        """
         tmp_formula = self.formula
         if tmp_formula is None:
             return {}
@@ -232,7 +230,7 @@ class MassMetabolite(Metabolite):
         of the :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
         to allow for the use of moieties.
 
-        """  # noqa: E501
+        """
         element_dict = {k: v for k, v in iteritems(self.elements)
                         if not (k.startswith("[") and k.endswith("]"))}
         try:

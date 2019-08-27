@@ -66,7 +66,6 @@ Some SBML related issues are still open, please refer to the respective issue:
 import datetime
 import logging
 import re
-import traceback
 from collections import defaultdict
 from io import StringIO
 
@@ -3028,7 +3027,7 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
     except MassSBMLError as e:
         errors["MASS_ERROR"].append(str(e))
         return None, errors
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         errors["MASS_FATAL"].append(str(e))
         return None, errors
 
@@ -3212,7 +3211,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         sbml_str = libsbml.writeSBMLToString(doc)
         model, errors = validate_sbml_model(sbml_str, **all_kwargs["validate"])
 
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         success = False
         model = None
         errors["MASS_FATAL"].append(str(e))
