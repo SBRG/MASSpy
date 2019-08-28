@@ -1596,7 +1596,7 @@ class MassModel(Model):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
                                perc, domain=sym.S.Reals)
             if isinstance(sol, type(sym.S.Reals)) or sol.is_EmptySet \
-               or next(iter(sol)) <= 0:
+               or next(iter(sol)) == 0:
                 sol = float(at_equilibrium_default)
             else:
                 sol = float(next(iter(sol)))
@@ -1612,6 +1612,10 @@ class MassModel(Model):
                     "steady_state_fluxes must be a dict containing the "
                     "MassReactions and their steady state flux values.")
             rate_eq = strip_time(reaction.rate)
+            if reaction.kf_str not in str(rate_eq):
+                LOGGER.info("Skipping reaction {0}, no PERC in rate".format(
+                    reaction.id))
+                continue
             arguments = list(rate_eq.atoms(sym.Symbol))
             # Check for missing numerical values
             missing_values = [

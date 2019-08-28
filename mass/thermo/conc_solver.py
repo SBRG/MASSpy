@@ -10,8 +10,8 @@ Unless specified otherwise, all numerical solutions will be transformed back
 into linear space from logspace before being returned.
 
 Upon initialization, a generic problem is created, represented by an
-:class:`optlang.interface.Model`. The generic problem includes variables for the
-metabolite concentration and reaction equilibrium constants, along with
+:class:`optlang.interface.Model`. The generic problem includes variables for
+the metabolite concentration and reaction equilibrium constants, along with
 thermodynamic constraints for each reaction with the direction of the
 constraint (i.e. greater/less than) dependent on the sign of the steady
 state flux.
@@ -47,6 +47,7 @@ from collections import namedtuple
 from functools import partial
 from warnings import warn
 
+from cobra.core.dictlist import DictList
 from cobra.exceptions import (
     OPTLANG_TO_EXCEPTIONS_DICT, OptimizationError, SolverNotFound)
 from cobra.util.context import get_context, resettable
@@ -99,6 +100,10 @@ class ConcSolver:
       log space before being added to the solver.
     * Unless specified otherwise, all numerical solutions will be transformed
       back into linear space from logspace before being returned.
+    * Boundary reactions (a.k.a. reactions with only one metabolite involved)
+      are excluded automatically. To work with reactions that cross compartment
+      boundaries, :class:`.MassMetabolite` objects need to be defined for
+      the metabolites in both compartments.
 
     Parameters
     ----------
@@ -122,11 +127,6 @@ class ConcSolver:
         steady state flux values equal to 0. are typically ignored unless
         they are specified in the :class:`ConcSolver.equilibrium_reactions`
     **kwargs
-        exclude_boundary_reactions :
-            ``bool`` indicating whether to exclude boundary reactions from
-            the concentration solver.
-
-            Default is ``True``.
         exclude_infinite_Keqs :
             ``bool`` indicating whether to exclude reactions with equilibrium
             constant values of infinity from the concentration solver.
@@ -154,7 +154,7 @@ class ConcSolver:
         concentrations and reaction equilibrium constants.
     tolerance :
         The tolerance of the solver.
-    solver_problem_type : str
+    problem_type : str
         The type of mathematical problem that the concentration solver has
         been setup to solve.
     excluded_metabolites : list
@@ -176,7 +176,6 @@ class ConcSolver:
                  **kwargs):
         """Initialize the ConcSolver."""
         kwargs = _check_kwargs({
-            "exclude_boundary_reactions": True,
             "exclude_infinite_Keqs": True,
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
@@ -188,7 +187,7 @@ class ConcSolver:
         interface = MASSCONFIGURATION.solver
         self._solver = interface.Model()
         self.solver.objective = interface.Objective(Zero)
-        self.solver_problem_type = ""
+        self.problem_type = ""
 
         self._tolerance = None
         self.tolerance = MASSCONFIGURATION.tolerance
@@ -198,8 +197,7 @@ class ConcSolver:
         self.equilibrium_reactions = []
 
         # Try setting excluded and equilibrium attributes specified in kwargs
-        if kwargs.pop("exclude_boundary_reactions"):
-            self.excluded_reactions += [r.id for r in model.boundary]
+        self.excluded_reactions += [r.id for r in model.boundary]
         if kwargs.pop("exclude_infinite_Keqs"):
             self.excluded_reactions += [r.id for r in model.reactions
                                         if r.Keq == float("inf")]
@@ -500,7 +498,7 @@ class ConcSolver:
         -----
         * This involves changing solver variable bounds based on the percent
           deviation of the base value, removing the objective, and setting the
-          :attr:`~ConcSolver.solver_problem_type` to ``"sampling"``.
+          :attr:`~ConcSolver.problem_type` to ``"sampling"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
           :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
@@ -560,40 +558,42 @@ class ConcSolver:
         fixed_conc_bounds = kwargs.pop("fixed_conc_bounds")
         fixed_Keq_bounds = kwargs.pop("fixed_Keq_bounds")
 
-        # Get list of included metabolites
+        # Get list of included metabolites, reactions, and Keq_strs
         metabolites = self._get_included_metabolites(metabolites)
-        for met in metabolites:
-            if met.id in fixed_conc_bounds:
-                bounds = (met.initial_condition, met.initial_condition)
-            else:
-                bounds = (conc_percent_deviation, conc_percent_deviation)
-                bounds = _get_deviation_values(met.initial_condition, *bounds)
-            # Get log values of bounds
-            bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("apply_decimal_precision"))
-            # Set the bounds of the variable
-            var = self.variables[met.id]
-            var.lb, var.ub = bounds
-
-        # Get list of included reactions
         reactions = self._get_included_reactions(reactions)
-        for rxn in reactions:
-            if rxn.id in fixed_Keq_bounds or rxn.Keq_str in fixed_Keq_bounds:
-                bounds = (rxn.Keq, rxn.Keq)
+        Keq_strs = reactions.list_attr("Keq_str")
+
+        for var in self.variables:
+            if var.name in metabolites:
+                # Set bounds if metabolite
+                met = metabolites.get_by_id(var.name)
+                if any([m in fixed_conc_bounds for m in [met, met.id]]):
+                    bounds = (met.initial_condition, met.initial_condition)
+                else:
+                    bounds = (conc_percent_deviation, conc_percent_deviation)
+                    bounds = _get_deviation_values(met.initial_condition,
+                                                   *bounds)
+                upper_def = np.inf
+            elif var.name in Keq_strs:
+                # Set bounds if reaction Keq variable
+                rxn = reactions[Keq_strs.index(var.name)]
+                if any([r in fixed_Keq_bounds
+                        for r in [rxn, rxn.id, rxn.Keq_str]]):
+                    bounds = (rxn.Keq, rxn.Keq)
+                else:
+                    bounds = (Keq_percent_deviation, Keq_percent_deviation)
+                    bounds = _get_deviation_values(rxn.Keq, *bounds)
+                upper_def = MASSCONFIGURATION.irreversible_Keq
             else:
-                bounds = (Keq_percent_deviation, Keq_percent_deviation)
-                bounds = _get_deviation_values(rxn.Keq, *bounds)
-            # Get log values of bounds
-            bounds = _get_log_bounds(
-                bounds, MASSCONFIGURATION.irreversible_Keq,
-                kwargs.get("apply_decimal_precision"))
-            # Set the bounds of the variable
-            var = self.variables[rxn.Keq_str]
+                continue
+            # Get log values of bounds and set
+            bounds = _get_log_bounds(bounds, upper_def,
+                                     kwargs.get("apply_decimal_precision"))
             var.lb, var.ub = bounds
 
         # Ensure objective is zero for sampling
         self.objective = Zero
-        self.solver_problem_type = "sampling"
+        self.problem_type = "sampling"
 
     def setup_feasible_qp_problem(self, metabolites=None, reactions=None,
                                   **kwargs):
@@ -603,7 +603,7 @@ class ConcSolver:
         -----
         * This involves changing solver variable bounds to ``[0, inf]``,
           setting the objective as a QP problem, and setting the
-          :attr:`~ConcSolver.solver_problem_type` to ``"feasible_qp"``.
+          :attr:`~ConcSolver.problem_type` to ``"feasible_qp"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
           :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
@@ -665,47 +665,50 @@ class ConcSolver:
         fixed_conc_bounds = kwargs.pop("fixed_conc_bounds")
         fixed_Keq_bounds = kwargs.pop("fixed_Keq_bounds")
 
-        # Get list of included metabolites
+        # Get list of included metabolites, reactions, and Keq_strs
         metabolites = self._get_included_metabolites(metabolites)
-        for met in metabolites:
-            if met.id in fixed_conc_bounds:
-                bounds = (met.initial_condition, met.initial_condition)
-            else:
-                bounds = (0, np.inf)
-            # Get log values of bounds
-            bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("apply_decimal_precision"))
-            # Set the bounds of the variable
-            var = self.variables[met.id]
-            var.lb, var.ub = bounds
-
-        # Get list of included reactions
         reactions = self._get_included_reactions(reactions)
-        for rxn in reactions:
-            if rxn.id in fixed_Keq_bounds or rxn.Keq_str in fixed_Keq_bounds:
-                bounds = (rxn.Keq, rxn.Keq)
+        Keq_strs = reactions.list_attr("Keq_str")
+
+        # Initialize lists for x_vars and x_data for QP objective
+        x_vars = []
+        x_data = []
+        for var in self.variables:
+            if var.name in metabolites:
+                # Set bounds if metabolite
+                met = metabolites.get_by_id(var.name)
+                if met.id in fixed_conc_bounds:
+                    bounds = (met.initial_condition, met.initial_condition)
+                else:
+                    bounds = (0, np.inf)
+                x_data.append(met.initial_condition)
+            elif var.name in Keq_strs:
+                # Set bounds if reaction Keq variable
+                rxn = reactions[Keq_strs.index(var.name)]
+                if any([r in fixed_Keq_bounds for r in [rxn.id, rxn.Keq_str]]):
+                    bounds = (rxn.Keq, rxn.Keq)
+                else:
+                    bounds = (0, np.inf)
+                x_data.append(rxn.equilibrium_constant)
             else:
-                bounds = (0, np.inf)
-            # Get log values of bounds
+                continue
+            # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, np.inf,
                                      kwargs.get("apply_decimal_precision"))
-            # Set the bounds of the variable
-            var = self.variables[rxn.Keq_str]
             var.lb, var.ub = bounds
+            x_vars.append(var)
 
         # Set objective for feasible qp problem
-        x = Matrix(
-            [self.variables[m.id] for m in metabolites] +
-            [self.variables[r.Keq_str] for r in reactions])
+        x_vars = Matrix(x_vars)
+        x_data = Matrix(np.log(x_data))
+        F = 2 * eye(len(x_vars))
 
-        x_data = Matrix(np.log([m.initial_condition for m in metabolites] +
-                               [r.equilibrium_constant for r in reactions]))
-        F = 2 * eye(len(x))
         # QP Objective must be in form of 0.5 * x.T * F * x - c.T * x
-        obj = 0.5 * x.T * F * x - (2 * x_data).T * x
+        obj = 0.5 * x_vars.T * F * x_vars - (2 * x_data).T * x_vars
+
         self.objective = obj[0]
         self.objective_direction = "min"
-        self.solver_problem_type = "feasible_qp"
+        self.problem_type = "feasible_qp"
 
     def choose_solver(self, solver=None, qp=False):
         """Choose a solver given a solver name.
@@ -1309,16 +1312,11 @@ class ConcSolver:
         }, kwargs)
 
         steady_state_flux = kwargs.pop("steady_state_flux")
-        if steady_state_flux is None:
-            raise ValueError("Steady state flux for Reaction '{0}' has not"
-                             " been defined.".format(reaction.id))
         if steady_state_flux == 0\
            and reaction.id not in self.equilibrium_reactions:
-            LOGGER.info(
-                "Steady state flux is at equilibrium for reaction %s and not "
-                "in `equilibrium_reactions` attribute, no variable created.",
-                reaction.id)
-            return None
+            raise ValueError(
+                "Steady state flux is at equilibrium for reaction '{0}' and "
+                "not in `equilibrium_reactions` attribute".format(reaction.id))
 
         # Create and return log variable
         variable = self._create_variable(reaction, lower_bound, upper_bound,
@@ -1370,9 +1368,6 @@ class ConcSolver:
         }, kwargs)
 
         steady_state_flux = kwargs.get("steady_state_flux")
-        if steady_state_flux is None:
-            raise ValueError("Steady state flux for Reaction '{0}' has not"
-                             " been defined.".format(reaction.id))
         if kwargs.get("apply_decimal_precision"):
             steady_state_flux = round(steady_state_flux,
                                       MASSCONFIGURATION.decimal_precision)
@@ -1384,11 +1379,9 @@ class ConcSolver:
         elif reaction.id in self.equilibrium_reactions:
             lb, ub = (0, 0)
         else:
-            LOGGER.info(
-                "Steady state flux is at equilibrium for reaction %s and not "
-                "in `equilibrium_reactions` attribute, no constraint created.",
-                reaction.id)
-            return None
+            raise ValueError(
+                "Steady state flux is at equilibrium for reaction '{0}' and "
+                "not in `equilibrium_reactions` attribute".format(reaction.id))
 
         var_and_coeffs = {}
         for metabolite, coefficient in iteritems(reaction.metabolites):
@@ -1513,7 +1506,7 @@ class ConcSolver:
             interface = MASSCONFIGURATION.solver
             self._solver = interface.Model()
             self.solver.objective = interface.Objective(Zero)
-            self.solver_problem_type = ""
+            self.problem_type = ""
 
         # Get fixed variables
         fixed_conc_bounds = kwargs.pop("fixed_conc_bounds")
@@ -1534,6 +1527,7 @@ class ConcSolver:
 
         # Get reaction variables for the solver,
         # filtering out those to be excluded.
+        ignored_rxns = []
         reactions = self._get_included_reactions()
         for rxn in reactions:
             if rxn.id in fixed_Keq_bounds or rxn.Keq_str in fixed_Keq_bounds:
@@ -1543,12 +1537,21 @@ class ConcSolver:
                 lb, ub = (0, np.inf)
                 bound_type = "absolute"
             kwargs["bound_type"] = bound_type
-            self.add_reaction_Keq_var_to_problem(rxn, lb, ub, **kwargs)
+            try:
+                # Add Keq variable to problem
+                self.add_reaction_Keq_var_to_problem(rxn, lb, ub, **kwargs)
+                # Add concentration Keq log constraint
+                self.add_concentration_Keq_cons_to_problem(rxn)
+            except ValueError:
+                ignored_rxns += [rxn.id]
 
-            # Add concentration Keq log constraint
-            self.add_concentration_Keq_cons_to_problem(rxn)
+        if ignored_rxns:
+            LOGGER.warning(
+                "No Keq variables or reaction constraints created for the "
+                "following reactions not defined as equilibrium reactions but "
+                "with steady state fluxes of 0.:\n{0!r}".format(ignored_rxns))
 
-        self.solver_problem_type = "generic"
+        self.problem_type = "generic"
 
     def _get_included_metabolites(self, metabolites=None):
         """Return a list of MassMetabolite objects for included metabolites.
@@ -1569,7 +1572,7 @@ class ConcSolver:
         metabolites = self.model.metabolites.get_by_any(
             self.included_metabolites)
 
-        return metabolites
+        return DictList(metabolites)
 
     def _get_included_reactions(self, reactions=None):
         """Return a list of MassReaction objects for included reactions.
@@ -1589,7 +1592,7 @@ class ConcSolver:
                          if r.id not in self.excluded_reactions]
         reactions = self.model.reactions.get_by_any(self.included_reactions)
 
-        return reactions
+        return DictList(reactions)
 
     def __repr__(self):
         """Override default repr.

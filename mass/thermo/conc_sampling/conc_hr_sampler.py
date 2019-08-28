@@ -105,7 +105,7 @@ class ConcHRSampler:
         if not isinstance(concentration_solver, ConcSolver):
             raise TypeError(
                 "`concentration_solver` must be a ConcSolver instance")
-        if concentration_solver.solver_problem_type != "sampling":
+        if concentration_solver.problem_type != "sampling":
             raise ValueError(
                 "The given `concentration_solver` is not set up for sampling. "
                 "To set up the concentration solver for sampling, utilize the "
@@ -135,11 +135,13 @@ class ConcHRSampler:
                 iterkeys(concentration_solver.variables))}
         self.met_var_idx = np.array([
             var_idx[m.id]
-            for m in concentration_solver._get_included_metabolites()])
+            for m in concentration_solver._get_included_metabolites()
+            if m.id in concentration_solver.variables])
 
         self.Keq_var_idx = np.array([
             var_idx[r.Keq_str]
-            for r in concentration_solver._get_included_reactions()])
+            for r in concentration_solver._get_included_reactions()
+            if r.Keq_str in concentration_solver.variables])
 
         # Set warmup variables
         self.warmup = None
@@ -433,19 +435,6 @@ class ConcHRSampler:
         bounds = np.atleast_2d(problem.bounds).T
         variable_fixed = problem.variable_fixed
         variable_bounds = np.atleast_2d(problem.variable_bounds).T
-
-        fixed_non_zero = np.abs(problem.variable_bounds[:, 1]) > \
-            self.feasibility_tol
-        fixed_non_zero &= variable_fixed
-
-        # Add any non-zero fixed variables as equalities to the matrix.
-        if any(fixed_non_zero):
-            n_fixed = fixed_non_zero.sum()
-            rows = np.zeros((n_fixed, equalities.shape[1]))
-            rows[range(n_fixed), np.where(fixed_non_zero)] = 1.0
-            # Add to equalities
-            equalities = np.vstack([equalities, rows])
-            b = np.hstack([b, problem.variable_bounds[:, 1][fixed_non_zero]])
 
         # Set up a projection that can cast point into the nullspace
         nulls = nullspace(self.concentration_solver.model.S.T)
