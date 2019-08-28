@@ -237,15 +237,14 @@ class ConcOptGPSampler(ConcHRSampler):
                        np.atleast_2d(chains).sum(0)) / (self.n_samples + n)
         self.n_samples += n
 
-        if concs:
-            names = self.concentration_solver.included_metabolites
-            df = pd.DataFrame(chains[:, self.met_var_idx], columns=names)
-        else:
-            names = [v.name for v in self.concentration_solver.variables]
-            df = pd.DataFrame(chains, columns=names)
-
+        names = [v.name for v in self.concentration_solver.variables]
+        df = pd.DataFrame(chains, columns=names)
         # Map from logspace back to linspace
         df = df.apply(np.exp)
+
+        if concs:
+            df = df.loc[:, self.concentration_solver.included_metabolites]
+
         return df
 
     # Models can be large so don't pass them around during multiprocessing

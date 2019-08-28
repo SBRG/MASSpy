@@ -85,16 +85,6 @@ class ConcACHRSampler(ConcHRSampler):
         yet.
     nproj : int
         How often to reproject the sampling point into the feasibility space.
-    met_var_idx : numpy.ndarray
-        Has one entry for each metabolite in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_metabolites`, containing the index of the
-        respective metabolite variable.
-    Keq_var_idx : numpy.ndarray
-        Has one entry for each reaction in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_reactions`,containing the index of
-        respective :attr:`.MassReaction.Keq_str` variable.
 
     """
 
@@ -143,15 +133,14 @@ class ConcACHRSampler(ConcHRSampler):
             if i % self.thinning == 0:
                 samples[i // self.thinning - 1, ] = self.prev
 
-        if concs:
-            names = self.concentration_solver.included_metabolites
-            df = pd.DataFrame(samples[:, self.met_var_idx], columns=names)
-        else:
-            names = [v.name for v in self.concentration_solver.variables]
-            df = pd.DataFrame(samples, columns=names)
-
+        names = [v.name for v in self.concentration_solver.variables]
+        df = pd.DataFrame(samples, columns=names)
         # Map from logspace back to linspace
         df = df.apply(np.exp)
+
+        if concs:
+            df = df.loc[:, self.concentration_solver.included_metabolites]
+
         return df
 
     def __single_iteration(self):

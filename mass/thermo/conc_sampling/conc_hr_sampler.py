@@ -85,17 +85,7 @@ class ConcHRSampler:
         than 3 rows containing a warmup sample in each row. None if no warmup
         points have been generated yet.
     nproj : int
-        How often to reproject the sampling point into the feasibility space.
-    met_var_idx : numpy.ndarray
-        Has one entry for each metabolite in the model containing the index of
-        the respective metabolite variable.
-
-        Does not included :attr:`.ConcSolver.excluded_metabolites`.
-    Keq_var_idx : numpy.ndarray
-        Has one entry for each reaction in the model containing the index of
-        the respective reaction Keq variable.
-
-        Does not included :attr:`.ConcSolver.excluded_reactions`.
+        How often to reproject the sampling point into the feasibility space. 
 
     """
 
@@ -128,20 +118,6 @@ class ConcHRSampler:
         self.n_samples = 0
         self.retries = 0
         self.problem = self.__build_problem()
-
-        # Set variable indicies
-        var_idx = {
-            v: idx for idx, v in enumerate(
-                iterkeys(concentration_solver.variables))}
-        self.met_var_idx = np.array([
-            var_idx[m.id]
-            for m in concentration_solver._get_included_metabolites()
-            if m.id in concentration_solver.variables])
-
-        self.Keq_var_idx = np.array([
-            var_idx[r.Keq_str]
-            for r in concentration_solver._get_included_reactions()
-            if r.Keq_str in concentration_solver.variables])
 
         # Set warmup variables
         self.warmup = None
@@ -224,13 +200,12 @@ class ConcHRSampler:
         self.n_warmup = 0
         c_solver = self.concentration_solver
         metabolites = c_solver._get_included_metabolites()
-
         self.warmup = np.zeros((2 * len(metabolites), len(c_solver.variables)))
         for sense in ("min", "max"):
             c_solver.objective_direction = sense
 
             for i, met in enumerate(metabolites):
-                variable = c_solver.variables[self.met_var_idx[i]]
+                variable = c_solver.variables[str(met)]
 
                 # Omit fixed metabolites if they are non-homogeneous
                 if variable.ub - variable.lb < self.bounds_tol:
@@ -438,6 +413,7 @@ class ConcHRSampler:
 
         # Set up a projection that can cast point into the nullspace
         nulls = nullspace(self.concentration_solver.model.S.T)
+
         # Create the problem
         return Problem(
             equalities=shared_np_array(equalities.shape, equalities),
