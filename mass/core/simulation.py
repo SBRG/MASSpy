@@ -140,16 +140,15 @@ class Simulation(Object):
 
     """
 
-    def __init__(self, reference_model, simulation_id=None,
-                 simulation_name=None, verbose=False):
+    def __init__(self, reference_model, id=None, name=None, verbose=False):
         """Initialize the Simulation."""
         if not isinstance(reference_model, MassModel):
             raise TypeError(
                 "'{0}' is not a valid MassModel instance".format(
                     str(reference_model)))
 
-        if simulation_id is None:
-            simulation_id = "{0}_Simulation".format(str(reference_model))
+        if id is None:
+            id = "{0}_Simulation".format(str(reference_model))
 
         try:
             # QCQA check model
@@ -166,7 +165,7 @@ class Simulation(Object):
             raise MassSimulationError(msg)
 
         # Initialize Simulation
-        super(Simulation, self).__init__(simulation_id, simulation_name)
+        super(Simulation, self).__init__(id, name)
         # Store the original model used to create the Simulation
         self._reference_model = reference_model
         # Set roadrunner
@@ -177,7 +176,7 @@ class Simulation(Object):
         self._model_values.add(_get_sim_values_from_model(reference_model))
 
         # Storing concentration and flux solutions in simulations
-        self._conc_solutions = DictList()
+        self._concentration_solutions = DictList()
         self._flux_solutions = DictList()
 
     @property
@@ -203,6 +202,30 @@ class Simulation(Object):
         see the :mod:`~.simulation` documentation.
         """
         return RR_LOGGER
+
+    @property
+    def concentration_solutions(self):
+        r"""Get a copy of stored :class:`.MassSolution`\ s for concentrations.
+
+        Returns
+        -------
+        ~cobra.core.dictlist.DictList
+            Contains all :class:`.MassSolution` objects for concentrations.
+
+        """
+        return getattr(self, "_concentration_solutions").copy()
+
+    @property
+    def flux_solutions(self):
+        r"""Get a copy of the stored :class:`.MassSolution`\ s for fluxes.
+
+        Returns
+        -------
+        ~cobra.core.dictlist.DictList
+            Contains all :class:`.MassSolution` objects for fluxes.
+
+        """
+        return getattr(self, "_flux_solutions").copy()
 
     def set_new_reference_model(self, model, verbose=False):
         """Set a new reference model for the :class:`Simulation`.
@@ -997,7 +1020,7 @@ class Simulation(Object):
         """
         # Determine where solutions are stored
         stored_solution_dictlist = {
-            "Conc": self._conc_solutions,
+            "Conc": self._concentration_solutions,
             "Flux": self._flux_solutions}[solution_type]
 
         # Add solutions to their corresponding DictList
