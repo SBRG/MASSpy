@@ -98,7 +98,8 @@ from mass.exceptions import MassSimulationError
 from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
 from mass.util.qcqa import is_simulatable, qcqa_model
-from mass.util.util import _check_kwargs, ensure_iterable
+from mass.util.util import (
+    _check_kwargs, apply_decimal_precision, ensure_iterable)
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
 
@@ -139,7 +140,7 @@ class Simulation(Object):
 
     """
 
-    def __init__(self, reference_model=None, simulation_id=None,
+    def __init__(self, reference_model, simulation_id=None,
                  simulation_name=None, verbose=False):
         """Initialize the Simulation."""
         if not isinstance(reference_model, MassModel):
@@ -276,7 +277,7 @@ class Simulation(Object):
             values_dict = self._model_values.get_by_id(str(model) + "_values")
         except KeyError:
             raise ValueError(
-                "Model '{0}' does not exist in the Simulation object."
+                "MassModel '{0}' does not exist in the Simulation object."
                 .format(str(model)))
 
         return (values_dict["init_conds"], values_dict["parameters"])
@@ -320,13 +321,13 @@ class Simulation(Object):
             if not self.reference_model.has_equivalent_odes(model, verbose):
                 RR_LOGGER.log(
                     RR_LOGGER.LOG_WARNING,
-                    "Skipping Model '{0}', ODEs are not equivalent to the "
+                    "Skipping MassModel '{0}', ODEs are not equivalent to the "
                     "reference model.".format(str(model)))
                 continue
             try:
                 _assess_model_quality_for_simulation(model, verbose, False)
             except MassSimulationError as e:
-                msg = "Could not load Model '" + str(model) + "'"
+                msg = "Could not load MassModel '" + str(model) + "'"
                 if verbose:
                     msg += ": " + str(e)
                 RR_LOGGER.log(RR_LOGGER.LOG_WARNING, msg)
@@ -338,15 +339,14 @@ class Simulation(Object):
                 if verbose:
                     RR_LOGGER.log(
                         RR_LOGGER.LOG._NOTICE,
-                        "Model '{0}' already exists, existing values will be "
-                        "replaced".format(str(model)))
+                        "MassModel '{0}' already exists, existing values will "
+                        "be replaced".format(str(model)))
             else:
                 self._model_values.add(values)
             if verbose:
                 RR_LOGGER.log(
-                    RR_LOGGER.LOG_NOTICE,
-                    "Successfully loaded Model '{0}' into Simulation.".format(
-                        str(model)))
+                    RR_LOGGER.LOG_NOTICE, "Successfully loaded MassModel '{0}'"
+                    " into Simulation.".format(str(model)))
 
     def remove_models(self, models, verbose=False):
         r"""Remove the model values to the :class:`Simulation`.
@@ -373,13 +373,14 @@ class Simulation(Object):
                 values_dict = self._model_values.get_by_id(
                     str(model) + "_values")
             except KeyError:
-                warn("Model '{0}'does not exist in Simulation.".format(model))
+                warn("MassModel '{0}' does not exist in Simulation.".format(
+                    model))
             else:
                 self._model_values -= [values_dict]
                 if verbose:
-                    RR_LOGGER.log(RR_LOGGER.LOG_NOTICE,
-                                  "Successfully removed Model '{0}' from the "
-                                  "Simulation.".format(str(model)))
+                    RR_LOGGER.log(
+                        RR_LOGGER.LOG_NOTICE, "Successfully removed MassModel "
+                        "'{0}' from the Simulation.".format(str(model)))
 
     def get_model_objects(self, models=None):
         r"""Return the loaded models as :class:`~.MassModel`\ s.
@@ -489,6 +490,12 @@ class Simulation(Object):
                 the simulation with the new simulation results.
 
                 Default is ``True``.
+            decimal_precision :
+                ``bool`` indicating whether to apply the
+                :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
+                the :class:`.MassConfiguration` to the solution values.
+
+                Default is ``False``.
 
         Returns
         -------
@@ -512,7 +519,8 @@ class Simulation(Object):
             "disable_warnings": False,
             "steps": None,
             "interpolate": False,
-            "update_solutions": True}, kwargs)
+            "update_solutions": True,
+            "decimal_precision": False}, kwargs)
 
         # Set all models for simulation if None provided.
         if models is None:
@@ -556,7 +564,7 @@ class Simulation(Object):
                     RR_LOGGER.log(
                         RR_LOGGER.LOG_ERROR,
                         "Failed simulation for '{0}' due the following error: "
-                        "'{1}'".format(model, str(e)))
+                        "{1}".format(model, str(e)))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
                         model, default_selections=selections, results=None,
@@ -663,6 +671,12 @@ class Simulation(Object):
                 ``strategy='nleq2'``.
 
                 Default is ``2``.
+            decimal_precision :
+                ``bool`` indicating whether to apply the
+                :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
+                the :class:`.MassConfiguration` to the solution values.
+
+                Default is ``False``.
 
         Returns
         -------
@@ -686,7 +700,8 @@ class Simulation(Object):
             "disable_warnings": False,
             "steps": None,
             "tfinal": 1e8,
-            "num_attempts": 2}, kwargs)
+            "num_attempts": 2,
+            "decimal_precision": True}, kwargs)
 
         # Set all models for simulation if None provided.
         if models is None:
@@ -738,10 +753,9 @@ class Simulation(Object):
                         warn("Unable to find a steady state for one or more "
                              "models. Check the log for more details.")
                     RR_LOGGER.log(
-                        RR_LOGGER.LOG_ERROR,
-                        "Unable to find a steady state for Model '{0}' using "
-                        "strategy '{1}' due to the following: '{2}'".format(
-                            model, strategy, str(e)))
+                        RR_LOGGER.LOG_ERROR, "Unable to find a steady state "
+                        "for MassModel '{0}' using strategy '{1}' due to the "
+                        "following: {2}".format(model, strategy, str(e)))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
                         model, default_selections=selections, results=None,
@@ -947,11 +961,13 @@ class Simulation(Object):
                     time = results[sol_key]
                 elif sol_key in species_list:
                     # Add solution to concentration solutions if specie
-                    result_array = _round_values(results[sol_key])
+                    result_array = _round_values(
+                        results[sol_key], kwargs.get("decimal_precision"))
                     conc_sol[_strip_conc(sol_key)] = result_array
                 elif sol_key in reaction_list:
                     # Add solution to flux solutions if reaction
-                    result_array = _round_values(results[sol_key])
+                    result_array = _round_values(
+                        results[sol_key], kwargs.get("decimal_precision"))
                     flux_sol[sol_key] = result_array
                 else:
                     pass
@@ -1038,26 +1054,24 @@ class Simulation(Object):
             raise MassSimulationError(
                 str(e.__class__.__name__) + ": " + str(e))
 
-        def is_steady_state(abs_diff):
-            """Compare the absolute diff. to the steady state threshold."""
-            # Round value before comparision
-            if MASSCONFIGURATION.decimal_precision is not None:
-                abs_diff = round(abs_diff, MASSCONFIGURATION.decimal_precision)
-            if abs_diff <= MASSCONFIGURATION.steady_state_threshold:
-                return True
-            return False
+        final_points = np.array([simulation_results[key][-2:]
+                                 for key in rr.timeCourseSelections])
 
-        ss_results = {}
-        for sol_key in rr.timeCourseSelections:
-            second_to_last, last = simulation_results[sol_key][-2:]
-            success = is_steady_state(abs(second_to_last - last))
-            if success:
-                ss_results[sol_key] = last
-            else:
-                # If no steady state found, raise MassSimulationError
-                raise MassSimulationError(
-                    "Absolute difference for '{0}' in Model '{1}' is greater "
-                    "than the steady state threshold.".format(sol_key, model))
+        abs_diff = np.abs(final_points[:, 0] - final_points[:, -1])
+        if kwargs.get("decimal_precision"):
+            abs_diff = apply_decimal_precision(
+                abs_diff, MASSCONFIGURATION.decimal_precision)
+
+        abs_diff = abs_diff < MASSCONFIGURATION.steady_state_threshold
+        if not all(abs_diff):
+            raise MassSimulationError(
+                'For MassModel "{0}", absolute difference for "{1!r}" is '
+                'greater than the steady state threshold.'.format(model, [
+                    key for i, key in enumerate(rr.timeCourseSelections)
+                    if not abs_diff[i]]))
+
+        ss_results = {key: final_points[i, -1]
+                      for i, key in enumerate(rr.timeCourseSelections)}
 
         return ss_results
 
@@ -1075,9 +1089,9 @@ class Simulation(Object):
             """Solve for steady state via RoadRunner."""
             is_ss_value = rr.steadyState()
             # Round value before comparision
-            if MASSCONFIGURATION.decimal_precision is not None:
-                is_ss_value = round(is_ss_value,
-                                    MASSCONFIGURATION.decimal_precision)
+            if kwargs.get("decimal_precision"):
+                is_ss_value = apply_decimal_precision(
+                    is_ss_value, MASSCONFIGURATION.decimal_precision)
             if is_ss_value <= MASSCONFIGURATION.steady_state_threshold:
                 return True
             return False
@@ -1095,7 +1109,7 @@ class Simulation(Object):
 
         if not success:
             raise MassSimulationError(
-                "Could not find steady state for Model '{0}' after {1:d} "
+                "Could not find steady state for MassModel '{0}' after {1:d} "
                 "attempts, steady state threshold always exceeded.".format(
                     model, i))
 
@@ -1174,8 +1188,8 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
     if not simulate_check:
         msg = ""
         if verbose:
-            msg += "Model is missing numerical values that are necessary " + \
-                   "for simulation."
+            msg += "MassModel is missing numerical values that are " + \
+                   "necessary for simulation."
         if report:
             qcqa_model(mass_model, **{
                 "parameters": True,
@@ -1187,7 +1201,7 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
         raise MassSimulationError(msg)
 
     if not consistency_check:
-        msg = "Model has numerical consistency issues, use with caution."
+        msg = "MassModel has numerical consistency issues, use with caution."
         if verbose:
             msg += " To help determine which values are not numerically " + \
                    "consistent, use the `qcqa_model` method in mass.util.qcqa."
@@ -1223,7 +1237,7 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
 
     if verbose:
         RR_LOGGER.log(
-            RR_LOGGER.LOG_NOTICE, "Successfully loaded Model '{0}' into "
+            RR_LOGGER.LOG_NOTICE, "Successfully loaded MassModel '{0}' into "
             "RoadRunner.".format(str(mass_model)))
 
     return rr
@@ -1277,7 +1291,7 @@ def _format_time_input(time, steps=None):
     return time
 
 
-def _round_values(values):
+def _round_values(values, decimal_precision=True):
     """Round a value to the decimal precision in the MassConfiguration.
 
     Warnings
@@ -1285,18 +1299,9 @@ def _round_values(values):
     This method is intended for internal use only.
 
     """
-    return_as_array = True
-
-    if not hasattr(values, "__iter__"):
-        values = ensure_iterable(values)
-        return_as_array = False
-
-    if MASSCONFIGURATION.decimal_precision is not None:
-        values = np.array([
-            round(v, MASSCONFIGURATION.decimal_precision) for v in values])
-
-    if not return_as_array:
-        values = values[0]
+    if decimal_precision:
+        values = apply_decimal_precision(values,
+                                         MASSCONFIGURATION.decimal_precision)
 
     return values
 

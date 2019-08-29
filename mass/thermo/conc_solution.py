@@ -169,7 +169,7 @@ def get_concentration_solution(concentration_solver, metabolites=None,
             ``bool`` indicating whether to leave values in logspace.
 
             Default is ``False``.
-        apply_decimal_precision :
+        decimal_precision :
             ``bool`` indicating whether to apply the
             :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
             the :class:`.MassConfiguration` to the solution values.
@@ -184,7 +184,7 @@ def get_concentration_solution(concentration_solver, metabolites=None,
     """
     kwargs = _check_kwargs({
         "logspace": False,
-        "apply_decimal_precision": False,
+        "decimal_precision": False,
     }, kwargs)
 
     check_solver_status(concentration_solver.solver.status,
@@ -226,16 +226,10 @@ def get_concentration_solution(concentration_solver, metabolites=None,
         """Transform array from logs to linear space and round if desired."""
         if not kwargs.get("logspace"):
             arr = exp(arr)
-        if kwargs.get("apply_decimal_precision") and\
-           MASSCONFIGURATION.decimal_precision is not None:
-            if hasattr(arr, "__iter__"):
-                arr = array([
-                    apply_decimal_precision(
-                        v, MASSCONFIGURATION.decimal_precision)
-                    for v in arr if v != nan])
-            else:
-                arr = apply_decimal_precision(
-                    arr, MASSCONFIGURATION.decimal_precision)
+
+        if kwargs.get("decimal_precision"):
+            arr = apply_decimal_precision(
+                arr, MASSCONFIGURATION.decimal_precision)
 
         return arr
 

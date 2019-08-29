@@ -98,15 +98,6 @@ class MassSolution(DictWithID):
         return getattr(self, "_simulation")
 
     @property
-    def df(self):
-        """Return the stored solutions as a :class:`pandas.DataFrame`."""
-        sols = dict((k, v(self.time)) if self.interpolate
-                    else (k, v) for k, v in iteritems(self))
-        df = pd.DataFrame.from_dict(sols)
-        df.index = pd.Series(self.time, name="Time")
-        return df
-
-    @property
     def time(self):
         r"""Get or set the time points stored in the :class:`MassSolution`.
 
@@ -252,6 +243,14 @@ class MassSolution(DictWithID):
                 "tile_ylabel_fontdict": {"size": "large"},
                 "annotate_time_points_legend_loc": "right outside"})
         ax.get_figure().set_size_inches((7, 7))
+
+    def to_frame(self):
+        """Return the stored solutions as a :class:`pandas.DataFrame`."""
+        sols = dict((k, v(self.time)) if self.interpolate
+                    else (k, v) for k, v in iteritems(self))
+        df = pd.DataFrame.from_dict(sols)
+        df.index = pd.Series(self.time, name="Time")
+        return df
 
     def __getattribute__(self, name):
         """Override of default :func:`getattr` to enable attribute accessors.

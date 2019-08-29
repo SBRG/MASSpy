@@ -103,7 +103,18 @@ def apply_decimal_precision(value, decimal_precision):
 
     """
     if decimal_precision is not None and value is not None:
-        return round(value, decimal_precision)
+        if hasattr(value, "__iter__"):
+            new = [round(v, decimal_precision) for v in value]
+            if not isinstance(value, (list, np.ndarray)):
+                try:
+                    value = value.__class__(new)
+                except Exception:
+                    pass
+            elif isinstance(value, np.ndarray):
+                value = np.array(new)
+
+        else:
+            value = round(value, decimal_precision)
 
     return value
 
