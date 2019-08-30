@@ -75,7 +75,6 @@ implementation of the Poco logging system. See the :mod:`roadrunner`
 documentation for more information on how to configure the
 `RoadRunner logger <https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging>`_.
 """  # noqa
-import sys
 from warnings import warn
 
 from cobra.core.dictlist import DictList
@@ -102,11 +101,9 @@ from mass.util.util import (
     _check_kwargs, apply_decimal_precision, ensure_iterable)
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
+# If working in Python application (e.g. iPython notebooks), enable logging
 
 RR_LOGGER = roadrunner.Logger
-# If working in Python application (e.g. iPython notebooks), enable logging
-if sys.__stderr__ != sys.stderr:
-    RR_LOGGER.enablePythonLogging()
 RR_LOGGER.setFormattingPattern("'roadrunner %p: %t'")
 
 # SBML writing kwargs
@@ -172,8 +169,9 @@ class Simulation(Object):
         self._roadrunner = rr
 
         # Storing model values for simulations
-        self._model_values = DictList()
-        self._model_values.add(_get_sim_values_from_model(reference_model))
+        self._simulation_values = DictList()
+        self._simulation_values.add(
+            _get_sim_values_from_model(reference_model))
 
         # Storing concentration and flux solutions in simulations
         self._concentration_solutions = DictList()
@@ -187,7 +185,7 @@ class Simulation(Object):
     @property
     def models(self):
         """Return the IDs of models that exist in the :class:`Simulation`."""
-        return [d.id.replace("_values", "") for d in self._model_values]
+        return [d.id.replace("_values", "") for d in self._simulation_values]
 
     @property
     def roadrunner(self):
@@ -252,7 +250,7 @@ class Simulation(Object):
             as the new reference model.
         verbose : bool
             Whether to output additional and more verbose messages.
-            Default is ``True``.
+            Default is ``False``.
 
         """
         # If a MassModel is provided, add the model to the Simulation,
@@ -277,7 +275,7 @@ class Simulation(Object):
                 new_model, rr=self.roadrunner, verbose=verbose,
                 **_SBML_KWARGS)
 
-    def get_model_values(self, model):
+    def get_model_simulation_values(self, model):
         """Return two dictionaries containing initial and parameter values.
 
         Parameters
@@ -297,7 +295,8 @@ class Simulation(Object):
 
         """
         try:
-            values_dict = self._model_values.get_by_id(str(model) + "_values")
+            values_dict = self._simulation_values.get_by_id(
+                str(model) + "_values")
         except KeyError:
             raise ValueError(
                 "MassModel '{0}' does not exist in the Simulation object."
@@ -328,7 +327,7 @@ class Simulation(Object):
         models : iterable of models
             An iterable containing the :class:`~.MassModel`\ s to add.
         verbose : bool
-            Whether to log successful loading of models. Default is ``True``.
+            Whether to log successful loading of models. Default is ``False``.
 
         """
         models = ensure_iterable(models)
@@ -357,15 +356,14 @@ class Simulation(Object):
                 continue
 
             values = _get_sim_values_from_model(model)
-            if values in self._model_values:
-                self._model_values._replace_on_id(values)
-                if verbose:
-                    RR_LOGGER.log(
-                        RR_LOGGER.LOG._NOTICE,
-                        "MassModel '{0}' already exists, existing values will "
-                        "be replaced".format(str(model)))
+            if values in self._simulation_values:
+                self._simulation_values._replace_on_id(values)
+                RR_LOGGER.log(
+                    RR_LOGGER.LOG._NOTICE, "MassModel '{0}' already exists, "
+                    "existing values will be replaced".format(str(model)))
             else:
-                self._model_values.add(values)
+                self._simulation_values.add(values)
+
             if verbose:
                 RR_LOGGER.log(
                     RR_LOGGER.LOG_NOTICE, "Successfully loaded MassModel '{0}'"
@@ -387,19 +385,19 @@ class Simulation(Object):
             An iterable of :class:`.MassModel`\ s or their string identifiers
             to be removed.
         verbose : bool
-            Whether to log successful removal of a model. Default is ``True``.
+            Whether to log successful removal of models. Default is ``False``.
 
         """
         models = [str(m) for m in ensure_iterable(models)]
         for model in models:
             try:
-                values_dict = self._model_values.get_by_id(
+                values_dict = self._simulation_values.get_by_id(
                     str(model) + "_values")
             except KeyError:
                 warn("MassModel '{0}' does not exist in Simulation.".format(
                     model))
             else:
-                self._model_values -= [values_dict]
+                self._simulation_values -= [values_dict]
                 if verbose:
                     RR_LOGGER.log(
                         RR_LOGGER.LOG_NOTICE, "Successfully removed MassModel "
@@ -846,13 +844,15 @@ class Simulation(Object):
 
         # Get the reference model initial conditions and parameters
         if perturbations:
-            model_values = self._get_all_model_values(self.reference_model)
+            sim_values = self._get_all_values_for_sim(self.reference_model)
+
             for key, value in iteritems(perturbations):
                 # Ensure key exists in model values
-                if key not in model_values\
-                   and _make_init_cond(key) not in model_values:
-                    raise ValueError("Invalid Perturbation: '{0}' not found in"
-                                     " model values".format(key))
+                if key not in sim_values\
+                   and _make_init_cond(key) not in sim_values:
+                    raise ValueError(
+                        "Invalid Perturbation: '{0}' not found in model "
+                        "simulation values".format(key))
                 try:
                     value = float(value)
                 except (ValueError, TypeError):
@@ -886,7 +886,7 @@ class Simulation(Object):
         rr = self.roadrunner
         try:
             # Ensure values exist for the model
-            model_values_to_set = self._get_all_model_values(model)
+            sim_values_to_set = self._get_all_values_for_sim(model)
         except ValueError as e:
             raise MassSimulationError(e)
 
@@ -897,35 +897,35 @@ class Simulation(Object):
             for key, value in iteritems(perturbations):
                 # Perturb value to a number if value is float
                 if isinstance(value, float):
-                    model_values_to_set[key] = value
+                    sim_values_to_set[key] = value
                     continue
 
-                model_values = self._get_all_model_values(self.reference_model)
+                sim_values = self._get_all_values_for_sim(self.reference_model)
                 # Determine type of perturbation
-                if _make_init_cond(key) in model_values:
+                if _make_init_cond(key) in sim_values:
                     accessor_key = _make_init_cond(key)
                 else:
                     accessor_key = key
 
-                value = value.subs({key: model_values_to_set[accessor_key]})
+                value = value.subs({key: sim_values_to_set[accessor_key]})
                 try:
                     value = float(value)
                 except (ValueError, TypeError):
                     reset = True
 
-                model_values_to_set[accessor_key] = value
+                sim_values_to_set[accessor_key] = value
                 continue
 
         except (ValueError, MassSimulationError) as e:
             raise MassSimulationError(e)
 
         # Set roadrunner to reflect given model variant
-        rr = self._set_values_in_roadrunner(model, reset, model_values_to_set)
+        rr = self._set_values_in_roadrunner(model, reset, sim_values_to_set)
 
         # Return the roadrunner instance and whether it will need a reload for
         return rr, reset
 
-    def _set_values_in_roadrunner(self, model, reset, model_values_to_set):
+    def _set_values_in_roadrunner(self, model, reset, sim_values_to_set):
         """Set the roadrunner values to reflect the given model.
 
         Warnings
@@ -938,13 +938,13 @@ class Simulation(Object):
             new_model = self.reference_model.copy()
             new_model.id = model
             new_model = self._update_mass_model_with_values(
-                new_model, model_values_to_set)
+                new_model, sim_values_to_set)
 
             rr = _load_model_into_roadrunner(
                 new_model, rr=self.roadrunner, verbose=False,
                 **_SBML_KWARGS)
         else:
-            for key, value in iteritems(model_values_to_set):
+            for key, value in iteritems(sim_values_to_set):
                 if isinstance(value, Basic):
                     continue
                 rr.setValue(key, value)
@@ -1006,7 +1006,7 @@ class Simulation(Object):
                                 interpolate=kwargs.get("interpolate", False))
 
         if update_values:
-            self._update_model_values(model, (conc_sol, flux_sol))
+            self._update_simulation_values(model, (conc_sol, flux_sol))
 
         return conc_sol, flux_sol
 
@@ -1140,7 +1140,7 @@ class Simulation(Object):
         results = zip(rr.steadyStateSelections, rr.getSteadyStateValues())
         return dict(results)
 
-    def _update_model_values(self, model, values):
+    def _update_simulation_values(self, model, values):
         """Update the stored values for the model with the new ones.
 
         Warnings
@@ -1148,10 +1148,10 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        model_values = self.get_model_values(model)
+        sim_values = self.get_model_simulation_values(model)
         id_fix_dict = {model + "_init_conds": _make_init_cond,
                        model + "_parameters": _make_ss_flux}
-        for current_value_dict, new_value_dict in zip(model_values, values):
+        for current_value_dict, new_value_dict in zip(sim_values, values):
             id_fix_func = id_fix_dict[current_value_dict.id]
             for key, value in iteritems(new_value_dict):
                 current_value_dict[id_fix_func(key)] = value
@@ -1165,7 +1165,7 @@ class Simulation(Object):
 
         """
         # Get the model values
-        init_conds, parameters = self.get_model_values(mass_model)
+        init_conds, parameters = self.get_model_simulation_values(mass_model)
 
         # Update with provided model values
         if value_dict is not None:
@@ -1184,7 +1184,7 @@ class Simulation(Object):
 
         return mass_model
 
-    def _get_all_model_values(self, mass_model):
+    def _get_all_values_for_sim(self, mass_model):
         """Get all model values as a single dict.
 
         Warnings
@@ -1192,11 +1192,11 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        init_conds, parameters = self.get_model_values(mass_model)
-        model_values = {}
-        model_values.update(init_conds)
-        model_values.update(parameters)
-        return model_values
+        init_conds, parameters = self.get_model_simulation_values(mass_model)
+        sim_values = {}
+        sim_values.update(init_conds)
+        sim_values.update(parameters)
+        return sim_values
 
 
 def _assess_model_quality_for_simulation(mass_model, verbose, report):
