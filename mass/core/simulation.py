@@ -56,7 +56,8 @@ reaction with ID ``'RID'``:
     * Altering :attr:`~.MassModel.boundary_conditions` (BCs):
 
         * ``{'MID_b': 'sin(2 * pi * t)'}`` Change BC to a ``sin`` function.
-        * ``{'MID_b': 'MID_b + cos(t)'}`` Add ``cos`` function to current BC value.
+        * ``{'MID_b': 'MID_b + cos(t)'}`` Add ``cos`` function to current BC
+          value.
 
 Note that perturbations using functions of time may take longer to implement
 than other perturbations.
@@ -69,12 +70,16 @@ means that there can only be one concentration solution and one flux solution
 per simulated model. A failed simulation of a model will return an empty
 :class:`~.MassSolution`.
 
-Because the :class:`Simulation` utilizes the :mod:`roadrunner` package for
-simulating models, the :class:`Simulation` will also utilize the :mod:`roadrunner`
-implementation of the Poco logging system. See the :mod:`roadrunner`
-documentation for more information on how to configure the
-`RoadRunner logger <https://libroadrunner.readthedocs.io/en/latest/api_reference.html#logging>`_.
-"""  # noqa
+Though the :class:`Simulation` utilizes the :mod:`roadrunner` package, the
+standard :mod:`logging` module will be used for :mod:`mass` logging purposes in
+the :mod:`simulation` submodule. Therefore, the roadrunner logger is disabled
+upon loading the :mod:`simulation` submodule. However, because the
+:class:`Simulation` utilizes the :mod:`roadrunner` package for simulating
+models, the :class:`roadrunner.Logger` can be accessed via the
+:const:`RR_LOGGER` variable for those who wish to utilize it. See the
+:mod:`roadrunner` documentation for more information on how to configure the
+:class:`roadrunner.Logger`.
+"""
 from warnings import warn
 
 from cobra.core.dictlist import DictList
@@ -98,13 +103,18 @@ from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
 from mass.util.qcqa import is_simulatable, qcqa_model
 from mass.util.util import (
-    _check_kwargs, apply_decimal_precision, ensure_iterable)
+    _check_kwargs, _make_logger, apply_decimal_precision, ensure_iterable)
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
 # If working in Python application (e.g. iPython notebooks), enable logging
 
+# Set the logger
+LOGGER = _make_logger(__name__)
+"""logging.Logger: Logger for :mod:`~mass.core.simulation` submodule."""
+
 RR_LOGGER = roadrunner.Logger
-RR_LOGGER.setFormattingPattern("'roadrunner %p: %t'")
+"""roadrunner.Logger: The logger for the :mod:`roadrunner`."""
+RR_LOGGER.disableLogging()
 
 # SBML writing kwargs
 _SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
@@ -155,7 +165,7 @@ class Simulation(Object):
             rr = _load_model_into_roadrunner(reference_model, rr=None,
                                              verbose=verbose, **_SBML_KWARGS)
         except MassSimulationError as e:
-            msg = "Could not load MassModel '{0}' in Simulation object".format(
+            msg = "Could not load MassModel '{0}'".format(
                 str(reference_model))
             if verbose:
                 msg += ": " + str(e)
@@ -191,15 +201,6 @@ class Simulation(Object):
     def roadrunner(self):
         """Return the :class:`~roadrunner.RoadRunner` instance."""
         return self._roadrunner
-
-    @property
-    def logger(self):
-        """Return the logging instance of the :class:`Simulation`.
-
-        For more information on setting the logging system configuration,
-        see the :mod:`~.simulation` documentation.
-        """
-        return RR_LOGGER
 
     @property
     def concentration_solutions(self):
@@ -327,7 +328,8 @@ class Simulation(Object):
         models : iterable of models
             An iterable containing the :class:`~.MassModel`\ s to add.
         verbose : bool
-            Whether to log successful loading of models. Default is ``False``.
+            Whether to raise warnings if loading of models fails.
+            Default is ``False``.
 
         """
         models = ensure_iterable(models)
@@ -341,36 +343,36 @@ class Simulation(Object):
 
         for model in models:
             if not self.reference_model.has_equivalent_odes(model, verbose):
-                RR_LOGGER.log(
-                    RR_LOGGER.LOG_WARNING,
-                    "Skipping MassModel '{0}', ODEs are not equivalent to the "
-                    "reference model.".format(str(model)))
+                msg = str(
+                    "Could not load MassModel '{0}', ODEs are not equivalent"
+                    "to the reference model.".format(str(model)))
+                if verbose:
+                    warn(msg)
+                LOGGER.warning(msg)
                 continue
             try:
                 _assess_model_quality_for_simulation(model, verbose, False)
             except MassSimulationError as e:
                 msg = "Could not load MassModel '" + str(model) + "'"
                 if verbose:
-                    msg += ": " + str(e)
-                RR_LOGGER.log(RR_LOGGER.LOG_WARNING, msg)
+                    warn(msg)
+                msg += ": " + str(e)
+                LOGGER.warning(msg)
                 continue
 
             values = _get_sim_values_from_model(model)
             if values in self._simulation_values:
                 self._simulation_values._replace_on_id(values)
-                RR_LOGGER.log(
-                    RR_LOGGER.LOG._NOTICE, "MassModel '{0}' already exists, "
-                    "existing values will be replaced".format(str(model)))
+                LOGGER.warning(
+                    "MassModel '%s' already exists, existing values will be "
+                    "replaced", str(model))
             else:
                 self._simulation_values.add(values)
 
-            if verbose:
-                RR_LOGGER.log(
-                    RR_LOGGER.LOG_NOTICE, "Successfully loaded MassModel '{0}'"
-                    " into Simulation.".format(str(model)))
+            LOGGER.info("Successfully loaded MassModel '%s'.", str(model))
 
     def remove_models(self, models, verbose=False):
-        r"""Remove the model values to the :class:`Simulation`.
+        r"""Remove the model values from the :class:`Simulation`.
 
         Notes
         -----
@@ -385,7 +387,8 @@ class Simulation(Object):
             An iterable of :class:`.MassModel`\ s or their string identifiers
             to be removed.
         verbose : bool
-            Whether to log successful removal of models. Default is ``False``.
+            Whether to  raise warnings if removal of model fails.
+            Default is ``False``.
 
         """
         models = [str(m) for m in ensure_iterable(models)]
@@ -394,14 +397,12 @@ class Simulation(Object):
                 values_dict = self._simulation_values.get_by_id(
                     str(model) + "_values")
             except KeyError:
-                warn("MassModel '{0}' does not exist in Simulation.".format(
-                    model))
+                if verbose:
+                    warn("MassModel '{0}' does not exist.".format(model))
             else:
                 self._simulation_values -= [values_dict]
-                if verbose:
-                    RR_LOGGER.log(
-                        RR_LOGGER.LOG_NOTICE, "Successfully removed MassModel "
-                        "'{0}' from the Simulation.".format(str(model)))
+                LOGGER.info(
+                    "Successfully removed MassModel '%s'.", str(model))
 
     def get_model_objects(self, models=None):
         r"""Return the loaded models as :class:`~.MassModel`\ s.
@@ -489,9 +490,9 @@ class Simulation(Object):
                 concentrations in the output.
 
                 Default is ``False``.
-            disable_warnings :
-                ``bool`` indicating disable the user warnings that are raised
-                in addition to logging.
+            verbose :
+                ``bool`` indicating whether to raise user warnings if something
+                unexpected occurs.
 
                 Default is ``False``.
             steps :
@@ -537,7 +538,7 @@ class Simulation(Object):
         kwargs = _check_kwargs({
             "selections": None,
             "boundary_metabolites": False,
-            "disable_warnings": False,
+            "verbose": False,
             "steps": None,
             "interpolate": False,
             "update_solutions": True,
@@ -579,13 +580,12 @@ class Simulation(Object):
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    if not kwargs.get("disable_warnings"):
+                    if not kwargs.get("verbose"):
                         warn("One or more simulations failed. Check the log "
                              "for more details.")
-                    RR_LOGGER.log(
-                        RR_LOGGER.LOG_ERROR,
-                        "Failed simulation for '{0}' due the following error: "
-                        "{1}".format(model, str(e)))
+                    LOGGER.error(
+                        "Failed simulation for '%s' due the following error: "
+                        "%s", model, str(e))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
                         model, default_selections=selections, results=None,
@@ -666,9 +666,9 @@ class Simulation(Object):
                 concentrations in the output.
 
                 Default is ``False``.
-            disable_warnings :
-                ``bool`` indicating disable the user warnings that are raised
-                in addition to logging.
+            verbose :
+                ``bool`` indicating whether to raise user warnings if something
+                unexpected occurs.
 
                 Default is ``False``.
             steps :
@@ -718,7 +718,7 @@ class Simulation(Object):
         kwargs = _check_kwargs({
             "selections": None,
             "boundary_metabolites": False,
-            "disable_warnings": False,
+            "verbose": False,
             "steps": None,
             "tfinal": 1e8,
             "num_attempts": 2,
@@ -770,13 +770,13 @@ class Simulation(Object):
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    if not kwargs.get("disable_warnings"):
+                    if not kwargs.get("verbose"):
                         warn("Unable to find a steady state for one or more "
                              "models. Check the log for more details.")
-                    RR_LOGGER.log(
-                        RR_LOGGER.LOG_ERROR, "Unable to find a steady state "
-                        "for MassModel '{0}' using strategy '{1}' due to the "
-                        "following: {2}".format(model, strategy, str(e)))
+                    LOGGER.error(
+                        "Unable to find a steady state for MassModel '%s' "
+                        "using strategy '%s' due to the following: %s",
+                        model, strategy, str(e))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
                         model, default_selections=selections, results=None,
@@ -1228,7 +1228,7 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
         if verbose:
             msg += " To help determine which values are not numerically " + \
                    "consistent, use the `qcqa_model` method in mass.util.qcqa."
-        RR_LOGGER.log(RR_LOGGER.LOG_WARNING, msg)
+        LOGGER.warning(msg)
 
 
 def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
@@ -1259,9 +1259,9 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
         rr.load(sbml_str)
 
     if verbose:
-        RR_LOGGER.log(
-            RR_LOGGER.LOG_NOTICE, "Successfully loaded MassModel '{0}' into "
-            "RoadRunner.".format(str(mass_model)))
+        LOGGER.info(
+            "Successfully loaded MassModel '%s' into RoadRunner.",
+            str(mass_model))
 
     return rr
 
@@ -1384,4 +1384,4 @@ def _make_ss_flux(reaction_str):
     return "v_" + reaction_str
 
 
-__all__ = ("Simulation",)
+__all__ = ("Simulation", "LOGGER", "RR_LOGGER",)
