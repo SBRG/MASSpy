@@ -919,7 +919,7 @@ class MassReaction(Reaction):
             elif isinstance(met, Metabolite):
                 # Convert metabolite to a MassMetabolite and raise a warning
                 warnings.warn(
-                    "'{0}' is a not a mass.MassMetabolite, therefore "
+                    "'{0}' is not a mass.MassMetabolite, therefore "
                     "converting metabolite before adding.".format(str(met)))
                 mass_met = MassMetabolite(met)
                 metabolites_to_add[mass_met] = metabolites_to_add.pop(met)
@@ -1101,7 +1101,9 @@ class MassReaction(Reaction):
         """
         is_reversible = self.reversible
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.filterwarnings("ignore",
+                                    ".*is not a mass.MassMetabolite, therefore"
+                                    " converting metabolite.*")
             super(MassReaction, self).build_reaction_from_string(
                 reaction_str, verbose, fwd_arrow, rev_arrow, reversible_arrow,
                 term_split)

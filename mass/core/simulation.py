@@ -328,7 +328,7 @@ class Simulation(Object):
         models : iterable of models
             An iterable containing the :class:`~.MassModel`\ s to add.
         verbose : bool
-            Whether to raise warnings if loading of models fails.
+            Whether to print if loading of models succeeds or fails.
             Default is ``False``.
 
         """
@@ -347,7 +347,7 @@ class Simulation(Object):
                     "Could not load MassModel '{0}', ODEs are not equivalent"
                     "to the reference model.".format(str(model)))
                 if verbose:
-                    warn(msg)
+                    print(msg)
                 LOGGER.warning(msg)
                 continue
             try:
@@ -355,7 +355,7 @@ class Simulation(Object):
             except MassSimulationError as e:
                 msg = "Could not load MassModel '" + str(model) + "'"
                 if verbose:
-                    warn(msg)
+                    print(msg)
                 msg += ": " + str(e)
                 LOGGER.warning(msg)
                 continue
@@ -369,7 +369,10 @@ class Simulation(Object):
             else:
                 self._simulation_values.add(values)
 
-            LOGGER.info("Successfully loaded MassModel '%s'.", str(model))
+            msg = "Successfully loaded MassModel '{0}'.".format(str(model))
+            LOGGER.info(msg)
+            if verbose:
+                print(msg)
 
     def remove_models(self, models, verbose=False):
         r"""Remove the model values from the :class:`Simulation`.
@@ -387,7 +390,7 @@ class Simulation(Object):
             An iterable of :class:`.MassModel`\ s or their string identifiers
             to be removed.
         verbose : bool
-            Whether to  raise warnings if removal of model fails.
+            Whether to print if removal of models succeeds.
             Default is ``False``.
 
         """
@@ -397,12 +400,13 @@ class Simulation(Object):
                 values_dict = self._simulation_values.get_by_id(
                     str(model) + "_values")
             except KeyError:
-                if verbose:
-                    warn("MassModel '{0}' does not exist.".format(model))
+                warn("MassModel '{0}' does not exist.".format(model))
             else:
                 self._simulation_values -= [values_dict]
-                LOGGER.info(
-                    "Successfully removed MassModel '%s'.", str(model))
+                msg = "Successfully removed MassModel '{0}.".format(str(model))
+                LOGGER.info(msg)
+                if verbose:
+                    print(msg)
 
     def get_model_objects(self, models=None):
         r"""Return the loaded models as :class:`~.MassModel`\ s.
@@ -490,11 +494,7 @@ class Simulation(Object):
                 concentrations in the output.
 
                 Default is ``False``.
-            verbose :
-                ``bool`` indicating whether to raise user warnings if something
-                unexpected occurs.
 
-                Default is ``False``.
             steps :
                 ``int`` indicating number of steps at which the output is
                 sampled where the samples are evenly spaced and
@@ -538,7 +538,6 @@ class Simulation(Object):
         kwargs = _check_kwargs({
             "selections": None,
             "boundary_metabolites": False,
-            "verbose": False,
             "steps": None,
             "interpolate": False,
             "update_solutions": True,
@@ -580,9 +579,8 @@ class Simulation(Object):
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    if not kwargs.get("verbose"):
-                        warn("One or more simulations failed. Check the log "
-                             "for more details.")
+                    warn("One or more simulations failed. Check the log "
+                         "for more details.")
                     LOGGER.error(
                         "Failed simulation for '%s' due the following error: "
                         "%s", model, str(e))
@@ -666,11 +664,6 @@ class Simulation(Object):
                 concentrations in the output.
 
                 Default is ``False``.
-            verbose :
-                ``bool`` indicating whether to raise user warnings if something
-                unexpected occurs.
-
-                Default is ``False``.
             steps :
                 ``int`` indicating number of steps at which the output is
                 sampled where the samples are evenly spaced and
@@ -718,7 +711,6 @@ class Simulation(Object):
         kwargs = _check_kwargs({
             "selections": None,
             "boundary_metabolites": False,
-            "verbose": False,
             "steps": None,
             "tfinal": 1e8,
             "num_attempts": 2,
@@ -770,9 +762,8 @@ class Simulation(Object):
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    if not kwargs.get("verbose"):
-                        warn("Unable to find a steady state for one or more "
-                             "models. Check the log for more details.")
+                    warn("Unable to find a steady state for one or more "
+                         "models. Check the log for more details.")
                     LOGGER.error(
                         "Unable to find a steady state for MassModel '%s' "
                         "using strategy '%s' due to the following: %s",
@@ -1051,6 +1042,7 @@ class Simulation(Object):
                 **_SBML_KWARGS)
         else:
             self.roadrunner.resetToOrigin()
+            LOGGER.info("Reset roadrunner to origin.")
 
     def _find_steady_state_simulate(self, model, **kwargs):
         """Find the steady state of a model through simulation of the model.
@@ -1178,7 +1170,7 @@ class Simulation(Object):
                 (_strip_init_cond(key), ic) if "init" in key
                 else (key, ic) for key, ic in iteritems(init_conds))
         # Update the model initial conditions
-        mass_model.update_initial_conditions(init_conds)
+        mass_model.update_initial_conditions(init_conds, verbose=False)
         # Update the model parameter values
         mass_model.update_parameters(parameters, verbose=False)
 
@@ -1258,10 +1250,11 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
         rr.clearModel()
         rr.load(sbml_str)
 
+    msg = "Successfully loaded MassModel '{0}' into RoadRunner.".format(
+        str(mass_model))
+    LOGGER.info(msg)
     if verbose:
-        LOGGER.info(
-            "Successfully loaded MassModel '%s' into RoadRunner.",
-            str(mass_model))
+        print(msg)
 
     return rr
 

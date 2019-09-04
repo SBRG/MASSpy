@@ -285,7 +285,7 @@ def update_model_with_concentration_solution(model, concentration_solution,
 
     if concentrations:
         model.update_initial_conditions(
-            concentration_solution.concentrations.to_dict())
+            concentration_solution.concentrations.to_dict(), verbose=False)
     if Keqs:
         model.update_parameters(
             concentration_solution.Keqs.to_dict(), verbose=False)
