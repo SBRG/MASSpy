@@ -1642,21 +1642,21 @@ class MassModel(Model):
                     print(msg)
                 continue
 
-            arguments = list(rate_eq.atoms(sym.Symbol))
-            # Check for missing numerical values
-            missing_values = [
-                str(arg) for arg in arguments
-                if str(arg) not in numerical_values
-                and str(arg) != reaction.kf_str]
+            args = [a for a in list(rate_eq.atoms(sym.Symbol))
+                    if str(a) != reaction.kf_str]
 
-            if missing_values:
+            vals = {a: numerical_values[str(a)] for a in args
+                    if str(a) in numerical_values}
+
+            if len(args) != len(vals):
                 warnings.warn(
-                    "Cannot calculate the PERC for reaction '%s' missing "
-                    "values for %s.", reaction.id, str(missing_values))
+                    "Cannot calculate the PERC for reaction '{0}' missing "
+                    "values for {1!r}.".format(
+                        reaction.id, [str(a) for a in args if a not in vals]))
                 continue
 
             # Substitute values into rate equation
-            rate_eq = rate_eq.subs(numerical_values)
+            rate_eq = rate_eq.subs(vals)
 
             # Calculate rate equation and update with soluton for PERC
             sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))
@@ -1822,7 +1822,7 @@ class MassModel(Model):
                     p_type, reaction = key.split("_", 1)
                     reaction = self.reactions.get_by_id(reaction)
                     with warnings.catch_warnings():
-                        if verbose:
+                        if not verbose:
                             warnings.filterwarnings(
                                 "ignore", 
                                 ".*constant for an irreversible reaction.*")
