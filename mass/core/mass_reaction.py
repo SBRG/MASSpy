@@ -708,6 +708,8 @@ class MassReaction(Reaction):
         if reverse_bounds:
             new_reaction.bounds = (-self.upper_bound, -self.lower_bound)
 
+        new_reaction.get_mass_action_rate(update_reaction=True)
+
         return new_reaction
 
     def get_mass_action_rate(self, rate_type=1, update_reaction=False,
