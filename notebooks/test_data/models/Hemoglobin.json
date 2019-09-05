@@ -66,7 +66,7 @@
             "name": "Deoxyhemoglobin"
         },
         {
-            "_initial_condition": 0.00024300006515384965,
+            "_initial_condition": 0.000243,
             "charge": -4,
             "compartment": "c",
             "formula": "C3H4O10P2",
@@ -74,7 +74,7 @@
             "name": "3-Phospho-D-glyceroyl phosphate"
         },
         {
-            "_initial_condition": 0.07730000983010729,
+            "_initial_condition": 0.0773,
             "charge": -3,
             "compartment": "c",
             "formula": "C3H4O7P",
@@ -90,7 +90,7 @@
             "name": "Oxygen"
         },
         {
-            "_initial_condition": 2.4999999999999987,
+            "_initial_condition": 2.5,
             "charge": -2,
             "compartment": "c",
             "formula": "HPO4",
@@ -118,7 +118,7 @@
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
-            "_forward_rate_constant": 1824.9365356715123,
+            "_forward_rate_constant": 1824.9370277078087,
             "_lower_bound": -1000.0,
             "_rate": "kf_DPGM*(_13dpg_c(t) - _23dpg_c(t)/Keq_DPGM)",
             "_reversible": true,
