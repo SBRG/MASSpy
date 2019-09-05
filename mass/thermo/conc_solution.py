@@ -77,7 +77,7 @@ class ConcSolution:
 
     def Keqs_to_frame(self):
         """Get a :class:`pandas.DataFrame` of Keqs and reduced costs."""
-        return DataFrame({'Keqs': self.concentrations,
+        return DataFrame({'Keqs': self.Keqs,
                           'reduced_costs': self.Keq_reduced_costs})
 
     def to_frame(self):
@@ -165,10 +165,6 @@ def get_concentration_solution(concentration_solver, metabolites=None,
     raise_error : bool
         Whether to raise an OptimizationError if solver status is not optimal.
     **kwargs
-        logspace :
-            ``bool`` indicating whether to leave values in logspace.
-
-            Default is ``False``.
         decimal_precision :
             ``bool`` indicating whether to apply the
             :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
@@ -183,7 +179,6 @@ def get_concentration_solution(concentration_solver, metabolites=None,
 
     """
     kwargs = _check_kwargs({
-        "logspace": False,
         "decimal_precision": False,
     }, kwargs)
 
@@ -224,19 +219,15 @@ def get_concentration_solution(concentration_solver, metabolites=None,
 
     def transform_values(arr, **kwargs):
         """Transform array from logs to linear space and round if desired."""
-        if not kwargs.get("logspace"):
-            arr = exp(arr)
-
         if kwargs.get("decimal_precision"):
             arr = apply_decimal_precision(
                 arr, MASSCONFIGURATION.decimal_precision)
-
         return arr
 
     objective_value = transform_values(
-        concentration_solver.solver.objective.value, **kwargs)
-    concs = transform_values(concs, **kwargs)
-    Keqs = transform_values(Keqs, **kwargs)
+        exp(concentration_solver.solver.objective.value), **kwargs)
+    concs = transform_values(exp(concs), **kwargs)
+    Keqs = transform_values(exp(Keqs), **kwargs)
     reduced_concs = transform_values(reduced_concs, **kwargs)
     reduced_Keqs = transform_values(reduced_Keqs, **kwargs)
     shadow = transform_values(shadow, **kwargs)
