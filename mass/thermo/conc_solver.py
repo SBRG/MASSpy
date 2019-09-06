@@ -140,7 +140,7 @@ class ConcSolver:
             An iterable containing reactions whose equilibrium constants
             are to be set as fixed variables, meaning that their lower and
             upper bounds are equal to the base value.
-        apply_decimal_precision :
+        decimal_precision :
             ``bool`` indicating whether to apply the
             :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
             the :class:`.MassConfiguration` to the bound values.
@@ -179,7 +179,7 @@ class ConcSolver:
             "exclude_infinite_Keqs": True,
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
         }, kwargs)
         self._model = model
         model._conc_solver = self
@@ -540,7 +540,7 @@ class ConcSolver:
                 An iterable containing reactions whose equilibrium constants
                 are to be set as fixed variables, meaning that their lower and
                 upper bounds are equal to the base value.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the bound values.
@@ -551,7 +551,7 @@ class ConcSolver:
         kwargs = _check_kwargs({
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
         }, kwargs)
 
         # Get fixed variables
@@ -588,7 +588,7 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, upper_def,
-                                     kwargs.get("apply_decimal_precision"))
+                                     kwargs.get("decimal_precision"))
             var.lb, var.ub = bounds
 
         # Ensure objective is zero for sampling
@@ -630,7 +630,7 @@ class ConcSolver:
                 An iterable containing reactions whose equilibrium constants
                 are to be set as fixed variables, meaning that their lower and
                 upper bounds are equal to the base value.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the bound values.
@@ -658,7 +658,7 @@ class ConcSolver:
         kwargs = _check_kwargs({
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
         }, kwargs)
 
         # Get fixed variables
@@ -677,7 +677,7 @@ class ConcSolver:
             if var.name in metabolites:
                 # Set bounds if metabolite
                 met = metabolites.get_by_id(var.name)
-                if met.id in fixed_conc_bounds:
+                if any([m in fixed_conc_bounds for m in [met, met.id]]):
                     bounds = (met.initial_condition, met.initial_condition)
                 else:
                     bounds = (0, np.inf)
@@ -694,7 +694,7 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("apply_decimal_precision"))
+                                     kwargs.get("decimal_precision"))
             var.lb, var.ub = bounds
             x_vars.append(var)
 
@@ -1044,12 +1044,7 @@ class ConcSolver:
             If ``True``, raise an :class:`~cobra.exceptions.OptimizationError`
             if solver status is not optimal.
         **kwargs
-            logspace :
-                ``bool`` indicating whether return values in logspace.
-
-                Default is ``False``, meaning that values are transformed to
-                linear space before being returned.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the solution values.
@@ -1058,8 +1053,7 @@ class ConcSolver:
 
         """
         kwargs = _check_kwargs({
-            "logspace": False,
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
         }, kwargs)
         original_direction = self.objective.direction
         self.objective.direction = {
@@ -1102,12 +1096,7 @@ class ConcSolver:
         message : string
            Error message to use if the optimization did not succeed.
         **kwargs
-            logspace :
-                ``bool`` indicating whether return values in logspace.
-
-                Default is ``False``, meaning that values are transformed to
-                linear space before being returned.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the solution values.
@@ -1121,16 +1110,13 @@ class ConcSolver:
 
         """
         kwargs = _check_kwargs({
-            "apply_decimal_precision": False,
-            "logspace": False,
+            "decimal_precision": False,
         }, kwargs)
         self.solver.optimize()
         status = self.solver.status
         if status == optlang.interface.OPTIMAL:
-            value = self.solver.objective.value
-            if not kwargs.get("logspace"):
-                value = np.exp(value)
-            if kwargs.get("apply_decimal_precision"):
+            value = np.exp(self.solver.objective.value)
+            if kwargs.get("decimal_precision"):
                 value = apply_decimal_precision(
                     value, MASSCONFIGURATION.decimal_precision)
             return value
@@ -1236,7 +1222,7 @@ class ConcSolver:
 
                 Default is the current metabolite concentration accessed via
                 :attr:`.MassMetabolite.initial_condition`.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the bound values.
@@ -1247,7 +1233,7 @@ class ConcSolver:
         kwargs = _check_kwargs({
             "concentration": metabolite.initial_condition,
             "bound_type": "deviation",
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
         }, kwargs)
         # Create and return log variable
         variable = self._create_variable(metabolite, lower_bound, upper_bound,
@@ -1296,7 +1282,7 @@ class ConcSolver:
 
                 Default is the current reaction steady state flux accessed
                 via :attr:`.MassReaction.steady_state_flux`.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the bound values.
@@ -1307,11 +1293,14 @@ class ConcSolver:
         kwargs = _check_kwargs({
             "Keq": reaction.Keq,
             "steady_state_flux": reaction.steady_state_flux,
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
             "bound_type": "deviation",
         }, kwargs)
 
         steady_state_flux = kwargs.pop("steady_state_flux")
+        if kwargs.get("decimal_precision"):
+            steady_state_flux = round(steady_state_flux,
+                                      MASSCONFIGURATION.decimal_precision)
         if steady_state_flux == 0\
            and reaction.id not in self.equilibrium_reactions:
             raise ValueError(
@@ -1353,7 +1342,7 @@ class ConcSolver:
 
                 Default is the current reaction steady state flux accessed
                 via :attr:`.MassReaction.steady_state_flux`.
-            apply_decimal_precision :
+            decimal_precision :
                 ``bool`` indicating whether to apply the
                 :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
                 the :class:`.MassConfiguration` to the bound values.
@@ -1362,13 +1351,13 @@ class ConcSolver:
 
         """
         kwargs = _check_kwargs({
-            "apply_decimal_precision": False,
+            "decimal_precision": False,
             "bound_type": "deviation",
             "steady_state_flux": reaction.steady_state_flux,
         }, kwargs)
 
         steady_state_flux = kwargs.get("steady_state_flux")
-        if kwargs.get("apply_decimal_precision"):
+        if kwargs.get("decimal_precision"):
             steady_state_flux = round(steady_state_flux,
                                       MASSCONFIGURATION.decimal_precision)
 
@@ -1488,7 +1477,7 @@ class ConcSolver:
             bounds = _get_deviation_values(value, *bounds)
 
         bounds = _get_log_bounds(bounds, upper_default,
-                                 kwargs.get("apply_decimal_precision"))
+                                 kwargs.get("decimal_precision"))
 
         # Create variable and return
         variable = self.problem.Variable(var_id, lb=bounds[0], ub=bounds[1])
@@ -1516,7 +1505,7 @@ class ConcSolver:
         # filtering out those to be excluded.
         metabolites = self._get_included_metabolites()
         for met in metabolites:
-            if met.id in fixed_conc_bounds:
+            if any([m in fixed_conc_bounds for m in [met, met.id]]):
                 lb, ub = (0, 0)
                 bound_type = "deviation"
             else:

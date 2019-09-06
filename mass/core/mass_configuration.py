@@ -44,7 +44,7 @@ from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
 
-from six import integer_types, iteritems, string_types
+from six import integer_types, iteritems, itervalues, string_types
 
 COBRA_CONFIGURATION = Configuration()
 
@@ -123,6 +123,13 @@ class MassBaseConfiguration:
         are better. Values less than the threshold indicate steady state.
 
         Default is ``1e-6``.
+    zero_value_log_substitute : float
+        A value to substitute for 0 when trying to take the logarithm of 0
+        to avoid a domain error. A value of 1e-10 means that whenever
+        instead of attempting ``log(0)`` which causes a :class:`ValueError`,
+        it will be instead calculated as ``log(1e-10)``.
+
+        Default is ``1e-10``.
     solver : str
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
@@ -148,14 +155,6 @@ class MassBaseConfiguration:
         A default number of processes to use where multiprocessing is
         possible. The default number corresponds to the number of available
         cores (hyperthreads).
-
-    zero_value_log_substitute : float
-        A value to substitute for 0 when trying to take the logarithm of 0
-        to avoid a domain error. A value of 1e-10 means that whenever
-        instead of attempting ``log(0)`` which causes a :class:`ValueError`,
-        it will be instead calculated as ``log(1e-10)``.
-
-        Default is ``1e-10``.
 
     """
 
@@ -541,19 +540,28 @@ class MassBaseConfiguration:
                 <td><strong>Irreversible Reaction kr</strong></td>
                 <td>{irreversible_kr}</td>
             </tr><tr>
+                <td><strong>Metabolites excluded in rates</strong></td>
+                <td>{excluded_metabolites_in_rates}</td>
+            </tr><tr>
                 <td><strong>Compartments in rates</strong></td>
                 <td>{include_compartments_in_rates}</td>
+            </tr><tr>
+                <td><strong>Model creator set</strong></td>
+                <td>{model_creator}</td>
             </tr><tr>
                 <td><strong>Decimal precision</strong></td>
                 <td>{decimal_precision}</td>
             </tr><tr>
                 <td><strong>Steady state threshold</strong></td>
                 <td>{steady_state_threshold}</td>
+            </tr><tr>
+                <td><strong>Zero substitute for log(0) </strong></td>
+                <td>{steady_state_threshold}</td>
             </tr>
-                <td><strong>Optimization solver</strong></td>
+                <td><strong>Solver</strong></td>
                 <td>{solver}</td>
             </tr><tr>
-                <td><strong>Optimization solver tolerance</strong></td>
+                <td><strong>Solver tolerance</strong></td>
                 <td>{tolerance}</td>
             </tr><tr>
                 <td><strong>Lower bound</strong></td>
@@ -567,16 +575,20 @@ class MassBaseConfiguration:
             </tr>
         </table>""".format(
             boundary_compartment=[
-                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
                     self.boundary_compartment)][0],
             default_compartment=[
-                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
                     self.default_compartment)][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
+            excluded_metabolites_in_rates=bool(
+                self.exclude_metabolites_from_rates),
             include_compartments_in_rates=self.include_compartments_in_rates,
+            model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
+            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,
@@ -596,11 +608,14 @@ class MassBaseConfiguration:
         default compartment: {default_compartment}
         irreversible reaction Keq: {irreversible_Keq}
         irreversible reaction kr: {irreversible_kr}
-        include_compartments_in_rates: {include_compartments_in_rates}
+        metabolites excluded in rates: {excluded_metabolites_in_rates}
+        include compartments in rates: {include_compartments_in_rates}
+        model creator set: {model_creator}
         decimal_precision: {decimal_precision}
         steady_state_threshold: {steady_state_threshold}
-        optimization solver: {solver}
-        optimization solver tolerance: {tolerance}
+        zero value log substitute: {zero_value_log_substitute}
+        solver: {solver}
+        solver tolerance: {tolerance}
         lower_bound: {lower_bound}
         upper_bound: {upper_bound}
         processes: {processes}""".format(
@@ -612,9 +627,13 @@ class MassBaseConfiguration:
                     self.default_compartment)][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
+            excluded_metabolites_in_rates=bool(
+                self.exclude_metabolites_from_rates),
             include_compartments_in_rates=self.include_compartments_in_rates,
+            model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
+            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,

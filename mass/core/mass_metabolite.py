@@ -116,6 +116,7 @@ class MassMetabolite(Metabolite):
             composition[moiety] = 1
             tmp_formula = tmp_formula.replace(tmp_formula[s:e], "")
 
+        # Count elements
         for (element, count) in element_re.findall(tmp_formula):
             if count == "":
                 count = 1
@@ -231,8 +232,10 @@ class MassMetabolite(Metabolite):
         to allow for the use of moieties.
 
         """
+        # Remove moieties
         element_dict = {k: v for k, v in iteritems(self.elements)
                         if not (k.startswith("[") and k.endswith("]"))}
+        # Calculate formula weight
         try:
             return sum([count * elements_and_molecular_weights[element]
                         for element, count in sorted(iteritems(element_dict))])

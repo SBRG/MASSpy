@@ -16,7 +16,7 @@
     "id": "PentosePhosphatePathway",
     "metabolites": [
         {
-            "_initial_condition": 0.01979999999999966,
+            "_initial_condition": 0.0198,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -24,7 +24,7 @@
             "name": "D-Fructose 6-phosphate"
         },
         {
-            "_initial_condition": 0.048600000000016415,
+            "_initial_condition": 0.0486,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -32,7 +32,7 @@
             "name": "D-Glucose 6-phosphate"
         },
         {
-            "_initial_condition": 0.0072799999999998725,
+            "_initial_condition": 0.00728,
             "charge": -2,
             "compartment": "c",
             "formula": "C3H5O6P",
@@ -40,7 +40,7 @@
             "name": "Glyceraldehyde 3-phosphate"
         },
         {
-            "_initial_condition": 0.0017542400034099464,
+            "_initial_condition": 0.00175424,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H9O9P",
@@ -48,7 +48,7 @@
             "name": "6-Phospho-D-gluco-1,5-lactone"
         },
         {
-            "_initial_condition": 0.03747530340997573,
+            "_initial_condition": 0.0374753,
             "charge": -3,
             "compartment": "c",
             "formula": "C6H10O10P",
@@ -56,7 +56,7 @@
             "name": "6-Phospho-D-gluconate"
         },
         {
-            "_initial_condition": 0.004936789999999947,
+            "_initial_condition": 0.00493679,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -64,7 +64,7 @@
             "name": "D-Ribulose 5-phosphate"
         },
         {
-            "_initial_condition": 0.014784199999999841,
+            "_initial_condition": 0.0147842,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -72,7 +72,7 @@
             "name": "D-Xylulose 5-phosphate"
         },
         {
-            "_initial_condition": 0.012668899999999863,
+            "_initial_condition": 0.0126689,
             "charge": -2,
             "compartment": "c",
             "formula": "C5H9O8P",
@@ -80,7 +80,7 @@
             "name": "Alpha-D-Ribose 5-phosphate"
         },
         {
-            "_initial_condition": 0.023987999999999877,
+            "_initial_condition": 0.023988,
             "charge": -2,
             "compartment": "c",
             "formula": "C7H13O10P",
@@ -88,7 +88,7 @@
             "name": "Sedoheptulose 7-phosphate"
         },
         {
-            "_initial_condition": 0.00507506999999995,
+            "_initial_condition": 0.00507507,
             "charge": -2,
             "compartment": "c",
             "formula": "C4H7O7P",
@@ -96,7 +96,7 @@
             "name": "D-Erythrose 4-phosphate"
         },
         {
-            "_initial_condition": 0.0002000000000045456,
+            "_initial_condition": 0.0002,
             "charge": -3,
             "compartment": "c",
             "formula": "C21H25N7O17P3",
@@ -104,7 +104,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate"
         },
         {
-            "_initial_condition": 0.06579999999999545,
+            "_initial_condition": 0.0658,
             "charge": -4,
             "compartment": "c",
             "formula": "C21H26N7O17P3",
@@ -112,7 +112,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate - reduced"
         },
         {
-            "_initial_condition": 3.1999999999999735,
+            "_initial_condition": 3.2,
             "charge": -1,
             "compartment": "c",
             "formula": "C10H16N3O6S",
@@ -120,7 +120,7 @@
             "name": "Reduced glutathione"
         },
         {
-            "_initial_condition": 0.12000000000001332,
+            "_initial_condition": 0.12,
             "charge": -2,
             "compartment": "c",
             "formula": "C20H30N6O12S2",
@@ -128,7 +128,7 @@
             "name": "Oxidized glutathione"
         },
         {
-            "_initial_condition": 1.0000020999999997,
+            "_initial_condition": 1,
             "charge": 0,
             "compartment": "c",
             "formula": "CO2",
@@ -136,7 +136,7 @@
             "name": "CO2"
         },
         {
-            "_initial_condition": 7.149569999999984e-05,
+            "_initial_condition": 7.14957e-05,
             "charge": 1,
             "compartment": "c",
             "formula": "H",
@@ -144,7 +144,7 @@
             "name": "H+"
         },
         {
-            "_initial_condition": 0.9999979,
+            "_initial_condition": 1,
             "charge": 0,
             "compartment": "c",
             "formula": "H2O",
@@ -171,7 +171,7 @@
                 "nadph_c": 1
             },
             "name": "Glucose 6-phosphate dehydrogenase",
-            "steady_state_flux": 0.20999999999999638,
+            "steady_state_flux": 0.21,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -190,7 +190,7 @@
                 "h_c": 1
             },
             "name": "6-phosphogluconolactonase",
-            "steady_state_flux": 0.2099999999999964,
+            "steady_state_flux": 0.21,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -210,7 +210,7 @@
                 "ru5p__D_c": 1
             },
             "name": "Phosphogluconate dehydrogenase",
-            "steady_state_flux": 0.20999999999999638,
+            "steady_state_flux": 0.21,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -263,7 +263,7 @@
                 "xu5p__D_c": -1
             },
             "name": "Transketolase",
-            "steady_state_flux": 0.06666666666666549,
+            "steady_state_flux": 0.06666666666666665,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -282,7 +282,7 @@
                 "xu5p__D_c": -1
             },
             "name": "Transketolase",
-            "steady_state_flux": 0.0666666666666655,
+            "steady_state_flux": 0.06666666666666665,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -301,7 +301,7 @@
                 "s7p_c": -1
             },
             "name": "Transaldolase",
-            "steady_state_flux": 0.06666666666666549,
+            "steady_state_flux": 0.06666666666666665,
             "subsystem": "PentosePhosphatePathway"
         },
         {
@@ -321,7 +321,7 @@
                 "nadph_c": -1
             },
             "name": "Glutathione oxidoreductase",
-            "steady_state_flux": 0.41999999999999277,
+            "steady_state_flux": 0.42,
             "subsystem": "Misc."
         },
         {
@@ -339,7 +339,7 @@
                 "h_c": 2
             },
             "name": "Glutathione-disulfide reductase",
-            "steady_state_flux": 0.41999999999999277,
+            "steady_state_flux": 0.42,
             "subsystem": "Misc."
         },
         {
@@ -358,7 +358,7 @@
                 "g6p_c": 1
             },
             "name": "D-Glucose 6-phosphate sink",
-            "steady_state_flux": 0.20999999999999638,
+            "steady_state_flux": 0.21,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -378,7 +378,7 @@
                 "f6p_c": -1
             },
             "name": "D-Fructose 6-phosphate demand",
-            "steady_state_flux": 0.133333333333331,
+            "steady_state_flux": 0.1333333333333333,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -398,7 +398,7 @@
                 "g3p_c": -1
             },
             "name": "Glyceraldehyde 3-phosphate demand",
-            "steady_state_flux": 0.06666666666666549,
+            "steady_state_flux": 0.06666666666666665,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -418,7 +418,7 @@
                 "r5p_c": -1
             },
             "name": "Alpha-D-Ribose 5-phosphate demand",
-            "steady_state_flux": 0.009999999999999891,
+            "steady_state_flux": 0.01,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -437,7 +437,7 @@
                 "co2_c": -1
             },
             "name": "CO2 sink",
-            "steady_state_flux": 0.20999999996718088,
+            "steady_state_flux": 0.21,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -456,7 +456,7 @@
                 "h_c": -1
             },
             "name": "H+ sink",
-            "steady_state_flux": 0.8399999999999836,
+            "steady_state_flux": 0.84,
             "subsystem": "Pseudoreaction"
         },
         {
@@ -475,7 +475,7 @@
                 "h2o_c": -1
             },
             "name": "H2O sink",
-            "steady_state_flux": -0.21000000000048757,
+            "steady_state_flux": -0.21,
             "subsystem": "Pseudoreaction"
         }
     ],

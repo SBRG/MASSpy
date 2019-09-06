@@ -18,8 +18,8 @@
     },
     "_enzyme_module_reactions_categorized": {
         "atp_c_binding": [
-            "HEX1_6",
-            "HEX1_4"
+            "HEX1_4",
+            "HEX1_6"
         ],
         "catalyzation": [
             "HEX1_8"
@@ -38,10 +38,10 @@
     },
     "_enzyme_module_species_categorized": {
         "Free": [
-            "hex1_c",
             "hex1_AG_c",
             "hex1_G_c",
-            "hex1_A_c"
+            "hex1_A_c",
+            "hex1_c"
         ],
         "Inhibited": [
             "hex1_A_PI_c",
@@ -49,7 +49,7 @@
             "hex1_G_CI_c"
         ]
     },
-    "_enzyme_net_flux": 1.1200000000000003,
+    "_enzyme_net_flux": 1.12,
     "_enzyme_net_flux_equation": "kf_HEX1*(Keq_HEX1*hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t))/Keq_HEX1",
     "compartments": {
         "c": "Cytosol"
@@ -58,9 +58,9 @@
         "Keq_HEX1": 313.11999999999995,
         "Keq_HEX1_A": 0.4854368932038835,
         "Keq_HEX1_G": 26.315789473684212,
-        "kf_HEX1": 2925079.0,
-        "kf_HEX1_A": 2305855.0,
-        "kf_HEX1_G": 57889.0
+        "kf_HEX1": 2960686.0,
+        "kf_HEX1_A": 1804171.0,
+        "kf_HEX1_G": 58064.0
     },
     "custom_rates": {
         "HEX1_3": "kf_HEX1_G*(glc__D_c(t)*hex1_c(t) - hex1_G_c(t)/Keq_HEX1_G)",
@@ -102,7 +102,7 @@
     "id": "HEX1",
     "metabolites": [
         {
-            "_initial_condition": 0.999999999998507,
+            "_initial_condition": 1.0,
             "charge": 0,
             "compartment": "c",
             "formula": "C6H12O6",
@@ -110,7 +110,7 @@
             "name": "D-Glucose"
         },
         {
-            "_initial_condition": 0.048600000000718034,
+            "_initial_condition": 0.0486,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -126,7 +126,7 @@
             "name": "2,3-Disphospho-D-glycerate"
         },
         {
-            "_initial_condition": 1.5999999999999996,
+            "_initial_condition": 1.6,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -134,7 +134,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.2899999582027138,
+            "_initial_condition": 0.29,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -152,7 +152,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 1.0969574e-05,
+            "_initial_condition": 1.095345e-05,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -165,7 +165,7 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.417649e-06,
+            "_initial_condition": 8.376888e-06,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -178,7 +178,7 @@
                 "glc__D_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 6.65338e-07,
+            "_initial_condition": 7.07466e-07,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -192,7 +192,7 @@
                 "glc__D_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.83389e-07,
+            "_initial_condition": 3.78784e-07,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -206,7 +206,7 @@
                 "glc__D_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.75009e-07,
+            "_initial_condition": 3.98754e-07,
             "charge": -5,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -219,7 +219,7 @@
                 "adp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 3.181176e-06,
+            "_initial_condition": 3.176501e-06,
             "charge": -3,
             "compartment": "c",
             "enzyme_module_id": "HEX1",
@@ -232,7 +232,7 @@
                 "g6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 7.997e-09,
+            "_initial_condition": 7.985e-09,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "HEX1",

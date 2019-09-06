@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -26,22 +26,22 @@
       <compartment id="b" name="boundary" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="0.999999999998507" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
-      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.048600000000718" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198000000002944" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146000026077805" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
-      <species id="M_dhap_c" name="Dihydroxyacetone phosphate" compartment="c" initialConcentration="0.160000013020749" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
-      <species id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" initialConcentration="0.00728000074404336" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
-      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.00024300006515385" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
-      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773000098301073" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
-      <species id="M__2pg_c" name="D-Glycerate 2-phosphate" compartment="c" initialConcentration="0.0113000014456057" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
-      <species id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" initialConcentration="0.0170000024501861" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P"/>
+      <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
+      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.0486" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.0198" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
+      <species id="M_dhap_c" name="Dihydroxyacetone phosphate" compartment="c" initialConcentration="0.16" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
+      <species id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" initialConcentration="0.00728" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
+      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.000243" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
+      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
+      <species id="M__2pg_c" name="D-Glycerate 2-phosphate" compartment="c" initialConcentration="0.0113" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
+      <species id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" initialConcentration="0.017" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P"/>
       <species id="M_pyr_c" name="Pyruvate" compartment="c" initialConcentration="0.060301" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H3O3"/>
       <species id="M_lac__L_c" name="L-Lactate" compartment="c" initialConcentration="1.36" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H5O3"/>
       <species id="M_nad_c" name="Nicotinamide adenine dinucleotide" compartment="c" initialConcentration="0.0589" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C21H26N7O14P2"/>
       <species id="M_nadh_c" name="Nicotinamide adenine dinucleotide - reduced" compartment="c" initialConcentration="0.0301" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C21H27N7O14P2"/>
       <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867281" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
-      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289999958202714" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.29" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
       <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
       <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
@@ -56,10 +56,10 @@
       <parameter id="v_R_HEX1" value="1.12" constant="false"/>
       <parameter id="v_R_PGI" value="1.12" constant="false"/>
       <parameter id="v_R_PFK" value="1.12" constant="false"/>
-      <parameter id="v_R_FBA" value="1.11999999999999" constant="false"/>
+      <parameter id="v_R_FBA" value="1.12" constant="false"/>
       <parameter id="v_R_TPI" value="1.12" constant="false"/>
       <parameter id="v_R_GAPD" value="2.24" constant="false"/>
-      <parameter id="v_R_PGK" value="2.24000000000002" constant="false"/>
+      <parameter id="v_R_PGK" value="2.24" constant="false"/>
       <parameter id="v_R_PGM" value="2.24" constant="false"/>
       <parameter id="v_R_ENO" value="2.24" constant="false"/>
       <parameter id="v_R_PYK" value="2.24" constant="false"/>
@@ -74,7 +74,7 @@
       <parameter id="v_R_SK_amp_c" value="0.014" constant="false"/>
       <parameter id="v_R_SK_h_c" value="2.688" constant="false"/>
       <parameter id="v_R_SK_h2o_c" value="0" constant="false"/>
-      <parameter id="v_R_SK_pi_c" value="-3.46389583683049e-16" constant="false"/>
+      <parameter id="v_R_SK_pi_c" value="0" constant="false"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="R_HEX1" name="Hexokinase (D-glucose:ATP)" reversible="true" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
@@ -141,8 +141,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGI" value="3644.44444444449"/>
             <localParameter id="Keq_R_PGI" value="0.41"/>
+            <localParameter id="kf_R_PGI" value="3644.44444444449"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -215,8 +215,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_FBA" value="0.082"/>
             <localParameter id="kf_R_FBA" value="2834.56790123458"/>
+            <localParameter id="Keq_R_FBA" value="0.082"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -244,8 +244,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TPI" value="34.3557275249293"/>
             <localParameter id="Keq_R_TPI" value="0.0571429"/>
+            <localParameter id="kf_R_TPI" value="34.3557275249293"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -286,8 +286,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_GAPD" value="3376.74924217682"/>
             <localParameter id="Keq_R_GAPD" value="0.0179"/>
+            <localParameter id="kf_R_GAPD" value="3376.74924217682"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -325,8 +325,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGK" value="1273531.26974101"/>
             <localParameter id="Keq_R_PGK" value="1800"/>
+            <localParameter id="kf_R_PGK" value="1273531.26974101"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -384,8 +384,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_ENO" value="1763.74052539353"/>
             <localParameter id="Keq_R_ENO" value="1.69492"/>
+            <localParameter id="kf_R_ENO" value="1763.74052539353"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -519,8 +519,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_ADK1" value="100000"/>
             <localParameter id="Keq_R_ADK1" value="1.65"/>
+            <localParameter id="kf_R_ADK1" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -545,8 +545,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="pyr_b" value="0.06"/>
             <localParameter id="Keq_R_SK_pyr_c" value="1"/>
+            <localParameter id="pyr_b" value="0.06"/>
             <localParameter id="kf_R_SK_pyr_c" value="744.186046511621"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -572,9 +572,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
             <localParameter id="kf_R_SK_lac__L_c" value="5.6"/>
             <localParameter id="lac__L_b" value="1"/>
+            <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -643,9 +643,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="glc__D_b" value="1"/>
-            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
+            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
+            <localParameter id="glc__D_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -670,8 +670,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="amp_b" value="1"/>
             <localParameter id="kf_R_SK_amp_c" value="0.014"/>
+            <localParameter id="amp_b" value="1"/>
             <localParameter id="Keq_R_SK_amp_c" value="INF"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -697,9 +697,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="h_b" value="6.30957e-05"/>
             <localParameter id="Keq_R_SK_h_c" value="1"/>
             <localParameter id="kf_R_SK_h_c" value="100000"/>
+            <localParameter id="h_b" value="6.30957e-05"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -725,8 +725,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="h2o_b" value="1"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

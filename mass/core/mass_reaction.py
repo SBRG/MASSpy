@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-MassReaction is a class for holding information regarding reactions.
+"""MassReaction is a class for holding information regarding reactions.
 
 The :class:`MassReaction` class inherits and extends the
 :class:`~cobra.core.reaction.Reaction` class in :mod:`cobra`. It contains
@@ -708,6 +707,8 @@ class MassReaction(Reaction):
         if reverse_bounds:
             new_reaction.bounds = (-self.upper_bound, -self.lower_bound)
 
+        new_reaction.get_mass_action_rate(update_reaction=True)
+
         return new_reaction
 
     def get_mass_action_rate(self, rate_type=1, update_reaction=False,
@@ -919,7 +920,7 @@ class MassReaction(Reaction):
             elif isinstance(met, Metabolite):
                 # Convert metabolite to a MassMetabolite and raise a warning
                 warnings.warn(
-                    "'{0}' is a not a mass.MassMetabolite, therefore "
+                    "'{0}' is not a mass.MassMetabolite, therefore "
                     "converting metabolite before adding.".format(str(met)))
                 mass_met = MassMetabolite(met)
                 metabolites_to_add[mass_met] = metabolites_to_add.pop(met)
@@ -1101,7 +1102,9 @@ class MassReaction(Reaction):
         """
         is_reversible = self.reversible
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.filterwarnings("ignore",
+                                    ".*is not a mass.MassMetabolite, therefore"
+                                    " converting metabolite.*")
             super(MassReaction, self).build_reaction_from_string(
                 reaction_str, verbose, fwd_arrow, rev_arrow, reversible_arrow,
                 term_split)

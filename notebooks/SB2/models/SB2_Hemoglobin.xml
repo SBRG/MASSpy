@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -33,8 +33,8 @@
       <species id="M_hb_3o2_c" name="Oxyhemoglobin (3)" compartment="c" initialConcentration="0.262841727245073" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="O6Moietyhb"/>
       <species id="M_hb_4o2_c" name="Oxyhemoglobin (4)" compartment="c" initialConcentration="6.80761274646297" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="O8Moietyhb"/>
       <species id="M_dhb_c" name="Deoxyhemoglobin" compartment="c" initialConcentration="0.0462096080496562" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C3H3O10P2Moietyhb"/>
-      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.00024300006515385" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
-      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773000098301073" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
+      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.000243" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
+      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
       <species id="M_o2_c" name="Oxygen" compartment="c" initialConcentration="0.0200788" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="O2"/>
       <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
@@ -81,8 +81,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_DPGM" value="1824.93653567151"/>
             <localParameter id="Keq_R_DPGM" value="2300000"/>
+            <localParameter id="kf_R_DPGM" value="1824.93702770781"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -171,8 +171,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO2" value="73.2115"/>
             <localParameter id="kf_R_HBO2" value="511077"/>
+            <localParameter id="Keq_R_HBO2" value="73.2115"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -273,8 +273,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBDPG" value="0.25"/>
             <localParameter id="kf_R_HBDPG" value="519613"/>
+            <localParameter id="Keq_R_HBDPG" value="0.25"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -299,8 +299,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="o2_b" value="0.0200788"/>
+            <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="Keq_R_SK_o2_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>

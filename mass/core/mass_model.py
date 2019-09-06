@@ -575,7 +575,7 @@ class MassModel(Model):
             elif isinstance(reaction, Reaction):
                 # Convert reaction to a MassReaction and raise a warning
                 warnings.warn(
-                    "'{0}' is a not a mass.MassReaction, therefore "
+                    "'{0}' is not a mass.MassReaction, therefore "
                     "converting reaction before adding.".format(reaction.id))
                 mass_reaction = MassReaction(reaction)
                 reaction_list[i] = mass_reaction
@@ -717,7 +717,9 @@ class MassModel(Model):
 
         # Create boundary reaction
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.filterwarnings("ignore",
+                                    ".*is not a mass.MassReaction, therefore "
+                                    "converting reaction.*")
             reaction = super(MassModel, self).add_boundary(
                 metabolite, type=boundary_type, reaction_id=reaction_id,
                 lb=kwargs.get("lb", None), ub=kwargs.get("ub", None),
@@ -1532,30 +1534,24 @@ class MassModel(Model):
 
         return steady_state_fluxes
 
-    def calculate_PERCs(self, steady_state_fluxes=None,
-                        steady_state_concentrations=None,
-                        at_equilibrium_default=100000, update_reactions=False):
+    def calculate_PERCs(self, at_equilibrium_default=100000,
+                        update_reactions=False, verbose=False, **kwargs):
         r"""Calculate pseudo-order rate constants for reactions in the model.
 
         Pseudo-order rate constants (PERCs) are considered to be the same as
         :attr:`~.MassReaction.forward_rate_constant` attributes, and are
         calculated based on the steady state concentrations and fluxes.
 
+        Notes
+        -----
+        * All fluxes and concentrations used in calculations must be provided,
+          including relevant boundary conditions. By default, the relevant
+          values are taken from objects associated with the model.
+        * To calculate PERCs for a subset of model reactions, use the
+          ``steady_state_fluxes`` kwawrg.
+
         Parameters
         ----------
-        steady_state_fluxes : dict
-            A ``dict`` of steady state fluxes where :class:`~MassReaction`\ s
-            are keys and fluxes are the values. All reactions provided will
-            have their PERCs calculated. If ``None``, PERCs are calculated
-            using the current steady state fluxes for all reactions that
-            exist in the model.
-        steady_state_concentrations : dict
-            A ``dict`` of all steady state concentrations necessary for the PERC
-            calculations, where :class:`~.MassMetabolite`\ s are keys and
-            concentrations are the values. If ``None``, the relevant
-            concentrations that exist in the model are used. All
-            concentrations used in calculations must be provided, including
-            relevant boundary conditions.
         at_equilibrium_default : float
             The value to set the pseudo-order rate constant if the reaction is
             at equilibrium. Default is ``100,000``.
@@ -1563,6 +1559,24 @@ class MassModel(Model):
             If ``True`` then will update the values for the
             :attr:`~MassReaction.forward_rate_constant` attributes with the
             calculated PERC values.
+        verbose : bool
+            Whether to output more verbose messages for errors and logging.
+        **kwargs
+            fluxes :
+                A ``dict`` of reaction fluxes where :class:`~MassReaction`\ s
+                are keys and fluxes are the values. Only reactions provided
+                will have their PERCs calculated. If ``None``, PERCs are
+                calculated using the current steady state fluxes for all
+                reactions in the model.
+
+                Default is ``None``.
+            concentrations : dict
+                A ``dict`` of concentrations necessary for the PERC
+                calculations, where :class:`~.MassMetabolite`\ s are keys and
+                concentrations are the values. If ``None``, the relevant
+                concentrations that exist in the model are used. 
+
+                Default is ``None``.
 
         Returns
         -------
@@ -1572,24 +1586,38 @@ class MassModel(Model):
             values are the calculated PERC values.
 
         """
+        kwargs = _check_kwargs({
+            "fluxes": None,
+            "concentrations": None
+        }, kwargs)
         # Get the model steady state concentrations if None are provided.
-        if steady_state_concentrations is None:
-            steady_state_concentrations = self.boundary_conditions.copy()
-            steady_state_concentrations.update({
+        if kwargs.get("concentrations") is None:
+            concentrations = self.boundary_conditions.copy()
+            concentrations.update({
                 str(m): ic for m, ic in iteritems(self.initial_conditions)})
         else:
-            steady_state_concentrations = {
-                str(m): v for m, v in iteritems(steady_state_concentrations)}
+            concentrations = {
+                str(m): v for m, v in iteritems(kwargs.get("concentrations"))}
+
         # Get the model reactions and fluxes if None are provided.
-        if steady_state_fluxes is None:
-            steady_state_fluxes = self.steady_state_fluxes
+        if kwargs.get("fluxes") is None:
+            fluxes = self.steady_state_fluxes
+        else:
+            fluxes = kwargs.get("fluxes")
+            invalid = {
+                rxn: flux for rxn, flux in iteritems(fluxes)
+                if not isinstance(rxn, MassReaction)
+                or not isinstance(flux, (float, integer_types))}
+            if invalid:
+                raise TypeError("Invalid ``fluxes``: '{0!r}'".format(invalid))
 
         # Get defined numerical values
         numerical_values = {
             str(param): value
             for p_type, subdict in iteritems(self.parameters)
-            for param, value in iteritems(subdict) if p_type != "kf"}
-        numerical_values.update(steady_state_concentrations)
+            for param, value in iteritems(subdict)
+            if p_type not in ["kf", "v"]}
+        numerical_values.update(concentrations)
 
         # Function to calculate the solution
         def calculate_sol(flux, rate_equation, perc):
@@ -1603,35 +1631,35 @@ class MassModel(Model):
 
             return sol
 
+        # Calculate the PERCs
         percs_dict = {}
-        for reaction, flux in iteritems(steady_state_fluxes):
-            # Ensure inputs are correct
-            if not isinstance(reaction, MassReaction)\
-               or not isinstance(flux, (float, integer_types)):
-                raise TypeError(
-                    "steady_state_fluxes must be a dict containing the "
-                    "MassReactions and their steady state flux values.")
+        for reaction, flux in iteritems(fluxes):
             rate_eq = strip_time(reaction.rate)
             if reaction.kf_str not in str(rate_eq):
-                LOGGER.info("Skipping reaction {0}, no PERC in rate".format(
-                    reaction.id))
+                msg = "Skipping reaction {0}, no PERC in rate".format(
+                    reaction.id)
+                LOGGER.info(msg)
+                if verbose:
+                    print(msg)
                 continue
-            arguments = list(rate_eq.atoms(sym.Symbol))
-            # Check for missing numerical values
-            missing_values = [
-                str(arg) for arg in arguments
-                if str(arg) not in numerical_values
-                and str(arg) != reaction.kf_str]
 
-            if missing_values:
-                raise ValueError(
-                    "Cannot calculate the PERC for reaction '{0}' because "
-                    "values for {1} not defined.".format(
-                        reaction.id, str(missing_values)))
+            # Get arguments
+            args = [a for a in list(rate_eq.atoms(sym.Symbol))
+                    if str(a) != reaction.kf_str]
+
+            # Get numerical values for arguments
+            vals = {a: numerical_values[str(a)] for a in args
+                    if str(a) in numerical_values}
+
+            if len(args) != len(vals):
+                warnings.warn(
+                    "Cannot calculate the PERC for reaction '{0}' missing "
+                    "values for {1!r}.".format(
+                        reaction.id, [str(a) for a in args if a not in vals]))
+                continue
 
             # Substitute values into rate equation
-            rate_eq = rate_eq.subs(numerical_values)
-
+            rate_eq = rate_eq.subs(vals)
             # Calculate rate equation and update with soluton for PERC
             sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))
             percs_dict.update({reaction.kf_str: sol})
@@ -1729,7 +1757,7 @@ class MassModel(Model):
                 reaction.build_reaction_from_string(
                     reaction_str, verbose=verbose, **kwargs)
             except ValueError as e:
-                # Log reactions that could not be built.
+                # Raise warnings for reactions that could not be built.
                 warnings.warn(
                     "Failed to build reaction '{0}' due to the following:\n"
                     "{1}".format(orig_reaction_str, str(e)))
@@ -1797,7 +1825,9 @@ class MassModel(Model):
                     reaction = self.reactions.get_by_id(reaction)
                     with warnings.catch_warnings():
                         if not verbose:
-                            warnings.simplefilter("ignore")
+                            warnings.filterwarnings(
+                                "ignore", 
+                                ".*constant for an irreversible reaction.*")
                         setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
                     self.custom_parameters.update({key: value})
@@ -1805,7 +1835,7 @@ class MassModel(Model):
             else:
                 self.custom_parameters.update({key: value})
 
-    def update_initial_conditions(self, initial_conditions):
+    def update_initial_conditions(self, initial_conditions, verbose=True):
         """Update the initial conditions of the model.
 
         Can also be used to update initial conditions of fixed metabolites to
@@ -1823,6 +1853,9 @@ class MassModel(Model):
         initial_conditions : dict
             A ``dict`` where metabolites are the keys and the initial
             conditions are the values.
+        verbose : bool
+            If ``True`` then display the warnings that may be raised when
+            setting metabolite initial conditions. Default is ``True``.
 
         """
         if not isinstance(initial_conditions, dict):
@@ -1838,9 +1871,10 @@ class MassModel(Model):
             try:
                 metabolite.initial_condition = ic_value
             except (TypeError, ValueError) as e:
-                warnings.warn(
-                    "Cannot set initial condition for {0} due to the "
-                    "following: {1}".format(metabolite.id, str(e)))
+                if verbose:
+                    warnings.warn(
+                        "Cannot set initial condition for {0} due to the "
+                        "following: {1}".format(metabolite.id, str(e)))
                 continue
 
     def update_custom_rates(self, custom_rates, custom_parameters=None):
@@ -1872,16 +1906,20 @@ class MassModel(Model):
                 raise TypeError("custom_parameters must be a dict.")
             self.custom_parameters.update(custom_parameters)
 
+        # Iterate through custrom rates
         for reaction, custom_rate in iteritems(custom_rates):
             if not isinstance(reaction, MassReaction):
+                # Ensure reaction exists
                 try:
                     reaction = self.reactions.get_by_id(reaction)
                 except KeyError as e:
                     warnings.warn("No reaction found for {0}".format(str(e)))
                     continue
+            # Try to create the rate expression
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
+                # Warn if fail
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 
@@ -1924,6 +1962,7 @@ class MassModel(Model):
             equivalent = False
 
         if not equivalent and verbose:
+            msg_out = "{0} vs. {1}:\n".format(self.id, right.id)
             for i, (l_dict, r_dict) in enumerate(zip(l_odes_and_rates,
                                                      r_odes_and_rates)):
                 # Determine which metabolites do not exist in both models
@@ -1934,16 +1973,20 @@ class MassModel(Model):
                     l_key for l_key, l_value in iteritems(l_dict)
                     if l_key in r_dict and l_value != r_dict[l_key])
 
+                # Format and return messages for differences
                 if i == 0:
                     msgs = ["Metabolites", "ODEs"]
                 else:
                     msgs = ["Reactions", "rates"]
 
-                msgs = ["{0} in one model only:".format(msgs[0]),
+                msgs = ["{0} in one model only: ".format(msgs[0]),
                         "{0} with different {1}: ".format(*msgs)]
+
                 for item, msg in zip([missing, diff_equations], msgs):
                     if item:
-                        warnings.warn(msg + str(sorted(list(item))))
+                        msg_out += msg + str(sorted(list(item))) + "\n"
+
+            print(msg_out.rstrip("\n"))
 
         return equivalent
 
@@ -1955,8 +1998,6 @@ class MassModel(Model):
 
         Parameters
         ----------
-        organism : str
-            The organism represented by the model
         *assumptions
             Any number of assumptions as strings to add to the description.
         **additional_notes
@@ -1984,25 +2025,31 @@ class MassModel(Model):
             to represent a space ``" "``. (e.g. cell_type for cell type)
 
         """
+        # Determine whether description is being replaced
         replace = True
         if "replace" in additional_notes:
             replace = additional_notes.pop("replace")
+        # Determine max line length for description
         mml = 80
         if "max_line_length" in additional_notes:
             mml = additional_notes.pop("max_line_length")
         if not isinstance(mml, integer_types) or not 50 <= mml < 100:
+            # If bad line length input, reset to 80 
             warnings.warn(
-                "max_line_length not an int between 50 and 100 "
+                "`max_line_length` not an int between 50 and 100 "
                 "using default value.")
             mml = 80
 
         def add_to_description(description, key, value, key_newline=False,
                                captialize=True):
             """Add to the description string."""
+            # Captialize first letter for description if desired
             if captialize:
                 key = key.capitalize()
+            # Turn underscores into whitespace
             key = key.replace("_", " ")
             display_str = key
+            # Ensure indents match if there is to be a multiple lines
             if key_newline:
                 key = "  "
                 display_str += "\n" + key
@@ -2016,9 +2063,11 @@ class MassModel(Model):
                 display_str += value[mml - n_key:]
             else:
                 display_str = key + value
+            # Join new description item to the current description and return
             description = "\n".join((description, display_str))
             return description
 
+        # Initialize description with the model ID
         description = "Model ID: " + str(self.id)
 
         # Handle recognized kwargs
@@ -2049,9 +2098,11 @@ class MassModel(Model):
                     description, " * ", assumption, captialize=False)
             description += "\n"
 
+        # Append old description to the new one.
         if not replace:
             additional_notes["Old Description"] = self.description
 
+        # Add any additional notes
         if additional_notes:
             description += "\n".join((
                 "", "=" * mml, "Additional Notes", "-" * mml))
@@ -2114,6 +2165,7 @@ class MassModel(Model):
         if not isinstance(update_model, bool):
             raise TypeError("update_model must be a bool")
 
+        # Use current array type and dtype if None provided
         if array_type is None:
             array_type = self._array_type
 

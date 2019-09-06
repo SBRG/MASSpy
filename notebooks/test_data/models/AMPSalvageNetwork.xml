@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="Hour">
@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
-          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -26,21 +26,21 @@
       <compartment id="b" name="boundary" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="M_adn_c" name="Adenosine" compartment="c" initialConcentration="0.00119990009767627" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H13N5O4"/>
-      <species id="M_ade_c" name="Adenine" compartment="c" initialConcentration="0.000999859991221583" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H5N5"/>
-      <species id="M_imp_c" name="Inosine monophosphate" compartment="c" initialConcentration="0.00999999999070976" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H11N4O8P"/>
-      <species id="M_ins_c" name="Inosine" compartment="c" initialConcentration="0.00100009998289626" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H12N4O5"/>
-      <species id="M_hxan_c" name="Hypoxanthine" compartment="c" initialConcentration="0.00200014000877842" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H4N4O"/>
-      <species id="M_r1p_c" name="Alpha-D-Ribose 1-phosphate" compartment="c" initialConcentration="0.0600037556468137" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
-      <species id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" initialConcentration="0.00494022287840186" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
-      <species id="M_prpp_c" name="5-Phospho-alpha-D-ribose 1-diphosphate" compartment="c" initialConcentration="0.00500101370071216" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C5H8O14P3"/>
-      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.60001406801802" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
-      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289985931981982" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
-      <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867280999194275" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
-      <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.50000000008057" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
-      <species id="M_nh3_c" name="Ammonia" compartment="c" initialConcentration="0.0910022399916747" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H3N"/>
+      <species id="M_adn_c" name="Adenosine" compartment="c" initialConcentration="0.0012" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H13N5O4"/>
+      <species id="M_ade_c" name="Adenine" compartment="c" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H5N5"/>
+      <species id="M_imp_c" name="Inosine monophosphate" compartment="c" initialConcentration="0.01" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H11N4O8P"/>
+      <species id="M_ins_c" name="Inosine" compartment="c" initialConcentration="0.001" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C10H12N4O5"/>
+      <species id="M_hxan_c" name="Hypoxanthine" compartment="c" initialConcentration="0.002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C5H4N4O"/>
+      <species id="M_r1p_c" name="Alpha-D-Ribose 1-phosphate" compartment="c" initialConcentration="0.06" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_r5p_c" name="Alpha-D-Ribose 5-phosphate" compartment="c" initialConcentration="0.00494" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C5H9O8P"/>
+      <species id="M_prpp_c" name="5-Phospho-alpha-D-ribose 1-diphosphate" compartment="c" initialConcentration="0.005" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-5" fbc:chemicalFormula="C5H8O14P3"/>
+      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.29" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867281" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
+      <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.5" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
+      <species id="M_nh3_c" name="Ammonia" compartment="c" initialConcentration="0.091002" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H3N"/>
       <species id="M_h_c" name="H+" compartment="c" initialConcentration="6.30957e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
-      <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="0.999999759927753" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
+      <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
     </listOfSpecies>
     <listOfParameters>
       <parameter sboTerm="SBO:0000626" id="cobra_default_lb" value="-1000" units="mmol_per_gDW_per_hr" constant="true"/>
@@ -48,25 +48,25 @@
       <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
-      <parameter id="v_R_ADNK1" value="0.119991064781139" constant="false"/>
-      <parameter id="v_R_NTD7" value="0.119999999888517" constant="false"/>
-      <parameter id="v_R_AMPDA" value="0.0139999999869937" constant="false"/>
-      <parameter id="v_R_NTD11" value="0.0139999999869937" constant="false"/>
-      <parameter id="v_R_ADA" value="0.00999916748063556" constant="false"/>
-      <parameter id="v_R_PUNP5" value="0.0140008778417006" constant="false"/>
-      <parameter id="v_R_PPM" value="0.0140008778417006" constant="false"/>
-      <parameter id="v_R_PRPPS" value="0.0140008778417006" constant="false"/>
-      <parameter id="v_R_ADPT" value="0.0140008778417006" constant="false"/>
-      <parameter id="v_R_ATPM" value="0.14799282046454" constant="false"/>
-      <parameter id="v_R_SK_adn_c" value="-0.00999023237325918" constant="false"/>
-      <parameter id="v_R_SK_ade_c" value="-0.0140008778417048" constant="false"/>
-      <parameter id="v_R_SK_ins_c" value="0.00999828962593239" constant="false"/>
-      <parameter id="v_R_SK_hxan_c" value="0.0140008778416831" constant="false"/>
-      <parameter id="v_R_SK_nh3_c" value="0.0239991674672035" constant="false"/>
-      <parameter id="v_R_SK_pi_c" value="8.05724376107264e-06" constant="false"/>
-      <parameter id="v_R_SK_amp_c" value="-8.05725208774533e-06" constant="false"/>
+      <parameter id="v_R_ADNK1" value="0.12" constant="false"/>
+      <parameter id="v_R_NTD7" value="0.12" constant="false"/>
+      <parameter id="v_R_AMPDA" value="0.014" constant="false"/>
+      <parameter id="v_R_NTD11" value="0.014" constant="false"/>
+      <parameter id="v_R_ADA" value="0.01" constant="false"/>
+      <parameter id="v_R_PUNP5" value="0.014" constant="false"/>
+      <parameter id="v_R_PPM" value="0.014" constant="false"/>
+      <parameter id="v_R_PRPPS" value="0.014" constant="false"/>
+      <parameter id="v_R_ADPT" value="0.014" constant="false"/>
+      <parameter id="v_R_ATPM" value="0.148" constant="false"/>
+      <parameter id="v_R_SK_adn_c" value="-0.01" constant="false"/>
+      <parameter id="v_R_SK_ade_c" value="-0.014" constant="false"/>
+      <parameter id="v_R_SK_ins_c" value="0.01" constant="false"/>
+      <parameter id="v_R_SK_hxan_c" value="0.014" constant="false"/>
+      <parameter id="v_R_SK_nh3_c" value="0.024" constant="false"/>
+      <parameter id="v_R_SK_pi_c" value="0" constant="false"/>
+      <parameter id="v_R_SK_amp_c" value="0" constant="false"/>
       <parameter id="v_R_SK_h_c" value="0" constant="false"/>
-      <parameter id="v_R_SK_h2o_c" value="-0.0240072247192913" constant="false"/>
+      <parameter id="v_R_SK_h2o_c" value="-0.024" constant="false"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="R_ADNK1" name="Adenosine kinase" reversible="false" fast="false" fbc:lowerFluxBound="cobra_default_lb" fbc:upperFluxBound="cobra_default_ub">
@@ -215,8 +215,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PUNP5" value="0.09"/>
             <localParameter id="kf_R_PUNP5" value="12"/>
+            <localParameter id="Keq_R_PUNP5" value="0.09"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -347,8 +347,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="adn_b" value="0.0012"/>
             <localParameter id="kf_R_SK_adn_c" value="100000"/>
+            <localParameter id="adn_b" value="0.0012"/>
             <localParameter id="Keq_R_SK_adn_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -374,9 +374,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="ade_b" value="0.001"/>
             <localParameter id="kf_R_SK_ade_c" value="100000"/>
             <localParameter id="Keq_R_SK_ade_c" value="1"/>
-            <localParameter id="ade_b" value="0.001"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -482,9 +482,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="pi_b" value="2.5"/>
             <localParameter id="Keq_R_SK_pi_c" value="1"/>
             <localParameter id="kf_R_SK_pi_c" value="100000"/>
+            <localParameter id="pi_b" value="2.5"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -510,8 +510,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="amp_b" value="0.0867281"/>
-            <localParameter id="kf_R_SK_amp_c" value="100000"/>
             <localParameter id="Keq_R_SK_amp_c" value="1"/>
+            <localParameter id="kf_R_SK_amp_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -537,8 +537,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="Keq_R_SK_h_c" value="1"/>
-            <localParameter id="h_b" value="6.30957e-05"/>
             <localParameter id="kf_R_SK_h_c" value="100000"/>
+            <localParameter id="h_b" value="6.30957e-05"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -563,9 +563,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
-            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
             <localParameter id="h2o_b" value="1"/>
+            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>

@@ -17,8 +17,6 @@ import numpy as np
 
 from optlang.interface import OPTIMAL
 
-from six import iterkeys
-
 from mass.core.mass_configuration import MassConfiguration
 from mass.thermo.conc_solver import (
     ConcSolver, concentration_constraint_matricies)
@@ -204,7 +202,7 @@ class ConcHRSampler:
         for sense in ("min", "max"):
             c_solver.objective_direction = sense
 
-            for i, met in enumerate(metabolites):
+            for met in metabolites:
                 variable = c_solver.variables[str(met)]
 
                 # Omit fixed metabolites if they are non-homogeneous

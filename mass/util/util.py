@@ -2,6 +2,7 @@
 """Contains utility functions to assist in various :mod:`mass` functions."""
 import logging
 import warnings
+from copy import copy
 from operator import le, lt
 
 from cobra import DictList
@@ -11,6 +12,17 @@ from depinfo import print_dependencies
 import numpy as np
 
 from six import integer_types, iteritems, string_types
+
+
+LOG_COLORS = {
+    logging.CRITICAL: "\x1b[90m",
+    logging.ERROR: "\x1b[91m",
+    logging.WARNING: "\x1b[93m",
+    logging.INFO: "\x1b[94m",
+    logging.DEBUG: "\x1b[92m",
+    -1: "\x1b[0m",
+}
+"""dict: Contains logger levels and corresponding color codes."""
 
 
 # Public
@@ -103,7 +115,18 @@ def apply_decimal_precision(value, decimal_precision):
 
     """
     if decimal_precision is not None and value is not None:
-        return round(value, decimal_precision)
+        if hasattr(value, "__iter__"):
+            new = [round(v, decimal_precision) for v in value]
+            if not isinstance(value, (list, np.ndarray)):
+                try:
+                    value = value.__class__(new)
+                except Exception:
+                    pass
+            elif isinstance(value, np.ndarray):
+                value = np.array(new)
+
+        else:
+            value = round(value, decimal_precision)
 
     return value
 
@@ -148,13 +171,51 @@ def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
     return DictList(items)
 
 
+class ColorFormatter(logging.Formatter):
+    """Colored Formatter for logging output.
+
+    Based on 
+    http://uran198.github.io/en/python/2016/07/12/colorful-python-logging.html
+
+    """
+
+    def format(self, record, *args, **kwargs):
+        """Set logger format."""
+        # Copy old record
+        new_record = copy(record)
+        # Ensure level in log color dict
+        if new_record.levelno in LOG_COLORS:
+            # Get the color
+            color, reset = LOG_COLORS[new_record.levelno], LOG_COLORS[-1]
+            # Set the levelname color
+            new_record.levelname = "{color}{level}:{reset}".format(
+                color=color,
+                level=new_record.levelname,
+                reset=reset)
+
+            # Set the message color
+            new_record.msg = "{color}{msg}{reset}".format(
+                color=color,
+                msg=new_record.msg,
+                reset=reset)
+
+        return super(ColorFormatter, self).format(new_record, *args, **kwargs)
+
+
 def _make_logger(name):
     """Make the logger instance and set the default format."""
-    name = name.split(".")[-1]
-    logging.basicConfig(format="%(name)s %(levelname)s: %(message)s")
+    # Create colored formatter
+    formatter = ColorFormatter("%(levelname)s %(message)s")
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+
+    # Get logger
     logger = logging.getLogger(name)
+    # Add handler and return
+    logger.addHandler(handler)
     return logger
 
 
 __all__ = (
-    "show_versions", "ensure_iterable", "ensure_non_negative_value",)
+    "show_versions", "ensure_iterable", "ensure_non_negative_value",
+    "LOG_COLORS", "ColorFormatter")
