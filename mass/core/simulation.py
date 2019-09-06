@@ -815,8 +815,6 @@ class Simulation(Object):
 
         # Update reference model to have the new values
         if update_values:
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Updating reference model values")
             model = self._update_mass_model_with_values(self.reference_model)
             setattr(self, "_reference_model", model)
             self._reset_roadrunner(True)
