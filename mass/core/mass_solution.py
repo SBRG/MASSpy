@@ -198,7 +198,7 @@ class MassSolution(DictWithID):
         :func:`matplotlib.pyplot.gca`).
 
         """
-        ax = plt.gca()
+        # Get solution type for title
         solution_type = ""
         if self.solution_type == _CONC_STR:
             solution_type += "Concentrations"
@@ -206,6 +206,7 @@ class MassSolution(DictWithID):
         if self.solution_type == _FLUX_STR:
             solution_type += "Fluxes"
 
+        # Set plot options
         options = {
             "plot_function": "semilogx",
             "grid": ("major", "x"),
@@ -213,9 +214,12 @@ class MassSolution(DictWithID):
             "xlabel": "Time",
             "ylabel": solution_type,
         }
-
+        # Get current axis and clear it
+        ax = plt.gca()
         ax.cla()
+        # Plot time profile
         ax = plot_time_profile(self, ax=ax, legend="right outside", **options)
+        # Set figure size
         ax.get_figure().set_size_inches((6, 4))
 
     @property
@@ -230,24 +234,30 @@ class MassSolution(DictWithID):
         :func:`matplotlib.pyplot.gca`).
 
         """
+        # Get current axis
         ax = plt.gca()
         ax.cla()
-        title = ("Tiled Phase portraits for " + self.id, {"size": "large"})
-        ax = plot_tiled_phase_portraits(
-            self, ax=ax, **{
-                "title": title,
-                "annotate_time_points": "endpoints",
-                "annotate_time_points_color": ["r", "b"],
-                "annotate_time_points_marker": ["o", "D"],
-                "tile_xlabel_fontdict": {"size": "large"},
-                "tile_ylabel_fontdict": {"size": "large"},
-                "annotate_time_points_legend_loc": "right outside"})
+        # Set options
+        options = {
+            "title": (
+                "Tiled Phase portraits for " + self.id, {"size": "large"}),
+            "annotate_time_points": "endpoints",
+            "annotate_time_points_color": ["r", "b"],
+            "annotate_time_points_marker": ["o", "D"],
+            "tile_xlabel_fontdict": {"size": "large"},
+            "tile_ylabel_fontdict": {"size": "large"},
+            "annotate_time_points_legend_loc": "right outside"}
+        # Plot with kwargs 
+        ax = plot_tiled_phase_portraits(self, ax=ax, **options)
+        # Set figure size 
         ax.get_figure().set_size_inches((7, 7))
 
     def to_frame(self):
         """Return the stored solutions as a :class:`pandas.DataFrame`."""
+        # Ensure solutions are data points
         sols = dict((k, v(self.time)) if self.interpolate
                     else (k, v) for k, v in iteritems(self))
+        # Make dataframe and set time as index
         df = pd.DataFrame.from_dict(sols)
         df.index = pd.Series(self.time, name="Time")
         return df

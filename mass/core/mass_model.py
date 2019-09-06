@@ -1631,6 +1631,7 @@ class MassModel(Model):
 
             return sol
 
+        # Calculate the PERCs
         percs_dict = {}
         for reaction, flux in iteritems(fluxes):
             rate_eq = strip_time(reaction.rate)
@@ -1642,9 +1643,11 @@ class MassModel(Model):
                     print(msg)
                 continue
 
+            # Get arguments
             args = [a for a in list(rate_eq.atoms(sym.Symbol))
                     if str(a) != reaction.kf_str]
 
+            # Get numerical values for arguments
             vals = {a: numerical_values[str(a)] for a in args
                     if str(a) in numerical_values}
 
@@ -1657,7 +1660,6 @@ class MassModel(Model):
 
             # Substitute values into rate equation
             rate_eq = rate_eq.subs(vals)
-
             # Calculate rate equation and update with soluton for PERC
             sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))
             percs_dict.update({reaction.kf_str: sol})
@@ -1904,16 +1906,20 @@ class MassModel(Model):
                 raise TypeError("custom_parameters must be a dict.")
             self.custom_parameters.update(custom_parameters)
 
+        # Iterate through custrom rates
         for reaction, custom_rate in iteritems(custom_rates):
             if not isinstance(reaction, MassReaction):
+                # Ensure reaction exists
                 try:
                     reaction = self.reactions.get_by_id(reaction)
                 except KeyError as e:
                     warnings.warn("No reaction found for {0}".format(str(e)))
                     continue
+            # Try to create the rate expression
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
+                # Warn if fail
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 
@@ -1967,6 +1973,7 @@ class MassModel(Model):
                     l_key for l_key, l_value in iteritems(l_dict)
                     if l_key in r_dict and l_value != r_dict[l_key])
 
+                # Format and return messages for differences
                 if i == 0:
                     msgs = ["Metabolites", "ODEs"]
                 else:
@@ -2018,25 +2025,31 @@ class MassModel(Model):
             to represent a space ``" "``. (e.g. cell_type for cell type)
 
         """
+        # Determine whether description is being replaced
         replace = True
         if "replace" in additional_notes:
             replace = additional_notes.pop("replace")
+        # Determine max line length for description
         mml = 80
         if "max_line_length" in additional_notes:
             mml = additional_notes.pop("max_line_length")
         if not isinstance(mml, integer_types) or not 50 <= mml < 100:
+            # If bad line length input, reset to 80 
             warnings.warn(
-                "max_line_length not an int between 50 and 100 "
+                "`max_line_length` not an int between 50 and 100 "
                 "using default value.")
             mml = 80
 
         def add_to_description(description, key, value, key_newline=False,
                                captialize=True):
             """Add to the description string."""
+            # Captialize first letter for description if desired
             if captialize:
                 key = key.capitalize()
+            # Turn underscores into whitespace
             key = key.replace("_", " ")
             display_str = key
+            # Ensure indents match if there is to be a multiple lines
             if key_newline:
                 key = "  "
                 display_str += "\n" + key
@@ -2050,9 +2063,11 @@ class MassModel(Model):
                 display_str += value[mml - n_key:]
             else:
                 display_str = key + value
+            # Join new description item to the current description and return
             description = "\n".join((description, display_str))
             return description
 
+        # Initialize description with the model ID
         description = "Model ID: " + str(self.id)
 
         # Handle recognized kwargs
@@ -2083,9 +2098,11 @@ class MassModel(Model):
                     description, " * ", assumption, captialize=False)
             description += "\n"
 
+        # Append old description to the new one.
         if not replace:
             additional_notes["Old Description"] = self.description
 
+        # Add any additional notes
         if additional_notes:
             description += "\n".join((
                 "", "=" * mml, "Additional Notes", "-" * mml))
@@ -2148,6 +2165,7 @@ class MassModel(Model):
         if not isinstance(update_model, bool):
             raise TypeError("update_model must be a bool")
 
+        # Use current array type and dtype if None provided
         if array_type is None:
             array_type = self._array_type
 

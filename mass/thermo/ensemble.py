@@ -1,5 +1,30 @@
 # -*- coding: utf-8 -*-
-"""TODO DOCSTRING."""
+r"""Module to create and manage an ensemble of models.
+
+The :mod:`ensemble` module contains the :class:`Ensemble` class and the
+:func:`generate_ensemble` function.
+
+The :class:`Ensemble` class is designed to manage an ensemble of models. It
+contains various methods to assist in generating multiple models from existing
+:class:`~.MassModel`\ s from either flux data or concentration data in
+:class:`pandas.DataFrame`\ s  (e.g. generated from
+:mod:`~mass.thermo.conc_sampling`).
+There are also methods to help ensure that models are thermodynamically
+feasible and can reach steady states with or without perturbations applied.
+
+The benefits of using the the :class:`Ensemble` is that it provides more
+control over the model creation and validation processes. However, if a large
+number of models is to be generated and performance is a priority, the
+:func:`generate_ensemble` function can be used.
+
+The :func:`generate_ensemble` function is optimized for performance when
+generating a large number of models. This function ensures valid user input is
+before generating models to reduce the likelihood of a user error causing the
+model generation process to stop before completion. However, there is time
+spent in function's setup, so for generation of a smaller number of models,
+performance gains may not be seen.
+
+"""
 import logging
 from warnings import warn
 
@@ -22,7 +47,27 @@ LOGGER = _make_logger(__name__)
 
 
 class Ensemble(Simulation):
-    """TODO DOCSTRING."""
+    """Class for managing a large ensemble of :mod:`mass` models.
+
+    Parameters
+    ----------
+    reference_model : MassModel
+        The referebce model used in generating the ensemble.
+        The model will be set as the :attr:`Ensemble.reference_model`. 
+    id : str or None
+        An identifier to associate with the :class:`Ensemble`. If ``None``
+        then one is automatically created based on the model identifier.
+    **kwargs
+        name :
+            ``str`` representing a human readable name for the
+            :class:`Ensemble`.
+        verbose : 
+            ``bool`` indicating whether to provide a QCQA report and more
+            verbose messages when trying to load the model.
+
+            Default is ``False``.
+
+    """
 
     def __init__(self, reference_model, id=None, **kwargs):
         """Initialize the Ensemble."""
@@ -45,7 +90,47 @@ class Ensemble(Simulation):
 
     def create_models_from_flux_data(self, models=None, data=None,
                                      raise_error=False, **kwargs):
-        """TODO DOCSTRING."""
+        """Generate ensemble of models for a given set of flux data.
+
+        Notes
+        -----
+        * If ``x`` models are provided with ``y`` sets of flux data values,
+          ``x * y`` total models will be generated.
+
+        Parameters
+        ----------
+        models : iterable, None
+            An iterable of :class:`.MassModel` objects to treat as references.
+            If ``None`` provided, the :attr:`Ensemble.reference_model` is used.
+        data : pandas.DataFrame
+            A :class:`pandas.DataFrame` containing the flux data for generation
+            of the models. Each row is a different set of flux values to
+            generate a model for, and each column corresponds to the reaction
+            identifier for the flux value.
+        raise_error : bool
+            Whether to raise an error upon failing to generate a model from a
+            given reference. Default is ``False``.
+        **kwargs
+            verbose :
+                ``bool`` indicating the verbosity of the function.
+
+                Default is ``False``.
+            suffix :
+                ``str`` representing the suffix to append to generated models.
+
+                Default is ``'_F'``.
+
+        Returns
+        -------
+        ensemble : list
+            A ``list`` of successfully generated :class:`.MassModel` objects.
+
+        Raises
+        ------
+        MassEnsembleError
+            Raised if generation of a model fails and ``raise_error=True``.
+
+        """
         kwargs = _check_kwargs({
             "verbose": False,
             "suffix": "_F",
@@ -97,7 +182,48 @@ class Ensemble(Simulation):
 
     def create_models_from_concentration_data(self, models=None, data=None,
                                               raise_error=False, **kwargs):
-        """TODO DOCSTRING."""
+        """Generate ensemble of models for a given set of concentration data.
+
+        Notes
+        -----
+        * If ``x`` models are provided with ``y`` sets of concentration data
+          values, ``x * y`` total models will be generated.
+
+        Parameters
+        ----------
+        models : iterable, None
+            An iterable of :class:`.MassModel` objects to treat as references.
+            If ``None`` provided, the :attr:`Ensemble.reference_model` is used.
+        data : pandas.DataFrame
+            A :class:`pandas.DataFrame` containing the concentration data for
+            generation of the models. Each row is a different set of
+            concentration values to generate a model for, and each column
+            corresponds to the metabolite identifier for the concentraiton
+            value.
+        raise_error : bool
+            Whether to raise an error upon failing to generate a model from a
+            given reference. Default is ``False``.
+        **kwargs
+            verbose :
+                ``bool`` indicating the verbosity of the function.
+
+                Default is ``False``.
+            suffix :
+                ``str`` representing the suffix to append to generated models.
+
+                Default is ``'_C'``.
+
+        Returns
+        -------
+        ensemble : list
+            A ``list`` of successfully generated :class:`.MassModel` objects.
+
+        Raises
+        ------
+        MassEnsembleError
+            Raised if generation of a model fails and ``raise_error=True``.
+
+        """
         kwargs = _check_kwargs({
             "verbose": False,
             "suffix": "_C",
@@ -151,7 +277,46 @@ class Ensemble(Simulation):
 
     def ensure_positive_percs(self, models, raise_error=False,
                               update_values=False, **kwargs):
-        """TODO DOCSTRING."""
+        """Seperate models based on whether all calculated PERCs are positive.
+
+        Parameters
+        ----------
+        models : iterable
+            An iterable of :class:`.MassModel` objects to use for PERC
+            calculations.
+        raise_error : bool
+            Whether to raise an error upon failing to generate a model from a
+            given reference. Default is ``False``.
+        update_values : bool
+            Whether to update the PERC values for models that generate all
+            positive PERCs. Default is ``False``.
+        **kwargs
+            verbose :
+                ``bool`` indicating the verbosity of the function.
+
+                Default is ``False``.
+            at_equilibrium_default :
+                ``float`` value to set the pseudo-order rate constant if the
+                reaction is at equilibrium.
+
+                Default is ``100,000``.
+
+        Returns
+        -------
+        tuple (feasible, infeasible)
+        feasible : list
+            A ``list`` of :class:`.MassModel` objects whose calculated PERC
+            values were postiive.
+        infeasible : list
+            A ``list`` of :class:`.MassModel` objects whose calculated PERC
+            values were negative.
+
+        Raises
+        ------
+        MassEnsembleError
+            Raised if PERC calculation fails and ``raise_error=True``.
+
+        """
         kwargs = _check_kwargs({
             "verbose": False,
             "at_equilibrium_default": 100000,
@@ -184,7 +349,90 @@ class Ensemble(Simulation):
     def ensure_steady_state(self, models=None, strategy="nleq2",
                             perturbations=None, update_values=False,
                             **kwargs):
-        """TODO DOCSTRING."""
+        """Seperate models based on whether a steady state can be reached.
+
+        All ``kwargs`` are passed to :meth:`~.Simulation.find_steady_state`.
+
+        Parameters
+        ----------
+        models : iterable, None
+            An iterable of :class:`.MassModel` objects to find a steady state
+            for. If ``None`` provided, all models in the :class:`Ensemble` are
+            used.
+        strategy : str
+            The strategy for finding the steady state. Must be one of the
+            following:
+
+                * ``'simulate'``
+                * ``'nleq1'``
+                * ``'nleq2'``
+
+        perturbations : dict
+            A ``dict`` of perturbations to incorporate into the simulation.
+            Models must reach a steady state with the given pertubration to be
+            considered feasible.
+            See :mod:`~.simulation` documentation for more information on
+            valid perturbations.
+        update_values : bool
+            Whether to update the model with the steady state results.
+            Default is ``False``.
+        **kwargs
+            verbose :
+                ``bool`` indicating the verbosity of the method.
+
+                Default is ``False``.
+            selections :
+                ``list`` of identifiers corresponding to the time course
+                selections to return in the solutions. If pools or net fluxes
+                are included, all variables for their formulas must be
+                included.
+
+                Default is ``None`` for all concentrations, fluxes, pools,
+                and net fluxes.
+            boundary_metabolites :
+                ``bool`` indicating whether to include boundary metabolite
+                concentrations in the output.
+
+                Default is ``False``.
+            steps :
+                ``int`` indicating number of steps at which the output is
+                sampled where the samples are evenly spaced and
+                ``steps = (number of time points) - 1.``
+                Steps and number of time points may not both be specified.
+                Only valid for ``strategy='simulate'``.
+
+                Default is ``None``.
+            tfinal :
+                ``float`` indicating the final time point to use in when
+                simulating to long times to find a steady state.
+                Only valid for ``strategy='simulate'``.
+
+                Default is ``1e8``.
+            num_attempts :
+                ``int`` indicating the number of attempts the steady state
+                solver should make before determining that a steady state
+                cannot be found. Only valid for ``strategy='nleq1'`` or
+                ``strategy='nleq2'``.
+
+                Default is ``2``.
+            decimal_precision :
+                ``bool`` indicating whether to apply the
+                :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
+                the :class:`.MassConfiguration` to the solution values.
+
+                Default is ``False``.
+
+        Returns
+        -------
+        tuple (feasible, infeasible)
+        feasible : list
+            A ``list`` of :class:`.MassModel` objects that could reach
+            a steady state.
+        infeasible : list
+            A ``list`` of :class:`.MassModel` objects that could not reach
+            a steady state.
+
+        """
         kwargs = _check_kwargs({
             "verbose": False,
             "selections": None,
@@ -219,7 +467,13 @@ class Ensemble(Simulation):
 
 
 def _validate_data_input(reference_model, data, id_type, verbose):
-    """TODO DOCSTRING."""
+    """Validate the DataFrame input.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
     if isinstance(data, pd.Series):
         data = pd.DataFrame(data).T
     if not isinstance(data, pd.DataFrame):
@@ -253,7 +507,13 @@ def _validate_data_input(reference_model, data, id_type, verbose):
 
 def _ensure_positive_percs_for_model(model, verbose, raise_error,
                                      update_values, at_equilibrium_default):
-    """TODO DOCSTRING."""
+    """Ensure calculated PERCs for a model are positive.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
     try:
         _log_msg(LOGGER, logging.INFO, verbose,
                  "Calculating PERCs for '%s'", model.id)
@@ -289,15 +549,99 @@ def _ensure_positive_percs_for_model(model, verbose, raise_error,
 def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                       steady_state_strategy="simulate", perturbations=None,
                       **kwargs):
-    """TODO DOCSTRING.
+    """Generate an :class:`Ensemble` of feasible models for given data sets.
+
+    This function is optimized for performance when generating a large
+    ensemble of models when compared to the various methods of the
+    :class:`Ensemble` class. However, this function may not provide as much
+    control over the process as the methods defined in the :class:`Ensemble`
+    class.
 
     Notes
     -----
-    * This function is optimized for performance when generating a large
-      ensemble of models when compared to the various methods of the
-      :class:`Ensemble` class. However, this function may not provide as much
-      control over the process as the methods defined in the :class:`Ensemble`
-      class.
+    * Only one data set is required to generate the ensemble, meaning that
+      a flux data set can be given without a concentration data set, and vice
+      versa.
+
+    * If ``x`` flux data samples and ``y`` concentration data samples are
+      provided, ``x * y`` total models will be generated.
+
+    * If models deemed ``infeasible`` are to be returned, ensure the
+      ``return_infeasible`` kwarg is set to ``True``.
+
+    Parameters
+    ----------
+    reference_model : MassModel
+        The referebce model used in generating the ensemble.
+        The model will be set as the :attr:`Ensemble.reference_model`.
+    flux_data : pandas.DataFrame or None
+        A :class:`pandas.DataFrame` containing the flux data for generation
+        of the models. Each row is a different set of flux values to
+        generate a model for, and each column corresponds to the reaction
+        identifier for the flux value.
+    conc_data : pandas.DataFrame or None
+        A :class:`pandas.DataFrame` containing the concentration data for
+        generation of the models. Each row is a different set of
+        concentration values to generate a model for, and each column
+        corresponds to the metabolite identifier for the concentraiton
+        value.
+    steady_state_strategy : str, None
+        The strategy for finding the steady state. Must be one of the
+        following:
+
+            * ``'simulate'``
+            * ``'nleq1'``
+            * ``'nleq2'``
+
+        If ``None``, no attempts will be made to determine whether a generated
+        model can reach a steady state.
+    perturbations : dict
+        A ``dict`` of perturbations to incorporate into the simulation, 
+        or a list of perturbation dictionaries where each ``dict`` is applied
+        to a simulation. Models must reach a steady state with all given
+        pertubration dictionaries to be considered feasible.
+        See :mod:`~.simulation` documentation for more information on
+        valid perturbations.
+
+        Ignored if ``steady_state_strategy=None``. 
+    **kwargs
+        verbose :
+            ``bool`` indicating the verbosity of the function.
+
+            Default is ``False``.
+        ensure_positive_percs :
+            ``bool`` indicating whether to calculate PERCs, ensure they
+            are postive, and update feasible models with the new PERC values.
+
+            Default is ``True``.
+        flux_suffix :
+            ``str`` representing the suffix to append to generated models
+            indicating the flux data set used.
+
+            Default is ``'_F'``.
+        conc_suffix :
+            ``str`` representing the suffix to append to generated models
+            indicating the conc data set used.
+
+            Default is ``'_C'``.
+        at_equilibrium_default :
+            ``float`` value to set the pseudo-order rate constant if the
+            reaction is at equilibrium. 
+
+            Default is ``100,000``. Ignored if ``ensure_positive_percs=False``.
+        return_infeasible :
+            ``bool`` indicating whether to generate and return an
+            :class:`Ensemble` containing the models deemed infeasible.
+
+            Default is ``False``.
+
+    Returns
+    -------
+    feasible : Ensemble
+        An :class:`Ensemble` containing the models deemed feasible.
+    infeasible : Ensemble
+        An :class:`Ensemble` containing the models deemed infeasible.
+        Only returned if ``return_infeasible=True``.
 
     """
     # Check all inputs at beginning to ensure that ensemble generation is not

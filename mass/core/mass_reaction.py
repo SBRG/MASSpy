@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-MassReaction is a class for holding information regarding reactions.
+"""MassReaction is a class for holding information regarding reactions.
 
 The :class:`MassReaction` class inherits and extends the
 :class:`~cobra.core.reaction.Reaction` class in :mod:`cobra`. It contains
