@@ -23,6 +23,8 @@ except ImportError:
 
 import numpy as np
 
+import pandas as pd
+
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 from mass.util.util import ensure_iterable
@@ -110,7 +112,7 @@ def _validate_time_vector(time_vector, default_time_vector):
        and not isinstance(time_vector, string_types):
         return np.array(sorted(time_vector))
 
-    raise ValueError("Invalid input for 'time_vector'.")
+    raise ValueError("Invalid input for `time_vector`.")
 
 
 def _validate_plot_observables(mass_solution, observable, time_vector=None):
@@ -134,7 +136,7 @@ def _validate_plot_observables(mass_solution, observable, time_vector=None):
 
     # Check to ensure specified observables are in the MassSolution
     if not set(observable).issubset(set(iterkeys(mass_solution))):
-        raise ValueError("observables must keys from the mass_solution.")
+        raise ValueError("`observable` must keys from the mass_solution.")
 
     # Turn solutions into interpolating functions if the timepoints provided
     # are not identical to those used in the simulation.
@@ -198,7 +200,7 @@ def _validate_legend_input_fmt(legend, observable):
            (isinstance(legend[0], list) or n_obs <= n_leg <= n_obs + 1):
             items = ensure_iterable(legend[0]), possible_loc
         elif legend[0] == possible_loc:
-            items = list(iterkeys(observable)), possible_loc
+            items = list(observable), possible_loc
         else:
             items = None, possible_loc
 
@@ -213,7 +215,7 @@ def _validate_legend_input_fmt(legend, observable):
             items = ensure_iterable(legend[0]), possible_loc
         elif n_leg in [n_obs, 1]:
             items = _validate_legend_loc(legend, possible_loc,
-                                         def_labels=list(iterkeys(observable)),
+                                         def_labels=list(observable),
                                          def_loc=default_loc)
     # Either only labels provided or bad label input and location
     elif n_leg == n_obs:
@@ -254,7 +256,8 @@ def _validate_annotate_time_points_input(*args):
     t_max = max(time_vector)
 
     # Get the start and finish points
-    if time_points.lower() == "endpoints":
+    if isinstance(time_points, string_types) and\
+       time_points.lower() == "endpoints":
         time_points = [t_min, t_max]
         default_markers = ["o", "D"]
     else:
@@ -282,7 +285,7 @@ def _validate_annotate_time_points_input(*args):
         if markers is not None and len(time_points) < len(markers):
             _raise_kwarg_warning(
                 "marker",
-                msg=", therefore utilizing default 'markers' values instead",
+                msg=", therefore utilizing default `markers` values instead",
                 kwarg_prefix="annotate_time_points")
             markers = None
 
@@ -351,7 +354,7 @@ def _validate_tile_placement(tile_placement, prefix=None):
         if prefix is not None:
             arg_name = "_".join(("plot", arg_name))
         raise ValueError(
-            "Invalid '{0}' input '{1}'. Can only be one of the following: "
+            "Invalid `{0}` input '{1}'. Can only be one of the following: "
             "{2}.".format(arg_name, tile_placement, str(valid)))
 
     return tile_placement.lower()
@@ -439,11 +442,11 @@ def _get_legend_args(ax, legend, observable, **kwargs):
         _raise_kwarg_warning(
             "legend",
             msg="therefore utilizing keys from the MassSolution instead")
-        legend_labels = list(iterkeys(observable))
+        legend_labels = list(observable)
 
     if legend_loc is None:
         _raise_kwarg_warning(
-            "loc", msg="therefore utilizing default legend 'loc' instead",
+            "loc", msg="therefore utilizing default legend `loc` instead",
             kwarg_prefix="legend")
         legend_loc = rc.defaultParams['legend.loc'][0]
 
@@ -474,9 +477,13 @@ def _map_labels_to_solutions(observable, labels):
     This method is intended for internal use only.
 
     """
-    # Map solutions to labels
-    for old_label, new_label in zip(list(observable), list(labels)):
-        observable[new_label.lstrip("_")] = observable.pop(old_label)
+    labels = [l.lstrip("_") for l in labels]
+    if isinstance(observable, pd.DataFrame):
+        observable.index = labels
+    else:
+        # Map solutions to labels
+        for old_label, new_label in zip(list(observable), list(labels)):
+            observable[new_label] = observable.pop(old_label)
 
     return observable
 
@@ -528,7 +535,7 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
             # number of new items. Do not need to include this message
             # if invalid kwarg values were found.
             if len(values) != n_new and not msg:
-                msg += "Wrong number of values for '{0}' provided".format(k)
+                msg += "Wrong number of values for `{0}` provided".format(k)
 
             if msg:
                 # Raise warning if a warning message was created and utilize
@@ -580,7 +587,7 @@ def _set_axes_labels(ax, **kwargs):
             try:
                 getattr(ax, "set_" + label_type)(label_str, fontdict=fontdict)
             except ValueError as e:
-                warn("Could not set '{0}' due to the following: '{1}'.".format(
+                warn("Could not set `{0}` due to the following: '{1}'.".format(
                     label_type, e))
 
 
@@ -606,7 +613,7 @@ def _set_axes_limits(ax, **kwargs):
             try:
                 getattr(ax, "set_" + limit_type)(tuple(limit_values))
             except ValueError as e:
-                warn("Could not set '{0}' due to the following: '{1}'".format(
+                warn("Could not set `{0}` due to the following: '{1}'".format(
                     limit_type, e))
 
 
@@ -645,7 +652,7 @@ def _set_axes_gridlines(ax, **kwargs):
             except ValueError as e:
                 # Format warning message
                 msg += str(e).split(":")[-1].strip()
-                msg += " for grid 'which' argument"
+                msg += " for grid `which` argument"
                 which = None
 
             # Validate axis argument for gridlines
@@ -655,7 +662,7 @@ def _set_axes_gridlines(ax, **kwargs):
                 # Format warning message
                 msg += " and " if msg else ""
                 msg += str(e).split(":")[-1].strip()
-                msg += " for grid 'which' argument"
+                msg += " for grid `which` argument"
                 axis = None
 
             if which is None or axis is None:
@@ -776,7 +783,7 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
             ax, desired_loc=kwargs.get("annotate_time_points_legend_loc"),
             taken_loc=first_legend[1])
 
-        ax = _set_annotated_time_points_legend_box(ax, items, first_legend[0])
+        ax = _set_additional_legend_box(ax, items, first_legend[0])
 
     return ax
 
@@ -808,7 +815,7 @@ def _get_annotated_time_points_legend_args(ax, desired_loc=None,
             if v == (taken_loc, bbox_to_anchor):
                 taken_loc = k
                 break
-    # Make sure desired location is not alreadytaken
+    # Make sure desired location is not already taken
     if desired_loc is not None and desired_loc == taken_loc:
         msg = " location already used, utilizing default value instead"
         _raise_kwarg_warning(
@@ -835,7 +842,7 @@ def _get_annotated_time_points_legend_args(ax, desired_loc=None,
     return points, labels, {"loc": desired_loc, "bbox_to_anchor": anchor}
 
 
-def _set_annotated_time_points_legend_box(ax, legend_args, first_legend=None):
+def _set_additional_legend_box(ax, legend_args, first_legend=None):
     """Set the legend box of the annotated time points.
 
     Warnings
@@ -850,7 +857,7 @@ def _set_annotated_time_points_legend_box(ax, legend_args, first_legend=None):
             old_legend.remove()
 
     # Set legend, adding the first legend back if needed
-    ax.legend(points, labels, **legend_kwargs)
+    ax.legend(handles=points, labels=labels, **legend_kwargs)
     if first_legend:
         ax.add_artist(first_legend)
 
@@ -950,13 +957,98 @@ def _raise_kwarg_warning(kwarg_name, msg=None, kwarg_prefix=None):
 
     # Format warning message
     if msg is None:
-        warning_msg = "Invalid '{0}' input{1}"
+        warning_msg = "Invalid `{0}` input{1}"
         msg = "."
     else:
-        warning_msg = "Invalid '{0}' input: {1}."
+        warning_msg = "Invalid `{0}` input: {1}."
 
     # Raise warnings
     warn(warning_msg.format(kwarg_name, str(msg)))
+
+
+def _get_values_as_series(obj, compare, name=None):
+    """Get values from ``obj`` as a pandas.Series.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    cls_ = obj.__class__
+
+    def _validate_compare_type(compare, valid):
+        """Ensure ``compare`` is valid."""
+        if compare is None or compare not in valid:
+            raise ValueError("Invalid `compare` '{0}' given, cannot access "
+                             "'{1}' values.".format(compare, cls_.__name__))
+
+    if cls_.__name__ == "Series":
+        series = obj.copy()
+
+    elif "MassModel" in [cls_.__name__, cls_.__base__.__name__]:
+        _validate_compare_type(compare, [
+            "concentrations", "Keqs", "fluxes", "kfs"])
+        values = getattr(obj, {
+            "concentrations": "initial_conditions",
+            "fluxes": "steady_state_fluxes",
+            "Keqs": "parameters",
+            "kfs": "parameters"}[compare])
+        if compare in ["Keqs", "kfs"]:
+            values = values[compare[:-1]]
+        else:
+            values = {x.id: v for x, v in iteritems(values)}
+        series = pd.Series(values)
+
+    elif cls_.__name__ == "ConcSolution":
+        _validate_compare_type(compare, ["concentrations", "Keqs"])
+        series = getattr(obj, compare).copy()
+
+    elif cls_.__name__ == "Solution":
+        _validate_compare_type(compare, ["fluxes"])
+        series = getattr(obj, compare).copy()
+    else:
+        raise TypeError("Unrecognized object type.")
+
+    if name:
+        series.name = name
+
+    return series
+
+
+def _get_dataframe_of_observables(x, y, compare, observable):
+    """Concat ``x`` and ``y`` into DataFrame containing ``observable`` values.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Concat x and y together
+    xy = pd.concat([x, y], axis=1, sort=False)
+    # Filter for plot observables 
+    if observable is not None:
+        if compare in ["Keqs", "kfs"]:
+            p_type = compare[:-1]
+            observable = [getattr(x, p_type + "_str", "_".join((p_type, x)))
+                          for x in ensure_iterable(observable)]
+        else:
+            observable = [getattr(x, "id", x)
+                          for x in ensure_iterable(observable)]
+        if set(observable).difference(xy.index):
+            raise ValueError(
+                "Invalid `observable` values: '{0}'".format(
+                    set(observable).difference(xy.index)))
+        else:
+            xy = xy.loc[observable]
+
+    # Check for NA values, raise warning
+    diff = set(xy.index).symmetric_difference(set(xy.dropna().index))
+    if diff:
+        warn("Ignoring {0}, they only exist in one set of given values".format(
+            diff))
+        xy.dropna(inplace=True)
+
+    return xy
 
 
 __all__ = ()

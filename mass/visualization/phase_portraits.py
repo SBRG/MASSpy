@@ -21,9 +21,9 @@ from mass.visualization import visualization_util as v_util
 def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     """Plot phase portraits of solutions in a given :class:`.MassSolution`.
 
-    Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
-    in the function. See the :mod:`~mass.visualization` module documentation
-    for more detailed information about the possible ``kwargs``.
+    Accepted ``kwargs`` are passed onto various :mod:`matplotlib` methods
+    utilized in the function. See the :mod:`~mass.visualization` module
+    documentation for more detailed information about the possible ``kwargs``.
 
     Notes
     -----
@@ -51,7 +51,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
             1. An iterable of legend labels as strings.
             2. A ``str`` representing the location of the legend, or an
-               ``int`` between 0 and 10 (inclusive) corresponding to the
+               ``int`` between 0 and 14 (inclusive) corresponding to the
                legend location.
             3. An iterable of the format ``(labels, loc)`` to set both
                the legend labels and location, where ``labels`` and ``loc``
@@ -308,8 +308,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
                 sub_ax, "right outside")
             break
 
-    ax = v_util._set_annotated_time_points_legend_box(ax, leg_args,
-                                                      first_legend=None)
+    ax = v_util._set_additional_legend_box(ax, leg_args, first_legend=None)
     # Set the axes title.
     v_util._set_axes_labels(ax, **kwargs)
     # Reset default prop_cycle

@@ -93,17 +93,21 @@ of the :mod:`~mass.visualiation` module.
       ``str`` representing the plotting function to use. Accepted values are
       the following:
 
-          For functions in :mod:`~mass.visualization.time_profiles` and
-          :mod:`~mass.visualization.phase_portraits` modules:
+          For all functions:
 
-              * ``"plot"`` for a linear x-axis and a linear y-axis
+            * ``"plot"`` for a linear x-axis and a linear y-axis
                 via :meth:`Axes.plot() <matplotlib.axes.Axes.plot>`
+            * ``"loglog"`` for a logarithmic x-axis and a logarithmic y-axis
+                via :meth:`Axes.loglog() <matplotlib.axes.Axes.loglog>`
+
+          In addition, for functions in
+          :mod:`~mass.visualization.time_profiles` and
+          :mod:`~mass.visualization.phase_portraits` modules only:
+
               * ``"semilogx``" for a logarithmic x-axis and a linear y-axis
                 via :meth:`Axes.semilogx() <matplotlib.axes.Axes.semilogx>`
               * ``"semilogy"`` for a linear x-axis and a logarithmic y-axis
                 via :meth:`Axes.semilogy() <matplotlib.axes.Axes.semilogy>`
-              * ``"loglog"`` for a logarithmic x-axis and a logarithmic y-axis
-                via :meth:`Axes.loglog() <matplotlib.axes.Axes.loglog>`
 
            Default is ``"plot"``.
   title :
@@ -196,7 +200,8 @@ of the :mod:`~mass.visualiation` module.
       For :func:`~.plot_tiled_phase_portraits`, the markers will be applied
       to all tiles containing phase portrait plots.
 
-      Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
+      For functions in :mod:`.comparision`, default is ``"o"``, otherwise
+      default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
       Ignored if the kwarg ``prop_cycler`` is also provided.
   markersize :
       ``float`` value representing the size of the marker (in points) to set.
@@ -350,15 +355,53 @@ of the :mod:`~mass.visualiation` module.
 
       Default is ``None`` to utilize the color ``"white"``.
       Only valid for :func:`~.plot_tiled_phase_portraits`.
+  xy_line :
+      Whether to plot a line with equation ``y=x``.
+      If ``xy_line=True``, then the line will be created based on the default
+      values in :mod:`matplotlib.rcsetup` unless overridden by
+      ``xy_linecolor``, ``xy_linestyle``, or ``xy_linewidth`` kwargs.
+
+      Ignored if the kwarg ``xy_line=False``.
+      Only valid for functions in the :mod:`~.comparison` module.
+  xy_linecolor :
+      Value representing a valid :mod:`matplotlib.colors` value to use as
+      the color of the ``y=x`` line.
+
+      Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
+      Ignored if the kwarg ``xy_line=False``.
+      Only valid for functions in the :mod:`~.comparison` module.
+  xy_linestyle :
+      Value representing a valid :mod:`matplotlib` value to use as the
+      style of the ``y=x`` line.
+
+      Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
+      Ignored if the kwarg ``xy_line=False``.
+      Only valid for functions in the :mod:`~.comparison` module.
+  xy_linewidth :
+       ``float`` value representing the linewidth (in points) to set for
+       the ``y=x`` line.
+
+      Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
+      Ignored if the kwarg ``xy_line=False``.
+      Only valid for functions in the :mod:`~.comparison` module.
+  xy_legend :
+      ``bool`` indicating whether to include a legend for the ``y=x`` line.
+
+      Default is ``True``. 
+      Ignored if the kwarg ``xy_line=False``.
+      Only valid for functions in the :mod:`~.comparison` module.
+  
 
 .. _marker:  https://matplotlib.org/api/markers_api.html
 .. _linestyles: https://matplotlib.org/gallery/lines_bars_and_markers/linestyles
 
 """  # noqa
+from mass.visualization.comparison import comparison_plot
 from mass.visualization.time_profiles import plot_time_profile
 from mass.visualization.phase_portraits import (
     plot_phase_portrait, plot_tiled_phase_portraits)
 
 
 __all__ = (
-    "plot_time_profile", "plot_phase_portrait", "plot_tiled_phase_portraits")
+    "plot_time_profile", "plot_phase_portrait", "plot_tiled_phase_portraits",
+    "comparison_plot")
