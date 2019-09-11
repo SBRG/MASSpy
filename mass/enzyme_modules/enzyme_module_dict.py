@@ -47,6 +47,7 @@ from collections import OrderedDict
 from copy import copy, deepcopy
 
 from cobra.core.dictlist import DictList
+from cobra.core.group import Group
 
 import numpy as np
 
@@ -160,9 +161,16 @@ class EnzymeModuleDict(OrderedDictWithID):
                 "enzyme_module_ligands": model.metabolites,
                 "enzyme_module_species": model.metabolites,
                 "enzyme_module_reactions": model.reactions}.get(attr)
-            self[attr] = _mk_new_dictlist(model_dictlist, getattr(self, attr))
+            attr_value = getattr(self, attr)
+            self[attr] = _mk_new_dictlist(model_dictlist, attr_value)
             attr += "_categorized"
-            self[attr] = _mk_new_dictlist(model.groups, getattr(self, attr))
+            attr_value = getattr(self, attr)
+            if isinstance(attr_value, dict):
+                attr_value = [
+                    Group(category, members=model_dictlist.get_by_any(obj_ids))
+                    for category, obj_ids in iteritems(attr_value)]
+                model.add_groups(attr_value)
+            self[attr] = _mk_new_dictlist(model.groups, attr_value)
 
         for enzyme_module_specie in self.enzyme_module_species:
             enzyme_module_specie._repair_bound_obj_pointers()
@@ -353,9 +361,9 @@ _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "enzyme_module_ligands": DictList(),
     "enzyme_module_species": DictList(),
     "enzyme_module_reactions": DictList(),
-    "enzyme_module_ligands_categorized": {"Undefined": DictList()},
-    "enzyme_module_species_categorized": {"Undefined": DictList()},
-    "enzyme_module_reactions_categorized": {"Undefined": DictList()},
+    "enzyme_module_ligands_categorized": DictList(),
+    "enzyme_module_species_categorized": DictList(),
+    "enzyme_module_reactions_categorized": DictList(),
     "enzyme_concentration_total": None,
     "enzyme_net_flux": None,
     "enzyme_concentration_total_equation": None,

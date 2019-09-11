@@ -5,6 +5,8 @@
     "compartments": {
         "c": "Cytosol"
     },
+    "custom_parameters": {},
+    "custom_rates": {},
     "enzyme_modules": [],
     "genes": [],
     "id": "Hemoglobin",

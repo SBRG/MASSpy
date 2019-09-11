@@ -92,7 +92,7 @@ class MassBaseConfiguration:
         remove the hydrogen and water metabolites using the
         :attr:`~.MassMetabolite.elements` attribute to filter out the hydrogen
         and water in all rates except the hydrogen and water exchange
-        reactions on the boundary.
+        reactions.
     include_compartments_in_rates : bool
         Whether to include the compartment volumes in rate expressions.
         The boundary compartment will always excluded.

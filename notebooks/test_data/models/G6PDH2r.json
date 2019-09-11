@@ -33,21 +33,21 @@
             "G6PDH2r_6"
         ],
         "product_inhibition": [
-            "G6PDH2r_1",
-            "G6PDH2r_2"
+            "G6PDH2r_2",
+            "G6PDH2r_1"
         ]
     },
     "_enzyme_module_species_categorized": {
         "Free": [
-            "g6pdh2r_G_P_c",
             "g6pdh2r_c",
-            "g6pdh2r_GN_c",
             "g6pdh2r_GN_P_c",
+            "g6pdh2r_GN_c",
+            "g6pdh2r_G_P_c",
             "g6pdh2r_G_c"
         ],
         "Inhibited": [
-            "g6pdh2r_A_CI_c",
-            "g6pdh2r_N_PI_c"
+            "g6pdh2r_N_PI_c",
+            "g6pdh2r_A_CI_c"
         ]
     },
     "_enzyme_net_flux": 0.21,
@@ -55,6 +55,8 @@
     "compartments": {
         "c": "Cytosol"
     },
+    "custom_parameters": {},
+    "custom_rates": {},
     "enzyme_concentration_total_equation": "g6pdh2r_A_CI_c(t) + g6pdh2r_GN_P_c(t) + g6pdh2r_GN_c(t) + g6pdh2r_G_P_c(t) + g6pdh2r_G_c(t) + g6pdh2r_N_PI_c(t) + g6pdh2r_c(t)",
     "enzyme_module_ligands": [
         "g6p_c",

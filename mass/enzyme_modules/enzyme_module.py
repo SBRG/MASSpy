@@ -1382,32 +1382,26 @@ class EnzymeModule(MassModel):
                          "_enzyme_net_flux", "enzyme_net_flux_equation"]:
                 setattr(new_model, attr, getattr(self, attr))
 
-        # Fix enzyme module ligands, species, and reactions
-        for attr in ["ligands", "species", "reactions"]:
-            # Update DictList attributes
-            new_model._get_current_enzyme_module_objs(attr=attr,
-                                                      update_enzyme=True)
-            # Update categorized dict attributes
-            attr = "_enzyme_module_" + attr + "_categorized"
-            new_categorized_attr_ids = [g.id for g in getattr(new_model, attr)]
-            for g in getattr(right, attr):
-                if prefix_existing is not None:
-                    gid = "{0}{1}".format(prefix_existing, g.id)
-                else:
-                    gid = g.id
-                if gid in new_model.groups and\
-                   gid not in new_categorized_attr_ids:
-                    new_categorized_attr_ids += [gid]
-
-            print(new_categorized_attr_ids)
-            setattr(new_model, attr,
-                    DictList([new_model.groups.get_by_id(gid)
-                              for gid in new_categorized_attr_ids]))
-            print(getattr(new_model, attr))
-            print()
-
-        # setattr(self, attr,
-        #         _mk_new_dictlist(self.groups, getattr(self, attr)))
+            # Fix enzyme module ligands, species, and reactions
+            for attr in ["ligands", "species", "reactions"]:
+                # Update DictList attributes
+                new_model._get_current_enzyme_module_objs(attr=attr,
+                                                          update_enzyme=True)
+                # Update categorized dict attributes
+                attr = "_enzyme_module_" + attr + "_categorized"
+                new_categorized_attr_ids = [
+                    g.id for g in getattr(new_model, attr)]
+                for g in getattr(right, attr):
+                    if prefix_existing is not None:
+                        gid = "{0}{1}".format(prefix_existing, g.id)
+                    else:
+                        gid = g.id
+                    if gid in new_model.groups and\
+                       gid not in new_categorized_attr_ids:
+                        new_categorized_attr_ids += [gid]
+                setattr(
+                    new_model, attr, _mk_new_dictlist(
+                        new_model.groups, getattr(new_model, attr)))
 
         return new_model
 
@@ -1657,17 +1651,14 @@ class EnzymeModule(MassModel):
 
         """
         # Switch the objective to match the switch in the merge order.
-        if objective == "left":
-            objective = "right"
-        elif objective == "right":
-            objective = "left"
-        else:
-            # No need to switch for sum.
-            pass
+        objective = {"left": "right",
+                     "right": "left", 
+                     "sum": "sum"}[objective]
 
         # Create a MassModel instance of self to merge normally
         model = model.merge(MassModel(self), prefix_existing=prefix_existing,
                             inplace=inplace, objective=objective)
+
         # Turn EnzymeModule into an EnzymeModuleDict
         # to store in MassModel.enzyme_modules
         enzyme_dict = EnzymeModuleDict(self)

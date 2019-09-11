@@ -126,6 +126,12 @@ class ConcSolver:
         identifiers that are intended to be at equilibrium. Reactions with
         steady state flux values equal to 0. are typically ignored unless
         they are specified in the :class:`ConcSolver.equilibrium_reactions`
+    constraint_buffer : float or None
+        A ``float`` value to use as a constraint buffer for all constraints.
+        How the buffer value is applied is depends on the
+        :attr:`ConcSolver.buffer_type` attribute.
+
+        Default is ``None`` to utilize the solver's tolerance value.
     **kwargs
         exclude_infinite_Keqs :
             ``bool`` indicating whether to exclude reactions with equilibrium
@@ -149,10 +155,10 @@ class ConcSolver:
 
     Attributes
     ----------
-    solver :
+    solver : optlang.interface.Model
         The solver utilized for problems concerning metabolite
         concentrations and reaction equilibrium constants.
-    tolerance :
+    tolerance : float
         The tolerance of the solver.
     problem_type : str
         The type of mathematical problem that the concentration solver has
@@ -168,12 +174,14 @@ class ConcSolver:
     equilibrium_reactions : list
         A ``list`` of reaction identifiers for model reactions that are
         intended to be at equilibrium.
+    constraint_buffer : float
+        A value to utilize when setting a constraint buffer.
 
     """
 
     def __init__(self, model, excluded_metabolites=None,
                  excluded_reactions=None, equilibrium_reactions=None,
-                 **kwargs):
+                 constraint_buffer=None, **kwargs):
         """Initialize the ConcSolver."""
         kwargs = _check_kwargs({
             "exclude_infinite_Keqs": True,
@@ -195,6 +203,12 @@ class ConcSolver:
         self.excluded_metabolites = []
         self.excluded_reactions = []
         self.equilibrium_reactions = []
+
+        if constraint_buffer is None:
+            constraint_buffer = self.tolerance
+        else:
+            self.constraint_buffer = ensure_non_negative_value(
+                constraint_buffer)
 
         # Try setting excluded and equilibrium attributes specified in kwargs
         self.excluded_reactions += [r.id for r in model.boundary]
@@ -795,6 +809,21 @@ class ConcSolver:
         if context:
             context(partial(self.solver.add, what))
 
+    def reset_constraints(self):
+        """Reset the constraints.
+
+        Ensures constraints are updated if solver's problem changes in any way.
+
+        """
+        self.remove_cons_vars(list(self.constraints))
+        # Get reaction variables for the solver,
+        # filtering out those to be excluded.
+        reactions = self._get_included_reactions()
+        for rxn in reactions:
+            if rxn.Keq_str in self.variables:
+                # Add concentration Keq log constraint
+                self.add_concentration_Keq_cons_to_problem(rxn)
+
     def add_excluded_metabolites(self, metabolites, reset_problem=False):
         """Add metabolites to the exclusion list for problem creation.
 
@@ -1193,6 +1222,16 @@ class ConcSolver:
                                       upper_bound=None, **kwargs):
         """Add a metabolite concentration variable to the problem.
 
+        The variable in linear space is represented as::
+
+            log(x_lb) <= log(x) <= log(x_ub)
+
+        where
+
+            * ``x`` is the metabolite concentration variable.
+            * ``x_lb`` is the lower bound for the concentration.
+            * ``x_ub`` is the upper bound for the concentration.
+
         Parameters
         ----------
         metabolite : MassMetabolite
@@ -1245,6 +1284,16 @@ class ConcSolver:
     def add_reaction_Keq_var_to_problem(self, reaction, lower_bound=None,
                                         upper_bound=None, **kwargs):
         """Add a reaction equilibrium constant variable to the problem.
+
+        The variable in linear space is represented as::
+
+            log(Keq_lb) <= log(Keq) <= log(Keq_ub)
+
+        where
+
+            * ``Keq`` is the equilibrium constant variable for the reaction.
+            * ``Keq_lb`` is the lower bound for the equilibrium constant.
+            * ``Keq_ub`` is the upper bound for the equilibrium constant.
 
         Parameters
         ----------
@@ -1314,14 +1363,32 @@ class ConcSolver:
 
         return variable
 
-    def add_concentration_Keq_cons_to_problem(self, reaction, **kwargs):
+    def add_concentration_Keq_cons_to_problem(self, reaction, epsilon=None,
+                                              **kwargs):
         """Add constraint using the reaction metabolite stoichiometry and Keq.
+
+        The constraint in linear space is represented as::
+
+            S^T * log(x) <= log(Keq) - epsilon if v > 0
+            S^T * log(x) >= log(Keq) + epsilon if v < 0
+
+        where
+
+            * ``S^T ``is the transposed stoichiometry for the reaction.
+            * ``x`` is the vector of concentration variables.
+            * ``Keq`` is the equilibrium constant variable for the reaction.
+            * ``v`` is the steady state flux value for the reaction.
+            * ``epsilon`` is a buffer for the constraint .
 
         Parameters
         ----------
         reaction : MassReaction
             The reaction whose metabolite stoichiometry and equilibrium
             constant is used to create the constraint to be added.
+        epsilon : float
+            The buffer for the constraint.
+
+            Default is ``None`` to use :attr:`ConcSolver.constraint_buffer`.
         **kwargs
             bound_type :
                 Either ``"deviation"`` to indicate that bound values are
@@ -1351,9 +1418,9 @@ class ConcSolver:
 
         """
         kwargs = _check_kwargs({
-            "decimal_precision": False,
             "bound_type": "deviation",
             "steady_state_flux": reaction.steady_state_flux,
+            "decimal_precision": False,
         }, kwargs)
 
         steady_state_flux = kwargs.get("steady_state_flux")
@@ -1361,10 +1428,13 @@ class ConcSolver:
             steady_state_flux = round(steady_state_flux,
                                       MASSCONFIGURATION.decimal_precision)
 
+        if epsilon is None:
+            epsilon = self.constraint_buffer  
+
         if steady_state_flux > 0:
-            lb, ub = (None, 0)
+            lb, ub = (None, -1 * epsilon)
         elif steady_state_flux < 0:
-            lb, ub = (0, None)
+            lb, ub = (1 * epsilon, None)
         elif reaction.id in self.equilibrium_reactions:
             lb, ub = (0, 0)
         else:

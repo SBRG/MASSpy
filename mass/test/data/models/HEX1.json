@@ -8,9 +8,9 @@
             "_23dpg_c"
         ],
         "Products": [
+            "g6p_c",
             "h_c",
-            "adp_c",
-            "g6p_c"
+            "adp_c"
         ],
         "Substrates": [
             "glc__D_c"
@@ -28,12 +28,12 @@
             "HEX1_5"
         ],
         "glc__D_c_binding": [
-            "HEX1_7",
-            "HEX1_3"
+            "HEX1_3",
+            "HEX1_7"
         ],
         "product_inhibition": [
-            "HEX1_2",
-            "HEX1_1"
+            "HEX1_1",
+            "HEX1_2"
         ]
     },
     "_enzyme_module_species_categorized": {

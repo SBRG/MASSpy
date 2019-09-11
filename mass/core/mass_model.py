@@ -1241,6 +1241,10 @@ class MassModel(Model):
         for e in self.enzyme_modules:
             e._model = self
 
+    def add_groups(self, group_list):
+        """TODO DOCSTRING."""
+        super(MassModel, self).add_groups(group_list)
+
     def copy(self):
         r"""Create a partial "deepcopy" of the :class:`MassModel`.
 
@@ -1262,8 +1266,8 @@ class MassModel(Model):
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules", "_S",
-            "custom_rates", "units", "boundary_conditions",
+            "metabolites", "reactions", "genes", "enzyme_modules", "groups",
+            "_S", "custom_rates", "units", "boundary_conditions",
             "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
@@ -1373,6 +1377,7 @@ class MassModel(Model):
            and issubclass(right.__class__, MassModel):
             return right._add_self_to_model(self, prefix_existing, inplace,
                                             objective)
+
         # Set the merged model object and its ID,
         # then add the module attribute of the right model into the left
         new_model = super(MassModel, self).merge(
@@ -2284,11 +2289,7 @@ class MassModel(Model):
 
         """
         new_enzyme_modules = DictList()
-        do_not_copy_by_ref = {
-            "ligands", "enzyme_module_species", "enzyme_module_reactions",
-            "enzyme_module_ligands_categorized",
-            "enzyme_module_species_categorized",
-            "enzyme_module_reactions_categortized", "model"}
+        do_not_copy_by_ref = {"model"}
         # Copy the enzyme_modules
         for enzyme in self.enzyme_modules:
             new_enzyme = enzyme.__class__()

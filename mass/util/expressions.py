@@ -14,7 +14,7 @@ MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
-def Keq2k(sympy_expr, simplify=True):
+def Keq2k(sympy_expr, simplify=False):
     """Replace ``'Keq'`` symbols with ``'kf/kr'`` in :mod:`sympy` expressions.
 
     Parameters
@@ -50,6 +50,9 @@ def Keq2k(sympy_expr, simplify=True):
             substituion_dict[Keq] = kf / kr
         # Substitute Keq for kf/kr
         new_expr = expr.subs(substituion_dict)
+        if len(identifiers) == 1:
+            new_expr = sym.collect(new_expr, kf)
+
         # Simplify if desired
         if simplify:
             new_expr = sym.simplify(new_expr)
@@ -61,7 +64,7 @@ def Keq2k(sympy_expr, simplify=True):
     return new_expr
 
 
-def k2Keq(sympy_expr, simplify=True):
+def k2Keq(sympy_expr, simplify=False):
     """Replace ``'kr'`` symbols with ``'kf/Keq'`` in :mod:`sympy` expressions.
 
     Parameters
@@ -99,11 +102,13 @@ def k2Keq(sympy_expr, simplify=True):
             substituion_dict[kr] = kf / Keq
         # Substitute kr for kf/Keq
         new_expr = expr.subs(substituion_dict)
+
+        if len(identifiers) == 1:
+            new_expr = sym.collect(new_expr, kf)
+
         # Simplify if desired
         if simplify:
             new_expr = sym.simplify(new_expr)
-            if len(identifiers) == 1:
-                new_expr = sym.collect(new_expr, kf)
 
         return new_expr
 
@@ -480,7 +485,7 @@ def _remove_metabolites_from_rate(reaction):
     This method is intended for internal use only.
 
     """
-    reaction = reaction.copy()
+    rxn = reaction.copy()
     # Get exclusion criteria and reaction metabolites
     exclusion_criteria_dict = MASSCONFIGURATION.exclude_metabolites_from_rates
     metabolites_to_exclude = []
@@ -490,18 +495,22 @@ def _remove_metabolites_from_rate(reaction):
             getattr(value, attr) if hasattr(value, attr) else value
             for value in exclusion_values]
         # Iterate through reaction metabolites
-        for met in list(reaction.metabolites):
+        for met in list(rxn.metabolites):
             met_value = getattr(met, attr)
             # Add metabolite to be excluded if it matches the criteria
             if met_value in exclusion_values:
                 metabolites_to_exclude += [str(met)]
 
     # Remove metabolites from reaction copy
-    reaction.subtract_metabolites({
-        met: coeff for met, coeff in iteritems(reaction.metabolites)
+    rxn.subtract_metabolites({
+        met: coeff for met, coeff in iteritems(rxn.metabolites)
         if str(met) in metabolites_to_exclude})
 
-    return reaction
+    # If all metabolites were removed, leave the reaction as is
+    if not rxn.metabolites:
+        rxn = reaction.copy()
+
+    return rxn
 
 
 # Internal

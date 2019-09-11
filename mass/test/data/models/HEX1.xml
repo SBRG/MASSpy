@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
+          <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -290,8 +290,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HEX1_5" value="0.181818181818182"/>
             <localParameter id="kf_R_HEX1_5" value="1000000"/>
+            <localParameter id="Keq_R_HEX1_5" value="0.181818181818182"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -413,8 +413,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_HEX1" value="313.12"/>
             <localParameter id="kf_HEX1" value="2960686"/>
+            <localParameter id="Keq_HEX1" value="313.12"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -437,9 +437,9 @@
       </groups:group>
       <groups:group groups:id="Products" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
           <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
-          <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Free" groups:kind="collection">
@@ -459,14 +459,14 @@
       </groups:group>
       <groups:group groups:id="product_inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
           <groups:member groups:name="hex1-adp binding" groups:idRef="R_HEX1_1"/>
+          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="glc__D_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1_A-glc__D binding" groups:idRef="R_HEX1_7"/>
           <groups:member groups:name="hex1-glc__D binding" groups:idRef="R_HEX1_3"/>
+          <groups:member groups:name="hex1_A-glc__D binding" groups:idRef="R_HEX1_7"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_binding" groups:kind="collection">
@@ -487,12 +487,12 @@
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_ligands" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="D-Glucose" groups:idRef="M_glc__D_c"/>
-          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
           <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
           <groups:member groups:name="2,3-Disphospho-D-glycerate" groups:idRef="M__23dpg_c"/>
           <groups:member groups:name="D-Glucose 6-phosphate" groups:idRef="M_g6p_c"/>
+          <groups:member groups:name="D-Glucose" groups:idRef="M_glc__D_c"/>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_species" groups:kind="collection">
@@ -502,28 +502,28 @@
           <groups:member groups:name="HEX1-glc__D-atp complex" groups:idRef="M_hex1_AG_c"/>
           <groups:member groups:name="HEX1-atp complex" groups:idRef="M_hex1_A_c"/>
           <groups:member groups:name="HEX1" groups:idRef="M_hex1_c"/>
-          <groups:member groups:name="HEX1-glc__D complex" groups:idRef="M_hex1_G_c"/>
           <groups:member groups:name="HEX1-glc__D-_23dpg complex" groups:idRef="M_hex1_G_CI_c"/>
+          <groups:member groups:name="HEX1-glc__D complex" groups:idRef="M_hex1_G_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="hex1_AG catalyzation" groups:idRef="R_HEX1_8"/>
           <groups:member groups:name="hex1-atp binding" groups:idRef="R_HEX1_4"/>
+          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
+          <groups:member groups:name="hex1-adp binding" groups:idRef="R_HEX1_1"/>
+          <groups:member groups:name="hex1-glc__D binding" groups:idRef="R_HEX1_3"/>
           <groups:member groups:name="hex1_G-atp binding" groups:idRef="R_HEX1_6"/>
           <groups:member groups:name="hex1_A-glc__D binding" groups:idRef="R_HEX1_7"/>
           <groups:member groups:name="hex1_G-_23dpg binding" groups:idRef="R_HEX1_5"/>
-          <groups:member groups:name="hex1-g6p binding" groups:idRef="R_HEX1_2"/>
-          <groups:member groups:name="hex1-glc__D binding" groups:idRef="R_HEX1_3"/>
-          <groups:member groups:name="hex1-adp binding" groups:idRef="R_HEX1_1"/>
+          <groups:member groups:name="hex1_AG catalyzation" groups:idRef="R_HEX1_8"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:idRef="Substrates"/>
-          <groups:member groups:idRef="Products"/>
-          <groups:member groups:idRef="Inhibitors"/>
           <groups:member groups:idRef="Cofactors"/>
+          <groups:member groups:idRef="Inhibitors"/>
+          <groups:member groups:idRef="Products"/>
+          <groups:member groups:idRef="Substrates"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_species_categorized" groups:kind="collection">
@@ -534,11 +534,11 @@
       </groups:group>
       <groups:group groups:id="HEX1_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:idRef="glc__D_c_binding"/>
+          <groups:member groups:idRef="atp_c_binding"/>
           <groups:member groups:idRef="catalyzation"/>
+          <groups:member groups:idRef="glc__D_c_binding"/>
           <groups:member groups:idRef="product_inhibition"/>
           <groups:member groups:idRef="competitive_inhibition"/>
-          <groups:member groups:idRef="atp_c_binding"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="HEX1_EnzymeModule" groups:kind="collection">
@@ -552,12 +552,12 @@
           </html>
         </notes>
         <groups:listOfMembers>
-          <groups:member groups:idRef="HEX1_enzyme_module_species"/>
-          <groups:member groups:idRef="HEX1_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="HEX1_enzyme_module_ligands_categorized"/>
+          <groups:member groups:idRef="HEX1_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="HEX1_enzyme_module_reactions"/>
-          <groups:member groups:idRef="HEX1_enzyme_module_ligands"/>
           <groups:member groups:idRef="HEX1_enzyme_module_reactions_categorized"/>
+          <groups:member groups:idRef="HEX1_enzyme_module_ligands"/>
+          <groups:member groups:idRef="HEX1_enzyme_module_species"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>

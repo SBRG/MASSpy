@@ -511,12 +511,11 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
         }
 
         for k in default_cycler_values:
-            values = kwargs.get(k)
+            values = ensure_iterable(kwargs.get(k))
             # Don't add to cycler instance if it was not provided.
             if not values:
                 continue
 
-            values = ensure_iterable(values)
             msg = ""
             # Validate values using appropriate validation method.
             try:
@@ -776,9 +775,7 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
                 plot_function(t, items[i], label="t=" + str(t))
 
     # Add the legend to the axes.
-    if first_legend[0] is not None\
-       and not kwargs.get("annotate_time_points_legend_loc")\
-       or kwargs.get("annotate_time_points_legend_loc"):
+    if kwargs.get("annotate_time_points_legend_loc"):
         items = _get_annotated_time_points_legend_args(
             ax, desired_loc=kwargs.get("annotate_time_points_legend_loc"),
             taken_loc=first_legend[1])
@@ -913,10 +910,12 @@ def _get_ax_current(ax, time_points=False):
     This method is intended for internal use only.
 
     """
+    lines_with_labels = [
+        l for l in ax.get_lines() if "_line" not in l.get_label()]
     if time_points:
-        return [l for l in ax.get_lines() if l.get_label()[:2] == "t="]
+        return [l for l in lines_with_labels if l.get_label()[:2] == "t="]
 
-    return [l for l in ax.get_lines() if l.get_label()[:2] != "t="]
+    return [l for l in lines_with_labels if l.get_label()[:2] != "t="]
 
 
 def _get_handles_and_labels(ax, time_points):

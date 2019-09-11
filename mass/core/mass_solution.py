@@ -26,11 +26,15 @@ from warnings import warn
 
 import matplotlib.pyplot as plt
 
+from numpy import array
+
 import pandas as pd
 
 from scipy.interpolate import interp1d
 
 from six import iteritems, iterkeys, string_types
+
+from sympy import Symbol, sympify
 
 from mass.core.mass_model import MassModel
 from mass.util.dict_with_id import DictWithID
@@ -261,6 +265,74 @@ class MassSolution(DictWithID):
         df = pd.DataFrame.from_dict(sols)
         df.index = pd.Series(self.time, name="Time")
         return df
+
+    def make_solution_from_equation(self, solution_id, variables, equation,
+                                    update=True):
+        """Make a new solution using an string representation of an equation.
+
+        Parameters
+        ----------
+        solution_id : str
+            An identifier for the solution to be made.
+        variables : iterable
+            Either an iterable of object identifiers or the objects themselves
+            representing keys in the :class:`MassSolution` that are used as
+            variables in equation.
+        equation : str
+            A string representing the equation of the new solution. Must be
+        update : bool
+            Whether to add the new solution into the :class:`MassSolution`.
+            via the :meth:`~dict.update` method. Default is ``True``.
+
+        Returns
+        -------
+        solution : dict
+            A ``dict`` containing where the key is the ``solution_id`` and the
+            value is the newly created solution as the same type as the
+            variable solutions
+
+        Raises
+        ------
+        SympifyError
+            Raised if the ``equation_str`` could not be interpreted.
+
+        """
+        variables = [getattr(var, "_id", var) for var in variables]
+        invalid = [var for var in variables if var not in self]
+        if invalid:
+            raise ValueError(
+                "'{0!r}' not found in MassSolution".format(invalid))
+        equation = sympify(equation,
+                           locals={k: Symbol(k) for k in variables})
+
+        if self.time is not None:
+            values = dict(
+                (k, self[k](self.time)) if self.interpolate
+                else (k, self[k]) for k in variables)
+
+            solution = array([
+                equation.subs({
+                    k: sol[i] for k, sol in iteritems(values)})
+                for i in range(len(self.time))])
+        else:
+            values = {k: self[k] for k in variables}
+            solution = array([
+                equation.subs(values)])
+
+        # Return solution as type in the MassSolution
+        if self.interpolate and self.time is not None:
+            solution = interp1d(self.time, solution, kind='cubic',
+                                fill_value='extrapolate')
+        elif solution.size == 1:
+            solution = solution.item()
+
+        solution = {solution_id: solution}
+
+        # Update MassSolution if d
+        if update:
+            self.update(solution)
+
+        return solution
 
     def __getattribute__(self, name):
         """Override of default :func:`getattr` to enable attribute accessors.
