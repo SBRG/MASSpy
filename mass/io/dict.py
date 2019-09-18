@@ -144,7 +144,7 @@ def model_to_dict(model, sort=False):
         obj["genes"].sort(key=get_id)
         obj["enzyme_modules"].sort(key=get_id)
         obj["units"].sort(key=get_id)
- 
+
     for custom_key in ["custom_rates", "custom_parameters"]:
         custom_values = getattr(model, custom_key, {})
         if custom_values:

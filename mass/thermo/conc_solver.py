@@ -205,16 +205,24 @@ class ConcSolver:
         self.equilibrium_reactions = []
 
         if constraint_buffer is None:
-            constraint_buffer = self.tolerance
+            self.constraint_buffer = self.tolerance
         else:
             self.constraint_buffer = ensure_non_negative_value(
                 constraint_buffer)
 
         # Try setting excluded and equilibrium attributes specified in kwargs
-        self.excluded_reactions += [r.id for r in model.boundary]
+        if excluded_reactions is not None:
+            excluded_reactions = [getattr(r, "_id", str(r))
+                                  for r in excluded_reactions]
+        else:
+            excluded_reactions = []
+        excluded_reactions += [r.id for r in model.boundary
+                               if r.id not in excluded_reactions]
         if kwargs.pop("exclude_infinite_Keqs"):
-            self.excluded_reactions += [r.id for r in model.reactions
-                                        if r.Keq == float("inf")]
+            excluded_reactions += [
+                r.id for r in model.reactions
+                if r.Keq == float("inf") and r.id not in excluded_reactions]
+
         exclude_and_equilibrium = {
             "excluded_metabolites": excluded_metabolites,
             "excluded_reactions": excluded_reactions,

@@ -1248,8 +1248,8 @@ class EnzymeModule(MassModel):
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules", "_S",
-            "enzyme_module_ligands", "enzyme_module_species",
+            "metabolites", "reactions", "genes", "enzyme_modules", "groups",
+            "_S", "enzyme_module_ligands", "enzyme_module_species",
             "enzyme_module_reactions", "_enzyme_module_ligands_categorized",
             "_enzyme_module_species_categorized",
             "_enzyme_module_reactions_categorized", "boundary_conditions",
@@ -1289,8 +1289,8 @@ class EnzymeModule(MassModel):
             # Update categorized dict attributes
             attr = "enzyme_module_" + attr + "_categorized"
             new_model_categorized_attr = getattr(new_model, attr)
-            new_model_categorized_attr = _mk_new_dictlist(
-                new_model_categorized_attr, getattr(self, attr))
+            new_model_categorized_attr += new_model.groups.get_by_any([
+                g.id for g in getattr(self, attr)])
 
         # Create the new stoichiometric matrix for the model.
         new_model._S = self._mk_stoich_matrix(array_type=self._array_type,

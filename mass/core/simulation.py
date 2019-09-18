@@ -864,7 +864,6 @@ class Simulation(Object):
         This method is intended for internal use only.
 
         """
-        _log_msg(LOGGER, logging.INFO, verbose, "Parsing perturbations")
         formatted_perturbations = {}
         # Check input type.
         if not isinstance(perturbations, dict) and perturbations is not None:
@@ -872,6 +871,7 @@ class Simulation(Object):
 
         # Get the reference model initial conditions and parameters
         if perturbations:
+            _log_msg(LOGGER, logging.INFO, verbose, "Parsing perturbations")
             sim_values = self._get_all_values_for_sim(self.reference_model)
 
             for key, value in iteritems(perturbations):

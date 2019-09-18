@@ -34,7 +34,7 @@ from scipy.interpolate import interp1d
 
 from six import iteritems, iterkeys, string_types
 
-from sympy import Symbol, sympify
+from sympy import Symbol, lambdify, sympify
 
 from mass.core.mass_model import MassModel
 from mass.util.dict_with_id import DictWithID
@@ -212,9 +212,9 @@ class MassSolution(DictWithID):
 
         # Set plot options
         options = {
-            "plot_function": "semilogx",
+            "plot_function": "loglog",
             "grid": ("major", "x"),
-            "title": "TIme Profile for {0} {1}".format(self.id, solution_type),
+            "title": "Time Profile for {0} {1}".format(self.id, solution_type),
             "xlabel": "Time",
             "ylabel": solution_type,
         }
@@ -297,29 +297,23 @@ class MassSolution(DictWithID):
             Raised if the ``equation_str`` could not be interpreted.
 
         """
-        variables = [getattr(var, "_id", var) for var in variables]
+        variables = sorted([getattr(var, "_id", var) for var in variables])
         invalid = [var for var in variables if var not in self]
         if invalid:
             raise ValueError(
                 "'{0!r}' not found in MassSolution".format(invalid))
-        equation = sympify(equation,
-                           locals={k: Symbol(k) for k in variables})
+        equation = sympify(equation, locals={k: Symbol(k) for k in variables})
+        equation = lambdify(args=variables, expr=equation)
 
         if self.time is not None:
-            values = dict(
-                (k, self[k](self.time)) if self.interpolate
-                else (k, self[k]) for k in variables)
-
-            solution = array([
-                equation.subs({
-                    k: sol[i] for k, sol in iteritems(values)})
-                for i in range(len(self.time))])
+            values = array([
+                self[k](self.time) if self.interpolate
+                else self[k] for k in variables])
         else:
-            values = {k: self[k] for k in variables}
-            solution = array([
-                equation.subs(values)])
+            values = array([self[k] for k in variables])
 
-        # Return solution as type in the MassSolution
+        solution = equation(*values)
+        # # Return solution as type in the MassSolution
         if self.interpolate and self.time is not None:
             solution = interp1d(self.time, solution, kind='cubic',
                                 fill_value='extrapolate')
