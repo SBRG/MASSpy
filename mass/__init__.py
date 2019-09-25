@@ -10,7 +10,7 @@ from mass.core import (
     MassSolution, Unit, UnitDefinition)
 from mass.util import show_versions, qcqa
 
-__version__ = "0.1.0a41"
+__version__ = "0.1.0a42"
 
 # set the warning format to be prettier and fit on one line
 _MASS_PATH = _dirname(_abspath(__file__))
