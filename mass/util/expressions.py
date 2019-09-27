@@ -220,7 +220,7 @@ def generate_foward_mass_action_rate_expression(reaction, rate_type=1):
         The type of rate law to return. Must be 1, 2, or 3.
 
             * Type 1 and 2 will utilize the
-              :attr:`~.MassReaction.`forward_rate_constant`.
+              :attr:`~.MassReaction.forward_rate_constant`.
             * Type 3 will utilize the
               :attr:`~.MassReaction.equilibrium_constant` and the
               :attr:`~.MassReaction.reverse_rate_constant`.
@@ -281,7 +281,7 @@ def generate_reverse_mass_action_rate_expression(reaction, rate_type=1):
     Returns
     -------
     ~sympy.core.basic.Basic or None
-        The reverse rate as a :mod`sympy` expression. If the reaction
+        The reverse rate as a :mod:`sympy` expression. If the reaction
         has no metabolites associated, ``None`` will be returned.
 
     """

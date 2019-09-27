@@ -13,7 +13,7 @@ for most of the enzyme specific attribute information of the
 after the merging. All keys of the :class:`EnzymeModuleDict` can be used as
 attribute accessors.  Additionally :class:`EnzymeModuleDict` is a subclass of
 an :class:`~.OrderedDictWithID` which in turn is a subclass of an
-:class:~.collections.OrderedDict`, thereby inheriting its methods and behavior.
+:class:`~.collections.OrderedDict`, thereby inheriting its methods and behavior.
 
 The :class:`.EnzymeModule` attributes preserved in the
 :class:`EnzymeModuleDict` are the following:

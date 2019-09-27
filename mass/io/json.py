@@ -11,7 +11,7 @@ documentation for more information on Escher.
 To enable faster JSON export, the :mod:`simplejson` package can be installed
 during the :mod:`mass` installation process as follows::
 
-    # Installs :mod:`simplejson` package.
+    # Installs simplejson package.
     pip install masspy["json"]
     # Or to install all additional packages.
     pip install masspy["all"]
@@ -88,7 +88,7 @@ def from_json(document):
 def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
     """Write the model to a file in JSON format.
 
-    `kwargs`` are passed on to ``json.dump``
+    ``kwargs`` are passed on to ``json.dump``
 
     Parameters
     ----------

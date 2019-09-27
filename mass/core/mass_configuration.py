@@ -33,7 +33,7 @@ Attributes involved in thermodynamics:
 
 Notes
 -----
-* Some attributes are used in multiple :mod:`mass`submodules, such as
+* Some attributes are used in multiple :mod:`mass` submodules, such as
   :attr:`~MassBaseConfiguration.decimal_precision`.
 
 * The :class:`MassConfiguration` is synchronized with the

@@ -761,7 +761,7 @@ class MassModel(Model):
                 * Type 3 will utilize the :attr:`equilibrium_constant` and the
                   :attr:`reverse_rate_constant`.
 
-            Default is `` 0.``
+            Default is ``0.``
         update_reactions : bool
             If ``True``, update the :class:`~.MassReaction` rate in addition
             to returning the rate expressions. Will not remove a custom
@@ -1678,7 +1678,7 @@ class MassModel(Model):
         """Create a :class:`MassModel` from strings of reaction equations.
 
         Accepted ``kwargs`` are passed to the underlying function for reaction
-        creation, :func:`.MassReaction.build_reaction_from_string`.
+        creation, :meth:`.MassReaction.build_reaction_from_string`.
 
         Takes a string representation of the reactions and uses the
         specifications supplied in the optional arguments to first infer a set
@@ -1727,7 +1727,7 @@ class MassModel(Model):
         See Also
         --------
         :meth:`.MassReaction.build_reaction_from_string`
-            Base function for building reactions.
+            Base method for building reactions.
 
         """
         # Use the reaction split arguments to get the reactions and strip them

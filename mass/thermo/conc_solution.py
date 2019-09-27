@@ -264,7 +264,7 @@ def update_model_with_concentration_solution(model, concentration_solution,
     Returns
     -------
     MassModel
-        Either the given model if``inplace=True``, or a new copy of the model
+        Either the given model if ``inplace=True``, or a new copy of the model
         ``inplace=False``.
 
     """

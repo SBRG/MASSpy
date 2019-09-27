@@ -46,14 +46,14 @@ class EnzymeModuleReaction(MassReaction):
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
     **kwargs
-        name : str
+        name :
             ``str`` representing a human readable name for the enzyme
             module reaction.
-        subsystem : str
+        subsystem :
             ``str`` representing the subsystem where the enzyme
             module reaction is meant to occur.
-        reversible : bool
-            ``bool indicating the the kinetic reversibility of the reaction.
+        reversible :
+            ``bool`` indicating the the kinetic reversibility of the reaction.
             Irreversible reactions have an equilibrium constant and a
             reverse rate constant as set in the
             :attr:`~.MassBaseConfiguration.irreversible_Keq` and

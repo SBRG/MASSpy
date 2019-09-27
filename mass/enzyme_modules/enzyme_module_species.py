@@ -7,7 +7,7 @@ The :class:`EnzymeModuleSpecies` class inherits and extends the
 states and conformations of the enzymes represented through the
 :class:`~.EnzymeModule` class.
 
-The enzyme specific attributes on the :class`EnzymeModuleSpecies` are the
+The enzyme specific attributes on the :class:`EnzymeModuleSpecies` are the
 following:
 
     * :attr:`~EnzymeModuleSpecies.enzyme_module_id`
