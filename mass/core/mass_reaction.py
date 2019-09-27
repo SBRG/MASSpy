@@ -64,8 +64,6 @@ from cobra.util.util import format_long_string
 
 from six import iteritems, itervalues, string_types
 
-from sympy import Symbol
-
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
@@ -165,8 +163,8 @@ class MassReaction(Reaction):
                 self._reverse_rate_constant = MASSCONFIGURATION.irreversible_kr
                 self._equilibrium_constant = MASSCONFIGURATION.irreversible_Keq
 
-            # Rate type and law and as a sympy expression for simulation.
-            self._rate = None
+            # Rate type as a sympy expression for simulation.
+            self._rate_type = 1
 
     # Public
     @property
@@ -204,7 +202,6 @@ class MassReaction(Reaction):
             if context:
                 existing = [self._reverse_rate_constant,
                             self._equilibrium_constant]
-                print(existing)
 
             if reversible:
                 setattr(self, "_reverse_rate_constant", None)
@@ -411,11 +408,7 @@ class MassReaction(Reaction):
         if self.model is not None and self in self.model.custom_rates:
             return self.model.custom_rates[self]
 
-        # Generate rate if rate is None
-        if self._rate is None:
-            return self.get_mass_action_rate(rate_type=1, update_reaction=True)
-
-        return getattr(self, "_rate")
+        return self.get_mass_action_rate(rate_type=getattr(self, "_rate_type"))
 
     @property
     def model(self):
@@ -557,17 +550,17 @@ class MassReaction(Reaction):
         return super(MassReaction, self).functional
 
     @property
-    def flux_symbol(self):
-        """Return the symbol representation for the reaction flux."""
+    def flux_symbol_str(self):
+        """Return the string representation for the reaction flux symbol."""
         if self.id is None:
             return None
 
-        return Symbol("v_" + self.id)
+        return str("v_" + self.id)
 
     @property
     def all_parameter_ids(self):
         """Return ``list`` of strings representing non-custom parameters."""
-        return [self.kf_str, self.Keq_str, self.kr_str, str(self.flux_symbol)]
+        return [self.kf_str, self.Keq_str, self.kr_str, self.flux_symbol_str]
 
     @property
     def kf_str(self):
@@ -751,7 +744,7 @@ class MassReaction(Reaction):
         """
         rate = generate_mass_action_rate_expression(self, rate_type)
         if update_reaction:
-            self._rate = rate
+            self._rate_type = rate_type
 
         if destructive:
             if self.model is not None and self in self.model.custom_rates:
@@ -763,19 +756,20 @@ class MassReaction(Reaction):
 
         return rate
 
-    def get_foward_mass_action_rate_expression(self, rate_type=1):
+    def get_foward_mass_action_rate_expression(self, rate_type=None):
         """Get the foward mass action rate expression for the reaction.
 
         Parameters
         ----------
-        rate_type : int
+        rate_type : int, None
             The type of rate law to return. Must be 1, 2, or 3.
 
                 * Type 1 and 2 will utilize the :attr:`forward_rate_constant`.
                 * Type 3 will utilize the :attr:`equilibrium_constant` and the
                   :attr:`reverse_rate_constant`.
 
-            Default is `1`.
+            If ``None``, the current rate type will be used.
+            Default is ``None``.
 
         Returns
         -------
@@ -784,6 +778,8 @@ class MassReaction(Reaction):
             has no metabolites associated, ``None`` will be returned.
 
         """
+        if rate_type is None:
+            rate_type = getattr(self, "_rate_type")
         return generate_foward_mass_action_rate_expression(self, rate_type)
 
     def get_reverse_mass_action_rate_expression(self, rate_type=1):
@@ -791,14 +787,15 @@ class MassReaction(Reaction):
 
         Parameters
         ----------
-        rate_type : int
+        rate_type : int, None
             The type of rate law to return. Must be 1, 2, or 3.
 
                 * Type 1 will utilize the :attr:`forward_rate_constant` and the
                   :attr:`equilibrium_constant`.
                 * Type 2 and 3 will utilize the :attr:`reverse_rate_constant`.
 
-            Default is `1`.
+            If ``None``, the current rate type will be used.
+            Default is ``None``.
 
         Returns
         -------
@@ -807,6 +804,8 @@ class MassReaction(Reaction):
             has no metabolites associated, ``None`` will be returned.
 
         """
+        if rate_type is None:
+            rate_type = getattr(self, "_rate_type")
         return generate_reverse_mass_action_rate_expression(self, rate_type)
 
     def get_mass_action_ratio(self):

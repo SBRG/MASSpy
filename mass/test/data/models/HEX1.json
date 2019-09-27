@@ -8,9 +8,9 @@
             "_23dpg_c"
         ],
         "Products": [
-            "g6p_c",
             "h_c",
-            "adp_c"
+            "adp_c",
+            "g6p_c"
         ],
         "Substrates": [
             "glc__D_c"
@@ -32,8 +32,8 @@
             "HEX1_7"
         ],
         "product_inhibition": [
-            "HEX1_1",
-            "HEX1_2"
+            "HEX1_2",
+            "HEX1_1"
         ]
     },
     "_enzyme_module_species_categorized": {
@@ -247,7 +247,6 @@
             "_equilibrium_constant": 1,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_HEX1_1*(adp_c(t)*hex1_c(t) - hex1_A_PI_c(t)/Keq_HEX1_1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "HEX1",
@@ -265,7 +264,6 @@
             "_equilibrium_constant": 0.015,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_HEX1_2*(g6p_c(t)*hex1_c(t) - hex1_G_PI_c(t)/Keq_HEX1_2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "HEX1",
@@ -313,7 +311,6 @@
             "_equilibrium_constant": 0.18181818181818182,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_HEX1_5*(_23dpg_c(t)*hex1_G_c(t) - hex1_G_CI_c(t)/Keq_HEX1_5)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "HEX1",

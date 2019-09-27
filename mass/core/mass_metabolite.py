@@ -309,15 +309,15 @@ class MassMetabolite(Metabolite):
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
-        <table>""".format(id=self.id, name=format_long_string(self.name),
-                          formula=self.formula,
-                          address='0x0%x' % id(self),
-                          compartment=self.compartment,
-                          fixed="Fixed at " if self.fixed else "",
-                          ic=self.initial_condition,
-                          n_reactions=len(self.reactions),
-                          reactions=format_long_string(
-                              ', '.join(r.id for r in self.reactions), 200))
+        </table>""".format(id=self.id, name=format_long_string(self.name),
+                           formula=self.formula,
+                           address='0x0%x' % id(self),
+                           compartment=self.compartment,
+                           fixed="Fixed at " if self.fixed else "",
+                           ic=self.initial_condition,
+                           n_reactions=len(self.reactions),
+                           reactions=format_long_string(
+                               ', '.join(r.id for r in self.reactions), 200))
 
     def __dir__(self):
         """Override default dir() implementation to list only public items.

@@ -41,7 +41,7 @@ _REQUIRED_REACTION_ATTRIBUTES = [
 _ORDERED_OPTIONAL_REACTION_KEYS = [
     "subsystem", "steady_state_flux", "_forward_rate_constant",
     "_reverse_rate_constant", "_equilibrium_constant", "objective_coefficient",
-    "_rate", "notes", "annotation"]
+    "_rate_type", "notes", "annotation"]
 _OPTIONAL_REACTION_ATTRIBUTES = {
     "subsystem": "",
     "steady_state_flux": None,
@@ -49,7 +49,7 @@ _OPTIONAL_REACTION_ATTRIBUTES = {
     "_equilibrium_constant": None,
     "_reverse_rate_constant": None,
     "objective_coefficient": 0,
-    "_rate": None,
+    "_rate_type": 1,
     "notes": {},
     "annotation": {}
 }
@@ -408,7 +408,7 @@ def reaction_from_dict(reaction, model):
         # Change infinity type from a string to a float
         if isinstance(v, string_types) and v == "inf":
             v = _INF
-        if k in {"objective_coefficient", "reaction", "_rate"}:
+        if k in {"objective_coefficient", "reaction"}:
             continue
         elif k == "metabolites":
             new_reaction.add_metabolites(OrderedDict(
@@ -416,12 +416,6 @@ def reaction_from_dict(reaction, model):
                 for met, coeff in iteritems(v)))
         else:
             setattr(new_reaction, k, v)
-
-    for rate_type in [1, 2, 3]:
-        rate = new_reaction.get_mass_action_rate(rate_type)
-        if str(rate) == new_reaction._rate:
-            setattr(new_reaction, "_rate", rate)
-            break
 
     return new_reaction
 

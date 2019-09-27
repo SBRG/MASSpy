@@ -309,7 +309,7 @@ class MassModel(Model):
             parameters.update({p_type: p_type_dict})
         # Add fluxes, custom parameters, and fixed concentrations.
         parameters.update({"v": {
-            str(rxn.flux_symbol): flux
+            rxn.flux_symbol_str: flux
             for rxn, flux in iteritems(self.steady_state_fluxes)}})
         parameters.update({"Custom": self.custom_parameters})
         parameters.update({"Boundary": self.boundary_conditions})
@@ -353,8 +353,7 @@ class MassModel(Model):
         if hasattr(self, "_conc_solver"):
             return getattr(self, "_conc_solver")
 
-        raise SolverNotFound(
-            "No ConcSolver is associated with this model.")
+        raise SolverNotFound("No ConcSolver is associated with this model.")
 
     def update_S(self, array_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.

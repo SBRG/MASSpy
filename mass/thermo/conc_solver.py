@@ -1382,7 +1382,7 @@ class ConcSolver:
 
         where
 
-            * ``S^T ``is the transposed stoichiometry for the reaction.
+            * ``S^T`` is the transposed stoichiometry for the reaction.
             * ``x`` is the vector of concentration variables.
             * ``Keq`` is the equilibrium constant variable for the reaction.
             * ``v`` is the steady state flux value for the reaction.

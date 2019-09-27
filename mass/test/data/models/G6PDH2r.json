@@ -39,15 +39,15 @@
     },
     "_enzyme_module_species_categorized": {
         "Free": [
+            "g6pdh2r_G_P_c",
+            "g6pdh2r_G_c",
             "g6pdh2r_c",
             "g6pdh2r_GN_P_c",
-            "g6pdh2r_GN_c",
-            "g6pdh2r_G_P_c",
-            "g6pdh2r_G_c"
+            "g6pdh2r_GN_c"
         ],
         "Inhibited": [
-            "g6pdh2r_N_PI_c",
-            "g6pdh2r_A_CI_c"
+            "g6pdh2r_A_CI_c",
+            "g6pdh2r_N_PI_c"
         ]
     },
     "_enzyme_net_flux": 0.21,
@@ -234,7 +234,6 @@
             "_equilibrium_constant": 41.666666666666664,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_1*(g6pdh2r_c(t)*nadph_c(t) - g6pdh2r_N_PI_c(t)/Keq_G6PDH2r_1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -252,7 +251,6 @@
             "_equilibrium_constant": 22.72727272727273,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_2*(atp_c(t)*g6pdh2r_c(t) - g6pdh2r_A_CI_c(t)/Keq_G6PDH2r_2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -270,7 +268,6 @@
             "_equilibrium_constant": 37.03703703703704,
             "_forward_rate_constant": 1910636.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_3*(g6p_c(t)*g6pdh2r_c(t) - g6pdh2r_G_c(t)/Keq_G6PDH2r_3)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -288,7 +285,6 @@
             "_equilibrium_constant": 0.05,
             "_forward_rate_constant": 347591.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_4*(g6pdh2r_G_P_c(t) - _6pgl_c(t)*g6pdh2r_c(t)/Keq_G6PDH2r_4)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -306,7 +302,6 @@
             "_equilibrium_constant": 52.631578947368425,
             "_forward_rate_constant": 23270728.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_5*(g6pdh2r_G_c(t)*nadp_c(t) - g6pdh2r_GN_c(t)/Keq_G6PDH2r_5)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -324,7 +319,6 @@
             "_equilibrium_constant": 0.0105,
             "_forward_rate_constant": 121773.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_6*(g6pdh2r_GN_P_c(t) - g6pdh2r_G_P_c(t)*nadph_c(t)/Keq_G6PDH2r_6)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -342,7 +336,6 @@
             "_equilibrium_constant": 977.1428571428569,
             "_forward_rate_constant": 2619905.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_7*(g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t)/Keq_G6PDH2r_7)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",

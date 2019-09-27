@@ -164,20 +164,20 @@ class EnzymeModule(MassModel):
         self.enzyme_net_flux_equation = None
 
     @property
-    def enzyme_total_symbol(self):
-        """Get the symbol for the total enzyme concentration."""
+    def enzyme_total_symbol_str(self):
+        """Get the symbol as a string for the total enzyme concentration."""
         if self.id is None:
             return None
 
-        return sym.Symbol(self.id + "_Total")
+        return str(self.id + "_Total")
 
     @property
-    def enzyme_flux_symbol(self):
-        """Get the symbol for the net flux through the enzyme."""
+    def enzyme_flux_symbol_str(self):
+        """Get the symbol as a string for the net flux through the enzyme."""
         if self.id is None:
             return None
 
-        return sym.Symbol("v_" + self.id)
+        return str("v_" + self.id)
 
     @property
     def enzyme_concentration_total(self):
@@ -245,11 +245,11 @@ class EnzymeModule(MassModel):
         -------
         ~sympy.core.relational.Equality
             A :mod:`sympy` equation with the left-hand side containing the
-            :attr:`EnzymeModule.enzyme_total_symbol` and the right-hand side
-            containing the sum of the :class:`~.EnzymeModuleSpecies`.
+            :attr:`EnzymeModule.enzyme_total_symbol_str` and the right-hand
+            side containing the sum of the :class:`~.EnzymeModuleSpecies`.
 
         """
-        if self.enzyme_total_symbol is None:
+        if self.enzyme_total_symbol_str is None:
             warn("No enzyme total symbol. Define the EnzymeModule ID first.")
             return None
 
@@ -265,7 +265,7 @@ class EnzymeModule(MassModel):
         if not enzyme_module_species:
             enzyme_module_species = self.enzyme_module_species
 
-        return sym.Eq(self.enzyme_total_symbol,
+        return sym.Eq(sym.Symbol(self.enzyme_total_symbol_str),
                       self.sum_enzyme_module_species_concentrations(
                           enzyme_module_species, use_values=False))
 
@@ -285,33 +285,33 @@ class EnzymeModule(MassModel):
         -------
         ~sympy.core.relational.Equality
             A :mod:`sympy` equation with the left-hand side containing the
-            :attr:`EnzymeModule.enzyme_flux_symbol` and the right-hand side
+            :attr:`EnzymeModule.enzyme_flux_symbol_str` and the right-hand side
             containing the equation repredenting the net flux through the
             enzyme.
 
         """
-        if self.enzyme_flux_symbol is None:
+        if self.enzyme_flux_symbol_str is None:
             warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
             return None
 
         value = getattr(self, "_enzyme_net_flux_equation", None)
         if value is not None:
-            value = sym.Eq(self.enzyme_flux_symbol, value)
+            value = sym.Eq(sym.Symbol(self.enzyme_flux_symbol_str), value)
         return value
 
     @enzyme_net_flux_equation.setter
     def enzyme_net_flux_equation(self, equation_rhs):
         """Set the net rate equation of the enzyme."""
         # Set the equation RHS
-        if equation_rhs is not None and self.enzyme_flux_symbol is not None:
+        if equation_rhs is not None and self.enzyme_flux_symbol_str is not None:
             if not isinstance(equation_rhs, (sym.Basic, string_types)):
                 raise TypeError("equation_rhs must be a sympy expression.")
             if isinstance(equation_rhs, string_types):
                 equation_rhs = sym.sympify(equation_rhs)
             elif hasattr(equation_rhs, "lhs") and hasattr(equation_rhs, "rhs"):
-                if equation_rhs.lhs == self.enzyme_flux_symbol:
+                if equation_rhs.lhs == sym.Symbol(self.enzyme_flux_symbol_str):
                     equation_rhs = equation_rhs.rhs
-                if equation_rhs.rhs == self.enzyme_flux_symbol:
+                if equation_rhs.rhs == sym.Symbol(self.enzyme_flux_symbol_str):
                     equation_rhs = equation_rhs.lhs
             else:
                 pass
@@ -659,7 +659,7 @@ class EnzymeModule(MassModel):
         r"""Create an equation representing the net flux through the enzyme.
 
         The left side of the rate equation will always be the flux symbol of
-        the enzyme, accessible via :attr:`enzyme_flux_symbol`.
+        the enzyme, accessible via :attr:`enzyme_flux_symbol_str`.
 
         Parameters
         ----------
@@ -669,7 +669,7 @@ class EnzymeModule(MassModel):
         use_rates : bool
             If ``True``, then the rates of the provided reactions are used in
             creating the expression. Otherwise the arguments in the expression
-            are left as the :attr:`.EnzymeModuleReaction.flux_symbol`\ s.
+            are left as the :attr:`.EnzymeModuleReaction.flux_symbol_str`\ s.
         update_enzyme : bool
             If ``True``, update the :attr:`enzyme_net_flux_equation` attribute
             and, if necessary, the :attr:`enzyme_module_reactions` attribute
@@ -683,7 +683,7 @@ class EnzymeModule(MassModel):
             A :mod:`sympy` expression of the net flux equation.
 
         """
-        if self.enzyme_flux_symbol is None:
+        if self.enzyme_flux_symbol_str is None:
             warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
             return None
 
@@ -699,13 +699,14 @@ class EnzymeModule(MassModel):
         if use_rates:
             enzyme_net_flux_equation = sym.simplify(
                 enzyme_net_flux_equation.subs({
-                    enz_rxn.flux_symbol: enz_rxn.rate
+                    enz_rxn.flux_symbol_str: enz_rxn.rate
                     for enz_rxn in enzyme_rxns}))
 
         if update_enzyme:
             self.enzyme_net_flux_equation = enzyme_net_flux_equation
 
-        return sym.Eq(self.enzyme_flux_symbol, enzyme_net_flux_equation)
+        return sym.Eq(sym.Symbol(self.enzyme_flux_symbol_str),
+                      enzyme_net_flux_equation)
 
     def sum_enzyme_module_species_concentrations(self, enzyme_module_species,
                                                  use_values=False):
@@ -810,7 +811,7 @@ class EnzymeModule(MassModel):
 
 
         """
-        if self.enzyme_total_symbol is None:
+        if self.enzyme_total_symbol_str is None:
             warn("No enzyme total symbol. Define the EnzymeModule ID first.")
             return None
 
@@ -826,9 +827,10 @@ class EnzymeModule(MassModel):
                  - self.enzyme_concentration_total_equation.rhs)
         # Try to substitute values into equations
         if use_values:
+            values = {
+                self.enzyme_total_symbol_str: self.enzyme_concentration_total}
             error = self._sub_values_into_expr(
-                strip_time(error), EnzymeModuleSpecies, {
-                    self.enzyme_total_symbol: self.enzyme_concentration_total})
+                strip_time(error), EnzymeModuleSpecies, values)
 
         return error
 
@@ -862,7 +864,7 @@ class EnzymeModule(MassModel):
             a :mod:`sympy` expression representing the error.
 
         """
-        if self.enzyme_flux_symbol is None:
+        if self.enzyme_flux_symbol_str is None:
             warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
             return None
 
@@ -878,7 +880,7 @@ class EnzymeModule(MassModel):
         if use_values:
             error = self._sub_values_into_expr(
                 strip_time(error), EnzymeModuleReaction, {
-                    self.enzyme_flux_symbol: self.enzyme_net_flux})
+                    self.enzyme_flux_symbol_str: self.enzyme_net_flux})
 
         return error
 
@@ -1603,8 +1605,9 @@ class EnzymeModule(MassModel):
         items = list(filter(
             lambda x: isinstance(x, object_type) and x in item_list, items))
 
-        return sum([x.flux_symbol if isinstance(x, EnzymeModuleReaction)
-                    else _mk_met_func(x.id) for x in items])
+        return sum([
+            sym.Symbol(x.flux_symbol_str) if isinstance(x, EnzymeModuleReaction)
+            else _mk_met_func(x.id) for x in items])
 
     def _sub_values_into_expr(self, expr, object_type, additional=None):
         """Substitute values into an expression and try to return a float.

@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -16,8 +16,8 @@
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
           <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
-          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
+          <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -1400,8 +1400,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PYK_L" value="19"/>
             <localParameter id="kf_R_PYK_L" value="1000000000000"/>
+            <localParameter id="Keq_R_PYK_L" value="19"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1441,8 +1441,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
             <localParameter id="kf_PYK_I" value="1000000"/>
+            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1486,8 +1486,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
             <localParameter id="kf_PYK_I" value="1000000"/>
+            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1531,8 +1531,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
             <localParameter id="kf_PYK_I" value="1000000"/>
+            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1575,8 +1575,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
             <localParameter id="kf_PYK_I" value="1000000"/>
+            <localParameter id="Keq_PYK_I" value="0.294985250737463"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1613,24 +1613,24 @@
         <groups:listOfMembers>
           <groups:member groups:name="PYK-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_P_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_AP_c"/>
-          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
           <groups:member groups:name="PYK; 3 fdp_c" groups:idRef="M_pyk_R3_c"/>
+          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
           <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
-          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
           <groups:member groups:name="PYK-adp complex; 3 fdp_c" groups:idRef="M_pyk_R3_A_c"/>
-          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
+          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
           <groups:member groups:name="PYK-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_P_c"/>
+          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_AP_c"/>
           <groups:member groups:name="PYK; 4 fdp_c" groups:idRef="M_pyk_R4_c"/>
           <groups:member groups:name="PYK-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_P_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_AP_c"/>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_R0_c"/>
-          <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
-          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
           <groups:member groups:name="PYK; 2 fdp_c" groups:idRef="M_pyk_R2_c"/>
+          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
+          <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
+          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
           <groups:member groups:name="PYK-adp complex; 2 fdp_c" groups:idRef="M_pyk_R2_A_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_AP_c"/>
-          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Tense" groups:kind="collection">
@@ -1638,60 +1638,60 @@
           <groups:member groups:name="PYK; 3 atp_c" groups:idRef="M_pyk_T3_c"/>
           <groups:member groups:name="PYK; 2 atp_c" groups:idRef="M_pyk_T2_c"/>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_T0_c"/>
-          <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
           <groups:member groups:name="PYK; 4 atp_c" groups:idRef="M_pyk_T4_c"/>
+          <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="pep_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
-          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
-          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
-          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
           <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
-          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
-          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
-          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
           <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
           <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
+          <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
+          <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
+          <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
+          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="adp_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
-          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
-          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
-          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
-          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
-          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
           <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
-          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
-          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
           <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
+          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
+          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
+          <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
-          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
           <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
-          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
           <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
+          <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
+          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="fdp_c_activation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
           <groups:member groups:name="pyk_R2-fdp binding" groups:idRef="R_PYK_R30"/>
           <groups:member groups:name="pyk_R3-fdp binding" groups:idRef="R_PYK_R40"/>
           <groups:member groups:name="pyk_R0-fdp binding" groups:idRef="R_PYK_R10"/>
+          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_inhibition" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
-          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
           <groups:member groups:name="pyk_T1-atp binding" groups:idRef="R_PYK_T2"/>
+          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
           <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
         </groups:listOfMembers>
       </groups:group>
@@ -1702,88 +1702,88 @@
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_ligands" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:name="Pyruvate" groups:idRef="M_pyr_c"/>
+          <groups:member groups:name="Phosphoenolpyruvate" groups:idRef="M_pep_c"/>
           <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
           <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
           <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
-          <groups:member groups:name="Pyruvate" groups:idRef="M_pyr_c"/>
-          <groups:member groups:name="Phosphoenolpyruvate" groups:idRef="M_pep_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PYK-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_P_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 2 fdp_c" groups:idRef="M_pyk_R2_AP_c"/>
-          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
           <groups:member groups:name="PYK; 3 fdp_c" groups:idRef="M_pyk_R3_c"/>
-          <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
           <groups:member groups:name="PYK; 2 atp_c" groups:idRef="M_pyk_T2_c"/>
+          <groups:member groups:name="PYK-pep complex" groups:idRef="M_pyk_R0_P_c"/>
+          <groups:member groups:name="PYK-adp-pep complex" groups:idRef="M_pyk_R0_AP_c"/>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_T0_c"/>
-          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
           <groups:member groups:name="PYK-adp complex; 3 fdp_c" groups:idRef="M_pyk_R3_A_c"/>
-          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
+          <groups:member groups:name="PYK; 1 fdp_c" groups:idRef="M_pyk_R1_c"/>
           <groups:member groups:name="PYK-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_P_c"/>
+          <groups:member groups:name="PYK-adp complex; 1 fdp_c" groups:idRef="M_pyk_R1_A_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 3 fdp_c" groups:idRef="M_pyk_R3_AP_c"/>
           <groups:member groups:name="PYK; 4 fdp_c" groups:idRef="M_pyk_R4_c"/>
           <groups:member groups:name="PYK; 3 atp_c" groups:idRef="M_pyk_T3_c"/>
           <groups:member groups:name="PYK-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_P_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 1 fdp_c" groups:idRef="M_pyk_R1_AP_c"/>
           <groups:member groups:name="PYK" groups:idRef="M_pyk_R0_c"/>
+          <groups:member groups:name="PYK; 2 fdp_c" groups:idRef="M_pyk_R2_c"/>
+          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
           <groups:member groups:name="PYK; 1 atp_c" groups:idRef="M_pyk_T1_c"/>
           <groups:member groups:name="PYK-adp complex" groups:idRef="M_pyk_R0_A_c"/>
-          <groups:member groups:name="PYK-adp complex; 4 fdp_c" groups:idRef="M_pyk_R4_A_c"/>
-          <groups:member groups:name="PYK; 2 fdp_c" groups:idRef="M_pyk_R2_c"/>
+          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
           <groups:member groups:name="PYK-adp complex; 2 fdp_c" groups:idRef="M_pyk_R2_A_c"/>
           <groups:member groups:name="PYK-adp-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_AP_c"/>
-          <groups:member groups:name="PYK-pep complex; 4 fdp_c" groups:idRef="M_pyk_R4_P_c"/>
           <groups:member groups:name="PYK; 4 atp_c" groups:idRef="M_pyk_T4_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
           <groups:member groups:name="pyk_R4_AP catalyzation" groups:idRef="R_PYK_R45"/>
+          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
           <groups:member groups:name="pyk_R0-fdp binding" groups:idRef="R_PYK_R10"/>
           <groups:member groups:name="pyk_R1-pep binding" groups:idRef="R_PYK_R11"/>
           <groups:member groups:name="pyk_R1_A-pep binding" groups:idRef="R_PYK_R13"/>
-          <groups:member groups:name="pyk_R4-adp binding" groups:idRef="R_PYK_R42"/>
-          <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
-          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
           <groups:member groups:name="pyk_R2-pep binding" groups:idRef="R_PYK_R21"/>
           <groups:member groups:name="pyk_R3_P-adp binding" groups:idRef="R_PYK_R34"/>
-          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
-          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
           <groups:member groups:name="pyk_R2_A-pep binding" groups:idRef="R_PYK_R23"/>
-          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
-          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
-          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
-          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
-          <groups:member groups:name="pyk_R0-pyk_T0 transition" groups:idRef="R_PYK_L"/>
+          <groups:member groups:name="pyk_R0_A-pep binding" groups:idRef="R_PYK_R03"/>
           <groups:member groups:name="pyk_R3-pep binding" groups:idRef="R_PYK_R31"/>
+          <groups:member groups:name="pyk_R0-pyk_T0 transition" groups:idRef="R_PYK_L"/>
+          <groups:member groups:name="pyk_R1-fdp binding" groups:idRef="R_PYK_R20"/>
+          <groups:member groups:name="pyk_T3-atp binding" groups:idRef="R_PYK_T4"/>
+          <groups:member groups:name="pyk_R4_P-adp binding" groups:idRef="R_PYK_R44"/>
+          <groups:member groups:name="pyk_R3_A-pep binding" groups:idRef="R_PYK_R33"/>
+          <groups:member groups:name="pyk_R0_AP catalyzation" groups:idRef="R_PYK_R05"/>
           <groups:member groups:name="pyk_R0-pep binding" groups:idRef="R_PYK_R01"/>
-          <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
-          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
-          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
           <groups:member groups:name="pyk_R2-fdp binding" groups:idRef="R_PYK_R30"/>
-          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R2_P-adp binding" groups:idRef="R_PYK_R24"/>
+          <groups:member groups:name="pyk_R1-adp binding" groups:idRef="R_PYK_R12"/>
+          <groups:member groups:name="pyk_T0-atp binding" groups:idRef="R_PYK_T1"/>
           <groups:member groups:name="pyk_R4_A-pep binding" groups:idRef="R_PYK_R43"/>
+          <groups:member groups:name="pyk_R1_AP catalyzation" groups:idRef="R_PYK_R15"/>
           <groups:member groups:name="pyk_R4-pep binding" groups:idRef="R_PYK_R41"/>
           <groups:member groups:name="pyk_R2_AP catalyzation" groups:idRef="R_PYK_R25"/>
-          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
           <groups:member groups:name="pyk_R3-fdp binding" groups:idRef="R_PYK_R40"/>
-          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
           <groups:member groups:name="pyk_R2-adp binding" groups:idRef="R_PYK_R22"/>
+          <groups:member groups:name="pyk_R0_P-adp binding" groups:idRef="R_PYK_R04"/>
+          <groups:member groups:name="pyk_R0-adp binding" groups:idRef="R_PYK_R02"/>
           <groups:member groups:name="pyk_T1-atp binding" groups:idRef="R_PYK_T2"/>
           <groups:member groups:name="pyk_R3_AP catalyzation" groups:idRef="R_PYK_R35"/>
+          <groups:member groups:name="pyk_R1_P-adp binding" groups:idRef="R_PYK_R14"/>
+          <groups:member groups:name="pyk_R3-adp binding" groups:idRef="R_PYK_R32"/>
+          <groups:member groups:name="pyk_T2-atp binding" groups:idRef="R_PYK_T3"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:idRef="Substrates"/>
           <groups:member groups:idRef="Activators"/>
-          <groups:member groups:idRef="Products"/>
-          <groups:member groups:idRef="Inhibitors"/>
+          <groups:member groups:idRef="Substrates"/>
           <groups:member groups:idRef="Cofactors"/>
+          <groups:member groups:idRef="Inhibitors"/>
+          <groups:member groups:idRef="Products"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_species_categorized" groups:kind="collection">
@@ -1794,12 +1794,12 @@
       </groups:group>
       <groups:group groups:id="PYK_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="atp_c_inhibition"/>
           <groups:member groups:idRef="adp_c_binding"/>
           <groups:member groups:idRef="pep_c_binding"/>
-          <groups:member groups:idRef="catalyzation"/>
-          <groups:member groups:idRef="atp_c_inhibition"/>
           <groups:member groups:idRef="RT_transition"/>
           <groups:member groups:idRef="fdp_c_activation"/>
+          <groups:member groups:idRef="catalyzation"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PYK_EnzymeModule" groups:kind="collection">
@@ -1813,12 +1813,12 @@
           </html>
         </notes>
         <groups:listOfMembers>
-          <groups:member groups:idRef="PYK_enzyme_module_species_categorized"/>
           <groups:member groups:idRef="PYK_enzyme_module_reactions"/>
-          <groups:member groups:idRef="PYK_enzyme_module_reactions_categorized"/>
-          <groups:member groups:idRef="PYK_enzyme_module_ligands"/>
-          <groups:member groups:idRef="PYK_enzyme_module_species"/>
           <groups:member groups:idRef="PYK_enzyme_module_ligands_categorized"/>
+          <groups:member groups:idRef="PYK_enzyme_module_species"/>
+          <groups:member groups:idRef="PYK_enzyme_module_species_categorized"/>
+          <groups:member groups:idRef="PYK_enzyme_module_ligands"/>
+          <groups:member groups:idRef="PYK_enzyme_module_reactions_categorized"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>

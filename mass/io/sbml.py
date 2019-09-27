@@ -1199,11 +1199,10 @@ def _read_model_reactions_from_sbml(model, metabolites, f_replace, **kwargs):
         if rate_eq in mass_action_rates:
             # Rate law is a mass action rate law identical to the one
             # automatically generated when reaction rate type is 1, 2, or 3
-            mass_reaction._rate = rate_eq
+            mass_reaction._rate_type = int(mass_action_rates.index(rate_eq)
+                                           + 1)
         else:
             custom_rates_dict[mass_reaction] = str(rate_eq)
-            mass_reaction.get_mass_action_rate(rate_type=1,
-                                               update_reaction=True)
 
         # Parse the notes dict for fall back solutions
         mass_notes = _parse_notes_dict(reaction)
