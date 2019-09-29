@@ -1017,12 +1017,12 @@ def _read_specie_initial_value(model, specie, sid):
     """
     initial_condition = None
     # Try to set initial concentration or amount depending on rate law.
-    if MASSCONFIGURATION.include_compartments_in_rates:
-        attributes = ("InitialAmount", "InitialConcentration")
-        msg = "include compartments"
-    else:
+    if MASSCONFIGURATION.exclude_compartments_in_rates:
         attributes = ("InitialConcentration", "InitialAmount")
         msg = "exclude compartments"
+    else:
+        attributes = ("InitialAmount", "InitialConcentration")
+        msg = "include compartments"
     for i, attr in enumerate(attributes):
         if getattr(specie, "isSet" + attr)():
             initial_condition = getattr(specie, "get" + attr)()
@@ -2294,12 +2294,12 @@ def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
         _check(specie.setBoundaryCondition(is_boundary_condition),
                "set specie boundary condition" + _for_id(mid))
 
-        if MASSCONFIGURATION.include_compartments_in_rates:
-            has_only_substance_units = True
-            setter = specie.setInitialAmount
-        else:
+        if MASSCONFIGURATION.exclude_compartments_in_rates:
             has_only_substance_units = False
             setter = specie.setInitialConcentration
+        else:
+            has_only_substance_units = True
+            setter = specie.setInitialAmount
 
         # Set metabolite initial condition value and unit restrictions
         _check(specie.setHasOnlySubstanceUnits(has_only_substance_units),

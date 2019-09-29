@@ -1240,10 +1240,6 @@ class MassModel(Model):
         for e in self.enzyme_modules:
             e._model = self
 
-    def add_groups(self, group_list):
-        """TODO DOCSTRING."""
-        super(MassModel, self).add_groups(group_list)
-
     def copy(self):
         r"""Create a partial "deepcopy" of the :class:`MassModel`.
 

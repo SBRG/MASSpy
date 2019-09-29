@@ -8,6 +8,7 @@ Attributes involved in model construction:
     * :attr:`~MassBaseConfiguration.irreversible_Keq`
     * :attr:`~MassBaseConfiguration.irreversible_kr`
     * :attr:`~MassBaseConfiguration.exclude_metabolites_from_rates`
+    * :attr:`~MassBaseConfiguration.exclude_compartments_in_rates`
     * :attr:`~MassBaseConfiguration.model_creator`
     * :attr:`~MassBaseConfiguration.decimal_precision`
 
@@ -28,16 +29,14 @@ Attributes involved in thermodynamics:
     * :attr:`~MassBaseConfiguration.solver`
     * :attr:`~MassBaseConfiguration.tolerance`
     * :attr:`~MassBaseConfiguration.processes`
-    * :attr:`~MassBaseConfiguration.zero_value_log_substitute`
-
 
 Notes
 -----
 * Some attributes are used in multiple :mod:`mass` submodules, such as
   :attr:`~MassBaseConfiguration.decimal_precision`.
 
-* The :class:`MassConfiguration` is synchronized with the
-  :class:`~.Configuration`.
+* The :class:`MassConfiguration` shares the configuration attributes of the
+  :class:`~.Configuration` class from :mod:`cobra`.
 
 """
 from cobra.core.configuration import Configuration
@@ -93,11 +92,11 @@ class MassBaseConfiguration:
         :attr:`~.MassMetabolite.elements` attribute to filter out the hydrogen
         and water in all rates except the hydrogen and water exchange
         reactions.
-    include_compartments_in_rates : bool
-        Whether to include the compartment volumes in rate expressions.
+    exclude_compartments_in_rates : bool
+        Whether to exclude the compartment volumes in rate expressions.
         The boundary compartment will always excluded.
 
-        Default is ``False``.
+        Default is ``True``.
     model_creator : dict
         A dict containing the information about the model creator where keys
         are SBML creator fields and values are strings. Valid keys include:
@@ -123,13 +122,6 @@ class MassBaseConfiguration:
         are better. Values less than the threshold indicate steady state.
 
         Default is ``1e-6``.
-    zero_value_log_substitute : float
-        A value to substitute for 0 when trying to take the logarithm of 0
-        to avoid a domain error. A value of 1e-10 means that whenever
-        instead of attempting ``log(0)`` which causes a :class:`ValueError`,
-        it will be instead calculated as ``log(1e-10)``.
-
-        Default is ``1e-10``.
     solver : str
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
@@ -167,7 +159,7 @@ class MassBaseConfiguration:
         self._irreversible_kr = 0
         self.exclude_metabolites_from_rates = {
             "elements": [{"H": 2, "O": 1}, {"H": 1}]}
-        self.include_compartments_in_rates = False
+        self.exclude_compartments_in_rates = True
         self._model_creator = {
             "familyName": "",
             "givenName": "",
@@ -180,9 +172,6 @@ class MassBaseConfiguration:
 
         # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
-
-        # For thermodynamics
-        self._zero_value_log_substitute = 1e-10
 
     @property
     def boundary_compartment(self):
@@ -492,31 +481,6 @@ class MassBaseConfiguration:
         """Return a read-only ``dict`` for shared configuration attributes."""
         return getattr(self, "_shared_state").copy()
 
-    @property
-    def zero_value_log_substitute(self):
-        """Get or set the a value to substitute for 0 when taking the log of 0.
-
-        A value of ``1e-10`` means that instead of attempting ``log(0)`` which
-        causes a :class:`ValueError`, it will be instead calculated as
-        ``log(1e-10)``.
-
-        Parameters
-        ----------
-        value : float
-            A positive value to use instead of 0 when taking the logarithm.
-
-        """
-        return getattr(self, "_zero_value_log_substitute")
-
-    @zero_value_log_substitute.setter
-    def zero_value_log_substitute(self, value):
-        """Set the value to substitute for 0. when taking the log of 0."""
-        if not isinstance(value, (integer_types, float)):
-            raise TypeError("Must be an int or float")
-        if value <= 0.:
-            raise ValueError("Must be a postive number")
-        setattr(self, "_zero_value_log_substitute", value)
-
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
 
@@ -544,7 +508,7 @@ class MassBaseConfiguration:
                 <td>{excluded_metabolites_in_rates}</td>
             </tr><tr>
                 <td><strong>Compartments in rates</strong></td>
-                <td>{include_compartments_in_rates}</td>
+                <td>{exclude_compartments_in_rates}</td>
             </tr><tr>
                 <td><strong>Model creator set</strong></td>
                 <td>{model_creator}</td>
@@ -553,9 +517,6 @@ class MassBaseConfiguration:
                 <td>{decimal_precision}</td>
             </tr><tr>
                 <td><strong>Steady state threshold</strong></td>
-                <td>{steady_state_threshold}</td>
-            </tr><tr>
-                <td><strong>Zero substitute for log(0) </strong></td>
                 <td>{steady_state_threshold}</td>
             </tr>
                 <td><strong>Solver</strong></td>
@@ -584,11 +545,10 @@ class MassBaseConfiguration:
             irreversible_kr=self.irreversible_kr,
             excluded_metabolites_in_rates=bool(
                 self.exclude_metabolites_from_rates),
-            include_compartments_in_rates=self.include_compartments_in_rates,
+            exclude_compartments_in_rates=self.exclude_compartments_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
-            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,
@@ -609,11 +569,10 @@ class MassBaseConfiguration:
         irreversible reaction Keq: {irreversible_Keq}
         irreversible reaction kr: {irreversible_kr}
         metabolites excluded in rates: {excluded_metabolites_in_rates}
-        include compartments in rates: {include_compartments_in_rates}
+        include compartments in rates: {exclude_compartments_in_rates}
         model creator set: {model_creator}
         decimal_precision: {decimal_precision}
         steady_state_threshold: {steady_state_threshold}
-        zero value log substitute: {zero_value_log_substitute}
         solver: {solver}
         solver tolerance: {tolerance}
         lower_bound: {lower_bound}
@@ -629,11 +588,10 @@ class MassBaseConfiguration:
             irreversible_kr=self.irreversible_kr,
             excluded_metabolites_in_rates=bool(
                 self.exclude_metabolites_from_rates),
-            include_compartments_in_rates=self.include_compartments_in_rates,
+            exclude_compartments_in_rates=self.exclude_compartments_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
-            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,

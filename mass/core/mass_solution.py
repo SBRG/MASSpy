@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""
-MassSolution is a class for storing the simulation results.
+r"""MassSolution is a class for storing the simulation results.
 
 After a :class:`~.Simulation` is used to simulate a :mod:`mass` model,
 :class:`MassSolution`\ s are created to store the results computed over the

@@ -152,6 +152,11 @@ class ConcSolver:
             the :class:`.MassConfiguration` to the bound values.
 
             Default is ``False``.
+        zero_value_log_substitute :
+            ``float`` value to substitute for 0 when trying to take the
+            logarithm of 0 to avoid a domain error.
+
+            Default is ``1e-10``.
 
     Attributes
     ----------
@@ -176,6 +181,13 @@ class ConcSolver:
         intended to be at equilibrium.
     constraint_buffer : float
         A value to utilize when setting a constraint buffer.
+    zero_value_log_substitute : float
+        A value to substitute for 0 when trying to take the logarithm of 0
+        to avoid a domain error. A value of 1e-10 means that whenever
+        instead of attempting ``log(0)``, which causes a :class:`ValueError`,
+        it will be instead calculated as ``log(1e-10)``.
+
+        Default is ``1e-10``.
 
     """
 
@@ -188,6 +200,7 @@ class ConcSolver:
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
             "decimal_precision": False,
+            "zero_value_log_substitute": 1e-10
         }, kwargs)
         self._model = model
         model._conc_solver = self
@@ -209,6 +222,9 @@ class ConcSolver:
         else:
             self.constraint_buffer = ensure_non_negative_value(
                 constraint_buffer)
+
+        self._zero_value_log_substitute = ensure_non_negative_value(
+            kwargs.pop("zero_value_log_substitute"), exclude_zero=True)
 
         # Try setting excluded and equilibrium attributes specified in kwargs
         if excluded_reactions is not None:
@@ -511,6 +527,28 @@ class ConcSolver:
         return [r.id for r in self.model.reactions
                 if r.id not in self.excluded_reactions]
 
+    @property
+    def zero_value_log_substitute(self):
+        """Get or set the a value to substitute for 0 when taking the log of 0.
+
+        A value of ``1e-10`` means that instead of attempting ``log(0)`` which
+        causes a :class:`ValueError`, it will be instead calculated as
+        ``log(1e-10)``.
+
+        Parameters
+        ----------
+        value : float
+            A positive value to use instead of 0 when taking the logarithm.
+
+        """
+        return getattr(self, "_zero_value_log_substitute")
+
+    @zero_value_log_substitute.setter
+    def zero_value_log_substitute(self, value):
+        """Set the value to substitute for 0. when taking the log of 0."""
+        value = ensure_non_negative_value(value, exclude_zero=True)
+        setattr(self, "_zero_value_log_substitute", value)
+
     def setup_sampling_problem(self, metabolites=None, reactions=None,
                                conc_percent_deviation=0.2,
                                Keq_percent_deviation=0.2, **kwargs):
@@ -523,9 +561,8 @@ class ConcSolver:
           :attr:`~ConcSolver.problem_type` to ``"sampling"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
-          :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
-          the :class:`.MassConfiguration` to ensure that returned values are
-          notnegative.
+          :attr:`~.ConcSolver.zero_value_log_substitute` value
+          to ensure that returned values are not negative.
 
         Parameters
         ----------
@@ -610,7 +647,8 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, upper_def,
-                                     kwargs.get("decimal_precision"))
+                                     kwargs.get("decimal_precision"),
+                                     self.zero_value_log_substitute)
             var.lb, var.ub = bounds
 
         # Ensure objective is zero for sampling
@@ -628,9 +666,8 @@ class ConcSolver:
           :attr:`~ConcSolver.problem_type` to ``"feasible_qp"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
-          :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
-          the :class:`.MassConfiguration` to ensure that returned values are
-          not negative.
+          :attr:`~.ConcSolver.zero_value_log_substitute` value to ensure
+          that returned values are not negative.
         * The :attr:`ConcSolver.solver` must have QP capabilities.
 
         Parameters
@@ -716,7 +753,8 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("decimal_precision"))
+                                     kwargs.get("decimal_precision"),
+                                     self.zero_value_log_substitute)
             var.lb, var.ub = bounds
             x_vars.append(var)
 
@@ -1555,7 +1593,8 @@ class ConcSolver:
             bounds = _get_deviation_values(value, *bounds)
 
         bounds = _get_log_bounds(bounds, upper_default,
-                                 kwargs.get("decimal_precision"))
+                                 kwargs.get("decimal_precision"),
+                                 self.zero_value_log_substitute)
 
         # Create variable and return
         variable = self.problem.Variable(var_id, lb=bounds[0], ub=bounds[1])
@@ -1844,7 +1883,8 @@ def _get_deviation_values(value, lower_bound_percent, upper_bound_percent):
     return lower_bound, upper_bound
 
 
-def _get_log_bounds(bounds, upper_default, decimal_precision):
+def _get_log_bounds(bounds, upper_default, decimal_precision,
+                    zero_value_log_substitute):
     """Calculate the bound values in logspace and return them.
 
     Warnings
@@ -1856,7 +1896,7 @@ def _get_log_bounds(bounds, upper_default, decimal_precision):
     bounds = [b if b is not None else default
               for b, default in zip(bounds, [0, upper_default])]
     # Substitute for zero values to prevent math domain error in logspace
-    bounds = [b if b != 0 else MASSCONFIGURATION.zero_value_log_substitute
+    bounds = [b if b != 0 else zero_value_log_substitute
               for b in bounds]
     # Validate bounds before taking log
     bounds = _validate_bounds(*bounds, exclude_zero=True)
