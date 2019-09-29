@@ -7,7 +7,7 @@ The :class:`EnzymeModuleSpecies` class inherits and extends the
 states and conformations of the enzymes represented through the
 :class:`~.EnzymeModule` class.
 
-The enzyme specific attributes on the :class`EnzymeModuleSpecies` are the
+The enzyme specific attributes on the :class:`EnzymeModuleSpecies` are the
 following:
 
     * :attr:`~EnzymeModuleSpecies.enzyme_module_id`
@@ -418,7 +418,7 @@ class EnzymeModuleSpecies(MassMetabolite):
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
-        <table>""".format(
+        </table>""".format(
             id=self.id, name=self.name, address='0x0%x' % id(self),
             enzyme=str(self.enzyme_module_id), compartment=self.compartment,
             catalytic=_make_bound_attr_str_repr(self.bound_catalytic),

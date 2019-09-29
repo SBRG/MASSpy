@@ -42,6 +42,7 @@ from cobra.core.group import Group
 from cobra.core.metabolite import Metabolite
 from cobra.core.model import Model
 from cobra.core.reaction import Reaction
+from cobra.exceptions import SolverNotFound
 from cobra.util.array import create_stoichiometric_matrix
 from cobra.util.context import get_context
 from cobra.util.util import format_long_string
@@ -57,9 +58,11 @@ from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
+from mass.util.matrix import (
+    _get_matrix_constructor, convert_matrix, matrix_rank)
 from mass.util.util import (
-    _check_kwargs, _get_matrix_constructor, _make_logger, convert_matrix,
-    ensure_iterable, get_public_attributes_and_methods)
+    _check_kwargs, _make_logger, ensure_iterable,
+    get_public_attributes_and_methods)
 
 # Set the logger
 LOGGER = _make_logger(__name__)
@@ -83,12 +86,12 @@ class MassModel(Model):
         properties as the original model.
     name : str
         A human readable name for the model.
-    matrix_type : str
+    array_type : str
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
         ``'DataFrame'``, and ``'symbolic'`` Default is ``'DataFrame'``.
-        See the :mod:`~.linear` module documentation for more information
-        on the ``matrix_type``.
+        See the :mod:`~.matrix` module documentation for more information
+        on the ``array_type``.
     dtype : data-type
         The desired array data-type for the stoichiometric matrix. If ``None``
         then the data-type will default to ``numpy.float64``.
@@ -150,9 +153,7 @@ class MassModel(Model):
 
     """
 
-    # pylint: disable=too-many-public-methods
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, id_or_model=None, name=None, matrix_type="DataFrame",
+    def __init__(self, id_or_model=None, name=None, array_type="DataFrame",
                  dtype=np.float64):
         """Initialize the MassModel."""
         # Instiantiate a new MassModel with state identical to
@@ -178,17 +179,16 @@ class MassModel(Model):
             self.custom_parameters = {}
 
             # Store the stoichiometric matrix, its matrix type, and data type
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
-            self._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
+            self._S = self._mk_stoich_matrix(array_type=self._array_type,
                                              dtype=self._dtype,
                                              update_model=True)
-
     # Public
     @property
     def stoichiometric_matrix(self):
         """Return the stoichiometric matrix."""
-        return self.update_S(matrix_type=self._matrix_type, dtype=self._dtype,
+        return self.update_S(array_type=self._array_type, dtype=self._dtype,
                              update_model=False)
 
     @property
@@ -247,7 +247,6 @@ class MassModel(Model):
     @property
     def boundary(self):
         """Return a ``list`` of boundary reactions in the model."""
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).boundary
 
     @property
@@ -270,7 +269,6 @@ class MassModel(Model):
         Uses annotations and heuristics to exclude non-exchanges such as sink
         and demand reactions.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).exchanges
 
     @property
@@ -280,7 +278,6 @@ class MassModel(Model):
         Demands are irreversible reactions that accumulate or consume a
         metabolite in the inside of the model.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).demands
 
     @property
@@ -290,7 +287,6 @@ class MassModel(Model):
         Sinks are reversible reactions that accumulate or consume a metabolite
         in the inside of the model.
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).sinks
 
     @property
@@ -313,7 +309,7 @@ class MassModel(Model):
             parameters.update({p_type: p_type_dict})
         # Add fluxes, custom parameters, and fixed concentrations.
         parameters.update({"v": {
-            str(rxn.flux_symbol): flux
+            rxn.flux_symbol_str: flux
             for rxn, flux in iteritems(self.steady_state_fluxes)}})
         parameters.update({"Custom": self.custom_parameters})
         parameters.update({"Boundary": self.boundary_conditions})
@@ -340,7 +336,6 @@ class MassModel(Model):
             An empty ``dict`` will reset the compartments.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).compartments
 
     @compartments.setter
@@ -352,17 +347,25 @@ class MassModel(Model):
         else:
             setattr(self, "_compartments", {})
 
-    def update_S(self, matrix_type=None, dtype=None, update_model=True):
+    @property
+    def conc_solver(self):
+        """Return the :class:`.ConcSolver` associated with the model."""
+        if hasattr(self, "_conc_solver"):
+            return getattr(self, "_conc_solver")
+
+        raise SolverNotFound("No ConcSolver is associated with this model.")
+
+    def update_S(self, array_type=None, dtype=None, update_model=True):
         r"""Update the stoichiometric matrix of the model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is the current ``matrix_type``. See the :mod:`~.linear`
-            module documentation for more information on the ``matrix_type``.
+            Default is the current ``array_type``. See the :mod:`~.matrix`
+            module documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the stoichiometric matrix.
             If ``None`` then the data-type will default to the
@@ -373,14 +376,14 @@ class MassModel(Model):
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The stoichiometric matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
         # Use the model's stored matrix type if the matrix-type is not given.
-        if matrix_type is None:
-            matrix_type = self._matrix_type
+        if array_type is None:
+            array_type = self._array_type
         # Use the model's stored data-type if the data-type is not specified.
         if dtype is None:
             dtype = self._dtype
@@ -392,11 +395,11 @@ class MassModel(Model):
         # If a matrix has not been constructed yet, or if there are no changes
         # to the reactions, return a newly constructed stoichiometric matrix.
         stoich_mat = self._mk_stoich_matrix(
-            matrix_type=matrix_type, dtype=dtype, update_model=update_model)
+            array_type=array_type, dtype=dtype, update_model=update_model)
         # Internally update the model if desired
         if update_model:
             self._S = stoich_mat
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
 
         return stoich_mat
@@ -414,7 +417,6 @@ class MassModel(Model):
             the model.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassModel, self).add_metabolites(metabolite_list)
 
     def remove_metabolites(self, metabolite_list, destructive=False):
@@ -434,7 +436,6 @@ class MassModel(Model):
             :class:`~.MassReaction`\ s from the model.
 
         """
-        # pylint: disable=useless-super-delegation
         super(MassModel, self).remove_metabolites(metabolite_list,
                                                   destructive)
 
@@ -573,7 +574,7 @@ class MassModel(Model):
             elif isinstance(reaction, Reaction):
                 # Convert reaction to a MassReaction and raise a warning
                 warnings.warn(
-                    "'{0}' is a not a mass.MassReaction, therefore "
+                    "'{0}' is not a mass.MassReaction, therefore "
                     "converting reaction before adding.".format(reaction.id))
                 mass_reaction = MassReaction(reaction)
                 reaction_list[i] = mass_reaction
@@ -700,7 +701,6 @@ class MassModel(Model):
             The :class:`~.MassReaction` of the new boundary reaction.
 
         """
-        # pylint: disable=arguments-differ
         kwargs = _check_kwargs({
             "subsystem": "",
             "lb": MASSCONFIGURATION.lower_bound,
@@ -716,7 +716,9 @@ class MassModel(Model):
 
         # Create boundary reaction
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.filterwarnings("ignore",
+                                    ".*is not a mass.MassReaction, therefore "
+                                    "converting reaction.*")
             reaction = super(MassModel, self).add_boundary(
                 metabolite, type=boundary_type, reaction_id=reaction_id,
                 lb=kwargs.get("lb", None), ub=kwargs.get("ub", None),
@@ -759,7 +761,7 @@ class MassModel(Model):
                 * Type 3 will utilize the :attr:`equilibrium_constant` and the
                   :attr:`reverse_rate_constant`.
 
-            Default is `` 0.``
+            Default is ``0.``
         update_reactions : bool
             If ``True``, update the :class:`~.MassReaction` rate in addition
             to returning the rate expressions. Will not remove a custom
@@ -1095,31 +1097,31 @@ class MassModel(Model):
         if context:
             context(partial(self.units.__iadd__, existing_units))
 
-    def get_elemental_matrix(self, matrix_type=None, dtype=None):
+    def get_elemental_matrix(self, array_type=None, dtype=None):
         """Get the elemental matrix for a model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
-            documentation for more information on the ``matrix_type``.
+            Default is ``'dense'``. See the :mod:`~.matrix` module
+            documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
             the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The elemntal matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
         # Set up for matrix construction if matrix types are correct.
-        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type=matrix_type, dtype=dtype)
+        (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
+            array_type=array_type, dtype=dtype)
 
         # Build the elemental matrix
         elem_mat = matrix_constructor((len(CHOPNSQ), len(self.metabolites)))
@@ -1164,46 +1166,46 @@ class MassModel(Model):
             row_ids.extend(moieties)
 
         # Convert matrix to a dataframe if matrix type is a dataframe
-        elem_mat = convert_matrix(elem_mat, matrix_type=matrix_type,
+        elem_mat = convert_matrix(elem_mat, array_type=array_type,
                                   dtype=dtype, row_ids=row_ids,
                                   col_ids=[m.id for m in self.metabolites])
 
         return elem_mat
 
-    def get_elemental_charge_balancing(self, matrix_type=None, dtype=None):
+    def get_elemental_charge_balancing(self, array_type=None, dtype=None):
         """Get the elemental charge balance as a matrix for a model.
 
         Parameters
         ----------
-        matrix_type : str
+        array_type : str
             A string identifiying the desired format for the returned matrix.
             Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
             ``'DataFrame'``, and ``'symbolic'``
-            Default is ``'dense'``. See the :mod:`~.linear` module
-            documentation for more information on the ``matrix_type``.
+            Default is ``'dense'``. See the :mod:`~.matrix` module
+            documentation for more information on the ``array_type``.
         dtype : data-type
             The desired array data-type for the matrix. If ``None`` then
             the data-type will default to ``numpy.float64``.
 
         Returns
         -------
-        matrix of type ``matrix_type``
+        matrix of type ``array_type``
             The charge balancing matrix for the :class:`~.MassModel` returned
-            as the given ``matrix_type`` and with a data-type of ``dtype``.
+            as the given ``array_type`` and with a data-type of ``dtype``.
 
         """
-        elem_mat = self.get_elemental_matrix(matrix_type="DataFrame")
+        elem_mat = self.get_elemental_matrix(array_type="DataFrame")
         row_ids = elem_mat.index
 
-        stoich_mat = self.update_S(matrix_type="dense", update_model=False)
+        stoich_mat = self.update_S(array_type="dense", update_model=False)
         charge_mat = np.array(elem_mat).dot(stoich_mat)
 
-        if matrix_type is None:
-            matrix_type = "dense"
+        if array_type is None:
+            array_type = "dense"
         if dtype is None:
             dtype = np.float64
 
-        charge_mat = convert_matrix(charge_mat, matrix_type=matrix_type,
+        charge_mat = convert_matrix(charge_mat, array_type=array_type,
                                     dtype=dtype, row_ids=row_ids,
                                     col_ids=[r.id for r in self.reactions])
         return charge_mat
@@ -1238,6 +1240,10 @@ class MassModel(Model):
         for e in self.enzyme_modules:
             e._model = self
 
+    def add_groups(self, group_list):
+        """TODO DOCSTRING."""
+        super(MassModel, self).add_groups(group_list)
+
     def copy(self):
         r"""Create a partial "deepcopy" of the :class:`MassModel`.
 
@@ -1259,8 +1265,8 @@ class MassModel(Model):
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules", "_S",
-            "custom_rates", "units", "boundary_conditions",
+            "metabolites", "reactions", "genes", "enzyme_modules", "groups",
+            "_S", "custom_rates", "units", "boundary_conditions",
             "custom_parameters", "notes", "annotation"]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
@@ -1290,16 +1296,20 @@ class MassModel(Model):
         # Copy any existing enzyme_modules
         new_model.enzyme_modules += self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
-        new_model._S = self._mk_stoich_matrix(matrix_type=self._matrix_type,
+        new_model._S = self._mk_stoich_matrix(array_type=self._array_type,
                                               dtype=self._dtype,
                                               update_model=True)
 
-        try:
-            new_model._solver = deepcopy(self.solver)
-            # Cplex has an issue with deep copies
-        # pylint: disable=broad-except
-        except Exception:
-            new_model._solver = copy(self.solver)
+        solvers_dict = {"_solver": self.solver}
+        if hasattr(self, "_conc_solver"):
+            solvers_dict["_conc_solver"] = self.conc_solver
+
+        for attr, solver in iteritems(solvers_dict):
+            try:
+                setattr(new_model, attr, deepcopy(solver))
+                # Cplex has an issue with deep copies
+            except Exception:
+                setattr(new_model, attr, copy(solver))
 
         # Doesn't make sense to retain the context of a copied model so
         # assign a new empty context
@@ -1366,6 +1376,7 @@ class MassModel(Model):
            and issubclass(right.__class__, MassModel):
             return right._add_self_to_model(self, prefix_existing, inplace,
                                             objective)
+
         # Set the merged model object and its ID,
         # then add the module attribute of the right model into the left
         new_model = super(MassModel, self).merge(
@@ -1527,30 +1538,24 @@ class MassModel(Model):
 
         return steady_state_fluxes
 
-    def calculate_PERCs(self, steady_state_fluxes=None,
-                        steady_state_concentrations=None,
-                        at_equilibrium_default=100000, update_reactions=False):
+    def calculate_PERCs(self, at_equilibrium_default=100000,
+                        update_reactions=False, verbose=False, **kwargs):
         r"""Calculate pseudo-order rate constants for reactions in the model.
 
         Pseudo-order rate constants (PERCs) are considered to be the same as
         :attr:`~.MassReaction.forward_rate_constant` attributes, and are
         calculated based on the steady state concentrations and fluxes.
 
+        Notes
+        -----
+        * All fluxes and concentrations used in calculations must be provided,
+          including relevant boundary conditions. By default, the relevant
+          values are taken from objects associated with the model.
+        * To calculate PERCs for a subset of model reactions, use the
+          ``steady_state_fluxes`` kwawrg.
+
         Parameters
         ----------
-        steady_state_fluxes : dict
-            A ``dict`` of steady state fluxes where :class:`~MassReaction`\ s
-            are keys and fluxes are the values. All reactions provided will
-            have their PERCs calculated. If ``None``, PERCs are calculated
-            using the current steady state fluxes for all reactions that
-            exist in the model.
-        steady_state_concentrations : dict
-            A ``dict`` of all steady state concentrations necessary for the PERC
-            calculations, where :class:`~.MassMetabolite`\ s are keys and
-            concentrations are the values. If ``None``, the relevant
-            concentrations that exist in the model are used. All
-            concentrations used in calculations must be provided, including
-            relevant boundary conditions.
         at_equilibrium_default : float
             The value to set the pseudo-order rate constant if the reaction is
             at equilibrium. Default is ``100,000``.
@@ -1558,6 +1563,24 @@ class MassModel(Model):
             If ``True`` then will update the values for the
             :attr:`~MassReaction.forward_rate_constant` attributes with the
             calculated PERC values.
+        verbose : bool
+            Whether to output more verbose messages for errors and logging.
+        **kwargs
+            fluxes :
+                A ``dict`` of reaction fluxes where :class:`~MassReaction`\ s
+                are keys and fluxes are the values. Only reactions provided
+                will have their PERCs calculated. If ``None``, PERCs are
+                calculated using the current steady state fluxes for all
+                reactions in the model.
+
+                Default is ``None``.
+            concentrations : dict
+                A ``dict`` of concentrations necessary for the PERC
+                calculations, where :class:`~.MassMetabolite`\ s are keys and
+                concentrations are the values. If ``None``, the relevant
+                concentrations that exist in the model are used. 
+
+                Default is ``None``.
 
         Returns
         -------
@@ -1567,62 +1590,80 @@ class MassModel(Model):
             values are the calculated PERC values.
 
         """
+        kwargs = _check_kwargs({
+            "fluxes": None,
+            "concentrations": None
+        }, kwargs)
         # Get the model steady state concentrations if None are provided.
-        if steady_state_concentrations is None:
-            steady_state_concentrations = self.boundary_conditions.copy()
-            steady_state_concentrations.update({
+        if kwargs.get("concentrations") is None:
+            concentrations = self.boundary_conditions.copy()
+            concentrations.update({
                 str(m): ic for m, ic in iteritems(self.initial_conditions)})
         else:
-            steady_state_concentrations = {
-                str(m): v for m, v in iteritems(steady_state_concentrations)}
+            concentrations = {
+                str(m): v for m, v in iteritems(kwargs.get("concentrations"))}
+
         # Get the model reactions and fluxes if None are provided.
-        if steady_state_fluxes is None:
-            steady_state_fluxes = self.steady_state_fluxes
+        if kwargs.get("fluxes") is None:
+            fluxes = self.steady_state_fluxes
+        else:
+            fluxes = kwargs.get("fluxes")
+            invalid = {
+                rxn: flux for rxn, flux in iteritems(fluxes)
+                if not isinstance(rxn, MassReaction)
+                or not isinstance(flux, (float, integer_types))}
+            if invalid:
+                raise TypeError("Invalid ``fluxes``: '{0!r}'".format(invalid))
 
         # Get defined numerical values
         numerical_values = {
             str(param): value
             for p_type, subdict in iteritems(self.parameters)
-            for param, value in iteritems(subdict) if p_type != "kf"}
-        numerical_values.update(steady_state_concentrations)
+            for param, value in iteritems(subdict)
+            if p_type not in ["kf", "v"]}
+        numerical_values.update(concentrations)
 
         # Function to calculate the solution
         def calculate_sol(flux, rate_equation, perc):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
                                perc, domain=sym.S.Reals)
             if isinstance(sol, type(sym.S.Reals)) or sol.is_EmptySet \
-               or next(iter(sol)) <= 0:
+               or next(iter(sol)) == 0:
                 sol = float(at_equilibrium_default)
             else:
                 sol = float(next(iter(sol)))
 
             return sol
 
+        # Calculate the PERCs
         percs_dict = {}
-        for reaction, flux in iteritems(steady_state_fluxes):
-            # Ensure inputs are correct
-            if not isinstance(reaction, MassReaction)\
-               or not isinstance(flux, (float, integer_types)):
-                raise TypeError(
-                    "steady_state_fluxes must be a dict containing the "
-                    "MassReactions and their steady state flux values.")
+        for reaction, flux in iteritems(fluxes):
             rate_eq = strip_time(reaction.rate)
-            arguments = list(rate_eq.atoms(sym.Symbol))
-            # Check for missing numerical values
-            missing_values = [
-                str(arg) for arg in arguments
-                if str(arg) not in numerical_values
-                and str(arg) != reaction.kf_str]
+            if reaction.kf_str not in str(rate_eq):
+                msg = "Skipping reaction {0}, no PERC in rate".format(
+                    reaction.id)
+                LOGGER.info(msg)
+                if verbose:
+                    print(msg)
+                continue
 
-            if missing_values:
-                raise ValueError(
-                    "Cannot calculate the PERC for reaction '{0}' because "
-                    "values for {1} not defined.".format(
-                        reaction.id, str(missing_values)))
+            # Get arguments
+            args = [a for a in list(rate_eq.atoms(sym.Symbol))
+                    if str(a) != reaction.kf_str]
+
+            # Get numerical values for arguments
+            vals = {a: numerical_values[str(a)] for a in args
+                    if str(a) in numerical_values}
+
+            if len(args) != len(vals):
+                warnings.warn(
+                    "Cannot calculate the PERC for reaction '{0}' missing "
+                    "values for {1!r}.".format(
+                        reaction.id, [str(a) for a in args if a not in vals]))
+                continue
 
             # Substitute values into rate equation
-            rate_eq = rate_eq.subs(numerical_values)
-
+            rate_eq = rate_eq.subs(vals)
             # Calculate rate equation and update with soluton for PERC
             sol = calculate_sol(flux, rate_eq, sym.Symbol(reaction.kf_str))
             percs_dict.update({reaction.kf_str: sol})
@@ -1637,7 +1678,7 @@ class MassModel(Model):
         """Create a :class:`MassModel` from strings of reaction equations.
 
         Accepted ``kwargs`` are passed to the underlying function for reaction
-        creation, :func:`.MassReaction.build_reaction_from_string`.
+        creation, :meth:`.MassReaction.build_reaction_from_string`.
 
         Takes a string representation of the reactions and uses the
         specifications supplied in the optional arguments to first infer a set
@@ -1686,7 +1727,7 @@ class MassModel(Model):
         See Also
         --------
         :meth:`.MassReaction.build_reaction_from_string`
-            Base function for building reactions.
+            Base method for building reactions.
 
         """
         # Use the reaction split arguments to get the reactions and strip them
@@ -1720,7 +1761,7 @@ class MassModel(Model):
                 reaction.build_reaction_from_string(
                     reaction_str, verbose=verbose, **kwargs)
             except ValueError as e:
-                # Log reactions that could not be built.
+                # Raise warnings for reactions that could not be built.
                 warnings.warn(
                     "Failed to build reaction '{0}' due to the following:\n"
                     "{1}".format(orig_reaction_str, str(e)))
@@ -1788,7 +1829,9 @@ class MassModel(Model):
                     reaction = self.reactions.get_by_id(reaction)
                     with warnings.catch_warnings():
                         if not verbose:
-                            warnings.simplefilter("ignore")
+                            warnings.filterwarnings(
+                                "ignore", 
+                                ".*constant for an irreversible reaction.*")
                         setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
                     self.custom_parameters.update({key: value})
@@ -1796,7 +1839,7 @@ class MassModel(Model):
             else:
                 self.custom_parameters.update({key: value})
 
-    def update_initial_conditions(self, initial_conditions):
+    def update_initial_conditions(self, initial_conditions, verbose=True):
         """Update the initial conditions of the model.
 
         Can also be used to update initial conditions of fixed metabolites to
@@ -1814,6 +1857,9 @@ class MassModel(Model):
         initial_conditions : dict
             A ``dict`` where metabolites are the keys and the initial
             conditions are the values.
+        verbose : bool
+            If ``True`` then display the warnings that may be raised when
+            setting metabolite initial conditions. Default is ``True``.
 
         """
         if not isinstance(initial_conditions, dict):
@@ -1829,9 +1875,10 @@ class MassModel(Model):
             try:
                 metabolite.initial_condition = ic_value
             except (TypeError, ValueError) as e:
-                warnings.warn(
-                    "Cannot set initial condition for {0} due to the "
-                    "following: {1}".format(metabolite.id, str(e)))
+                if verbose:
+                    warnings.warn(
+                        "Cannot set initial condition for {0} due to the "
+                        "following: {1}".format(metabolite.id, str(e)))
                 continue
 
     def update_custom_rates(self, custom_rates, custom_parameters=None):
@@ -1863,16 +1910,20 @@ class MassModel(Model):
                 raise TypeError("custom_parameters must be a dict.")
             self.custom_parameters.update(custom_parameters)
 
+        # Iterate through custrom rates
         for reaction, custom_rate in iteritems(custom_rates):
             if not isinstance(reaction, MassReaction):
+                # Ensure reaction exists
                 try:
                     reaction = self.reactions.get_by_id(reaction)
                 except KeyError as e:
                     warnings.warn("No reaction found for {0}".format(str(e)))
                     continue
+            # Try to create the rate expression
             try:
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
+                # Warn if fail
                 warnings.warn("Unable to sympify rate equation for "
                               "'{0}'.".format(reaction.id))
 
@@ -1915,6 +1966,7 @@ class MassModel(Model):
             equivalent = False
 
         if not equivalent and verbose:
+            msg_out = "{0} vs. {1}:\n".format(self.id, right.id)
             for i, (l_dict, r_dict) in enumerate(zip(l_odes_and_rates,
                                                      r_odes_and_rates)):
                 # Determine which metabolites do not exist in both models
@@ -1925,16 +1977,20 @@ class MassModel(Model):
                     l_key for l_key, l_value in iteritems(l_dict)
                     if l_key in r_dict and l_value != r_dict[l_key])
 
+                # Format and return messages for differences
                 if i == 0:
                     msgs = ["Metabolites", "ODEs"]
                 else:
                     msgs = ["Reactions", "rates"]
 
-                msgs = ["{0} in one model only:".format(msgs[0]),
+                msgs = ["{0} in one model only: ".format(msgs[0]),
                         "{0} with different {1}: ".format(*msgs)]
+
                 for item, msg in zip([missing, diff_equations], msgs):
                     if item:
-                        warnings.warn(msg + str(sorted(list(item))))
+                        msg_out += msg + str(sorted(list(item))) + "\n"
+
+            print(msg_out.rstrip("\n"))
 
         return equivalent
 
@@ -1946,8 +2002,6 @@ class MassModel(Model):
 
         Parameters
         ----------
-        organism : str
-            The organism represented by the model
         *assumptions
             Any number of assumptions as strings to add to the description.
         **additional_notes
@@ -1975,25 +2029,31 @@ class MassModel(Model):
             to represent a space ``" "``. (e.g. cell_type for cell type)
 
         """
+        # Determine whether description is being replaced
         replace = True
         if "replace" in additional_notes:
             replace = additional_notes.pop("replace")
+        # Determine max line length for description
         mml = 80
         if "max_line_length" in additional_notes:
             mml = additional_notes.pop("max_line_length")
         if not isinstance(mml, integer_types) or not 50 <= mml < 100:
+            # If bad line length input, reset to 80 
             warnings.warn(
-                "max_line_length not an int between 50 and 100 "
+                "`max_line_length` not an int between 50 and 100 "
                 "using default value.")
             mml = 80
 
         def add_to_description(description, key, value, key_newline=False,
                                captialize=True):
             """Add to the description string."""
+            # Captialize first letter for description if desired
             if captialize:
                 key = key.capitalize()
+            # Turn underscores into whitespace
             key = key.replace("_", " ")
             display_str = key
+            # Ensure indents match if there is to be a multiple lines
             if key_newline:
                 key = "  "
                 display_str += "\n" + key
@@ -2007,9 +2067,11 @@ class MassModel(Model):
                 display_str += value[mml - n_key:]
             else:
                 display_str = key + value
+            # Join new description item to the current description and return
             description = "\n".join((description, display_str))
             return description
 
+        # Initialize description with the model ID
         description = "Model ID: " + str(self.id)
 
         # Handle recognized kwargs
@@ -2040,9 +2102,11 @@ class MassModel(Model):
                     description, " * ", assumption, captialize=False)
             description += "\n"
 
+        # Append old description to the new one.
         if not replace:
             additional_notes["Old Description"] = self.description
 
+        # Add any additional notes
         if additional_notes:
             description += "\n".join((
                 "", "=" * mml, "Additional Notes", "-" * mml))
@@ -2088,7 +2152,7 @@ class MassModel(Model):
                 group.remove_members(old_members)
                 group.add_members(new_members)
 
-    def _mk_stoich_matrix(self, matrix_type=None, dtype=None,
+    def _mk_stoich_matrix(self, array_type=None, dtype=None,
                           update_model=True):
         """Return the stoichiometric matrix for a given MassModel.
 
@@ -2105,8 +2169,9 @@ class MassModel(Model):
         if not isinstance(update_model, bool):
             raise TypeError("update_model must be a bool")
 
-        if matrix_type is None:
-            matrix_type = self._matrix_type
+        # Use current array type and dtype if None provided
+        if array_type is None:
+            array_type = self._array_type
 
         if dtype is None:
             dtype = self._dtype
@@ -2115,13 +2180,13 @@ class MassModel(Model):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            stoich_mat, array_type=array_type, dtype=dtype,
             row_ids=[m.id for m in self.metabolites],
             col_ids=[r.id for r in self.reactions])
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
             self._S = stoich_mat
-            self._matrix_type = matrix_type
+            self._array_type = array_type
             self._dtype = dtype
 
         return stoich_mat
@@ -2223,11 +2288,7 @@ class MassModel(Model):
 
         """
         new_enzyme_modules = DictList()
-        do_not_copy_by_ref = {
-            "ligands", "enzyme_module_species", "enzyme_module_reactions",
-            "enzyme_module_ligands_categorized",
-            "enzyme_module_species_categorized",
-            "enzyme_module_reactions_categortized", "model"}
+        do_not_copy_by_ref = {"model"}
         # Copy the enzyme_modules
         for enzyme in self.enzyme_modules:
             new_enzyme = enzyme.__class__()
@@ -2296,10 +2357,11 @@ class MassModel(Model):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>
@@ -2381,7 +2443,6 @@ class MassModel(Model):
         This method is intended for internal use only.
 
         """
-        # pylint: disable=useless-super-delegation
         return super(MassModel, self).__getstate__()
 
     def __dir__(self):

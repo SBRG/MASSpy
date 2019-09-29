@@ -66,7 +66,6 @@ Some SBML related issues are still open, please refer to the respective issue:
 import datetime
 import logging
 import re
-import traceback
 from collections import defaultdict
 from io import StringIO
 
@@ -84,7 +83,7 @@ from cobra.util.solver import linear_reaction_coefficients, set_objective
 
 import libsbml
 
-from six import integer_types, iteritems, itervalues, string_types
+from six import integer_types, iteritems, itervalues, raise_from, string_types
 
 from sympy import Basic, Symbol, SympifyError, mathml, sympify
 
@@ -514,10 +513,9 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
         # Raise Import/export error if error not SBML parsing related.
         raise e
 
-    except Exception:
+    except Exception as original_error:
         # Log traceback and raise a MassSBMLError for parsing related errors.
-        LOGGER.error(traceback.print_exc())
-        raise MassSBMLError(
+        mass_error = MassSBMLError(
             "Something went wrong reading the SBML model. Most likely the SBML"
             " model is not valid. Please check that your model is valid using "
             "the `mass.io.sbml.validate_sbml_model` function or via the "
@@ -525,6 +523,7 @@ def read_sbml_model(filename, f_replace=None, **kwargs):
             "\t`(model, errors) = validate_sbml_model(filename)`"
             "\nIf the model is valid and cannot be read please open an issue "
             "at https://github.com/SBRG/masspy/issues .")
+        raise_from(mass_error, original_error)
 
 
 def _get_doc_from_filename(filename):
@@ -1200,11 +1199,10 @@ def _read_model_reactions_from_sbml(model, metabolites, f_replace, **kwargs):
         if rate_eq in mass_action_rates:
             # Rate law is a mass action rate law identical to the one
             # automatically generated when reaction rate type is 1, 2, or 3
-            mass_reaction._rate = rate_eq
+            mass_reaction._rate_type = int(mass_action_rates.index(rate_eq)
+                                           + 1)
         else:
             custom_rates_dict[mass_reaction] = str(rate_eq)
-            mass_reaction.get_mass_action_rate(rate_type=1,
-                                               update_reaction=True)
 
         # Parse the notes dict for fall back solutions
         mass_notes = _parse_notes_dict(reaction)
@@ -3028,7 +3026,7 @@ def validate_sbml_model(filename, check_model=True, internal_consistency=True,
     except MassSBMLError as e:
         errors["MASS_ERROR"].append(str(e))
         return None, errors
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         errors["MASS_FATAL"].append(str(e))
         return None, errors
 
@@ -3212,7 +3210,7 @@ def validate_sbml_model_export(mass_model, filename, f_replace=None, **kwargs):
         sbml_str = libsbml.writeSBMLToString(doc)
         model, errors = validate_sbml_model(sbml_str, **all_kwargs["validate"])
 
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         success = False
         model = None
         errors["MASS_FATAL"].append(str(e))

@@ -21,8 +21,8 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
                       **kwargs):
     """Plot time profiles of solutions in a given :class:`.MassSolution`.
 
-    Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
-    in the function. See the :mod:`.visualization.time_profiles` module
+    Accepted ``kwargs`` are passed onto various :mod:`matplotlib` methods
+    utilized in the function. See the :mod:`~mass.visualization` module
     documentation for more detailed information about the possible ``kwargs``.
 
     Notes
@@ -47,7 +47,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
 
             1. An iterable of legend labels as strings.
             2. A ``str`` representing the location of the legend, or an
-               ``int`` between 0 and 10 (inclusive) corresponding to the
+               ``int`` between 0 and 14 (inclusive) corresponding to the
                legend location.
             3. An iterable of the format ``(labels, loc)`` to set both
                the legend labels and location, where ``labels`` and ``loc``

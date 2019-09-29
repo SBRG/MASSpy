@@ -26,11 +26,15 @@ from warnings import warn
 
 import matplotlib.pyplot as plt
 
+from numpy import array
+
 import pandas as pd
 
 from scipy.interpolate import interp1d
 
 from six import iteritems, iterkeys, string_types
+
+from sympy import Symbol, lambdify, sympify
 
 from mass.core.mass_model import MassModel
 from mass.util.dict_with_id import DictWithID
@@ -96,15 +100,6 @@ class MassSolution(DictWithID):
     def simulation(self):
         """Return the associated :class:`~.Simulation`."""
         return getattr(self, "_simulation")
-
-    @property
-    def df(self):
-        """Return the stored solutions as a :class:`pandas.DataFrame`."""
-        sols = dict((k, v(self.time)) if self.interpolate
-                    else (k, v) for k, v in iteritems(self))
-        df = pd.DataFrame.from_dict(sols)
-        df.index = pd.Series(self.time, name="Time")
-        return df
 
     @property
     def time(self):
@@ -207,7 +202,7 @@ class MassSolution(DictWithID):
         :func:`matplotlib.pyplot.gca`).
 
         """
-        ax = plt.gca()
+        # Get solution type for title
         solution_type = ""
         if self.solution_type == _CONC_STR:
             solution_type += "Concentrations"
@@ -215,16 +210,20 @@ class MassSolution(DictWithID):
         if self.solution_type == _FLUX_STR:
             solution_type += "Fluxes"
 
+        # Set plot options
         options = {
-            "plot_function": "semilogx",
+            "plot_function": "loglog",
             "grid": ("major", "x"),
-            "title": "TIme Profile for {0} {1}".format(self.id, solution_type),
+            "title": "Time Profile for {0} {1}".format(self.id, solution_type),
             "xlabel": "Time",
             "ylabel": solution_type,
         }
-
+        # Get current axis and clear it
+        ax = plt.gca()
         ax.cla()
+        # Plot time profile
         ax = plot_time_profile(self, ax=ax, legend="right outside", **options)
+        # Set figure size
         ax.get_figure().set_size_inches((6, 4))
 
     @property
@@ -239,19 +238,95 @@ class MassSolution(DictWithID):
         :func:`matplotlib.pyplot.gca`).
 
         """
+        # Get current axis
         ax = plt.gca()
         ax.cla()
-        title = ("Tiled Phase portraits for " + self.id, {"size": "large"})
-        ax = plot_tiled_phase_portraits(
-            self, ax=ax, **{
-                "title": title,
-                "annotate_time_points": "endpoints",
-                "annotate_time_points_color": ["r", "b"],
-                "annotate_time_points_marker": ["o", "D"],
-                "tile_xlabel_fontdict": {"size": "large"},
-                "tile_ylabel_fontdict": {"size": "large"},
-                "annotate_time_points_legend_loc": "right outside"})
+        # Set options
+        options = {
+            "title": (
+                "Tiled Phase portraits for " + self.id, {"size": "large"}),
+            "annotate_time_points": "endpoints",
+            "annotate_time_points_color": ["r", "b"],
+            "annotate_time_points_marker": ["o", "D"],
+            "tile_xlabel_fontdict": {"size": "large"},
+            "tile_ylabel_fontdict": {"size": "large"},
+            "annotate_time_points_legend_loc": "right outside"}
+        # Plot with kwargs 
+        ax = plot_tiled_phase_portraits(self, ax=ax, **options)
+        # Set figure size 
         ax.get_figure().set_size_inches((7, 7))
+
+    def to_frame(self):
+        """Return the stored solutions as a :class:`pandas.DataFrame`."""
+        # Ensure solutions are data points
+        sols = dict((k, v(self.time)) if self.interpolate
+                    else (k, v) for k, v in iteritems(self))
+        # Make dataframe and set time as index
+        df = pd.DataFrame.from_dict(sols)
+        df.index = pd.Series(self.time, name="Time")
+        return df
+
+    def make_solution_from_equation(self, solution_id, variables, equation,
+                                    update=True):
+        """Make a new solution using an string representation of an equation.
+
+        Parameters
+        ----------
+        solution_id : str
+            An identifier for the solution to be made.
+        variables : iterable
+            Either an iterable of object identifiers or the objects themselves
+            representing keys in the :class:`MassSolution` that are used as
+            variables in equation.
+        equation : str
+            A string representing the equation of the new solution. Must be
+        update : bool
+            Whether to add the new solution into the :class:`MassSolution`.
+            via the :meth:`~dict.update` method. Default is ``True``.
+
+        Returns
+        -------
+        solution : dict
+            A ``dict`` containing where the key is the ``solution_id`` and the
+            value is the newly created solution as the same type as the
+            variable solutions
+
+        Raises
+        ------
+        SympifyError
+            Raised if the ``equation_str`` could not be interpreted.
+
+        """
+        variables = sorted([getattr(var, "_id", var) for var in variables])
+        invalid = [var for var in variables if var not in self]
+        if invalid:
+            raise ValueError(
+                "'{0!r}' not found in MassSolution".format(invalid))
+        equation = sympify(equation, locals={k: Symbol(k) for k in variables})
+        equation = lambdify(args=variables, expr=equation)
+
+        if self.time is not None:
+            values = array([
+                self[k](self.time) if self.interpolate
+                else self[k] for k in variables])
+        else:
+            values = array([self[k] for k in variables])
+
+        solution = equation(*values)
+        # # Return solution as type in the MassSolution
+        if self.interpolate and self.time is not None:
+            solution = interp1d(self.time, solution, kind='cubic',
+                                fill_value='extrapolate')
+        elif solution.size == 1:
+            solution = solution.item()
+
+        solution = {solution_id: solution}
+
+        # Update MassSolution if d
+        if update:
+            self.update(solution)
+
+        return solution
 
     def __getattribute__(self, name):
         """Override of default :func:`getattr` to enable attribute accessors.

@@ -13,7 +13,7 @@ for most of the enzyme specific attribute information of the
 after the merging. All keys of the :class:`EnzymeModuleDict` can be used as
 attribute accessors.  Additionally :class:`EnzymeModuleDict` is a subclass of
 an :class:`~.OrderedDictWithID` which in turn is a subclass of an
-:class:~.collections.OrderedDict`, thereby inheriting its methods and behavior.
+:class:`~.collections.OrderedDict`, thereby inheriting its methods and behavior.
 
 The :class:`.EnzymeModule` attributes preserved in the
 :class:`EnzymeModuleDict` are the following:
@@ -47,6 +47,7 @@ from collections import OrderedDict
 from copy import copy, deepcopy
 
 from cobra.core.dictlist import DictList
+from cobra.core.group import Group
 
 import numpy as np
 
@@ -55,8 +56,9 @@ import pandas as pd
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID
-from mass.util.util import (
-    _get_matrix_constructor, _mk_new_dictlist, convert_matrix)
+from mass.util.matrix import (
+    _get_matrix_constructor, convert_matrix, matrix_rank)
+from mass.util.util import _mk_new_dictlist
 
 
 class EnzymeModuleDict(OrderedDictWithID):
@@ -90,7 +92,7 @@ class EnzymeModuleDict(OrderedDictWithID):
                     continue
                 elif nkey == "S":
                     self[nkey] = id_or_enzyme._mk_stoich_matrix(
-                        matrix_type="DataFrame", update_model=False)
+                        array_type="DataFrame", update_model=False)
                 elif "_equation" in nkey:
                     self[nkey] = getattr(id_or_enzyme, nkey, None)
                 else:
@@ -159,9 +161,16 @@ class EnzymeModuleDict(OrderedDictWithID):
                 "enzyme_module_ligands": model.metabolites,
                 "enzyme_module_species": model.metabolites,
                 "enzyme_module_reactions": model.reactions}.get(attr)
-            self[attr] = _mk_new_dictlist(model_dictlist, getattr(self, attr))
+            attr_value = getattr(self, attr)
+            self[attr] = _mk_new_dictlist(model_dictlist, attr_value)
             attr += "_categorized"
-            self[attr] = _mk_new_dictlist(model.groups, getattr(self, attr))
+            attr_value = getattr(self, attr)
+            if isinstance(attr_value, dict):
+                attr_value = [
+                    Group(category, members=model_dictlist.get_by_any(obj_ids))
+                    for category, obj_ids in iteritems(attr_value)]
+                model.add_groups(attr_value)
+            self[attr] = _mk_new_dictlist(model.groups, attr_value)
 
         for enzyme_module_specie in self.enzyme_module_species:
             enzyme_module_specie._repair_bound_obj_pointers()
@@ -175,8 +184,8 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         """
         # Set up for matrix construction.
-        (matrix_constructor, matrix_type, dtype) = _get_matrix_constructor(
-            matrix_type="DataFrame", dtype=np.float_)
+        (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
+            array_type="DataFrame", dtype=np.float_)
 
         metabolites = DictList([
             met for attr in ["enzyme_module_ligands", "enzyme_module_species"]
@@ -195,7 +204,7 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, matrix_type=matrix_type, dtype=dtype,
+            stoich_mat, array_type=array_type, dtype=dtype,
             row_ids=[m.id for m in metabolites],
             col_ids=[r.id for r in self.enzyme_module_reactions])
 
@@ -226,10 +235,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
-            rank = np.linalg.matrix_rank(self.S)
+            rank = matrix_rank(self.S)
         except (np.linalg.LinAlgError, ValueError):
             dim_S = "0x0"
             rank = 0
+
         return """
             <table>
                 <tr>
@@ -351,9 +361,9 @@ _ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
     "enzyme_module_ligands": DictList(),
     "enzyme_module_species": DictList(),
     "enzyme_module_reactions": DictList(),
-    "enzyme_module_ligands_categorized": {"Undefined": DictList()},
-    "enzyme_module_species_categorized": {"Undefined": DictList()},
-    "enzyme_module_reactions_categorized": {"Undefined": DictList()},
+    "enzyme_module_ligands_categorized": DictList(),
+    "enzyme_module_species_categorized": DictList(),
+    "enzyme_module_reactions_categorized": DictList(),
     "enzyme_concentration_total": None,
     "enzyme_net_flux": None,
     "enzyme_concentration_total_equation": None,

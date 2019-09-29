@@ -4,8 +4,8 @@
     <listOfUnitDefinitions>
       <unitDefinition id="mM" name="Millimolar">
         <listOfUnits>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="litre" exponent="-1" scale="0" multiplier="1"/>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
       <unitDefinition id="hr" name="hour">
@@ -15,9 +15,9 @@
       </unitDefinition>
       <unitDefinition id="mmol_per_gDW_per_hr" name="cobra flux unit">
         <listOfUnits>
+          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
           <unit kind="gram" exponent="-1" scale="0" multiplier="1"/>
           <unit kind="second" exponent="-1" scale="0" multiplier="3600"/>
-          <unit kind="mole" exponent="1" scale="-3" multiplier="1"/>
         </listOfUnits>
       </unitDefinition>
     </listOfUnitDefinitions>
@@ -26,34 +26,34 @@
       <compartment id="b" name="boundary" spatialDimensions="3" size="1" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="1.00014464696689" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
-      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.726944546324595" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.297921263993083" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
-      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.014600002607844" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
-      <species id="M_dhap_c" name="Dihydroxyacetone phosphate" compartment="c" initialConcentration="0.16000001302117" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
-      <species id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" initialConcentration="0.00728000074405546" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
-      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.000243000065155748" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
-      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773000098303109" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
-      <species id="M__2pg_c" name="D-Glycerate 2-phosphate" compartment="c" initialConcentration="0.0113000014456353" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
-      <species id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" initialConcentration="0.0170000024502223" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P"/>
-      <species id="M_pyr_c" name="Pyruvate" compartment="c" initialConcentration="0.0603010000000019" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H3O3"/>
-      <species id="M_lac__L_c" name="L-Lactate" compartment="c" initialConcentration="1.36000000000232" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H5O3"/>
-      <species id="M_nad_c" name="Nicotinamide adenine dinucleotide" compartment="c" initialConcentration="0.0588999999998079" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C21H26N7O14P2"/>
-      <species id="M_nadh_c" name="Nicotinamide adenine dinucleotide - reduced" compartment="c" initialConcentration="0.0301000000001922" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C21H27N7O14P2"/>
-      <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.086728099999911" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
-      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289999958203961" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
-      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.6000000000154" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
-      <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.50000000002747" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
-      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99757000001723e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
+      <species id="M_glc__D_c" name="D-Glucose" compartment="c" initialConcentration="1.00016209587483" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="C6H12O6"/>
+      <species id="M_g6p_c" name="D-Glucose 6-phosphate" compartment="c" initialConcentration="0.808773736501955" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_f6p_c" name="D-Fructose 6-phosphate" compartment="c" initialConcentration="0.331471231965803" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C6H11O9P"/>
+      <species id="M_fdp_c" name="D-Fructose 1,6-bisphosphate" compartment="c" initialConcentration="0.0146000026076147" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C6H10O12P2"/>
+      <species id="M_dhap_c" name="Dihydroxyacetone phosphate" compartment="c" initialConcentration="0.160000013019604" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
+      <species id="M_g3p_c" name="Glyceraldehyde 3-phosphate" compartment="c" initialConcentration="0.00728000074401445" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C3H5O6P"/>
+      <species id="M__13dpg_c" name="3-Phospho-D-glyceroyl phosphate" compartment="c" initialConcentration="0.00024300006514863" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C3H4O10P2"/>
+      <species id="M__3pg_c" name="3-Phospho-D-glycerate" compartment="c" initialConcentration="0.0773000098295739" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
+      <species id="M__2pg_c" name="D-Glycerate 2-phosphate" compartment="c" initialConcentration="0.0113000014455286" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H4O7P"/>
+      <species id="M_pep_c" name="Phosphoenolpyruvate" compartment="c" initialConcentration="0.0170000024500976" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C3H2O6P"/>
+      <species id="M_pyr_c" name="Pyruvate" compartment="c" initialConcentration="0.0603009999999941" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H3O3"/>
+      <species id="M_lac__L_c" name="L-Lactate" compartment="c" initialConcentration="1.35999999999294" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C3H5O3"/>
+      <species id="M_nad_c" name="Nicotinamide adenine dinucleotide" compartment="c" initialConcentration="0.0589000000005859" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-1" fbc:chemicalFormula="C21H26N7O14P2"/>
+      <species id="M_nadh_c" name="Nicotinamide adenine dinucleotide - reduced" compartment="c" initialConcentration="0.0300999999994135" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C21H27N7O14P2"/>
+      <species id="M_amp_c" name="AMP" compartment="c" initialConcentration="0.0867281000000513" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P"/>
+      <species id="M_adp_c" name="ADP" compartment="c" initialConcentration="0.289999958198536" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-3" fbc:chemicalFormula="C10H12N5O10P2"/>
+      <species id="M_atp_c" name="ATP" compartment="c" initialConcentration="1.59999999995295" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3"/>
+      <species id="M_pi_c" name="Phosphate" compartment="c" initialConcentration="2.49999999991568" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="HPO4"/>
+      <species id="M_h_c" name="H+" compartment="c" initialConcentration="8.99756999994736e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="1" fbc:chemicalFormula="H"/>
       <species id="M_h2o_c" name="H2O" compartment="c" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="H2O"/>
-      <species id="M_pfk_R0_c" name="PFK" compartment="c" initialConcentration="2.07230405207509e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
+      <species id="M_pfk_R0_c" name="PFK" compartment="c" initialConcentration="1.11296896803391e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R0_A_c" name="PFK-atp complex" compartment="c" initialConcentration="9.30987676642455e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
+      <species id="M_pfk_R0_A_c" name="PFK-atp complex" compartment="c" initialConcentration="3.76572613778219e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -61,7 +61,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R0_AF_c" name="PFK-atp-f6p complex" compartment="c" initialConcentration="9.60494797238107e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C16H23N5O22P4Moietypfk">
+      <species id="M_pfk_R0_AF_c" name="PFK-atp-f6p complex" compartment="c" initialConcentration="3.42591315838495e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C16H23N5O22P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -69,7 +69,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_c" name="PFK; 1 amp_c" compartment="c" initialConcentration="8.1694087753904e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P1Moietypfk">
+      <species id="M_pfk_R1_c" name="PFK; 1 amp_c" compartment="c" initialConcentration="1.17000829038301e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-2" fbc:chemicalFormula="C10H12N5O7P1Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -77,14 +77,14 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T0_c" name="PFK" compartment="c" initialConcentration="2.27953445728259e-12" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
+      <species id="M_pfk_T0_c" name="PFK" compartment="c" initialConcentration="1.2242658648373e-12" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="0" fbc:chemicalFormula="Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T1_c" name="PFK; 1 atp_c" compartment="c" initialConcentration="1.45890205267488e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
+      <species id="M_pfk_T1_c" name="PFK; 1 atp_c" compartment="c" initialConcentration="7.83530153472862e-11" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C10H12N5O13P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -92,7 +92,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_A_c" name="PFK-atp complex; 1 amp_c" compartment="c" initialConcentration="3.67012692356963e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C20H24N10O20P4Moietypfk">
+      <species id="M_pfk_R1_A_c" name="PFK-atp complex; 1 amp_c" compartment="c" initialConcentration="3.95871846121674e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C20H24N10O20P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -101,7 +101,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R1_AF_c" name="PFK-atp-f6p complex; 1 amp_c" compartment="c" initialConcentration="3.78644949201186e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C26H35N10O29P5Moietypfk">
+      <species id="M_pfk_R1_AF_c" name="PFK-atp-f6p complex; 1 amp_c" compartment="c" initialConcentration="3.60149016959881e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C26H35N10O29P5Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -110,7 +110,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_c" name="PFK; 2 amp_c" compartment="c" initialConcentration="5.36755531221379e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C20H24N10O14P2Moietypfk">
+      <species id="M_pfk_R2_c" name="PFK; 2 amp_c" compartment="c" initialConcentration="4.61239072769213e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-4" fbc:chemicalFormula="C20H24N10O14P2Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -118,7 +118,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T2_c" name="PFK; 2 atp_c" compartment="c" initialConcentration="5.83560821075568e-10" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypfk">
+      <species id="M_pfk_T2_c" name="PFK; 2 atp_c" compartment="c" initialConcentration="1.88047236827958e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C20H24N10O26P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -126,7 +126,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_A_c" name="PFK-atp complex; 2 amp_c" compartment="c" initialConcentration="2.41138738514937e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C30H36N15O27P5Moietypfk">
+      <species id="M_pfk_R2_A_c" name="PFK-atp complex; 2 amp_c" compartment="c" initialConcentration="1.56060059352934e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C30H36N15O27P5Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -135,7 +135,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R2_AF_c" name="PFK-atp-f6p complex; 2 amp_c" compartment="c" initialConcentration="2.48781492566531e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C36H47N15O36P6Moietypfk">
+      <species id="M_pfk_R2_AF_c" name="PFK-atp-f6p complex; 2 amp_c" compartment="c" initialConcentration="1.41977454353712e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C36H47N15O36P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -144,7 +144,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_c" name="PFK; 3 amp_c" compartment="c" initialConcentration="5.64264089542711e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C30H36N15O21P3Moietypfk">
+      <species id="M_pfk_R3_c" name="PFK; 3 amp_c" compartment="c" initialConcentration="8.08129059132509e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-6" fbc:chemicalFormula="C30H36N15O21P3Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -152,7 +152,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T3_c" name="PFK; 3 atp_c" compartment="c" initialConcentration="6.2246487581993e-09" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypfk">
+      <species id="M_pfk_T3_c" name="PFK; 3 atp_c" compartment="c" initialConcentration="2.00583719277257e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C30H36N15O39P9Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -160,7 +160,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_A_c" name="PFK-atp complex; 3 amp_c" compartment="c" initialConcentration="2.53497025791226e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C40H48N20O34P6Moietypfk">
+      <species id="M_pfk_R3_A_c" name="PFK-atp complex; 3 amp_c" compartment="c" initialConcentration="2.73430150173235e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-10" fbc:chemicalFormula="C40H48N20O34P6Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -169,7 +169,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R3_AF_c" name="PFK-atp-f6p complex; 3 amp_c" compartment="c" initialConcentration="2.6153146867197e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C46H59N20O43P7Moietypfk">
+      <species id="M_pfk_R3_AF_c" name="PFK-atp-f6p complex; 3 amp_c" compartment="c" initialConcentration="2.48756259776595e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C46H59N20O43P7Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -178,7 +178,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_c" name="PFK; 4 amp_c" compartment="c" initialConcentration="9.88637421903415e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C40H48N20O28P4Moietypfk">
+      <species id="M_pfk_R4_c" name="PFK; 4 amp_c" compartment="c" initialConcentration="5.30965892828724e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-8" fbc:chemicalFormula="C40H48N20O28P4Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -186,7 +186,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_T4_c" name="PFK; 4 atp_c" compartment="c" initialConcentration="1.49391570198221e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypfk">
+      <species id="M_pfk_T4_c" name="PFK; 4 atp_c" compartment="c" initialConcentration="8.02334877085438e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-16" fbc:chemicalFormula="C40H48N20O52P12Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -194,7 +194,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_A_c" name="PFK-atp complex; 4 amp_c" compartment="c" initialConcentration="4.44147785909121e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C50H60N25O41P7Moietypfk">
+      <species id="M_pfk_R4_A_c" name="PFK-atp complex; 4 amp_c" compartment="c" initialConcentration="1.79652101570101e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-12" fbc:chemicalFormula="C50H60N25O41P7Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -203,7 +203,7 @@
           </html>
         </notes>
       </species>
-      <species id="M_pfk_R4_AF_c" name="PFK-atp-f6p complex; 4 amp_c" compartment="c" initialConcentration="4.58224795315277e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C56H71N25O50P8Moietypfk">
+      <species id="M_pfk_R4_AF_c" name="PFK-atp-f6p complex; 4 amp_c" compartment="c" initialConcentration="1.63440589193509e-08" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false" fbc:charge="-14" fbc:chemicalFormula="C56H71N25O50P8Moietypfk">
         <notes>
           <html xmlns="http://www.w3.org/1999/xhtml">
             <p>enzyme_module_id: PFK</p>
@@ -219,50 +219,50 @@
       <parameter sboTerm="SBO:0000626" id="cobra_0_bound" value="0" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="minus_inf" value="-INF" units="mmol_per_gDW_per_hr" constant="true"/>
       <parameter sboTerm="SBO:0000625" id="plus_inf" value="INF" units="mmol_per_gDW_per_hr" constant="true"/>
-      <parameter id="v_R_HEX1" value="1.12000000000001" constant="false"/>
-      <parameter id="v_R_PGI" value="1.12000000000665" constant="false"/>
-      <parameter id="v_R_FBA" value="1.12000000000719" constant="false"/>
-      <parameter id="v_R_TPI" value="1.1200000000072" constant="false"/>
-      <parameter id="v_R_GAPD" value="2.2400000000144" constant="false"/>
-      <parameter id="v_R_PGK" value="2.24000000001439" constant="false"/>
-      <parameter id="v_R_PGM" value="2.24000000001439" constant="false"/>
-      <parameter id="v_R_ENO" value="2.2400000000144" constant="false"/>
-      <parameter id="v_R_PYK" value="2.2400000000144" constant="false"/>
-      <parameter id="v_R_LDH_L" value="2.01600000001297" constant="false"/>
-      <parameter id="v_R_DM_amp_c" value="0.0139999999999856" constant="false"/>
-      <parameter id="v_R_ADK1" value="2.77555756156289e-12" constant="false"/>
-      <parameter id="v_R_SK_pyr_c" value="0.22400000000143" constant="false"/>
-      <parameter id="v_R_SK_lac__L_c" value="2.01600000001297" constant="false"/>
-      <parameter id="v_R_ATPM" value="2.24000000002156" constant="false"/>
-      <parameter id="v_R_DM_nadh" value="0.224000000001431" constant="false"/>
+      <parameter id="v_R_HEX1" value="1.11999999999999" constant="false"/>
+      <parameter id="v_R_PGI" value="1.1199999999844" constant="false"/>
+      <parameter id="v_R_FBA" value="1.11999999997804" constant="false"/>
+      <parameter id="v_R_TPI" value="1.11999999997804" constant="false"/>
+      <parameter id="v_R_GAPD" value="2.23999999995608" constant="false"/>
+      <parameter id="v_R_PGK" value="2.23999999995609" constant="false"/>
+      <parameter id="v_R_PGM" value="2.23999999995602" constant="false"/>
+      <parameter id="v_R_ENO" value="2.23999999995607" constant="false"/>
+      <parameter id="v_R_PYK" value="2.23999999995607" constant="false"/>
+      <parameter id="v_R_LDH_L" value="2.01599999996044" constant="false"/>
+      <parameter id="v_R_DM_amp_c" value="0.0140000000000083" constant="false"/>
+      <parameter id="v_R_ADK1" value="0" constant="false"/>
+      <parameter id="v_R_SK_pyr_c" value="0.223999999995637" constant="false"/>
+      <parameter id="v_R_SK_lac__L_c" value="2.01599999996044" constant="false"/>
+      <parameter id="v_R_ATPM" value="2.23999999993414" constant="false"/>
+      <parameter id="v_R_DM_nadh" value="0.223999999995635" constant="false"/>
       <parameter id="v_R_SK_glc__D_c" value="1.12" constant="false"/>
       <parameter id="v_R_SK_amp_c" value="0.014" constant="false"/>
-      <parameter id="v_R_SK_h_c" value="2.68800000001723" constant="false"/>
-      <parameter id="v_R_SK_h2o_c" value="-1.11022302462516e-11" constant="false"/>
-      <parameter id="v_R_SK_pi_c" value="7.14301506832271e-12" constant="false"/>
-      <parameter id="v_R_PFK_R01" value="0.0135809738152361" constant="false"/>
-      <parameter id="v_R_PFK_R02" value="0.0135809738152364" constant="false"/>
-      <parameter id="v_R_PFK_R03" value="0.013580973815236" constant="false"/>
-      <parameter id="v_R_PFK_R10" value="0" constant="false"/>
-      <parameter id="v_R_PFK_T1" value="2.09380092552485e-19" constant="false"/>
-      <parameter id="v_R_PFK_R11" value="0.0535387297792711" constant="false"/>
-      <parameter id="v_R_PFK_R12" value="0.0535387297792725" constant="false"/>
-      <parameter id="v_R_PFK_R13" value="0.0535387297792712" constant="false"/>
-      <parameter id="v_R_PFK_R20" value="-1.1137159767414e-17" constant="false"/>
-      <parameter id="v_R_PFK_T2" value="2.06795153138257e-19" constant="false"/>
-      <parameter id="v_R_PFK_R21" value="0.0351766084103403" constant="false"/>
-      <parameter id="v_R_PFK_R22" value="0.0351766084103412" constant="false"/>
-      <parameter id="v_R_PFK_R23" value="0.0351766084103402" constant="false"/>
-      <parameter id="v_R_PFK_R30" value="-2.14008168079719e-17" constant="false"/>
-      <parameter id="v_R_PFK_T3" value="-3.30872245021211e-19" constant="false"/>
-      <parameter id="v_R_PFK_R31" value="0.369793989317544" constant="false"/>
-      <parameter id="v_R_PFK_R32" value="0.369793989317554" constant="false"/>
-      <parameter id="v_R_PFK_R33" value="0.369793989317543" constant="false"/>
-      <parameter id="v_R_PFK_R40" value="-2.44580763519679e-17" constant="false"/>
+      <parameter id="v_R_SK_h_c" value="2.68799999994736" constant="false"/>
+      <parameter id="v_R_SK_h2o_c" value="2.22044604925031e-11" constant="false"/>
+      <parameter id="v_R_SK_pi_c" value="-2.19229967513002e-11" constant="false"/>
+      <parameter id="v_R_PFK_R01" value="0.00646382246646912" constant="false"/>
+      <parameter id="v_R_PFK_R02" value="0.0064638224664693" constant="false"/>
+      <parameter id="v_R_PFK_R03" value="0.00646382246646912" constant="false"/>
+      <parameter id="v_R_PFK_R10" value="3.6189151799195e-19" constant="false"/>
+      <parameter id="v_R_PFK_T1" value="-2.85958922698996e-19" constant="false"/>
+      <parameter id="v_R_PFK_R11" value="0.067950914091456" constant="false"/>
+      <parameter id="v_R_PFK_R12" value="0.0679509140914578" constant="false"/>
+      <parameter id="v_R_PFK_R13" value="0.067950914091456" constant="false"/>
+      <parameter id="v_R_PFK_R20" value="4.54949336904165e-18" constant="false"/>
+      <parameter id="v_R_PFK_T2" value="-1.55096364853693e-19" constant="false"/>
+      <parameter id="v_R_PFK_R21" value="0.267875166928122" constant="false"/>
+      <parameter id="v_R_PFK_R22" value="0.267875166928129" constant="false"/>
+      <parameter id="v_R_PFK_R23" value="0.267875166928122" constant="false"/>
+      <parameter id="v_R_PFK_R30" value="1.48892510259545e-17" constant="false"/>
+      <parameter id="v_R_PFK_T3" value="0" constant="false"/>
+      <parameter id="v_R_PFK_R31" value="0.469339480098435" constant="false"/>
+      <parameter id="v_R_PFK_R32" value="0.469339480098448" constant="false"/>
+      <parameter id="v_R_PFK_R33" value="0.469339480098435" constant="false"/>
+      <parameter id="v_R_PFK_R40" value="1.65436122510606e-18" constant="false"/>
       <parameter id="v_R_PFK_T4" value="0" constant="false"/>
-      <parameter id="v_R_PFK_R41" value="0.647909698684808" constant="false"/>
-      <parameter id="v_R_PFK_R42" value="0.647909698684825" constant="false"/>
-      <parameter id="v_R_PFK_R43" value="0.647909698684808" constant="false"/>
+      <parameter id="v_R_PFK_R41" value="0.308370616393554" constant="false"/>
+      <parameter id="v_R_PFK_R42" value="0.308370616393563" constant="false"/>
+      <parameter id="v_R_PFK_R43" value="0.308370616393554" constant="false"/>
       <parameter id="v_R_PFK_L" value="0" constant="false"/>
     </listOfParameters>
     <listOfReactions>
@@ -393,8 +393,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TPI" value="34.3557275249293"/>
             <localParameter id="Keq_R_TPI" value="0.0571429"/>
+            <localParameter id="kf_R_TPI" value="34.3557275249293"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -435,8 +435,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_GAPD" value="0.0179"/>
             <localParameter id="kf_R_GAPD" value="3376.74924217682"/>
+            <localParameter id="Keq_R_GAPD" value="0.0179"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -503,8 +503,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PGM" value="0.147059"/>
             <localParameter id="kf_R_PGM" value="4868.58929925345"/>
+            <localParameter id="Keq_R_PGM" value="0.147059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -533,8 +533,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_ENO" value="1763.74052539353"/>
             <localParameter id="Keq_R_ENO" value="1.69492"/>
+            <localParameter id="kf_R_ENO" value="1763.74052539353"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -573,8 +573,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PYK" value="363000"/>
             <localParameter id="kf_R_PYK" value="454.385551911368"/>
+            <localParameter id="Keq_R_PYK" value="363000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -721,9 +721,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_lac__L_c" value="5.6"/>
-            <localParameter id="lac__L_b" value="1"/>
             <localParameter id="Keq_R_SK_lac__L_c" value="1"/>
+            <localParameter id="lac__L_b" value="1"/>
+            <localParameter id="kf_R_SK_lac__L_c" value="5.6"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -792,9 +792,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
-            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="glc__D_b" value="1"/>
+            <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
+            <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -819,9 +819,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_amp_c" value="INF"/>
             <localParameter id="amp_b" value="1"/>
             <localParameter id="kf_R_SK_amp_c" value="0.014"/>
+            <localParameter id="Keq_R_SK_amp_c" value="INF"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -846,9 +846,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_SK_h_c" value="1"/>
-            <localParameter id="h_b" value="6.30957e-05"/>
             <localParameter id="kf_R_SK_h_c" value="100000"/>
+            <localParameter id="h_b" value="6.30957e-05"/>
+            <localParameter id="Keq_R_SK_h_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -873,9 +873,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
             <localParameter id="kf_R_SK_h2o_c" value="100000"/>
             <localParameter id="h2o_b" value="1"/>
-            <localParameter id="Keq_R_SK_h2o_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -900,9 +900,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_R_SK_pi_c" value="0.26"/>
             <localParameter id="pi_b" value="2.5"/>
             <localParameter id="Keq_R_SK_pi_c" value="1"/>
-            <localParameter id="kf_R_SK_pi_c" value="0.26"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -923,27 +923,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_A </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_A </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_A </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_R0_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_R0_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R0_A_c </ci>
+                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_PFK_A" value="4239459"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="5062588"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -964,27 +963,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_F </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_F </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_F </ci>
-                    <ci> M_f6p_c </ci>
-                    <ci> M_pfk_R0_A_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_f6p_c </ci>
+                  <ci> M_pfk_R0_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R0_AF_c </ci>
+                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5072144"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5324529"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1013,7 +1011,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="14139560"/>
+            <localParameter id="kf_PFK" value="18867444"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1034,27 +1032,22 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_ACT </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_ACT </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <cn> 3 </cn>
-                    <ci> Keq_PFK_ACT </ci>
-                    <ci> M_amp_c </ci>
-                    <ci> M_pfk_R0_c </ci>
-                  </apply>
-                  <apply>
-                    <times/>
-                    <cn> 2 </cn>
-                    <ci> M_pfk_R1_c </ci>
-                  </apply>
+                  <times/>
+                  <cn> 4 </cn>
+                  <ci> M_amp_c </ci>
+                  <ci> M_pfk_R0_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> M_pfk_R1_c </ci>
+                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1080,28 +1073,27 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_I </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_I </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <cn> 4 </cn>
-                    <ci> Keq_PFK_I </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_T0_c </ci>
-                  </apply>
+                  <times/>
+                  <cn> 4 </cn>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_T0_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_T1_c </ci>
+                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1122,27 +1114,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_A </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_A </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_A </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_R1_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_R1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R1_A_c </ci>
+                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_PFK_A" value="4239459"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="5062588"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1163,27 +1154,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_F </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_F </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_F </ci>
-                    <ci> M_f6p_c </ci>
-                    <ci> M_pfk_R1_A_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_f6p_c </ci>
+                  <ci> M_pfk_R1_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R1_AF_c </ci>
+                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5072144"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5324529"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1212,7 +1202,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="14139560"/>
+            <localParameter id="kf_PFK" value="18867444"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1233,26 +1223,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_ACT </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_ACT </ci>
+                <minus/>
                 <apply>
-                  <minus/>
+                  <times/>
+                  <cn> 3 </cn>
+                  <ci> M_amp_c </ci>
+                  <ci> M_pfk_R1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
-                    <ci> Keq_PFK_ACT </ci>
-                    <ci> M_amp_c </ci>
-                    <ci> M_pfk_R1_c </ci>
-                  </apply>
-                  <apply>
-                    <times/>
-                    <cn> 4 </cn>
+                    <cn> 2 </cn>
                     <ci> M_pfk_R2_c </ci>
                   </apply>
+                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1278,31 +1268,31 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_I </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_I </ci>
+                <minus/>
                 <apply>
-                  <minus/>
+                  <times/>
+                  <cn> 3 </cn>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_T1_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
-                    <ci> Keq_PFK_I </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_T1_c </ci>
-                  </apply>
-                  <apply>
-                    <times/>
-                    <cn> 4 </cn>
+                    <cn> 2 </cn>
                     <ci> M_pfk_T2_c </ci>
                   </apply>
+                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1323,27 +1313,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_A </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_A </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_A </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_R2_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_R2_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R2_A_c </ci>
+                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_PFK_A" value="4239459"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="5062588"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1364,27 +1353,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_F </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_F </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_F </ci>
-                    <ci> M_f6p_c </ci>
-                    <ci> M_pfk_R2_A_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_f6p_c </ci>
+                  <ci> M_pfk_R2_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R2_AF_c </ci>
+                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5072144"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5324529"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1413,7 +1401,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="14139560"/>
+            <localParameter id="kf_PFK" value="18867444"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1434,23 +1422,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_ACT </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_ACT </ci>
+                <minus/>
                 <apply>
-                  <minus/>
+                  <times/>
+                  <cn> 2 </cn>
+                  <ci> M_amp_c </ci>
+                  <ci> M_pfk_R2_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
-                    <cn> 4 </cn>
-                    <ci> Keq_PFK_ACT </ci>
-                    <ci> M_amp_c </ci>
-                    <ci> M_pfk_R2_c </ci>
+                    <cn> 3 </cn>
+                    <ci> M_pfk_R3_c </ci>
                   </apply>
-                  <ci> M_pfk_R3_c </ci>
+                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1476,32 +1467,31 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_I </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_I </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <cn> 2 </cn>
-                    <ci> Keq_PFK_I </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_T2_c </ci>
-                  </apply>
+                  <times/>
+                  <cn> 2 </cn>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_T2_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
                     <cn> 3 </cn>
                     <ci> M_pfk_T3_c </ci>
                   </apply>
+                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1522,27 +1512,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_A </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_A </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_A </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_R3_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_R3_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R3_A_c </ci>
+                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_PFK_A" value="4239459"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="5062588"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1563,27 +1552,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_F </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_F </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_F </ci>
-                    <ci> M_f6p_c </ci>
-                    <ci> M_pfk_R3_A_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_f6p_c </ci>
+                  <ci> M_pfk_R3_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R3_AF_c </ci>
+                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5072144"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5324529"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1612,7 +1600,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="14139560"/>
+            <localParameter id="kf_PFK" value="18867444"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1633,27 +1621,25 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_ACT </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_ACT </ci>
+                <minus/>
                 <apply>
-                  <minus/>
+                  <times/>
+                  <ci> M_amp_c </ci>
+                  <ci> M_pfk_R3_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
-                    <cn> 2 </cn>
-                    <ci> Keq_PFK_ACT </ci>
-                    <ci> M_amp_c </ci>
-                    <ci> M_pfk_R3_c </ci>
-                  </apply>
-                  <apply>
-                    <times/>
-                    <cn> 3 </cn>
+                    <cn> 4 </cn>
                     <ci> M_pfk_R4_c </ci>
                   </apply>
+                  <ci> Keq_PFK_ACT </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_ACT </ci>
             </apply>
           </math>
           <listOfLocalParameters>
@@ -1679,32 +1665,30 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_I </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_I </ci>
+                <minus/>
                 <apply>
-                  <minus/>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_T3_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <apply>
                     <times/>
-                    <cn> 3 </cn>
-                    <ci> Keq_PFK_I </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_T3_c </ci>
-                  </apply>
-                  <apply>
-                    <times/>
-                    <cn> 2 </cn>
+                    <cn> 4 </cn>
                     <ci> M_pfk_T4_c </ci>
                   </apply>
+                  <ci> Keq_PFK_I </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_I </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_I" value="1000000"/>
             <localParameter id="Keq_PFK_I" value="10"/>
+            <localParameter id="kf_PFK_I" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1725,27 +1709,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_A </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_A </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_A </ci>
-                    <ci> M_atp_c </ci>
-                    <ci> M_pfk_R4_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_atp_c </ci>
+                  <ci> M_pfk_R4_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R4_A_c </ci>
+                  <ci> Keq_PFK_A </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_A </ci>
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_PFK_A" value="4239459"/>
             <localParameter id="Keq_PFK_A" value="14.7058823529412"/>
-            <localParameter id="kf_PFK_A" value="5062588"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1766,27 +1749,26 @@
         <kineticLaw>
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
-              <divide/>
+              <times/>
+              <ci> kf_PFK_F </ci>
               <apply>
-                <times/>
-                <ci> kf_PFK_F </ci>
+                <minus/>
                 <apply>
-                  <minus/>
-                  <apply>
-                    <times/>
-                    <ci> Keq_PFK_F </ci>
-                    <ci> M_f6p_c </ci>
-                    <ci> M_pfk_R4_A_c </ci>
-                  </apply>
+                  <times/>
+                  <ci> M_f6p_c </ci>
+                  <ci> M_pfk_R4_A_c </ci>
+                </apply>
+                <apply>
+                  <divide/>
                   <ci> M_pfk_R4_AF_c </ci>
+                  <ci> Keq_PFK_F </ci>
                 </apply>
               </apply>
-              <ci> Keq_PFK_F </ci>
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="5072144"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="5324529"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1815,7 +1797,7 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK" value="14139560"/>
+            <localParameter id="kf_PFK" value="18867444"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1878,107 +1860,107 @@
       </groups:group>
       <groups:group groups:id="Products" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
-          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
           <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Relaxed" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
-          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
-          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
-          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
           <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
-          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
+          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
           <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
+          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
           <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Free_Catalytic" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
           <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Complexed_ATP" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
-          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
           <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
-          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
           <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Complexed_ATP_F6P" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Tense" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
           <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
-          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
-          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
           <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
+          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
+          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
+          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
           <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
           <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
+          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
           <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="f6p_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
-          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
-          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
           <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
+          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
+          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
-          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
           <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
-          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
           <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
+          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
+          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="amp_c_activation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
           <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
           <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
           <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
+          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
           <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
-          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
+          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
           <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
+          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="RT_transition" groups:kind="collection">
@@ -1988,92 +1970,92 @@
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_ligands" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
           <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
-          <groups:member groups:name="AMP" groups:idRef="M_amp_c"/>
-          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
           <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
           <groups:member groups:name="D-Fructose 6-phosphate" groups:idRef="M_f6p_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
+          <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
+          <groups:member groups:name="AMP" groups:idRef="M_amp_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
-          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
-          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
-          <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
+          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
           <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
           <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
+          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
+          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
           <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
-          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
-          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
-          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
-          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
-          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
+          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
           <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
+          <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
           <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
-          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
-          <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
-          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
-          <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
-          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
-          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
-          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
           <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
-          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
-          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
-          <groups:member groups:name="pfk_R0-pfk_T0 transition" groups:idRef="R_PFK_L"/>
+          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
           <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
           <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
-          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
-          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
           <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
-          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
-          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
+          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
+          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
+          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
           <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
+          <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
+          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
+          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
+          <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
+          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
+          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
           <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
+          <groups:member groups:name="pfk_R0-pfk_T0 transition" groups:idRef="R_PFK_L"/>
+          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:idRef="Activators"/>
           <groups:member groups:idRef="Products"/>
+          <groups:member groups:idRef="Activators"/>
+          <groups:member groups:idRef="Substrates"/>
           <groups:member groups:idRef="Cofactors"/>
           <groups:member groups:idRef="Inhibitors"/>
-          <groups:member groups:idRef="Substrates"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:idRef="Complexed_ATP"/>
           <groups:member groups:idRef="Relaxed"/>
           <groups:member groups:idRef="Complexed_ATP_F6P"/>
           <groups:member groups:idRef="Tense"/>
+          <groups:member groups:idRef="Complexed_ATP"/>
           <groups:member groups:idRef="Free_Catalytic"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="catalyzation"/>
+          <groups:member groups:idRef="amp_c_activation"/>
           <groups:member groups:idRef="RT_transition"/>
           <groups:member groups:idRef="atp_c_inhibition"/>
-          <groups:member groups:idRef="catalyzation"/>
           <groups:member groups:idRef="f6p_c_binding"/>
           <groups:member groups:idRef="atp_c_binding"/>
-          <groups:member groups:idRef="amp_c_activation"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_EnzymeModuleDict" groups:kind="collection">
@@ -2087,12 +2069,12 @@
           </html>
         </notes>
         <groups:listOfMembers>
-          <groups:member groups:idRef="PFK_enzyme_module_species"/>
-          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
-          <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species"/>
           <groups:member groups:idRef="PFK_enzyme_module_ligands"/>
+          <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
           <groups:member groups:idRef="PFK_enzyme_module_ligands_categorized"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>

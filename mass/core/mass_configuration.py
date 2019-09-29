@@ -2,19 +2,20 @@
 """
 Define the global configuration values through the :class:`MassConfiguration`.
 
-Attributes for model construction:
+Attributes involved in model construction:
     * :attr:`~MassBaseConfiguration.boundary_compartment`
     * :attr:`~MassBaseConfiguration.default_compartment`
     * :attr:`~MassBaseConfiguration.irreversible_Keq`
     * :attr:`~MassBaseConfiguration.irreversible_kr`
     * :attr:`~MassBaseConfiguration.exclude_metabolites_from_rates`
     * :attr:`~MassBaseConfiguration.model_creator`
+    * :attr:`~MassBaseConfiguration.decimal_precision`
 
-Attributes for model simulation:
+Attributes involved in model simulation:
     * :attr:`~MassBaseConfiguration.decimal_precision`
     * :attr:`~MassBaseConfiguration.steady_state_threshold`
 
-Attributes for flux balance analysis (FBA):
+Attributes involved in flux balance analysis (FBA):
     * :attr:`~MassBaseConfiguration.solver`
     * :attr:`~MassBaseConfiguration.tolerance`
     * :attr:`~MassBaseConfiguration.processes`
@@ -22,17 +23,28 @@ Attributes for flux balance analysis (FBA):
     * :attr:`~MassBaseConfiguration.upper_bound`
     * :attr:`~MassBaseConfiguration.bounds`
 
+Attributes involved in thermodynamics:
+    * :attr:`~MassBaseConfiguration.decimal_precision`
+    * :attr:`~MassBaseConfiguration.solver`
+    * :attr:`~MassBaseConfiguration.tolerance`
+    * :attr:`~MassBaseConfiguration.processes`
+    * :attr:`~MassBaseConfiguration.zero_value_log_substitute`
+
+
 Notes
 -----
-The :class:`MassConfiguration` is synchronized with the
-:class:`~.Configuration`.
+* Some attributes are used in multiple :mod:`mass` submodules, such as
+  :attr:`~MassBaseConfiguration.decimal_precision`.
+
+* The :class:`MassConfiguration` is synchronized with the
+  :class:`~.Configuration`.
 
 """
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
 
-from six import integer_types, iteritems, string_types
+from six import integer_types, iteritems, itervalues, string_types
 
 COBRA_CONFIGURATION = Configuration()
 
@@ -71,7 +83,7 @@ class MassBaseConfiguration:
 
         Default value is the ``0.``
     exclude_metabolites_from_rates : dict
-        A dict where keys should correspond to a metabolite attrubute to
+        A dict where keys should correspond to a metabolite attribute to
         utilize for filtering, and values are lists that contain the items to
         exclude that would be returned by the metabolite attribute. Does not
         apply to boundary reactions.
@@ -80,7 +92,7 @@ class MassBaseConfiguration:
         remove the hydrogen and water metabolites using the
         :attr:`~.MassMetabolite.elements` attribute to filter out the hydrogen
         and water in all rates except the hydrogen and water exchange
-        reactions on the boundary.
+        reactions.
     include_compartments_in_rates : bool
         Whether to include the compartment volumes in rate expressions.
         The boundary compartment will always excluded.
@@ -111,6 +123,13 @@ class MassBaseConfiguration:
         are better. Values less than the threshold indicate steady state.
 
         Default is ``1e-6``.
+    zero_value_log_substitute : float
+        A value to substitute for 0 when trying to take the logarithm of 0
+        to avoid a domain error. A value of 1e-10 means that whenever
+        instead of attempting ``log(0)`` which causes a :class:`ValueError`,
+        it will be instead calculated as ``log(1e-10)``.
+
+        Default is ``1e-10``.
     solver : str
         The default optimization solver. The solver choices are the ones
         provided by `optlang` and solvers installed in your environment.
@@ -139,7 +158,6 @@ class MassBaseConfiguration:
 
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(self):
         """Initialize MassBaseConfiguration."""
         # Model construction configuration options
@@ -162,6 +180,9 @@ class MassBaseConfiguration:
 
         # For cobra configuration synchronization
         self._shared_state = COBRA_CONFIGURATION.__dict__
+
+        # For thermodynamics
+        self._zero_value_log_substitute = 1e-10
 
     @property
     def boundary_compartment(self):
@@ -385,7 +406,6 @@ class MassBaseConfiguration:
     @solver.setter
     def solver(self, solver):
         """Set the solver utilized for optimization."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.solver = solver
 
     @property
@@ -403,7 +423,6 @@ class MassBaseConfiguration:
     @tolerance.setter
     def tolerance(self, tol):
         """Set the tolerance value utilized by the optimization solver."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.tolerance = tol
 
     @property
@@ -421,7 +440,6 @@ class MassBaseConfiguration:
     @lower_bound.setter
     def lower_bound(self, bound):
         """Set the default value of the lower bound for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.lower_bound = bound
 
     @property
@@ -439,7 +457,6 @@ class MassBaseConfiguration:
     @upper_bound.setter
     def upper_bound(self, bound):
         """Set the default value of the lower bound for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.upper_bound = bound
 
     @property
@@ -463,7 +480,6 @@ class MassBaseConfiguration:
     @bounds.setter
     def bounds(self, bounds):
         """Set the default lower and upper bounds for reactions."""
-        # pylint: disable=no-self-use
         COBRA_CONFIGURATION.bounds = bounds
 
     @property
@@ -475,6 +491,31 @@ class MassBaseConfiguration:
     def shared_state(self):
         """Return a read-only ``dict`` for shared configuration attributes."""
         return getattr(self, "_shared_state").copy()
+
+    @property
+    def zero_value_log_substitute(self):
+        """Get or set the a value to substitute for 0 when taking the log of 0.
+
+        A value of ``1e-10`` means that instead of attempting ``log(0)`` which
+        causes a :class:`ValueError`, it will be instead calculated as
+        ``log(1e-10)``.
+
+        Parameters
+        ----------
+        value : float
+            A positive value to use instead of 0 when taking the logarithm.
+
+        """
+        return getattr(self, "_zero_value_log_substitute")
+
+    @zero_value_log_substitute.setter
+    def zero_value_log_substitute(self, value):
+        """Set the value to substitute for 0. when taking the log of 0."""
+        if not isinstance(value, (integer_types, float)):
+            raise TypeError("Must be an int or float")
+        if value <= 0.:
+            raise ValueError("Must be a postive number")
+        setattr(self, "_zero_value_log_substitute", value)
 
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
@@ -499,19 +540,28 @@ class MassBaseConfiguration:
                 <td><strong>Irreversible Reaction kr</strong></td>
                 <td>{irreversible_kr}</td>
             </tr><tr>
+                <td><strong>Metabolites excluded in rates</strong></td>
+                <td>{excluded_metabolites_in_rates}</td>
+            </tr><tr>
                 <td><strong>Compartments in rates</strong></td>
                 <td>{include_compartments_in_rates}</td>
+            </tr><tr>
+                <td><strong>Model creator set</strong></td>
+                <td>{model_creator}</td>
             </tr><tr>
                 <td><strong>Decimal precision</strong></td>
                 <td>{decimal_precision}</td>
             </tr><tr>
                 <td><strong>Steady state threshold</strong></td>
                 <td>{steady_state_threshold}</td>
+            </tr><tr>
+                <td><strong>Zero substitute for log(0) </strong></td>
+                <td>{steady_state_threshold}</td>
             </tr>
-                <td><strong>Optimization solver</strong></td>
+                <td><strong>Solver</strong></td>
                 <td>{solver}</td>
             </tr><tr>
-                <td><strong>Optimization solver tolerance</strong></td>
+                <td><strong>Solver tolerance</strong></td>
                 <td>{tolerance}</td>
             </tr><tr>
                 <td><strong>Lower bound</strong></td>
@@ -525,16 +575,20 @@ class MassBaseConfiguration:
             </tr>
         </table>""".format(
             boundary_compartment=[
-                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
                     self.boundary_compartment)][0],
             default_compartment=[
-                "{0}: {1}".format(k, v) if v else k for k, v in iteritems(
+                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
                     self.default_compartment)][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
+            excluded_metabolites_in_rates=bool(
+                self.exclude_metabolites_from_rates),
             include_compartments_in_rates=self.include_compartments_in_rates,
+            model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
+            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,
@@ -554,11 +608,14 @@ class MassBaseConfiguration:
         default compartment: {default_compartment}
         irreversible reaction Keq: {irreversible_Keq}
         irreversible reaction kr: {irreversible_kr}
-        include_compartments_in_rates: {include_compartments_in_rates}
+        metabolites excluded in rates: {excluded_metabolites_in_rates}
+        include compartments in rates: {include_compartments_in_rates}
+        model creator set: {model_creator}
         decimal_precision: {decimal_precision}
         steady_state_threshold: {steady_state_threshold}
-        optimization solver: {solver}
-        optimization solver tolerance: {tolerance}
+        zero value log substitute: {zero_value_log_substitute}
+        solver: {solver}
+        solver tolerance: {tolerance}
         lower_bound: {lower_bound}
         upper_bound: {upper_bound}
         processes: {processes}""".format(
@@ -570,9 +627,13 @@ class MassBaseConfiguration:
                     self.default_compartment)][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
+            excluded_metabolites_in_rates=bool(
+                self.exclude_metabolites_from_rates),
             include_compartments_in_rates=self.include_compartments_in_rates,
+            model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
+            zero_value_log_substitute=self.zero_value_log_substitute,
             solver=interface_to_str(self.solver),
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,

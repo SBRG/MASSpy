@@ -41,7 +41,7 @@ _REQUIRED_REACTION_ATTRIBUTES = [
 _ORDERED_OPTIONAL_REACTION_KEYS = [
     "subsystem", "steady_state_flux", "_forward_rate_constant",
     "_reverse_rate_constant", "_equilibrium_constant", "objective_coefficient",
-    "_rate", "notes", "annotation"]
+    "_rate_type", "notes", "annotation"]
 _OPTIONAL_REACTION_ATTRIBUTES = {
     "subsystem": "",
     "steady_state_flux": None,
@@ -49,7 +49,7 @@ _OPTIONAL_REACTION_ATTRIBUTES = {
     "_equilibrium_constant": None,
     "_reverse_rate_constant": None,
     "objective_coefficient": 0,
-    "_rate": None,
+    "_rate_type": 1,
     "notes": {},
     "annotation": {}
 }
@@ -89,13 +89,12 @@ _OPTIONAL_ENZYMEMODULE_ATTRIBUTES = OrderedDict({
 })
 
 _ORDERED_OPTIONAL_MODEL_KEYS = [
-    "name", "description", "boundary_conditions", "custom_parameters",
+    "name", "description", "boundary_conditions",
     "compartments", "notes", "annotation"]
 _OPTIONAL_MODEL_ATTRIBUTES = {
     "name": None,
     "description": "",
     "boundary_conditions": {},
-    "custom_parameters": {},
     "compartments": {},
     "notes": {},
     "annotation": {}
@@ -145,14 +144,16 @@ def model_to_dict(model, sort=False):
         obj["genes"].sort(key=get_id)
         obj["enzyme_modules"].sort(key=get_id)
         obj["units"].sort(key=get_id)
-    custom_rates = getattr(model, "custom_rates", {})
-    if custom_rates:
-        custom_rates = OrderedDict(
-            (k.id, _fix_type(v)) for k, v in iteritems(custom_rates))
+
+    for custom_key in ["custom_rates", "custom_parameters"]:
+        custom_values = getattr(model, custom_key, {})
+        if custom_values:
+            custom_values = OrderedDict((getattr(k, "_id", k), _fix_type(v))
+                                        for k, v in iteritems(custom_values))
         if sort:
-            custom_rates = OrderedDict(
-                (k, custom_rates[k]) for k in sorted(custom_rates))
-        obj["custom_rates"] = custom_rates
+            custom_values = OrderedDict((k, custom_values[k])
+                                        for k in sorted(custom_values))
+        obj[custom_key] = custom_values
 
     _update_optional(model, obj, _OPTIONAL_MODEL_ATTRIBUTES,
                      _ORDERED_OPTIONAL_MODEL_KEYS)
@@ -234,7 +235,9 @@ def model_from_dict(obj):
 
     # Get custom parameters if they exist
     if "custom_parameters" in obj:
-        model.custom_parameters.update(obj["custom_parameters"])
+        model.custom_parameters.update({
+            k: float(v) for k, v in iteritems(obj["custom_parameters"])})
+
     # Add custom rates and any custom parameters if they exist
     if "custom_rates" in obj:
         # Add custom rates to the model
@@ -405,7 +408,7 @@ def reaction_from_dict(reaction, model):
         # Change infinity type from a string to a float
         if isinstance(v, string_types) and v == "inf":
             v = _INF
-        if k in {"objective_coefficient", "reaction", "_rate"}:
+        if k in {"objective_coefficient", "reaction"}:
             continue
         elif k == "metabolites":
             new_reaction.add_metabolites(OrderedDict(
@@ -413,12 +416,6 @@ def reaction_from_dict(reaction, model):
                 for met, coeff in iteritems(v)))
         else:
             setattr(new_reaction, k, v)
-
-    for rate_type in [1, 2, 3]:
-        rate = new_reaction.get_mass_action_rate(rate_type)
-        if str(rate) == new_reaction._rate:
-            setattr(new_reaction, "_rate", rate)
-            break
 
     return new_reaction
 
@@ -649,7 +646,6 @@ def _fix_type(value):
     This method is intended for internal use only.
 
     """
-    # pylint: disable=too-many-return-statements
     if isinstance(value, (string_types, Basic)):
         return str(value)
     if isinstance(value, np.float_):

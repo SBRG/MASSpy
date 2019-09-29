@@ -8,9 +8,9 @@
             "atp_c"
         ],
         "Products": [
+            "h_c",
             "nadph_c",
-            "_6pgl_c",
-            "h_c"
+            "_6pgl_c"
         ],
         "Substrates": [
             "g6p_c"
@@ -33,28 +33,30 @@
             "G6PDH2r_6"
         ],
         "product_inhibition": [
-            "G6PDH2r_1",
-            "G6PDH2r_2"
+            "G6PDH2r_2",
+            "G6PDH2r_1"
         ]
     },
     "_enzyme_module_species_categorized": {
         "Free": [
-            "g6pdh2r_GN_c",
-            "g6pdh2r_c",
+            "g6pdh2r_G_P_c",
             "g6pdh2r_G_c",
+            "g6pdh2r_c",
             "g6pdh2r_GN_P_c",
-            "g6pdh2r_G_P_c"
+            "g6pdh2r_GN_c"
         ],
         "Inhibited": [
-            "g6pdh2r_N_PI_c",
-            "g6pdh2r_A_CI_c"
+            "g6pdh2r_A_CI_c",
+            "g6pdh2r_N_PI_c"
         ]
     },
-    "_enzyme_net_flux": 0.20999999999999638,
+    "_enzyme_net_flux": 0.21,
     "_enzyme_net_flux_equation": "kf_G6PDH2r_7*(Keq_G6PDH2r_7*g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t))/Keq_G6PDH2r_7",
     "compartments": {
         "c": "Cytosol"
     },
+    "custom_parameters": {},
+    "custom_rates": {},
     "enzyme_concentration_total_equation": "g6pdh2r_A_CI_c(t) + g6pdh2r_GN_P_c(t) + g6pdh2r_GN_c(t) + g6pdh2r_G_P_c(t) + g6pdh2r_G_c(t) + g6pdh2r_N_PI_c(t) + g6pdh2r_c(t)",
     "enzyme_module_ligands": [
         "g6p_c",
@@ -87,7 +89,7 @@
     "id": "G6PDH2r",
     "metabolites": [
         {
-            "_initial_condition": 0.048600000000718034,
+            "_initial_condition": 0.0486,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H11O9P",
@@ -95,7 +97,7 @@
             "name": "D-Glucose 6-phosphate"
         },
         {
-            "_initial_condition": 0.0017542400034099464,
+            "_initial_condition": 0.00175424,
             "charge": -2,
             "compartment": "c",
             "formula": "C6H9O9P",
@@ -103,7 +105,7 @@
             "name": "6-Phospho-D-gluco-1,5-lactone"
         },
         {
-            "_initial_condition": 1.5999999999999996,
+            "_initial_condition": 1.6,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -111,7 +113,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.0002000000000045456,
+            "_initial_condition": 0.0002,
             "charge": -3,
             "compartment": "c",
             "formula": "C21H25N7O17P3",
@@ -119,7 +121,7 @@
             "name": "Nicotinamide adenine dinucleotide phosphate"
         },
         {
-            "_initial_condition": 0.06579999999999545,
+            "_initial_condition": 0.0658,
             "charge": -4,
             "compartment": "c",
             "formula": "C21H26N7O17P3",
@@ -137,7 +139,7 @@
         {
             "_bound_catalytic": {},
             "_bound_effectors": {},
-            "_initial_condition": 3.2539871e-05,
+            "_initial_condition": 3.2239734e-05,
             "charge": 0,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -150,7 +152,7 @@
                 "g6p_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 5.381805e-05,
+            "_initial_condition": 5.3960743e-05,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -164,7 +166,7 @@
                 "nadp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 9.6091e-08,
+            "_initial_condition": 9.3049e-08,
             "charge": -5,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -178,7 +180,7 @@
                 "nadph_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 1.1399706e-05,
+            "_initial_condition": 1.259896e-05,
             "charge": -6,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -191,7 +193,7 @@
                 "_6pgl_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 1.570313e-06,
+            "_initial_condition": 1.735283e-06,
             "charge": -2,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -204,7 +206,7 @@
                 "atp_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 0.001183268051,
+            "_initial_condition": 0.001172353979,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -217,7 +219,7 @@
                 "nadph_c": 1
             },
             "_bound_effectors": {},
-            "_initial_condition": 8.9213481e-05,
+            "_initial_condition": 8.8390605e-05,
             "charge": -4,
             "compartment": "c",
             "enzyme_module_id": "G6PDH2r",
@@ -232,7 +234,6 @@
             "_equilibrium_constant": 41.666666666666664,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_1*(g6pdh2r_c(t)*nadph_c(t) - g6pdh2r_N_PI_c(t)/Keq_G6PDH2r_1)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -250,7 +251,6 @@
             "_equilibrium_constant": 22.72727272727273,
             "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_2*(atp_c(t)*g6pdh2r_c(t) - g6pdh2r_A_CI_c(t)/Keq_G6PDH2r_2)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -266,9 +266,8 @@
         },
         {
             "_equilibrium_constant": 37.03703703703704,
-            "_forward_rate_constant": 1636146.0,
+            "_forward_rate_constant": 1910636.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_3*(g6p_c(t)*g6pdh2r_c(t) - g6pdh2r_G_c(t)/Keq_G6PDH2r_3)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -284,9 +283,8 @@
         },
         {
             "_equilibrium_constant": 0.05,
-            "_forward_rate_constant": 489901.0,
+            "_forward_rate_constant": 347591.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_4*(g6pdh2r_G_P_c(t) - _6pgl_c(t)*g6pdh2r_c(t)/Keq_G6PDH2r_4)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -302,9 +300,8 @@
         },
         {
             "_equilibrium_constant": 52.631578947368425,
-            "_forward_rate_constant": 23495520.0,
+            "_forward_rate_constant": 23270728.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_5*(g6pdh2r_G_c(t)*nadp_c(t) - g6pdh2r_GN_c(t)/Keq_G6PDH2r_5)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -320,9 +317,8 @@
         },
         {
             "_equilibrium_constant": 0.0105,
-            "_forward_rate_constant": 134695.0,
+            "_forward_rate_constant": 121773.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_6*(g6pdh2r_GN_P_c(t) - g6pdh2r_G_P_c(t)*nadph_c(t)/Keq_G6PDH2r_6)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",
@@ -338,9 +334,8 @@
         },
         {
             "_equilibrium_constant": 977.1428571428569,
-            "_forward_rate_constant": 2487415.0,
+            "_forward_rate_constant": 2619905.0,
             "_lower_bound": -1000.0,
-            "_rate": "kf_G6PDH2r_7*(g6pdh2r_GN_c(t) - g6pdh2r_GN_P_c(t)/Keq_G6PDH2r_7)",
             "_reversible": true,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "G6PDH2r",

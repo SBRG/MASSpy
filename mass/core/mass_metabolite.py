@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""
-MassMetabolite is a class for holding information regarding metabolites.
+r"""MassMetabolite is a class for holding information regarding metabolites.
 
 The :class:`MassMetabolite` class inherits and extends the
 :class:`~cobra.core.metabolite.Metabolite` class in :mod:`cobra`. It contains
@@ -27,6 +26,7 @@ from warnings import warn
 
 from cobra.core.metabolite import (
     Metabolite, element_re, elements_and_molecular_weights)
+from cobra.util.context import resettable
 from cobra.util.util import format_long_string
 
 from six import iteritems
@@ -62,7 +62,6 @@ class MassMetabolite(Metabolite):
 
     def __init__(self, id_or_specie=None, name="", formula=None,
                  charge=None, compartment=None, fixed=False):
-        # pylint: disable=too-many-arguments
         """Initialize the MassMetabolite."""
         super(MassMetabolite, self).__init__(
             id=str(id_or_specie), formula=formula, name=name, charge=charge,
@@ -75,7 +74,7 @@ class MassMetabolite(Metabolite):
         # If is not a MassMetabolite object, initialize additional attributes
         if not isinstance(id_or_specie, MassMetabolite):
             # Whether the concentration of the metabolite is fixed.
-            self.fixed = fixed
+            self._fixed = fixed
             # The initial condition of the metabolite.
             self._initial_condition = None
 
@@ -100,7 +99,7 @@ class MassMetabolite(Metabolite):
           :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
           to allow for the use of moieties.
 
-        """  # noqa: E501
+        """
         tmp_formula = self.formula
         if tmp_formula is None:
             return {}
@@ -117,6 +116,7 @@ class MassMetabolite(Metabolite):
             composition[moiety] = 1
             tmp_formula = tmp_formula.replace(tmp_formula[s:e], "")
 
+        # Count elements
         for (element, count) in element_re.findall(tmp_formula):
             if count == "":
                 count = 1
@@ -152,6 +152,9 @@ class MassMetabolite(Metabolite):
     def initial_condition(self):
         """Get or set the initial condition of the metabolite.
 
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
         Notes
         -----
         Initial conditions of metabolites cannot be negative.
@@ -170,10 +173,41 @@ class MassMetabolite(Metabolite):
         return getattr(self, "_initial_condition")
 
     @initial_condition.setter
+    @resettable
     def initial_condition(self, initial_condition):
         """Set the initial condition of the metabolite."""
         initial_condition = ensure_non_negative_value(initial_condition)
         setattr(self, "_initial_condition", initial_condition)
+
+    @property
+    def fixed(self):
+        """Get or set whether the metabolite remains constant.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
+        Parameters
+        ----------
+        value : bool
+            Whether the metabolite should remain constant, meaning that the
+            metabolite ODE is 0.
+
+        """
+        return getattr(self, "_fixed")
+
+    @fixed.setter
+    @resettable
+    def fixed(self, value):
+        """Set whether the metabolite remains constant.
+
+        When using a `HistoryManager` context, this attribute can be set
+        temporarily, reversed when the exiting the context.
+
+        """
+        if not isinstance(value, bool):
+            raise TypeError("value must be a bool")
+
+        setattr(self, "_fixed", value)
 
     @property
     def ordinary_differential_equation(self):
@@ -197,9 +231,11 @@ class MassMetabolite(Metabolite):
         of the :class:`cobra.Metabolite <cobra.core.metabolite.Metabolite>`
         to allow for the use of moieties.
 
-        """  # noqa: E501
+        """
+        # Remove moieties
         element_dict = {k: v for k, v in iteritems(self.elements)
                         if not (k.startswith("[") and k.endswith("]"))}
+        # Calculate formula weight
         try:
             return sum([count * elements_and_molecular_weights[element]
                         for element, count in sorted(iteritems(element_dict))])
@@ -268,19 +304,20 @@ class MassMetabolite(Metabolite):
                 <td>{compartment}</td>
             </tr><tr>
                 <td><strong>Initial Condition</strong></td>
-                <td>{ic}</td>
+                <td>{fixed}{ic}</td>
             </tr><tr>
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
-        <table>""".format(id=self.id, name=format_long_string(self.name),
-                          formula=self.formula,
-                          address='0x0%x' % id(self),
-                          compartment=self.compartment,
-                          ic=self._initial_condition,
-                          n_reactions=len(self.reactions),
-                          reactions=format_long_string(
-                              ', '.join(r.id for r in self.reactions), 200))
+        </table>""".format(id=self.id, name=format_long_string(self.name),
+                           formula=self.formula,
+                           address='0x0%x' % id(self),
+                           compartment=self.compartment,
+                           fixed="Fixed at " if self.fixed else "",
+                           ic=self.initial_condition,
+                           n_reactions=len(self.reactions),
+                           reactions=format_long_string(
+                               ', '.join(r.id for r in self.reactions), 200))
 
     def __dir__(self):
         """Override default dir() implementation to list only public items.

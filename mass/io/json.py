@@ -8,8 +8,16 @@ or the
 `Python package <https://escher.readthedocs.io/en/stable/escher-python.html>`_
 documentation for more information on Escher.
 
-If the :mod:`~mass.core.visualization` submodule is installed, see the
-mass.visualiation.escher documentation for more information on using
+To enable faster JSON export, the :mod:`simplejson` package can be installed
+during the :mod:`mass` installation process as follows::
+
+    # Installs simplejson package.
+    pip install masspy["json"]
+    # Or to install all additional packages.
+    pip install masspy["all"]
+
+If the :mod:`~mass.visualization` submodule is installed, see the
+:mod:`mass.visualiation.escher` documentation for more information on using
 :mod:`mass` with :mod:`escher` (Coming soon).
 """
 try:
@@ -80,7 +88,7 @@ def from_json(document):
 def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
     """Write the model to a file in JSON format.
 
-    `kwargs`` are passed on to ``json.dump``
+    ``kwargs`` are passed on to ``json.dump``
 
     Parameters
     ----------
