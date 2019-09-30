@@ -70,13 +70,14 @@ def _sample_chain(args):
 class ConcOptGPSampler(ConcHRSampler):
     """A parallel optimized sampler.
 
-    A parallel sampler with fast convergence and parallel execution. REF OPTGP
+    A parallel sampler with fast convergence and parallel execution
+    :cite:`optgp`.
 
     Notes
     -----
     The sampler is very similar to artificial centering where each process
     samples its own chain. The implementation used here is the similar
-    as in the Python :mod:`cobra` package REF COBRA.
+    as in the Python :mod:`cobra` package.
 
     Initial points are chosen randomly from the warmup points followed by a
     linear transformation that pulls the points a little bit towards the
