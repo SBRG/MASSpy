@@ -153,7 +153,7 @@ class MassModel(Model):
 
     """
 
-    def __init__(self, id_or_model=None, name=None, array_type="DataFrame",
+    def __init__(self, id_or_model=None, name=None, array_type="dense",
                  dtype=np.float64):
         """Initialize the MassModel."""
         # Instiantiate a new MassModel with state identical to
@@ -1548,7 +1548,7 @@ class MassModel(Model):
           including relevant boundary conditions. By default, the relevant
           values are taken from objects associated with the model.
         * To calculate PERCs for a subset of model reactions, use the
-          ``steady_state_fluxes`` kwawrg.
+          ``fluxes`` kwawrg.
 
         Parameters
         ----------

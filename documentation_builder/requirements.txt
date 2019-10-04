@@ -1,5 +1,5 @@
 Sphinx
-sphinxcontrib-napoleon
+sphinxcontrib-bibtex
 sphinx-autoapi
 nbsphinx>=0.2.4
 ipykernel

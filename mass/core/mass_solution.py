@@ -265,7 +265,8 @@ class MassSolution(DictWithID):
         df.index = pd.Series(self.time, name="Time")
         return df
 
-    def make_solution_from_equation(self, solution_id, variables, equation,
+    def make_solution_from_equation(self, solution_id, equation,
+                                    variables=None, parameters=None,
                                     update=True):
         """Make a new solution using an string representation of an equation.
 
@@ -273,12 +274,19 @@ class MassSolution(DictWithID):
         ----------
         solution_id : str
             An identifier for the solution to be made.
-        variables : iterable
+        equation : str
+            A string representing the equation of the new solution.
+        variables : iterable or None
             Either an iterable of object identifiers or the objects themselves
             representing keys in the :class:`MassSolution` that are used as
-            variables in equation.
-        equation : str
-            A string representing the equation of the new solution. Must be
+            variables in equation. If ``None``, then all keys of the solution
+            object are checked as variables, potentially resulting in lower
+            performance time.
+        parameters : dict or None
+            A ``dict`` of additional parameters to use, where key:value pairs
+            are the parameter identifiers and their numerical values.
+            If ``None`` then it is assumed that there are no additional
+            parameters in the equation.
         update : bool
             Whether to add the new solution into the :class:`MassSolution`.
             via the :meth:`~dict.update` method. Default is ``True``.
@@ -296,13 +304,22 @@ class MassSolution(DictWithID):
             Raised if the ``equation_str`` could not be interpreted.
 
         """
-        variables = sorted([getattr(var, "_id", var) for var in variables])
-        invalid = [var for var in variables if var not in self]
-        if invalid:
-            raise ValueError(
-                "'{0!r}' not found in MassSolution".format(invalid))
-        equation = sympify(equation, locals={k: Symbol(k) for k in variables})
-        equation = lambdify(args=variables, expr=equation)
+        if variables is None:
+            variables = list(iterkeys(self))
+        else:
+            variables = sorted([getattr(var, "_id", var) for var in variables])
+            invalid = [var for var in variables if var not in self]
+            if invalid:
+                raise ValueError(
+                    "'{0!r}' not found in MassSolution".format(invalid))
+        local_syms = list(variables)
+        if parameters is None:
+            parameters = {}
+        else:
+            local_syms += list(parameters)
+
+        equation = sympify(equation, locals={k: Symbol(k) for k in local_syms})
+        equation = lambdify(args=variables, expr=equation.subs(parameters))
 
         if self.time is not None:
             values = array([

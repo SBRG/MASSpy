@@ -252,7 +252,7 @@ class EnzymeModuleSpecies(MassMetabolite):
         """
         formula = ""
         if self.enzyme_module_id:
-            moiety = self.enzyme_module_id.lower()
+            moiety = self.enzyme_module_id.upper()
             if not re.match('^[A-Z]+[a-z]+$', moiety):
                 moiety = re.sub("[0-9]", "", moiety)
 

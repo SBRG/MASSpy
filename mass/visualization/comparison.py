@@ -94,6 +94,7 @@ def comparison_plot(x, y, compare=None, observable=None, ax=None,
         * xy_linecolor
         * xy_linewidth
         * xy_linestyle
+        * xy_legend
 
         See :mod:`~mass.visualization` documentation for more information on
         optional ``kwargs``.
@@ -206,8 +207,19 @@ def _plot_xy_line(ax, limits, first_legend=None, **kwargs):
                          linestyle=linestyle, linewidth=linewidth,
                          marker="", zorder=1.9)
 
-    if kwargs.get("xy_legend"):
-        legend_args = (line, ["y=x"], {"loc": "best"})
+    if kwargs.get("xy_legend") is not None:
+        desired, taken = v_util._check_second_legend_location(
+            kwargs.get("xy_legend"), first_legend[1])
+        # Set default desired location
+        if desired is None:
+            desired = "best" if taken != "best" else "right outside"
+        # Get kwargs for legend location
+        anch = None
+        if desired in v_util.OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
+            desired, anch = v_util.OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired]
+
+        legend_args = (line, ["y=x"],
+                       {"loc": desired, "bbox_to_anchor": anch})
         ax = v_util._set_additional_legend_box(ax, legend_args,
                                                first_legend=first_legend[0])
 
@@ -258,7 +270,7 @@ def get_comparison_default_kwargs(function_name):
         "xy_linecolor": None,
         "xy_linewidth": None,
         "xy_linestyle": None,
-        "xy_legend": True,
+        "xy_legend": None,
     }
 
     return default_kwargs

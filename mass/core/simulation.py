@@ -145,10 +145,18 @@ class Simulation(Object):
     verbose : bool
         Whether to provide a QCQA report and more verbose messages when trying
         to load the model. Default is ``False``.
+    variable_step_size : bool
+        Whether to perform a variable time step simulation. Enabling this
+        setting will allow the integrator to the size of each time step,
+        resulting in a non-uniform time column. Otherwise, the output is
+        uniformly spaced based on the number of time points specified
+        for a simulation.
 
+        Default is ``True``.
     """
 
-    def __init__(self, reference_model, id=None, name=None, verbose=False):
+    def __init__(self, reference_model, id=None, name=None, verbose=False,
+                 variable_step_size=True):
         """Initialize the Simulation."""
         if not isinstance(reference_model, MassModel):
             raise TypeError(
@@ -188,6 +196,8 @@ class Simulation(Object):
         self._concentration_solutions = DictList()
         self._flux_solutions = DictList()
 
+        self.variable_step_size = variable_step_size
+
     @property
     def reference_model(self):
         """Return the reference model of the :class:`Simulation`."""
@@ -213,7 +223,7 @@ class Simulation(Object):
             Contains all :class:`.MassSolution` objects for concentrations.
 
         """
-        return getattr(self, "_concentration_solutions").copy()
+        return DictList(getattr(self, "_concentration_solutions").copy())
 
     @property
     def flux_solutions(self):
@@ -225,7 +235,31 @@ class Simulation(Object):
             Contains all :class:`.MassSolution` objects for fluxes.
 
         """
-        return getattr(self, "_flux_solutions").copy()
+        return DictList(getattr(self, "_flux_solutions").copy())
+
+    @property
+    def variable_step_size(self):
+        """Get or set whether to use a variable step size in solution output.
+
+        Notes
+        -----
+        Enabling this setting will allow the integrator to the size of each
+        time step, resulting in a non-uniform time column. Otherwise, the
+        output is uniformly spaced based on the number of time points specified
+        for a simulation.
+
+        Parameters
+        ----------
+        value : bool
+            Whether to perform a variable time step simulation.
+        
+        """
+        return self.roadrunner.getIntegrator().variable_step_size
+
+    @variable_step_size.setter
+    def variable_step_size(self, value):
+        """Set whether to use a variable step size in solution output."""
+        self.roadrunner.getIntegrator().variable_step_size = value
 
     def set_new_reference_model(self, model, verbose=False):
         """Set a new reference model for the :class:`Simulation`.
@@ -362,16 +396,15 @@ class Simulation(Object):
                 continue
 
             # Get the simulation values
-            values = _get_sim_values_from_model(model)
-            if values in self._simulation_values:
-                # Replace existing values
-                _log_msg(LOGGER, logging.WARN, verbose,
-                         "MassModel '%s' already exists, existing values will "
-                         "be replaced", str(model))
-                self._simulation_values._replace_on_id(values)
+            if str(model) + "_values" in self._simulation_values:
+                _log_msg(LOGGER, logging.INFO, verbose,
+                         "Replacing existing values for MassModel '%s'",
+                         str(model))
+                self.update_model_simulation_values(model)
             else:
                 # Otherwise add to simulation values
-                self._simulation_values.add(values)
+                self._simulation_values.add(
+                    _get_sim_values_from_model(model))
 
             _log_msg(LOGGER, logging.INFO, verbose,
                      "Successfully loaded MassModel '%s'.", str(model))
@@ -530,16 +563,22 @@ class Simulation(Object):
         Returns
         -------
         tuple (conc_solutions, flux_solutions)
-        conc_solutions : :class:`~cobra.core.dictlist.DictList`
-            A :class:`~cobra.core.dictlist.DictList` of
-            :class:`~.MassSolution`\ s containing the concentration solutions
-            for successful simulations. If the simulation failed, the
-            :class:`~.MassSolution` will be returned as empty.
-        flux_solutions : :class:`~cobra.core.dictlist.DictList`
-            A :class:`~cobra.core.dictlist.DictList` of
-            :class:`~.MassSolution`\ s containing the flux solutions for
-            successful simulations. If the simulation failed, the
-            :class:`~.MassSolution` will be returned as empty.
+        conc_solutions : MassSolution or DictList
+            If only one model was simulated, the return type is 
+            a :class:`~.MassSolution` containing the concentration solutions.
+            If multiple models were simulated, the return type is a
+            :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the concentration solutions.
+            If a simulation failed, the corresponding :class:`~.MassSolution`
+            will be returned as empty.
+        flux_solutions : MassSolution or DictList
+            If only one model was simulated, the return type is 
+            a :class:`~.MassSolution` containing the flux solutions.
+            If multiple models were simulated, the return type is a
+            :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the flux solutions.
+            If a simulation failed, the corresponding :class:`~.MassSolution`
+            will be returned as empty.
 
         """
         # Check kwargs
@@ -631,6 +670,9 @@ class Simulation(Object):
             self._update_stored_solutions(_CONC_STR, conc_sol_list)
             self._update_stored_solutions(_FLUX_STR, flux_sol_list)
 
+        if len(models) == 1:
+            return conc_sol_list[0], flux_sol_list[0]
+
         return conc_sol_list, flux_sol_list
 
     def find_steady_state(self, models=None, strategy="nleq2",
@@ -703,7 +745,7 @@ class Simulation(Object):
                 simulating to long times to find a steady state.
                 Only valid for ``strategy='simulate'``.
 
-                Default is ``1e8``.
+                Default is ``1e5``.
             num_attempts :
                 ``int`` indicating the number of attempts the steady state
                 solver should make before determining that a steady state
@@ -721,16 +763,22 @@ class Simulation(Object):
         Returns
         -------
         tuple (conc_solutions, flux_solutions)
-        conc_solutions : :class:`~cobra.core.dictlist.DictList`
-            A :class:`~cobra.core.dictlist.DictList` of
-            :class:`~.MassSolution`\ s containing the concentration solutions
-            for successful simulations. If the simulation failed, the
-            :class:`~.MassSolution` will be returned as empty.
-        flux_solutions : :class:`~cobra.core.dictlist.DictList`
-            A :class:`~cobra.core.dictlist.DictList` of
-            :class:`~.MassSolution`\ s containing the flux solutions for
-            successful simulations. If the simulation failed, the
-            :class:`~.MassSolution` will be returned as empty.
+        conc_solutions : MassSolution or DictList
+            If only one model was simulated, the return type is 
+            a :class:`~.MassSolution` containing the concentration solutions.
+            If multiple models were simulated, the return type is a
+            :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the concentration solutions.
+            If a simulation failed, the corresponding :class:`~.MassSolution`
+            will be returned as empty.
+        flux_solutions : MassSolution or DictList
+            If only one model was simulated, the return type is 
+            a :class:`~.MassSolution` containing the flux solutions.
+            If multiple models were simulated, the return type is a
+            :class:`~cobra.core.dictlist.DictList` of
+            :class:`~.MassSolution`\ s containing the flux solutions.
+            If a simulation failed, the corresponding :class:`~.MassSolution`
+            will be returned as empty.
 
         """
         # Check kwargs
@@ -739,7 +787,7 @@ class Simulation(Object):
             "selections": None,
             "boundary_metabolites": False,
             "steps": None,
-            "tfinal": 1e8,
+            "tfinal": 1e5,
             "num_attempts": 2,
             "decimal_precision": False}, kwargs)
         # Set all models for simulation if None provided.
@@ -828,6 +876,9 @@ class Simulation(Object):
             model = self._update_mass_model_with_values(self.reference_model)
             setattr(self, "_reference_model", model)
             self._reset_roadrunner(True)
+
+        if len(models) == 1:
+            return conc_sol_list[0], flux_sol_list[0]
 
         return conc_sol_list, flux_sol_list
 
@@ -1039,13 +1090,22 @@ class Simulation(Object):
         flux_sol = MassSolution(id_or_model=model, data_dict=flux_sol,
                                 solution_type=_FLUX_STR, time=time,
                                 interpolate=kwargs.get("interpolate", False))
-
+        values = (conc_sol, flux_sol)
         if update_values:
             _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
                      "Updating '%s' values", model)
-            self._update_simulation_values(model, (conc_sol, flux_sol))
+            # Update current model values with new simulation values
+            sim_values = self.get_model_simulation_values(model)
+            id_fix_dict = {model + "_init_conds": _make_init_cond,
+                           model + "_parameters": _make_ss_flux}
 
-        return conc_sol, flux_sol
+            for current_value_dict, new_value_dict in zip(sim_values, values):
+                # Fix the IDs for the simulation values, then set new values
+                id_fix_func = id_fix_dict[current_value_dict.id]
+                for key, value in iteritems(new_value_dict):
+                    current_value_dict[id_fix_func(key)] = value
+
+        return values
 
     def _update_stored_solutions(self, solution_type, solutions):
         """Update stored MassSolutions with new MassSolution objects.
@@ -1084,7 +1144,7 @@ class Simulation(Object):
         """
         if reset:
             # Reloat model into roadrunner
-            _load_model_into_roadrunner(
+            self._roadrunner = _load_model_into_roadrunner(
                 self.reference_model, rr=self.roadrunner, verbose=False,
                 **_SBML_KWARGS)
         else:
@@ -1193,24 +1253,45 @@ class Simulation(Object):
         results = zip(rr.steadyStateSelections, rr.getSteadyStateValues())
         return dict(results)
 
-    def _update_simulation_values(self, model, values):
-        """Update the stored values for the model with the new ones.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
+    def update_model_simulation_values(self, model, initial_conditions=None,
+                                       parameters=None, verbose=False):
+        """Update the simulation values for a given model.
+        
+        Parameters
+        ----------
+        model : MassModel or its string identifier.
+            A previously loaded MassModel.
+        initial_conditions : dict or None
+            A ``dict`` containing initial conditions to update.
+        parameters : dict or None
+            A ``dict`` containing parameters to update. If ``None`` provided,
+            will attempt to extract values from the given MassModel
 
         """
-        # Update current model values with new simulation values
-        sim_values = self.get_model_simulation_values(model)
-        id_fix_dict = {model + "_init_conds": _make_init_cond,
-                       model + "_parameters": _make_ss_flux}
+        if str(model) + "_values" not in self._simulation_values:
+            raise ValueError(
+                "MassModel '{0}' does not exist in the Simulation object."
+                .format(str(model)))
 
-        for current_value_dict, new_value_dict in zip(sim_values, values):
-            # Fix the IDs for the simulation values, then set new values
-            id_fix_func = id_fix_dict[current_value_dict.id]
-            for key, value in iteritems(new_value_dict):
-                current_value_dict[id_fix_func(key)] = value
+        if isinstance(model, MassModel):
+            values = _get_sim_values_from_model(model)
+        else:
+            values = self.get_model_simulation_values(model)
+
+        # Fix identifiers before adding to values for updating
+        if initial_conditions is not None:
+            values[0].update(dict(
+                (met, ic) if met in values[0]
+                else (_make_init_cond(met.id), ic)
+                for met, ic in iteritems(initial_conditions)
+            ))
+        if parameters is not None:
+            values[1].update({
+                param: value for param, value in iteritems(parameters)})
+
+        _log_msg(LOGGER, logging.INFO, verbose,
+                 "Replacing existing values for MassModel '%s'", str(model))
+        self._simulation_values._replace_on_id(values)
 
     def _update_mass_model_with_values(self, mass_model, value_dict=None):
         """Update the MassModel object with the stored model values.
@@ -1321,9 +1402,18 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
         # Create new roadrunner instance with model
         rr = roadrunner.RoadRunner(sbml_str)
     else:
-        # Otherwise clear model from current roadrunner and then load new model
-        rr.clearModel()
-        rr.load(sbml_str)
+        try:
+            # Otherwise clear model from current roadrunner and load new model
+            rr.clearModel()
+            rr.load(sbml_str)
+        # Sometimes roadrunner fails to load a model for unknown reasons
+        except Exception:
+            _log_msg(LOGGER, logging.ERROR, verbose,
+                     "Something unexpected occurred and the model could not be"
+                     " loaded into the current RoadRunner instance. Therefore"
+                     " initializing a new RoadRunner instance for the"
+                     " Simulation.")
+            rr = roadrunner.RoadRunner(sbml_str)
 
     _log_msg(LOGGER, logging.INFO, verbose,
              "Successfully loaded MassModel '%s' into RoadRunner.",
@@ -1376,6 +1466,9 @@ def _format_time_input(time, steps=None, verbose=False):
     else:
         raise TypeError("The 'time' input mut be one of the following: "
                         "'(t0, tf)' or '(t0, tf, numpoints)'")
+    if steps is not None:
+        steps = int(steps)
+    
     time = (t0, tf, numpoints, None, steps)
 
     return time

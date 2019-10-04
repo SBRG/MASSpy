@@ -1,7 +1,7 @@
 Installation of masspy
 =======================
 
-All releases require Python 3.4+ to be installed before proceeding.
+All releases require Python 3.6+ to be installed before proceeding.
 Mac OS X (10.7+) and Ubuntu ship with Python. Windows users without python can
 download and install python from the `python website
 <https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64-webinstall.exe>`_.

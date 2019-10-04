@@ -55,10 +55,14 @@ location codes are the following:
     'lower center'          8
     'upper center'          9
     'center'                10
-    'right outside'         11
-    'left outside'          12
-    'upper outside'         13
-    'lower outside'         14
+    'upper right outside'   11
+    'upper left outside'    12
+    'lower left outside'    13
+    'lower right outside'   14
+    'right outside'         15
+    'left outside'          16
+    'lower outside'         17
+    'upper outside'         18
     =====================   ===================
 
 Some other important things to note about the legend include the following:
@@ -266,8 +270,7 @@ of the :mod:`~mass.visualiation` module.
     annotated. For :func:`~.plot_tiled_phase_portraits`, the time points
     will be applied to all tiles containing phase portrait plots.
 
-    Default is ``endpoints`` for :func:`~.plot_tiled_phase_portraits`,
-    otherwise ``None``.
+    Default is ``None``.
   annotate_time_points_color :
       Value or ``iterable`` of values representing valid
       :mod:`matplotlib.colors` values to use as time point colors. If a single
@@ -277,8 +280,7 @@ of the :mod:`~mass.visualiation` module.
       For :func:`~.plot_tiled_phase_portraits`, the colors will be applied to
       all tiles containing phase portrait plots.
 
-      Default is ``["red", "blue"]`` for :func:`~.plot_tiled_phase_portraits`,
-      otherwise ``None``.
+      Default is ``None``.
   annotate_time_points_marker :
       Value or ``iterable`` of values representing valud :mod:`matplotlib`
       marker_ values to use as time point markers. If a single marker is
@@ -288,22 +290,25 @@ of the :mod:`~mass.visualiation` module.
       For :func:`~.plot_tiled_phase_portraits`, the markers will be applied
       to all tiles containing phase portrait plots.
 
-      Default is ``["o", "D"]`` for :func:`~.plot_tiled_phase_portraits`,
-      otherwise ``None``.
+      Default is ``None``.
   annotate_time_points_markersize :
       ``float`` value representing the size of the marker (in points) to set.
       For :func:`~.plot_tiled_phase_portraits`, the markersizes will be applied
       to all tiles containing phase portrait plots.
 
       Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
-  annotate_time_points_legend_loc :
+  annotate_time_points_labels :
+      ``bool`` indicating whether to annotate the time points with their
+      labels on the plot itself.
+      
+      Default is ``False``.
+  annotate_time_points_legend :
       A ``str`` representing the location of the legend, or an ``int``
       between 0 and 14 (inclusive) corresponding to the location to use for
       the legend of annotated time points. Cannot be the same location value
-      as the plot's ``legend`` location.
+      as the plot's ``legend`` location. If ``None``, no legend is created.
 
-      Default is ``None`` to use either the ``"right outside"`` location,
-      or ``"left outside"`` location if ``"right outside"`` is occupied.
+      Default is ``None``.
   prop_cycle :
       A valid :func:`matplotlib.rcsetup.cycler` instance to use in the plot.
       If provided, then the ``color``, ``linestyle``, ``linewidth``,
@@ -385,9 +390,9 @@ of the :mod:`~mass.visualiation` module.
       Ignored if the kwarg ``xy_line=False``.
       Only valid for functions in the :mod:`~.comparison` module.
   xy_legend :
-      ``bool`` indicating whether to include a legend for the ``y=x`` line.
+      ``str`` indicating where to place a legend for the ``y=x`` line.
 
-      Default is ``True``. 
+      Default is ``None``. 
       Ignored if the kwarg ``xy_line=False``.
       Only valid for functions in the :mod:`~.comparison` module.
   

@@ -8,7 +8,7 @@ from mass import (io, enzyme_modules)
 from mass.core import (
     MassConfiguration, MassMetabolite, MassModel, MassReaction, Simulation,
     MassSolution, Unit, UnitDefinition)
-from mass.util import show_versions, qcqa
+from mass.util import show_versions, strip_time, qcqa_model
 
 __version__ = "0.1.0a42"
 

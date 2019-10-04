@@ -35,8 +35,7 @@ if __name__ == "__main__":
         install_requires=[
             "cobra>=0.15.0",
             "depinfo",
-            "libroadrunner==1.5.3",
-            "matplotlib>=3.0.0",
+            "libroadrunner>=1.5",
             "numpy>=1.13.0",
             "pandas>=0.17.0",
             "scipy>=1.2.0",
@@ -48,7 +47,7 @@ if __name__ == "__main__":
             "pytest",
             "pytest-benchmark"
         ],
-        # extras_require=extras,
+        extras_require=extras,
         package_data={
             '': [
                 'test/data/*',
@@ -77,7 +76,6 @@ if __name__ == "__main__":
             'License :: OSI Approved :: GNU General Public License v2'
                 ' or later (GPLv2+)',
             'Operating System :: OS Independent',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: Implementation :: CPython',

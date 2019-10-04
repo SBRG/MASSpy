@@ -35,15 +35,26 @@ INSTALLED_VISUALIZATION_PACKAGES = {
 }
 r"""dict: Package names and ``bool``\ s indicating if they are installed."""
 
+L_PAD = 0.15
+"""float: Padding between legend and figure for outside legend locations."""
+
 OUTSIDE_LEGEND_LOCATION_AND_ANCHORS = {
-    "right outside": ("center left", (1.2, 0.5)),
-    "left outside": ("center right", (-0.2, 0.5)),
-    "upper outside": ("lower center", (0.5, 1.2)),
-    "lower outside": ("upper center", (0.5, -0.2)),
-    11: (6, (1.2, 0.5)),
-    12: (7, (-0.2, 0.5)),
-    13: (8, (0.5, 1.2)),
-    14: (9, (0.5, -0.2)),
+    "upper right outside": ("center left", (1 + L_PAD, 1 + L_PAD)),
+    "upper left outside": ("center right", (0 - L_PAD, 1 + L_PAD)),
+    "lower left outside": ("center right", (0 - L_PAD, 0 - L_PAD)),
+    "lower right outside": ("center left", (1 + L_PAD, 0 - L_PAD)),
+    "right outside": ("center left", (1 + L_PAD, 0.5)),
+    "left outside": ("center right", (0 - L_PAD, 0.5)),
+    "lower outside": ("upper center", (0.5, 0 - L_PAD)),
+    "upper outside": ("lower center", (0.5, 1 + L_PAD)),
+    11: (6, (1 + L_PAD, 1 + L_PAD)),
+    12: (7, (0 - L_PAD, 1 + L_PAD)),
+    13: (7, (0 - L_PAD, 0 - L_PAD)),
+    14: (6, (1 + L_PAD, 0 - L_PAD)),
+    15: (6, (1 + L_PAD, 0.5)),
+    16: (7, (0 - L_PAD, 0.5)),
+    17: (9, (0.5, 0 - L_PAD)),
+    18: (8, (0.5, 1 + L_PAD)),
 }
 """dict: Legend location and anchors for default outside legend locations."""
 
@@ -243,7 +254,7 @@ def _validate_legend_input_fmt(legend, observable):
 
 
 def _validate_annotate_time_points_input(*args):
-    """Validate the inputs for kwargs of ``annotate_time_point`` and return.
+    """Validate the inputs for kwargs of ``annotate_time_points`` and return.
 
     Warnings
     --------
@@ -251,7 +262,7 @@ def _validate_annotate_time_points_input(*args):
 
     """
     # Get args and determine minimum and maximum time points
-    time_vector, time_points, markers, marker_sizes = args
+    time_vector, time_points, colors, markers, marker_sizes = args
     t_min = min(time_vector)
     t_max = max(time_vector)
 
@@ -260,10 +271,12 @@ def _validate_annotate_time_points_input(*args):
        time_points.lower() == "endpoints":
         time_points = [t_min, t_max]
         default_markers = ["o", "D"]
+        default_colors = ["r", "b"]
     else:
         # Ensure the time points are iterable
         time_points = ensure_iterable(time_points)
         default_markers = ["o"] * len(time_points)
+        default_colors = ["k"] * len(time_points)
 
     # Get the default marker sizes
     default_sizes = [
@@ -277,7 +290,7 @@ def _validate_annotate_time_points_input(*args):
         else:
             outside_t_range += [t]
 
-    # If outside the time range, no need to check markers or markersizes
+    # If outside the time range, no need to check colors, markers or sizes
     if outside_t_range:
         outside_t_range += [[t_min, t_max]]
     else:
@@ -298,8 +311,14 @@ def _validate_annotate_time_points_input(*args):
                                                                len(markers))
         # Assign value dependning on whether validation was successful
         marker_sizes = default_sizes if not marker_sizes else marker_sizes
+    
+    # Validate time points colors
+    colors = _validate_time_points_marker_properties("color", colors,
+                                                     len(time_points))
+    if colors is None:
+        colors = default_colors
 
-    return ([time_points, markers, marker_sizes], outside_t_range)
+    return ([time_points, colors, markers, marker_sizes], outside_t_range)
 
 
 def _validate_time_points_marker_properties(marker_prop, values, num_expected):
@@ -713,14 +732,13 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
     This method is intended for internal use only.
 
     """
-    time_points = kwargs.get("annotate_time_points")
-    time_points_marker = kwargs.get("annotate_time_points_marker")
-    time_points_markersize = kwargs.get("annotate_time_points_markersize")
 
-    items = _validate_annotate_time_points_input(observable.time,
-                                                 time_points,
-                                                 time_points_marker,
-                                                 time_points_markersize)
+    items = _validate_annotate_time_points_input(
+        observable.time, kwargs.get("annotate_time_points"),
+        kwargs.get("annotate_time_points_color"),
+        kwargs.get("annotate_time_points_marker"),
+        kwargs.get("annotate_time_points_markersize"))
+
     if items[-1]:
         # Invalid time points, end function early
         _raise_kwarg_warning(
@@ -730,11 +748,7 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
 
         return ax
 
-    time_points, time_points_marker, time_points_markersize = items[0]
-    # Validate time points colors
-    time_points_color = _validate_time_points_marker_properties(
-        "color", kwargs.get("annotate_time_points_color"),
-        len(time_points_marker))
+    time_points, colors, markers, marker_sizes = items[0]
 
     # Change the time points of the MassSolution to make the MassSolution
     # carry only solutuons for time points to be plotted.
@@ -751,38 +765,75 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
 
     for line in lines:
         # Set up the prop_cycler arguments for the time points
-        if time_points_color is None:
-            time_points_color = [line.get_color()] * len(time_points)
+        if colors is None:
+            colors = [line.get_color()] * len(time_points)
         # Make and set the prop_cycler for the time points
         ax.set_prop_cycle(_validate_kwarg_input(
             "cycler", cycler(**{
-                "color": time_points_color,
+                "color": colors,
                 "linestyle": [" "] * len(time_points),
-                "marker": time_points_marker,
-                "markersize": time_points_markersize
+                "marker": markers,
+                "markersize": marker_sizes
             })))
 
-        # Check if phase portrait or time profile
-        if type_of_plot == "phase_portrait":
-            # Handle as a phase portrait, get solutions and plot
-            items = _group_xy_items(observable, itervalues)
-            for i, t in enumerate(time_points):
-                plot_function(items[0][i], items[1][i], label="t=" + str(t))
-        else:
-            # Handle as a time profile, get solutions and plot
-            items = observable[line.get_label()]
-            for i, t in enumerate(time_points):
-                plot_function(t, items[i], label="t=" + str(t))
+        for i, t in enumerate(time_points):
+            label = "t=" + str(t)
+            # Check if phase portrait or time profile
+            if type_of_plot == "phase_portrait":
+                # Handle as a phase portrait, get solutions and plot
+                items = _group_xy_items(observable, itervalues)
+                x, y = items[0][i], items[1][i]
+            else:
+                # Handle as a time profile, get solutions and plot
+                items = observable[line.get_label()]
+                x, y = t, items[i]
+
+            plot_function(x, y, label=label)
+            if kwargs.get("annotate_time_points_labels"):
+                ax.annotate("    " + label, xy=(x, y), xytext=(x, y))
 
     # Add the legend to the axes.
-    if kwargs.get("annotate_time_points_legend_loc"):
+    if kwargs.get("annotate_time_points_legend") is not None:
         items = _get_annotated_time_points_legend_args(
-            ax, desired_loc=kwargs.get("annotate_time_points_legend_loc"),
+            ax, desired_loc=kwargs.get("annotate_time_points_legend"),
             taken_loc=first_legend[1])
 
         ax = _set_additional_legend_box(ax, items, first_legend[0])
 
     return ax
+
+
+def _check_second_legend_location(desired_loc, taken_loc):
+    """Check the legend location and determine if it is being occupied already.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Get the taken location (check if it is an outside location too)
+    if taken_loc:
+        bbox_to_anchor = taken_loc["bbox_to_anchor"]
+        taken_loc = taken_loc["loc"]
+        for k, v in iteritems(OUTSIDE_LEGEND_LOCATION_AND_ANCHORS):
+            if v == (taken_loc, bbox_to_anchor):
+                taken_loc = k
+                break
+    
+    # Make sure desired location is not already taken
+    if desired_loc is not None and desired_loc == taken_loc:
+        msg = " location already used, utilizing default value instead"
+        _raise_kwarg_warning(
+            "legend_loc",
+            msg=msg,
+            kwarg_prefix="annotate_time_points")
+        desired_loc = None
+
+    # Validate desired location
+    elif desired_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
+        desired_loc = _validate_kwarg_input("legend_loc", desired_loc)
+
+    return desired_loc, taken_loc
 
 
 def _get_annotated_time_points_legend_args(ax, desired_loc=None,
@@ -804,39 +855,20 @@ def _get_annotated_time_points_legend_args(ax, desired_loc=None,
     points = list(itervalues(labels_and_points))
     labels = list(iterkeys(labels_and_points))
 
-    # Get the taken location (check if it is an outside location too)
-    if taken_loc:
-        bbox_to_anchor = taken_loc["bbox_to_anchor"]
-        taken_loc = taken_loc["loc"]
-        for k, v in iteritems(OUTSIDE_LEGEND_LOCATION_AND_ANCHORS):
-            if v == (taken_loc, bbox_to_anchor):
-                taken_loc = k
-                break
-    # Make sure desired location is not already taken
-    if desired_loc is not None and desired_loc == taken_loc:
-        msg = " location already used, utilizing default value instead"
-        _raise_kwarg_warning(
-            "legend_loc",
-            msg=msg,
-            kwarg_prefix="annotate_time_points")
-        desired_loc = None
-
-    # Validate desired location
-    elif desired_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-        desired_loc = _validate_kwarg_input("legend_loc", desired_loc)
-
-    # Set default desired location
-    if desired_loc is None:
-        desired_loc = "right " if taken_loc != "right outside" else "left "
-        desired_loc += "outside"
-
+    desired_loc, taken_loc = _check_second_legend_location(desired_loc,
+                                                           taken_loc)
+    anchor = None
     # Get kwargs for legend location
     if desired_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-        desired_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired_loc]
-    else:
-        anchor = None
+        desired_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired_loc]        
 
-    return points, labels, {"loc": desired_loc, "bbox_to_anchor": anchor}
+    if desired_loc is None and anchor is None:
+        legend_kwargs = {}
+    else:
+        legend_kwargs = {"loc": desired_loc, "bbox_to_anchor": anchor}
+
+
+    return points, labels, legend_kwargs
 
 
 def _set_additional_legend_box(ax, legend_args, first_legend=None):

@@ -78,7 +78,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         * annotate_time_points_color
         * annotate_time_points_marker
         * annotate_time_points_markersize
-        * annotate_time_points_legend_loc
+        * annotate_time_points_legend
 
         See :mod:`~mass.visualization` documentation for more information on
         optional ``kwargs``.
@@ -200,7 +200,8 @@ def get_time_profile_default_kwargs(function_name):
         "annotate_time_points_color": None,
         "annotate_time_points_marker": None,
         "annotate_time_points_markersize": None,
-        "annotate_time_points_legend_loc": None,
+        "annotate_time_points_labels": False,
+        "annotate_time_points_legend": None,
         "prop_cycle": None,
     }
 
