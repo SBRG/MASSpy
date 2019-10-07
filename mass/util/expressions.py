@@ -201,7 +201,7 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
 
     # Try to group compartments in the rate
-    if not MASSCONFIGURATION.exclude_compartments_in_rates\
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates\
        and len(reaction.compartments) == 1:
         c = list(reaction.compartments)[0]
         rate_expression = sym.collect(rate_expression, c)
@@ -254,7 +254,7 @@ def generate_foward_mass_action_rate_expression(reaction, rate_type=1):
     fwd_rate = _set_fixed_metabolites_in_rate(reaction, fwd_rate)
 
     # Add compartments
-    if not MASSCONFIGURATION.exclude_compartments_in_rates:
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates:
         compartments = set(
             met.compartment for met in reaction.reactants if met is not None)
         for c in list(compartments):
@@ -309,7 +309,7 @@ def generate_reverse_mass_action_rate_expression(reaction, rate_type=1):
     rev_rate = _set_fixed_metabolites_in_rate(reaction, rev_rate)
 
     # Add compartments
-    if not MASSCONFIGURATION.exclude_compartments_in_rates:
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates:
         compartments = set(
             met.compartment for met in reaction.products if met is not None)
         for c in list(compartments):

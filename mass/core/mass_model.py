@@ -136,9 +136,6 @@ class MassModel(Model):
         values are the corresponding boundary condition numerical value or
         function of time. Note that boundary conditions are treated as
         parameters and NOT as species.
-    compartments : dict
-        A ``dict`` to store the compartment shorthands and their full names.
-        Keys are the shorthands while values are the full names.
     units : ~cobra.core.dictlist.DictList
         :class:`~cobra.core.dictlist.DictList` of :class:`~.UnitDefinition`\ s
         to store in the model for referencing.

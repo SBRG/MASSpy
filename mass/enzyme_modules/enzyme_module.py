@@ -115,29 +115,6 @@ class EnzymeModule(MassModel):
         A :class:`~cobra.core.dictlist.DictList` where keys are the
         reaction identifiers and the values are the associated
         :class:`~.EnzymeModuleReaction`\ s.
-    enzyme_module_ligands_categorized : ~cobra.core.dictlist.DictList
-        A :class:`~cobra.core.dictlist.DictList` where keys are the
-        group identifiers and the values are the associated categorized groups
-        containing :class:`~.MassMetabolite`\ s.
-    enzyme_module_species_categorized : ~cobra.core.dictlist.DictList
-        A :class:`~cobra.core.dictlist.DictList` where keys are the
-        group identifiers and the values are the associated categorized groups
-        containing :class:`~.EnzymeModuleSpecies`\ s.
-    enzyme_module_reactions_categorized : ~cobra.core.dictlist.DictList
-        A :class:`~cobra.core.dictlist.DictList` where keys are the
-        group identifiers and the values are the associated categorized groups
-        containing :class:`~.EnzymeModuleReaction`\ s.
-    enzyme_concentration_total : float
-        A non-negative value representing the total enzyme concentration.
-    enzyme_net_flux : float
-        The value of the net flux through the enzyme.
-    enzyme_concentration_total_equation : ~sympy.core.basic.Basic
-        A :mod:`sympy` expression representing the net reaction rate equation
-        for the enzyme represented by the module.
-    enzyme_net_flux_equation :  ~sympy.core.basic.Basic
-        A :mod:`sympy` expression representing the net reaction rate equation
-        for the enzyme represented by the module.
-
     """
 
     def __init__(self, id_or_model=None, name=None, subsystem="",

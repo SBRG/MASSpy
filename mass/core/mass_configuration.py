@@ -2,33 +2,33 @@
 """
 Define the global configuration values through the :class:`MassConfiguration`.
 
-Attributes involved in model construction:
-    * :attr:`~MassBaseConfiguration.boundary_compartment`
-    * :attr:`~MassBaseConfiguration.default_compartment`
-    * :attr:`~MassBaseConfiguration.irreversible_Keq`
-    * :attr:`~MassBaseConfiguration.irreversible_kr`
-    * :attr:`~MassBaseConfiguration.exclude_metabolites_from_rates`
-    * :attr:`~MassBaseConfiguration.exclude_compartments_in_rates`
-    * :attr:`~MassBaseConfiguration.model_creator`
-    * :attr:`~MassBaseConfiguration.decimal_precision`
+Involved in model construction:
+    * :meth:`~MassBaseConfiguration.boundary_compartment`
+    * :meth:`~MassBaseConfiguration.default_compartment`
+    * :meth:`~MassBaseConfiguration.irreversible_Keq`
+    * :meth:`~MassBaseConfiguration.irreversible_kr`
+    * :meth:`~MassBaseConfiguration.exclude_metabolites_from_rates`
+    * :meth:`~MassBaseConfiguration.exclude_compartment_volumes_in_rates`
+    * :meth:`~MassBaseConfiguration.model_creator`
+    * :meth:`~MassBaseConfiguration.decimal_precision`
 
-Attributes involved in model simulation:
-    * :attr:`~MassBaseConfiguration.decimal_precision`
-    * :attr:`~MassBaseConfiguration.steady_state_threshold`
+Involved in model simulation:
+    * :meth:`~MassBaseConfiguration.decimal_precision`
+    * :meth:`~MassBaseConfiguration.steady_state_threshold`
 
-Attributes involved in flux balance analysis (FBA):
-    * :attr:`~MassBaseConfiguration.solver`
-    * :attr:`~MassBaseConfiguration.tolerance`
-    * :attr:`~MassBaseConfiguration.processes`
-    * :attr:`~MassBaseConfiguration.lower_bound`
-    * :attr:`~MassBaseConfiguration.upper_bound`
-    * :attr:`~MassBaseConfiguration.bounds`
+Involved in flux balance analysis (FBA):
+    * :meth:`~MassBaseConfiguration.solver`
+    * :meth:`~MassBaseConfiguration.tolerance`
+    * :meth:`~MassBaseConfiguration.processes`
+    * :meth:`~MassBaseConfiguration.lower_bound`
+    * :meth:`~MassBaseConfiguration.upper_bound`
+    * :meth:`~MassBaseConfiguration.bounds`
 
-Attributes involved in thermodynamics:
-    * :attr:`~MassBaseConfiguration.decimal_precision`
-    * :attr:`~MassBaseConfiguration.solver`
-    * :attr:`~MassBaseConfiguration.tolerance`
-    * :attr:`~MassBaseConfiguration.processes`
+Involved in thermodynamics:
+    * :meth:`~MassBaseConfiguration.decimal_precision`
+    * :meth:`~MassBaseConfiguration.solver`
+    * :meth:`~MassBaseConfiguration.tolerance`
+    * :meth:`~MassBaseConfiguration.processes`
 
 Notes
 -----
@@ -57,109 +57,18 @@ class MassBaseConfiguration:
     :class:`MassBaseConfiguration` in order for global configuration to work
     as intended.
 
-    Attributes
-    ----------
-    boundary_compartment : dict
-        A ``dict`` containing the identifier of the boundary compartment
-        mapped to the name of the boundary compartment.
-
-        Default value is ``{"b": "boundary"}``.
-    default_compartment : dict
-        A ``dict`` containing the identifier of the default compartment
-        mapped to the name of the desired name of default compartment.
-        Primarily used in writing models to SBML when there are no set
-        compartments in the model.
-
-        Default value is ``{"default": "default_compartment"}``.
-    irreversible_Keq : float
-        The default value to assign to equilibrium constants (Keq) for
-        irreversible reactions. Must be a non-negative value.
-
-        Default value is ``float("inf")``.
-    irreversible_kr : float
-        The default value to assign to equilibrium constants (Keq) for
-        irreversible reactions. Must be a non-negative value.
-
-        Default value is the ``0.``
-    exclude_metabolites_from_rates : dict
-        A dict where keys should correspond to a metabolite attribute to
-        utilize for filtering, and values are lists that contain the items to
-        exclude that would be returned by the metabolite attribute. Does not
-        apply to boundary reactions.
-
-        Default is ``dict("elements", [{"H": 2, "O": 1}, {"H": 1}])`` to
-        remove the hydrogen and water metabolites using the
-        :attr:`~.MassMetabolite.elements` attribute to filter out the hydrogen
-        and water in all rates except the hydrogen and water exchange
-        reactions.
-    exclude_compartments_in_rates : bool
-        Whether to exclude the compartment volumes in rate expressions.
-        The boundary compartment will always excluded.
-
-        Default is ``True``.
-    model_creator : dict
-        A dict containing the information about the model creator where keys
-        are SBML creator fields and values are strings. Valid keys include:
-
-        * ``'familyName'``
-        * ``'givenName'``
-        * ``'organization'``
-        * ``'email'``
-
-        To successfully export a model creator, all keys must have non-empty
-        string values.
-    decimal_precision : int or None
-        An integer indicating the decimal precision to use for rounding
-        numerical values. Positive numbers indicated digits to the right of the
-        decimal place, negative numbers indicate digits to the left of the
-        decimal place. If ``None`` provided, no solutions will be rounded.
-
-        Default is ``None``.
-    steady_state_threshold : float
-        A threshold for determining whether the RoadRunner steady state solver
-        is at steady state. The steady state solver returns a value indicating
-        how close the solution is to the steady state, where smaller values
-        are better. Values less than the threshold indicate steady state.
-
-        Default is ``1e-6``.
-    solver : str
-        The default optimization solver. The solver choices are the ones
-        provided by `optlang` and solvers installed in your environment.
-        Valid solvers typically include: ``"glpk"``, ``"cplex"``, ``"gurobi"``
-    tolerance : float
-        The default tolerance for the optimization solver being used.
-
-        Default value is ``1e-7``.
-    lower_bound : float
-        The standard lower bound for reversible reactions.
-
-        Default value is ``-1000.``
-    upper_bound : float
-        The standard upper bound for all reactions.
-
-        Default value is ``1000.``
-    bounds : tuple of floats
-        The default reaction bounds for newly created reactions. The bounds
-        are in the form of lower_bound, upper_bound.
-
-        Default values are ``(-1000.0, 1000.0)``.
-    processes : int
-        A default number of processes to use where multiprocessing is
-        possible. The default number corresponds to the number of available
-        cores (hyperthreads).
-
     """
 
     def __init__(self):
         """Initialize MassBaseConfiguration."""
         # Model construction configuration options
         self._boundary_compartment = {"b": "boundary"}
-        self._default_compartment = {"compartment": "default_compartment"}
+        self._default_compartment = {"compartment": "compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
-        self.exclude_metabolites_from_rates = {
+        self._exclude_metabolites_from_rates = {
             "elements": [{"H": 2, "O": 1}, {"H": 1}]}
-        self.exclude_compartments_in_rates = True
+        self._exclude_compartment_volumes_in_rates = True
         self._model_creator = {
             "familyName": "",
             "givenName": "",
@@ -277,12 +186,15 @@ class MassBaseConfiguration:
 
         Notes
         -----
-        A read-only copy of the ``dict`` is returned.
+        * A read-only copy of the ``dict`` is returned.
+        * To successfully export a model creator, all keys must have non-empty
+          string values.
 
         Parameters
         ----------
         creator_dict : dict
-            A ``dict`` containing the model creator information. Keys can only
+            A ``dict`` containing the model creator information where keys
+            are SBML creator fields and values are strings. Keys can only
             be the following:
 
             * 'familyName'
@@ -310,8 +222,62 @@ class MassBaseConfiguration:
         self._model_creator.update(creator_dict)
 
     @property
+    def exclude_metabolites_from_rates(self):
+        """Get or set the metabolites that should be excluded from rates.
+
+        Default is ``dict("elements", [{"H": 2, "O": 1}, {"H": 1}])`` to
+        remove the hydrogen and water metabolites using the
+        :attr:`~.MassMetabolite.elements` attribute to filter out the hydrogen
+        and water in all rates except the hydrogen and water exchange
+        reactions.
+
+        Parameters
+        ----------
+        to_exclude : dict
+            A dict where keys should correspond to a metabolite attribute to
+            utilize for filtering, and values are lists that contain the items
+            to exclude that would be returned by the metabolite attribute.
+            Does not apply to boundary reactions.
+
+        """
+        return getattr(self, "_exclude_metabolites_from_rates")
+
+    @exclude_metabolites_from_rates.setter
+    def exclude_metabolites_from_rates(self, to_exclude):
+        """Set the metabolites that should be excluded from rates."""
+        if not isinstance(to_exclude, dict):
+            raise TypeError("Must be a ``dict``.")
+        setattr(self, "_exclude_metabolites_from_rates", to_exclude)
+
+    @property
+    def exclude_compartment_volumes_in_rates(self):
+        """Get or set whether to exclude the compartment volumes in rates.
+        
+        The boundary compartment will always excluded.
+
+        Parameters
+        ----------
+        value : bool
+            Whether to exclude the compartment volumes in rate expressions.
+
+        """
+        return getattr(self, "_exclude_compartment_volumes_in_rates")
+
+    @exclude_compartment_volumes_in_rates.setter
+    def exclude_compartment_volumes_in_rates(self, value):
+        """Set whether to exclude the compartment volumes in rates."""
+        if not isinstance(value, bool):
+            raise TypeError("Must be a ``bool``.")
+        setattr(self, "_exclude_compartment_volumes_in_rates", value)
+
+
+    @property
     def decimal_precision(self):
         """Get or set the default decimal precision when rounding.
+
+        Positive numbers indicated digits to the right of the
+        decimal place, negative numbers indicate digits to the left of the
+        decimal place.
 
         Notes
         -----
@@ -339,6 +305,11 @@ class MassBaseConfiguration:
     @property
     def steady_state_threshold(self):
         """Get or set the steady state threshold when using roadrunner solvers.
+
+        A threshold for determining whether the RoadRunner steady state solver
+        is at steady state. The steady state solver returns a value indicating
+        how close the solution is to the steady state, where smaller values
+        are better. Values less than the threshold indicate steady state.
 
         Notes
         -----
@@ -373,6 +344,9 @@ class MassBaseConfiguration:
     @property
     def solver(self):
         """Get or set the solver utilized for optimization.
+
+        The solver choices are the ones
+        provided by `optlang` and solvers installed in the environment.
 
         Parameters
         ----------
@@ -473,7 +447,12 @@ class MassBaseConfiguration:
 
     @property
     def processes(self):
-        """Return the default number of processes to use when possible."""
+        """Return the default number of processes to use when possible.
+
+        Number of processes to use where multiprocessing is
+        possible. The default number corresponds to the number of available
+        cores (hyperthreads).
+        """
         return COBRA_CONFIGURATION.processes
 
     @property
@@ -508,7 +487,7 @@ class MassBaseConfiguration:
                 <td>{excluded_metabolites_in_rates}</td>
             </tr><tr>
                 <td><strong>Compartments in rates</strong></td>
-                <td>{exclude_compartments_in_rates}</td>
+                <td>{exclude_comp_vols}</td>
             </tr><tr>
                 <td><strong>Model creator set</strong></td>
                 <td>{model_creator}</td>
@@ -545,7 +524,7 @@ class MassBaseConfiguration:
             irreversible_kr=self.irreversible_kr,
             excluded_metabolites_in_rates=bool(
                 self.exclude_metabolites_from_rates),
-            exclude_compartments_in_rates=self.exclude_compartments_in_rates,
+            exclude_comp_vols=self.exclude_compartment_volumes_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,
@@ -569,7 +548,7 @@ class MassBaseConfiguration:
         irreversible reaction Keq: {irreversible_Keq}
         irreversible reaction kr: {irreversible_kr}
         metabolites excluded in rates: {excluded_metabolites_in_rates}
-        include compartments in rates: {exclude_compartments_in_rates}
+        include compartments in rates: {exclude_comp_vols}
         model creator set: {model_creator}
         decimal_precision: {decimal_precision}
         steady_state_threshold: {steady_state_threshold}
@@ -588,7 +567,7 @@ class MassBaseConfiguration:
             irreversible_kr=self.irreversible_kr,
             excluded_metabolites_in_rates=bool(
                 self.exclude_metabolites_from_rates),
-            exclude_compartments_in_rates=self.exclude_compartments_in_rates,
+            exclude_comp_vols=self.exclude_compartment_volumes_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
             steady_state_threshold=self.steady_state_threshold,

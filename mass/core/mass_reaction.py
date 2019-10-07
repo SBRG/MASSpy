@@ -113,17 +113,6 @@ class MassReaction(Reaction):
 
             Default is ``None``.
 
-    Attributes
-    ----------
-    rate : ~sympy.core.basic.Basic
-        The rate of the reaction as a :mod:`sympy` expression. If there is an
-        associated :class:`.MassModel` that contains a custom rate set
-        for the reaction in the :attr:`.MassModel.custom_rates` attribute,
-        it will be returned.
-    steady_state_flux : float
-        The stored (typically steady state) flux for the reaction. Stored flux
-        values can be accessed for operations such as PERC calculations.
-
     """
 
     def __init__(self, id_or_reaction=None, name="", subsystem="",

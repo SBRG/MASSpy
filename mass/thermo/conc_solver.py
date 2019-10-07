@@ -160,11 +160,6 @@ class ConcSolver:
 
     Attributes
     ----------
-    solver : optlang.interface.Model
-        The solver utilized for problems concerning metabolite
-        concentrations and reaction equilibrium constants.
-    tolerance : float
-        The tolerance of the solver.
     problem_type : str
         The type of mathematical problem that the concentration solver has
         been setup to solve.
@@ -181,13 +176,6 @@ class ConcSolver:
         intended to be at equilibrium.
     constraint_buffer : float
         A value to utilize when setting a constraint buffer.
-    zero_value_log_substitute : float
-        A value to substitute for 0 when trying to take the logarithm of 0
-        to avoid a domain error. A value of 1e-10 means that whenever
-        instead of attempting ``log(0)``, which causes a :class:`ValueError`,
-        it will be instead calculated as ``log(1e-10)``.
-
-        Default is ``1e-10``.
 
     """
 
