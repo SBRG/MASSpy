@@ -145,18 +145,17 @@ class Simulation(Object):
     verbose : bool
         Whether to provide a QCQA report and more verbose messages when trying
         to load the model. Default is ``False``.
-    variable_step_size : bool
-        Whether to perform a variable time step simulation. Enabling this
-        setting will allow the integrator to the size of each time step,
-        resulting in a non-uniform time column. Otherwise, the output is
-        uniformly spaced based on the number of time points specified
-        for a simulation.
+    *kwargs
+        variable_step_size :
+            ``bool`` indicating whether to initialize the integrator with a
+            variable time step for simulations.
 
-        Default is ``True``.
+            Default is ``False``.
+
     """
 
     def __init__(self, reference_model, id=None, name=None, verbose=False,
-                 variable_step_size=True):
+                 **kwargs):
         """Initialize the Simulation."""
         if not isinstance(reference_model, MassModel):
             raise TypeError(
@@ -165,6 +164,9 @@ class Simulation(Object):
 
         if id is None:
             id = "{0}_Simulation".format(str(reference_model))
+        kwargs = _check_kwargs({
+            "variable_step_size": False
+        }, kwargs)
 
         try:
             # QCQA check model
@@ -196,7 +198,7 @@ class Simulation(Object):
         self._concentration_solutions = DictList()
         self._flux_solutions = DictList()
 
-        self.variable_step_size = variable_step_size
+        self.integrator.variable_step_size = kwargs.get("variable_step_size")
 
     @property
     def reference_model(self):
@@ -238,28 +240,14 @@ class Simulation(Object):
         return DictList(getattr(self, "_flux_solutions").copy())
 
     @property
-    def variable_step_size(self):
-        """Get or set whether to use a variable step size in solution output.
+    def integrator(self):
+        """Return the :class:`roadrunner.roadrunner.Integrator`."""
+        return self.roadrunner.integrator
 
-        Notes
-        -----
-        Enabling this setting will allow the integrator to the size of each
-        time step, resulting in a non-uniform time column. Otherwise, the
-        output is uniformly spaced based on the number of time points specified
-        for a simulation.
-
-        Parameters
-        ----------
-        value : bool
-            Whether to perform a variable time step simulation.
-        
-        """
-        return self.roadrunner.getIntegrator().variable_step_size
-
-    @variable_step_size.setter
-    def variable_step_size(self, value):
-        """Set whether to use a variable step size in solution output."""
-        self.roadrunner.getIntegrator().variable_step_size = value
+    @property
+    def steady_state_solver(self):
+        """Return the :class:`roadrunner.roadrunner.SteadyStateSolver`."""
+        return self.roadrunner.steadyStateSolver
 
     def set_new_reference_model(self, model, verbose=False):
         """Set a new reference model for the :class:`Simulation`.
@@ -580,6 +568,11 @@ class Simulation(Object):
             If a simulation failed, the corresponding :class:`~.MassSolution`
             will be returned as empty.
 
+        See Also
+        --------
+        :attr:`~.integrator`
+            Access the integrator utilized in simulations.
+
         """
         # Check kwargs
         kwargs = _check_kwargs({
@@ -745,7 +738,7 @@ class Simulation(Object):
                 simulating to long times to find a steady state.
                 Only valid for ``strategy='simulate'``.
 
-                Default is ``1e5``.
+                Default is ``1e8``.
             num_attempts :
                 ``int`` indicating the number of attempts the steady state
                 solver should make before determining that a steady state
@@ -780,6 +773,14 @@ class Simulation(Object):
             If a simulation failed, the corresponding :class:`~.MassSolution`
             will be returned as empty.
 
+        See Also
+        --------
+        :attr:`~.integrator`
+            Access the integrator utilized in the ``"simulate"`` strategy.
+        :attr:`~.steady_state_solver`
+            Access the steady state solver utilized in root finding strategies
+            i.e. ``"nleq1"`` and ``"nleq2"``.
+
         """
         # Check kwargs
         kwargs = _check_kwargs({
@@ -787,7 +788,7 @@ class Simulation(Object):
             "selections": None,
             "boundary_metabolites": False,
             "steps": None,
-            "tfinal": 1e5,
+            "tfinal": 1e8,
             "num_attempts": 2,
             "decimal_precision": False}, kwargs)
         # Set all models for simulation if None provided.
