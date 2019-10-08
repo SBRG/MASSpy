@@ -26,6 +26,8 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    :caption: Contents:
 
    getting_started_with_masspy
+   reading_writing_models
+   thermo_concentrations
    faq
    autoapi/index.rst
    references.rst

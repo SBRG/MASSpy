@@ -45,7 +45,7 @@ additional SBML group objects for enzyme module ligands, species, and reactions
 for the categories of the enzyme module categorized dictionary attributes.
 The remaining information is written to the the notes field of the main SBML
 group for the enzyme module. Disabling use of the 'groups' package extension
-will result in the loss of the  enzyme specific information, but it will not
+will result in the loss of the enzyme specific information, but it will not
 prevent :class:`~.EnzymeModuleSpecies`\ s and :class:`~.EnzymeModuleReaction`\ s
 from being written to the SBML model as species and reactions, respectively.
 
@@ -1761,6 +1761,11 @@ def write_sbml_model(mass_model, filename, f_replace=None, **kwargs):
             or as global model parameters in the SBML model file.
 
             Default is ``True`` to write parameters as local parameters.
+        write_objective :
+            ``bool`` indicating whether the model objective(s) should also be
+            written into the SBML model file.
+
+            Default is ``False``.
 
     Raises
     ------
@@ -2752,9 +2757,6 @@ def _write_enzyme_modules_to_sbml(model_groups, mass_obj, f_replace):
             enzyme_group_members += [new_group]
             _write_group_to_sbml(model_groups, new_group, f_replace)
 
-        elif isinstance(attr_value, Basic):
-            # Write attribute with sympy equation to the group notes.
-            notes.update({attr_name: str(attr_value.rhs)})
         else:
             # Add attribute to the group notes.
             notes.update({attr_name: str(attr_value)})

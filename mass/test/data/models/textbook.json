@@ -58,11 +58,11 @@
             "enzyme_concentration_total": 3.3e-05,
             "enzyme_concentration_total_equation": "pfk_R0_AF_c(t) + pfk_R0_A_c(t) + pfk_R0_c(t) + pfk_R1_AF_c(t) + pfk_R1_A_c(t) + pfk_R1_c(t) + pfk_R2_AF_c(t) + pfk_R2_A_c(t) + pfk_R2_c(t) + pfk_R3_AF_c(t) + pfk_R3_A_c(t) + pfk_R3_c(t) + pfk_R4_AF_c(t) + pfk_R4_A_c(t) + pfk_R4_c(t) + pfk_T0_c(t) + pfk_T1_c(t) + pfk_T2_c(t) + pfk_T3_c(t) + pfk_T4_c(t)",
             "enzyme_module_ligands": [
-                "adp_c",
-                "amp_c",
-                "atp_c",
                 "f6p_c",
                 "fdp_c",
+                "amp_c",
+                "adp_c",
+                "atp_c",
                 "h_c"
             ],
             "enzyme_module_ligands_categorized": {
@@ -76,8 +76,8 @@
                     "atp_c"
                 ],
                 "Products": [
-                    "adp_c",
                     "fdp_c",
+                    "adp_c",
                     "h_c"
                 ],
                 "Substrates": [
@@ -85,7 +85,6 @@
                 ]
             },
             "enzyme_module_reactions": [
-                "PFK_L",
                 "PFK_R01",
                 "PFK_R02",
                 "PFK_R03",
@@ -105,6 +104,7 @@
                 "PFK_R41",
                 "PFK_R42",
                 "PFK_R43",
+                "PFK_L",
                 "PFK_T1",
                 "PFK_T2",
                 "PFK_T3",
@@ -115,55 +115,55 @@
                     "PFK_L"
                 ],
                 "amp_c_activation": [
-                    "PFK_R10",
-                    "PFK_R20",
                     "PFK_R30",
-                    "PFK_R40"
+                    "PFK_R40",
+                    "PFK_R20",
+                    "PFK_R10"
                 ],
                 "atp_c_binding": [
-                    "PFK_R01",
-                    "PFK_R11",
-                    "PFK_R21",
                     "PFK_R31",
-                    "PFK_R41"
+                    "PFK_R01",
+                    "PFK_R41",
+                    "PFK_R21",
+                    "PFK_R11"
                 ],
                 "atp_c_inhibition": [
                     "PFK_T1",
+                    "PFK_T4",
                     "PFK_T2",
-                    "PFK_T3",
-                    "PFK_T4"
+                    "PFK_T3"
                 ],
                 "catalyzation": [
                     "PFK_R03",
-                    "PFK_R13",
                     "PFK_R23",
-                    "PFK_R33",
-                    "PFK_R43"
+                    "PFK_R43",
+                    "PFK_R13",
+                    "PFK_R33"
                 ],
                 "f6p_c_binding": [
-                    "PFK_R02",
+                    "PFK_R42",
                     "PFK_R12",
-                    "PFK_R22",
+                    "PFK_R02",
                     "PFK_R32",
-                    "PFK_R42"
+                    "PFK_R22"
                 ]
             },
             "enzyme_module_species": [
-                "pfk_R0_AF_c",
-                "pfk_R0_A_c",
                 "pfk_R0_c",
-                "pfk_R1_AF_c",
-                "pfk_R1_A_c",
+                "pfk_R0_A_c",
+                "pfk_R0_AF_c",
                 "pfk_R1_c",
-                "pfk_R2_AF_c",
-                "pfk_R2_A_c",
+                "pfk_R1_A_c",
+                "pfk_R1_AF_c",
                 "pfk_R2_c",
-                "pfk_R3_AF_c",
-                "pfk_R3_A_c",
+                "pfk_R2_A_c",
+                "pfk_R2_AF_c",
                 "pfk_R3_c",
-                "pfk_R4_AF_c",
-                "pfk_R4_A_c",
+                "pfk_R3_A_c",
+                "pfk_R3_AF_c",
                 "pfk_R4_c",
+                "pfk_R4_A_c",
+                "pfk_R4_AF_c",
                 "pfk_T0_c",
                 "pfk_T1_c",
                 "pfk_T2_c",
@@ -172,18 +172,18 @@
             ],
             "enzyme_module_species_categorized": {
                 "Complexed_ATP": [
-                    "pfk_R0_A_c",
-                    "pfk_R1_A_c",
                     "pfk_R2_A_c",
+                    "pfk_R1_A_c",
+                    "pfk_R4_A_c",
                     "pfk_R3_A_c",
-                    "pfk_R4_A_c"
+                    "pfk_R0_A_c"
                 ],
                 "Complexed_ATP_F6P": [
-                    "pfk_R0_AF_c",
-                    "pfk_R1_AF_c",
-                    "pfk_R2_AF_c",
+                    "pfk_R4_AF_c",
                     "pfk_R3_AF_c",
-                    "pfk_R4_AF_c"
+                    "pfk_R0_AF_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R1_AF_c"
                 ],
                 "Free_Catalytic": [
                     "pfk_R0_c",
@@ -193,28 +193,28 @@
                     "pfk_R4_c"
                 ],
                 "Relaxed": [
-                    "pfk_R0_AF_c",
-                    "pfk_R0_A_c",
                     "pfk_R0_c",
-                    "pfk_R1_AF_c",
-                    "pfk_R1_A_c",
-                    "pfk_R1_c",
-                    "pfk_R2_AF_c",
                     "pfk_R2_A_c",
-                    "pfk_R2_c",
                     "pfk_R3_AF_c",
-                    "pfk_R3_A_c",
-                    "pfk_R3_c",
                     "pfk_R4_AF_c",
+                    "pfk_R1_A_c",
                     "pfk_R4_A_c",
+                    "pfk_R1_c",
+                    "pfk_R3_c",
+                    "pfk_R0_AF_c",
+                    "pfk_R3_A_c",
+                    "pfk_R2_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R0_A_c",
+                    "pfk_R1_AF_c",
                     "pfk_R4_c"
                 ],
                 "Tense": [
                     "pfk_T0_c",
-                    "pfk_T1_c",
-                    "pfk_T2_c",
                     "pfk_T3_c",
-                    "pfk_T4_c"
+                    "pfk_T4_c",
+                    "pfk_T2_c",
+                    "pfk_T1_c"
                 ]
             },
             "enzyme_net_flux": 1.12,
@@ -1828,6 +1828,8 @@
             "subsystem": "Pseudoreaction"
         },
         {
+            "_equilibrium_constant": 14.705882352941176,
+            "_forward_rate_constant": 200325.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1844,6 +1846,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000059.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1861,6 +1865,7 @@
         },
         {
             "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
@@ -1880,6 +1885,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 30.3030303030303,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1896,6 +1903,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 14.705882352941176,
+            "_forward_rate_constant": 200325.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1912,6 +1921,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000059.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1929,6 +1940,7 @@
         },
         {
             "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
@@ -1948,6 +1960,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 30.3030303030303,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1964,6 +1978,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 14.705882352941176,
+            "_forward_rate_constant": 200325.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1980,6 +1996,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000059.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -1997,6 +2015,7 @@
         },
         {
             "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
@@ -2016,6 +2035,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 30.3030303030303,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2032,6 +2053,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 14.705882352941176,
+            "_forward_rate_constant": 200325.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2048,6 +2071,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000059.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2065,6 +2090,7 @@
         },
         {
             "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
@@ -2084,6 +2110,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 30.3030303030303,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2100,6 +2128,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 14.705882352941176,
+            "_forward_rate_constant": 200325.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2116,6 +2146,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000059.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2133,6 +2165,7 @@
         },
         {
             "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
             "_reverse_rate_constant": 0,
             "_reversible": false,
@@ -2169,6 +2202,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2185,6 +2220,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2201,6 +2238,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -2217,6 +2256,8 @@
             "subsystem": "Glycolysis"
         },
         {
+            "_equilibrium_constant": 10.0,
+            "_forward_rate_constant": 1000000.0,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,

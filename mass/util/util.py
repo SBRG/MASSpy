@@ -92,7 +92,10 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
         Overridden and extended methods are not excluded.
 
     """
-    all_public = [i for i in obj.__dict__ if not i.startswith("_")]
+    try:
+        all_public = [i for i in obj.__dict__ if not i.startswith("_")]
+    except AttributeError:
+        all_public = []
     all_public += [i for i in obj.__class__.__dict__
                    if i not in all_public and not i.startswith("_")]
     if not exclude_parent:

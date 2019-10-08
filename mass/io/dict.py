@@ -460,7 +460,7 @@ def enzyme_to_dict(enzyme):
     for key in ["enzyme_concentration_total_equation",
                 "enzyme_net_flux_equation"]:
         if key in new_enzyme:
-            new_enzyme[key] = str(getattr(enzyme, key).rhs)
+            new_enzyme[key] = str(getattr(enzyme, key))
 
     return new_enzyme
 

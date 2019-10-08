@@ -147,16 +147,6 @@ class ConcOptGPSampler(ConcHRSampler):
         yet.
     nproj : int
         How often to reproject the sampling point into the feasibility space.
-    met_var_idx : numpy.ndarray
-        Has one entry for each metabolite in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_metabolites`, containing the index of the
-        respective metabolite variable.
-    Keq_var_idx : numpy.ndarray
-        Has one entry for each reaction in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_reactions`,containing the index of
-        respective :attr:`.MassReaction.Keq_str` variable.
 
     """
 

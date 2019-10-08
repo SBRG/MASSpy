@@ -275,7 +275,7 @@ class Ensemble(Simulation):
 
         return ensemble
 
-    def ensure_positive_percs(self, models, raise_error=False,
+    def ensure_positive_percs(self, models, reactions=None, raise_error=False,
                               update_values=False, **kwargs):
         """Seperate models based on whether all calculated PERCs are positive.
 
@@ -284,6 +284,9 @@ class Ensemble(Simulation):
         models : iterable
             An iterable of :class:`.MassModel` objects to use for PERC
             calculations.
+        reactions : iterable
+            An iterable of reaction identifiers to calculate the
+            PERCs for. If ``None``, all reactions in the model will be used.
         raise_error : bool
             Whether to raise an error upon failing to generate a model from a
             given reference. Default is ``False``.
@@ -333,9 +336,10 @@ class Ensemble(Simulation):
         if any([not isinstance(model, MassModel) for model in models]):
             raise TypeError("`models` must be an iterable of MassModels.")
 
+        reactions = [getattr(r, "_id", r) for r in reactions]
         for model in models:
             model, is_feasible = _ensure_positive_percs_for_model(
-                model, verbose, raise_error, update_values,
+                model, reactions, verbose, raise_error, update_values,
                 kwargs.get("at_equilibrium_default"))
             if is_feasible:
                 feasible.append(model)
@@ -505,7 +509,7 @@ def _validate_data_input(reference_model, data, id_type, verbose):
     return data, values
 
 
-def _ensure_positive_percs_for_model(model, verbose, raise_error,
+def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
                                      update_values, at_equilibrium_default):
     """Ensure calculated PERCs for a model are positive.
 
@@ -518,7 +522,9 @@ def _ensure_positive_percs_for_model(model, verbose, raise_error,
         _log_msg(LOGGER, logging.INFO, verbose,
                  "Calculating PERCs for '%s'", model.id)
         # Calculate PERCs
-        percs = model.calculate_PERCs(at_equilibrium_default)
+        percs = model.calculate_PERCs(at_equilibrium_default, fluxes={
+            r: v for r, v in iteritems(model.steady_state_fluxes)
+            if r.id in reactions})
         negative_percs = [kf for kf, v in iteritems(percs) if v < 0]
         if negative_percs:
             # Found negative percs
@@ -610,8 +616,9 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
 
             Default is ``False``.
         ensure_positive_percs :
-            ``bool`` indicating whether to calculate PERCs, ensure they
+            ``list`` of reaction to calculate PERCs for, ensure they
             are postive, and update feasible models with the new PERC values.
+            If ``None``, no PERCs will be checked.
 
             Default is ``True``.
         flux_suffix :
@@ -648,7 +655,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     # disrupted near the end due to invalid input format
     kwargs = _check_kwargs({
         "verbose": False,
-        "ensure_positive_percs": True,
+        "ensure_positive_percs": None,
         "flux_suffix": "_F",
         "conc_suffix": "_C",
         "at_equilibrium_default": 100000,
@@ -656,7 +663,6 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     }, kwargs)
     verbose = kwargs.pop("verbose")
     ensure_positive_percs = kwargs.pop("ensure_positive_percs")
-
     # Validate model input
     if not isinstance(reference_model, MassModel):
         raise TypeError("`reference_model` must be a MassModel.")
@@ -754,9 +760,11 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                          "Updated initial conditions for '%s'", model.id)
 
             # Ensure PERCs are positive, updating model if they are
-            if ensure_positive_percs:
+            if ensure_positive_percs is not None:
+                ensure_positive_percs = [
+                    getattr(r, "_id", r) for r in ensure_positive_percs]
                 model, is_feasible = _ensure_positive_percs_for_model(
-                    model, verbose, False, True,
+                    model, ensure_positive_percs, verbose, False, True,
                     kwargs.get("at_equilibrium_default"))
 
                 if is_feasible:
@@ -768,11 +776,10 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                     numbers["Infeasible, negative PERCs"] += 1
 
     # Add feasible models to ensemble
-    feasible.add_models(feasible_list)
+    feasible.add_models(feasible_list, verbose=verbose)
 
     # Ensure steady state exists if given a strategy
     if steady_state_strategy is not None:
-
         # Define helper function for determining steady state feasibility
         def ensure_steady_state_feasibility(num_key, perturbation=None):
             models = [m for m in feasible.models if m != reference_model.id]

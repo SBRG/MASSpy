@@ -138,7 +138,7 @@ class EnzymeModule(MassModel):
         # Initialize EnzymeModule attributes
         self._enzyme_concentration_total = None
         self._enzyme_net_flux = None
-        self.enzyme_net_flux_equation = None
+        self._enzyme_net_flux_equation = None
 
     @property
     def enzyme_total_symbol_str(self):
@@ -220,15 +220,11 @@ class EnzymeModule(MassModel):
 
         Returns
         -------
-        ~sympy.core.relational.Equality
-            A :mod:`sympy` equation with the left-hand side containing the
-            :attr:`EnzymeModule.enzyme_total_symbol_str` and the right-hand
-            side containing the sum of the :class:`~.EnzymeModuleSpecies`.
+        ~sympy.core.basic.Basic
+            A :mod:`sympy` expression of the sum of the
+            :class:`~.EnzymeModuleSpecies`.
 
         """
-        if self.enzyme_total_symbol_str is None:
-            warn("No enzyme total symbol. Define the EnzymeModule ID first.")
-            return None
 
         if not self.enzyme_module_species:
             warn("No EnzymeModuleSpecies found in EnzymeModule.")
@@ -242,9 +238,8 @@ class EnzymeModule(MassModel):
         if not enzyme_module_species:
             enzyme_module_species = self.enzyme_module_species
 
-        return sym.Eq(sym.Symbol(self.enzyme_total_symbol_str),
-                      self.sum_enzyme_module_species_concentrations(
-                          enzyme_module_species, use_values=False))
+        return self.sum_enzyme_module_species_concentrations(
+            enzyme_module_species, use_values=False)
 
     @property
     def enzyme_net_flux_equation(self):
@@ -252,47 +247,29 @@ class EnzymeModule(MassModel):
 
         Parameters
         ----------
-        equation_rhs : str, ~sympy.core.basic.Basic
-            Either a string representing the right-hand side of the equation
-            that will be sympified via the :func:`~sympy.core.sympify.sympify`
-            function., or a :mod:`sympy` expression representing the
-            right-hand side of the equation.
+        equation : str, ~sympy.core.basic.Basic
+            Either a string representing  the equationcthat will be sympified
+            via the :func:`~sympy.core.sympify.sympify` function., or a
+            :mod:`sympy` expression representing the of the expression.
 
         Returns
         -------
-        ~sympy.core.relational.Equality
-            A :mod:`sympy` equation with the left-hand side containing the
-            :attr:`EnzymeModule.enzyme_flux_symbol_str` and the right-hand side
-            containing the equation repredenting the net flux through the
+        ~sympy.core.basic.Basic
+            A :mod:`sympy` expression representing the net flux through the
             enzyme.
 
         """
-        if self.enzyme_flux_symbol_str is None:
-            warn("No enzyme flux symbol. Define the EnzymeModule ID first.")
-            return None
-
-        value = getattr(self, "_enzyme_net_flux_equation", None)
-        if value is not None:
-            value = sym.Eq(sym.Symbol(self.enzyme_flux_symbol_str), value)
-        return value
+        return getattr(self, "_enzyme_net_flux_equation", None)
 
     @enzyme_net_flux_equation.setter
-    def enzyme_net_flux_equation(self, equation_rhs):
+    def enzyme_net_flux_equation(self, equation):
         """Set the net rate equation of the enzyme."""
-        # Set the equation RHS
-        if equation_rhs is not None and self.enzyme_flux_symbol_str is not None:
-            if not isinstance(equation_rhs, (sym.Basic, string_types)):
-                raise TypeError("equation_rhs must be a sympy expression.")
-            if isinstance(equation_rhs, string_types):
-                equation_rhs = sym.sympify(equation_rhs)
-            elif hasattr(equation_rhs, "lhs") and hasattr(equation_rhs, "rhs"):
-                if equation_rhs.lhs == sym.Symbol(self.enzyme_flux_symbol_str):
-                    equation_rhs = equation_rhs.rhs
-                if equation_rhs.rhs == sym.Symbol(self.enzyme_flux_symbol_str):
-                    equation_rhs = equation_rhs.lhs
-            else:
-                pass
-        setattr(self, "_enzyme_net_flux_equation", equation_rhs)
+        # Set the equation
+        if not isinstance(equation, (sym.Basic, string_types)):
+            raise TypeError("`equation` must be a str or a sympy expression.")
+        if isinstance(equation, string_types):
+            equation = sym.sympify(equation)
+        setattr(self, "_enzyme_net_flux_equation", equation)
 
     @property
     def enzyme_module_ligands_categorized(self):
@@ -682,8 +659,7 @@ class EnzymeModule(MassModel):
         if update_enzyme:
             self.enzyme_net_flux_equation = enzyme_net_flux_equation
 
-        return sym.Eq(sym.Symbol(self.enzyme_flux_symbol_str),
-                      enzyme_net_flux_equation)
+        return enzyme_net_flux_equation
 
     def sum_enzyme_module_species_concentrations(self, enzyme_module_species,
                                                  use_values=False):
@@ -800,8 +776,8 @@ class EnzymeModule(MassModel):
             return None
 
         # Make error expression
-        error = (self.enzyme_concentration_total_equation.lhs
-                 - self.enzyme_concentration_total_equation.rhs)
+        error = (sym.Symbol(self.enzyme_total_symbol_str)
+                 - self.enzyme_concentration_total_equation)
         # Try to substitute values into equations
         if use_values:
             values = {
@@ -851,8 +827,8 @@ class EnzymeModule(MassModel):
             return None
 
         # Make error expression
-        error = (self.enzyme_net_flux_equation.lhs
-                 - self.enzyme_net_flux_equation.rhs)
+        error = (sym.Symbol(self.enzyme_flux_symbol_str)
+                 - self.enzyme_net_flux_equation)
         # Try to substitute values into equations
         if use_values:
             error = self._sub_values_into_expr(
@@ -945,9 +921,7 @@ class EnzymeModule(MassModel):
                     "species": self.enzyme_concentration_total_equation,
                     "reactions": self.enzyme_net_flux_equation
                 }[categorized_attr]
-                if summation_expr is not None:
-                    summation_expr = summation_expr.rhs
-                else:
+                if summation_expr is None:
                     raise ValueError(
                         "No equation found for '{0}' attribute".format({
                             "species": "enzyme_concentration_total_equation",

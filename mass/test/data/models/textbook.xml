@@ -360,8 +360,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
             <localParameter id="Keq_R_HEX1" value="850"/>
+            <localParameter id="kf_R_HEX1" value="0.700007254339884"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -389,8 +389,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PGI" value="0.41"/>
             <localParameter id="kf_R_PGI" value="2961.11111111115"/>
+            <localParameter id="Keq_R_PGI" value="0.41"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -452,8 +452,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_TPI" value="33.9058310930553"/>
             <localParameter id="Keq_R_TPI" value="0.0571429"/>
+            <localParameter id="kf_R_TPI" value="33.9058310930553"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -533,8 +533,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGK" value="1061655.08528112"/>
             <localParameter id="Keq_R_PGK" value="1800"/>
+            <localParameter id="kf_R_PGK" value="1061655.08528112"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -632,8 +632,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PYK" value="363000"/>
             <localParameter id="kf_R_PYK" value="468.247015920569"/>
+            <localParameter id="Keq_R_PYK" value="363000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -712,8 +712,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_G6PDH2r" value="1000"/>
             <localParameter id="kf_R_G6PDH2r" value="21864.5892487112"/>
+            <localParameter id="Keq_R_G6PDH2r" value="1000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -743,8 +743,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PGL" value="122.323111606384"/>
             <localParameter id="Keq_R_PGL" value="1000"/>
+            <localParameter id="kf_R_PGL" value="122.323111606384"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -813,8 +813,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_RPE" value="22392.0519679016"/>
             <localParameter id="Keq_R_RPE" value="3"/>
+            <localParameter id="kf_R_RPE" value="22392.0519679016"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -842,8 +842,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_RPI" value="2021.05774884763"/>
             <localParameter id="Keq_R_RPI" value="2.57"/>
+            <localParameter id="kf_R_RPI" value="2021.05774884763"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -920,8 +920,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_TKT2" value="10.3"/>
             <localParameter id="kf_R_TKT2" value="1600.14102769997"/>
+            <localParameter id="Keq_R_TKT2" value="10.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1110,8 +1110,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PUNP5" value="0.09"/>
             <localParameter id="kf_R_PUNP5" value="83.1428571428571"/>
+            <localParameter id="Keq_R_PUNP5" value="0.09"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1139,8 +1139,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_PPM" value="13.3"/>
             <localParameter id="kf_R_PPM" value="1.64274660713169"/>
+            <localParameter id="Keq_R_PPM" value="13.3"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1226,8 +1226,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_ADK1" value="100000"/>
             <localParameter id="Keq_R_ADK1" value="1.65"/>
+            <localParameter id="kf_R_ADK1" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1256,8 +1256,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_DPGM" value="1824.93702770781"/>
             <localParameter id="Keq_R_DPGM" value="2300000"/>
+            <localParameter id="kf_R_DPGM" value="1824.93702770781"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1312,8 +1312,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBDPG" value="0.25"/>
             <localParameter id="kf_R_HBDPG" value="519613"/>
+            <localParameter id="Keq_R_HBDPG" value="0.25"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1380,8 +1380,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO2" value="73.2115"/>
             <localParameter id="kf_R_HBO2" value="511077"/>
+            <localParameter id="Keq_R_HBO2" value="73.2115"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1448,8 +1448,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_HBO4" value="1289.92"/>
             <localParameter id="kf_R_HBO4" value="501595"/>
+            <localParameter id="Keq_R_HBO4" value="1289.92"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1536,8 +1536,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="Keq_R_GTHOr" value="100"/>
             <localParameter id="kf_R_GTHOr" value="53.3298118727398"/>
+            <localParameter id="Keq_R_GTHOr" value="100"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1596,9 +1596,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="glc__D_b" value="1"/>
             <localParameter id="Keq_R_SK_glc__D_c" value="INF"/>
             <localParameter id="kf_R_SK_glc__D_c" value="1.12"/>
-            <localParameter id="glc__D_b" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1732,8 +1732,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="kf_R_SK_ins_c" value="100000"/>
-            <localParameter id="Keq_R_SK_ins_c" value="1"/>
             <localParameter id="ins_b" value="0.001"/>
+            <localParameter id="Keq_R_SK_ins_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1759,8 +1759,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="kf_R_SK_hxan_c" value="100000"/>
-            <localParameter id="Keq_R_SK_hxan_c" value="1"/>
             <localParameter id="hxan_b" value="0.002"/>
+            <localParameter id="Keq_R_SK_hxan_c" value="1"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1812,8 +1812,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_h_c" value="100000"/>
             <localParameter id="Keq_R_SK_h_c" value="1"/>
+            <localParameter id="kf_R_SK_h_c" value="100000"/>
             <localParameter id="h_b" value="6.30957e-05"/>
           </listOfLocalParameters>
         </kineticLaw>
@@ -1840,8 +1840,8 @@
           </math>
           <listOfLocalParameters>
             <localParameter id="h2o_b" value="1"/>
-            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
             <localParameter id="Keq_R_SK_h2o_c" value="1"/>
+            <localParameter id="kf_R_SK_h2o_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1866,9 +1866,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_SK_co2_c" value="100000"/>
-            <localParameter id="co2_b" value="1"/>
             <localParameter id="Keq_R_SK_co2_c" value="1"/>
+            <localParameter id="co2_b" value="1"/>
+            <localParameter id="kf_R_SK_co2_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1893,9 +1893,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="kf_R_SK_nh3_c" value="100000"/>
             <localParameter id="nh3_b" value="0.091002"/>
             <localParameter id="Keq_R_SK_nh3_c" value="1"/>
-            <localParameter id="kf_R_SK_nh3_c" value="100000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -1920,9 +1920,9 @@
             </apply>
           </math>
           <listOfLocalParameters>
+            <localParameter id="o2_b" value="0.0200788"/>
             <localParameter id="kf_R_SK_o2_c" value="509726"/>
             <localParameter id="Keq_R_SK_o2_c" value="1"/>
-            <localParameter id="o2_b" value="0.0200788"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2001,8 +2001,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="1000059"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="1000059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2071,8 +2071,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2151,8 +2151,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="1000059"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="1000059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2225,8 +2225,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2305,8 +2305,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="1000059"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="1000059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2379,8 +2379,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2459,8 +2459,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="1000059"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="1000059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2532,8 +2532,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_ACT" value="1000000"/>
             <localParameter id="Keq_PFK_ACT" value="30.3030303030303"/>
+            <localParameter id="kf_PFK_ACT" value="1000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2612,8 +2612,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_PFK_F" value="1000059"/>
             <localParameter id="Keq_PFK_F" value="10"/>
+            <localParameter id="kf_PFK_F" value="1000059"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2676,8 +2676,8 @@
             </apply>
           </math>
           <listOfLocalParameters>
-            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
             <localParameter id="Keq_R_PFK_L" value="0.0011"/>
+            <localParameter id="kf_R_PFK_L" value="1000000000000"/>
           </listOfLocalParameters>
         </kineticLaw>
       </reaction>
@@ -2875,9 +2875,9 @@
       </groups:group>
       <groups:group groups:id="Products" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
-          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
           <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="H+" groups:idRef="M_h_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Substrates" groups:kind="collection">
@@ -2892,190 +2892,190 @@
       </groups:group>
       <groups:group groups:id="amp_c_activation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
-          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
           <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
+          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
           <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
+          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_binding" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
+          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
+          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
           <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
           <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
-          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="atp_c_inhibition" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
-          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
           <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
+          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
+          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
           <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="catalyzation" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
-          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
-          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
           <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
           <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
+          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="f6p_c_binding" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
-          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
           <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
           <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
+          <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Complexed_ATP" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
-          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
           <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
           <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
           <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Complexed_ATP_F6P" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Free_Catalytic" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
-          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
+          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
           <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
           <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
+          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Relaxed" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
-          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
-          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
-          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
-          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
-          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
-          <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
-          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
-          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
           <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
+          <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
           <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
+          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="Tense" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
-          <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
           <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
+          <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
           <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
           <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_ligands" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
-          <groups:member groups:name="AMP" groups:idRef="M_amp_c"/>
-          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="D-Fructose 6-phosphate" groups:idRef="M_f6p_c"/>
           <groups:member groups:name="ATP" groups:idRef="M_atp_c"/>
           <groups:member groups:name="H+" groups:idRef="M_h_c"/>
-          <groups:member groups:name="D-Fructose 6-phosphate" groups:idRef="M_f6p_c"/>
+          <groups:member groups:name="AMP" groups:idRef="M_amp_c"/>
+          <groups:member groups:name="ADP" groups:idRef="M_adp_c"/>
+          <groups:member groups:name="D-Fructose 1,6-bisphosphate" groups:idRef="M_fdp_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_species" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
-          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
-          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
-          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
-          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
-          <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
-          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
-          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
-          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
-          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
-          <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
-          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
-          <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
           <groups:member groups:name="PFK; 1 amp_c" groups:idRef="M_pfk_R1_c"/>
           <groups:member groups:name="PFK-atp complex; 1 amp_c" groups:idRef="M_pfk_R1_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 4 amp_c" groups:idRef="M_pfk_R4_A_c"/>
+          <groups:member groups:name="PFK; 3 atp_c" groups:idRef="M_pfk_T3_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 1 amp_c" groups:idRef="M_pfk_R1_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 2 amp_c" groups:idRef="M_pfk_R2_AF_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 3 amp_c" groups:idRef="M_pfk_R3_AF_c"/>
+          <groups:member groups:name="PFK; 4 amp_c" groups:idRef="M_pfk_R4_c"/>
+          <groups:member groups:name="PFK; 4 atp_c" groups:idRef="M_pfk_T4_c"/>
+          <groups:member groups:name="PFK; 3 amp_c" groups:idRef="M_pfk_R3_c"/>
+          <groups:member groups:name="PFK; 1 atp_c" groups:idRef="M_pfk_T1_c"/>
+          <groups:member groups:name="PFK-atp complex; 3 amp_c" groups:idRef="M_pfk_R3_A_c"/>
+          <groups:member groups:name="PFK-atp complex; 2 amp_c" groups:idRef="M_pfk_R2_A_c"/>
+          <groups:member groups:name="PFK; 2 amp_c" groups:idRef="M_pfk_R2_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex; 4 amp_c" groups:idRef="M_pfk_R4_AF_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_R0_c"/>
+          <groups:member groups:name="PFK-atp complex" groups:idRef="M_pfk_R0_A_c"/>
+          <groups:member groups:name="PFK" groups:idRef="M_pfk_T0_c"/>
+          <groups:member groups:name="PFK-atp-f6p complex" groups:idRef="M_pfk_R0_AF_c"/>
+          <groups:member groups:name="PFK; 2 atp_c" groups:idRef="M_pfk_T2_c"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions" groups:kind="collection">
         <groups:listOfMembers>
-          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
           <groups:member groups:name="pfk_R0-pfk_T0 transition" groups:idRef="R_PFK_L"/>
-          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
-          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
-          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
-          <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
-          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
-          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
-          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
-          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
-          <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
-          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
-          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
-          <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
-          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
-          <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
-          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
-          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
-          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
           <groups:member groups:name="pfk_R3_A-f6p binding" groups:idRef="R_PFK_R32"/>
+          <groups:member groups:name="pfk_R0-atp binding" groups:idRef="R_PFK_R01"/>
+          <groups:member groups:name="pfk_R3-atp binding" groups:idRef="R_PFK_R31"/>
+          <groups:member groups:name="pfk_R2-atp binding" groups:idRef="R_PFK_R21"/>
+          <groups:member groups:name="pfk_R0_AF catalyzation" groups:idRef="R_PFK_R03"/>
+          <groups:member groups:name="pfk_T0-atp binding" groups:idRef="R_PFK_T1"/>
+          <groups:member groups:name="pfk_T2-atp binding" groups:idRef="R_PFK_T3"/>
+          <groups:member groups:name="pfk_R2-amp binding" groups:idRef="R_PFK_R30"/>
           <groups:member groups:name="pfk_R4_A-f6p binding" groups:idRef="R_PFK_R42"/>
-          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R1-atp binding" groups:idRef="R_PFK_R11"/>
+          <groups:member groups:name="pfk_R3-amp binding" groups:idRef="R_PFK_R40"/>
+          <groups:member groups:name="pfk_R3_AF catalyzation" groups:idRef="R_PFK_R33"/>
+          <groups:member groups:name="pfk_R0-amp binding" groups:idRef="R_PFK_R10"/>
+          <groups:member groups:name="pfk_R4-atp binding" groups:idRef="R_PFK_R41"/>
           <groups:member groups:name="pfk_R1-amp binding" groups:idRef="R_PFK_R20"/>
           <groups:member groups:name="pfk_R2_A-f6p binding" groups:idRef="R_PFK_R22"/>
+          <groups:member groups:name="pfk_T1-atp binding" groups:idRef="R_PFK_T2"/>
+          <groups:member groups:name="pfk_R1_A-f6p binding" groups:idRef="R_PFK_R12"/>
+          <groups:member groups:name="pfk_R1_AF catalyzation" groups:idRef="R_PFK_R13"/>
+          <groups:member groups:name="pfk_R0_A-f6p binding" groups:idRef="R_PFK_R02"/>
+          <groups:member groups:name="pfk_R4_AF catalyzation" groups:idRef="R_PFK_R43"/>
+          <groups:member groups:name="pfk_T3-atp binding" groups:idRef="R_PFK_T4"/>
+          <groups:member groups:name="pfk_R2_AF catalyzation" groups:idRef="R_PFK_R23"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_ligands_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="Products"/>
           <groups:member groups:idRef="Cofactors"/>
           <groups:member groups:idRef="Substrates"/>
           <groups:member groups:idRef="Inhibitors"/>
-          <groups:member groups:idRef="Products"/>
           <groups:member groups:idRef="Activators"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_species_categorized" groups:kind="collection">
         <groups:listOfMembers>
+          <groups:member groups:idRef="Free_Catalytic"/>
           <groups:member groups:idRef="Tense"/>
           <groups:member groups:idRef="Complexed_ATP_F6P"/>
-          <groups:member groups:idRef="Free_Catalytic"/>
-          <groups:member groups:idRef="Relaxed"/>
           <groups:member groups:idRef="Complexed_ATP"/>
+          <groups:member groups:idRef="Relaxed"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_enzyme_module_reactions_categorized" groups:kind="collection">
         <groups:listOfMembers>
           <groups:member groups:idRef="RT_transition"/>
-          <groups:member groups:idRef="atp_c_inhibition"/>
+          <groups:member groups:idRef="atp_c_binding"/>
           <groups:member groups:idRef="catalyzation"/>
           <groups:member groups:idRef="amp_c_activation"/>
-          <groups:member groups:idRef="atp_c_binding"/>
           <groups:member groups:idRef="f6p_c_binding"/>
+          <groups:member groups:idRef="atp_c_inhibition"/>
         </groups:listOfMembers>
       </groups:group>
       <groups:group groups:id="PFK_EnzymeModuleDict" groups:kind="collection">
@@ -3089,12 +3089,12 @@
           </html>
         </notes>
         <groups:listOfMembers>
-          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
-          <groups:member groups:idRef="PFK_enzyme_module_ligands_categorized"/>
-          <groups:member groups:idRef="PFK_enzyme_module_ligands"/>
-          <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
           <groups:member groups:idRef="PFK_enzyme_module_reactions"/>
           <groups:member groups:idRef="PFK_enzyme_module_species"/>
+          <groups:member groups:idRef="PFK_enzyme_module_species_categorized"/>
+          <groups:member groups:idRef="PFK_enzyme_module_reactions_categorized"/>
+          <groups:member groups:idRef="PFK_enzyme_module_ligands"/>
+          <groups:member groups:idRef="PFK_enzyme_module_ligands_categorized"/>
         </groups:listOfMembers>
       </groups:group>
     </groups:listOfGroups>

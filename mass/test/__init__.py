@@ -75,14 +75,12 @@ def create_test_model(model_name, io="sbml"):
 
 def view_test_models():
     """Print the test models that can be loaded."""
-    for model_name in _get_directory_files(MODELS_DIR):
-        print(model_name)
+    return _get_directory_files(MODELS_DIR)
 
 
 def view_test_maps():
     """Print the test models that can be loaded."""
-    for map_name in _get_directory_files(MAPS_DIR):
-        print(map_name)
+    return _get_directory_files(MAPS_DIR)
 
 
 def test_all(args=None):

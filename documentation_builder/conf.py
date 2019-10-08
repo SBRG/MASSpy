@@ -19,7 +19,7 @@ from mass import __version__
 
 # -- Project information ------------------------------------------------------
 
-project = 'masspy'
+project = 'MASSpy'
 copyright = '2019, Z. Haiman'
 author = 'Z. Haiman'
 
