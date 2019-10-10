@@ -334,7 +334,6 @@ class Ensemble(Simulation):
         if any([not isinstance(model, MassModel) for model in models]):
             raise TypeError("`models` must be an iterable of MassModels.")
 
-        reactions = [getattr(r, "_id", r) for r in reactions]
         for model in models:
             model, is_positive = _ensure_positive_percs_for_model(
                 model, reactions, verbose, raise_error, update_values,
@@ -516,6 +515,10 @@ def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
     This method is intended for internal use only.
 
     """
+    if reactions is None:
+        reactions = model.reactions
+    
+    reactions = [getattr(r, "_id", r) for r in reactions]
     try:
         _log_msg(LOGGER, logging.INFO, verbose,
                  "Calculating PERCs for '%s'", model.id)
@@ -758,9 +761,9 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 feasible_list.append(model)
             else:
                 numbers.update({"Infeasible, negative PERCs": 0})
+                if reactions is None:
+                    reactions = []
                 # Ensure PERCs are positive, updating model if they are
-                ensure_positive_percs = [
-                    getattr(r, "_id", r) for r in ensure_positive_percs]
                 model, is_feasible = _ensure_positive_percs_for_model(
                     model, ensure_positive_percs, verbose, False, True,
                     kwargs.get("at_equilibrium_default"))
