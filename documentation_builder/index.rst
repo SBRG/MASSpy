@@ -28,6 +28,7 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    getting_started_with_masspy
    reading_writing_models
    thermo_concentrations
+   ensemble_modeling
    faq
    autoapi/index.rst
    references.rst

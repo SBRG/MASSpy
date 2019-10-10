@@ -26,7 +26,7 @@ performance gains may not be seen.
 
 """
 import logging
-from warnings import warn
+import warnings
 
 from cobra.core.dictlist import DictList
 
@@ -52,30 +52,28 @@ class Ensemble(Simulation):
     Parameters
     ----------
     reference_model : MassModel
-        The referebce model used in generating the ensemble.
-        The model will be set as the :attr:`Ensemble.reference_model`. 
+        The model to load for simulation. The model will be set as the
+        :attr:`Simulation.reference_model`.
     id : str or None
-        An identifier to associate with the :class:`Ensemble`. If ``None``
+        An identifier to associate with the :class:`Simulation`. If ``None``
         then one is automatically created based on the model identifier.
-    **kwargs
-        name :
-            ``str`` representing a human readable name for the
-            :class:`Ensemble`.
-        verbose : 
-            ``bool`` indicating whether to provide a QCQA report and more
-            verbose messages when trying to load the model.
+    name : str
+        A human readable name for the :class:`Simulation`.
+    verbose : bool
+        Whether to provide a QCQA report and more verbose messages when trying
+        to load the model. Default is ``False``.
+    *kwargs
+        variable_step_size :
+            ``bool`` indicating whether to initialize the integrator with a
+            variable time step for simulations.
 
             Default is ``False``.
 
     """
 
-    def __init__(self, reference_model, id=None, **kwargs):
+    def __init__(self, reference_model, id=None, name=None, verbose=False,
+                 **kwargs):
         """Initialize the Ensemble."""
-        kwargs = _check_kwargs({
-            "name": None,
-            "verbose": False,
-        }, kwargs)
-
         # Create ID if None
         if id is None:
             id = "{0}_Ensemble".format(str(reference_model))
@@ -83,8 +81,8 @@ class Ensemble(Simulation):
         # Intiailize
         try:
             super(Ensemble, self).__init__(reference_model=reference_model,
-                                           id=id, name=kwargs.get("name"),
-                                           verbose=kwargs.get("verbose"))
+                                           id=id, name=name, verbose=verbose,
+                                           **kwargs)
         except MassSimulationError as e:
             raise MassEnsembleError(e)
 
@@ -306,11 +304,11 @@ class Ensemble(Simulation):
 
         Returns
         -------
-        tuple (feasible, infeasible)
-        feasible : list
+        tuple (positive, negative)
+        positive : list
             A ``list`` of :class:`.MassModel` objects whose calculated PERC
             values were postiive.
-        infeasible : list
+        negative : list
             A ``list`` of :class:`.MassModel` objects whose calculated PERC
             values were negative.
 
@@ -325,30 +323,30 @@ class Ensemble(Simulation):
             "at_equilibrium_default": 100000,
         }, kwargs)
         verbose = kwargs.pop("verbose")
-        feasible = []
-        infeasible = []
+        positive = []
+        negative = []
 
         models = ensure_iterable(models)
         if not models:
-            warn("No models provided.")
-            return feasible, infeasible
+            warnings.warn("No models provided.")
+            return positive, negative
 
         if any([not isinstance(model, MassModel) for model in models]):
             raise TypeError("`models` must be an iterable of MassModels.")
 
         reactions = [getattr(r, "_id", r) for r in reactions]
         for model in models:
-            model, is_feasible = _ensure_positive_percs_for_model(
+            model, is_positive = _ensure_positive_percs_for_model(
                 model, reactions, verbose, raise_error, update_values,
                 kwargs.get("at_equilibrium_default"))
-            if is_feasible:
-                feasible.append(model)
+            if is_positive:
+                positive.append(model)
             else:
-                infeasible.append(model)
+                negative.append(model)
 
         _log_msg(LOGGER, logging.INFO, verbose,
                  "Finished PERC calculations, returning seperated models.")
-        return feasible, infeasible
+        return positive, negative
 
     def ensure_steady_state(self, models=None, strategy="nleq2",
                             perturbations=None, update_values=False,
@@ -553,8 +551,8 @@ def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
 
 
 def generate_ensemble(reference_model, flux_data=None, conc_data=None,
-                      steady_state_strategy="simulate", perturbations=None,
-                      **kwargs):
+                      ensure_positive_percs=None, steady_state_strategy=None,
+                      perturbations=None, **kwargs):
     """Generate an :class:`Ensemble` of feasible models for given data sets.
 
     This function is optimized for performance when generating a large
@@ -578,7 +576,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     Parameters
     ----------
     reference_model : MassModel
-        The referebce model used in generating the ensemble.
+        The reference model used in generating the ensemble.
         The model will be set as the :attr:`Ensemble.reference_model`.
     flux_data : pandas.DataFrame or None
         A :class:`pandas.DataFrame` containing the flux data for generation
@@ -591,6 +589,10 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
         concentration values to generate a model for, and each column
         corresponds to the metabolite identifier for the concentraiton
         value.
+    ensure_positive_percs :
+        A ``list`` of reactions to calculate PERCs for, ensure they
+        are postive, and update feasible models with the new PERC values.
+        If ``None``, no PERCs will be checked.
     steady_state_strategy : str, None
         The strategy for finding the steady state. Must be one of the
         following:
@@ -615,12 +617,6 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
             ``bool`` indicating the verbosity of the function.
 
             Default is ``False``.
-        ensure_positive_percs :
-            ``list`` of reaction to calculate PERCs for, ensure they
-            are postive, and update feasible models with the new PERC values.
-            If ``None``, no PERCs will be checked.
-
-            Default is ``True``.
         flux_suffix :
             ``str`` representing the suffix to append to generated models
             indicating the flux data set used.
@@ -655,14 +651,12 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     # disrupted near the end due to invalid input format
     kwargs = _check_kwargs({
         "verbose": False,
-        "ensure_positive_percs": None,
         "flux_suffix": "_F",
         "conc_suffix": "_C",
         "at_equilibrium_default": 100000,
         "return_infeasible": False,
     }, kwargs)
     verbose = kwargs.pop("verbose")
-    ensure_positive_percs = kwargs.pop("ensure_positive_percs")
     # Validate model input
     if not isinstance(reference_model, MassModel):
         raise TypeError("`reference_model` must be a MassModel.")
@@ -712,11 +706,12 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 # Parse the perturbations and format the input to be used
                 perturbations[i] = feasible._format_perturbations_input(
                     perturbation, verbose)
-    else:
+            
+    if perturbations is None:
         perturbations = []
 
     # Dictionary to track when models were determined to be infeasible
-    numbers = {"Infeasible, negative PERCs": 0}
+    numbers = {}
 
     feasible_list = DictList([])
     infeasible_list = DictList([])
@@ -759,8 +754,11 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 _log_msg(LOGGER, logging.INFO, verbose,
                          "Updated initial conditions for '%s'", model.id)
 
-            # Ensure PERCs are positive, updating model if they are
-            if ensure_positive_percs is not None:
+            if ensure_positive_percs is None:
+                feasible_list.append(model)
+            else:
+                numbers.update({"Infeasible, negative PERCs": 0})
+                # Ensure PERCs are positive, updating model if they are
                 ensure_positive_percs = [
                     getattr(r, "_id", r) for r in ensure_positive_percs]
                 model, is_feasible = _ensure_positive_percs_for_model(
@@ -774,6 +772,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                     # Add infeasible model to ensemble if specified
                     infeasible_list.append(model)
                     numbers["Infeasible, negative PERCs"] += 1
+                
 
     # Add feasible models to ensemble
     feasible.add_models(feasible_list, verbose=verbose)
@@ -781,15 +780,21 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     # Ensure steady state exists if given a strategy
     if steady_state_strategy is not None:
         # Define helper function for determining steady state feasibility
-        def ensure_steady_state_feasibility(num_key, perturbation=None):
+        def ensure_steady_state_feasibility(num_key, perturbation=None,
+                                            update_values=False):
             models = [m for m in feasible.models if m != reference_model.id]
-            conc_sol_list, flux_sol_list = feasible.find_steady_state(
-                models=models, strategy=steady_state_strategy,
-                perturbations=perturbation,
-                update_values=True, verbose=verbose)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                conc_sol_list, flux_sol_list = feasible.find_steady_state(
+                    models=models, strategy=steady_state_strategy,
+                    perturbations=perturbation,
+                    update_values=update_values, verbose=verbose)
             numbers[num_key] = 0
             for i, model in enumerate(models):
-                conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
+                if len(models) == 1:
+                    conc_sol, flux_sol = conc_sol_list, flux_sol_list
+                else:
+                    conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
                 if conc_sol and flux_sol:
                     _log_msg(LOGGER, logging.INFO, verbose,
                              "Successfully found steady state for '%s'",
@@ -806,7 +811,8 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 numbers[num_key] += 1
 
         # Ensure models can reach a steady state
-        ensure_steady_state_feasibility("Infeasible, no steady state found")
+        ensure_steady_state_feasibility("Infeasible, no steady state found",
+                                        update_values=True)
 
         # Ensure models can reach a steady state with the given perturbations
         for i, perturbation in enumerate(perturbations):
@@ -817,15 +823,16 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
             ensure_steady_state_feasibility(
                 "Infeasible, no steady state with " + perturbation_str,
                 perturbation)
-
-    num_str = "\nTotal Models generated: {0}\n".format(
+    num_str = "\n" if verbose else ""
+    num_str += "Total models generated: {0}".format(
         len(feasible.models) - 1 + len(infeasible_list))
-    num_str += "Feasible: {0}\n".format(str(len(feasible.models) - 1))
-    num_str += "\n".join(["{0}: {1}".format(k, v)
-                         for k, v in iteritems(numbers)])
+    if numbers:
+        num_str += "\nFeasible: {0}\n".format(str(len(feasible.models) - 1))
+        num_str += "\n".join(["{0}: {1}".format(k, v)
+                            for k, v in iteritems(numbers)])
 
     if not kwargs.get("return_infeasible"):
-        _log_msg(LOGGER, logging.INFO, verbose, num_str)
+        _log_msg(LOGGER, logging.INFO, True, num_str)
 
         return feasible
 
@@ -838,7 +845,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     infeasible.id += "_Infeasible"
     infeasible.add_models(infeasible_list)
 
-    _log_msg(LOGGER, logging.INFO, verbose, num_str)
+    _log_msg(LOGGER, logging.INFO, True, num_str)
 
     return feasible, infeasible
 

@@ -137,12 +137,16 @@ def strip_time(sympy_expr):
     def _strip_single_expr(expr):
         if not isinstance(expr, sym.Basic):
             raise TypeError("{0} is not a sympy expression".format(str(expr)))
-        # Get the functions of time.
+        # Get the functions of only time.
+        subs_dict = {}
         funcs = list(expr.atoms(sym.Function))
-        # Get the symbols to replace the functions
-        symbols = list(sym.Symbol(str(f)[:-3]) for f in funcs)
+        for func in funcs:
+            if len(func.atoms(sym.Function)) == 1 \
+               and func.atoms(sym.Symbol).pop() == sym.Symbol("t"):
+                # Make symbol to replace function
+                subs_dict[func] = sym.Symbol(str(func)[:-3])
         # Substitute functions for symbols
-        new_expr = expr.subs(dict(zip(funcs, symbols)))
+        new_expr = expr.subs(subs_dict)
 
         return new_expr
 
