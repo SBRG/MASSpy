@@ -1987,128 +1987,97 @@ class MassModel(Model):
 
         return equivalent
 
-    def set_model_description(self, *assumptions, **additional_notes):
-        """Set the model :attr:`MassModel.description` in a readable format.
-
-        This is a convenience method to help set the description in a human
-        legible format.
-
-        Parameters
-        ----------
-        *assumptions
-            Any number of assumptions as strings to add to the description.
-        **additional_notes
-            Recognized ``kwargs`` are the following:
-
-                replace :
-                    ``bool`` indicating whether to replace the current
-                    description or to add it to the additional notes.
-
-                    Default is ``True`` to replace the current description.
-                max_line_length :
-                    ``int`` between 50 and 100 indicating the maximum line
-                    length before wrapping. Default is 80.
-                organism :
-                    ``str`` indicating the organism represented by the model.
-                    Can be used in addition or instead of the ``cell_type``
-                    kwarg.
-                cell_type :
-                    ``str`` indicating the cell type represented by the model.
-                    Can be used in addition or instead of the ``organism``
-                    kwarg
-
-            All remaining ``kwargs`` are considered additional notes to be
-            added to the description. Use an underscore ``"_"`` in the kwarg
-            to represent a space ``" "``. (e.g. cell_type for cell type)
+    def set_model_description(self, description=None, assumptions=None,
+                              max_line_length=80, **additional_notes):
+        """TODO DOCSTRING.
 
         """
-        # Determine whether description is being replaced
-        replace = True
-        if "replace" in additional_notes:
-            replace = additional_notes.pop("replace")
+        # Check input for description and max line length
+        if description is not None\
+           and not isinstance(description, string_types):
+            raise TypeError("`description` must be a string.")
+            
         # Determine max line length for description
-        mml = 80
-        if "max_line_length" in additional_notes:
-            mml = additional_notes.pop("max_line_length")
-        if not isinstance(mml, integer_types) or not 50 <= mml < 100:
-            # If bad line length input, reset to 80 
+        max_line_length = int(max_line_length)
+        if not isinstance(max_line_length, integer_types) or \
+           not 20 <= max_line_length <= 100:
             warnings.warn(
-                "`max_line_length` not an int between 50 and 100 "
-                "using default value.")
-            mml = 80
+                "`max_line_length` not an int between 50 and 100, "
+                "therefore using default value.")
+            max_line_length = 80
 
-        def add_to_description(description, key, value, key_newline=False,
-                               captialize=True):
+        # Helper function to add to the description
+        def add_to_description(description_str, key, value, add_section=None,
+                               indent=0):
             """Add to the description string."""
-            # Captialize first letter for description if desired
-            if captialize:
-                key = key.capitalize()
-            # Turn underscores into whitespace
-            key = key.replace("_", " ")
-            display_str = key
-            # Ensure indents match if there is to be a multiple lines
-            if key_newline:
-                key = "  "
-                display_str += "\n" + key
-            n_key = len(key)
-            display_str += value[:mml - n_key] + "\n"
-            if len(value) > mml - n_key:
-                while len(value) > mml - n_key:
-                    value = value[mml - n_key:]
-                    display_str += n_key * " " + value[:mml - n_key]
-                    display_str += "\n"
-                display_str += value[mml - n_key:]
-            else:
-                display_str = key + value
-            # Join new description item to the current description and return
-            description = "\n".join((description, display_str))
-            return description
+            display_str = ""
+            if add_section is not None:
+                display_str = "\n".join((
+                    display_str, add_section.capitalize() + ":",
+                    "-" * max_line_length))
+                display_str += "\n"
 
-        # Initialize description with the model ID
-        description = "Model ID: " + str(self.id)
+            display_str += key.replace("_", " ")
+            # Add to description, wrapping text when needed while respecting
+            # newline characters.
+            for i, value in enumerate(value.split("\n")):
+                value += "\n"
+                if i != 0:
+                    value = " " * indent + value
+                while len(value) >  max_line_length:
+                    display_str += value[:max_line_length] + "\n"
+                    value = " " * indent + value[max_line_length:]
+                display_str += value
 
-        # Handle recognized kwargs
-        for key in ["organism", "cell_type"]:
+            description_str = "\n".join((
+                description_str, display_str.rstrip("\n")))
+            return description_str
+
+        # Initialize description, add recognized kwargs
+        description_str = ""
+        additional_notes["model"] = str(self.id)
+        for key in ["model", "organism", "cell_type"]:
             value = additional_notes.get(key, "")
-            if not isinstance(key, string_types):
-                warnings.warn(
-                    "{0} '{1}' is not a string, therefore it will "
-                    "be ignored".format(key, str(value)))
-                continue
-
-            description = add_to_description(
-                description, key + ":", value) if value else description
-
-            if key in additional_notes:
+            if value:
+                description_str = add_to_description(description_str,
+                                                     key.capitalize() + ": ",
+                                                     value)
                 del additional_notes[key]
-        # Handle assumptions
-        if assumptions:
-            description += "\n".join((
-                "", "=" * mml, "Assumptions", "-" * mml))
-            for assumption in ensure_iterable(assumptions):
-                if not isinstance(assumption, string_types):
-                    warnings.warn(
-                        "{0} '{1}' is not a string, therefore it will be "
-                        "ignored".format("Assumption", str(assumption)))
-                    continue
-                description = add_to_description(
-                    description, " * ", assumption, captialize=False)
-            description += "\n"
 
-        # Append old description to the new one.
-        if not replace:
-            additional_notes["Old Description"] = self.description
+        if assumptions or additional_notes:
+            # Add line at the beginning of the description section
+            description_str += "\n" + "=" * max_line_length 
+            dipslay_str = ""
+            # Add description section
+            if description is not None:
+                dipslay_str = add_to_description(
+                    dipslay_str, "", description, "description")
 
-        # Add any additional notes
-        if additional_notes:
-            description += "\n".join((
-                "", "=" * mml, "Additional Notes", "-" * mml))
-            for key, value in iteritems(additional_notes):
-                description = add_to_description(
-                    description, key.capitalize() + ":", value,
-                    key_newline=True, captialize=False)
+            # Add assumptions section
+            if assumptions:
+                for i, assumption in enumerate(assumptions):
+                    add_section = None
+                    if i == 0:
+                        add_section = "assumptions"
+                    dipslay_str = add_to_description(
+                        dipslay_str, "", " * " + assumption, add_section,
+                        indent=3)
 
-        self.description = description
+            # Add additional notes section
+            if additional_notes:
+                for i, (key, value) in enumerate(iteritems(additional_notes)):
+                    add_section = None
+                    if i == 0:
+                        add_section = "additional"
+                    dipslay_str = add_to_description(
+                        dipslay_str, key.capitalize() + ":\n",
+                        " " * 3  + value, add_section, indent=3)
+            # Add line at the end of the description section
+            description_str = "\n".join((
+                description_str, dipslay_str.strip("\n"),
+                "=" * max_line_length))
+        # Set description
+        self.description = description_str.strip("\n")
 
     # Internal
     def _cobra_to_mass_repair(self):
