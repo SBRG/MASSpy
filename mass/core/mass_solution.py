@@ -17,7 +17,7 @@ category, respectively.
 All solutions in a :class:`MassSolution` can be accessed via attribute
 accessors. A :class:`MassSolution` also contains standard ``dict`` methods.
 
-All functions from the :mod:`mass.core.visualization` submodule are designed
+All functions from the :mod:`mass.visualization` submodule are designed
 to work seamlessly with :class:`MassSolution`\ s, provided they are properly
 created.
 """

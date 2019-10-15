@@ -143,10 +143,11 @@ class MassBaseConfiguration:
     @irreversible_Keq.setter
     def irreversible_Keq(self, value):
         """Set the default value for Keq of an irreversible reaction."""
-        if not isinstance(value, (integer_types, float)):
-            raise TypeError("Must be an int or float")
-        if value < 0.:
-            raise ValueError("Must be a non-negative number")
+        if value is not None:
+            if not isinstance(value, (integer_types, float)):
+                raise TypeError("Must be an int or float")
+            if value < 0.:
+                raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_Keq", value)
 
     @property
@@ -174,10 +175,11 @@ class MassBaseConfiguration:
     @irreversible_kr.setter
     def irreversible_kr(self, value):
         """Set the default value for kr of an irreversible reaction."""
-        if not isinstance(value, (integer_types, float)):
-            raise TypeError("Must be an int or float")
-        if value < 0.:
-            raise ValueError("Must be a non-negative number")
+        if value is not None:
+            if not isinstance(value, (integer_types, float)):
+                raise TypeError("Must be an int or float")
+            if value < 0.:
+                raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_kr", value)
 
     @property

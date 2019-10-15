@@ -188,16 +188,19 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         warn("No metabolites exist in reaction.")
         return None
 
-    # Generate forward and reverse rate expressions
+    # Generate forward rate expression
     fwd_rate = generate_foward_mass_action_rate_expression(reaction,
                                                            rate_type)
-    rev_rate = generate_reverse_mass_action_rate_expression(reaction,
-                                                            rate_type)
 
-    # Ignore reverse rate if it is mathematically equal to 0.
-    if reaction.Keq == float("inf") and reaction.kr == 0:
+    # Ignore reverse rate if it is mathematically equal to 0, or if 
+    # the equilibrium and rate constants are None and reaction is irreversible
+    if (reaction.Keq == float("inf") or reaction.kr == 0) or\
+       (reaction.Keq, reaction.kr) == (None, None) and not reaction.reversible:
         rate_expression = fwd_rate
     else:
+        # Generate reverse rate expression
+        rev_rate = generate_reverse_mass_action_rate_expression(reaction,
+                                                                rate_type)
         rate_expression = sym.Add(fwd_rate, sym.Mul(-sym.S.One, rev_rate))
 
     # Try to group the forward rate constants

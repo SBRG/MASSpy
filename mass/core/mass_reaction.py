@@ -355,12 +355,11 @@ class MassReaction(Reaction):
         accessed through the model.
 
         """
-        keys = [self.kf_str, self.Keq_str]
-        attrs = ["_forward_rate_constant", "_equilibrium_constant"]
+        keys = [self.kf_str, self.Keq_str, self.kr_str]
+        attrs = ["_forward_rate_constant",
+                 "_equilibrium_constant",
+                 "_reverse_rate_constant"]
         # Return reverse rate constants for reversible reactions.
-        if self.reversible:
-            keys += [self.kr_str]
-            attrs += ["_reverse_rate_constant"]
         parameters = {key: getattr(self, attr)
                       for key, attr in zip(keys, attrs)
                       if getattr(self, attr) is not None}

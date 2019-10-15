@@ -135,16 +135,18 @@ def get_missing_reaction_parameters(model, reaction_list=None):
             try:
                 rxn.parameters[key]
             except KeyError:
-                if not rxn.reversible and key is rxn.kr_str:
+                if not rxn.reversible and key in [rxn.Keq_str, rxn.kr_str]:
                     pass
                 else:
                     missing_params.append(key)
         missing_params = "; ".join([
             k.split("_")[0] for k in missing_params]).rstrip("; ")
 
-        # Remove missing reverse rate constants for irreversible reactions
-        if not rxn.reversible and "kr" in missing_params:
-            missing_params = missing_params.replace("kr", "")
+        # Remove missing equilibrium and reverse rate constants
+        # for irreversible reactions
+        for param in ["Keq", "kr"]:
+            if not rxn.reversible and param in missing_params:
+                missing_params = missing_params.replace(param, "")
 
         if missing_params:
             missing[rxn] = "{0}".format(missing_params.rstrip("; "))
@@ -442,7 +444,7 @@ def check_reaction_parameters(model, reaction_list=None):
         elif len(rxn.parameters) < 2:
             missing.append(rxn)
         # Address reactions that have superfluous parameters
-        elif len(rxn.parameters) > 2:
+        elif len(rxn.parameters) > 2 and rxn.reversible:
             superfluous.append(rxn)
         # Only two reaction parameters exist, no consistency check required
         else:
