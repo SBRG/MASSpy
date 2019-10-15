@@ -26,6 +26,7 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    :caption: Contents:
 
    getting_started_with_masspy
+   constructing_models
    reading_writing_models
    thermo_concentrations
    ensemble_modeling

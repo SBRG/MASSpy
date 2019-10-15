@@ -14,7 +14,7 @@ from mass.thermo.conc_sampling.conc_hr_sampler import ConcHRSampler, step
 class ConcACHRSampler(ConcHRSampler):
     """Artificial Centering Hit-and-Run sampler for concentration sampling.
 
-    A sampler with low memory footprint and good convergence :cite:`achr`.
+    A sampler with low memory footprint and good convergence :cite:`KS98`.
 
     Notes
     -----

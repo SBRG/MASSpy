@@ -71,7 +71,7 @@ class ConcOptGPSampler(ConcHRSampler):
     """A parallel optimized sampler.
 
     A parallel sampler with fast convergence and parallel execution
-    :cite:`optgp`.
+    :cite:`MHM14`.
 
     Notes
     -----

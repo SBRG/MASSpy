@@ -20,12 +20,12 @@ def sample_concentrations(concentration_solver, n, method="optgp",
     Currently supports two methods.
 
     1. ``'optgp'`` which uses the :class:`~.ConcOptGPSampler` that supports
-       parallel sampling :cite:`optgp`. Requires large numbers of samples to be
+       parallel sampling :cite:`MHM14`. Requires large numbers of samples to be
        performant (n > 1000). For smaller samples, ``'achr'`` might be better
        suited.
     2. ``'achr'`` which uses artificial centering hit-and-run via the
        :class:`.ConcACHRSampler`. This is a single process method with
-       good convergence :cite:`achr`.
+       good convergence :cite:`KS98`.
 
     Parameters
     ----------
