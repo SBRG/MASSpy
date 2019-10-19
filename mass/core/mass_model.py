@@ -1571,7 +1571,7 @@ class MassModel(Model):
                 A ``dict`` of concentrations necessary for the PERC
                 calculations, where :class:`~.MassMetabolite`\ s are keys and
                 concentrations are the values. If ``None``, the relevant
-                concentrations that exist in the model are used. 
+                concentrations that exist in the model are used.
 
                 Default is ``None``.
 
@@ -1823,7 +1823,7 @@ class MassModel(Model):
                     with warnings.catch_warnings():
                         if not verbose:
                             warnings.filterwarnings(
-                                "ignore", 
+                                "ignore",
                                 ".*constant for an irreversible reaction.*")
                         setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
@@ -1996,7 +1996,7 @@ class MassModel(Model):
         if description is not None\
            and not isinstance(description, string_types):
             raise TypeError("`description` must be a string.")
-            
+
         # Determine max line length for description
         max_line_length = int(max_line_length)
         if not isinstance(max_line_length, integer_types) or \
@@ -2024,7 +2024,7 @@ class MassModel(Model):
                 value += "\n"
                 if i != 0:
                     value = " " * indent + value
-                while len(value) >  max_line_length:
+                while len(value) > max_line_length:
                     display_str += value[:max_line_length] + "\n"
                     value = " " * indent + value[max_line_length:]
                 display_str += value
@@ -2046,7 +2046,7 @@ class MassModel(Model):
 
         if assumptions or additional_notes:
             # Add line at the beginning of the description section
-            description_str += "\n" + "=" * max_line_length 
+            description_str += "\n" + "=" * max_line_length
             dipslay_str = ""
             # Add description section
             if description is not None:
@@ -2071,7 +2071,7 @@ class MassModel(Model):
                         add_section = "additional"
                     dipslay_str = add_to_description(
                         dipslay_str, key.capitalize() + ":\n",
-                        " " * 3  + value, add_section, indent=3)
+                        " " * 3 + value, add_section, indent=3)
             # Add line at the end of the description section
             description_str = "\n".join((
                 description_str, dipslay_str.strip("\n"),

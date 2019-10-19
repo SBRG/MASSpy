@@ -250,9 +250,9 @@ class MassSolution(DictWithID):
             "tile_xlabel_fontdict": {"size": "large"},
             "tile_ylabel_fontdict": {"size": "large"},
             "annotate_time_points_legend_loc": "right outside"}
-        # Plot with kwargs 
+        # Plot with kwargs
         ax = plot_tiled_phase_portraits(self, ax=ax, **options)
-        # Set figure size 
+        # Set figure size
         ax.get_figure().set_size_inches((7, 7))
 
     def to_frame(self):

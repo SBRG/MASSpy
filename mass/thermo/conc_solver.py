@@ -236,7 +236,7 @@ class ConcSolver:
                     key, str(e)))
 
         # Ensure model has Keq parameters and initial conditions defined
-         # Ensure model has Keq parameters and initial conditions defined
+        # Ensure model has Keq parameters and initial conditions defined
         missing = self._check_for_missing_values(model)
         for key, missing_values in iteritems(missing):
             if missing_values:
@@ -613,7 +613,7 @@ class ConcSolver:
                     LOGGER.info("No Keq defined for '%s', no variable bounds "
                                 "set", rxn.id)
                 elif any([r in fixed_Keq_bounds
-                        for r in [rxn, rxn.id, rxn.Keq_str]]):
+                          for r in [rxn, rxn.id, rxn.Keq_str]]):
                     bounds = (rxn.Keq, rxn.Keq)
                 else:
                     bounds = (Keq_percent_deviation, Keq_percent_deviation)
@@ -689,7 +689,7 @@ class ConcSolver:
                 "Solver does not have QP capabilities. Utilize the "
                 "`ConcSolver.choose_solver` method to set a QP "
                 "capable solver.")
-    
+
         missing = self._check_for_missing_values(self.model)
         if any(list(itervalues(missing))):
             raise ValueError(
@@ -1462,7 +1462,7 @@ class ConcSolver:
                                       MASSCONFIGURATION.decimal_precision)
 
         if epsilon is None:
-            epsilon = self.constraint_buffer  
+            epsilon = self.constraint_buffer
 
         if steady_state_flux > 0:
             lb, ub = (None, -1 * epsilon)
@@ -1690,7 +1690,7 @@ class ConcSolver:
     def _check_for_missing_values(self, model, concentrations=True,
                                   equilibrium_constants=True,
                                   steady_state_fluxes=True):
-        """Determine missing values that prevent setup of a problem. 
+        """Determine missing values that prevent setup of a problem.
 
         Warnings
         --------
@@ -1706,18 +1706,18 @@ class ConcSolver:
                         if met.id not in self.excluded_metabolites])]
         if equilibrium_constants:
             missing["equilibrium constants"] = [
-            r.id for r, v in iteritems(get_missing_reaction_parameters(
-                model, reaction_list=[
-                    rxn for rxn in model.reactions
-                    if rxn.id not in self.excluded_reactions]))
-            if "Keq" in v]
+                r.id for r, v in iteritems(get_missing_reaction_parameters(
+                    model, reaction_list=[
+                        rxn for rxn in model.reactions
+                        if rxn.id not in self.excluded_reactions]))
+                if "Keq" in v]
 
         if steady_state_fluxes:
             missing["steady state fluxes"] = [
-            r.id for r in get_missing_steady_state_fluxes(
-                model, reaction_list=[
-                    rxn for rxn in model.reactions
-                    if rxn.id not in self.excluded_reactions])]
+                r.id for r in get_missing_steady_state_fluxes(
+                    model, reaction_list=[
+                        rxn for rxn in model.reactions
+                        if rxn.id not in self.excluded_reactions])]
 
         return missing
 

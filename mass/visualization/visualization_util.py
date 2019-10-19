@@ -311,7 +311,7 @@ def _validate_annotate_time_points_input(*args):
                                                                len(markers))
         # Assign value dependning on whether validation was successful
         marker_sizes = default_sizes if not marker_sizes else marker_sizes
-    
+
     # Validate time points colors
     colors = _validate_time_points_marker_properties("color", colors,
                                                      len(time_points))
@@ -819,7 +819,7 @@ def _check_second_legend_location(desired_loc, taken_loc):
             if v == (taken_loc, bbox_to_anchor):
                 taken_loc = k
                 break
-    
+
     # Make sure desired location is not already taken
     if desired_loc is not None and desired_loc == taken_loc:
         msg = " location already used, utilizing default value instead"
@@ -860,13 +860,12 @@ def _get_annotated_time_points_legend_args(ax, desired_loc=None,
     anchor = None
     # Get kwargs for legend location
     if desired_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-        desired_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired_loc]        
+        desired_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired_loc]
 
     if desired_loc is None and anchor is None:
         legend_kwargs = {}
     else:
         legend_kwargs = {"loc": desired_loc, "bbox_to_anchor": anchor}
-
 
     return points, labels, legend_kwargs
 
@@ -1056,7 +1055,7 @@ def _get_dataframe_of_observables(x, y, compare, observable):
     """
     # Concat x and y together
     xy = pd.concat([x, y], axis=1, sort=False)
-    # Filter for plot observables 
+    # Filter for plot observables
     if observable is not None:
         if compare in ["Keqs", "kfs"]:
             p_type = compare[:-1]

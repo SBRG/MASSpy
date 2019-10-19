@@ -192,7 +192,7 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
     fwd_rate = generate_foward_mass_action_rate_expression(reaction,
                                                            rate_type)
 
-    # Ignore reverse rate if it is mathematically equal to 0, or if 
+    # Ignore reverse rate if it is mathematically equal to 0, or if
     # the equilibrium and rate constants are None and reaction is irreversible
     if (reaction.Keq == float("inf") or reaction.kr == 0) or\
        (reaction.Keq, reaction.kr) == (None, None) and not reaction.reversible:

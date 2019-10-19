@@ -304,8 +304,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     if kwargs.get("annotate_time_points_legend"):
         for sub_ax in ax.get_children():
             if sub_ax.__class__.__name__ == "Axes"\
-            and v_util._get_ax_current(sub_ax, time_points=True):
-                
+               and v_util._get_ax_current(sub_ax, time_points=True):
                 leg_args = v_util._get_annotated_time_points_legend_args(
                     sub_ax, kwargs.get("annotate_time_points_legend"))
                 break

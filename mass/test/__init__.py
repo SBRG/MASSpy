@@ -39,7 +39,7 @@ MAPS_DIR = join(DATA_DIR, "maps", "")
 """str: The directory location of the pre-made :mod:`escher` maps files."""
 
 
-def create_test_model(model_name, io="sbml"):
+def create_test_model(model_name, io="json"):
     """Return a :class:`mass.MassModel <~.MassModel>` for testing.
 
     Parameters

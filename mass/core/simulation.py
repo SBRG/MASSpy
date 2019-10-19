@@ -552,7 +552,7 @@ class Simulation(Object):
         -------
         tuple (conc_solutions, flux_solutions)
         conc_solutions : MassSolution or DictList
-            If only one model was simulated, the return type is 
+            If only one model was simulated, the return type is
             a :class:`~.MassSolution` containing the concentration solutions.
             If multiple models were simulated, the return type is a
             :class:`~cobra.core.dictlist.DictList` of
@@ -560,7 +560,7 @@ class Simulation(Object):
             If a simulation failed, the corresponding :class:`~.MassSolution`
             will be returned as empty.
         flux_solutions : MassSolution or DictList
-            If only one model was simulated, the return type is 
+            If only one model was simulated, the return type is
             a :class:`~.MassSolution` containing the flux solutions.
             If multiple models were simulated, the return type is a
             :class:`~cobra.core.dictlist.DictList` of
@@ -757,7 +757,7 @@ class Simulation(Object):
         -------
         tuple (conc_solutions, flux_solutions)
         conc_solutions : MassSolution or DictList
-            If only one model was simulated, the return type is 
+            If only one model was simulated, the return type is
             a :class:`~.MassSolution` containing the concentration solutions.
             If multiple models were simulated, the return type is a
             :class:`~cobra.core.dictlist.DictList` of
@@ -765,7 +765,7 @@ class Simulation(Object):
             If a simulation failed, the corresponding :class:`~.MassSolution`
             will be returned as empty.
         flux_solutions : MassSolution or DictList
-            If only one model was simulated, the return type is 
+            If only one model was simulated, the return type is
             a :class:`~.MassSolution` containing the flux solutions.
             If multiple models were simulated, the return type is a
             :class:`~cobra.core.dictlist.DictList` of
@@ -1257,7 +1257,7 @@ class Simulation(Object):
     def update_model_simulation_values(self, model, initial_conditions=None,
                                        parameters=None, verbose=False):
         """Update the simulation values for a given model.
-        
+
         Parameters
         ----------
         model : MassModel or its string identifier.
@@ -1469,7 +1469,7 @@ def _format_time_input(time, steps=None, verbose=False):
                         "'(t0, tf)' or '(t0, tf, numpoints)'")
     if steps is not None:
         steps = int(steps)
-    
+
     time = (t0, tf, numpoints, None, steps)
 
     return time

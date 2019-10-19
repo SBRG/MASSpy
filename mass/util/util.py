@@ -177,7 +177,7 @@ def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
 class ColorFormatter(logging.Formatter):
     """Colored Formatter for logging output.
 
-    Based on 
+    Based on
     http://uran198.github.io/en/python/2016/07/12/colorful-python-logging.html
 
     """

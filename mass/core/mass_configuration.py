@@ -254,7 +254,7 @@ class MassBaseConfiguration:
     @property
     def exclude_compartment_volumes_in_rates(self):
         """Get or set whether to exclude the compartment volumes in rates.
-        
+
         The boundary compartment will always excluded.
 
         Parameters
@@ -271,7 +271,6 @@ class MassBaseConfiguration:
         if not isinstance(value, bool):
             raise TypeError("Must be a ``bool``.")
         setattr(self, "_exclude_compartment_volumes_in_rates", value)
-
 
     @property
     def decimal_precision(self):

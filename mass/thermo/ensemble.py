@@ -255,7 +255,7 @@ class Ensemble(Simulation):
                     new_model.update_initial_conditions(
                         dict(zip(id_array, values)), verbose=False)
                     _log_msg(LOGGER, logging.INFO, verbose,
-                             "Updated initial conditions for '%s'", 
+                             "Updated initial conditions for '%s'",
                              new_model.id)
 
                     # Add model to the ensemble
@@ -444,7 +444,7 @@ class Ensemble(Simulation):
             "decimal_precision": True}, kwargs)
         # Get models, adding any models that may not already exist
         if models is None:
-            models = self.models 
+            models = self.models
         elif any([str(m) not in self.models for m in models]):
             self.add_models([m for m in models if m not in self.models],
                             verbose=kwargs.get("verbose"))
@@ -517,7 +517,7 @@ def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
     """
     if reactions is None:
         reactions = model.reactions
-    
+
     reactions = [getattr(r, "_id", r) for r in reactions]
     try:
         _log_msg(LOGGER, logging.INFO, verbose,
@@ -607,14 +607,14 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
         If ``None``, no attempts will be made to determine whether a generated
         model can reach a steady state.
     perturbations : dict
-        A ``dict`` of perturbations to incorporate into the simulation, 
+        A ``dict`` of perturbations to incorporate into the simulation,
         or a list of perturbation dictionaries where each ``dict`` is applied
         to a simulation. Models must reach a steady state with all given
         pertubration dictionaries to be considered feasible.
         See :mod:`~.simulation` documentation for more information on
         valid perturbations.
 
-        Ignored if ``steady_state_strategy=None``. 
+        Ignored if ``steady_state_strategy=None``.
     **kwargs
         verbose :
             ``bool`` indicating the verbosity of the function.
@@ -632,7 +632,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
             Default is ``'_C'``.
         at_equilibrium_default :
             ``float`` value to set the pseudo-order rate constant if the
-            reaction is at equilibrium. 
+            reaction is at equilibrium.
 
             Default is ``100,000``. Ignored if ``ensure_positive_percs=False``.
         return_infeasible :
@@ -709,7 +709,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 # Parse the perturbations and format the input to be used
                 perturbations[i] = feasible._format_perturbations_input(
                     perturbation, verbose)
-            
+
     if perturbations is None:
         perturbations = []
 
@@ -761,8 +761,8 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                 feasible_list.append(model)
             else:
                 numbers.update({"Infeasible, negative PERCs": 0})
-                if reactions is None:
-                    reactions = []
+                if ensure_positive_percs is None:
+                    ensure_positive_percs = []
                 # Ensure PERCs are positive, updating model if they are
                 model, is_feasible = _ensure_positive_percs_for_model(
                     model, ensure_positive_percs, verbose, False, True,
@@ -775,7 +775,6 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
                     # Add infeasible model to ensemble if specified
                     infeasible_list.append(model)
                     numbers["Infeasible, negative PERCs"] += 1
-                
 
     # Add feasible models to ensemble
     feasible.add_models(feasible_list, verbose=verbose)
@@ -832,7 +831,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
     if numbers:
         num_str += "\nFeasible: {0}\n".format(str(len(feasible.models) - 1))
         num_str += "\n".join(["{0}: {1}".format(k, v)
-                            for k, v in iteritems(numbers)])
+                              for k, v in iteritems(numbers)])
 
     if not kwargs.get("return_infeasible"):
         _log_msg(LOGGER, logging.INFO, True, num_str)

@@ -39,7 +39,7 @@ def comparison_plot(x, y, compare=None, observable=None, ax=None,
     Parameters
     ----------
     x : MassModel, ConcSolution, ~cobra.core.solution.Solution, ~pandas.Series
-        The object to access for x-axis values. 
+        The object to access for x-axis values.
     y : MassModel, ConcSolution, ~cobra.core.solution.Solution, ~pandas.Series
         The object to access for y-axis values.
     compare : str
