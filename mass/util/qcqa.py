@@ -440,15 +440,19 @@ def check_reaction_parameters(model, reaction_list=None):
                     if isinstance(missing, string_types)
                     else (rxn, "; ".join(missing))
                     for rxn, missing in iteritems(missing_customs)))
-        # Address reactions that are missing parameters
-        elif len(rxn.parameters) < 2:
+        # Always check if forward rate constant defined
+        elif rxn.forward_rate_constant is None:
             missing.append(rxn)
-        # Address reactions that have superfluous parameters
-        elif len(rxn.parameters) > 2 and rxn.reversible:
+        # Reversible reaction without an equilibrium or reverse rate constant
+        elif rxn.reversible and len(rxn.parameters) < 2:
+            missing.append(rxn)
+        elif rxn.reversible and len(rxn.parameters) > 2:
             superfluous.append(rxn)
-        # Only two reaction parameters exist, no consistency check required
+        # Two reaction parameters exist for reversible reactions or
+        # forward rate constant exists for an irreversible reaction
         else:
             pass
+
     if missing:
         missing = get_missing_reaction_parameters(model, missing)
     else:
