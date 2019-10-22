@@ -55,6 +55,7 @@ autosectionlabel_prefix_document = True
 autodoc_mock_imports = [
     "cobra",
     "depinfo",
+    "escher",
     "libroadrunner",
     "matplotlib",
     "numpy",
@@ -83,6 +84,8 @@ master_doc = 'index'
 todo_include_todos = False
 
 pygments_style = 'sphinx'
+
+nbsphinx_timeout = 180
 
 # -- Options for HTML output --------------------------------------------------
 

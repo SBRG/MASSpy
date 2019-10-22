@@ -5,7 +5,7 @@ The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
 (**MASSpy**) package contains modules for the construction, simulation, and
 analysis of kinetic models of biochemical reaction systems.
 
-**MASSpy** is built to integrate seemlessly with **COBRApy**, a widely used
+**MASSpy** is built to integrate seemlessly with **COBRApy** :cite:`ELPH13`, a widely used
 modeling software package for constraint-based reconstruction and analysis of
 biochemical reaction systems. Therefore **MASSpy**  can be used seperately from
 or in conjuction with **COBRApy**, thereby providing a wide range of modeling
@@ -28,8 +28,10 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    getting_started_with_masspy
    constructing_models
    reading_writing_models
+   enzyme_modules
    thermo_concentrations
    ensemble_modeling
+   network_visualization
    faq
    autoapi/index.rst
    references.rst
