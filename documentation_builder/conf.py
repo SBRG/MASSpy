@@ -56,6 +56,7 @@ autodoc_mock_imports = [
     "cobra",
     "depinfo",
     "escher",
+    "gurobipy",
     "libroadrunner",
     "matplotlib",
     "numpy",
