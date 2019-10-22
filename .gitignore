@@ -64,6 +64,7 @@ instance/
 
 # Sphinx documentation
 documentation_builder/_build/
+documentation_builder/_static/
 documentation_builder/_template/
 
 # PyBuilder
