@@ -31,7 +31,7 @@ Notes are read into the :attr:`.notes` attribute of :mod:`mass` objects when
 reading SBML files. On writing, the :attr:`.notes` attribute of :mod:`mass`
 objects dictionary is serialized to the SBML notes information.
 
-Attribute information for :class:`~.EnzymeModuleSpecies`\ s and
+Attribute information for :class:`~.EnzymeModuleForm`\ s and
 :class:`~.EnzymeModuleReaction`\ s are written into the SBML object notes
 field. Upon import of the SBML, the information is read into the
 enzyme specific attribute as long as the ``"key"`` in the notes matches the
@@ -41,12 +41,12 @@ The information specific to attributes of the :class:`~.EnzymeModule` and
 :class:`~.EnzymeModuleDict` information is stored using the
 `groups extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__groups.html>`_
 by creating an SBML 'group' representing the enzyme module containing
-additional SBML group objects for enzyme module ligands, species, and reactions
+additional SBML group objects for enzyme module ligands, forms, and reactions
 for the categories of the enzyme module categorized dictionary attributes.
 The remaining information is written to the the notes field of the main SBML
 group for the enzyme module. Disabling use of the 'groups' package extension
 will result in the loss of the enzyme specific information, but it will not
-prevent :class:`~.EnzymeModuleSpecies`\ s and :class:`~.EnzymeModuleReaction`\ s
+prevent :class:`~.EnzymeModuleForm`\ s and :class:`~.EnzymeModuleReaction`\ s
 from being written to the SBML model as species and reactions, respectively.
 
 Annotations are read and written via :attr:`annotation` attribute for
@@ -85,7 +85,7 @@ import libsbml
 
 from six import integer_types, iteritems, itervalues, raise_from, string_types
 
-from sympy import Basic, Symbol, SympifyError, mathml, sympify
+from sympy import Symbol, SympifyError, mathml, sympify
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
@@ -95,9 +95,9 @@ from mass.core.units import SBML_BASE_UNIT_KINDS_DICT, Unit, UnitDefinition
 from mass.enzyme_modules.enzyme_module import EnzymeModule
 from mass.enzyme_modules.enzyme_module_dict import (
     EnzymeModuleDict, _ORDERED_ENZYMEMODULE_DICT_DEFAULTS)
+from mass.enzyme_modules.enzyme_module_form import (
+    EnzymeModuleForm, _make_bound_attr_str_repr)
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
-from mass.enzyme_modules.enzyme_module_species import (
-    EnzymeModuleSpecies, _make_bound_attr_str_repr)
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
 from mass.util.util import (_check_kwargs, _make_logger)
@@ -618,10 +618,6 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
 
     # Read the MassModel notes and annotations from the SBMLDocument
     mass_model.notes = _parse_notes_dict(model)
-    if "description" in mass_model.notes:
-        # Set description and remove from the dictionary
-        mass_model.description = mass_model.notes["description"]
-        del mass_model.notes["description"]
     mass_model.annotation = _parse_annotations(model)
 
     # Read the MassModel unit information from the SBMLDocument
@@ -632,7 +628,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     mass_model.compartments = _read_model_compartments_from_sbml(model)
 
     # Read the MassModel species information from the SBMLDocument
-    # Includes MassMetabolites and EnzymeModuleSpecies, boundary conditions are
+    # Includes MassMetabolites and EnzymeModuleForm, boundary conditions are
     # stored in order to be added after boundary reactions.
     metabolites = _read_model_species_from_sbml(model, f_replace, **kwargs)
     mass_model.add_metabolites(metabolites)
@@ -687,7 +683,7 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
             else:
                 mass_model = EnzymeModule(mass_model)
                 for attr, value in iteritems(enzyme_module_dict):
-                    if attr in ["id", "name", "description", "S", "model",
+                    if attr in ["id", "name", "S", "model",
                                 "enzyme_concentration_total_equation"]:
                         continue
                     attr = "_" + attr if "_categorized" in attr else attr
@@ -959,7 +955,7 @@ def _read_global_parameters_from_sbml(model, reactions, f_replace, **kwargs):
 def _read_model_species_from_sbml(model, f_replace, **kwargs):
     """Read SBML species and boundary conditions and return them.
 
-    MassMetabolites and EnzymeModuleSpecies are created and returned in a list.
+    MassMetabolites and EnzymeModuleForm are created and returned in a list.
     Boundary conditions are returned as a dict.
 
     Warnings
@@ -988,10 +984,10 @@ def _read_model_species_from_sbml(model, f_replace, **kwargs):
         met.initial_condition = _read_specie_initial_value(model, specie, sid)
 
         # Using notes information, determine whether the metabolite should
-        # be added to the model as an EnzymeModuleSpecies.
+        # be added to the model as an EnzymeModuleForm.
         notes = _parse_notes_dict(specie)
         if "enzyme_module_id" in notes:
-            met = EnzymeModuleSpecies(met)
+            met = EnzymeModuleForm(met)
             _read_enzyme_attr_info_from_notes(met, notes, f_replace)
 
         # Add the notes and annotations to the metabolite
@@ -1600,7 +1596,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
                 # Correct object ID if necessary.
                 replace_key = {
                     "enzyme_module_ligands": F_SPECIE,
-                    "enzyme_module_species": F_SPECIE,
+                    "enzyme_module_forms": F_SPECIE,
                     "enzyme_module_reactions": F_REACTION}.get(
                         gid)
                 obj_id = _get_corrected_id(obj_id, (f_replace, replace_key),
@@ -1641,7 +1637,7 @@ def _read_enzyme_modules_from_sbml(enzyme_group_dict, f_replace, **kwargs):
 def _read_enzyme_attr_info_from_notes(mass_obj, notes, f_replace, **kwargs):
     """Read the enzyme object attributes from the notes into the mass object.
 
-    Applies to the EnzymeModuleSpecies and EnzymeModuleReactions
+    Applies to the EnzymeModuleForm and EnzymeModuleReactions
 
     Warnings
     --------
@@ -1649,7 +1645,7 @@ def _read_enzyme_attr_info_from_notes(mass_obj, notes, f_replace, **kwargs):
 
     """
     subclass_specific_attributes = {
-        "EnzymeModuleSpecies": [
+        "EnzymeModuleForm": [
             "enzyme_module_id", "bound_catalytic", "bound_effectors"],
         "EnzymeModuleReaction": [
             "enzyme_module_id"],
@@ -1866,8 +1862,6 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
 
     # Write model notes and annotations into the SBMLDocument
     model_notes = mass_model.notes
-    if mass_model.description:
-        model_notes["description"] = mass_model.description
     _sbase_notes_dict(model, model_notes)
     _sbase_annotations(model, mass_model.annotation)
 
@@ -1879,7 +1873,7 @@ def _model_to_sbml(mass_model, f_replace=None, **kwargs):
     _write_model_compartments_to_sbml(model, mass_model)
 
     # Write the species information into the SBMLDocument
-    # Includes MassMetabolites, EnzymeModuleSpecies, and their concentrations
+    # Includes MassMetabolites, EnzymeModuleForm, and their concentrations
     _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs)
 
     if kwargs.get("use_fbc_package"):
@@ -2317,8 +2311,8 @@ def _write_model_species_to_sbml(model, mass_model, f_replace, **kwargs):
                                                                   metabolite,
                                                                   **kwargs)
         # Set metabolite annotation and notes
-        if isinstance(metabolite, EnzymeModuleSpecies):
-            # Set enzyme information if EnzymeModuleSpecies
+        if isinstance(metabolite, EnzymeModuleForm):
+            # Set enzyme information if EnzymeModuleForm
             _write_enzyme_attr_info_to_notes(specie, metabolite, f_replace,
                                              additional_notes=additional_notes)
         else:
@@ -2715,7 +2709,7 @@ def _write_group_to_sbml(model_groups, mass_group, f_replace):
         m_type = str(mass_member.__class__.__name__)
         if m_type in ["MassReaction", "EnzymeModuleReaction"]:
             replacement_key = F_REACTION_REV
-        if m_type in ["MassMetabolite", "EnzymeModuleSpecies"]:
+        if m_type in ["MassMetabolite", "EnzymeModuleForm"]:
             replacement_key = F_SPECIE_REV
         if m_type in ["Gene"]:
             replacement_key = F_GENE_REV
@@ -2771,7 +2765,7 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
                                      additional_notes=None):
     """Write the enzyme object attribute into SBMLDocument in the notes.
 
-    Applies to the EnzymeModuleSpecies and EnzymeModuleReaction
+    Applies to the EnzymeModuleForm and EnzymeModuleReaction
 
     Warnings
     --------
@@ -2784,7 +2778,7 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
         notes.update(additional_notes)
     # Get the subclass specific attributes to write into the notes.
     attributes = {
-        "EnzymeModuleSpecies": [
+        "EnzymeModuleForm": [
             "enzyme_module_id", "bound_catalytic", "bound_effectors"],
         "EnzymeModuleReaction": [
             "enzyme_module_id"],

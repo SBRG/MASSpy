@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 r"""
-EnzymeModuleSpecies is a class for holding information regarding enzyme module species.
+EnzymeModuleForm is a class for holding information regarding enzyme module forms.
 
-The :class:`EnzymeModuleSpecies` class inherits and extends the
+The :class:`EnzymeModuleForm` class inherits and extends the
 :class:`~.MassMetabolite` class. It is designed to represent various bound
 states and conformations of the enzymes represented through the
 :class:`~.EnzymeModule` class.
 
-The enzyme specific attributes on the :class:`EnzymeModuleSpecies` are the
+The enzyme specific attributes on the :class:`EnzymeModuleForm` are the
 following:
 
-    * :attr:`~EnzymeModuleSpecies.enzyme_module_id`
-    * :attr:`~EnzymeModuleSpecies.bound_catalytic`
-    * :attr:`~EnzymeModuleSpecies.bound_effectors`
+    * :attr:`~EnzymeModuleForm.enzyme_module_id`
+    * :attr:`~EnzymeModuleForm.bound_catalytic`
+    * :attr:`~EnzymeModuleForm.bound_effectors`
 
-The :class:`EnzymeModuleSpecies` contains the attributes
-:attr:`~EnzymeModuleSpecies.bound_catalytic` and
-:attr:`~EnzymeModuleSpecies.bound_effectors`, designed to hold the
+The :class:`EnzymeModuleForm` contains the attributes
+:attr:`~EnzymeModuleForm.bound_catalytic` and
+:attr:`~EnzymeModuleForm.bound_effectors`, designed to hold the
 :class:`~.MassMetabolite`\ (s) that could be bound to the catalytic site and
 regularory sites. There are no differences between the attributes other than
 their name.
 
-Some other important points about the :class:`EnzymeModuleSpecies` include:
+Some other important points about the :class:`EnzymeModuleForm` include:
 
     * If the :attr:`name` attribute is not set upon initializing, it is
       automatically generated using the enzyme specific attributes.
@@ -29,9 +29,9 @@ Some other important points about the :class:`EnzymeModuleSpecies` include:
     * If the :attr:`formula` or charge attributes are not set upon
       initialization, it is inferred using the formulas and charges set on the
       :class:`~.MassMetabolite`\ (s) found in
-      :attr:`~EnzymeModuleSpecies.bound_catalytic` and
-      :attr:`~EnzymeModuleSpecies.bound_effectors`. A moiety is also included
-      for the formula using the :attr:`~EnzymeModuleSpecies.enzyme_module_id`.
+      :attr:`~EnzymeModuleForm.bound_catalytic` and
+      :attr:`~EnzymeModuleForm.bound_effectors`. A moiety is also included
+      for the formula using the :attr:`~EnzymeModuleForm.enzyme_module_id`.
 
     * The purpose of the generated formula and charge is to ensure reactions
       remained mass and charge balanaced as metabolite species are bound and
@@ -48,18 +48,18 @@ from six import integer_types, iteritems
 from mass.core.mass_metabolite import MassMetabolite
 
 
-class EnzymeModuleSpecies(MassMetabolite):
-    r"""Class representing an enzyme species of an :class:`~.EnzymeModule`.
+class EnzymeModuleForm(MassMetabolite):
+    r"""Class representing an enzyme forms of an :class:`~.EnzymeModule`.
 
     Accepted ``kwargs`` are passed to the initialization method of the base
     class, :class:`.MassMetabolite`.
 
     Parameters
     ----------
-    id_or_specie : str, MassMetabolite, EnzymeModuleSpecies
-        A string identifier to associate with the enzyme module species, or an
+    id_or_specie : str, MassMetabolite, EnzymeModuleForm
+        A string identifier to associate with the enzyme module forms, or an
         existing metabolite object. If an existing metabolite object is
-        provided, a new :class:`EnzymeModuleSpecies` is instantiated with the
+        provided, a new :class:`EnzymeModuleForm` is instantiated with the
         same properties as the original metabolite.
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
@@ -75,39 +75,39 @@ class EnzymeModuleSpecies(MassMetabolite):
     **kwargs
         name :
             ``str`` representing a human readable name for the enzyme module
-            species.
+            form.
         formula :
             ``str`` representing a chemical formula associated with the
-            enzyme module species.
+            enzyme module form.
         charge :
             ``float`` representing the charge number associated with the
-            enzyme module species.
+            enzyme module form.
         compartment :
             ``str`` representing the compartment where the enzyme module
-            species is located.
+            form is located.
         fixed :
-            ``bool`` indicating whether the enzyme module species
+            ``bool`` indicating whether the enzyme module form
             concentration should remain at a fixed value. Default is ``False``.
 
     """
 
     def __init__(self, id_or_specie=None, enzyme_module_id="",
                  bound_catalytic=None, bound_effectors=None, **kwargs):
-        """Initialize the EnzymeModuleSpecies."""
+        """Initialize the EnzymeModuleForm."""
         # Initialize MassMetabolite parent class
-        super(EnzymeModuleSpecies, self).__init__(
+        super(EnzymeModuleForm, self).__init__(
             id_or_specie=id_or_specie,
             name=kwargs.get("name", ""),
             formula=kwargs.get("formula", None),
             charge=kwargs.get("charge", None),
             compartment=kwargs.get("compartment", None),
             fixed=kwargs.get("fixed", False))
-        if isinstance(id_or_specie, EnzymeModuleSpecies):
-            # Instiantiate a new EnzymeModuleSpecies with state identical to
-            # the provided EnzymeModuleSpecies object.
+        if isinstance(id_or_specie, EnzymeModuleForm):
+            # Instiantiate a new EnzymeModuleForm with state identical to
+            # the provided EnzymeModuleForm object.
             self.__dict__.update(id_or_specie.__dict__)
         else:
-            # Set the id of the enzyme represented by the EnzymeModuleSpecies
+            # Set the id of the enzyme represented by the EnzymeModuleForm
             self.enzyme_module_id = enzyme_module_id
 
             # Set metabolites bound to active site(s) of the enzyme form
@@ -125,7 +125,7 @@ class EnzymeModuleSpecies(MassMetabolite):
                     val = kwargs.get(attr, None)
                     if val is None:
                         val = self.__class__.__dict__[
-                            "generate_species_" + attr](self)
+                            "generate_form_" + attr](self)
                     setattr(self, attr, val)
 
     @property
@@ -176,29 +176,29 @@ class EnzymeModuleSpecies(MassMetabolite):
         """Set the ``dict`` of ligands bound to the active site(s)."""
         self._set_bound_dict("bound_effectors", value)
 
-    def generate_enzyme_module_species_name(self, update_enzyme=False):
-        """Generate name for the enzyme module species based on bound ligands.
+    def generate_enzyme_module_form_name(self, update_enzyme=False):
+        """Generate name for the enzyme module form based on bound ligands.
 
         Notes
         -----
-        * The :attr:`~EnzymeModuleSpecies.enzyme_module_id`,
-          :attr:`~EnzymeModuleSpecies.bound_catalytic`, and
-          :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used in
+        * The :attr:`~EnzymeModuleForm.enzyme_module_id`,
+          :attr:`~EnzymeModuleForm.bound_catalytic`, and
+          :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
           generating the name.
-        * If the :attr:`~EnzymeModuleSpecies.enzyme_module_id` attributes are
+        * If the :attr:`~EnzymeModuleForm.enzyme_module_id` attributes are
           not set, the string ``'Enzyme'`` will be used in its place.
 
         Parameters
         ----------
         update_enzyme : bool
             If ``True``, update the :attr:`name` attribute of the enzyme
-            module species in addition to returning the generated name.
+            module form in addition to returning the generated name.
             Default is ``False``.
 
         Returns
         -------
         str
-            String representing the name of the :class:`EnzymeModuleSpecies`.
+            String representing the name of the :class:`EnzymeModuleForm`.
 
         """
         if self.enzyme_module_id:
@@ -223,31 +223,31 @@ class EnzymeModuleSpecies(MassMetabolite):
 
         return name
 
-    def generate_species_formula(self, update_enzyme=False):
-        """Generate the chemical formula for the enzyme module species.
+    def generate_form_formula(self, update_enzyme=False):
+        """Generate the chemical formula for the enzyme module form.
 
         This function is primarily utilized for keeping reactions between
-        :class:`EnzymeModuleSpecies` mass and charge balanced.
+        :class:`EnzymeModuleForm` mass and charge balanced.
 
         Notes
         -----
-        The :attr:`~EnzymeModuleSpecies.enzyme_module_id`,
-        :attr:`~EnzymeModuleSpecies.bound_catalytic`, and
-        :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used in
+        The :attr:`~EnzymeModuleForm.enzyme_module_id`,
+        :attr:`~EnzymeModuleForm.bound_catalytic`, and
+        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
         generating the formula.
 
         Parameters
         ----------
         update_enzyme : bool
             If ``True``, update the :attr:`formula` attribute of the enzyme
-            module species in addition to returning the generated formula.
+            module form in addition to returning the generated formula.
             Default is ``False``.
 
         Returns
         -------
         str
             String representing the formula of the
-            :class:`EnzymeModuleSpecies`.
+            :class:`EnzymeModuleForm`.
 
         """
         formula = ""
@@ -280,29 +280,29 @@ class EnzymeModuleSpecies(MassMetabolite):
 
         return formula
 
-    def generate_species_charge(self, update_enzyme=False):
-        """Generate the charge for the enzyme module species.
+    def generate_form_charge(self, update_enzyme=False):
+        """Generate the charge for the enzyme module form.
 
         This function is primarily utilized for keeping reactions between
-        :class:`EnzymeModuleSpecies` mass and charge balanced.
+        :class:`EnzymeModuleForm` mass and charge balanced.
 
         Notes
         -----
-        The attr:`~EnzymeModuleSpecies.bound_catalytic`, and
-        :attr:`~EnzymeModuleSpecies.bound_effectors` attributes are used
+        The attr:`~EnzymeModuleForm.bound_catalytic`, and
+        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used
         in generating the charge.
 
         Parameters
         ----------
         update_enzyme : bool
             If ``True``, update the :attr:`charge` attribute of the enzyme
-            module species in addition to returning the generated charge.
+            module form in addition to returning the generated charge.
             Default is ``False``.
 
         Returns
         -------
         float
-            Value representing the charge of the :class:`EnzymeModuleSpecies`.
+            Value representing the charge of the :class:`EnzymeModuleForm`.
 
         """
         charge = 0
@@ -347,20 +347,20 @@ class EnzymeModuleSpecies(MassMetabolite):
             setattr(self, "_" + attribute, {})
 
     def _set_id_with_model(self, value):
-        """Set the id of the EnzymeModuleSpecies to the associated MassModel.
+        """Set the id of the EnzymeModuleForm to the associated MassModel.
 
         Warnings
         --------
         This method is intended for internal use only.
 
         """
-        super(EnzymeModuleSpecies, self)._set_id_with_model(value)
-        self.model.enzyme_module_species._generate_index()
+        super(EnzymeModuleForm, self)._set_id_with_model(value)
+        self.model.enzyme_module_forms._generate_index()
 
     def _repair_bound_obj_pointers(self):
         """Repair object pointer for metabolites in bound dict attributes.
 
-        Requires a model to be associated with the EnzymeModuleSpecies.
+        Requires a model to be associated with the EnzymeModuleForm.
 
         Warnings
         --------
@@ -381,7 +381,7 @@ class EnzymeModuleSpecies(MassMetabolite):
                 bound_dict = setattr(self, attr, bound_dict)
 
     def _repr_html_(self):
-        """HTML representation of the overview for the EnzymeModuleSpecies.
+        """HTML representation of the overview for the EnzymeModuleForm.
 
         Warnings
         --------
@@ -391,7 +391,7 @@ class EnzymeModuleSpecies(MassMetabolite):
         return """
         <table>
             <tr>
-                <td><strong>EnzymeModuleSpecies identifier</strong></td>
+                <td><strong>EnzymeModuleForm identifier</strong></td>
                 <td>{id}</td>
             </tr><tr>
                 <td><strong>Name</strong></td>
@@ -440,4 +440,4 @@ def _make_bound_attr_str_repr(attribute_dict):
         for k, v in iteritems(attribute_dict) if v != 0])
 
 
-__all__ = ("EnzymeModuleSpecies",)
+__all__ = ("EnzymeModuleForm",)
