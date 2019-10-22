@@ -240,7 +240,13 @@ class ConcOptGPSampler(ConcHRSampler):
 
     # Models can be large so don't pass them around during multiprocessing
     def __getstate__(self):
-        """Return the object for serialization."""
+        """Return the object for serialization.
+        
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         d = dict(self.__dict__)
         del d['model']
         return d

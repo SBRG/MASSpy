@@ -150,7 +150,7 @@ class Simulation(Object):
             ``bool`` indicating whether to initialize the integrator with a
             variable time step for simulations.
 
-            Default is ``False``.
+            Default is ``True``.
 
     """
 
@@ -165,7 +165,7 @@ class Simulation(Object):
         if id is None:
             id = "{0}_Simulation".format(str(reference_model))
         kwargs = _check_kwargs({
-            "variable_step_size": False
+            "variable_step_size": True
         }, kwargs)
 
         try:
@@ -199,6 +199,7 @@ class Simulation(Object):
         self._flux_solutions = DictList()
 
         self.integrator.variable_step_size = kwargs.get("variable_step_size")
+        self.steady_state_solver.allow_approx = True
 
     @property
     def reference_model(self):
