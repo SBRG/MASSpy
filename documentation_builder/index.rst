@@ -28,13 +28,10 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    getting_started_with_masspy
    constructing_models
    reading_writing_models
-   dynamic_simulation
-   plot_visualization
    enzyme_modules
    thermo_concentrations
    ensemble_modeling
    network_visualization
-   global_configuration
    quality_assurance
    faq
    autoapi/index.rst
