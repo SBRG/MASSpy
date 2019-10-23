@@ -462,8 +462,10 @@ class MassModel(Model):
                bound_met not in self.metabolites:
                 raise ValueError("Did not find {0} in model metabolites or in "
                                  "boundary reactions.".format(bound_met))
+            if bound_cond in ["", None]:
+                boundary_conditions_to_set[bound_met] = None
             # Boundary condition is a function
-            if isinstance(bound_cond, (sym.Basic, string_types)):
+            elif isinstance(bound_cond, (sym.Basic, string_types)):
                 if isinstance(bound_cond, string_types):
                     bound_cond = sym.sympify(bound_cond)
                 for arg in list(bound_cond.atoms(sym.Function)):

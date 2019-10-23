@@ -58,6 +58,10 @@ def qcqa_model(model, **kwargs):
             the model. Boundary reactions are ignored.
 
             Default is ``False.``
+        simulation_only :
+            Only check for undefined values necessary for simulating the model.
+
+            Default is ``True``.
 
     """
     kwargs = _check_kwargs({
@@ -65,7 +69,8 @@ def qcqa_model(model, **kwargs):
         "concentrations": False,
         "fluxes": False,
         "superfluous": False,
-        "elemental": False}, kwargs)
+        "elemental": False,
+        "simulation_only": True}, kwargs)
 
     # Set up empty lists for storing QC/QA report items.
     table_items = [[], [], []]
@@ -77,7 +82,7 @@ def qcqa_model(model, **kwargs):
 
     # Get missing initial and fixed concentrations
     if kwargs.get("concentrations"):
-        results = _mk_concentration_content(model)
+        results = _mk_concentration_content(model, **kwargs)
         for to_add, item_list in zip(results, table_items):
             item_list.extend(to_add)
 
@@ -93,7 +98,8 @@ def qcqa_model(model, **kwargs):
     print(report)
 
 
-def get_missing_reaction_parameters(model, reaction_list=None):
+def get_missing_reaction_parameters(model, reaction_list=None,
+                                    simulation_only=True):
     r"""Identify the missing parameters for reactions in a model.
 
     Notes
@@ -109,6 +115,8 @@ def get_missing_reaction_parameters(model, reaction_list=None):
     reaction_list : iterable
         An iterable of :class:`~.MassReaction`\ s in the model to be checked.
         If ``None`` then all reactions in the model will be utilized.
+    simulation_only :
+        Only check for undefined values necessary for simulating the model.
 
     Returns
     -------
@@ -123,10 +131,7 @@ def get_missing_reaction_parameters(model, reaction_list=None):
         List of default reaction parameters.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
-
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
     missing = {}
     for rxn in reaction_list:
         missing_params = []
@@ -151,10 +156,14 @@ def get_missing_reaction_parameters(model, reaction_list=None):
         if missing_params:
             missing[rxn] = "{0}".format(missing_params.rstrip("; "))
 
+    if simulation_only and missing:
+        missing = _check_if_param_needed(model, missing)
+
     return missing
 
 
-def get_missing_custom_parameters(model, reaction_list=None):
+def get_missing_custom_parameters(model, reaction_list=None,
+                                  simulation_only=True):
     r"""Identify the missing custom parameters in a model.
 
     Notes
@@ -170,6 +179,8 @@ def get_missing_custom_parameters(model, reaction_list=None):
     reaction_list : iterable
         An iterable of :class:`~.MassReaction`\ s in the model to be checked.
         If ``None`` then all reactions in the model will be utilized.
+    simulation_only :
+        Only check for undefined values necessary for simulating the model.
 
     Returns
     -------
@@ -184,9 +195,7 @@ def get_missing_custom_parameters(model, reaction_list=None):
         List of default reaction parameters.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
 
     missing = {}
     # Filter out reactions without custom rates
@@ -209,6 +218,10 @@ def get_missing_custom_parameters(model, reaction_list=None):
                         customs.append(parameter)
         if customs:
             missing[rxn] = "; ".join(customs)
+
+    if simulation_only and missing:
+        missing = _check_if_param_needed(model, missing, customs=True)
+
     return missing
 
 
@@ -230,16 +243,15 @@ def get_missing_steady_state_fluxes(model, reaction_list=None):
         Will return as an empty ``list`` if there are no missing values.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
 
     missing = [rxn for rxn in reaction_list if rxn.steady_state_flux is None]
 
     return missing
 
 
-def get_missing_initial_conditions(model, metabolite_list=None):
+def get_missing_initial_conditions(model, metabolite_list=None,
+                                   simulation_only=True):
     r"""Identify the missing initial conditions for metabolites in a model.
 
     Notes
@@ -253,6 +265,8 @@ def get_missing_initial_conditions(model, metabolite_list=None):
     metabolite_list : iterable
         An iterable of :class:`~.MassMetabolite`\ s in the model to be checked.
         If ``None`` then all metabolites in the model will be utilized.
+    simulation_only :
+        Only check for undefined values necessary for simulating the model.
 
     Returns
     -------
@@ -261,9 +275,7 @@ def get_missing_initial_conditions(model, metabolite_list=None):
         Will return as an empty ``list`` if there are no missing values.
 
     """
-    if metabolite_list is None:
-        metabolite_list = model.metabolites
-    metabolite_list = ensure_iterable(metabolite_list)
+    metabolite_list = _get_objs_to_check(model, "metabolites", metabolite_list)
 
     # Filter out 'boundary metabolites'
     missing = [met for met in metabolite_list
@@ -272,12 +284,14 @@ def get_missing_initial_conditions(model, metabolite_list=None):
     missing = [met for met in missing if met not in model.initial_conditions
                or model.initial_conditions[met] is None]
 
-    missing = _check_if_needed(model, missing)
+    if simulation_only and missing:
+        missing = _check_if_conc_needed(model, missing)
 
     return missing
 
 
-def get_missing_boundary_conditions(model, metabolite_list=None):
+def get_missing_boundary_conditions(model, metabolite_list=None,
+                                    simulation_only=True):
     r"""Identify the missing boundary conditions for metabolites in a model.
 
     Parameters
@@ -288,6 +302,8 @@ def get_missing_boundary_conditions(model, metabolite_list=None):
         An iterable of 'boundary metabolites' or :class:`~.MassMetabolite`\ s
         in the model to be checked. If ``None`` then all 'boundary metabolites'
         in the model will be utilized.
+    simulation_only :
+        Only check for undefined values necessary for simulating the model.
 
     Returns
     -------
@@ -312,7 +328,8 @@ def get_missing_boundary_conditions(model, metabolite_list=None):
     missing = [met for met in missing if met not in model.boundary_conditions
                or model.boundary_conditions[met] is None]
 
-    missing = _check_if_needed(model, missing)
+    if simulation_only and missing:
+        missing = _check_if_conc_needed(model, missing)
 
     return missing
 
@@ -346,9 +363,7 @@ def check_superfluous_consistency(model, reaction_list=None):
         empty ``dict`` if there are no inconsistencies.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
 
     superfluous = {}
     for rxn in reaction_list:
@@ -385,9 +400,7 @@ def check_elemental_consistency(model, reaction_list=None):
         empty ``dict`` if there are no inconsistencies.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
 
     inconsistent = {}
     for reaction in reaction_list:
@@ -400,7 +413,7 @@ def check_elemental_consistency(model, reaction_list=None):
     return inconsistent
 
 
-def check_reaction_parameters(model, reaction_list=None):
+def check_reaction_parameters(model, reaction_list=None, simulation_only=True):
     r"""Check the model reactions for missing and superfluous parameters.
 
     Parameters
@@ -410,6 +423,8 @@ def check_reaction_parameters(model, reaction_list=None):
     reaction_list : iterable
         An iterable of :class:`~.MassReaction`\ s in the model to be checked.
         If ``None`` then all reactions in the model will be utilized.
+    simulation_only :
+        Only check for undefined values necessary for simulating the model.
 
     Returns
     -------
@@ -424,9 +439,7 @@ def check_reaction_parameters(model, reaction_list=None):
         superfluous values.
 
     """
-    if reaction_list is None:
-        reaction_list = model.reactions
-    reaction_list = ensure_iterable(reaction_list)
+    reaction_list = _get_objs_to_check(model, "reactions", reaction_list)
 
     missing = []
     superfluous = []
@@ -453,8 +466,12 @@ def check_reaction_parameters(model, reaction_list=None):
         else:
             pass
 
-    if missing:
-        missing = get_missing_reaction_parameters(model, missing)
+    if missing and simulation_only:
+        missing = get_missing_reaction_parameters(model, missing,
+                                                  simulation_only)
+    elif missing:
+        missing = get_missing_reaction_parameters(model, None,
+                                                  simulation_only)
     else:
         missing = {}
 
@@ -519,13 +536,15 @@ def _mk_parameter_content(model, **kwargs):
     # Check standard reaction parameters if desired.
     if parameters:
         headers.append("Reaction Parameters")
-        missing_params = check_reaction_parameters(model)[0]
+        missing_params = check_reaction_parameters(
+            model, simulation_only=kwargs.get("simulation_only"))[0]
         missing_params = ["{0}: {1}".format(rxn.id, params)
                           for rxn, params in iteritems(missing_params)]
         missing.append("\n".join(missing_params))
         # Check custom parameters
         headers.append("Custom Parameters")
-        missing_params = get_missing_custom_parameters(model)
+        missing_params = get_missing_custom_parameters(
+            model, simulation_only=kwargs.get("simulation_only"))
         missing_params = ["{0}: {1}".format(rxn.id, params)
                           for rxn, params in iteritems(missing_params)]
         missing.append("\n".join(missing_params))
@@ -541,7 +560,7 @@ def _mk_parameter_content(model, **kwargs):
     return content_lists, columns, sections
 
 
-def _mk_concentration_content(model):
+def _mk_concentration_content(model, **kwargs):
     """Create the content for summarizing missing concentrations.
 
     Warnings
@@ -552,7 +571,9 @@ def _mk_concentration_content(model):
     missing = []
     for i, function in enumerate([get_missing_initial_conditions,
                                   get_missing_boundary_conditions]):
-        missing_conc = [m for m in function(model)]
+        missing_conc = [
+            m for m in function(
+                model, simulation_only=kwargs.get("simulation_only"))]
         for j, met in enumerate(missing_conc):
             if i == 0:
                 # Identify reactions for missing initial conditions
@@ -590,7 +611,8 @@ def _mk_consistency_content(model, **kwargs):
     # Check superfluous parameters and their consistency if desired
     if superfluous:
         headers.append("Superfluous Parameters")
-        inconsistent = check_reaction_parameters(model)[1]
+        inconsistent = check_reaction_parameters(
+            model, simulation_only=kwargs.get("simulation_only"))[1]
         inconsistent = ["{0}: {1}".format(rxn.id, consistency)
                         for rxn, consistency in iteritems(inconsistent)]
         missing.append("\n".join(inconsistent))
@@ -599,7 +621,7 @@ def _mk_consistency_content(model, **kwargs):
         headers.append("Elemental")
         inconsistent = check_elemental_consistency(model)
         inconsistent = [
-            "{0}: {{{1}}} unbalanced".format(reaction.id, unbalanced)
+            "{0}: {{{1}}}".format(reaction.id, unbalanced)
             for reaction, unbalanced in iteritems(inconsistent)]
         missing.append("\n".join(inconsistent))
 
@@ -669,8 +691,9 @@ def _format_table_for_print(table_items, checks, model_id):
     report_head = ""
 
     # Create and print report
-    report_head += ("MODEL ID: {0}\nSIMULATABLE: {1};\nNUMERICALLY CONSISTENT:"
-                    " {2}".format(model_id, simulate_check, consistency_check))
+    report_head += (
+        "MODEL ID: {0}\nSIMULATABLE: {1}\nPARAMETERS NUMERICALY CONSISTENT:"
+        " {2}".format(model_id, simulate_check, consistency_check))
     report = make_formatted_table(tables, [report_head], 'fancy_grid', u'left')
     return report
 
@@ -716,8 +739,8 @@ def _is_consistent(kf, Keq, kr):
     return "Inconsistent"
 
 
-def _check_if_needed(model, missing):
-    """Check whether the missing values are needed for simulation.
+def _check_if_conc_needed(model, missing):
+    """Check whether the missing concentrations are needed for simulation.
 
     Warnings
     --------
@@ -734,6 +757,61 @@ def _check_if_needed(model, missing):
                or _mk_met_func(str(met)) in needed]
 
     return missing
+
+
+def _check_if_param_needed(model, missing, customs=False):
+    """Check whether the missing parameters are needed for simulation.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    needed = set()
+    for rate in itervalues(model.rates):
+        needed.update(rate.atoms(sym.Symbol))
+
+    for reaction, missing_values_str in iteritems(missing.copy()):
+        missing_params = missing_values_str.split("; ")
+        if customs:
+            missing_params = [
+                param for param in missing_params
+                if sym.Symbol(param) in needed]
+        else:
+            missing_params = [
+                param for param in missing_params
+                if sym.Symbol("_".join((param, reaction.id))) in needed]
+
+        if missing_params:
+            missing[reaction] = "; ".join(missing_params)
+        else:
+            del missing[reaction]
+
+    return missing
+
+
+def _get_objs_to_check(model, attribute, object_list):
+    """Check whether the missing parameters are needed for simulation.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    attribute_dictlist = getattr(model, attribute)
+    if object_list is not None:
+        object_list = ensure_iterable(object_list)
+        for i, obj in enumerate(object_list):
+            try:
+                obj = attribute_dictlist.get_by_id(getattr(obj, "_id", obj))
+            except KeyError as e:
+                raise ValueError("'{0}' not found in model.".format(str(e)))
+            else:
+                object_list[i] = obj
+    else:
+        object_list = attribute_dictlist
+
+    return object_list
 
 
 __all__ = (
