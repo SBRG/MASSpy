@@ -33,6 +33,7 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    ensemble_modeling
    network_visualization
    quality_assurance
+   global_configuration
    faq
    autoapi/index.rst
    zreferences.rst
