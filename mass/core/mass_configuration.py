@@ -63,7 +63,7 @@ class MassBaseConfiguration:
         """Initialize MassBaseConfiguration."""
         # Model construction configuration options
         self._boundary_compartment = {"b": "boundary"}
-        self._default_compartment = {"compartment": "compartment"}
+        self._default_compartment = {"compartment": "default_compartment"}
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = 0
         self._exclude_metabolites_from_rates = {
