@@ -116,7 +116,6 @@
             "name": "H2O"
         }
     ],
-    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
