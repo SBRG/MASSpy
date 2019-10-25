@@ -74,13 +74,9 @@ class MassSolution(DictWithID):
 
     """
 
-    def __init__(self, id_or_model, solution_type=None, data_dict=None,
+    def __init__(self, id_or_model, solution_type="", data_dict=None,
                  time=None, interpolate=False):
         """Initialize MassSolution."""
-        if solution_type not in {_CONC_STR, _FLUX_STR}:
-            raise ValueError(
-                "'{0}' is not a valid solution type.".format(solution_type))
-
         if isinstance(id_or_model, MassModel):
             id_or_model = "{0}_{1}Sols".format(str(id_or_model), solution_type)
         if not isinstance(id_or_model, string_types):
@@ -204,16 +200,16 @@ class MassSolution(DictWithID):
         # Get solution type for title
         solution_type = ""
         if self.solution_type == _CONC_STR:
-            solution_type += "Concentrations"
+            solution_type += " Concentrations"
 
         if self.solution_type == _FLUX_STR:
-            solution_type += "Fluxes"
+            solution_type += " Fluxes"
 
         # Set plot options
         options = {
             "plot_function": "loglog",
             "grid": ("major", "x"),
-            "title": "Time Profile for {0} {1}".format(self.id, solution_type),
+            "title": "Time Profile for {0}{1}".format(self.id, solution_type),
             "xlabel": "Time",
             "ylabel": solution_type,
         }

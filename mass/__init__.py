@@ -6,8 +6,9 @@ from os.path import dirname as _dirname
 
 from mass import (io, enzyme_modules)
 from mass.core import (
-    MassConfiguration, MassMetabolite, MassModel, MassReaction, Simulation,
+    MassConfiguration, MassMetabolite, MassModel, MassReaction,
     MassSolution, Unit, UnitDefinition)
+from mass.simulation import Simulation
 from mass.util import show_versions, strip_time, qcqa_model
 
 __version__ = "0.1.0a42"

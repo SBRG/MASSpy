@@ -7,6 +7,5 @@ from mass.thermo.conc_solver import (
 from mass.thermo.conc_solution import (
     ConcSolution, get_concentration_solution,
     update_model_with_concentration_solution)
-from mass.thermo.ensemble import Ensemble, generate_ensemble
 
 __all__ = ()

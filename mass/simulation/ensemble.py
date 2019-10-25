@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""Module to create and manage an ensemble of models.
 
-The :mod:`ensemble` module contains the :class:`Ensemble` class and the
+The :mod:`~.ensemble` module contains the :class:`Ensemble` class and the
 :func:`generate_ensemble` function.
 
 The :class:`Ensemble` class is designed to manage an ensemble of models. It
@@ -37,8 +37,8 @@ import pandas as pd
 from six import iteritems, string_types
 
 from mass.core.mass_model import MassModel
-from mass.core.simulation import Simulation, _log_msg
 from mass.exceptions import MassEnsembleError, MassSimulationError
+from mass.simulation.simulation import Simulation, _log_msg
 from mass.util.util import _check_kwargs, _make_logger, ensure_iterable
 
 # Set the logger
@@ -372,8 +372,8 @@ class Ensemble(Simulation):
             A ``dict`` of perturbations to incorporate into the simulation.
             Models must reach a steady state with the given pertubration to be
             considered feasible.
-            See :mod:`~.simulation` documentation for more information on
-            valid perturbations.
+            See :mod:`~.simulation.simulation` documentation for more
+            information on valid perturbations.
         update_values : bool
             Whether to update the model with the steady state results.
             Default is ``False``.
@@ -611,8 +611,8 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
         or a list of perturbation dictionaries where each ``dict`` is applied
         to a simulation. Models must reach a steady state with all given
         pertubration dictionaries to be considered feasible.
-        See :mod:`~.simulation` documentation for more information on
-        valid perturbations.
+        See :mod:`~.simulation.simulation` documentation for more
+        information on valid perturbations.
 
         Ignored if ``steady_state_strategy=None``.
     **kwargs
@@ -634,7 +634,7 @@ def generate_ensemble(reference_model, flux_data=None, conc_data=None,
             ``float`` value to set the pseudo-order rate constant if the
             reaction is at equilibrium.
 
-            Default is ``100,000``. Ignored if ``ensure_positive_percs=False``.
+            Default is ``100,000``. Ignored if ``ensure_positive_percs=None``.
         return_infeasible :
             ``bool`` indicating whether to generate and return an
             :class:`Ensemble` containing the models deemed infeasible.

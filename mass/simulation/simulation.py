@@ -111,7 +111,7 @@ MASSCONFIGURATION = MassConfiguration()
 
 # Set the logger
 LOGGER = _make_logger(__name__)
-"""logging.Logger: Logger for :mod:`~mass.core.simulation` submodule."""
+"""logging.Logger: Logger for :mod:`~mass.simulation.simulation` submodule."""
 
 RR_LOGGER = roadrunner.Logger
 """roadrunner.Logger: The logger for the :mod:`roadrunner`."""
@@ -504,8 +504,8 @@ class Simulation(Object):
             and the number of time points to use.
         perturbations : dict
             A ``dict`` of perturbations to incorporate into the simulation.
-            See :mod:`~.simulation` documentation for more information on
-            valid perturbations.
+            See :mod:`~.simulation.simulation` documentation for more
+            information on valid perturbations.
         **kwargs
             verbose :
                 ``bool`` indicating the verbosity of the method.
@@ -703,8 +703,8 @@ class Simulation(Object):
 
         perturbations : dict
             A ``dict`` of perturbations to incorporate into the simulation.
-            See :mod:`~.simulation` documentation for more information on
-            valid perturbations.
+            See :mod:`~.simulation.simulation` documentation for more
+            information on valid perturbations.
         update_values : bool
             Whether to update the model with the steady state results.
             Default is ``False``.
