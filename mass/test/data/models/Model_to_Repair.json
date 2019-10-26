@@ -81,49 +81,49 @@
             ],
             "enzyme_module_forms_categorized": {
                 "Complexed_ATP": [
+                    "pfk_R3_A_c",
+                    "pfk_R0_A_c",
                     "pfk_R1_A_c",
                     "pfk_R4_A_c",
-                    "pfk_R2_A_c",
-                    "pfk_R0_A_c",
-                    "pfk_R3_A_c"
+                    "pfk_R2_A_c"
                 ],
                 "Complexed_ATP_F6P": [
-                    "pfk_R1_AF_c",
-                    "pfk_R4_AF_c",
                     "pfk_R2_AF_c",
+                    "pfk_R3_AF_c",
                     "pfk_R0_AF_c",
-                    "pfk_R3_AF_c"
+                    "pfk_R1_AF_c",
+                    "pfk_R4_AF_c"
                 ],
                 "Free_Catalytic": [
-                    "pfk_R4_c",
                     "pfk_R2_c",
-                    "pfk_R0_c",
                     "pfk_R3_c",
-                    "pfk_R1_c"
+                    "pfk_R1_c",
+                    "pfk_R4_c",
+                    "pfk_R0_c"
                 ],
                 "Relaxed": [
+                    "pfk_R0_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R4_AF_c",
+                    "pfk_R3_c",
+                    "pfk_R3_A_c",
+                    "pfk_R0_A_c",
+                    "pfk_R3_AF_c",
+                    "pfk_R1_c",
                     "pfk_R4_c",
+                    "pfk_R0_AF_c",
                     "pfk_R1_A_c",
                     "pfk_R1_AF_c",
                     "pfk_R4_A_c",
-                    "pfk_R4_AF_c",
                     "pfk_R2_c",
-                    "pfk_R2_A_c",
-                    "pfk_R2_AF_c",
-                    "pfk_R0_A_c",
-                    "pfk_R1_c",
-                    "pfk_R0_c",
-                    "pfk_R3_c",
-                    "pfk_R3_A_c",
-                    "pfk_R3_AF_c",
-                    "pfk_R0_AF_c"
+                    "pfk_R2_A_c"
                 ],
                 "Tense": [
-                    "pfk_T0_c",
                     "pfk_T1_c",
                     "pfk_T2_c",
                     "pfk_T3_c",
-                    "pfk_T4_c"
+                    "pfk_T4_c",
+                    "pfk_T0_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -145,9 +145,9 @@
                     "atp_c"
                 ],
                 "Products": [
+                    "h_c",
                     "adp_c",
-                    "fdp_c",
-                    "h_c"
+                    "fdp_c"
                 ],
                 "Substrates": [
                     "f6p_c"
@@ -184,37 +184,37 @@
                     "PFK_L"
                 ],
                 "amp_c_activation": [
+                    "PFK_R30",
                     "PFK_R10",
                     "PFK_R20",
-                    "PFK_R40",
-                    "PFK_R30"
+                    "PFK_R40"
                 ],
                 "atp_c_binding": [
                     "PFK_R11",
-                    "PFK_R31",
                     "PFK_R21",
                     "PFK_R01",
-                    "PFK_R41"
+                    "PFK_R41",
+                    "PFK_R31"
                 ],
                 "atp_c_inhibition": [
-                    "PFK_T3",
-                    "PFK_T4",
                     "PFK_T2",
-                    "PFK_T1"
+                    "PFK_T3",
+                    "PFK_T1",
+                    "PFK_T4"
                 ],
                 "catalyzation": [
-                    "PFK_R43",
-                    "PFK_R33",
                     "PFK_R23",
+                    "PFK_R43",
                     "PFK_R13",
+                    "PFK_R33",
                     "PFK_R03"
                 ],
                 "f6p_c_binding": [
-                    "PFK_R22",
-                    "PFK_R02",
-                    "PFK_R12",
                     "PFK_R42",
-                    "PFK_R32"
+                    "PFK_R22",
+                    "PFK_R32",
+                    "PFK_R12",
+                    "PFK_R02"
                 ]
             },
             "enzyme_rate": 1.12,
