@@ -1126,21 +1126,36 @@ class MassReaction(Reaction):
         This method is intended for internal use only.
 
         """
+        metabolites = {}
+        genes = set()
+        model = self.model
         if self.metabolites:
             for metabolite in self.metabolites:
-                if metabolite not in self.metabolites:
-                    continue
                 # See if there is an associated MassModel with MassMetabolites
                 # that already exist to add to the reaction
-                model = self.model
                 if model.__class__.__name__ == "MassModel"\
                    and str(metabolite) in model.metabolites:
                     mass_met = model.metabolites.get_by_id(str(metabolite))
                 else:
                     # Otherewise create a new MassMetabolite
                     mass_met = MassMetabolite(metabolite)
-                # Remove cobra metabolite and add MassMetabolite
-                self._metabolites[mass_met] = self._metabolites.pop(metabolite)
+                # Set MassMetabolite stoichiometry
+                metabolites[mass_met] = self.metabolites[metabolite]
+        if self.genes:
+            for gene in list(self.genes):
+                if model.__class__.__name__ == "MassModel"\
+                   and str(gene) in model.genes:
+                    gene = model.genes.get_by_id(str(gene))
+                else:
+                    gene = gene.copy()
+            genes.add(gene)
+        # Remove cobra Metabolites and add MassMetabolites
+        setattr(self, "_metabolites", metabolites)
+        # Remove old genes and add new ones
+        setattr(self, "_genes", genes)
+        # Remove model reference
+        setattr(self, "_model", None)
+        self._update_awareness()
 
     def _associate_gene(self, cobra_gene):
         """Associates a :class:`~cobra.core.gene.Gene` with the reaction.

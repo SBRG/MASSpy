@@ -1986,6 +1986,16 @@ class MassModel(Model):
 
         return equivalent
 
+    def set_steady_state_fluxes_from_solver(self):
+        """Set reaction steady state fluxes based on the state of the solver.
+
+        Only works when reaction is associated with a model that has been
+        optimized.
+
+        """
+        for reaction in self.reactions:
+            reaction.steady_state_flux = reaction.flux
+
     # Internal
     def _cobra_to_mass_repair(self):
         """Convert associated cobra objects to mass objects for self.
@@ -1999,6 +2009,9 @@ class MassModel(Model):
         if self.metabolites:
             self.metabolites = DictList([
                 MassMetabolite(metabolite) for metabolite in self.metabolites])
+        # Copy genes
+        if self.genes:
+            self.genes = DictList([gene.copy() for gene in self.genes])
         # Convert Reactions into MassReactions
         if self.reactions:
             self.reactions = DictList([
@@ -2020,6 +2033,8 @@ class MassModel(Model):
                         new_members.append(member)
                 group.remove_members(old_members)
                 group.add_members(new_members)
+        # Ensure all objects in the model point to the MassModel
+        self.__setstate__(self.__dict__)
 
     def _mk_stoich_matrix(self, array_type=None, dtype=None,
                           update_model=True):

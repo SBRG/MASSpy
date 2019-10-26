@@ -70,6 +70,8 @@ class MassMetabolite(Metabolite):
             # Instiantiate a new MassMetabolite with state identical to
             # the provided Metabolite/MassMetabolite object.
             self.__dict__.update(id_or_specie.__dict__)
+            self._reaction = set()
+            self._model = None
 
         # If is not a MassMetabolite object, initialize additional attributes
         if not isinstance(id_or_specie, MassMetabolite):
