@@ -22,19 +22,21 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
 
 .. toctree::
    :numbered:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
-   getting_started_with_masspy
-   constructing_models
-   reading_writing_models
-   enzyme_modules
-   thermo_concentrations
-   ensemble_modeling
-   network_visualization
-   quality_assurance
-   global_configuration
-   faq
+   notebooks/getting_started_with_masspy
+   notebooks/constructing_models
+   notebooks/reading_writing_models
+   notebooks/enzyme_modules
+   notebooks/thermo_concentrations
+   notebooks/ensemble_modeling
+   notebooks/network_visualization
+   notebooks/quality_assurance
+   notebooks/global_configuration
+   notebooks/cobra_to_mass
+   applications.rst
+   notebooks/faq
    autoapi/index.rst
    zreferences.rst
 
