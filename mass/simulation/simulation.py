@@ -151,6 +151,12 @@ class Simulation(Object):
             variable time step for simulations.
 
             Default is ``True``.
+        allow_approx :
+            ``bool`` indicating whether to allow the steady state solver to
+            approximate the steady state solution in cases where NLEQ methods
+            fail to converge to steady state due to a singular Jacobian matrix.
+
+            Default is ``True``.
 
     """
 
@@ -165,7 +171,8 @@ class Simulation(Object):
         if id is None:
             id = "{0}_Simulation".format(str(reference_model))
         kwargs = _check_kwargs({
-            "variable_step_size": True
+            "variable_step_size": True,
+            "allow_approx": True,
         }, kwargs)
 
         try:
@@ -199,7 +206,7 @@ class Simulation(Object):
         self._flux_solutions = DictList()
 
         self.integrator.variable_step_size = kwargs.get("variable_step_size")
-        self.steady_state_solver.allow_approx = True
+        self.steady_state_solver.allow_approx = kwargs.get("allow_approx")
 
     @property
     def reference_model(self):
@@ -511,20 +518,6 @@ class Simulation(Object):
                 ``bool`` indicating the verbosity of the method.
 
                 Default is ``False``.
-            selections :
-                ``list`` of identifiers corresponding to the time course
-                selections to return in the solutions. If pools or net fluxes
-                are included, all variables for their formulas must be
-                included.
-
-                Default is ``None`` for all concentrations, fluxes, pools,
-                and net fluxes.
-            boundary_metabolites :
-                ``bool`` indicating whether to include boundary metabolite
-                concentrations in the output.
-
-                Default is ``False``.
-
             steps :
                 ``int`` indicating number of steps at which the output is
                 sampled where the samples are evenly spaced and
@@ -578,8 +571,6 @@ class Simulation(Object):
         # Check kwargs
         kwargs = _check_kwargs({
             "verbose": False,
-            "selections": None,
-            "boundary_metabolites": False,
             "steps": None,
             "interpolate": False,
             "update_solutions": True,
@@ -600,8 +591,7 @@ class Simulation(Object):
         perturbations = self._format_perturbations_input(perturbations,
                                                          kwargs.get("verbose"))
         # Make the time course selection input and set the selections
-        selections = self._make_rr_selections(kwargs.get("selections"),
-                                              kwargs.get("verbose"))
+        selections = self._make_rr_selections(kwargs.get("verbose"))
 
         # Make DictLists for solution objects
         conc_sol_list = DictList()
@@ -622,7 +612,7 @@ class Simulation(Object):
                     _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
                              "Simulation for '%s' successful", str(model))
                     solutions = self._make_mass_solutions(
-                        model, default_selections=selections, results=results,
+                        model, selections=selections, results=results,
                         **kwargs)
 
                 # Handle MassSimulationErrors
@@ -636,7 +626,7 @@ class Simulation(Object):
                         "%s", model, str(e))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, default_selections=selections, results=None,
+                        model, selections=selections, results=None,
                         **kwargs)
                     reset = False
 
@@ -713,19 +703,6 @@ class Simulation(Object):
                 ``bool`` indicating the verbosity of the method.
 
                 Default is ``False``.
-            selections :
-                ``list`` of identifiers corresponding to the time course
-                selections to return in the solutions. If pools or net fluxes
-                are included, all variables for their formulas must be
-                included.
-
-                Default is ``None`` for all concentrations, fluxes, pools,
-                and net fluxes.
-            boundary_metabolites :
-                ``bool`` indicating whether to include boundary metabolite
-                concentrations in the output.
-
-                Default is ``False``.
             steps :
                 ``int`` indicating number of steps at which the output is
                 sampled where the samples are evenly spaced and
@@ -786,8 +763,6 @@ class Simulation(Object):
         # Check kwargs
         kwargs = _check_kwargs({
             "verbose": False,
-            "selections": None,
-            "boundary_metabolites": False,
             "steps": None,
             "tfinal": 1e8,
             "num_attempts": 2,
@@ -816,8 +791,7 @@ class Simulation(Object):
                                                          kwargs.get("verbose"))
 
         # Set species to use for steady state calculations
-        selections = self._make_rr_selections(kwargs.get("selections"),
-                                              kwargs.get("verbose"))
+        selections = self._make_rr_selections(kwargs.get("verbose"))
         # Remove time from selections
         selections.remove("time")
 
@@ -835,7 +809,7 @@ class Simulation(Object):
                     results = steady_state_function(model, **kwargs)
                     # Map results to their identifiers and return MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, default_selections=selections, results=results,
+                        model, selections=selections, results=results,
                         update_values=update_values, **kwargs)
 
                 # Handle MassSimulationErrors
@@ -851,7 +825,7 @@ class Simulation(Object):
                         model, strategy, str(e))
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, default_selections=selections, results=None,
+                        model, selections=selections, results=None,
                         update_values=False, **kwargs)
                     reset = False
 
@@ -897,12 +871,8 @@ class Simulation(Object):
 
         _log_msg(LOGGER, logging.INFO, verbose, "Setting output selections")
         rr_selections = ["time"]
-        if selections is None:
-            rr_selections += rr_model.getFloatingSpeciesConcentrationIds()
-            rr_selections += rr_model.getReactionIds()
-        else:
-            # TODO Catch selection errors here
-            rr_selections += selections
+        rr_selections += rr_model.getFloatingSpeciesConcentrationIds()
+        rr_selections += rr_model.getReactionIds()
 
         return rr_selections
 
@@ -1039,7 +1009,7 @@ class Simulation(Object):
 
         return rr
 
-    def _make_mass_solutions(self, model, default_selections, results,
+    def _make_mass_solutions(self, model, selections, results,
                              update_values=False, **kwargs):
         """Make the MassSolutions using the results of the Simulation.
 
@@ -1058,13 +1028,7 @@ class Simulation(Object):
         if results is not None:
             # Get species and reaction lists
             species_list = rr.model.getFloatingSpeciesConcentrationIds()
-            if kwargs.get("boundary_metabolites"):
-                species_list += rr.model.getBoundarySpeciesConcentrationIds()
             reaction_list = rr.model.getReactionIds()
-
-            selections = kwargs.get("selections")
-            if not selections:
-                selections = default_selections
 
             for sol_key in selections:
                 # Get the time vector
@@ -1084,14 +1048,17 @@ class Simulation(Object):
                     pass
 
         # Make a MassSolution object of the concentration solution dict.
-        conc_sol = MassSolution(id_or_model=model, data_dict=conc_sol,
-                                solution_type=_CONC_STR, time=time,
-                                interpolate=kwargs.get("interpolate", False))
+        conc_sol = MassSolution(
+            id_or_model="{0}_{1}Sols".format(model, _CONC_STR),
+            data_dict=conc_sol, solution_type=_CONC_STR, time=time,
+            interpolate=kwargs.get("interpolate", False))
 
         # Make a MassSolution object of the concentration solution dict.
-        flux_sol = MassSolution(id_or_model=model, data_dict=flux_sol,
-                                solution_type=_FLUX_STR, time=time,
-                                interpolate=kwargs.get("interpolate", False))
+        flux_sol = MassSolution(
+            id_or_model="{0}_{1}Sols".format(model, _FLUX_STR),
+            data_dict=flux_sol, solution_type=_FLUX_STR, time=time,
+            interpolate=kwargs.get("interpolate", False))
+
         values = (conc_sol, flux_sol)
         if update_values:
             _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
