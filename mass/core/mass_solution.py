@@ -185,7 +185,6 @@ class MassSolution(DictWithID):
 
         setattr(self, "_interpolate", value)
 
-    @property
     def view_time_profile(self):
         """Generate a preview of the time profile for the solution.
 
@@ -221,7 +220,6 @@ class MassSolution(DictWithID):
         # Set figure size
         ax.get_figure().set_size_inches((6, 4))
 
-    @property
     def view_tiled_phase_portraits(self):
         """Generate a preview of the phase portraits for the solution.
 
@@ -261,14 +259,13 @@ class MassSolution(DictWithID):
         df.index = pd.Series(self.time, name="Time")
         return df
 
-    def make_solution_from_equation(self, solution_id, equation,
-                                    variables=None, parameters=None,
-                                    update=True):
-        """Make a new solution using an string representation of an equation.
-
+    def make_aggregate_solution(self, aggregate_id, equation, variables=None,
+                                parameters=None, update=True):
+        """Make a new aggregate variable and its solution from an equation.
+        
         Parameters
         ----------
-        solution_id : str
+        aggregate_id : str
             An identifier for the solution to be made.
         equation : str
             A string representing the equation of the new solution.
@@ -290,7 +287,7 @@ class MassSolution(DictWithID):
         Returns
         -------
         solution : dict
-            A ``dict`` containing where the key is the ``solution_id`` and the
+            A ``dict`` containing where the key is the ``aggregate_id`` and the
             value is the newly created solution as the same type as the
             variable solutions
 
@@ -332,7 +329,7 @@ class MassSolution(DictWithID):
         elif solution.size == 1:
             solution = solution.item()
 
-        solution = {solution_id: solution}
+        solution = {aggregate_id: solution}
 
         # Update MassSolution if d
         if update:
