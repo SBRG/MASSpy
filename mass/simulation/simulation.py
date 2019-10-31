@@ -104,7 +104,8 @@ from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
 from mass.util.qcqa import is_simulatable, qcqa_model
 from mass.util.util import (
-    _check_kwargs, _make_logger, apply_decimal_precision, ensure_iterable)
+    _check_kwargs, _log_msg, _make_logger, apply_decimal_precision,
+    ensure_iterable)
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
 # If working in Python application (e.g. iPython notebooks), enable logging
@@ -116,6 +117,9 @@ LOGGER = _make_logger(__name__)
 RR_LOGGER = roadrunner.Logger
 """roadrunner.Logger: The logger for the :mod:`roadrunner`."""
 RR_LOGGER.disableLogging()
+
+STEADY_STATE_SOLVERS = list(roadrunner.steadyStateSolvers)
+"""list: Possible solver routines for :class:`roadrunner.SteadyStateSolver`."""
 
 # SBML writing kwargs
 _SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
@@ -776,8 +780,7 @@ class Simulation(Object):
         rr = self.roadrunner
 
         # Ensure strategy input is valid
-        if strategy not in rr.getRegisteredSteadyStateSolverNames()\
-           and strategy != "simulate":
+        if strategy not in STEADY_STATE_SOLVERS and strategy != "simulate":
             raise ValueError(
                 "Invalid steady state strategy: '{0}'".format(strategy))
         if strategy == "simulate":
@@ -1511,13 +1514,6 @@ def _make_ss_flux(reaction_str):
 
     """
     return "v_" + reaction_str
-
-
-def _log_msg(logger, level, verbose, msg, *args):
-    """TODO DOCSTRING."""
-    logger.log(level, msg, *args)
-    if verbose:
-        print(msg % args)
 
 
 __all__ = ("Simulation", "LOGGER", "RR_LOGGER",)

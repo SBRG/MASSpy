@@ -262,7 +262,7 @@ class MassSolution(DictWithID):
     def make_aggregate_solution(self, aggregate_id, equation, variables=None,
                                 parameters=None, update=True):
         """Make a new aggregate variable and its solution from an equation.
-        
+
         Parameters
         ----------
         aggregate_id : str

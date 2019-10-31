@@ -219,6 +219,19 @@ def _make_logger(name):
     return logger
 
 
+def _log_msg(logger, level, verbose, msg, *args):
+    """Log a message in the logger and print if desired.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    logger.log(level, msg, *args)
+    if verbose:
+        print(msg % args)
+
+
 __all__ = (
     "show_versions", "ensure_iterable", "ensure_non_negative_value",
     "LOG_COLORS", "ColorFormatter")
