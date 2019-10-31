@@ -1,15 +1,6 @@
-Applications and Additional Tutorials
+Applications and Additional Examples
 =====================================
-
-Advanced Visualization Examples
--------------------------------
-
-.. toctree::
-   :titlesonly:
-   :glob:
-   :maxdepth: 1
-
-   notebooks/advanced_visualization/*
+A variety of applications and additional examples demonstrating the capabilities of **MASSpy** can be found below.
 
 Workflows
 ---------
@@ -20,6 +11,16 @@ Workflows
    :maxdepth: 1
 
    notebooks/workflows/*
+
+Advanced Visualization Examples
+-------------------------------
+
+.. toctree::
+   :titlesonly:
+   :glob:
+   :maxdepth: 1
+
+   notebooks/advanced_visualization/*
 
 Code Repositories
 -----------------

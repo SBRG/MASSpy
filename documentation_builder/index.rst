@@ -20,6 +20,7 @@ To install **MASSpy** with all features enabled::
 For additional information, please refer to the the `detailed installation
 instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
 
+
 .. toctree::
    :numbered:
    :maxdepth: 2
@@ -28,6 +29,7 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    notebooks/getting_started_with_masspy
    notebooks/constructing_models
    notebooks/reading_writing_models
+   notebooks/dynamic_simulation
    notebooks/enzyme_modules
    notebooks/thermo_concentrations
    notebooks/ensemble_modeling
@@ -35,16 +37,17 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    notebooks/quality_assurance
    notebooks/global_configuration
    notebooks/cobra_to_mass
-   applications.rst
    notebooks/faq
    autoapi/index.rst
    zreferences.rst
 
+Applications and Additional Examples
+------------------------------------
 
-Additional Examples
-===================
-Additional examples using **MASSpy** can be found `here <https://github.com/z-haiman/MASSpy-examples>`_.
+.. toctree::
+   :maxdepth: 2
 
+   applications.rst
 
 Indices and tables
 ==================
