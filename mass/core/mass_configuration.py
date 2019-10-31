@@ -65,7 +65,7 @@ class MassBaseConfiguration:
         self._boundary_compartment = {"b": "boundary"}
         self._default_compartment = {"compartment": "default_compartment"}
         self._irreversible_Keq = float("inf")
-        self._irreversible_kr = 0
+        self._irreversible_kr = None
         self._exclude_metabolites_from_rates = {
             "elements": [{"H": 2, "O": 1}, {"H": 1}]}
         self._exclude_compartment_volumes_in_rates = True
