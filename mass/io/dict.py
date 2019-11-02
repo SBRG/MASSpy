@@ -20,7 +20,7 @@ import pandas as pd
 
 from six import iteritems, iterkeys, string_types
 
-from sympy import Basic, Eq, Symbol, sympify
+from sympy import Basic, sympify
 
 from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_model import MassModel
@@ -490,12 +490,10 @@ def enzyme_from_dict(enzyme, model):
     new_enzyme._update_object_pointers(model)
 
     # Make the enzyme equations
-    new_enzyme.enzyme_concentration_total_equation = Eq(Symbol(
-        new_enzyme.id + "_Total"), sympify(
-            new_enzyme.enzyme_concentration_total_equation))
-    new_enzyme.enzyme_rate_equation = Eq(Symbol(
-        "v_" + new_enzyme.id), sympify(
-            new_enzyme.enzyme_rate_equation))
+    new_enzyme.enzyme_concentration_total_equation = sympify(
+        new_enzyme.enzyme_concentration_total_equation)
+    new_enzyme.enzyme_rate_equation = sympify(
+        new_enzyme.enzyme_rate_equation)
 
     # Make the stoichiometric matrix and clean up the EnzymeModuleDict
     new_enzyme._make_enzyme_stoichiometric_matrix(update=True)
