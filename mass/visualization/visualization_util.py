@@ -790,7 +790,10 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
 
             plot_function(x, y, label=label)
             if kwargs.get("annotate_time_points_labels"):
-                ax.annotate("    " + label, xy=(x, y), xytext=(x, y))
+                ax.annotate(label, xy=(x, y),
+                            xytext=(10, 10), textcoords='offset pixels',
+                            horizontalalignment="left",
+                            verticalalignment="top")
 
     # Add the legend to the axes.
     if kwargs.get("annotate_time_points_legend") is not None:
