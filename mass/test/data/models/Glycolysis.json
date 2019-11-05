@@ -379,7 +379,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.161424,
             "_lower_bound": 0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -451,7 +450,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -471,7 +469,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 7.44186,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",

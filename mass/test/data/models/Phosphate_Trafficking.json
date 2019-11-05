@@ -16,7 +16,7 @@
     "id": "Phosphate_Trafficking",
     "metabolites": [
         {
-            "_initial_condition": 0.4,
+            "_initial_condition": 0.2,
             "charge": -3,
             "compartment": "c",
             "formula": "C10H12N5O10P2",
@@ -24,7 +24,7 @@
             "name": "ADP"
         },
         {
-            "_initial_condition": 1.6,
+            "_initial_condition": 1.7,
             "charge": -4,
             "compartment": "c",
             "formula": "C10H12N5O13P3",
@@ -32,7 +32,7 @@
             "name": "ATP"
         },
         {
-            "_initial_condition": 0.1,
+            "_initial_condition": 0.2,
             "charge": -2,
             "compartment": "c",
             "formula": "C10H12N5O7P",
@@ -44,7 +44,7 @@
             "charge": 0,
             "compartment": "c",
             "formula": "[B]",
-            "id": "b",
+            "id": "B",
             "name": "Phosphagen buffer (Free)"
         },
         {
@@ -52,7 +52,7 @@
             "charge": -1,
             "compartment": "c",
             "formula": "[B]-PO3",
-            "id": "bp",
+            "id": "BP",
             "name": "Phosphagen buffer (Loaded)"
         }
     ],
@@ -76,7 +76,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 6.25,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -91,7 +90,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 25,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -111,18 +109,17 @@
             "gene_reaction_rule": "",
             "id": "buffer",
             "metabolites": {
+                "B": -1,
+                "BP": 1,
                 "adp_c": 1,
-                "atp_c": -1,
-                "b": -1,
-                "bp": 1
+                "atp_c": -1
             },
             "name": "ATP Buffering"
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 0.03,
+            "_forward_rate_constant": 0.3,
             "_lower_bound": 0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "annotation": {
@@ -138,7 +135,6 @@
         {
             "_equilibrium_constant": "inf",
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 0,
             "annotation": {

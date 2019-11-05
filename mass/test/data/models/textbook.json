@@ -81,49 +81,49 @@
             ],
             "enzyme_module_forms_categorized": {
                 "Complexed_ATP": [
-                    "pfk_R3_A_c",
-                    "pfk_R2_A_c",
-                    "pfk_R0_A_c",
                     "pfk_R1_A_c",
-                    "pfk_R4_A_c"
+                    "pfk_R2_A_c",
+                    "pfk_R4_A_c",
+                    "pfk_R0_A_c",
+                    "pfk_R3_A_c"
                 ],
                 "Complexed_ATP_F6P": [
-                    "pfk_R4_AF_c",
-                    "pfk_R3_AF_c",
-                    "pfk_R2_AF_c",
                     "pfk_R1_AF_c",
-                    "pfk_R0_AF_c"
+                    "pfk_R3_AF_c",
+                    "pfk_R4_AF_c",
+                    "pfk_R0_AF_c",
+                    "pfk_R2_AF_c"
                 ],
                 "Free_Catalytic": [
-                    "pfk_R4_c",
                     "pfk_R2_c",
-                    "pfk_R3_c",
+                    "pfk_R0_c",
+                    "pfk_R4_c",
                     "pfk_R1_c",
-                    "pfk_R0_c"
+                    "pfk_R3_c"
                 ],
                 "Relaxed": [
-                    "pfk_R4_c",
-                    "pfk_R4_AF_c",
                     "pfk_R3_A_c",
                     "pfk_R3_AF_c",
-                    "pfk_R2_c",
-                    "pfk_R2_A_c",
-                    "pfk_R0_c",
-                    "pfk_R3_c",
-                    "pfk_R1_AF_c",
                     "pfk_R2_AF_c",
+                    "pfk_R1_AF_c",
+                    "pfk_R1_A_c",
+                    "pfk_R2_c",
+                    "pfk_R0_c",
+                    "pfk_R4_AF_c",
+                    "pfk_R2_A_c",
+                    "pfk_R4_A_c",
                     "pfk_R0_A_c",
                     "pfk_R0_AF_c",
+                    "pfk_R4_c",
                     "pfk_R1_c",
-                    "pfk_R1_A_c",
-                    "pfk_R4_A_c"
+                    "pfk_R3_c"
                 ],
                 "Tense": [
-                    "pfk_T1_c",
                     "pfk_T2_c",
-                    "pfk_T4_c",
+                    "pfk_T3_c",
                     "pfk_T0_c",
-                    "pfk_T3_c"
+                    "pfk_T1_c",
+                    "pfk_T4_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -146,8 +146,8 @@
                 ],
                 "Products": [
                     "fdp_c",
-                    "h_c",
-                    "adp_c"
+                    "adp_c",
+                    "h_c"
                 ],
                 "Substrates": [
                     "f6p_c"
@@ -186,35 +186,35 @@
                 "amp_c_activation": [
                     "PFK_R20",
                     "PFK_R30",
-                    "PFK_R40",
-                    "PFK_R10"
+                    "PFK_R10",
+                    "PFK_R40"
                 ],
                 "atp_c_binding": [
-                    "PFK_R01",
+                    "PFK_R11",
+                    "PFK_R41",
                     "PFK_R31",
                     "PFK_R21",
-                    "PFK_R11",
-                    "PFK_R41"
+                    "PFK_R01"
                 ],
                 "atp_c_inhibition": [
-                    "PFK_T3",
                     "PFK_T1",
+                    "PFK_T3",
                     "PFK_T4",
                     "PFK_T2"
                 ],
                 "catalyzation": [
+                    "PFK_R13",
                     "PFK_R43",
                     "PFK_R03",
-                    "PFK_R13",
                     "PFK_R23",
                     "PFK_R33"
                 ],
                 "f6p_c_binding": [
-                    "PFK_R12",
                     "PFK_R22",
-                    "PFK_R02",
+                    "PFK_R12",
+                    "PFK_R42",
                     "PFK_R32",
-                    "PFK_R42"
+                    "PFK_R02"
                 ]
             },
             "enzyme_rate": 1.12,
@@ -1213,7 +1213,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 62.5,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1233,7 +1232,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.383634600550456,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1252,7 +1250,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 8.33333333333333,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1271,7 +1268,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.16142403673088654,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1290,7 +1286,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1343,7 +1338,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.690667698063762,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1363,7 +1357,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 2799.9999999999986,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1418,7 +1411,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.14225806451612902,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1522,7 +1514,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 1.4020833333333331,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1542,7 +1533,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 7.441860465116281,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",
@@ -1866,7 +1856,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -1941,7 +1930,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -2016,7 +2004,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -2091,7 +2078,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
@@ -2166,7 +2152,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 307263.0,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "enzyme_module_id": "PFK",
