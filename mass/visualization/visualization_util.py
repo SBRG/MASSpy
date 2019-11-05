@@ -38,6 +38,9 @@ r"""dict: Package names and ``bool``\ s indicating if they are installed."""
 L_PAD = 0.15
 """float: Padding between legend and figure for outside legend locations."""
 
+UL_PAD = 0.2
+"""float: Additional padding for outside upper and lower legend locations."""
+
 OUTSIDE_LEGEND_LOCATION_AND_ANCHORS = {
     "upper right outside": ("center left", (1 + L_PAD, 1 + L_PAD)),
     "upper left outside": ("center right", (0 - L_PAD, 1 + L_PAD)),
@@ -45,16 +48,16 @@ OUTSIDE_LEGEND_LOCATION_AND_ANCHORS = {
     "lower right outside": ("center left", (1 + L_PAD, 0 - L_PAD)),
     "right outside": ("center left", (1 + L_PAD, 0.5)),
     "left outside": ("center right", (0 - L_PAD, 0.5)),
-    "lower outside": ("upper center", (0.5, 0 - L_PAD)),
-    "upper outside": ("lower center", (0.5, 1 + L_PAD)),
+    "lower outside": ("upper center", (0.5, 0 - L_PAD - UL_PAD)),
+    "upper outside": ("lower center", (0.5, 1 + L_PAD + UL_PAD)),
     11: (6, (1 + L_PAD, 1 + L_PAD)),
     12: (7, (0 - L_PAD, 1 + L_PAD)),
     13: (7, (0 - L_PAD, 0 - L_PAD)),
     14: (6, (1 + L_PAD, 0 - L_PAD)),
     15: (6, (1 + L_PAD, 0.5)),
     16: (7, (0 - L_PAD, 0.5)),
-    17: (9, (0.5, 0 - L_PAD)),
-    18: (8, (0.5, 1 + L_PAD)),
+    17: (9, (0.5, 0 - L_PAD - UL_PAD)),
+    18: (8, (0.5, 1 + L_PAD + UL_PAD)),
 }
 """dict: Legend location and anchors for default outside legend locations."""
 

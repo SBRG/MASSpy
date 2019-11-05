@@ -100,9 +100,9 @@ of the :mod:`~mass.visualiation` module.
           For all functions:
 
             * ``"plot"`` for a linear x-axis and a linear y-axis
-                via :meth:`Axes.plot() <matplotlib.axes.Axes.plot>`
+              via :meth:`Axes.plot() <matplotlib.axes.Axes.plot>`
             * ``"loglog"`` for a logarithmic x-axis and a logarithmic y-axis
-                via :meth:`Axes.loglog() <matplotlib.axes.Axes.loglog>`
+              via :meth:`Axes.loglog() <matplotlib.axes.Axes.loglog>`
 
           In addition, for functions in
           :mod:`~mass.visualization.time_profiles` and
@@ -113,7 +113,7 @@ of the :mod:`~mass.visualiation` module.
               * ``"semilogy"`` for a linear x-axis and a logarithmic y-axis
                 via :meth:`Axes.semilogy() <matplotlib.axes.Axes.semilogy>`
 
-           Default is ``"plot"``.
+    Default is ``"plot"``.
   title :
       Either a ``str`` to set as the title or a ``tuple`` of length 2 where
       the first value is the title string and the second value is a ``dict``
