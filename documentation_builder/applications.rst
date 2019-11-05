@@ -25,5 +25,5 @@ Advanced Visualization Examples
 Code Repositories
 -----------------
 * All documentation notebooks are viewable as Jupyter notebooks, which can be
-  viewed at `nbviewer <http://nbviewer.ipython.org/github/opencobra/masspy/tree/master/documentation_builder/notebooks/>`_.
+  viewed at `nbviewer <https://nbviewer.jupyter.org/github/SBRG/MASSpy/tree/master/documentation_builder/notebooks/>`_.
 * A repository of additional **MASSpy** examples can be found `here <https://github.com/z-haiman/MASSpy-examples>`_.
