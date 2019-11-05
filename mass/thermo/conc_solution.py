@@ -15,7 +15,8 @@ from optlang.interface import OPTIMAL
 from pandas import DataFrame, Series, option_context
 
 from mass.core.mass_configuration import MassConfiguration
-from mass.util.util import _check_kwargs, apply_decimal_precision
+from mass.util.util import (
+    _check_kwargs, apply_decimal_precision, get_public_attributes_and_methods)
 
 MASSCONFIGURATION = MassConfiguration()
 
@@ -143,6 +144,16 @@ class ConcSolution:
             raise ValueError(
                 "{0!r} is not a str ID of a ConcSolution variable.".format(
                     str(e)))
+
+    def __dir__(self):
+        """Override default dir() implementation to list only public items.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        return get_public_attributes_and_methods(self)
 
     get_primal_by_id = __getitem__
 

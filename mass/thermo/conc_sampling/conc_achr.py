@@ -14,13 +14,13 @@ from mass.thermo.conc_sampling.conc_hr_sampler import ConcHRSampler, step
 class ConcACHRSampler(ConcHRSampler):
     """Artificial Centering Hit-and-Run sampler for concentration sampling.
 
-    A sampler with low memory footprint and good convergence. REF ACHR
+    A sampler with low memory footprint and good convergence :cite:`KS98`.
 
     Notes
     -----
     ACHR generates samples by choosing new directions from the sampling space's
     center and the warmup points. The implementation used here is the similar
-    as in the Python :mod:`cobra` package REF COBRA.
+    as in the Python :mod:`cobra` package.
 
     This implementation uses only the initial warmup points to generate new
     directions and not any other previous iterates. This usually gives better

@@ -13,14 +13,14 @@ Key components in the :mod:`.thermo.conc_sampling` module are the following:
         2.  ``'achr'`` to utilize the :class:`.ConcACHRSampler`
 
     2. The :class:`.ConcOptGPSampler` is parallel optimized sampler with
-       fast convergence and parallel execution based on REF OPTGP, with its
-       implementation similar to the Python :mod:`cobra` package REF COBRA.
+       fast convergence and parallel execution based on :cite:`MHM14`, with its
+       implementation similar to the Python :mod:`cobra` package.
        See the :mod:`.conc_optgp` documentation for more information.
 
     3. The :class:`.ConcACHRSampler` is a sampler that utilizes an
        Artifial Centering Hit-and-Run (ACHR) sampler for a low memory
-       footprint and good convergence based on REF ACHR, with its
-       implementation similar to the Python :mod:`cobra` package REF COBRA.
+       footprint and good convergence based on :cite:`KS98`, with its
+       implementation similar to the Python :mod:`cobra` package.
        See the :mod:`.conc_achr` documentation for more information.
 
     4. The :class:`.ConcHRSampler` is the base class for the

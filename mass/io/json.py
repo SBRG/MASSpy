@@ -166,7 +166,6 @@ JSON_SCHEMA = {
     "properties": {
         "id": {"type": "string"},
         "name": {"type": "string"},
-        "description": {"type": "string"},
         "version": {
             "type": "integer",
             "default": 1,
@@ -289,7 +288,7 @@ JSON_SCHEMA = {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
-                    "enzyme_module_species": {
+                    "enzyme_module_forms": {
                         "type": "array",
                         "allOf": {"type": "string"}
                     },
@@ -304,7 +303,7 @@ JSON_SCHEMA = {
                             "allOf": {"type": "string"}
                         },
                     },
-                    "enzyme_module_species_categorized": {
+                    "enzyme_module_forms_categorized": {
                         "type": "object",
                         "allOf": {
                             "type": "array",
@@ -323,9 +322,9 @@ JSON_SCHEMA = {
                         "minimum": 0,
                         "exclusiveMinimum": False,
                     },
-                    "enzyme_net_flux": {"type": "number"},
+                    "enzyme_rate": {"type": "number"},
                     "enzyme_concentration_total_equation": {"type": "string"},
-                    "enzyme_net_flux_equation": {"type": "string"},
+                    "enzyme_rate_equation": {"type": "string"},
                 },
             },
             "required": ["id", "name"],
@@ -374,7 +373,7 @@ JSON_SCHEMA = {
             "type": "array",
             "allOf": {"type": "string"}
         },
-        "enzyme_module_species": {
+        "enzyme_module_forms": {
             "type": "array",
             "allOf": {"type": "string"}
         },
@@ -389,7 +388,7 @@ JSON_SCHEMA = {
                 "allOf": {"type": "string"}
             },
         },
-        "_enzyme_module_species_categorized": {
+        "_enzyme_module_forms_categorized": {
             "type": "object",
             "allOf": {
                 "type": "array",
@@ -408,8 +407,8 @@ JSON_SCHEMA = {
             "minimum": 0,
             "exclusiveMinimum": False,
         },
-        "_enzyme_net_flux": {"type": "number"},
-        "_enzyme_net_flux_equation": {"type": "string"},
+        "_enzyme_rate": {"type": "number"},
+        "_enzyme_rate_equation": {"type": "string"},
     },
     "required": ["id", "reactions", "metabolites", "genes"],
     "additionalProperties": False,

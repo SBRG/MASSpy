@@ -70,13 +70,14 @@ def _sample_chain(args):
 class ConcOptGPSampler(ConcHRSampler):
     """A parallel optimized sampler.
 
-    A parallel sampler with fast convergence and parallel execution. REF OPTGP
+    A parallel sampler with fast convergence and parallel execution
+    :cite:`MHM14`.
 
     Notes
     -----
     The sampler is very similar to artificial centering where each process
     samples its own chain. The implementation used here is the similar
-    as in the Python :mod:`cobra` package REF COBRA.
+    as in the Python :mod:`cobra` package.
 
     Initial points are chosen randomly from the warmup points followed by a
     linear transformation that pulls the points a little bit towards the
@@ -146,16 +147,6 @@ class ConcOptGPSampler(ConcHRSampler):
         yet.
     nproj : int
         How often to reproject the sampling point into the feasibility space.
-    met_var_idx : numpy.ndarray
-        Has one entry for each metabolite in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_metabolites`, containing the index of the
-        respective metabolite variable.
-    Keq_var_idx : numpy.ndarray
-        Has one entry for each reaction in the model of the
-        :class:`.ConcSolver`, except those specified in the
-        :attr:`.ConcSolver.excluded_reactions`,containing the index of
-        respective :attr:`.MassReaction.Keq_str` variable.
 
     """
 
@@ -249,7 +240,13 @@ class ConcOptGPSampler(ConcHRSampler):
 
     # Models can be large so don't pass them around during multiprocessing
     def __getstate__(self):
-        """Return the object for serialization."""
+        """Return the object for serialization.
+        
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
         d = dict(self.__dict__)
         del d['model']
         return d

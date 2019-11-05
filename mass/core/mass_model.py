@@ -98,8 +98,6 @@ class MassModel(Model):
 
     Attributes
     ----------
-    description : str
-        A human-readable description of the model.
     reactions : ~cobra.core.dictlist.DictList
         A :class:`~cobra.core.dictlist.DictList` where the keys are reaction
         identifiers and the values are the associated
@@ -136,9 +134,6 @@ class MassModel(Model):
         values are the corresponding boundary condition numerical value or
         function of time. Note that boundary conditions are treated as
         parameters and NOT as species.
-    compartments : dict
-        A ``dict`` to store the compartment shorthands and their full names.
-        Keys are the shorthands while values are the full names.
     units : ~cobra.core.dictlist.DictList
         :class:`~cobra.core.dictlist.DictList` of :class:`~.UnitDefinition`\ s
         to store in the model for referencing.
@@ -153,7 +148,7 @@ class MassModel(Model):
 
     """
 
-    def __init__(self, id_or_model=None, name=None, array_type="DataFrame",
+    def __init__(self, id_or_model=None, name=None, array_type="dense",
                  dtype=np.float64):
         """Initialize the MassModel."""
         # Instiantiate a new MassModel with state identical to
@@ -166,7 +161,6 @@ class MassModel(Model):
             self._cobra_to_mass_repair()
 
         if not isinstance(id_or_model, MassModel):
-            self.description = ''
             # Initialize DictLists for storing enzyme modules and units.
             # Reactions, metabolites, genes, and groups are initialized with
             # the model
@@ -468,8 +462,10 @@ class MassModel(Model):
                bound_met not in self.metabolites:
                 raise ValueError("Did not find {0} in model metabolites or in "
                                  "boundary reactions.".format(bound_met))
+            if bound_cond in ["", None]:
+                boundary_conditions_to_set[bound_met] = None
             # Boundary condition is a function
-            if isinstance(bound_cond, (sym.Basic, string_types)):
+            elif isinstance(bound_cond, (sym.Basic, string_types)):
                 if isinstance(bound_cond, string_types):
                     bound_cond = sym.sympify(bound_cond)
                 for arg in list(bound_cond.atoms(sym.Function)):
@@ -1240,10 +1236,6 @@ class MassModel(Model):
         for e in self.enzyme_modules:
             e._model = self
 
-    def add_groups(self, group_list):
-        """TODO DOCSTRING."""
-        super(MassModel, self).add_groups(group_list)
-
     def copy(self):
         r"""Create a partial "deepcopy" of the :class:`MassModel`.
 
@@ -1552,7 +1544,7 @@ class MassModel(Model):
           including relevant boundary conditions. By default, the relevant
           values are taken from objects associated with the model.
         * To calculate PERCs for a subset of model reactions, use the
-          ``steady_state_fluxes`` kwawrg.
+          ``fluxes`` kwawrg.
 
         Parameters
         ----------
@@ -1578,7 +1570,7 @@ class MassModel(Model):
                 A ``dict`` of concentrations necessary for the PERC
                 calculations, where :class:`~.MassMetabolite`\ s are keys and
                 concentrations are the values. If ``None``, the relevant
-                concentrations that exist in the model are used. 
+                concentrations that exist in the model are used.
 
                 Default is ``None``.
 
@@ -1830,7 +1822,7 @@ class MassModel(Model):
                     with warnings.catch_warnings():
                         if not verbose:
                             warnings.filterwarnings(
-                                "ignore", 
+                                "ignore",
                                 ".*constant for an irreversible reaction.*")
                         setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
@@ -1994,128 +1986,15 @@ class MassModel(Model):
 
         return equivalent
 
-    def set_model_description(self, *assumptions, **additional_notes):
-        """Set the model :attr:`MassModel.description` in a readable format.
+    def set_steady_state_fluxes_from_solver(self):
+        """Set reaction steady state fluxes based on the state of the solver.
 
-        This is a convenience method to help set the description in a human
-        legible format.
-
-        Parameters
-        ----------
-        *assumptions
-            Any number of assumptions as strings to add to the description.
-        **additional_notes
-            Recognized ``kwargs`` are the following:
-
-                replace :
-                    ``bool`` indicating whether to replace the current
-                    description or to add it to the additional notes.
-
-                    Default is ``True`` to replace the current description.
-                max_line_length :
-                    ``int`` between 50 and 100 indicating the maximum line
-                    length before wrapping. Default is 80.
-                organism :
-                    ``str`` indicating the organism represented by the model.
-                    Can be used in addition or instead of the ``cell_type``
-                    kwarg.
-                cell_type :
-                    ``str`` indicating the cell type represented by the model.
-                    Can be used in addition or instead of the ``organism``
-                    kwarg
-
-            All remaining ``kwargs`` are considered additional notes to be
-            added to the description. Use an underscore ``"_"`` in the kwarg
-            to represent a space ``" "``. (e.g. cell_type for cell type)
+        Only works when reaction is associated with a model that has been
+        optimized.
 
         """
-        # Determine whether description is being replaced
-        replace = True
-        if "replace" in additional_notes:
-            replace = additional_notes.pop("replace")
-        # Determine max line length for description
-        mml = 80
-        if "max_line_length" in additional_notes:
-            mml = additional_notes.pop("max_line_length")
-        if not isinstance(mml, integer_types) or not 50 <= mml < 100:
-            # If bad line length input, reset to 80 
-            warnings.warn(
-                "`max_line_length` not an int between 50 and 100 "
-                "using default value.")
-            mml = 80
-
-        def add_to_description(description, key, value, key_newline=False,
-                               captialize=True):
-            """Add to the description string."""
-            # Captialize first letter for description if desired
-            if captialize:
-                key = key.capitalize()
-            # Turn underscores into whitespace
-            key = key.replace("_", " ")
-            display_str = key
-            # Ensure indents match if there is to be a multiple lines
-            if key_newline:
-                key = "  "
-                display_str += "\n" + key
-            n_key = len(key)
-            display_str += value[:mml - n_key] + "\n"
-            if len(value) > mml - n_key:
-                while len(value) > mml - n_key:
-                    value = value[mml - n_key:]
-                    display_str += n_key * " " + value[:mml - n_key]
-                    display_str += "\n"
-                display_str += value[mml - n_key:]
-            else:
-                display_str = key + value
-            # Join new description item to the current description and return
-            description = "\n".join((description, display_str))
-            return description
-
-        # Initialize description with the model ID
-        description = "Model ID: " + str(self.id)
-
-        # Handle recognized kwargs
-        for key in ["organism", "cell_type"]:
-            value = additional_notes.get(key, "")
-            if not isinstance(key, string_types):
-                warnings.warn(
-                    "{0} '{1}' is not a string, therefore it will "
-                    "be ignored".format(key, str(value)))
-                continue
-
-            description = add_to_description(
-                description, key + ":", value) if value else description
-
-            if key in additional_notes:
-                del additional_notes[key]
-        # Handle assumptions
-        if assumptions:
-            description += "\n".join((
-                "", "=" * mml, "Assumptions", "-" * mml))
-            for assumption in ensure_iterable(assumptions):
-                if not isinstance(assumption, string_types):
-                    warnings.warn(
-                        "{0} '{1}' is not a string, therefore it will be "
-                        "ignored".format("Assumption", str(assumption)))
-                    continue
-                description = add_to_description(
-                    description, " * ", assumption, captialize=False)
-            description += "\n"
-
-        # Append old description to the new one.
-        if not replace:
-            additional_notes["Old Description"] = self.description
-
-        # Add any additional notes
-        if additional_notes:
-            description += "\n".join((
-                "", "=" * mml, "Additional Notes", "-" * mml))
-            for key, value in iteritems(additional_notes):
-                description = add_to_description(
-                    description, key.capitalize() + ":", value,
-                    key_newline=True, captialize=False)
-
-        self.description = description
+        for reaction in self.reactions:
+            reaction.steady_state_flux = reaction.flux
 
     # Internal
     def _cobra_to_mass_repair(self):
@@ -2130,6 +2009,9 @@ class MassModel(Model):
         if self.metabolites:
             self.metabolites = DictList([
                 MassMetabolite(metabolite) for metabolite in self.metabolites])
+        # Copy genes
+        if self.genes:
+            self.genes = DictList([gene.copy() for gene in self.genes])
         # Convert Reactions into MassReactions
         if self.reactions:
             self.reactions = DictList([
@@ -2151,6 +2033,8 @@ class MassModel(Model):
                         new_members.append(member)
                 group.remove_members(old_members)
                 group.add_members(new_members)
+        # Ensure all objects in the model point to the MassModel
+        self.__setstate__(self.__dict__)
 
     def _mk_stoich_matrix(self, array_type=None, dtype=None,
                           update_model=True):

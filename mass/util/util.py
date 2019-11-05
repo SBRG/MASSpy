@@ -92,7 +92,10 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
         Overridden and extended methods are not excluded.
 
     """
-    all_public = [i for i in obj.__dict__ if not i.startswith("_")]
+    try:
+        all_public = [i for i in obj.__dict__ if not i.startswith("_")]
+    except AttributeError:
+        all_public = []
     all_public += [i for i in obj.__class__.__dict__
                    if i not in all_public and not i.startswith("_")]
     if not exclude_parent:
@@ -174,7 +177,7 @@ def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
 class ColorFormatter(logging.Formatter):
     """Colored Formatter for logging output.
 
-    Based on 
+    Based on
     http://uran198.github.io/en/python/2016/07/12/colorful-python-logging.html
 
     """
@@ -214,6 +217,19 @@ def _make_logger(name):
     # Add handler and return
     logger.addHandler(handler)
     return logger
+
+
+def _log_msg(logger, level, verbose, msg, *args):
+    """Log a message in the logger and print if desired.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    logger.log(level, msg, *args)
+    if verbose:
+        print(msg % args)
 
 
 __all__ = (

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""
-MassSolution is a class for storing the simulation results.
+r"""MassSolution is a class for storing the simulation results.
 
 After a :class:`~.Simulation` is used to simulate a :mod:`mass` model,
 :class:`MassSolution`\ s are created to store the results computed over the
@@ -18,7 +17,7 @@ category, respectively.
 All solutions in a :class:`MassSolution` can be accessed via attribute
 accessors. A :class:`MassSolution` also contains standard ``dict`` methods.
 
-All functions from the :mod:`mass.core.visualization` submodule are designed
+All functions from the :mod:`mass.visualization` submodule are designed
 to work seamlessly with :class:`MassSolution`\ s, provided they are properly
 created.
 """
@@ -75,13 +74,9 @@ class MassSolution(DictWithID):
 
     """
 
-    def __init__(self, id_or_model, solution_type=None, data_dict=None,
+    def __init__(self, id_or_model, solution_type="", data_dict=None,
                  time=None, interpolate=False):
         """Initialize MassSolution."""
-        if solution_type not in {_CONC_STR, _FLUX_STR}:
-            raise ValueError(
-                "'{0}' is not a valid solution type.".format(solution_type))
-
         if isinstance(id_or_model, MassModel):
             id_or_model = "{0}_{1}Sols".format(str(id_or_model), solution_type)
         if not isinstance(id_or_model, string_types):
@@ -190,7 +185,6 @@ class MassSolution(DictWithID):
 
         setattr(self, "_interpolate", value)
 
-    @property
     def view_time_profile(self):
         """Generate a preview of the time profile for the solution.
 
@@ -205,16 +199,16 @@ class MassSolution(DictWithID):
         # Get solution type for title
         solution_type = ""
         if self.solution_type == _CONC_STR:
-            solution_type += "Concentrations"
+            solution_type += " Concentrations"
 
         if self.solution_type == _FLUX_STR:
-            solution_type += "Fluxes"
+            solution_type += " Fluxes"
 
         # Set plot options
         options = {
             "plot_function": "loglog",
             "grid": ("major", "x"),
-            "title": "Time Profile for {0} {1}".format(self.id, solution_type),
+            "title": "Time Profile for {0}{1}".format(self.id, solution_type),
             "xlabel": "Time",
             "ylabel": solution_type,
         }
@@ -226,7 +220,6 @@ class MassSolution(DictWithID):
         # Set figure size
         ax.get_figure().set_size_inches((6, 4))
 
-    @property
     def view_tiled_phase_portraits(self):
         """Generate a preview of the phase portraits for the solution.
 
@@ -251,9 +244,9 @@ class MassSolution(DictWithID):
             "tile_xlabel_fontdict": {"size": "large"},
             "tile_ylabel_fontdict": {"size": "large"},
             "annotate_time_points_legend_loc": "right outside"}
-        # Plot with kwargs 
+        # Plot with kwargs
         ax = plot_tiled_phase_portraits(self, ax=ax, **options)
-        # Set figure size 
+        # Set figure size
         ax.get_figure().set_size_inches((7, 7))
 
     def to_frame(self):
@@ -266,20 +259,27 @@ class MassSolution(DictWithID):
         df.index = pd.Series(self.time, name="Time")
         return df
 
-    def make_solution_from_equation(self, solution_id, variables, equation,
-                                    update=True):
-        """Make a new solution using an string representation of an equation.
+    def make_aggregate_solution(self, aggregate_id, equation, variables=None,
+                                parameters=None, update=True):
+        """Make a new aggregate variable and its solution from an equation.
 
         Parameters
         ----------
-        solution_id : str
+        aggregate_id : str
             An identifier for the solution to be made.
-        variables : iterable
+        equation : str
+            A string representing the equation of the new solution.
+        variables : iterable or None
             Either an iterable of object identifiers or the objects themselves
             representing keys in the :class:`MassSolution` that are used as
-            variables in equation.
-        equation : str
-            A string representing the equation of the new solution. Must be
+            variables in equation. If ``None``, then all keys of the solution
+            object are checked as variables, potentially resulting in lower
+            performance time.
+        parameters : dict or None
+            A ``dict`` of additional parameters to use, where key:value pairs
+            are the parameter identifiers and their numerical values.
+            If ``None`` then it is assumed that there are no additional
+            parameters in the equation.
         update : bool
             Whether to add the new solution into the :class:`MassSolution`.
             via the :meth:`~dict.update` method. Default is ``True``.
@@ -287,7 +287,7 @@ class MassSolution(DictWithID):
         Returns
         -------
         solution : dict
-            A ``dict`` containing where the key is the ``solution_id`` and the
+            A ``dict`` containing where the key is the ``aggregate_id`` and the
             value is the newly created solution as the same type as the
             variable solutions
 
@@ -297,13 +297,22 @@ class MassSolution(DictWithID):
             Raised if the ``equation_str`` could not be interpreted.
 
         """
-        variables = sorted([getattr(var, "_id", var) for var in variables])
-        invalid = [var for var in variables if var not in self]
-        if invalid:
-            raise ValueError(
-                "'{0!r}' not found in MassSolution".format(invalid))
-        equation = sympify(equation, locals={k: Symbol(k) for k in variables})
-        equation = lambdify(args=variables, expr=equation)
+        if variables is None:
+            variables = list(iterkeys(self))
+        else:
+            variables = sorted([getattr(var, "_id", var) for var in variables])
+            invalid = [var for var in variables if var not in self]
+            if invalid:
+                raise ValueError(
+                    "'{0!r}' not found in MassSolution".format(invalid))
+        local_syms = list(variables)
+        if parameters is None:
+            parameters = {}
+        else:
+            local_syms += list(parameters)
+
+        equation = sympify(equation, locals={k: Symbol(k) for k in local_syms})
+        equation = lambdify(args=variables, expr=equation.subs(parameters))
 
         if self.time is not None:
             values = array([
@@ -320,7 +329,7 @@ class MassSolution(DictWithID):
         elif solution.size == 1:
             solution = solution.item()
 
-        solution = {solution_id: solution}
+        solution = {aggregate_id: solution}
 
         # Update MassSolution if d
         if update:

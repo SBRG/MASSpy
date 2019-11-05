@@ -116,7 +116,6 @@
             "name": "H2O"
         }
     ],
-    "name": "",
     "reactions": [
         {
             "_equilibrium_constant": 2300000.0,
@@ -139,7 +138,6 @@
             "_equilibrium_constant": "inf",
             "_forward_rate_constant": 0.14225806451612902,
             "_lower_bound": -1000.0,
-            "_reverse_rate_constant": 0,
             "_reversible": false,
             "_upper_bound": 1000.0,
             "gene_reaction_rule": "",

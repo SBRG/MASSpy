@@ -1,7 +1,7 @@
 Installation of masspy
 =======================
 
-All releases require Python 3.4+ to be installed before proceeding.
+All releases require Python 3.6+ to be installed before proceeding.
 Mac OS X (10.7+) and Ubuntu ship with Python. Windows users without python can
 download and install python from the `python website
 <https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64-webinstall.exe>`_.
@@ -12,13 +12,18 @@ Stable version installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 masspy can be installed with any recent installation of pip.
+
+You can install all packages, including optional dependencies, directly by::
+
+    pip install "masspy[all]"
+
 Instructions for several operating systems are below:
 
 Mac OS X or Linux
 -----------------
 
 1. `install pip <http://pip.readthedocs.org/en/latest/installing.html>`_.
-2. In a terminal, run ``sudo pip install mass``
+2. In a terminal, run ``sudo pip install masspy``
 
 We highly recommend updating ``pip`` beforehand
 (``pip install pip --upgrade``).
@@ -42,27 +47,6 @@ Installation for development
 
 Get the `detailed contribution instructions <CONTRIBUTING.rst>`_ for
 contributing to masspy.
-
-Installation of optional dependencies
-=====================================
-
-Optional dependencies
-~~~~~~~~~~~~~~~~~~~~~
-
-On windows, these can downloaded from `this site
-<http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_. On Mac/Linux, they can be
-installed using pip, or from the OS package manager (e.g brew, apt, yum).
-
-1. `libsbml <http://sbml.org>`_ >= 5.10 to read/write SBML level 2
-   files
-
-   -  `Windows libsbml installer <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libsbml>`_
-   -  Use ``sudo pip install python-libsbml`` on Mac/Linux
-
-2. `lxml <http://lxml.de/>`_ to speed up read/write of SBML level 3 files.
-You can install all packages directly by::
-
-    pip install "masspy[all]"
 
 Testing your installation
 =========================

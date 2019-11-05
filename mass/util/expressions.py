@@ -137,12 +137,16 @@ def strip_time(sympy_expr):
     def _strip_single_expr(expr):
         if not isinstance(expr, sym.Basic):
             raise TypeError("{0} is not a sympy expression".format(str(expr)))
-        # Get the functions of time.
+        # Get the functions of only time.
+        subs_dict = {}
         funcs = list(expr.atoms(sym.Function))
-        # Get the symbols to replace the functions
-        symbols = list(sym.Symbol(str(f)[:-3]) for f in funcs)
+        for func in funcs:
+            if len(func.atoms(sym.Function)) == 1 \
+               and func.atoms(sym.Symbol).pop() == sym.Symbol("t"):
+                # Make symbol to replace function
+                subs_dict[func] = sym.Symbol(str(func)[:-3])
         # Substitute functions for symbols
-        new_expr = expr.subs(dict(zip(funcs, symbols)))
+        new_expr = expr.subs(subs_dict)
 
         return new_expr
 
@@ -184,16 +188,19 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         warn("No metabolites exist in reaction.")
         return None
 
-    # Generate forward and reverse rate expressions
+    # Generate forward rate expression
     fwd_rate = generate_foward_mass_action_rate_expression(reaction,
                                                            rate_type)
-    rev_rate = generate_reverse_mass_action_rate_expression(reaction,
-                                                            rate_type)
 
-    # Ignore reverse rate if it is mathematically equal to 0.
-    if reaction.Keq == float("inf") and reaction.kr == 0:
+    # Ignore reverse rate if it is mathematically equal to 0, or if
+    # the equilibrium and rate constants are None and reaction is irreversible
+    if (reaction.Keq == float("inf") or reaction.kr == 0) or\
+       (reaction.Keq, reaction.kr) == (None, None) and not reaction.reversible:
         rate_expression = fwd_rate
     else:
+        # Generate reverse rate expression
+        rev_rate = generate_reverse_mass_action_rate_expression(reaction,
+                                                                rate_type)
         rate_expression = sym.Add(fwd_rate, sym.Mul(-sym.S.One, rev_rate))
 
     # Try to group the forward rate constants
@@ -201,10 +208,10 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
 
     # Try to group compartments in the rate
-    if MASSCONFIGURATION.include_compartments_in_rates\
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates\
        and len(reaction.compartments) == 1:
         c = list(reaction.compartments)[0]
-        rate_expression = sym.collect(rate_expression, c)
+        rate_expression = sym.collect(rate_expression, "volume_" + c)
 
     return rate_expression
 
@@ -250,12 +257,15 @@ def generate_foward_mass_action_rate_expression(reaction, rate_type=1):
     else:
         fwd_rate = sym.Mul(sym.var(reaction.kf_str), fwd_rate)
 
+    # Remove time dependency from fixed metabolites
     fwd_rate = _set_fixed_metabolites_in_rate(reaction, fwd_rate)
-    if MASSCONFIGURATION.include_compartments_in_rates:
+
+    # Add compartments
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates:
         compartments = set(
             met.compartment for met in reaction.reactants if met is not None)
         for c in list(compartments):
-            fwd_rate = sym.Mul(fwd_rate, sym.Symbol(c))
+            fwd_rate = sym.Mul(fwd_rate, sym.Symbol("volume_" + c))
 
     return fwd_rate
 
@@ -302,12 +312,15 @@ def generate_reverse_mass_action_rate_expression(reaction, rate_type=1):
     else:
         rev_rate = sym.Mul(sym.var(reaction.kr_str), rev_rate)
 
+    # Remove time dependency from fixed metabolites
     rev_rate = _set_fixed_metabolites_in_rate(reaction, rev_rate)
-    if MASSCONFIGURATION.include_compartments_in_rates:
+
+    # Add compartments
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates:
         compartments = set(
             met.compartment for met in reaction.products if met is not None)
         for c in list(compartments):
-            rev_rate = sym.Mul(rev_rate, sym.Symbol(c))
+            rev_rate = sym.Mul(rev_rate, sym.Symbol("volume_" + c))
 
     return rev_rate
 

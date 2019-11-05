@@ -1,0 +1,184 @@
+{
+    "boundary_conditions": {
+        "amp_b": 0.0
+    },
+    "compartments": {
+        "c": "compartment"
+    },
+    "custom_parameters": {
+        "b1": 0.03
+    },
+    "custom_rates": {
+        "amp_in": "b1"
+    },
+    "enzyme_modules": [],
+    "genes": [],
+    "id": "Phosphate_Trafficking",
+    "metabolites": [
+        {
+            "_initial_condition": 0.2,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP"
+        },
+        {
+            "_initial_condition": 1.7,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP"
+        },
+        {
+            "_initial_condition": 0.2,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O7P",
+            "id": "amp_c",
+            "name": "AMP"
+        },
+        {
+            "_initial_condition": 2,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[B]",
+            "id": "B",
+            "name": "Phosphagen buffer (Free)"
+        },
+        {
+            "_initial_condition": 8,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "[B]-PO3",
+            "id": "BP",
+            "name": "Phosphagen buffer (Loaded)"
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 1000,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "distr",
+            "metabolites": {
+                "adp_c": -2,
+                "amp_c": 1,
+                "atp_c": 1
+            },
+            "name": "Distribution"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 6.25,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "use",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1
+            },
+            "name": "ATP Utilization"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 25,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "form",
+            "metabolites": {
+                "adp_c": -1,
+                "atp_c": 1
+            },
+            "name": "ATP Formation"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 1000,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "buffer",
+            "metabolites": {
+                "B": -1,
+                "BP": 1,
+                "adp_c": 1,
+                "atp_c": -1
+            },
+            "name": "ATP Buffering"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.3,
+            "_lower_bound": 0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000628"
+            },
+            "gene_reaction_rule": "",
+            "id": "amp_drain",
+            "metabolites": {
+                "amp_c": -1
+            },
+            "name": "AMP demand"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 0,
+            "annotation": {
+                "sbo": "SBO:0000628"
+            },
+            "gene_reaction_rule": "",
+            "id": "amp_in",
+            "metabolites": {
+                "amp_c": 1
+            },
+            "name": "AMP demand"
+        }
+    ],
+    "units": [
+        {
+            "_id": "mM",
+            "list_of_units": [
+                {
+                    "_exponent": -1,
+                    "_kind": "liter",
+                    "_multiplier": 1,
+                    "_scale": 1
+                },
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Millimolar"
+        },
+        {
+            "_id": "min",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 60,
+                    "_scale": 1
+                }
+            ],
+            "name": "Minute"
+        }
+    ],
+    "version": "1"
+}

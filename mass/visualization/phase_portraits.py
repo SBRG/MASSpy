@@ -82,7 +82,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         * annotate_time_points_color
         * annotate_time_points_marker
         * annotate_time_points_markersize
-        * annotate_time_points_legend_loc
+        * annotate_time_points_legend
 
         See :mod:`~mass.visualization` documentation for more information on
         optional ``kwargs``.
@@ -229,7 +229,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         * annotate_time_points_color
         * annotate_time_points_marker
         * annotate_time_points_markersize
-        * annotate_time_points_legend_loc
+        * annotate_time_points_legend
         * tile_ticks_on
         * tile_xlabel_fontdict
         * tile_ylabel_fontdict
@@ -301,14 +301,15 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
             if i == 0:
                 sub_ax.set_ylabel(y, kwargs.get("tile_ylabel_fontdict"))
 
-    for sub_ax in ax.get_children():
-        if sub_ax.__class__.__name__ == "Axes"\
-           and v_util._get_ax_current(sub_ax, time_points=True):
-            leg_args = v_util._get_annotated_time_points_legend_args(
-                sub_ax, "right outside")
-            break
+    if kwargs.get("annotate_time_points_legend"):
+        for sub_ax in ax.get_children():
+            if sub_ax.__class__.__name__ == "Axes"\
+               and v_util._get_ax_current(sub_ax, time_points=True):
+                leg_args = v_util._get_annotated_time_points_legend_args(
+                    sub_ax, kwargs.get("annotate_time_points_legend"))
+                break
 
-    ax = v_util._set_additional_legend_box(ax, leg_args, first_legend=None)
+        ax = v_util._set_additional_legend_box(ax, leg_args, first_legend=None)
     # Set the axes title.
     v_util._set_axes_labels(ax, **kwargs)
     # Reset default prop_cycle
@@ -361,7 +362,8 @@ def get_phase_portrait_default_kwargs(function_name):
         "annotate_time_points_color": None,
         "annotate_time_points_marker": None,
         "annotate_time_points_markersize": None,
-        "annotate_time_points_legend_loc": None,
+        "annotate_time_points_labels": False,
+        "annotate_time_points_legend": None,
         "prop_cycle": None,
     }
 
@@ -412,7 +414,7 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
             # Add to the tile kwargs
             tile_kwargs[key] = value
         # Get tile kwarge that is not exclusive to tiled phase portraits
-        elif key in ["title", "annotate_time_points_legend_loc"]:
+        elif key in ["title", "annotate_time_points_legend"]:
             # Add to the tile kwargs
             tile_kwargs[key] = value
         else:
@@ -459,7 +461,7 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     plot_tile_bool = get_plot_tile_bool(i, j, plot_tile_placement)
 
     # Validate fontsize and set default data tile fontsize as large if needed.
-    if data_matrix and tile_kwargs.get("data_tile_fontsize"):
+    if data_matrix is not None and tile_kwargs.get("data_tile_fontsize"):
         tile_kwargs["data_tile_fontsize"] = v_util._validate_kwarg_input(
             "fontsize", tile_kwargs.get("data_tile_fontsize"),
             prefix="data_tile")
@@ -474,7 +476,7 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
         ax = plot_phase_portrait(observable, x=x, y=y, ax=ax, legend=None,
                                  **pp_kwargs)
     # Create the data tile
-    elif data_matrix and not plot_tile_bool:
+    elif data_matrix is not None and not plot_tile_bool:
         # Create the data tile only if there is information,
         # otherwise set the facecolor as an empty tile
         if data_matrix[j][i] == 0 or not data_matrix[j][i]:
