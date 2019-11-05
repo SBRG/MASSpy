@@ -1,17 +1,16 @@
-Installation of masspy
+Installation of MASSpy
 =======================
 
 All releases require Python 3.6+ to be installed before proceeding.
-Mac OS X (10.7+) and Ubuntu ship with Python. Windows users without python can
-download and install python from the `python website
-<https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64-webinstall.exe>`_.
+Users without python can download and install python from the `python website
+<https://www.python.org/downloads/>`_.
 Please note that though Anaconda and other python distributions may work
-with masspy, they are not explicitly supported (yet!).
+with **MASSpy**, they are not explicitly supported.
 
 Stable version installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-masspy can be installed with any recent installation of pip.
+**MASSpy** can be installed with any recent installation of pip.
 
 You can install all packages, including optional dependencies, directly by::
 
@@ -46,12 +45,12 @@ Installation for development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Get the `detailed contribution instructions <CONTRIBUTING.rst>`_ for
-contributing to masspy.
+contributing to **MASSpy**.
 
 Testing your installation
 =========================
 
-Currently masspy is still under development and testing. We apologize
+Currently **MASSpy** is still under development and testing. We apologize
 for the inconvenience and provide further details on this page in a
 future update.
 
