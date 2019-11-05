@@ -10,8 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute.
 
+import os
 import sys
 from os.path import dirname
+
+from ipywidgets.embed import DEFAULT_EMBED_REQUIREJS_URL
 
 sys.path.insert(0, dirname(dirname(__file__)))
 
@@ -19,7 +22,7 @@ from mass import __version__
 
 # -- Project information ------------------------------------------------------
 
-project = 'masspy'
+project = 'MASSpy'
 copyright = '2019, Z. Haiman'
 author = 'Z. Haiman'
 
@@ -42,6 +45,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.autosectionlabel',
     'autoapi.extension',
+    'sphinxcontrib.bibtex',
 ]
 
 # Automated documention of Python Code
@@ -54,6 +58,8 @@ autosectionlabel_prefix_document = True
 autodoc_mock_imports = [
     "cobra",
     "depinfo",
+    "escher",
+    "gurobipy",
     "libroadrunner",
     "matplotlib",
     "numpy",
@@ -83,11 +89,21 @@ todo_include_todos = False
 
 pygments_style = 'sphinx'
 
+nbsphinx_timeout = 180
+
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+# on_rtd is whether we are on readthedocs.org,
+# this line of code grabbed from docs.readthedocs.org
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+# Only import and set the theme if we're building docs locally. Otherwise,
+# readthedocs.org uses their theme by default, so no need to specify it.
+if not on_rtd:
+    import sphinx_rtd_theme
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -102,10 +118,33 @@ html_extra_path = ["robots.txt"]
 
 # -- Options for LaTeX output -------------------------------------------------
 
+latex_documents = [
+  ('index', 'MASSpy.tex', u'MASSpy Documentation',
+   u'Zachary Haiman', 'manual'),
+]
+
+
 # -- Options for manual page output -------------------------------------------
+
+man_pages = [
+    ('index', 'MASSpy', u'MASSpy Documentation',
+     [u'Zachary Haiman'], 1)
+]
 
 # -- Options for Texinfo output -----------------------------------------------
 
+
+# -- NBSphinx -----------------------------------------------------------------
+
+# Execute notebooks before conversion: 'always', 'never', 'auto' (default)
+nbsphinx_execute = 'never'
+
+html_js_files = [
+    'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js',
+    DEFAULT_EMBED_REQUIREJS_URL,
+]
+
+# -- Intersphinx --------------------------------------------------------------
 
 # Refer to the Python documentation for other libraries.
 intersphinx_mapping = {

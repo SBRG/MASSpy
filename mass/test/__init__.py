@@ -39,7 +39,7 @@ MAPS_DIR = join(DATA_DIR, "maps", "")
 """str: The directory location of the pre-made :mod:`escher` maps files."""
 
 
-def create_test_model(model_name, io="sbml"):
+def create_test_model(model_name, io="json"):
     """Return a :class:`mass.MassModel <~.MassModel>` for testing.
 
     Parameters
@@ -75,14 +75,12 @@ def create_test_model(model_name, io="sbml"):
 
 def view_test_models():
     """Print the test models that can be loaded."""
-    for model_name in _get_directory_files(MODELS_DIR):
-        print(model_name)
+    return _get_directory_files(MODELS_DIR)
 
 
 def view_test_maps():
     """Print the test models that can be loaded."""
-    for map_name in _get_directory_files(MAPS_DIR):
-        print(map_name)
+    return _get_directory_files(MAPS_DIR)
 
 
 def test_all(args=None):

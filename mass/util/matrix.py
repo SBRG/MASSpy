@@ -59,15 +59,15 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
         Whether to substitute the numerical values for parameters into the
         matrix. If ``True`` then numerical values of the kinetic parameters
         are substituted into the matrix. Otherwise parameters in the matrix
-        are left as symbols.
+        are left as symbols. Default is ``True``.
     use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
-        the matrix are left as symbols.
+        the matrix are left as symbols. Default is ``True``.
     array_type : str
         A string identifiying the desired format for the returned matrix.
-        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        Default is ``'dense'``.  See the :mod:`~.matrix` module documentation
         for more information on the ``array_type``
 
     Returns
@@ -134,15 +134,15 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
         Whether to substitute the numerical values for parameters into the
         matrix. If ``True`` then numerical values of the kinetic parameters
         are substituted into the matrix. Otherwise parameters in the matrix
-        are left as symbols.
+        are left as symbols. Default is ``True``.
     use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
-        the matrix are left as symbols.
+        the matrix are left as symbols. Default is ``True``.
     array_type : str
         A string identifiying the desired format for the returned matrix.
-        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        Default is ``'dense'``.  See the :mod:`~.matrix` module documentation
         for more information on the ``array_type``.
 
     Returns
@@ -179,15 +179,15 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
         Whether to substitute the numerical values for parameters into the
         matrix. If ``True`` then numerical values of the kinetic parameters
         are substituted into the matrix. Otherwise parameters in the matrix
-        are left as symbols.
+        are left as symbols. Default is ``True``.
     use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into
         the matrix. If ``True`` then numerical values of the initial
         conditions are substituted into the matrix. Otherwise species
-        concentrations in the matrix are left as symbols.
+        concentrations in the matrix are left as symbols. Default is ``True``.
     array_type : str
         A string identifiying the desired format for the returned matrix.
-        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        Default is ``'dense'``.  See the :mod:`~.matrix` module documentation
         for more information on the ``array_type``.
 
     Returns
@@ -208,7 +208,7 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
     return gamma_matrix
 
 
-def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
+def jacobian(model, jacobian_type="species", use_parameter_values=True,
              use_concentration_values=True, array_type="dense"):
     """Get the jacobian matrix for a given model.
 
@@ -217,22 +217,23 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
     model : MassModel
         The :class:`~.MassModel` to construct the matrix for.
     jacobian_type: str
-        Either the string ``'Jx'`` to obtain the jacobian matrix with respect
-        to species, or the string ``'Jv'`` to obtain the jacobian matrix
-        with respect to the reactions. Default is ``'Jx'``.
+        Either the string ``'species'`` to obtain the jacobian matrix with
+        respect to species, or the string ``'reactions'`` to obtain the
+        jacobian matrix with respect to the reactions.
+        Default is ``'reactions'``.
     use_parameter_values : bool
         Whether to substitute the numerical values for parameters into the
         matrix. If ``True`` then numerical values of the kinetic parameters
         are substituted into the matrix. Otherwise parameters in the matrix
-        are left as symbols.
+        are left as symbols. Default is ``True``.
     use_concentration_values : bool
         Whether to substitute the numerical values for concentrations into the
         matrix. If ``True`` then numerical values of the initial conditions
         are substituted into the matrix. Otherwise species concentrations in
-        the matrix are left as symbols.
+        the matrix are left as symbols. Default is ``True``.
     array_type : str
         A string identifiying the desired format for the returned matrix.
-        Default is ``'dense'``.  See the :mod:`~.linear` module documentation
+        Default is ``'dense'``.  See the :mod:`~.matrix` module documentation
         for more information on the ``array_type``.
 
     Returns
@@ -241,15 +242,16 @@ def jacobian(model, jacobian_type="Jx", use_parameter_values=True,
         The jacobian matrix for the model.
 
     """
-    if jacobian_type not in {"Jx", "Jv"}:
-        raise ValueError("jacobian_type must be either 'Jx' or 'Jv'")
+    if jacobian_type not in {"species", "reactions"}:
+        raise ValueError(
+            "jacobian_type must be either 'species' or 'reactions'")
 
     gradient_matrix = gradient(model, use_parameter_values,
                                use_concentration_values,
                                array_type="symbolic")
     stoich_matrix = model._mk_stoich_matrix(array_type="symbolic",
                                             update_model=False)
-    if jacobian_type == "Jx":
+    if jacobian_type == "species":
         jacobian_matrix = stoich_matrix * gradient_matrix
         identifiers = [m.id for m in model.metabolites]
     else:
@@ -611,7 +613,7 @@ def convert_matrix(matrix, array_type, dtype, row_ids=None, col_ids=None):
     array_type : str
         A string identifiying the desired format for the returned matrix.
         Valid matrix types include ``'dense'``, ``'dok'``, ``'lil'``,
-        ``'DataFrame'``, and ``'symbolic'`` See the :mod:`~.linear` module
+        ``'DataFrame'``, and ``'symbolic'`` See the :mod:`~.matrix` module
         documentation for more information on the ``array_type``.
     dtype : data-type
         The desired array data-type for the matrix.

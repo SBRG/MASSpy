@@ -1,0 +1,3973 @@
+{
+    "boundary_conditions": {},
+    "compartments": {
+        "c": "",
+        "e": ""
+    },
+    "custom_parameters": {},
+    "custom_rates": {
+        "ALAt4": "kf_ALAt4*(ala__L_e - ala__L_c(t)/Keq_ALAt4)",
+        "BANDMT": "kf_BANDMT*(amet_c(t) - ahcys_c(t)/Keq_BANDMT)",
+        "CAATPS": "kf_CAATPS*(atp_c(t) - adp_c(t)*pi_c(t)/Keq_CAATPS)",
+        "GLNt4": "kf_GLNt4*(gln__L_e - gln__L_c(t)/Keq_GLNt4)",
+        "GLYt7_211_r": "kf_GLYt7_211_r*(gly_e - gly_c(t)/Keq_GLYt7_211_r)",
+        "GTHPi": "kf_GTHPi*(gthrd_c(t)**2 - gthox_c(t)/Keq_GTHPi)",
+        "HCO3E": "kf_HCO3E*(co2_c(t)*h2o_c(t) - hco3_c(t)/Keq_HCO3E)",
+        "NaKt": "kf_NaKt*(atp_c(t) - adp_c(t)*pi_c(t)/Keq_NaKt)"
+    },
+    "enzyme_modules": [],
+    "genes": [],
+    "id": "WholeCellRBC_MA_Rates",
+    "metabolites": [
+        {
+            "_initial_condition": 0.0003532596280021401,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C3H4O10P2",
+            "id": "_13dpg_c",
+            "name": "3-Phospho-D-glyceroyl phosphate"
+        },
+        {
+            "_initial_condition": 3.974170816738972,
+            "charge": -5,
+            "compartment": "c",
+            "formula": "C3H3O10P2",
+            "id": "_23dpg_c",
+            "name": "2 3 Disphospho D glycerate C3H3O10P2"
+        },
+        {
+            "_initial_condition": 0.0454950152674958,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C5H7O3S",
+            "id": "_2kmb_c",
+            "name": "2-keto-4-methylthiobutyrate"
+        },
+        {
+            "_initial_condition": 0.01135206298851554,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H4O7P",
+            "id": "_2pg_c",
+            "name": "D-Glycerate 2-phosphate"
+        },
+        {
+            "_initial_condition": 4.4694010075557645e-06,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C10H11N5O7P",
+            "id": "_35cgmp_c",
+            "name": "3',5'-Cyclic GMP"
+        },
+        {
+            "_initial_condition": 5.5e-06,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C10H11N5O7P",
+            "id": "_35cgmp_e",
+            "name": "3',5'-Cyclic GMP"
+        },
+        {
+            "_initial_condition": 0.07868102558953934,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H4O7P",
+            "id": "_3pg_c",
+            "name": "3-Phospho-D-glycerate"
+        },
+        {
+            "_initial_condition": 0.005221043205906681,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O7PS",
+            "id": "_5mdr1p_c",
+            "name": "5-Methylthio-5-deoxy-D-ribose 1-phosphate"
+        },
+        {
+            "_initial_condition": 9.13478515007908e-06,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O7PS",
+            "id": "_5mdru1p_c",
+            "name": "5-Methylthio-5-deoxy-D-ribulose 1-phosphate"
+        },
+        {
+            "_initial_condition": 0.001637381741029526,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C11H15N5O3S",
+            "id": "_5mta_c",
+            "name": "5-Methylthioadenosine"
+        },
+        {
+            "_initial_condition": 0.05256501703003371,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C5H6NO3",
+            "id": "_5oxpro_c",
+            "name": "5-Oxoproline"
+        },
+        {
+            "_initial_condition": 0.02,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H6NO3",
+            "id": "_5oxpro_e",
+            "name": "5-Oxoproline"
+        },
+        {
+            "_initial_condition": 0.03634303003285367,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C6H10O10P",
+            "id": "_6pgc_c",
+            "name": "6-Phospho-D-gluconate"
+        },
+        {
+            "_initial_condition": 0.001724591118360284,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H9O9P",
+            "id": "_6pgl_c",
+            "name": "6-phospho-D-glucono-1,5-lactone"
+        },
+        {
+            "_initial_condition": 0.005,
+            "charge": -4,
+            "compartment": "c",
+            "fixed": true,
+            "formula": "C23H34N7O17P3S",
+            "id": "accoa_c",
+            "name": "Acetyl-CoA"
+        },
+        {
+            "_initial_condition": 0.000947164047639456,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H5N5",
+            "id": "ade_c",
+            "name": "Adenine"
+        },
+        {
+            "_initial_condition": 0.0013,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H5N5",
+            "id": "ade_e",
+            "name": "Adenine"
+        },
+        {
+            "_initial_condition": 0.00118157772638567,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C10H13N5O4",
+            "id": "adn_c",
+            "name": "Adenosine"
+        },
+        {
+            "_initial_condition": 0.0002,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C10H13N5O4",
+            "id": "adn_e",
+            "name": "Adenosine"
+        },
+        {
+            "_initial_condition": 0.369826218115911,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP C10H12N5O10P2"
+        },
+        {
+            "_initial_condition": 0.001389068351325022,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C14H20N6O5S",
+            "id": "ahcys_c",
+            "name": "S-Adenosyl-L-homocysteine"
+        },
+        {
+            "_initial_condition": 0.02603921040251165,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H4O5",
+            "id": "akg_c",
+            "name": "2-Oxoglutarate"
+        },
+        {
+            "_initial_condition": 0.007,
+            "charge": -2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H4O5",
+            "id": "akg_e",
+            "name": "2-Oxoglutarate"
+        },
+        {
+            "_initial_condition": 0.2095820839737436,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C3H7NO2",
+            "id": "ala__L_c",
+            "name": "L-Alanine"
+        },
+        {
+            "_initial_condition": 0.32,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C3H7NO2",
+            "id": "ala__L_e",
+            "name": "L-Alanine"
+        },
+        {
+            "_initial_condition": 0.003746910230361765,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "C15H23N6O5S",
+            "id": "amet_c",
+            "name": "S-Adenosyl-L-methionine"
+        },
+        {
+            "_initial_condition": 0.0005078711328676623,
+            "charge": 2,
+            "compartment": "c",
+            "formula": "C14H24N6O3S",
+            "id": "ametam_c",
+            "name": "S-Adenosylmethioninamine"
+        },
+        {
+            "_initial_condition": 0.0958678209723057,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O7P",
+            "id": "amp_c",
+            "name": "AMP C10H12N5O7P"
+        },
+        {
+            "_initial_condition": 0.03999999999999994,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "C6H15N4O2",
+            "id": "arg__L_c",
+            "name": "L-Arginine"
+        },
+        {
+            "_initial_condition": 0.079,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H15N4O2",
+            "id": "arg__L_e",
+            "name": "L-Arginine"
+        },
+        {
+            "_initial_condition": 0.01852046642145102,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H8O6",
+            "id": "ascb__L_c",
+            "name": "L-Ascorbate"
+        },
+        {
+            "_initial_condition": 0.045,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H8O6",
+            "id": "ascb__L_e",
+            "name": "L-Ascorbate"
+        },
+        {
+            "_initial_condition": 0.121,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C4H8N2O3",
+            "id": "asn__L_c",
+            "name": "L-Asparagine"
+        },
+        {
+            "_initial_condition": 0.062,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H8N2O3",
+            "id": "asn__L_e",
+            "name": "L-Asparagine"
+        },
+        {
+            "_initial_condition": 1.788580723025522,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP C10H12N5O13P3"
+        },
+        {
+            "_initial_condition": 1.0,
+            "charge": 0,
+            "compartment": "c",
+            "fixed": true,
+            "formula": "BaH",
+            "id": "band_c",
+            "name": "Band membrane protein (universal, erythrocyte -> 2.1,3,4.1)"
+        },
+        {
+            "_initial_condition": 1.0,
+            "charge": 0,
+            "compartment": "c",
+            "fixed": true,
+            "formula": "BaCH3",
+            "id": "bandmt_c",
+            "name": "Band membrane protein (methylated, universal, erythrocyte -> 2.1,3,4.1)"
+        },
+        {
+            "_initial_condition": 0.01398107493954468,
+            "charge": 2,
+            "compartment": "c",
+            "formula": "Ca",
+            "id": "ca2_c",
+            "name": "Calcium"
+        },
+        {
+            "_initial_condition": 2.3645,
+            "charge": 2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "Ca",
+            "id": "ca2_e",
+            "name": "Calcium"
+        },
+        {
+            "_initial_condition": 1.091481459152668e-05,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C10H11N5O6P",
+            "id": "camp_c",
+            "name": "CAMP C10H11N5O6P"
+        },
+        {
+            "_initial_condition": 8.5e-06,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C10H11N5O6P",
+            "id": "camp_e",
+            "name": "CAMP C10H11N5O6P"
+        },
+        {
+            "_initial_condition": 0.08867662135446565,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C6H5O7",
+            "id": "cit_c",
+            "name": "Citrate"
+        },
+        {
+            "_initial_condition": 0.1,
+            "charge": -3,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H5O7",
+            "id": "cit_e",
+            "name": "Citrate"
+        },
+        {
+            "_initial_condition": 61.80197221030029,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "Cl",
+            "id": "cl_c",
+            "name": "Chloride"
+        },
+        {
+            "_initial_condition": 103.7,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "Cl",
+            "id": "cl_e",
+            "name": "Chloride"
+        },
+        {
+            "_initial_condition": 2.593107394118456e-05,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "CO2",
+            "id": "co2_c",
+            "name": "CO2"
+        },
+        {
+            "_initial_condition": 0.7,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "CO2",
+            "id": "co2_e",
+            "name": "CO2"
+        },
+        {
+            "_initial_condition": 0.00035,
+            "charge": -4,
+            "compartment": "c",
+            "fixed": true,
+            "formula": "C21H32N7O16P3S",
+            "id": "coa_c",
+            "name": "Coenzyme A"
+        },
+        {
+            "_initial_condition": 0.02613228450697826,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C3H7NO2S",
+            "id": "cys__L_c",
+            "name": "L-Cysteine"
+        },
+        {
+            "_initial_condition": 0.052,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C3H7NO2S",
+            "id": "cys__L_e",
+            "name": "L-Cysteine"
+        },
+        {
+            "_initial_condition": 0.193463352820594,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C3H5O6P",
+            "id": "dhap_c",
+            "name": "Dihydroxyacetone phosphate"
+        },
+        {
+            "_initial_condition": 1.022336562634357e-06,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H6O6",
+            "id": "dhdascb_c",
+            "name": "Dehydroascorbate"
+        },
+        {
+            "_initial_condition": 7.01e-05,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H6O6",
+            "id": "dhdascb_e",
+            "name": "Dehydroascorbate"
+        },
+        {
+            "_initial_condition": 9.67089050458353e-05,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H10O3S",
+            "id": "dhmtp_c",
+            "name": "1,2-Dihydroxy-5-(methylthio)pent-1-en-3-one"
+        },
+        {
+            "_initial_condition": 8.067482888589282e-05,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H9O6PS",
+            "id": "dkmpp_c",
+            "name": "2,3-diketo-5-methylthio-1-phosphopentane"
+        },
+        {
+            "_initial_condition": 0.005168332832045605,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C4H7O7P",
+            "id": "e4p_c",
+            "name": "D-Erythrose 4-phosphate"
+        },
+        {
+            "_initial_condition": 0.01916507284290878,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O9P",
+            "id": "f6p_c",
+            "name": "D-Fructose 6-phosphate"
+        },
+        {
+            "_initial_condition": 0.02058119831965632,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C6H10O12P2",
+            "id": "fdp_c",
+            "name": "D-Fructose 1,6-bisphosphate"
+        },
+        {
+            "_initial_condition": 8.228550000000001e-05,
+            "charge": -1,
+            "compartment": "c",
+            "fixed": true,
+            "formula": "CHO2",
+            "id": "for_c",
+            "name": "Formate"
+        },
+        {
+            "_initial_condition": 0.0002336724054313063,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H12O6",
+            "id": "fru_c",
+            "name": "D-Fructose"
+        },
+        {
+            "_initial_condition": 0.031,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H12O6",
+            "id": "fru_e",
+            "name": "D-Fructose"
+        },
+        {
+            "_initial_condition": 8.21699631991336e-05,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C4H2O4",
+            "id": "fum_c",
+            "name": "Fumarate"
+        },
+        {
+            "_initial_condition": 0.0015,
+            "charge": -2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H2O4",
+            "id": "fum_e",
+            "name": "Fumarate"
+        },
+        {
+            "_initial_condition": 0.008802617055802014,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C3H5O6P",
+            "id": "g3p_c",
+            "name": "Glyceraldehyde 3-phosphate"
+        },
+        {
+            "_initial_condition": 0.04710056665908308,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O9P",
+            "id": "g6p_c",
+            "name": "D-Glucose 6-phosphate"
+        },
+        {
+            "_initial_condition": 0.01910679200065942,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O11P2",
+            "id": "gdp_c",
+            "name": "GDP C10H12N5O11P2"
+        },
+        {
+            "_initial_condition": 5.349864384184065,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H12O6",
+            "id": "glc__D_c",
+            "name": "D-Glucose"
+        },
+        {
+            "_initial_condition": 5.35,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H12O6",
+            "id": "glc__D_e",
+            "name": "D-Glucose"
+        },
+        {
+            "_initial_condition": 0.628952460977436,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H10N2O3",
+            "id": "gln__L_c",
+            "name": "L-Glutamine"
+        },
+        {
+            "_initial_condition": 0.538,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H10N2O3",
+            "id": "gln__L_e",
+            "name": "L-Glutamine"
+        },
+        {
+            "_initial_condition": 0.000165,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C8H13N2O5",
+            "id": "gluala_e",
+            "name": "5 L Glutamyl L alanine C8H13N2O5"
+        },
+        {
+            "_initial_condition": 0.04602068260499785,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C8H13N2O5S",
+            "id": "glucys_c",
+            "name": "Gamma-L-Glutamyl-L-cysteine"
+        },
+        {
+            "_initial_condition": 0.2550957177445062,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C5H8NO4",
+            "id": "glu__L_c",
+            "name": "L-Glutamate"
+        },
+        {
+            "_initial_condition": 0.3441486308968465,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C2H5NO2",
+            "id": "gly_c",
+            "name": "Glycine"
+        },
+        {
+            "_initial_condition": 0.24,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C2H5NO2",
+            "id": "gly_e",
+            "name": "Glycine"
+        },
+        {
+            "_initial_condition": 0.1667930460404683,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O8P",
+            "id": "gmp_c",
+            "name": "GMP C10H12N5O8P"
+        },
+        {
+            "_initial_condition": 0.364579444997927,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C10H13N5O5",
+            "id": "gsn_c",
+            "name": "Guanosine"
+        },
+        {
+            "_initial_condition": 0.1165335104703935,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C20H30N6O12S2",
+            "id": "gthox_c",
+            "name": "Oxidized glutathione"
+        },
+        {
+            "_initial_condition": 0.00169,
+            "charge": -2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C20H30N6O12S2",
+            "id": "gthox_e",
+            "name": "Oxidized glutathione"
+        },
+        {
+            "_initial_condition": 3.164331894635334,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C10H16N3O6S",
+            "id": "gthrd_c",
+            "name": "Reduced glutathione"
+        },
+        {
+            "_initial_condition": 0.08543406018372529,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O14P3",
+            "id": "gtp_c",
+            "name": "GTP C10H12N5O14P3"
+        },
+        {
+            "_initial_condition": 0.00783098075504811,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H5N5O",
+            "id": "gua_c",
+            "name": "Guanine"
+        },
+        {
+            "_initial_condition": 5.059476696360102e-05,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "H",
+            "id": "h_c",
+            "name": "H+"
+        },
+        {
+            "_initial_condition": 3.9811e-05,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "H",
+            "id": "h_e",
+            "name": "H+"
+        },
+        {
+            "_initial_condition": 55000.00002522844,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "H2O",
+            "id": "h2o_c",
+            "name": "H2O"
+        },
+        {
+            "_initial_condition": 55000.0,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "H2O",
+            "id": "h2o_e",
+            "name": "H2O"
+        },
+        {
+            "_initial_condition": 2.0020810059761958e-07,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "H2O2",
+            "id": "h2o2_c",
+            "name": "Hydrogen peroxide"
+        },
+        {
+            "_initial_condition": 0.0001,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "H2O2",
+            "id": "h2o2_e",
+            "name": "Hydrogen peroxide"
+        },
+        {
+            "_initial_condition": 12.59669996113626,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "HCO3",
+            "id": "hco3_c",
+            "name": "Bicarbonate"
+        },
+        {
+            "_initial_condition": 24.9,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "HCO3",
+            "id": "hco3_e",
+            "name": "Bicarbonate"
+        },
+        {
+            "_initial_condition": 0.001964902812201704,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C4H9NO2S",
+            "id": "hcys__L_c",
+            "name": "L-Homocysteine"
+        },
+        {
+            "_initial_condition": 0.0098,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H9NO2S",
+            "id": "hcys__L_e",
+            "name": "L-Homocysteine"
+        },
+        {
+            "_initial_condition": 0.086,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H9N3O2",
+            "id": "his__L_c",
+            "name": "L-Histidine"
+        },
+        {
+            "_initial_condition": 0.082,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H9N3O2",
+            "id": "his__L_e",
+            "name": "L-Histidine"
+        },
+        {
+            "_initial_condition": 0.001991873169277454,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H4N4O",
+            "id": "hxan_c",
+            "name": "Hypoxanthine"
+        },
+        {
+            "_initial_condition": 0.0006,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H4N4O",
+            "id": "hxan_e",
+            "name": "Hypoxanthine"
+        },
+        {
+            "_initial_condition": 0.058,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H13NO2",
+            "id": "ile__L_c",
+            "name": "L-Isoleucine"
+        },
+        {
+            "_initial_condition": 0.062,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H13NO2",
+            "id": "ile__L_e",
+            "name": "L-Isoleucine"
+        },
+        {
+            "_initial_condition": 0.01115332501436014,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H11N4O8P",
+            "id": "imp_c",
+            "name": "IMP C10H11N4O8P"
+        },
+        {
+            "_initial_condition": 0.001118355329159923,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C10H12N4O5",
+            "id": "ins_c",
+            "name": "Inosine"
+        },
+        {
+            "_initial_condition": 0.001,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C10H12N4O5",
+            "id": "ins_e",
+            "name": "Inosine"
+        },
+        {
+            "_initial_condition": 165.8066781065473,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "P",
+            "id": "k_c",
+            "name": "Potassium"
+        },
+        {
+            "_initial_condition": 4.2,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "P",
+            "id": "k_e",
+            "name": "Potassium"
+        },
+        {
+            "_initial_condition": 1.130202367122641,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C3H5O3",
+            "id": "lac__L_c",
+            "name": "L-Lactate"
+        },
+        {
+            "_initial_condition": 1.5,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C3H5O3",
+            "id": "lac__L_e",
+            "name": "L-Lactate"
+        },
+        {
+            "_initial_condition": 0.11,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H13NO2",
+            "id": "leu__L_c",
+            "name": "L-Leucine"
+        },
+        {
+            "_initial_condition": 0.132,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H13NO2",
+            "id": "leu__L_e",
+            "name": "L-Leucine"
+        },
+        {
+            "_initial_condition": 0.139,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "C6H15N2O2",
+            "id": "lys__L_c",
+            "name": "L-Lysine"
+        },
+        {
+            "_initial_condition": 0.167,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H15N2O2",
+            "id": "lys__L_e",
+            "name": "L-Lysine"
+        },
+        {
+            "_initial_condition": 0.002483525535093325,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C4H4O5",
+            "id": "mal__L_c",
+            "name": "L-Malate"
+        },
+        {
+            "_initial_condition": 0.012,
+            "charge": -2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H4O5",
+            "id": "mal__L_e",
+            "name": "L-Malate"
+        },
+        {
+            "_initial_condition": 0.0842894055717999,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H12O6",
+            "id": "man_c",
+            "name": "D-Mannose"
+        },
+        {
+            "_initial_condition": 0.039,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C6H12O6",
+            "id": "man_e",
+            "name": "D-Mannose"
+        },
+        {
+            "_initial_condition": 0.01405876985807188,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O9P",
+            "id": "man6p_c",
+            "name": "D-Mannose 6-phosphate"
+        },
+        {
+            "_initial_condition": 0.01436508118498794,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H11NO2S",
+            "id": "met__L_c",
+            "name": "L-Methionine"
+        },
+        {
+            "_initial_condition": 0.024,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H11NO2S",
+            "id": "met__L_e",
+            "name": "L-Methionine"
+        },
+        {
+            "_initial_condition": 9.97219771455134,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "Na",
+            "id": "na1_c",
+            "name": "Sodium"
+        },
+        {
+            "_initial_condition": 142.6,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "Na",
+            "id": "na1_e",
+            "name": "Sodium"
+        },
+        {
+            "_initial_condition": 0.06038633281724509,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C21H26N7O14P2",
+            "id": "nad_c",
+            "name": "Nicotinamide adenine dinucleotide"
+        },
+        {
+            "_initial_condition": 0.02861366717407611,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C21H27N7O14P2",
+            "id": "nadh_c",
+            "name": "Nicotinamide adenine dinucleotide - reduced"
+        },
+        {
+            "_initial_condition": 0.0002033707836570714,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C21H25N7O17P3",
+            "id": "nadp_c",
+            "name": "Nicotinamide adenine dinucleotide phosphate"
+        },
+        {
+            "_initial_condition": 0.06579662920961606,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C21H26N7O17P3",
+            "id": "nadph_c",
+            "name": "Nicotinamide adenine dinucleotide phosphate - reduced"
+        },
+        {
+            "_initial_condition": 0.198033745233562,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "NH4",
+            "id": "nh4_c",
+            "name": "Ammonium"
+        },
+        {
+            "_initial_condition": 0.0504,
+            "charge": 1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "NH4",
+            "id": "nh4_e",
+            "name": "Ammonium"
+        },
+        {
+            "_initial_condition": 0.1000010243008056,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "O2",
+            "id": "o2_c",
+            "name": "O2"
+        },
+        {
+            "_initial_condition": 0.1,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "O2",
+            "id": "o2_e",
+            "name": "O2"
+        },
+        {
+            "_initial_condition": 4.752892305968655e-08,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C4H2O5",
+            "id": "oaa_c",
+            "name": "Oxaloacetate"
+        },
+        {
+            "_initial_condition": 0.121,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "C5H13N2O2",
+            "id": "orn_c",
+            "name": "Ornithine"
+        },
+        {
+            "_initial_condition": 0.01433318857592671,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H2O6P",
+            "id": "pep_c",
+            "name": "Phosphoenolpyruvate"
+        },
+        {
+            "_initial_condition": 0.049,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C9H11NO2",
+            "id": "phe__L_c",
+            "name": "L-Phenylalanine"
+        },
+        {
+            "_initial_condition": 0.053,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C9H11NO2",
+            "id": "phe__L_e",
+            "name": "L-Phenylalanine"
+        },
+        {
+            "_initial_condition": 0.002623615137177251,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C9H7O3",
+            "id": "phpyr_c",
+            "name": "Phenylpyruvate"
+        },
+        {
+            "_initial_condition": 2.446143006993934,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "HO4P",
+            "id": "pi_c",
+            "name": "phosphate"
+        },
+        {
+            "_initial_condition": 0.3791,
+            "charge": -2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "HO4P",
+            "id": "pi_e",
+            "name": "phosphate"
+        },
+        {
+            "_initial_condition": 3.72789194638877e-05,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "HO7P2",
+            "id": "ppi_c",
+            "name": "Diphosphate"
+        },
+        {
+            "_initial_condition": 0.005830822229836712,
+            "charge": -5,
+            "compartment": "c",
+            "formula": "C5H8O14P3",
+            "id": "prpp_c",
+            "name": "5-Phospho-alpha-D-ribose 1-diphosphate"
+        },
+        {
+            "_initial_condition": 0.0001046788111762542,
+            "charge": 2,
+            "compartment": "c",
+            "formula": "C4H14N2",
+            "id": "ptrc_c",
+            "name": "Putrescine"
+        },
+        {
+            "_initial_condition": 0.000214,
+            "charge": 2,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H14N2",
+            "id": "ptrc_e",
+            "name": "Putrescine"
+        },
+        {
+            "_initial_condition": 0.08712102934138201,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C3H3O3",
+            "id": "pyr_c",
+            "name": "Pyruvate"
+        },
+        {
+            "_initial_condition": 0.075,
+            "charge": -1,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C3H3O3",
+            "id": "pyr_e",
+            "name": "Pyruvate"
+        },
+        {
+            "_initial_condition": 0.0610296910631441,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "r1p_c",
+            "name": "Alpha-D-Ribose 1-phosphate"
+        },
+        {
+            "_initial_condition": 0.01253359524657143,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "r5p_c",
+            "name": "Alpha-D-Ribose 5-phosphate"
+        },
+        {
+            "_initial_condition": 0.004875390974321567,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "ru5p__D_c",
+            "name": "D-Ribulose 5-phosphate"
+        },
+        {
+            "_initial_condition": 0.01937874082722468,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C7H13O10P",
+            "id": "s7p_c",
+            "name": "Sedoheptulose 7-phosphate"
+        },
+        {
+            "_initial_condition": 0.117699731617428,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H14O6",
+            "id": "sbt__D_c",
+            "name": "D-Sorbitol"
+        },
+        {
+            "_initial_condition": 0.149,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C3H7NO3",
+            "id": "ser__L_c",
+            "name": "L-Serine"
+        },
+        {
+            "_initial_condition": 0.122,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C3H7NO3",
+            "id": "ser__L_e",
+            "name": "L-Serine"
+        },
+        {
+            "_initial_condition": 0.007365737223925033,
+            "charge": 3,
+            "compartment": "c",
+            "formula": "C7H22N3",
+            "id": "spmd_c",
+            "name": "Spermidine"
+        },
+        {
+            "_initial_condition": 0.009385,
+            "charge": 3,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C7H22N3",
+            "id": "spmd_e",
+            "name": "Spermidine"
+        },
+        {
+            "_initial_condition": 0.003170075767703188,
+            "charge": 4,
+            "compartment": "c",
+            "formula": "C10H30N4",
+            "id": "sprm_c",
+            "name": "Spermine C10H30N4"
+        },
+        {
+            "_initial_condition": 0.00997,
+            "charge": 4,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C10H30N4",
+            "id": "sprm_e",
+            "name": "Spermine C10H30N4"
+        },
+        {
+            "_initial_condition": 0.116,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C4H9NO3",
+            "id": "thr__L_c",
+            "name": "L-Threonine"
+        },
+        {
+            "_initial_condition": 0.142,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C4H9NO3",
+            "id": "thr__L_e",
+            "name": "L-Threonine"
+        },
+        {
+            "_initial_condition": 0.024,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C11H12N2O2",
+            "id": "trp__L_c",
+            "name": "L-Tryptophan"
+        },
+        {
+            "_initial_condition": 0.045,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C11H12N2O2",
+            "id": "trp__L_e",
+            "name": "L-Tryptophan"
+        },
+        {
+            "_initial_condition": 0.059,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C9H11NO3",
+            "id": "tyr__L_c",
+            "name": "L-Tyrosine"
+        },
+        {
+            "_initial_condition": 0.054,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C9H11NO3",
+            "id": "tyr__L_e",
+            "name": "L-Tyrosine"
+        },
+        {
+            "_initial_condition": 0.01292735526604759,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H4N4O3",
+            "id": "urate_c",
+            "name": "Urate C5H4N4O3"
+        },
+        {
+            "_initial_condition": 0.3,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H4N4O3",
+            "id": "urate_e",
+            "name": "Urate C5H4N4O3"
+        },
+        {
+            "_initial_condition": 1.699999999999993,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "CH4N2O",
+            "id": "urea_c",
+            "name": "Urea CH4N2O"
+        },
+        {
+            "_initial_condition": 6.0746,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "CH4N2O",
+            "id": "urea_e",
+            "name": "Urea CH4N2O"
+        },
+        {
+            "_initial_condition": 0.0032,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C9H12N2O6",
+            "id": "uri_c",
+            "name": "Uridine"
+        },
+        {
+            "_initial_condition": 0.0031,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C9H12N2O6",
+            "id": "uri_e",
+            "name": "Uridine"
+        },
+        {
+            "_initial_condition": 0.171,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H11NO2",
+            "id": "val__L_c",
+            "name": "L-Valine"
+        },
+        {
+            "_initial_condition": 0.235,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H11NO2",
+            "id": "val__L_e",
+            "name": "L-Valine"
+        },
+        {
+            "_initial_condition": 0.003587794806429677,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H4N4O2",
+            "id": "xan_c",
+            "name": "Xanthine"
+        },
+        {
+            "_initial_condition": 0.001,
+            "charge": 0,
+            "compartment": "e",
+            "fixed": true,
+            "formula": "C5H4N4O2",
+            "id": "xan_e",
+            "name": "Xanthine"
+        },
+        {
+            "_initial_condition": 1.2148343875391141e-06,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H11N4O9P",
+            "id": "xmp_c",
+            "name": "Xanthosine 5'-phosphate"
+        },
+        {
+            "_initial_condition": 0.01460685123625522,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "xu5p__D_c",
+            "name": "D-Xylulose 5-phosphate"
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": 1.9,
+            "_forward_rate_constant": 4.130726933803753,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "UNK3",
+            "metabolites": {
+                "_2kmb_c": -1,
+                "akg_c": 1,
+                "glu__L_c": -1,
+                "met__L_c": 1
+            },
+            "name": "2-keto-4-methylthiobutyrate transamination",
+            "steady_state_flux": 0.0471262752823035,
+            "subsystem": "Methionine Salvage"
+        },
+        {
+            "_equilibrium_constant": 790091.5,
+            "_forward_rate_constant": 287.0902976210762,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADA",
+            "metabolites": {
+                "adn_c": -1,
+                "h2o_c": -1,
+                "h_c": -1,
+                "ins_c": 1,
+                "nh4_c": 1
+            },
+            "name": "Adenosine deaminase",
+            "steady_state_flux": 0.3392194206556536,
+            "subsystem": "Purine Catabolism"
+        },
+        {
+            "_equilibrium_constant": 1.1,
+            "_forward_rate_constant": 208.9534942570069,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADEt",
+            "metabolites": {
+                "ade_c": 1,
+                "ade_e": -1
+            },
+            "name": "Adenine transport via diffusion",
+            "steady_state_flux": 0.0917184176351321,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 2.313344764913225,
+            "_forward_rate_constant": 4.382684406813142,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADK1",
+            "metabolites": {
+                "adp_c": 2,
+                "amp_c": -1,
+                "atp_c": -1
+            },
+            "name": "Adenylate kinase",
+            "steady_state_flux": 0.4923706262866404,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 2941.68251579754,
+            "_forward_rate_constant": 12.57736973700093,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADMDC",
+            "metabolites": {
+                "amet_c": -1,
+                "ametam_c": 1,
+                "co2_c": 1,
+                "h_c": -1
+            },
+            "name": "Adenosylmethionine decarboxylase",
+            "steady_state_flux": 0.04712627528230352,
+            "subsystem": "Arginine and Proline Metabolism"
+        },
+        {
+            "_equilibrium_constant": 65.0,
+            "_forward_rate_constant": 0.0450893453225499,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADNCYC",
+            "metabolites": {
+                "atp_c": -1,
+                "camp_c": 1,
+                "ppi_c": 1
+            },
+            "name": "Adenylate cyclase",
+            "steady_state_flux": 0.0806459338574715,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 16778.29148676275,
+            "_forward_rate_constant": 108.2734472923699,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADNK1",
+            "metabolites": {
+                "adn_c": -1,
+                "adp_c": 1,
+                "amp_c": 1,
+                "atp_c": -1,
+                "h_c": 1
+            },
+            "name": "Adenosine kinase",
+            "steady_state_flux": 0.2285905865453098,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1000.0,
+            "_forward_rate_constant": 1972.329546109829,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADNt",
+            "metabolites": {
+                "adn_c": 1,
+                "adn_e": -1
+            },
+            "name": "Adenosine facilated transport in cytosol",
+            "steady_state_flux": 0.39213544856119,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 956031.583899846,
+            "_forward_rate_constant": 25140.53831296645,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADPT",
+            "metabolites": {
+                "ade_c": -1,
+                "amp_c": 1,
+                "ppi_c": 1,
+                "prpp_c": -1
+            },
+            "name": "Adenine phosphoribosyltransferase",
+            "steady_state_flux": 0.1388446929174356,
+            "subsystem": "Salvage Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.04509999999999999,
+            "_forward_rate_constant": 31.60981870578009,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "AHCi",
+            "metabolites": {
+                "adn_c": 1,
+                "ahcys_c": -1,
+                "h2o_c": -1,
+                "hcys__L_c": 1
+            },
+            "name": "Adenosylhomocysteinase",
+            "steady_state_flux": 0.04228096916543189,
+            "subsystem": "Methionine Metabolism"
+        },
+        {
+            "_equilibrium_constant": 2.5,
+            "_forward_rate_constant": 0.1182230984712748,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ALAt4",
+            "metabolites": {
+                "ala__L_c": 1,
+                "ala__L_e": -1,
+                "na1_c": 1,
+                "na1_e": -1
+            },
+            "name": "Alanine-Sodium symporter",
+            "steady_state_flux": 0.02792041417023077,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 884032.6,
+            "_forward_rate_constant": 1.320394183211946,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "AMPDA",
+            "metabolites": {
+                "amp_c": -1,
+                "h2o_c": -1,
+                "h_c": -1,
+                "imp_c": 1,
+                "nh4_c": 1
+            },
+            "name": "Adenosine monophosphate deaminase",
+            "steady_state_flux": 0.1265833098700628,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 4872.954645924726,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ARD",
+            "metabolites": {
+                "_2kmb_c": 1,
+                "dhmtp_c": -1,
+                "for_c": 1,
+                "h_c": 2,
+                "o2_c": -1
+            },
+            "name": "1;2-dihydroxy-3-keto-5-methylthiopentene dioxygenase",
+            "steady_state_flux": 0.04712627528230351,
+            "subsystem": "Methionine Salvage"
+        },
+        {
+            "_equilibrium_constant": 132.0,
+            "_forward_rate_constant": 11.09081191812114,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ARGN",
+            "metabolites": {
+                "arg__L_c": -1,
+                "h2o_c": -1,
+                "orn_c": 1,
+                "urea_c": 1
+            },
+            "name": "Arginase",
+            "steady_state_flux": 0.4263492948191063,
+            "subsystem": "Urea cycle/amino group metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.5953,
+            "_forward_rate_constant": 7.906140974173966,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ARGt5r",
+            "metabolites": {
+                "arg__L_c": 1,
+                "arg__L_e": -1
+            },
+            "name": "ARGtiDF",
+            "steady_state_flux": 0.4263492948191063,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 10450000.0,
+            "_forward_rate_constant": 584.1510810365364,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ENOPH",
+            "metabolites": {
+                "dhmtp_c": 1,
+                "dkmpp_c": -1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "Enolase-phosphatase E1",
+            "steady_state_flux": 0.04712627528230352,
+            "subsystem": "Methionine Salvage"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 0.002568077323559894,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ASCBt",
+            "metabolites": {
+                "ascb__L_c": 1,
+                "ascb__L_e": -1
+            },
+            "name": "L-ascorbate transport via facilitated diffusion",
+            "steady_state_flux": -0.000360056418826613,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000.0,
+            "_forward_rate_constant": 11.28840749700563,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "BANDMT",
+            "metabolites": {
+                "ahcys_c": 1,
+                "amet_c": -1,
+                "band_c": -1,
+                "bandmt_c": 1,
+                "h_c": 1
+            },
+            "name": "Band membrane protein-methyltransferase",
+            "steady_state_flux": 0.04228096916543189,
+            "subsystem": "Methionine Metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.01,
+            "_forward_rate_constant": 0.2618887611030179,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CA2t",
+            "metabolites": {
+                "ca2_c": 1,
+                "ca2_e": -1
+            },
+            "name": "Calcium (Ca+2) transport via diffusion (extracellular to periplasm)",
+            "steady_state_flux": 0.2530873361475051,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 0.0707509,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CAATPS",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "ca2_c": -2,
+                "ca2_e": 2,
+                "h2o_c": -1,
+                "h_e": 1,
+                "pi_c": 1
+            },
+            "name": "CAATPS",
+            "steady_state_flux": 0.1265436680737525,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 924.655150050234,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CAMPt",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "camp_c": -1,
+                "camp_e": 1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "CAMP transport (ATP-dependent)",
+            "steady_state_flux": 0.01805113567060416,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 6.1913099999999995e+29,
+            "_forward_rate_constant": 43289500000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CAT",
+            "metabolites": {
+                "h2o2_c": -2,
+                "h2o_c": 2,
+                "o2_c": 1
+            },
+            "name": "Catalase",
+            "steady_state_flux": 1.735186287841464,
+            "subsystem": "ROS Detoxification"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 1773.979933644341,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CGMPt",
+            "metabolites": {
+                "_35cgmp_c": -1,
+                "_35cgmp_e": 1,
+                "adp_c": 1,
+                "atp_c": -1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "CGMP transport (ATP-dependent)",
+            "steady_state_flux": 0.01418098184274985,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 0.5100906495907399,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CO2t",
+            "metabolites": {
+                "co2_c": 1,
+                "co2_e": -1
+            },
+            "name": "CO2 transporter via diffusion",
+            "steady_state_flux": 0.3570502275151666,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.958203,
+            "_forward_rate_constant": 2.136185156684522,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CYStec",
+            "metabolites": {
+                "cys__L_c": 1,
+                "cys__L_e": -1
+            },
+            "name": "L-cysteine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0.05282320245485167,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 5.21234217994482,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DHAAt1r",
+            "metabolites": {
+                "dhdascb_c": 1,
+                "dhdascb_e": -1
+            },
+            "name": "Dehydroascorbate transport (uniport)",
+            "steady_state_flux": 0.000360056418826613,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 73.6380429563479,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_nadh",
+            "metabolites": {
+                "h_c": 1,
+                "nad_c": 1,
+                "nadh_c": -1
+            },
+            "name": "Demand NADH",
+            "steady_state_flux": 2.107050005771889
+        },
+        {
+            "_equilibrium_constant": 53550.06899489932,
+            "_forward_rate_constant": 1832.5475074712,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DPGM",
+            "metabolites": {
+                "_13dpg_c": -1,
+                "_23dpg_c": 1,
+                "h_c": 1
+            },
+            "name": "Diphosphoglyceromutase",
+            "steady_state_flux": 0.5113641648637322,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 3750868.0,
+            "_forward_rate_constant": 0.1286719154879626,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DPGase",
+            "metabolites": {
+                "_23dpg_c": -1,
+                "_3pg_c": 1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "Diphosphoglycerate phosphatase",
+            "steady_state_flux": 0.5113641648637339,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 4.946706569063036,
+            "_forward_rate_constant": 417.7921495433866,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ENO",
+            "metabolites": {
+                "_2pg_c": -1,
+                "h2o_c": 1,
+                "pep_c": 1
+            },
+            "name": "Enolase",
+            "steady_state_flux": 3.532241067137616,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.0925283474895767,
+            "_forward_rate_constant": 769.1288890971771,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "FBA",
+            "metabolites": {
+                "dhap_c": 1,
+                "fdp_c": -1,
+                "g3p_c": 1
+            },
+            "name": "Fructose-bisphosphate aldolase",
+            "steady_state_flux": 1.67378053989767,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 3.118388488168804,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "FRUt1r",
+            "metabolites": {
+                "fru_c": 1,
+                "fru_e": -1
+            },
+            "name": "D-fructose transport in via uniport",
+            "steady_state_flux": 0.0959413617941332,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 83000.0,
+            "_forward_rate_constant": 28605.78745010746,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "G6PDH2r",
+            "metabolites": {
+                "_6pgl_c": 1,
+                "g6p_c": -1,
+                "h_c": 1,
+                "nadp_c": -1,
+                "nadph_c": 1
+            },
+            "name": "Glucose 6-phosphate dehydrogenase",
+            "steady_state_flux": 0.2739722730367791,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.15,
+            "_forward_rate_constant": 2865.034004097039,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GAPD",
+            "metabolites": {
+                "_13dpg_c": 1,
+                "g3p_c": -1,
+                "h_c": 1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "pi_c": -1
+            },
+            "name": "Glyceraldehyde-3-phosphate dehydrogenase",
+            "steady_state_flux": 3.532241067137615,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 110000.0,
+            "_forward_rate_constant": 158.4792315617093,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GGLUCT",
+            "metabolites": {
+                "_5oxpro_c": 1,
+                "ala__L_c": 1,
+                "gluala_e": -1
+            },
+            "name": "Gamma-glutamylcyclotransferase",
+            "steady_state_flux": 0.02613320124493619,
+            "subsystem": "Glutathione Metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.314706044573294,
+            "_forward_rate_constant": 0.283624618460492,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GK1",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "gdp_c": 1,
+                "gmp_c": -1
+            },
+            "name": "Guanylate kinase (GMP:ATP)",
+            "steady_state_flux": 0.07824338624699832,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1.000250283714526,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLCt1",
+            "metabolites": {
+                "glc__D_c": 1,
+                "glc__D_e": -1
+            },
+            "name": "Glucose transport uniport",
+            "steady_state_flux": 1.474264704202533,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 3200.0,
+            "_forward_rate_constant": 1.442509279193698,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLNS",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "gln__L_c": 1,
+                "glu__L_c": -1,
+                "h_c": 1,
+                "nh4_c": -1,
+                "pi_c": 1
+            },
+            "name": "Glutamine synthetase",
+            "steady_state_flux": 0.1300810557974588,
+            "subsystem": "Glutamate metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.586219,
+            "_forward_rate_constant": 0.978338057174039,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLNt4",
+            "metabolites": {
+                "gln__L_c": 1,
+                "gln__L_e": -1,
+                "na1_c": 1,
+                "na1_e": -1
+            },
+            "name": "L-glutamine reversible transport via sodium symport",
+            "steady_state_flux": 0.1384245797004417,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 22255.95942862039,
+            "_forward_rate_constant": 17.36223579636818,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLUCYS",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "cys__L_c": -1,
+                "glu__L_c": -1,
+                "glucys_c": 1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "Gamma-glutamylcysteine synthetase",
+            "steady_state_flux": 0.2069791502792352,
+            "subsystem": "Glutathione Metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.584674,
+            "_forward_rate_constant": 2.31408,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLYt7_211_r",
+            "metabolites": {
+                "cl_c": 1,
+                "cl_e": -1,
+                "gly_c": 1,
+                "gly_e": -1,
+                "na1_c": 2,
+                "na1_e": -2
+            },
+            "name": "GLYt7 LPAREN 211 RPAREN r",
+            "steady_state_flux": 0.05282320245485166,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 3782009.542346936,
+            "_forward_rate_constant": 3.99275652051386,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GMPR",
+            "metabolites": {
+                "gmp_c": -1,
+                "h_c": -2,
+                "imp_c": 1,
+                "nadp_c": 1,
+                "nadph_c": -1,
+                "nh4_c": 1
+            },
+            "name": "GMP reductase",
+            "steady_state_flux": 0.04381818783216657,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 36980500.0,
+            "_forward_rate_constant": 42440.2891657032,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GMPS2",
+            "metabolites": {
+                "amp_c": 1,
+                "atp_c": -1,
+                "gln__L_c": -1,
+                "glu__L_c": 1,
+                "gmp_c": 1,
+                "h2o_c": -1,
+                "h_c": 2,
+                "ppi_c": 1,
+                "xmp_c": -1
+            },
+            "name": "GMP synthase",
+            "steady_state_flux": 0.0579991696749166,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 70503.8,
+            "_forward_rate_constant": 37067.8096985412,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GND",
+            "metabolites": {
+                "_6pgc_c": -1,
+                "co2_c": 1,
+                "nadp_c": -1,
+                "nadph_c": 1,
+                "ru5p__D_c": 1
+            },
+            "name": "Phosphogluconate dehydrogenase",
+            "steady_state_flux": 0.273972273036779,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 1700000.0,
+            "_forward_rate_constant": 35.1776,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GTHDH",
+            "metabolites": {
+                "ascb__L_c": 1,
+                "dhdascb_c": -1,
+                "gthox_c": 1,
+                "gthrd_c": -2
+            },
+            "name": "Glutathione dehydrogenase (dehydroascorbate reductase)",
+            "steady_state_flux": 0.0003600564188266131,
+            "subsystem": "Ascorbate and Aldarate Metabolism"
+        },
+        {
+            "_equilibrium_constant": 5.1,
+            "_forward_rate_constant": 43.5034,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GTHOr",
+            "metabolites": {
+                "gthox_c": -1,
+                "gthrd_c": 2,
+                "h_c": -1,
+                "nadp_c": 1,
+                "nadph_c": -1
+            },
+            "name": "Glutathione oxidoreductase",
+            "steady_state_flux": 0.3161924032965422,
+            "subsystem": "Glutamate metabolism"
+        },
+        {
+            "_equilibrium_constant": 3569717.92422143,
+            "_forward_rate_constant": 0.1267171385274827,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GTHOXti2",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "gthox_c": -1,
+                "gthox_e": 1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "Oxidized glutathione irreversible active transport (rbc)",
+            "steady_state_flux": 0.02641160122742587,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 73.5294,
+            "_forward_rate_constant": 0.0341854,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GTHPi",
+            "metabolites": {
+                "gthox_c": 1,
+                "gthrd_c": -2,
+                "h2o2_c": -1,
+                "h2o_c": 2
+            },
+            "name": "Glutathione peridoxase",
+            "steady_state_flux": 0.3422439481051416,
+            "subsystem": "Glutathione Metabolism"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 1.864923272899989,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GTHS",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "glucys_c": -1,
+                "gly_c": -1,
+                "gthrd_c": 1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "Glutathione synthetase",
+            "steady_state_flux": 0.05282320245485166,
+            "subsystem": "Glutathione Metabolism"
+        },
+        {
+            "_equilibrium_constant": 15.80323441374261,
+            "_forward_rate_constant": 0.915833639281478,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GUACYC",
+            "metabolites": {
+                "_35cgmp_c": 1,
+                "gtp_c": -1,
+                "ppi_c": 1
+            },
+            "name": "Guanylate cyclase",
+            "steady_state_flux": 0.07824338624699827,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 397.4168947595015,
+            "_forward_rate_constant": 1304.777940719777,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GUAPRT",
+            "metabolites": {
+                "gmp_c": 1,
+                "gua_c": -1,
+                "ppi_c": 1,
+                "prpp_c": -1
+            },
+            "name": "Guanine phosphoribosyltransferase",
+            "steady_state_flux": 0.05955712532929722,
+            "subsystem": "Salvage Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.999996,
+            "_forward_rate_constant": 36803.37252171078,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "H2O2t",
+            "metabolites": {
+                "h2o2_c": 1,
+                "h2o2_e": -1
+            },
+            "name": "Hydrogen peroxide transport via diffusion",
+            "steady_state_flux": 3.672968889389469,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.99999997025832,
+            "_forward_rate_constant": 984.811482523978,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "H2Ot",
+            "metabolites": {
+                "h2o_c": 1,
+                "h2o_e": -1
+            },
+            "name": "H2O transport via diffusion",
+            "steady_state_flux": -1.635792468732689,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 16.9896,
+            "_forward_rate_constant": 1.61379019280334,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HCO3E",
+            "metabolites": {
+                "co2_c": -1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "hco3_c": 1
+            },
+            "name": "HCO3 equilibration reaction",
+            "steady_state_flux": 1.105080165406847,
+            "subsystem": "Miscellaneous"
+        },
+        {
+            "_equilibrium_constant": 0.84,
+            "_forward_rate_constant": 0.06811603865289688,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HCO3_CLt",
+            "metabolites": {
+                "cl_c": -1,
+                "cl_e": 1,
+                "hco3_c": 1,
+                "hco3_e": -1
+            },
+            "name": "Bicarbonate transport (Cl-/HCO3- exchange)",
+            "steady_state_flux": -1.105080165406857,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 4.292907751061729,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HCYSte",
+            "metabolites": {
+                "hcys__L_c": 1,
+                "hcys__L_e": -1
+            },
+            "name": "Homocysteine transport (extracellular)",
+            "steady_state_flux": -0.04228096916543187,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 4000.0,
+            "_forward_rate_constant": 0.134431650355993,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HEX1",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "g6p_c": 1,
+                "glc__D_c": -1,
+                "h_c": 1
+            },
+            "name": "Hexokinase (D-glucose:ATP)",
+            "steady_state_flux": 1.286330749257252,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 78886.84431556812,
+            "_forward_rate_constant": 0.0543039426596678,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HEX4",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "h_c": 1,
+                "man6p_c": 1,
+                "man_c": -1
+            },
+            "name": "Hexokinase (D-mannose:ATP)",
+            "steady_state_flux": 0.008186772253685916,
+            "subsystem": "Fructose and Mannose Metabolism"
+        },
+        {
+            "_equilibrium_constant": 660.0,
+            "_forward_rate_constant": 697.134725170955,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HEX7",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "f6p_c": 1,
+                "fru_c": -1,
+                "h_c": 1
+            },
+            "name": "Hexokinase (D-fructose:ATP)",
+            "steady_state_flux": 0.2838753167389825,
+            "subsystem": "Fructose and Mannose Metabolism"
+        },
+        {
+            "_equilibrium_constant": 25784.9190103989,
+            "_forward_rate_constant": 5675.48521531307,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HXPRT",
+            "metabolites": {
+                "hxan_c": -1,
+                "imp_c": 1,
+                "ppi_c": 1,
+                "prpp_c": -1
+            },
+            "name": "Hypoxanthine phosphoribosyltransferase (Hypoxanthine)",
+            "steady_state_flux": 0.06591646005978254,
+            "subsystem": "Salvage Pathway"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 230.3033749363786,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HYXNt",
+            "metabolites": {
+                "hxan_c": 1,
+                "hxan_e": -1
+            },
+            "name": "Hypoxanthine transport",
+            "steady_state_flux": -0.320553088367991,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 453193.6717193352,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "Ht",
+            "metabolites": {
+                "h_c": -1,
+                "h_e": 1
+            },
+            "name": "Proton diffusion",
+            "steady_state_flux": 4.887134945200014,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.08331455,
+            "_forward_rate_constant": 86.1683707898266,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "IMPD",
+            "metabolites": {
+                "h2o_c": -1,
+                "h_c": 1,
+                "imp_c": -1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "xmp_c": 1
+            },
+            "name": "IMP dehydrogenase",
+            "steady_state_flux": 0.05799916967491659,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 0.5,
+            "_forward_rate_constant": 26.4486818767688,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "INSt",
+            "metabolites": {
+                "ins_c": 1,
+                "ins_e": -1
+            },
+            "name": "Inosine transport (diffusion)",
+            "steady_state_flux": -0.0327093667755109,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 0.0001180132375195217,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "KCCt",
+            "metabolites": {
+                "cl_c": 1,
+                "cl_e": -1,
+                "k_c": 1,
+                "k_e": -1
+            },
+            "name": "K+-Cl- cotransport",
+            "steady_state_flux": -1.157903367861755,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.5,
+            "_forward_rate_constant": 2.197761551452599,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "L_LACt2r",
+            "metabolites": {
+                "h_c": 1,
+                "h_e": -1,
+                "lac__L_c": 1,
+                "lac__L_e": -1
+            },
+            "name": "L lactate reversible transport via proton symport",
+            "steady_state_flux": -1.671188288466814,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 3.24e-05,
+            "_forward_rate_constant": 0.02173998710311415,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "LDH_L",
+            "metabolites": {
+                "h_c": 1,
+                "lac__L_c": -1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "pyr_c": 1
+            },
+            "name": "L-lactate dehydrogenase",
+            "steady_state_flux": -1.671188288466814,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 1.43838318592548,
+            "_forward_rate_constant": 11.14253714260417,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MAN6PI",
+            "metabolites": {
+                "f6p_c": 1,
+                "man6p_c": -1
+            },
+            "name": "Mannose-6-phosphate isomerase",
+            "steady_state_flux": 0.008186772253685927,
+            "subsystem": "Fructose and Mannose Metabolism"
+        },
+        {
+            "_equilibrium_constant": 1000.0,
+            "_forward_rate_constant": 0.2103719070944584,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MANt1r",
+            "metabolites": {
+                "man_c": 1,
+                "man_e": -1
+            },
+            "name": "Mannose transport (uniport)",
+            "steady_state_flux": 0.00818677225368588,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 5981699.3358968645,
+            "_forward_rate_constant": 5158.998716133931,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MDRPD",
+            "metabolites": {
+                "_5mdru1p_c": -1,
+                "dkmpp_c": 1,
+                "h2o_c": 1
+            },
+            "name": "5-Methylthio-5-deoxy-D-ribulose 1-phosphate dehydratase",
+            "steady_state_flux": 0.04712627528230352,
+            "subsystem": "Methionine Salvage"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 3.4798143888258,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "METAT",
+            "metabolites": {
+                "amet_c": 1,
+                "atp_c": -1,
+                "h2o_c": -1,
+                "met__L_c": -1,
+                "pi_c": 1,
+                "ppi_c": 1
+            },
+            "name": "Methionine adenosyltransferase",
+            "steady_state_flux": 0.08940724444773539,
+            "subsystem": "Methionine Metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 4.388305701087422,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "METtec",
+            "metabolites": {
+                "met__L_c": 1,
+                "met__L_e": -1
+            },
+            "name": "L-methionine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0.04228096916543191,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.006664357874845879,
+            "_forward_rate_constant": 14.44158071144295,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MTAP",
+            "metabolites": {
+                "_5mdr1p_c": 1,
+                "_5mta_c": -1,
+                "ade_c": 1,
+                "pi_c": -1
+            },
+            "name": "5 methylthioadenosine phosphorylase",
+            "steady_state_flux": 0.04712627528230352,
+            "subsystem": "Arginine and Proline Metabolism"
+        },
+        {
+            "_equilibrium_constant": 9.32049331897299,
+            "_forward_rate_constant": 9.02791290125548,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MTRI",
+            "metabolites": {
+                "_5mdr1p_c": -1,
+                "_5mdru1p_c": 1
+            },
+            "name": "5-methylthioribose-1-phosphate isomerase",
+            "steady_state_flux": 0.04712627528230351,
+            "subsystem": "Methionine Salvage"
+        },
+        {
+            "_equilibrium_constant": 0.07168357350055303,
+            "_forward_rate_constant": 1.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NAt",
+            "metabolites": {
+                "na1_c": 1,
+                "na1_e": -1
+            },
+            "name": "Sodium transport (uniport)",
+            "steady_state_flux": 3.485873463403635,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.997560980713012,
+            "_forward_rate_constant": 31.517164444982,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NDPK1",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "gdp_c": -1,
+                "gtp_c": 1
+            },
+            "name": "Nucleoside-diphosphate kinase (ATP:GDP)",
+            "steady_state_flux": 0.07882548100048961,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 3.996690102590929,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NH4t3r",
+            "metabolites": {
+                "h_c": 1,
+                "h_e": -1,
+                "nh4_c": -1,
+                "nh4_e": 1
+            },
+            "name": "Ammonia transport via proton antiport",
+            "steady_state_flux": 0.5900463283834079,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 10396265.0,
+            "_forward_rate_constant": 15.98794907030418,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NTD11",
+            "metabolites": {
+                "h2o_c": -1,
+                "imp_c": -1,
+                "ins_c": 1,
+                "pi_c": 1
+            },
+            "name": "5'-nucleotidase (IMP)",
+            "steady_state_flux": 0.1783187880870953,
+            "subsystem": "Purine Catabolism"
+        },
+        {
+            "_equilibrium_constant": 11701690.0,
+            "_forward_rate_constant": 1.391432374963011,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NTD7",
+            "metabolites": {
+                "adn_c": 1,
+                "amp_c": -1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "5'-nucleotidase (AMP)",
+            "steady_state_flux": 0.1333935894743415,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 10258105.0,
+            "_forward_rate_constant": 0.3570721788832304,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NTD9",
+            "metabolites": {
+                "gmp_c": -1,
+                "gsn_c": 1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "5'-nucleotidase (GMP)",
+            "steady_state_flux": 0.05955712532929736,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 0.700344,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NaKt",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "k_c": 2,
+                "k_e": -2,
+                "na1_c": -3,
+                "na1_e": 3,
+                "pi_c": 1
+            },
+            "name": "Na+/K+ exchanging ATPase",
+            "steady_state_flux": 1.252621620728002,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.984751978471171,
+            "_forward_rate_constant": 999.328691147597,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "O2t",
+            "metabolites": {
+                "o2_c": 1,
+                "o2_e": -1
+            },
+            "name": "O2 transport diffusion",
+            "steady_state_flux": -1.548412378160557,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 0.6554934579642324,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "OPAH",
+            "metabolites": {
+                "_5oxpro_c": -1,
+                "adp_c": 1,
+                "atp_c": -1,
+                "glu__L_c": 1,
+                "h2o_c": -2,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "5-Oxoproline amidohydrolase (ATP-hydrolysing) (ir)",
+            "steady_state_flux": 0.06162723044592982,
+            "subsystem": "Glutathione Metabolism"
+        },
+        {
+            "_equilibrium_constant": 2910753.845007247,
+            "_forward_rate_constant": 3.523547891067022,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ORNDC",
+            "metabolites": {
+                "co2_c": 1,
+                "h_c": -1,
+                "orn_c": -1,
+                "ptrc_c": 1
+            },
+            "name": "Ornithine Decarboxylase",
+            "steady_state_flux": 0.4263492948191063,
+            "subsystem": "Urea cycle/amino group metabolism"
+        },
+        {
+            "_equilibrium_constant": 19086540000.0,
+            "_forward_rate_constant": 5734.85023194536,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PDE1",
+            "metabolites": {
+                "amp_c": 1,
+                "camp_c": -1,
+                "h2o_c": -1,
+                "h_c": 1
+            },
+            "name": "3',5'-cyclic-nucleotide phosphodiesterase",
+            "steady_state_flux": 0.06259479818686733,
+            "subsystem": "Nucleotides"
+        },
+        {
+            "_equilibrium_constant": 1000.0,
+            "_forward_rate_constant": 48.8400319935351,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PFK",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "f6p_c": -1,
+                "fdp_c": 1,
+                "h_c": 1
+            },
+            "name": "Phosphofructokinase",
+            "steady_state_flux": 1.673780539897674,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.41,
+            "_forward_rate_constant": 2839.822326107817,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGI",
+            "metabolites": {
+                "f6p_c": 1,
+                "g6p_c": -1
+            },
+            "name": "Glucose-6-phosphate isomerase",
+            "steady_state_flux": 1.012358476220481,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.000434,
+            "_forward_rate_constant": 18.84547225690261,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGK",
+            "metabolites": {
+                "_13dpg_c": 1,
+                "_3pg_c": -1,
+                "adp_c": 1,
+                "atp_c": -1
+            },
+            "name": "Phosphoglycerate kinase",
+            "steady_state_flux": -3.020876902273882,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 459029.9320935722,
+            "_forward_rate_constant": 158.8694551299148,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGL",
+            "metabolites": {
+                "_6pgc_c": 1,
+                "_6pgl_c": -1,
+                "h2o_c": -1,
+                "h_c": 1
+            },
+            "name": "6-phosphogluconolactonase",
+            "steady_state_flux": 0.2739722730367791,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 5.555555555555555,
+            "_forward_rate_constant": 1256.791993705416,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGM",
+            "metabolites": {
+                "_2pg_c": -1,
+                "_3pg_c": 1
+            },
+            "name": "Phosphoglycerate mutase",
+            "steady_state_flux": -3.532241067137612,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.5245409582890679,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PHETA1",
+            "metabolites": {
+                "akg_c": -1,
+                "glu__L_c": 1,
+                "phe__L_c": -1,
+                "phpyr_c": 1
+            },
+            "name": "Phenylalanine transaminase",
+            "steady_state_flux": 2.1684043449710089e-16,
+            "subsystem": "Phenylalanine metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.924528301886793,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PHEtec",
+            "metabolites": {
+                "phe__L_c": 1,
+                "phe__L_e": -1
+            },
+            "name": "L-phenylalanine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 0.02396694792158352,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PIt",
+            "metabolites": {
+                "pi_c": -1,
+                "pi_e": 1
+            },
+            "name": "Inorganic phosphate exchange, diffusion",
+            "steady_state_flux": -0.03223211751335379,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 724603000.0,
+            "_forward_rate_constant": 15310,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PPA",
+            "metabolites": {
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 2,
+                "ppi_c": -1
+            },
+            "name": "Inorganic diphosphatase",
+            "steady_state_flux": 0.570614012533637,
+            "subsystem": "Oxidative Phosphorylation"
+        },
+        {
+            "_equilibrium_constant": 26.03473484951392,
+            "_forward_rate_constant": 8.990941303098333,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PPM",
+            "metabolites": {
+                "r1p_c": -1,
+                "r5p_c": 1
+            },
+            "name": "Phosphopentomutase",
+            "steady_state_flux": 0.5443859672965351,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 64626.8,
+            "_forward_rate_constant": 11.79079674683901,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PRPPS",
+            "metabolites": {
+                "amp_c": 1,
+                "atp_c": -1,
+                "h_c": 1,
+                "prpp_c": 1,
+                "r5p_c": -1
+            },
+            "name": "Phosphoribosylpyrophosphate synthetase",
+            "steady_state_flux": 0.2643182783065153,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 483.3015802208636,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PTRCtex2",
+            "metabolites": {
+                "ptrc_c": 1,
+                "ptrc_e": -1
+            },
+            "name": "Putrescine excretion cytosol to extracellular",
+            "steady_state_flux": -0.402487810403986,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.007891856452039372,
+            "_forward_rate_constant": 0.0716472786239895,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PUNP3",
+            "metabolites": {
+                "gsn_c": -1,
+                "gua_c": 1,
+                "pi_c": -1,
+                "r1p_c": 1
+            },
+            "name": "Purine-nucleoside phosphorylase (Guanosine)",
+            "steady_state_flux": 0.05955712532929723,
+            "subsystem": "Purine Catabolism"
+        },
+        {
+            "_equilibrium_constant": 0.05098504317084837,
+            "_forward_rate_constant": 1379.85697760565,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PUNP5",
+            "metabolites": {
+                "hxan_c": 1,
+                "ins_c": -1,
+                "pi_c": -1,
+                "r1p_c": 1
+            },
+            "name": "Purine-nucleoside phosphorylase (Inosine)",
+            "steady_state_flux": 0.4848288419672387,
+            "subsystem": "Purine Catabolism"
+        },
+        {
+            "_equilibrium_constant": 58728.05473990228,
+            "_forward_rate_constant": 666.804968856309,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PYK",
+            "metabolites": {
+                "adp_c": -1,
+                "atp_c": 1,
+                "h_c": -1,
+                "pep_c": -1,
+                "pyr_c": 1
+            },
+            "name": "Pyruvate kinase",
+            "steady_state_flux": 3.532823161891107,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.7,
+            "_forward_rate_constant": 38.73316211845745,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PYRt2",
+            "metabolites": {
+                "h_c": 1,
+                "h_e": -1,
+                "pyr_c": 1,
+                "pyr_e": -1
+            },
+            "name": "Pyruvate transport in via proton symport",
+            "steady_state_flux": -1.91568848883946,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 3.0,
+            "_forward_rate_constant": 57349.02654796213,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "RPE",
+            "metabolites": {
+                "ru5p__D_c": -1,
+                "xu5p__D_c": 1
+            },
+            "name": "Ribulose 5-phosphate 3-epimerase",
+            "steady_state_flux": 0.3693599746845779,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.3891050583657588,
+            "_forward_rate_constant": 24837.68472856243,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "RPI",
+            "metabolites": {
+                "r5p_c": -1,
+                "ru5p__D_c": 1
+            },
+            "name": "Ribose-5-phosphate isomerase",
+            "steady_state_flux": 0.0953877016477145,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.015,
+            "_forward_rate_constant": 28.2110814251703,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SBTD_D2",
+            "metabolites": {
+                "fru_c": 1,
+                "h_c": 1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "sbt__D_c": -1
+            },
+            "name": "D sorbitol dehydrogenase D fructose producing",
+            "steady_state_flux": 0.1879339549448493,
+            "subsystem": "Fructose and Mannose Metabolism"
+        },
+        {
+            "_equilibrium_constant": 23.104,
+            "_forward_rate_constant": 0.533900236698481,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SBTR",
+            "metabolites": {
+                "glc__D_c": -1,
+                "h_c": -1,
+                "nadp_c": 1,
+                "nadph_c": -1,
+                "sbt__D_c": 1
+            },
+            "name": "D sorbitol reductase",
+            "steady_state_flux": 0.1879339549448493,
+            "subsystem": "Fructose and Mannose Metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 0.00928382642725599,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SPMDtex2",
+            "metabolites": {
+                "spmd_c": 1,
+                "spmd_e": -1
+            },
+            "name": "Spermidine excretion cytosol to extracellular",
+            "steady_state_flux": -0.0005966935479371865,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 448935.223541932,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SPMS",
+            "metabolites": {
+                "_5mta_c": 1,
+                "ametam_c": -1,
+                "h_c": 1,
+                "ptrc_c": -1,
+                "spmd_c": 1
+            },
+            "name": "Spermidine synthase",
+            "steady_state_flux": 0.02386148441512035,
+            "subsystem": "Urea cycle/amino group metabolism"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 6219.13531057596,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SPRMS",
+            "metabolites": {
+                "_5mta_c": 1,
+                "ametam_c": -1,
+                "h_c": 1,
+                "spmd_c": -1,
+                "sprm_c": 1
+            },
+            "name": "Spermine synthase",
+            "steady_state_flux": 0.02326479086718316,
+            "subsystem": "Urea cycle/amino group metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 1.070592715309354,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SPRMt2i",
+            "metabolites": {
+                "h_c": -1,
+                "h_e": 1,
+                "sprm_c": 1,
+                "sprm_e": -1
+            },
+            "name": "Spermine transport via proton antiport irreversible",
+            "steady_state_flux": -0.02326479086718316,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.05,
+            "_forward_rate_constant": 2422.067681699967,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TALA",
+            "metabolites": {
+                "e4p_c": 1,
+                "f6p_c": 1,
+                "g3p_c": -1,
+                "s7p_c": -1
+            },
+            "name": "Transaldolase",
+            "steady_state_flux": 0.1846799873422663,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 1.2,
+            "_forward_rate_constant": 4512.828655016902,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TKT1",
+            "metabolites": {
+                "g3p_c": 1,
+                "r5p_c": -1,
+                "s7p_c": 1,
+                "xu5p__D_c": -1
+            },
+            "name": "Transketolase",
+            "steady_state_flux": 0.1846799873422662,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 10.3,
+            "_forward_rate_constant": 3124.124547185429,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TKT2",
+            "metabolites": {
+                "e4p_c": -1,
+                "f6p_c": 1,
+                "g3p_c": 1,
+                "xu5p__D_c": -1
+            },
+            "name": "Transketolase",
+            "steady_state_flux": 0.1846799873422663,
+            "subsystem": "Pentose Phosphate Pathway"
+        },
+        {
+            "_equilibrium_constant": 0.04550169495029605,
+            "_forward_rate_constant": 259569.5179105784,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TPI",
+            "metabolites": {
+                "dhap_c": -1,
+                "g3p_c": 1
+            },
+            "name": "Triose-phosphate isomerase",
+            "steady_state_flux": 1.673780539897128,
+            "subsystem": "Glycolysis/Gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 0.1,
+            "_forward_rate_constant": 0.03902367829270408,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "UREAt",
+            "metabolites": {
+                "urea_c": 1,
+                "urea_e": -1
+            },
+            "name": "Urea transport via facilitate diffusion",
+            "steady_state_flux": -0.4263492948191063,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.032258064516129,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "URIt",
+            "metabolites": {
+                "uri_c": 1,
+                "uri_e": -1
+            },
+            "name": "Uridine facilated transport in cytosol",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.626842,
+            "_forward_rate_constant": 0.008468167597965271,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "Kt1",
+            "metabolites": {
+                "k_c": -1,
+                "k_e": 1
+            },
+            "name": "Potassium transport via uniport (facilitated diffusion)",
+            "steady_state_flux": 1.34733987359412,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000.0,
+            "_forward_rate_constant": 0.993315038879592,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "AKGtr",
+            "metabolites": {
+                "akg_c": 1,
+                "akg_e": -1
+            },
+            "name": "AKG transport (extracellular to cytosol)",
+            "steady_state_flux": 0.006927340132863778,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 4.429847940440455,
+            "_forward_rate_constant": 122.7291863565322,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ALATA_L",
+            "metabolites": {
+                "akg_c": -1,
+                "ala__L_c": -1,
+                "glu__L_c": 1,
+                "pyr_c": 1
+            },
+            "name": "L-alanine transaminase",
+            "steady_state_flux": 0.0540536154151671,
+            "subsystem": "Glutamate metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.951612903225806,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ASNt5r",
+            "metabolites": {
+                "asn__L_c": 1,
+                "asn__L_e": -1
+            },
+            "name": "L asparagine transport out via proton symport vacuolar (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 36858.22215220251,
+            "_forward_rate_constant": 0.3346944922120452,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GLUN",
+            "metabolites": {
+                "gln__L_c": -1,
+                "glu__L_c": 1,
+                "h2o_c": -1,
+                "nh4_c": 1
+            },
+            "name": "Glutaminase",
+            "steady_state_flux": 0.2105064658229839,
+            "subsystem": "Glutamate metabolism"
+        },
+        {
+            "_equilibrium_constant": 1.048780487804878,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HIStiDF",
+            "metabolites": {
+                "his__L_c": 1,
+                "his__L_e": -1
+            },
+            "name": "L-histidine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.935483870967742,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ILEtec",
+            "metabolites": {
+                "ile__L_c": 1,
+                "ile__L_e": -1
+            },
+            "name": "L-isoleucine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.8333333333333333,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "LEUtec",
+            "metabolites": {
+                "leu__L_c": 1,
+                "leu__L_e": -1
+            },
+            "name": "L-leucine transport via diffusion",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.8323353293413174,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "LYSt5r",
+            "metabolites": {
+                "lys__L_c": 1,
+                "lys__L_e": -1
+            },
+            "name": "LYStiDF",
+            "steady_state_flux": -2.775557561562891e-14,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.221311475409836,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SERt5r",
+            "metabolites": {
+                "ser__L_c": 1,
+                "ser__L_e": -1
+            },
+            "name": "L-Serine Transport  (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.8169014084507042,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "THRt5r",
+            "metabolites": {
+                "thr__L_c": 1,
+                "thr__L_e": -1
+            },
+            "name": "L-Threonine Transport (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.5333333333333334,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TRPt",
+            "metabolites": {
+                "trp__L_c": 1,
+                "trp__L_e": -1
+            },
+            "name": "L-tryptophan transport",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 1.092592592592593,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TYRt",
+            "metabolites": {
+                "tyr__L_c": 1,
+                "tyr__L_e": -1
+            },
+            "name": "L-tyrosine transport",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.7276595744680852,
+            "_forward_rate_constant": 1000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "VALtec",
+            "metabolites": {
+                "val__L_c": 1,
+                "val__L_e": -1
+            },
+            "name": "L-valine transport via diffusion (extracellular to cytosol)",
+            "steady_state_flux": 0,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 113945.1796864654,
+            "_forward_rate_constant": 3.349711031653253,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GGCT",
+            "metabolites": {
+                "_5oxpro_c": 1,
+                "cys__L_c": 1,
+                "glucys_c": -1
+            },
+            "name": "(5-L-Glutamyl)-L-amino-acid 5-glutamyltransferase (cyclizing) Glutathione metabolism EC:2.3.2.4",
+            "steady_state_flux": 0.1541559478243836,
+            "subsystem": "Glutathione metabolism"
+        },
+        {
+            "_equilibrium_constant": 0.626853,
+            "_forward_rate_constant": 1.858290684658638,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "_5OXPROt",
+            "metabolites": {
+                "_5oxpro_c": 1,
+                "_5oxpro_e": -1
+            },
+            "name": "Transport of 5-oxoprolinate",
+            "steady_state_flux": -0.11866191862339,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 40811557396596.836,
+            "_forward_rate_constant": 493.7979363938475,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "XAO2",
+            "metabolites": {
+                "h2o2_c": 1,
+                "h2o_c": -1,
+                "hxan_c": -1,
+                "o2_c": -1,
+                "xan_c": 1
+            },
+            "name": "Xanthine oxidase (hypoxanthine)",
+            "steady_state_flux": 0.0983592935394644,
+            "subsystem": "Nucleotide interconversion"
+        },
+        {
+            "_equilibrium_constant": 4.929862208660442e+31,
+            "_forward_rate_constant": 115.0788163042892,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "XAO",
+            "metabolites": {
+                "h2o2_c": 1,
+                "h2o_c": -1,
+                "o2_c": -1,
+                "urate_c": 1,
+                "xan_c": -1
+            },
+            "name": "Xanthine oxidase",
+            "steady_state_flux": 0.04128834085913649,
+            "subsystem": "Purine catabolism"
+        },
+        {
+            "_equilibrium_constant": 0.911394,
+            "_forward_rate_constant": 19.43435516914289,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "XANt",
+            "metabolites": {
+                "xan_c": 1,
+                "xan_e": -1
+            },
+            "name": "Xanthine reversible transport",
+            "steady_state_flux": -0.05707095268032792,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 1000000.0,
+            "_forward_rate_constant": 1.785723850692906,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "URATEt",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 1,
+                "urate_c": -1,
+                "urate_e": 1
+            },
+            "name": "Urate export from cytosol",
+            "steady_state_flux": 0.0412883408591365,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 236.5,
+            "_forward_rate_constant": 0.101354255300411,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "FUM",
+            "metabolites": {
+                "fum_c": -1,
+                "h2o_c": -1,
+                "mal__L_c": 1
+            },
+            "name": "Fumarase",
+            "steady_state_flux": 7.263937664351635e-06,
+            "subsystem": "Citric Acid Cycle"
+        },
+        {
+            "_equilibrium_constant": 1.774718676749525e-05,
+            "_forward_rate_constant": 0.874039998317006,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MDH",
+            "metabolites": {
+                "h_c": 1,
+                "mal__L_c": -1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "oaa_c": 1
+            },
+            "name": "Malate dehydrogenase",
+            "steady_state_flux": 6.41024813227237e-05,
+            "subsystem": "Citric Acid Cycle"
+        },
+        {
+            "_equilibrium_constant": 24.30682427183053,
+            "_forward_rate_constant": 9.33120266425143,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ACITL",
+            "metabolites": {
+                "accoa_c": 1,
+                "adp_c": 1,
+                "atp_c": -1,
+                "cit_c": -1,
+                "coa_c": -1,
+                "oaa_c": 1,
+                "pi_c": 1
+            },
+            "name": "ATP-Citrate lyase",
+            "steady_state_flux": 0.0005179922721688295,
+            "subsystem": "Citric acid cycle"
+        },
+        {
+            "_equilibrium_constant": 3.288002453202298,
+            "_forward_rate_constant": 306242.856859663,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PEPCK_re",
+            "metabolites": {
+                "co2_c": 1,
+                "gdp_c": 1,
+                "gtp_c": -1,
+                "oaa_c": -1,
+                "pep_c": 1
+            },
+            "name": "Phosphoenolpyruvate carboxykinase (GTP)",
+            "steady_state_flux": 0.0005820947534915531,
+            "subsystem": "Glycolysis/gluconeogenesis"
+        },
+        {
+            "_equilibrium_constant": 1.6,
+            "_forward_rate_constant": 0.01162013986450416,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "CITt4",
+            "metabolites": {
+                "cit_c": 1,
+                "cit_e": -1
+            },
+            "name": "Citrate transport via sodium symport",
+            "steady_state_flux": 0.0005179922721688115,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.5,
+            "_forward_rate_constant": 0.008081751229193258,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "MALt",
+            "metabolites": {
+                "mal__L_c": 1,
+                "mal__L_e": -1
+            },
+            "name": "Malate exchange, diffusion",
+            "steady_state_flux": 5.683854365837245e-05,
+            "subsystem": "Transport, extracellular"
+        },
+        {
+            "_equilibrium_constant": 0.392992,
+            "_forward_rate_constant": 0.005626981860511692,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "FUMtr",
+            "metabolites": {
+                "fum_c": 1,
+                "fum_e": -1
+            },
+            "name": "Fumarate transport via diffusion (reversible)",
+            "steady_state_flux": 7.263937664351637e-06,
+            "subsystem": "Transport, Extracellular"
+        },
+        {
+            "_equilibrium_constant": 958856431.450059,
+            "_forward_rate_constant": 14334.11271765475,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PDE4",
+            "metabolites": {
+                "_35cgmp_c": -1,
+                "gmp_c": 1,
+                "h2o_c": -1,
+                "h_c": 1
+            },
+            "name": "3',5'-cyclic-nucleotide phosphodiesterase",
+            "steady_state_flux": 0.06406240440424843,
+            "subsystem": "Nucleotide interconversion"
+        }
+    ],
+    "units": [],
+    "version": "1"
+}

@@ -82,8 +82,6 @@ class ConcHRSampler:
         A matrix of with as many columns as reactions in the model and more
         than 3 rows containing a warmup sample in each row. None if no warmup
         points have been generated yet.
-    nproj : int
-        How often to reproject the sampling point into the feasibility space. 
 
     """
 

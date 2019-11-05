@@ -75,7 +75,7 @@ from mass.util.qcqa import (
     get_missing_steady_state_fluxes)
 from mass.util.util import (
     _check_kwargs, _make_logger, apply_decimal_precision, ensure_iterable,
-    ensure_non_negative_value)
+    ensure_non_negative_value, get_public_attributes_and_methods)
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~.conc_hr_sampler` submodule."""
@@ -152,14 +152,14 @@ class ConcSolver:
             the :class:`.MassConfiguration` to the bound values.
 
             Default is ``False``.
+        zero_value_log_substitute :
+            ``float`` value to substitute for 0 when trying to take the
+            logarithm of 0 to avoid a domain error.
+
+            Default is ``1e-10``.
 
     Attributes
     ----------
-    solver : optlang.interface.Model
-        The solver utilized for problems concerning metabolite
-        concentrations and reaction equilibrium constants.
-    tolerance : float
-        The tolerance of the solver.
     problem_type : str
         The type of mathematical problem that the concentration solver has
         been setup to solve.
@@ -181,13 +181,14 @@ class ConcSolver:
 
     def __init__(self, model, excluded_metabolites=None,
                  excluded_reactions=None, equilibrium_reactions=None,
-                 constraint_buffer=None, **kwargs):
+                 constraint_buffer=0, **kwargs):
         """Initialize the ConcSolver."""
         kwargs = _check_kwargs({
             "exclude_infinite_Keqs": True,
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
             "decimal_precision": False,
+            "zero_value_log_substitute": 1e-10
         }, kwargs)
         self._model = model
         model._conc_solver = self
@@ -204,11 +205,10 @@ class ConcSolver:
         self.excluded_reactions = []
         self.equilibrium_reactions = []
 
-        if constraint_buffer is None:
-            self.constraint_buffer = self.tolerance
-        else:
-            self.constraint_buffer = ensure_non_negative_value(
-                constraint_buffer)
+        self.constraint_buffer = ensure_non_negative_value(constraint_buffer)
+
+        self._zero_value_log_substitute = ensure_non_negative_value(
+            kwargs.pop("zero_value_log_substitute"), exclude_zero=True)
 
         # Try setting excluded and equilibrium attributes specified in kwargs
         if excluded_reactions is not None:
@@ -236,28 +236,12 @@ class ConcSolver:
                     key, str(e)))
 
         # Ensure model has Keq parameters and initial conditions defined
-        missing = {}
-        missing["concentrations"] = [
-            m.id for m in get_missing_initial_conditions(
-                model, metabolite_list=[
-                    met for met in model.metabolites
-                    if met.id not in self.excluded_metabolites])]
-        missing["steady_state_fluxes"] = [
-            r.id for r in get_missing_steady_state_fluxes(
-                model, reaction_list=[
-                    rxn for rxn in model.reactions
-                    if rxn.id not in self.excluded_reactions])]
-        missing["equilibrium_constants"] = [
-            r.id for r, v in iteritems(get_missing_reaction_parameters(
-                model, reaction_list=[
-                    rxn for rxn in model.reactions
-                    if rxn.id not in self.excluded_reactions]))
-            if "Keq" in v]
-
-        if any(list(itervalues(missing))):
-            raise ValueError(
-                "Cannot populate solver due to the following missing values : "
-                "{0!r}".format(missing))
+        # Ensure model has Keq parameters and initial conditions defined
+        missing = self._check_for_missing_values(model)
+        for key, missing_values in iteritems(missing):
+            if missing_values:
+                LOGGER.warning(
+                    "Missing %s for the following: %r", key, missing_values)
 
         self._initialize_solver(**kwargs)
 
@@ -511,6 +495,28 @@ class ConcSolver:
         return [r.id for r in self.model.reactions
                 if r.id not in self.excluded_reactions]
 
+    @property
+    def zero_value_log_substitute(self):
+        """Get or set the a value to substitute for 0 when taking the log of 0.
+
+        A value of ``1e-10`` means that instead of attempting ``log(0)`` which
+        causes a :class:`ValueError`, it will be instead calculated as
+        ``log(1e-10)``.
+
+        Parameters
+        ----------
+        value : float
+            A positive value to use instead of 0 when taking the logarithm.
+
+        """
+        return getattr(self, "_zero_value_log_substitute")
+
+    @zero_value_log_substitute.setter
+    def zero_value_log_substitute(self, value):
+        """Set the value to substitute for 0. when taking the log of 0."""
+        value = ensure_non_negative_value(value, exclude_zero=True)
+        setattr(self, "_zero_value_log_substitute", value)
+
     def setup_sampling_problem(self, metabolites=None, reactions=None,
                                conc_percent_deviation=0.2,
                                Keq_percent_deviation=0.2, **kwargs):
@@ -523,9 +529,8 @@ class ConcSolver:
           :attr:`~ConcSolver.problem_type` to ``"sampling"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
-          :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
-          the :class:`.MassConfiguration` to ensure that returned values are
-          notnegative.
+          :attr:`~.ConcSolver.zero_value_log_substitute` value
+          to ensure that returned values are not negative.
 
         Parameters
         ----------
@@ -589,7 +594,11 @@ class ConcSolver:
             if var.name in metabolites:
                 # Set bounds if metabolite
                 met = metabolites.get_by_id(var.name)
-                if any([m in fixed_conc_bounds for m in [met, met.id]]):
+                if met.initial_condition is None:
+                    bounds = (0, np.inf)
+                    LOGGER.info("No initial conditions defined for '%s', no "
+                                "variable bounds set", met.id)
+                elif any([m in fixed_conc_bounds for m in [met, met.id]]):
                     bounds = (met.initial_condition, met.initial_condition)
                 else:
                     bounds = (conc_percent_deviation, conc_percent_deviation)
@@ -599,8 +608,12 @@ class ConcSolver:
             elif var.name in Keq_strs:
                 # Set bounds if reaction Keq variable
                 rxn = reactions[Keq_strs.index(var.name)]
-                if any([r in fixed_Keq_bounds
-                        for r in [rxn, rxn.id, rxn.Keq_str]]):
+                if rxn.Keq is None:
+                    bounds = (0, np.inf)
+                    LOGGER.info("No Keq defined for '%s', no variable bounds "
+                                "set", rxn.id)
+                elif any([r in fixed_Keq_bounds
+                          for r in [rxn, rxn.id, rxn.Keq_str]]):
                     bounds = (rxn.Keq, rxn.Keq)
                 else:
                     bounds = (Keq_percent_deviation, Keq_percent_deviation)
@@ -610,7 +623,8 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, upper_def,
-                                     kwargs.get("decimal_precision"))
+                                     kwargs.get("decimal_precision"),
+                                     self.zero_value_log_substitute)
             var.lb, var.ub = bounds
 
         # Ensure objective is zero for sampling
@@ -628,9 +642,8 @@ class ConcSolver:
           :attr:`~ConcSolver.problem_type` to ``"feasible_qp"``.
         * If a percent deviation value is large enough to create a negative
           lower bound, it is set as the
-          :attr:`~.MassBaseConfiguration.zero_value_log_substitute` value in
-          the :class:`.MassConfiguration` to ensure that returned values are
-          not negative.
+          :attr:`~.ConcSolver.zero_value_log_substitute` value to ensure
+          that returned values are not negative.
         * The :attr:`ConcSolver.solver` must have QP capabilities.
 
         Parameters
@@ -677,6 +690,12 @@ class ConcSolver:
                 "`ConcSolver.choose_solver` method to set a QP "
                 "capable solver.")
 
+        missing = self._check_for_missing_values(self.model)
+        if any(list(itervalues(missing))):
+            raise ValueError(
+                "Cannot populate solver due to the following missing values : "
+                "{0!r}".format(missing))
+
         kwargs = _check_kwargs({
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
@@ -716,7 +735,8 @@ class ConcSolver:
                 continue
             # Get log values of bounds and set
             bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("decimal_precision"))
+                                     kwargs.get("decimal_precision"),
+                                     self.zero_value_log_substitute)
             var.lb, var.ub = bounds
             x_vars.append(var)
 
@@ -1432,12 +1452,17 @@ class ConcSolver:
         }, kwargs)
 
         steady_state_flux = kwargs.get("steady_state_flux")
+        if steady_state_flux is None:
+            warn("No flux defined for '{0}', no constraint "
+                 "can be made.".format(reaction.id))
+            return None
+
         if kwargs.get("decimal_precision"):
             steady_state_flux = round(steady_state_flux,
                                       MASSCONFIGURATION.decimal_precision)
 
         if epsilon is None:
-            epsilon = self.constraint_buffer  
+            epsilon = self.constraint_buffer
 
         if steady_state_flux > 0:
             lb, ub = (None, -1 * epsilon)
@@ -1555,7 +1580,8 @@ class ConcSolver:
             bounds = _get_deviation_values(value, *bounds)
 
         bounds = _get_log_bounds(bounds, upper_default,
-                                 kwargs.get("decimal_precision"))
+                                 kwargs.get("decimal_precision"),
+                                 self.zero_value_log_substitute)
 
         # Create variable and return
         variable = self.problem.Variable(var_id, lb=bounds[0], ub=bounds[1])
@@ -1660,6 +1686,50 @@ class ConcSolver:
         reactions = self.model.reactions.get_by_any(self.included_reactions)
 
         return DictList(reactions)
+
+    def _check_for_missing_values(self, model, concentrations=True,
+                                  equilibrium_constants=True,
+                                  steady_state_fluxes=True):
+        """Determine missing values that prevent setup of a problem.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        missing = {}
+        if concentrations:
+            missing["concentrations"] = [
+                m.id for m in get_missing_initial_conditions(
+                    model, metabolite_list=[
+                        met for met in model.metabolites
+                        if met.id not in self.excluded_metabolites])]
+        if equilibrium_constants:
+            missing["equilibrium constants"] = [
+                r.id for r, v in iteritems(get_missing_reaction_parameters(
+                    model, reaction_list=[
+                        rxn for rxn in model.reactions
+                        if rxn.id not in self.excluded_reactions]))
+                if "Keq" in v]
+
+        if steady_state_fluxes:
+            missing["steady state fluxes"] = [
+                r.id for r in get_missing_steady_state_fluxes(
+                    model, reaction_list=[
+                        rxn for rxn in model.reactions
+                        if rxn.id not in self.excluded_reactions])]
+
+        return missing
+
+    def __dir__(self):
+        """Override default dir() implementation to list only public items.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        return get_public_attributes_and_methods(self)
 
     def __repr__(self):
         """Override default repr.
@@ -1844,7 +1914,8 @@ def _get_deviation_values(value, lower_bound_percent, upper_bound_percent):
     return lower_bound, upper_bound
 
 
-def _get_log_bounds(bounds, upper_default, decimal_precision):
+def _get_log_bounds(bounds, upper_default, decimal_precision,
+                    zero_value_log_substitute):
     """Calculate the bound values in logspace and return them.
 
     Warnings
@@ -1856,7 +1927,7 @@ def _get_log_bounds(bounds, upper_default, decimal_precision):
     bounds = [b if b is not None else default
               for b, default in zip(bounds, [0, upper_default])]
     # Substitute for zero values to prevent math domain error in logspace
-    bounds = [b if b != 0 else MASSCONFIGURATION.zero_value_log_substitute
+    bounds = [b if b != 0 else zero_value_log_substitute
               for b in bounds]
     # Validate bounds before taking log
     bounds = _validate_bounds(*bounds, exclude_zero=True)

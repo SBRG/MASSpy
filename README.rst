@@ -1,29 +1,35 @@
-masspy - Mass Action Stoichiometric Simulation in Python
+MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-What is masspy?
+|PyPI|
+
+What is MASSpy?
 ~~~~~~~~~~~~~~~
-The **M**\ass **A**\ction **S**\toichiometric **S**\imulation for **Py**\thon
-(**masspy**) is a modeling software package for the construction and
+The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
+(**MASSpy**) package contains modules for the construction, simulation, and
 analysis of kinetic models of biochemical reaction systems.
 
-One of the main goals of masspy is to integrate seamlessly with  **cobrapy**,
-a widely used constraint-based reconstruction and analysis python package in
-order to provide a wide range of modeling techniques that can be utilized
-seperately or together. For further information about cobrapy, please visit
-their `github page <https://github.com/opencobra/cobrapy.>`_.
+**MASSpy** is built to integrate seemlessly with **COBRApy**, a widely used
+modeling software package for constraint-based reconstruction and analysis of
+biochemical reaction systems. Therefore **MASSpy**  can be used seperately from
+or in conjuction with **COBRApy**, thereby providing a wide range of modeling
+workflows and techniques.
+
+Additional information about **COBRApy** can be found in its
+`documentation <https://cobrapy.readthedocs.io/en/latest/index.html>`_ or
+`github page <https://github.com/opencobra/cobrapy>`_.
 
 Cite
 ----
 A manuscript is in preparation for publication and will be the proper reference
-for citing the masspy in the future.
+for citing the **MASSpy** in the future.
 
 Installation
 ~~~~~~~~~~~~
 
-The recommended method to install masspy is to use pip to `install masspy from
-PyPI <https://pypi.python.org/pypi/masspy>`_ (we recommend doing this
-inside a `virtual environment
+The recommended method is to install **MASSpy** is to use ``pip`` to
+`install masspy from PyPI <https://pypi.python.org/pypi/masspy>`_. It is
+recommended to do this inside a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
 	pip install masspy
@@ -32,7 +38,7 @@ If you downloaded the source code, run::
 
 	pip install -e .
 
-in the ``masspy`` directory. For additional information, please refer to the
+in the ``masspy`` source directory. For additional information, please refer to the
 the `detailed installation instructions <INSTALL.rst>`_.
 
 Contributing
@@ -45,8 +51,12 @@ to get started.
 License
 -------
 
-The masspy source is released under both the GPL and LGPL licenses. You
-may choose which license you choose to use the software under.
+The **MASSpy** source is released under both the GPL and LGPL licenses. You
+may choose which license you choose to use the software under. However,
+please note that binary packages which include GLPK (such as the binary
+wheels distributed at https://pypi.python.org/pypi/cobra) and
+`libRoadRunner <https://pypi.org/project/libroadrunner/>`_ will be bound
+by their licenses as well.
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License or the Lesser GNU
@@ -57,3 +67,6 @@ This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License for more details.
+
+.. |PyPI| image:: https://badge.fury.io/py/masspy.svg
+    :target: https://pypi.python.org/pypi/masspy
