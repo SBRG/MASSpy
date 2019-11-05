@@ -67,7 +67,7 @@ if __name__ == "__main__":
         # FIXME test_suite="mass.test.suite", Add when implemented
         download_url="https://pypi.python.org/pypi/masspy",
         classifiers=[
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 4 - Beta',
             'Environment :: Console',
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Build Tools',
