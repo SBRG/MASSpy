@@ -23,13 +23,14 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    notebooks/getting_started_with_masspy
    notebooks/constructing_models
    notebooks/reading_writing_models
    notebooks/dynamic_simulation
+   notebooks/plot_visualization
    notebooks/enzyme_modules
    notebooks/thermo_concentrations
    notebooks/ensemble_modeling
@@ -41,8 +42,8 @@ instructions <https://github.com/SBRG/MASSpy/blob/master/INSTALL.rst>`_.
    autoapi/index.rst
    zreferences.rst
 
-Applications and Additional Examples
-------------------------------------
+Applications and  Examples
+--------------------------
 
 .. toctree::
    :maxdepth: 2

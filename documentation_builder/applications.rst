@@ -1,5 +1,5 @@
-Applications and Additional Examples
-=====================================
+Applications and Examples
+=========================
 A variety of applications and additional examples demonstrating the capabilities of **MASSpy** can be found below.
 
 Workflows
