@@ -14,7 +14,7 @@ Stable version installation
 
 You can install all packages, including optional dependencies, directly by::
 
-    pip install "masspy[all]"
+    pip install masspy[all]
 
 Instructions for several operating systems are below:
 

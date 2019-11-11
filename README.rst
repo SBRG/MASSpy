@@ -34,6 +34,10 @@ recommended to do this inside a `virtual environment
 
 	pip install masspy
 
+You can install all packages, including optional dependencies, directly by::
+
+    pip install masspy[all]
+
 If you downloaded the source code, run::
 
 	pip install -e .
