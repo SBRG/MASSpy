@@ -35,14 +35,17 @@ from six import iteritems, iterkeys, string_types
 
 from sympy import Symbol, lambdify, sympify
 
+from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_model import MassModel
 from mass.util.dict_with_id import DictWithID
-from mass.util.util import ensure_iterable
+from mass.util.util import apply_decimal_precision, ensure_iterable
 from mass.visualization import plot_tiled_phase_portraits, plot_time_profile
 
 # Strings of valid solution types
 _CONC_STR = "Conc"
 _FLUX_STR = "Flux"
+
+MASSCONFIGURATION = MassConfiguration()
 
 
 class MassSolution(DictWithID):
@@ -75,7 +78,7 @@ class MassSolution(DictWithID):
     """
 
     def __init__(self, id_or_model, solution_type="", data_dict=None,
-                 time=None, interpolate=False):
+                 time=None, interpolate=False, initial_values=None):
         """Initialize MassSolution."""
         if isinstance(id_or_model, MassModel):
             id_or_model = "{0}_{1}Sols".format(str(id_or_model), solution_type)
@@ -90,6 +93,8 @@ class MassSolution(DictWithID):
         self._interpolate = interpolate
         if time is not None:
             self.interpolate = interpolate
+        self._initial_values = {}
+        self.initial_values = initial_values
 
     @property
     def simulation(self):
@@ -185,10 +190,46 @@ class MassSolution(DictWithID):
 
         setattr(self, "_interpolate", value)
 
-    def view_time_profile(self):
-        """Generate a preview of the time profile for the solution.
+    @property
+    def initial_values(self):
+        """Get or set a ``dict`` of the initial values for solution variables.
 
-        See :mod:`~mass.core.visualization` documentation for more information.
+        Notes
+        -----
+        Primarily for storing the intial values used in a simulation and for
+        calculating deviations from the initial state.
+
+        Parameters
+        ----------
+        initial_values : dict
+            A ``dict`` containining the variables stored in the
+            :class:`MassSolution` and their initial values.
+
+        """
+        return getattr(self, "_initial_values")
+
+    @initial_values.setter
+    def initial_values(self, initial_values):
+        """Set the initial values for solution variables."""
+        new_values = {}
+        if initial_values is not None:
+            for key, value in iteritems(initial_values):
+                if key not in self:
+                    continue
+                new_values[key] = apply_decimal_precision(
+                    value, MASSCONFIGURATION.decimal_precision)
+        setattr(self, "_initial_values", new_values)
+
+    def view_time_profile(self, deviation=False):
+        """Generate a quick view of the time profile for the solution.
+
+        See :mod:`~mass.visualization` documentation for more information.
+
+        Parameters
+        ----------
+        deviation : bool
+            Whether to plot time profiles as a deviation from their
+            initial value.
 
         Notes
         -----
@@ -211,6 +252,7 @@ class MassSolution(DictWithID):
             "title": "Time Profile for {0}{1}".format(self.id, solution_type),
             "xlabel": "Time",
             "ylabel": solution_type,
+            "deviation": deviation,
         }
         # Get current axis and clear it
         ax = plt.gca()
@@ -223,7 +265,7 @@ class MassSolution(DictWithID):
     def view_tiled_phase_portraits(self):
         """Generate a preview of the phase portraits for the solution.
 
-        See :mod:`~mass.core.visualization` documentation for more information.
+        See :mod:`~mass.visualization` documentation for more information.
 
         Notes
         -----

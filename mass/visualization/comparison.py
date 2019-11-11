@@ -7,7 +7,7 @@ on :mod:`mass.visualization` functions.
 This module contains the following functions for visually comparing a set of
 values in one object against a similar set of valeus in another object.
 
-    * :func:`~.comparison.comparison_plot`
+    * :func:`~.comparison.plot_comparison`
 
 """
 import math
@@ -16,7 +16,7 @@ from mass.util.util import _check_kwargs
 from mass.visualization import visualization_util as v_util
 
 
-def comparison_plot(x, y, compare=None, observable=None, ax=None,
+def plot_comparison(x, y, compare=None, observable=None, ax=None,
                     legend=None, **kwargs):
     """Plot values of two objects for comparision.
 
@@ -110,7 +110,7 @@ def comparison_plot(x, y, compare=None, observable=None, ax=None,
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_comparison_default_kwargs("comparison_plot"),
+        get_comparison_default_kwargs("plot_comparison"),
         kwargs)
     kwargs["linestyle"] = " "
     # Get the axies instance
@@ -235,7 +235,7 @@ def get_comparison_default_kwargs(function_name):
         The name of the plotting function to get the ``kwargs`` for.
         Valid values include the following:
 
-            * ``"comparison_plot"``
+            * ``"plot_comparison"``
 
     Returns
     -------
@@ -276,4 +276,4 @@ def get_comparison_default_kwargs(function_name):
     return default_kwargs
 
 
-__all__ = ("comparison_plot", "get_comparison_default_kwargs")
+__all__ = ("plot_comparison", "get_comparison_default_kwargs")

@@ -2,7 +2,7 @@
 r"""Contains function for visualizing simulation results.
 
 This module contains the various functions for visualization of solutions
-returned in :class:`.MassSolution`\ s after simulation of models. Note that
+returned in :class:`~.MassSolution`\ s after simulation of models. Note that
 to use the :mod:`mass.visualization` functions, additional packages
 for visualziation included during the :mod:`mass` installation process as
 follows::
@@ -87,10 +87,10 @@ of the :mod:`~mass.visualiation` module.
 
   time_vector :
       ``iterable`` of values to treat as time points for the solutions. If
-      provided, the original solutions in the :class:`.MassSolution` input
+      provided, the original solutions in the :class:`~.MassSolution` input
       will be converted into interpolating functions and the solutions are
       recalculated based on the provided ``time_vector``. If ``None`` then
-      the current :attr:`.MassSolution.time` values will be used.
+      the current :attr:`~.MassSolution.time` values will be used.
 
       Default is ``None``.
   plot_function :
@@ -106,7 +106,7 @@ of the :mod:`~mass.visualiation` module.
 
           In addition, for functions in
           :mod:`~mass.visualization.time_profiles` and
-          :mod:`~mass.visualization.phase_portraits` modules only:
+          :mod:`~mass.visualization.phase_portraits` submodules only:
 
               * ``"semilogx``" for a logarithmic x-axis and a linear y-axis
                 via :meth:`Axes.semilogx() <matplotlib.axes.Axes.semilogx>`
@@ -261,6 +261,28 @@ of the :mod:`~mass.visualiation` module.
       where ``N_total`` is equal to the total number of solution lines.
 
       Default is ``None``. Not valid for :func:`~.plot_tiled_phase_portraits`
+  deviation :
+      ``bool`` indicating whether to plot the deviation from the initial value
+      for the observable variables. 
+
+      Default is ``False``.
+  deviation_zero_centered :
+      ``bool`` indicating whether to center deviations around zero for
+      for the observable variables. 
+
+      Default is ``False``.
+      Ignored if the kwarg ``deviation=False``.
+  deviation_normalization :
+      ``str`` indicating how to normalize the plotted deviation values. Can be
+      one of the following:
+      
+        * 'initial' to normalize the solution by dividing by the initial value
+          of the solution variable
+        * 'range' to normalize the solution through dividing by the range of
+          solution values (maximum value - minimum value)
+
+      Default is ``initial``.
+      Ignored if the kwarg ``deviation=False``.
   annotate_time_points :
     Either the string ``"endpoints"`` or an ``iterable`` containing the
     numerical values for the time points of interest to be annotated by
@@ -315,6 +337,31 @@ of the :mod:`~mass.visualiation` module.
       ``marker``, and ``markersize`` kwargs are ignored.
 
       Default is ``None``.
+  mean_line_alpha :
+      ``float`` indicating the alpha (opacity) value to use for the line
+      representing the mean solution.
+
+      Default is ``1.0``.
+      Only valid for ensemble visualization functions.
+  interval_fill_alpha :
+      ``float`` indicating the alpha (opacity) value to use in shading the
+      interval.
+
+      Default is ``0.5``.
+      Only valid for ensemble visualization functions.
+  interval_border_alpha :
+      ``float`` indicating the alpha (opacity) value for border lines of the
+      interval.
+
+      Default is ``0.5``.
+      Only valid for ensemble visualization functions.
+  CI_distribution :
+      Either ``"t"`` to calculate the confidence interval using a
+      t-distribution or ``"z"`` to calculate the confidence interval using a
+      z-distribution.
+
+      Default is ``"t"``.
+      Only valid for ensemble visualization functions.
   tile_ticks_on :
       ``bool`` indicating whether to leave tick marks on tiles containing
       phase portraits.
@@ -367,46 +414,49 @@ of the :mod:`~mass.visualiation` module.
       ``xy_linecolor``, ``xy_linestyle``, or ``xy_linewidth`` kwargs.
 
       Ignored if the kwarg ``xy_line=False``.
-      Only valid for functions in the :mod:`~.comparison` module.
+      Only valid for functions in the :mod:`~.comparison` submodule.
   xy_linecolor :
       Value representing a valid :mod:`matplotlib.colors` value to use as
       the color of the ``y=x`` line.
 
       Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
       Ignored if the kwarg ``xy_line=False``.
-      Only valid for functions in the :mod:`~.comparison` module.
+      Only valid for functions in the :mod:`~.comparison` submodule.
   xy_linestyle :
       Value representing a valid :mod:`matplotlib` value to use as the
       style of the ``y=x`` line.
 
       Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
       Ignored if the kwarg ``xy_line=False``.
-      Only valid for functions in the :mod:`~.comparison` module.
+      Only valid for functions in the :mod:`~.comparison` submodule.
   xy_linewidth :
        ``float`` value representing the linewidth (in points) to set for
        the ``y=x`` line.
 
       Default is ``None`` to use default value in :mod:`matplotlib.rcsetup`.
       Ignored if the kwarg ``xy_line=False``.
-      Only valid for functions in the :mod:`~.comparison` module.
+      Only valid for functions in the :mod:`~.comparison` submodule.
   xy_legend :
       ``str`` indicating where to place a legend for the ``y=x`` line.
 
       Default is ``None``. 
       Ignored if the kwarg ``xy_line=False``.
-      Only valid for functions in the :mod:`~.comparison` module.
+      Only valid for functions in the :mod:`~.comparison` submodule.
   
 
 .. _marker:  https://matplotlib.org/api/markers_api.html
 .. _linestyles: https://matplotlib.org/gallery/lines_bars_and_markers/linestyles
 
 """  # noqa
-from mass.visualization.comparison import comparison_plot
-from mass.visualization.time_profiles import plot_time_profile
+from mass.visualization.comparison import plot_comparison
+from mass.visualization.time_profiles import (
+    plot_ensemble_time_profile, plot_time_profile)
 from mass.visualization.phase_portraits import (
-    plot_phase_portrait, plot_tiled_phase_portraits)
+    plot_ensemble_phase_portrait, plot_phase_portrait,
+    plot_tiled_phase_portraits)
 
 
 __all__ = (
-    "plot_time_profile", "plot_phase_portrait", "plot_tiled_phase_portraits",
-    "comparison_plot")
+    "plot_comparison", "plot_time_profile", "plot_ensemble_time_profile", 
+    "plot_ensemble_phase_portrait", "plot_phase_portrait",
+    "plot_tiled_phase_portraits")
