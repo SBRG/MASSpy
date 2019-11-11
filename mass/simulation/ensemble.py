@@ -456,6 +456,12 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             ``bool`` indicating the verbosity of the function.
 
             Default is ``False``.
+        decimal_precision :
+            ``bool`` indicating whether to apply the
+            :attr:`~.MassBaseConfiguration.decimal_precision` attribute of
+            the :class:`.MassConfiguration` to the solution values.
+
+            Default is ``False``.
         flux_suffix :
             ``str`` representing the suffix to append to generated models
             indicating the flux data set used.
@@ -493,6 +499,7 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
     # disrupted near the end due to invalid input format
     kwargs = _check_kwargs({
         "verbose": False,
+        "decimal_precision": False,
         "flux_suffix": "_F",
         "conc_suffix": "_C",
         "at_equilibrium_default": 100000,
@@ -621,8 +628,7 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             _get_sim_values_from_model(model) for model in feasible_models]
 
         _log_msg(LOGGER, logging.INFO, verbose,
-                 "Successfully loaded feasible models into Simulation.",
-                 str(model))
+                 "Successfully loaded feasible models into Simulation.")
 
         # Define helper function for determining steady state feasibility
         def ensure_steady_state_success(check_type, perturbation=None,
@@ -632,7 +638,8 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             with warnings.catch_warnings():
                 conc_sol_list, flux_sol_list = simulation.find_steady_state(
                     strategy=strategy, perturbations=perturbation,
-                    update_values=update_values, verbose=verbose)
+                    update_values=update_values, verbose=verbose,
+                    decimal_precision=kwargs.get("decimal_precision"))
 
             # Add failed count to final report
             numbers[check_type] = 0

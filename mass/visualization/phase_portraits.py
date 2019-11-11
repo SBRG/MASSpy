@@ -5,13 +5,16 @@ See the  :mod:`mass.visualization` documentation for general information
 on :mod:`mass.visualization` functions.
 
 This module contains the following functions for visualization of
-time-dependent solutions returned in :class:`.MassSolution`\ s after
+time-dependent solutions returned in :class:`~.MassSolution`\ s after
 simulation of models.
 
     * :func:`~.phase_portraits.plot_phase_portrait`
+    * :func:`~.phase_portraits.plot_ensemble_phase_portrait`
     * :func:`~.phase_portraits.plot_tiled_phase_portrait`
 
 """
+from warnings import warn
+
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.util import _check_kwargs
@@ -19,7 +22,7 @@ from mass.visualization import visualization_util as v_util
 
 
 def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
-    """Plot phase portraits of solutions in a given :class:`.MassSolution`.
+    """Plot phase portraits of solutions in a given :class:`~.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various :mod:`matplotlib` methods
     utilized in the function. See the :mod:`~mass.visualization` module
@@ -27,22 +30,22 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
     Notes
     -----
-    * To prevent any changes to the original :class:`.MassSolution`, a copy of
-      the :class:`.MassSolution` will be created and used.
+    * To prevent any changes to the original :class:`~.MassSolution`, a copy of
+      the :class:`~.MassSolution` is created and used.
 
     Parameters
     ----------
     mass_solution : MassSolution
-        The :class:`.MassSolution` containing the time-dependent solutions
+        The :class:`~.MassSolution` containing the time-dependent solutions
         to be plotted.
     x : :mod:`mass` object or its string identifier
         The string identifier of a :mod:`mass` object or the object itself
         that corresponds to the key for the desired solution in the
-        :class:`.MassSolution` for the x-axis of the phase portrait.
+        :class:`~.MassSolution` for the x-axis of the phase portrait.
     y : :mod:`mass` object or its string identifier
         The string identifier of a :mod:`mass` object or the object itself
         that corresponds to the key for the desired solution in the
-        :class:`.MassSolution` for the y-axis of the phase portrait.
+        :class:`~.MassSolution` for the y-axis of the phase portrait.
     ax : matplotlib.axes.Axes, None
         An :class:`~matplotlib.axes.Axes` instance to plot the data on.
         If ``None`` then the current axes instance is used.
@@ -82,7 +85,11 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         * annotate_time_points_color
         * annotate_time_points_marker
         * annotate_time_points_markersize
+        * annotate_time_points_labels
         * annotate_time_points_legend
+        * deviation
+        * deviation_zero_centered
+        * deviation_normalization
 
         See :mod:`~mass.visualization` documentation for more information on
         optional ``kwargs``.
@@ -110,7 +117,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
     # Get the solutions to be observed and validate time vector.
     xy = v_util._validate_plot_observables(mass_solution, (x, y),
-                                           kwargs.get("time_vector"))
+                                           **kwargs)
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
@@ -156,7 +163,8 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     if kwargs.get("annotate_time_points", None):
         ax = v_util._set_annotated_time_points(
             ax, observable=xy, type_of_plot="phase_portrait",
-            first_legend=(legend, legend_kwargs), **kwargs)
+            first_legend=(legend, legend_kwargs), time_range=xy.time,
+            **kwargs)
 
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
@@ -164,10 +172,178 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     return ax
 
 
+def plot_ensemble_phase_portrait(mass_solution_list, x, y, ax=None,
+                                 legend=None, **kwargs):
+    """Plot a phase portrait for an ensemble of class:`~.MassSolution` objects.
+
+    The plotted lines represent the mean for the values of a particular
+    solution specified in ``observable``.
+
+    Accepted ``kwargs`` are passed onto various :mod:`matplotlib` methods
+    utilized in the function. See the :mod:`~mass.visualization` module
+    documentation for more detailed information about the possible ``kwargs``.
+
+    Notes
+    -----
+    * To prevent any changes to the original :class:`~.MassSolution`, copies of
+      :class:`~.MassSolution` objects are created and used.
+
+    Parameters
+    ----------
+    mass_solution_list : iterable
+        An iterable of :class:`~.MassSolution` objects containing the
+        time-dependent solutions to be plotted.
+    x : :mod:`mass` object or its string identifier
+        The string identifier of a :mod:`mass` object or the object itself
+        that corresponds to the key for the desired solution in the
+        :class:`~.MassSolution` for the x-axis of the phase portrait.
+    y : :mod:`mass` object or its string identifier
+        The string identifier of a :mod:`mass` object or the object itself
+        that corresponds to the key for the desired solution in the
+        :class:`~.MassSolution` for the y-axis of the phase portrait.
+    ax : matplotlib.axes.Axes, None
+        An :class:`~matplotlib.axes.Axes` instance to plot the data on.
+        If ``None`` then the current axes instance is used.
+    legend : iterable, str, int
+        There are three possible input formats for the legend:
+
+            1. An iterable of legend labels as strings.
+            2. A ``str`` representing the location of the legend, or an
+               ``int`` between 0 and 14 (inclusive) corresponding to the
+               legend location.
+            3. An iterable of the format ``(labels, loc)`` to set both
+               the legend labels and location, where ``labels`` and ``loc``
+               follows the format specified in **1** and  **2**.
+
+        See the :mod:`~mass.visualization` documentation for more information
+        about legend and valid legend locations.
+    **kwargs
+        * time_vector
+        * plot_function
+        * title
+        * xlabel
+        * ylabel
+        * xlim
+        * ylim
+        * grid
+        * grid_color
+        * grid_linestyle
+        * grid_linewidth
+        * prop_cycle
+        * color
+        * linestyle
+        * linewidth
+        * marker
+        * markersize
+        * legend_ncol
+        * annotate_time_points
+        * annotate_time_points_color
+        * annotate_time_points_marker
+        * annotate_time_points_markersize
+        * annotate_time_points_labels
+        * annotate_time_points_legend
+        * deviation
+        * deviation_zero_centered
+        * deviation_normalization
+
+        See :mod:`~mass.visualization` documentation for more information on
+        optional ``kwargs``.
+
+    Returns
+    -------
+    ax :  matplotlib.axes.Axes
+        The :class:`~matplotlib.axes.Axes` instance containing the newly
+        created plot.
+
+    """
+    # Validate whether necessary packages are installed.
+    v_util._validate_visualization_packages("matplotlib")
+    # Check kwargs
+    kwargs = _check_kwargs(
+        get_phase_portrait_default_kwargs("plot_ensemble_phase_portrait"),
+        kwargs)
+    # Get the axes instance
+    ax = v_util._validate_axes_instance(ax)
+
+    # Validate MassSolutions
+    mass_solution_list = [sol for sol in mass_solution_list
+                          if v_util._validate_mass_solution(sol)]
+    if not mass_solution_list:
+        warn("No valid MassSolution objects given")
+        return ax
+
+    # Get the solutions to be observed and validate time vector.
+    xy, time_vector = v_util._validate_ensemble_plot_observables(
+        mass_solution_list, (x, y), **kwargs)
+
+    label = "{0} vs. {1}".format(*v_util._group_xy_items(xy, iterkeys))
+    sols = v_util._group_xy_items(xy, itervalues)
+    observable = {label: sols}
+
+    # Get the legend arguments if desired.
+    if legend is not None:
+        legend_labels, legend_kwargs = v_util._get_legend_args(ax, legend,
+                                                               observable,
+                                                               **kwargs)
+        observable = v_util._map_labels_to_solutions(observable, legend_labels)
+    else:
+        legend_kwargs = None
+
+    # Set line colors and styles using a custom cycler
+    prop_cycler = v_util._get_line_property_cycler(
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
+        **kwargs)
+
+    if prop_cycler:
+        ax.set_prop_cycle(prop_cycler)
+
+    _plot_ensemble_lines(ax, observable, **kwargs)
+
+    # Set the axes options including axis labels, limits, and gridlines.
+    v_util._set_axes_labels(ax, **kwargs)
+    v_util._set_axes_limits(ax, **kwargs)
+    v_util._set_axes_margins(ax, **kwargs)
+    v_util._set_axes_gridlines(ax, **kwargs)
+
+    # Set the legend if desired.
+    if legend is not None:
+        lines_and_labels = v_util._get_handles_and_labels(ax, False)
+        legend = ax.legend(*lines_and_labels, **legend_kwargs)
+
+    if kwargs.get("annotate_time_points", None):
+        ax = v_util._set_annotated_time_points(
+            ax, observable=xy, type_of_plot="phase_portrait",
+            first_legend=(legend, legend_kwargs), time_range=time_vector,
+            **kwargs)
+
+    # Reset default prop_cycle
+    ax.set_prop_cycle(v_util._get_default_cycler())
+
+    return ax
+
+
+def _plot_ensemble_lines(ax, observable, **kwargs):
+    """Plot the mean and interval of the ensemble solutions.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    # Get the plotting function or raise an error if invalid.
+    plot_function = v_util._get_plotting_function(
+        ax, plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"})
+
+    for label, (x_sol_df, y_sol_df) in iteritems(observable):
+        plot_function(x_sol_df.mean(axis=0), y_sol_df.mean(axis=0),
+                      label=label)
+
+
 def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
                                plot_tile_placement="all",
                                additional_data=None, **kwargs):
-    """Plot phase portraits of solutions in a given :class:`.MassSolution`.
+    """Plot phase portraits of solutions in a given :class:`~.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
     in the function. See the :mod:`~mass.visualization` module documentation
@@ -175,19 +351,19 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
 
     Notes
     -----
-    * To prevent any changes to the original :class:`.MassSolution`, a copy of
-      the :class:`.MassSolution` will be created and used.
+    * To prevent any changes to the original :class:`~.MassSolution`, a copy of
+      the :class:`~.MassSolution` will be created and used.
     * ``i`` and ``j`` represent the number of rows and columns, respectively.
 
     Parameters
     ----------
     mass_solution : MassSolution
-        The :class:`.MassSolution` containing the time-dependent solutions
+        The :class:`~.MassSolution` containing the time-dependent solutions
         to be plotted.
     observable : iterable
         An iterable containing string identifiers of the :mod:`mass` objects
         or the objects themselves that correspond to the keys for the desired
-        solutions in the :class:`.MassSolution`.
+        solutions in the :class:`~.MassSolution`.
     ax : matplotlib.axes.Axes, None
         An :class:`~matplotlib.axes.Axes` instance to plot the data on.
         If ``None`` then the current axes instance is used.
@@ -205,7 +381,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     additional_data : array_like, None
         A matrix of shape ``(N, N)`` where ``N_obs`` is the number
         of observables provided, or the number of keys in the
-        :class:`.MassSolution` if ``observable=None``. The value at ``(i, j)``
+        :class:`~.MassSolution` if ``observable=None``. The value at ``(i, j)``
         of the matrix must correspond to the empty tile that the data should
         be displayed on. All other values are ignored. If ``None`` then no
         data will be displayed and tiles will be left empty.
@@ -264,7 +440,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
 
     # Get the solutions to be observed and validate time vector.
     observable = v_util._validate_plot_observables(mass_solution, observable,
-                                                   kwargs.get("time_vector"))
+                                                   **kwargs)
     plot_tile_placement = v_util._validate_tile_placement(plot_tile_placement,
                                                           prefix="plot")
     # Split the tiled kwargs and the phase portrait kwargs into seperate dicts
@@ -365,9 +541,19 @@ def get_phase_portrait_default_kwargs(function_name):
         "annotate_time_points_labels": False,
         "annotate_time_points_legend": None,
         "prop_cycle": None,
+        "deviation": False,
+        "deviation_zero_centered": False,
+        "deviation_normalization": "initial value",
     }
 
     if function_name == "plot_phase_portrait":
+        default_kwargs.update({
+            "xlabel": None,
+            "ylabel": None,
+            "legend_ncol": None,
+        })
+
+    if function_name == "plot_ensemble_phase_portrait":
         default_kwargs.update({
             "xlabel": None,
             "ylabel": None,
@@ -494,5 +680,6 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     return ax
 
 
-__all__ = ("plot_phase_portrait", "plot_tiled_phase_portraits",
-           "get_phase_portrait_default_kwargs")
+__all__ = (
+    "plot_phase_portrait", "plot_ensemble_phase_portrait",
+    "plot_tiled_phase_portraits", "get_phase_portrait_default_kwargs")

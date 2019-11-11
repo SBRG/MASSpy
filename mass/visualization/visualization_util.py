@@ -6,7 +6,6 @@ Warnings
 The functions found in this module are NOT intended for direct use.
 
 """
-import math
 from collections.abc import Iterable
 from warnings import warn
 
@@ -25,9 +24,14 @@ import numpy as np
 
 import pandas as pd
 
+from scipy import interpolate, stats
+
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
-from mass.util.util import ensure_iterable
+from mass.core.mass_configuration import MassConfiguration
+from mass.util.util import apply_decimal_precision, ensure_iterable
+
+MASSCONFIGURATION = MassConfiguration()
 
 INSTALLED_VISUALIZATION_PACKAGES = {
     "matplotlib": bool(mpl),
@@ -94,7 +98,7 @@ def _validate_axes_instance(ax):
 
 
 def _validate_mass_solution(mass_solution):
-    """Validate the mass solution input and return a copy of it.
+    """Validate the mass solution input and return it.
 
     Warnings
     --------
@@ -129,7 +133,7 @@ def _validate_time_vector(time_vector, default_time_vector):
     raise ValueError("Invalid input for `time_vector`.")
 
 
-def _validate_plot_observables(mass_solution, observable, time_vector=None):
+def _validate_plot_observables(mass_solution, observable, **kwargs):
     """Validate the given observables and return them and their solutions.
 
     Warnings
@@ -137,7 +141,8 @@ def _validate_plot_observables(mass_solution, observable, time_vector=None):
     This method is intended for internal use only.
 
     """
-    time_vector = _validate_time_vector(time_vector, mass_solution.time)
+    time_vector = _validate_time_vector(kwargs.get("time_vector"),
+                                        mass_solution.time)
     # Return all items in the solution if no observables are provided.
     if observable is None:
         observable = list(iterkeys(mass_solution))
@@ -164,7 +169,10 @@ def _validate_plot_observables(mass_solution, observable, time_vector=None):
         solution_type=mass_solution.solution_type,
         data_dict={x: mass_solution[x] for x in observable},
         time=mass_solution.time,
-        interpolate=mass_solution.interpolate)
+        interpolate=mass_solution.interpolate,
+        initial_values={
+            x: mass_solution.initial_values.get(x) for x in observable
+            if mass_solution.initial_values.get(x, None) is not None})
 
     # Change the time points and solutions if the time_vector has changed
     if not np.array_equal(observable.time, time_vector):
@@ -173,6 +181,166 @@ def _validate_plot_observables(mass_solution, observable, time_vector=None):
 
     # Turn interpolating functions into solutions.
     observable.interpolate = False
+
+    if kwargs.get("deviation"):
+        observable = _calculate_deviation_solutions(observable, **kwargs)
+
+    return observable
+
+
+def _validate_ensemble_plot_observables(mass_solution_list, observable,
+                                        **kwargs):
+    """Validate the given observables and observable solutions in DataFrames.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+
+    # Get time vector with the most points
+    time_vector_lens = [len(sol.time) for sol in mass_solution_list]
+    idx = time_vector_lens.index(max(time_vector_lens))
+    # Use time vector with most points as default time vector for all solutions
+    time_vector = _validate_time_vector(kwargs.get("time_vector"),
+                                        mass_solution_list[idx].time)
+
+    # Replace mass objects with their identifiers.
+    observable = [getattr(x, "id", x) for x in ensure_iterable(observable)]
+
+    # Raise error if solutions are missing observables
+    missing_observables = [
+        mass_solution_list[idx]
+        for idx, x in enumerate([
+            set(observable).issubset(set(iterkeys(sol)))
+            for sol in mass_solution_list])
+        if not x]
+    if missing_observables:
+        raise ValueError(
+            "The following MassSolution objects are missing the specified "
+            "observables:\n{1!r}".format([s.id for s in missing_observables]))
+
+    # Turn observable into a copy of the MassSolution containing only
+    # the observable values as interpolating functions
+    mass_solution_list = [
+        sol.__class__(
+            id_or_model=sol.id, solution_type=sol.solution_type,
+            data_dict={x: sol[x] for x in observable},
+            time=sol.time, interpolate=True,
+            initial_values={
+                x: sol.initial_values.get(x) for x in observable
+                if sol.initial_values.get(x) is not None})
+        for sol in mass_solution_list]
+
+    for sol in mass_solution_list:
+        sol.time = time_vector
+        sol.interpolate = False
+        if kwargs.get("deviation"):
+            sol = _calculate_deviation_solutions(sol, **kwargs)
+
+    # Make DataFrames for each observable solution with timepoints as columns
+    observable_dataframes = {
+        sol_key: pd.DataFrame(
+            data=[sol[sol_key] for sol in mass_solution_list
+                  if sol_key in sol],
+            columns=time_vector)
+        for sol_key in observable}
+
+    return observable_dataframes, time_vector
+
+
+def _validate_interval_type(interval_type):
+    """Validate the given `interval_type` value.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if interval_type in [None, "range"]:
+        return interval_type
+
+    if interval_type.startswith("CI="):
+        interval_type = float(interval_type[3:]) / 100
+        if 0 <= interval_type <= 1:
+            return interval_type
+
+    raise ValueError("Invalid `interval_type`")
+
+
+def _calculate_confidence_interval(ci_value, sol_df, CI_distribution):
+    """Calculate the confidence interval bounds.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    n = len(sol_df)
+
+    if CI_distribution not in ["t", "z"]:
+        warn("Unrecognized `CI_distribution`, defaulting to t-distribution")
+        CI_distribution = "t"
+
+    options = {}
+    if CI_distribution.startswith("z"):
+        interval_func = stats.norm.interval
+        ddof = 0
+    else:
+        interval_func = stats.t.interval
+        ddof = 1
+        options["df"] = n - ddof
+
+    mean = sol_df.mean(axis=0)
+    options["scale"] = sol_df.std(axis=0, ddof=ddof) / np.sqrt(n)
+    options["loc"] = mean
+
+    lower_bound, upper_bound = interval_func(ci_value, **options)
+
+    return lower_bound, upper_bound, mean
+
+
+def _calculate_deviation_solutions(observable, initial_values=None,
+                                   **kwargs):
+    """Calculate the new deviated solution using the deviation kwargs.
+
+    Warnings
+    --------
+    This method is intended for internal use only.
+
+    """
+    if kwargs.get("deviation_normalization") in ["range", "initial value"]:
+        deviation_normalization = kwargs.get("deviation_normalization")
+    else:
+        raise ValueError("Unrecognized `deviation_normalization` input")
+
+    if initial_values is None:
+        initial_values = observable.initial_values
+
+    for label, sol in iteritems(observable.copy()):
+        if kwargs.get("deviation_zero_centered"):
+            # Shift solutions to be centered around 0.
+            sol = sol - initial_values[label]
+
+        if deviation_normalization == "initial value":
+            # Avoid plotting solutions that produce a divide by 0 error
+            if initial_values[label] == 0:
+                warn("Initial value for '{0}' is 0, therefore cannot plot "
+                     "deviation from initial value.".format(label))
+                del observable[label]
+                continue
+            sol = sol / initial_values[label]
+
+        if deviation_normalization == "range":
+            # Avoid plotting solutions that produce a divide by 0 error
+            value_range = apply_decimal_precision(
+                sol.max() - sol.min(), MASSCONFIGURATION.decimal_precision)
+            if value_range == 0:
+                sol.fill(0)
+            else:
+                sol = sol / value_range
+        # Overwrite old solution with new one
+        observable[label] = sol
 
     return observable
 
@@ -483,7 +651,7 @@ def _get_legend_args(ax, legend, observable, **kwargs):
     ncols = _validate_kwarg_input("legend_ncol", kwargs.get("legend_ncol"))
     # Use a default number of columns based on the total number of items
     if ncols is None:
-        ncols = int(math.ceil(math.sqrt(len(observable) + n_current) / 3))
+        ncols = int(np.ceil(np.sqrt(len(observable) + n_current) / 3))
 
     legend_kwargs = {
         "loc": legend_loc, "bbox_to_anchor": anchor, "ncol": ncols}
@@ -491,7 +659,7 @@ def _get_legend_args(ax, legend, observable, **kwargs):
     return legend_labels, legend_kwargs
 
 
-def _map_labels_to_solutions(observable, labels):
+def _map_labels_to_solutions(obs, labels, initial_values=None):
     """Map the legend labels to the observable solutions and return.
 
     Warnings
@@ -500,14 +668,17 @@ def _map_labels_to_solutions(observable, labels):
 
     """
     labels = [l.lstrip("_") for l in labels]
-    if isinstance(observable, pd.DataFrame):
-        observable.index = labels
+    if isinstance(obs, pd.DataFrame):
+        obs.index = labels
     else:
         # Map solutions to labels
-        for old_label, new_label in zip(list(observable), list(labels)):
-            observable[new_label] = observable.pop(old_label)
-
-    return observable
+        for old, new in zip(list(obs), list(labels)):
+            obs[new] = obs.pop(old)
+            try:
+                obs._initial_values[new] = obs._initial_values.pop(old)
+            except (AttributeError, KeyError):
+                pass
+    return obs
 
 
 def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
@@ -727,7 +898,8 @@ def _set_axes_margins(ax, x_default=None, y_default=None, tile=False, **kwargs):
 
 
 def _set_annotated_time_points(ax, observable, type_of_plot=None,
-                               first_legend=None, **kwargs):
+                               first_legend=None, time_range=None,
+                               **kwargs):
     """Set the given ``time_points`` and kwargs.
 
     Warnings
@@ -735,9 +907,8 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
     This method is intended for internal use only.
 
     """
-
     items = _validate_annotate_time_points_input(
-        observable.time, kwargs.get("annotate_time_points"),
+        time_range, kwargs.get("annotate_time_points"),
         kwargs.get("annotate_time_points_color"),
         kwargs.get("annotate_time_points_marker"),
         kwargs.get("annotate_time_points_markersize"))
@@ -753,12 +924,21 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
 
     time_points, colors, markers, marker_sizes = items[0]
 
-    # Change the time points of the MassSolution to make the MassSolution
-    # carry only solutuons for time points to be plotted.
-    observable.time = time_points
     plot_function = _get_plotting_function(
         ax, plot_function_str=kwargs.get("plot_function"),
         valid={"plot", "semilogx", "semilogy", "loglog"})
+
+    if hasattr(observable, "time"):
+        # Change the time points of the MassSolution to make the MassSolution
+        # carry only solutions for time points to be plotted.
+        observable.time = time_points
+    else:
+        # Interpolate mean solution at time points to annotate
+        for label, df in iteritems(observable):
+            func = interpolate.interp1d(
+                time_range, df.mean(axis=0), kind="cubic",
+                fill_value="extrapolate")
+            observable[label] = np.array(func(time_points))
 
     lines = _get_ax_current(ax)
     if type_of_plot == "phase_portrait":
@@ -950,12 +1130,17 @@ def _get_ax_current(ax, time_points=False):
     lines_with_labels = [
         l for l in ax.get_lines() if "_line" not in l.get_label()]
     if time_points:
-        return [l for l in lines_with_labels if l.get_label()[:2] == "t="]
+        return [l for l in lines_with_labels if l.get_label().startswith("t=")]
 
-    return [l for l in lines_with_labels if l.get_label()[:2] != "t="]
+    lines_with_labels = [
+        l for l in lines_with_labels if not (
+            l.get_label().endswith("_lb") or l.get_label().endswith("_ub")
+            or l.get_label().startswith("t="))]
+
+    return lines_with_labels
 
 
-def _get_handles_and_labels(ax, time_points):
+def _get_handles_and_labels(ax, time_points=False, bounds=False):
     """Return legend handles and labels for the axis.
 
     Warnings

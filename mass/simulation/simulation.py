@@ -596,7 +596,6 @@ class Simulation(Object):
                                                          kwargs.get("verbose"))
         # Make the time course selection input and set the selections
         selections = self._make_rr_selections(kwargs.get("verbose"))
-
         # Make DictLists for solution objects
         conc_sol_list = DictList()
         flux_sol_list = DictList()
@@ -902,8 +901,7 @@ class Simulation(Object):
 
             for key, value in iteritems(perturbations):
                 # Ensure key exists in model values
-                if key not in sim_values\
-                   and _make_init_cond(key) not in sim_values:
+                if key not in sim_values:
                     raise ValueError(
                         "Invalid Perturbation: '{0}' not found in model "
                         "simulation values".format(key))
@@ -959,20 +957,13 @@ class Simulation(Object):
                     sim_values_to_set[key] = value
                     continue
 
-                sim_values = self._get_all_values_for_sim(self.reference_model)
-                # Determine type of perturbation
-                if _make_init_cond(key) in sim_values:
-                    accessor_key = _make_init_cond(key)
-                else:
-                    accessor_key = key
-
-                value = value.subs({key: sim_values_to_set[accessor_key]})
+                value = value.subs({key: sim_values_to_set[key]})
                 try:
                     value = float(value)
                 except (ValueError, TypeError):
                     reset = True
 
-                sim_values_to_set[accessor_key] = value
+                sim_values_to_set[key] = value
                 continue
 
         except (ValueError, MassSimulationError) as e:
@@ -1008,7 +999,10 @@ class Simulation(Object):
             for key, value in iteritems(sim_values_to_set):
                 if isinstance(value, Basic):
                     continue
-                rr.setValue(key, value)
+                if _make_init_cond(key) in rr.keys():
+                    rr.setValue(_make_init_cond(key), value)
+                else:
+                    rr.setValue(key, value)
 
         return rr
 
@@ -1049,18 +1043,23 @@ class Simulation(Object):
                     flux_sol[sol_key] = result_array
                 else:
                     pass
-
+        init_conds, parameters = self.get_model_simulation_values(model)
+        parameters = {
+            param[2:]: value for param, value in iteritems(parameters)
+            if param.startswith("v_") and param[2:] in flux_sol}
         # Make a MassSolution object of the concentration solution dict.
         conc_sol = MassSolution(
             id_or_model="{0}_{1}Sols".format(model, _CONC_STR),
             data_dict=conc_sol, solution_type=_CONC_STR, time=time,
-            interpolate=kwargs.get("interpolate", False))
+            interpolate=kwargs.get("interpolate", False),
+            initial_values=dict(init_conds))
 
         # Make a MassSolution object of the concentration solution dict.
         flux_sol = MassSolution(
             id_or_model="{0}_{1}Sols".format(model, _FLUX_STR),
             data_dict=flux_sol, solution_type=_FLUX_STR, time=time,
-            interpolate=kwargs.get("interpolate", False))
+            interpolate=kwargs.get("interpolate", False),
+            initial_values=dict(parameters))
 
         values = (conc_sol, flux_sol)
         if update_values:
@@ -1068,14 +1067,13 @@ class Simulation(Object):
                      "Updating '%s' values", model)
             # Update current model values with new simulation values
             sim_values = self.get_model_simulation_values(model)
-            id_fix_dict = {model + "_init_conds": _make_init_cond,
-                           model + "_parameters": _make_ss_flux}
 
             for current_value_dict, new_value_dict in zip(sim_values, values):
                 # Fix the IDs for the simulation values, then set new values
-                id_fix_func = id_fix_dict[current_value_dict.id]
                 for key, value in iteritems(new_value_dict):
-                    current_value_dict[id_fix_func(key)] = value
+                    if current_value_dict.id.endswith("_parameters"):
+                        key = _make_ss_flux(key)
+                    current_value_dict[key] = value
 
         return values
 
@@ -1252,11 +1250,10 @@ class Simulation(Object):
 
         # Fix identifiers before adding to values for updating
         if initial_conditions is not None:
-            values[0].update(dict(
-                (met, ic) if met in values[0]
-                else (_make_init_cond(met.id), ic)
-                for met, ic in iteritems(initial_conditions)
-            ))
+            values[0].update({
+                str(met): ic for met, ic in iteritems(initial_conditions)
+            })
+
         if parameters is not None:
             values[1].update({
                 param: value for param, value in iteritems(parameters)})
@@ -1278,14 +1275,11 @@ class Simulation(Object):
 
         # Update with provided model values
         if value_dict is not None:
-            init_conds = dict(
-                (_strip_init_cond(key), value_dict[key]) if "init" in key
-                else (key, value_dict[key]) for key in init_conds)
+            init_conds = {key: value_dict[key] for key in init_conds}
             parameters = {key: value_dict[key] for key in parameters}
         else:
-            init_conds = dict(
-                (_strip_init_cond(key), ic) if "init" in key
-                else (key, ic) for key, ic in iteritems(init_conds))
+            init_conds = {key: ic for key, ic in iteritems(init_conds)}
+
         # Update the model initial conditions
         mass_model.update_initial_conditions(init_conds, verbose=False)
         # Update the model parameter values
@@ -1407,14 +1401,11 @@ def _get_sim_values_from_model(mass_model):
 
     values = {
         "init_conds": DictWithID(
-            id=mass_model.id + "_init_conds", data_dict=dict(
-                (_make_init_cond(met.id), ic)
-                if not met.fixed else (met.id, ic)
-                for met, ic in iteritems(init_conds))),
+            id=mass_model.id + "_init_conds", data_dict={
+                str(met): ic for met, ic in iteritems(init_conds)}),
         "parameters": DictWithID(
             id=mass_model.id + "_parameters", data_dict={
-                param: value
-                for param, value in iteritems(parameters)}),
+                param: value for param, value in iteritems(parameters)}),
     }
 
     return DictWithID(id=mass_model.id + "_values", data_dict=values)
@@ -1481,17 +1472,6 @@ def _make_conc(metabolite_str):
 
     """
     return "[" + metabolite_str + "]"
-
-
-def _strip_init_cond(metabolite_str):
-    """Strip the initial condition format from a metabolite identifier.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    return metabolite_str[5:-1]
 
 
 def _make_init_cond(metabolite_str):
