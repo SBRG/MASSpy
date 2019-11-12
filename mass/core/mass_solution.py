@@ -376,6 +376,8 @@ class MassSolution(DictWithID):
         # Update MassSolution if d
         if update:
             self.update(solution)
+            self.initial_values[aggregate_id] = equation(*array([
+                self.initial_values[k] for k in variables]))
 
         return solution
 
