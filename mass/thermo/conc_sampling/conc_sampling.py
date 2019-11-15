@@ -11,7 +11,7 @@ from mass.thermo.conc_sampling.conc_optgp import ConcOptGPSampler
 
 
 def sample_concentrations(concentration_solver, n, method="optgp",
-                          thinning=100, processes=None, seed=None):
+                          thinning=100, processes=1, seed=None):
     """Sample valid concentration distributions from a :mod:`mass` model.
 
     This function samples valid concentration distributions from a
@@ -44,11 +44,11 @@ def sample_concentrations(concentration_solver, n, method="optgp",
 
         Default is ``100``.
     processes : int or None
-        The number of processes used to generate samples. Only valid
-        for ``method='optgp'``.
+        The number of processes used to generate samples. If ``None`` the
+        number of processes specified in the :class:`.MassConfiguration` is
+        utilized. Only valid for ``method='optgp'``.
 
-        Default is ``None`` to utilize the number of processes specified in
-        the :class:`.MassConfiguration`.
+        Default is ``1``.
     seed : int or None
         A positive ``int`` > 0 indiciating random number seed that should be
         used. If ``None`` provided, the current time stamp is used.
