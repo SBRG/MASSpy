@@ -340,7 +340,7 @@ class Simulation(Object):
 
         return (values_dict["init_conds"], values_dict["parameters"])
 
-    def add_models(self, models, verbose=False):
+    def add_models(self, models, verbose=False, disable_safe_load=False):
         r"""Add the model values to the :class:`Simulation`.
 
         To add a model to the :class:`Simulation`, three criteria must be met:
@@ -365,6 +365,15 @@ class Simulation(Object):
         verbose : bool
             Whether to print if loading of models succeeds or fails.
             Default is ``False``.
+        disable_safe_load : bool
+            Whether to disable criteria checks. Default is ``False``.
+
+        Warnings
+        --------
+        Use the ``disable_safe_load`` argument with caution, as setting the
+        value as ``disable_safe_load=True`` will reduce the time it takes to
+        add models, but models that do not adhere to the three criteria may
+        create unexepcted downstream errors.
 
         """
         # Ensure model input is valid and does not include reference model ID
@@ -381,6 +390,10 @@ class Simulation(Object):
 
         for model in models:
             # Check ODEs for equivalence
+            if disable_safe_load:
+                self._add_model_values_to_simulation(model, verbose)
+                continue
+
             if not self.reference_model.has_equivalent_odes(model, verbose):
                 _log_msg(LOGGER, logging.WARN, verbose,
                          "Could not load MassModel '%s', ODEs are not "
@@ -394,20 +407,7 @@ class Simulation(Object):
                          "Could not load MassModel '%s': %s",
                          str(model), str(e))
                 continue
-
-            # Get the simulation values
-            if str(model) + "_values" in self._simulation_values:
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "Replacing existing values for MassModel '%s'",
-                         str(model))
-                self.update_model_simulation_values(model)
-            else:
-                # Otherwise add to simulation values
-                self._simulation_values.add(
-                    _get_sim_values_from_model(model))
-
-            _log_msg(LOGGER, logging.INFO, verbose,
-                     "Successfully loaded MassModel '%s'.", str(model))
+            self._add_model_values_to_simulation(model, verbose)
 
     def remove_models(self, models, verbose=False):
         r"""Remove the model values from the :class:`Simulation`.
@@ -1302,6 +1302,28 @@ class Simulation(Object):
         sim_values.update(init_conds)
         sim_values.update(parameters)
         return sim_values
+
+    def _add_model_values_to_simulation(self, model, verbose):
+        """Add model values to the simulation.
+
+        Warnings
+        --------
+        This method is intended for internal use only.
+
+        """
+        # Get the simulation values
+        if str(model) + "_values" in self._simulation_values:
+            _log_msg(LOGGER, logging.INFO, verbose,
+                     "Replacing existing values for MassModel '%s'",
+                     str(model))
+            self.update_model_simulation_values(model)
+        else:
+            # Otherwise add to simulation values
+            self._simulation_values.add(
+                _get_sim_values_from_model(model))
+
+        _log_msg(LOGGER, logging.INFO, verbose,
+                 "Successfully loaded MassModel '%s'.", str(model))
 
 
 def _assess_model_quality_for_simulation(mass_model, verbose, report):
