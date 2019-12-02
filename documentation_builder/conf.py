@@ -139,11 +139,6 @@ man_pages = [
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = 'never'
 
-html_js_files = [
-    'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js',
-    DEFAULT_EMBED_REQUIREJS_URL,
-]
-
 # -- Intersphinx --------------------------------------------------------------
 
 # Refer to the Python documentation for other libraries.

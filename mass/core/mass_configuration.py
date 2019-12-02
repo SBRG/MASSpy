@@ -459,7 +459,8 @@ class MassBaseConfiguration:
     @property
     def shared_state(self):
         """Return a read-only ``dict`` for shared configuration attributes."""
-        return getattr(self, "_shared_state").copy()
+        return {k.lstrip("_"): v
+                for k, v in iteritems(getattr(self, "_shared_state"))}
 
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
