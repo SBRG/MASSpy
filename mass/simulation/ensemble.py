@@ -295,7 +295,7 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
         options should correspond to the :class:`roadrunner.SteadyStateSolver`.
     update_values : bool
         Whether to update the model with the steady state results.
-        Default is ``False``.
+        Default is ``False``. Only updates models that reached steady state.
     **kwargs
         simulation :
             A :class:`.Simulation` object to use for the sim
@@ -370,8 +370,16 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
     feasible = []
     infeasible = []
     for i, model in enumerate(models):
-        conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
+        if len(models) == 1:
+            conc_sol, flux_sol = conc_sol_list, flux_sol_list
+        else:
+            conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
         if conc_sol and flux_sol:
+            ics, params = simulation.get_model_simulation_values(model)
+            model.update_initial_conditions(ics)
+            model.update_parameters({
+                param: value for param, value in params.items()
+                if param in model.reactions.list_attr("flux_symbol_str")})
             feasible.append(model)
         else:
             infeasible.append(model)
@@ -425,13 +433,15 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
         are postive, and update feasible models with the new PERC values.
         If ``None``, no PERCs will be checked.
     strategy : str, None
-        The strategy for finding the steady state. Must be one of the
-        following:
+        The strategy for finding the steady state.
+        Must be one of the following:
 
             * ``'simulate'``
             * ``'nleq1'``
             * ``'nleq2'``
 
+        If a ``strategy`` is given, models must reach a steady state to be
+        considered feasible. All feasible models are updated to steady state.
         If ``None``, no attempts will be made to determine whether a generated
         model can reach a steady state.
     perturbations : dict
@@ -560,6 +570,9 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
 
     # Dictionary to track when models failed a check
     numbers = {}
+    if ensure_positive_percs is not None:
+        numbers.update({"Infeasible, negative PERCs": 0})
+
     feasible_models = []
     infeasible_models = []
     for i, flux_values in enumerate(flux_data.values):
@@ -603,22 +616,20 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
 
             if ensure_positive_percs is None:
                 feasible_models.append(model)
-            else:
-                numbers.update({"Infeasible, negative PERCs": 0})
-                if ensure_positive_percs is None:
-                    ensure_positive_percs = []
-                # Ensure PERCs are positive, updating model if they are
-                model, is_feasible = _ensure_positive_percs_for_model(
-                    model, ensure_positive_percs, verbose, False, True,
-                    kwargs.get("at_equilibrium_default"))
+                continue
 
-                if is_feasible:
-                    # Add feasible model to ensemble
-                    feasible_models.append(model)
-                else:
-                    # Add infeasible model to ensemble if specified
-                    infeasible_models.append(model)
-                    numbers["Infeasible, negative PERCs"] += 1
+            # Ensure PERCs are positive, updating model if they are
+            model, is_feasible = _ensure_positive_percs_for_model(
+                model, ensure_positive_percs, verbose, False, True,
+                kwargs.get("at_equilibrium_default"))
+
+            if is_feasible:
+                # Add feasible model to ensemble
+                feasible_models.append(model)
+            else:
+                # Add infeasible model to ensemble if specified
+                infeasible_models.append(model)
+                numbers["Infeasible, negative PERCs"] += 1
 
     # Ensure steady state exists if given a strategy
     if strategy is not None:
@@ -637,7 +648,7 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             models = [m for m in feasible_models if m.id in simulation.models]
             with warnings.catch_warnings():
                 conc_sol_list, flux_sol_list = simulation.find_steady_state(
-                    strategy=strategy, perturbations=perturbation,
+                    models, strategy=strategy, perturbations=perturbation,
                     update_values=update_values, verbose=verbose,
                     decimal_precision=kwargs.get("decimal_precision"))
 
@@ -652,7 +663,15 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
                     _log_msg(LOGGER, logging.INFO, verbose,
                              "Successfully found steady state for '%s'",
                              model)
-
+                    if update_values:
+                        ics, params = simulation.get_model_simulation_values(
+                            model)
+                        model.update_initial_conditions(ics)
+                        model.update_parameters({
+                            param: value for param, value in params.items()
+                            if param in model.reactions.list_attr(
+                                "flux_symbol_str")})
+                        model.update_parameters(params)
                     continue
 
                 # Remove from feasible models and add to infeasible models

@@ -1,6 +1,6 @@
 Sphinx
 sphinxcontrib-bibtex
 sphinx-autoapi
-nbsphinx>=0.2.4
+nbsphinx>=0.5.0
 ipykernel
 sphinx_rtd_theme

@@ -658,7 +658,9 @@ def _sbml_to_model(doc, f_replace=None, **kwargs):
     mass_model.update_parameters(parameters, verbose=False)
 
     # Add custom rates
-    mass_model.update_custom_rates(custom_rates)
+    mass_model.update_custom_rates({
+        mass_model.reactions.get_by_id(rxn.id): rate
+        for rxn, rate in iteritems(custom_rates)})
 
     # Add groups to the model.
     if model_groups:
