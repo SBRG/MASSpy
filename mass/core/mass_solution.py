@@ -376,8 +376,12 @@ class MassSolution(DictWithID):
         # Update MassSolution if d
         if update:
             self.update(solution)
-            self.initial_values[aggregate_id] = equation(*array([
-                self.initial_values[k] for k in variables]))
+            try:
+                self.initial_values[aggregate_id] = equation(*array([
+                    self.initial_values[k] for k in variables]))
+            except KeyError:
+                # Not all initial values have been set
+                pass
 
         return solution
 

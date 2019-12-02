@@ -105,6 +105,12 @@ class ConcOptGPSampler(ConcHRSampler):
         The thinning factor for the generated sampling chain as a positive
         ``int`` > 0. A thinning factor of 10 means samples are returned every
         10 steps.
+    processes : int or None
+        The number of processes used to generate samples. If ``None`` the
+        number of processes specified in the :class:`.MassConfiguration` is
+        utilized. Only valid for ``method='optgp'``.
+
+        Default is ``None``.
     nproj : int or None
         A positive ``int`` > 0 indicating how often to reporject the sampling
         point into the feasibility space. Avoids numerical issues at the cost
@@ -241,7 +247,7 @@ class ConcOptGPSampler(ConcHRSampler):
     # Models can be large so don't pass them around during multiprocessing
     def __getstate__(self):
         """Return the object for serialization.
-        
+
         Warnings
         --------
         This method is intended for internal use only.

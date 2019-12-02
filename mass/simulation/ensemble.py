@@ -370,7 +370,10 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
     feasible = []
     infeasible = []
     for i, model in enumerate(models):
-        conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
+        if len(models) == 1:
+            conc_sol, flux_sol = conc_sol_list, flux_sol_list
+        else:
+            conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
         if conc_sol and flux_sol:
             ics, params = simulation.get_model_simulation_values(model)
             model.update_initial_conditions(ics)
