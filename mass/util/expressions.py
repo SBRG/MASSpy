@@ -189,7 +189,7 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         return None
 
     # Generate forward rate expression
-    fwd_rate = generate_foward_mass_action_rate_expression(reaction,
+    fwd_rate = generate_forward_mass_action_rate_expression(reaction,
                                                            rate_type)
 
     # Ignore reverse rate if it is mathematically equal to 0, or if
@@ -215,8 +215,8 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
     return rate_expression
 
 
-def generate_foward_mass_action_rate_expression(reaction, rate_type=1):
-    """Generate the foward mass action rate expression for the reaction.
+def generate_forward_mass_action_rate_expression(reaction, rate_type=1):
+    """Generate the forward mass action rate expression for the reaction.
 
     Parameters
     ----------
@@ -604,7 +604,7 @@ def _apply_func_to_expressions(sympy_expr, function, args=None):
 
 __all__ = (
     "Keq2k", "k2Keq", "strip_time", "generate_mass_action_rate_expression",
-    "generate_foward_mass_action_rate_expression",
+    "generate_forward_mass_action_rate_expression",
     "generate_reverse_mass_action_rate_expression",
     "generate_mass_action_ratio", "generate_disequilibrium_ratio",
     "create_custom_rate", "generate_ode",)
