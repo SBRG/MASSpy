@@ -310,7 +310,8 @@ class EnzymeModuleForm(MassMetabolite):
             if not dictionary:
                 continue
             for met, num_bound in iteritems(dictionary):
-                charge += met.charge * num_bound
+                if met.charge is not None:
+                    charge += met.charge * num_bound
 
         if update_enzyme:
             self.charge = charge
