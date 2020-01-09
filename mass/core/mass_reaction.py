@@ -67,7 +67,8 @@ from six import iteritems, itervalues, string_types
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, generate_foward_mass_action_rate_expression,
+    generate_disequilibrium_ratio, 
+    generate_forward_mass_action_rate_expression,
     generate_mass_action_rate_expression, generate_mass_action_ratio,
     generate_reverse_mass_action_rate_expression)
 from mass.util.util import (
@@ -744,8 +745,8 @@ class MassReaction(Reaction):
 
         return rate
 
-    def get_foward_mass_action_rate_expression(self, rate_type=None):
-        """Get the foward mass action rate expression for the reaction.
+    def get_forward_mass_action_rate_expression(self, rate_type=None):
+        """Get the forward mass action rate expression for the reaction.
 
         Parameters
         ----------
@@ -768,7 +769,7 @@ class MassReaction(Reaction):
         """
         if rate_type is None:
             rate_type = getattr(self, "_rate_type")
-        return generate_foward_mass_action_rate_expression(self, rate_type)
+        return generate_forward_mass_action_rate_expression(self, rate_type)
 
     def get_reverse_mass_action_rate_expression(self, rate_type=1):
         """Get the reverse mass action rate expression for the reaction.

@@ -14,11 +14,9 @@ import os
 import sys
 from os.path import dirname
 
-from ipywidgets.embed import DEFAULT_EMBED_REQUIREJS_URL
-
 sys.path.insert(0, dirname(dirname(__file__)))
 
-from mass import __version__
+from mass import __version__  # noqa: E402
 
 # -- Project information ------------------------------------------------------
 
@@ -150,6 +148,6 @@ intersphinx_mapping = {
     "http://docs.scipy.org/doc/numpy/": None,
     "https://pandas.pydata.org/pandas-docs/stable/": None,
     "http://docs.scipy.org/doc/scipy/reference": None,
-    "https://docs.sympy.org/latest/": None,
+    "https://docs.sympy.org/1.5.1/": None,
     }
 intersphinx_cache_limit = 10  # days to keep the cached inventories

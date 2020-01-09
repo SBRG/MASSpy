@@ -24,15 +24,5 @@ for doc_nb in "${DOCUMENTATION_NOTEBOOKS[@]}"; do
     jupyter nbconvert --to notebook --execute $doc_nb.ipynb  --inplace --ExecutePreprocessor.timeout=-1
 done
 
-# Execute additional example notebooks
-jupyter nbconvert --to notebook --execute ./workflows/*.ipynb  --inplace --ExecutePreprocessor.timeout=-1
-jupyter nbconvert --to notebook --execute ./advanced_visualization/*.ipynb  --inplace --ExecutePreprocessor.timeout=-1
-
 rm -rf test_textbook.*
 rm -rf SB2_Glycolysis.*
-
-cd $doc_builder_dir
-
-make clean
-make html
-make latex

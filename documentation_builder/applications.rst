@@ -22,8 +22,15 @@ Advanced Visualization Examples
 
    notebooks/advanced_visualization/*
 
+Education
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   sb2_textbook.rst
+
 Code Repositories
 -----------------
 * All documentation notebooks are viewable as Jupyter notebooks, which can be
   viewed at `nbviewer <https://nbviewer.jupyter.org/github/SBRG/MASSpy/tree/master/documentation_builder/notebooks/>`_.
-* A repository of additional **MASSpy** examples can be found `here <https://github.com/z-haiman/MASSpy-examples>`_.

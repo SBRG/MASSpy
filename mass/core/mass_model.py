@@ -2242,7 +2242,7 @@ class MassModel(Model):
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = matrix_rank(self.S)
-        except (np.linalg.LinAlgError, ValueError):
+        except (np.linalg.LinAlgError, ValueError, IndexError):
             dim_S = "0x0"
             rank = 0
 

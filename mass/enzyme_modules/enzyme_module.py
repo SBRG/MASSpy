@@ -1632,8 +1632,9 @@ class EnzymeModule(MassModel):
         try:
             dim_S = "{0}x{1}".format(self.S.shape[0], self.S.shape[1])
             rank = matrix_rank(self.S)
-        except (np.linalg.LinAlgError, ValueError):
-            dim_S = "0x0"
+        except (np.linalg.LinAlgError, ValueError, IndexError):
+            dim_S = "{0}x{1}".format(len(self.metabolites),
+                                     len(self.reactions))
             rank = 0
 
         return """
