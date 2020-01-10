@@ -8,6 +8,7 @@ Systems Biology: Simulation of Dynamic Network States
 
    notebooks/SB2_textbook/SB2-Chapter-1
    notebooks/SB2_textbook/SB2-Chapter-2
+   notebooks/SB2_textbook/SB2-Chapter-3
 
 
 .. toctree::
