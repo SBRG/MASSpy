@@ -39,6 +39,7 @@ if __name__ == "__main__":
             "libroadrunner>=1.5",
             "numpy>=1.13.0",
             "pandas>=0.17.0",
+            "optlang>=1.4.2",
             "scipy>=1.2.0",
             "six>=1.11.0",
             "sympy>=1.0.0",
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         maintainer_email="zhaiman@eng.ucsd.edu",
         description="MASSpy is a package for kinetic modeling and simulation "
                     "of biological networks",
-        license="LGPL/GPL v2+",
+        license="LGPL/GPL v3+",
         keywords=("metabolism biology kinetic modeling simulation programming"
                   "cobra"),
         url="https://github.com/SBRG/masspy",
@@ -72,10 +73,10 @@ if __name__ == "__main__":
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Build Tools',
             'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: GNU Lesser General Public License v2'
-                ' or later (LGPLv2+)',
-            'License :: OSI Approved :: GNU General Public License v2'
-                ' or later (GPLv2+)',
+            'License :: OSI Approved :: GNU Lesser General Public License v3'
+                ' or later (LGPLv3+)',
+            'License :: OSI Approved :: GNU General Public License v3'
+                ' or later (GPLv3+)',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
