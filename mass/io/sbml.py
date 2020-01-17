@@ -1648,7 +1648,7 @@ def _read_enzyme_attr_info_from_notes(mass_obj, notes, f_replace, **kwargs):
     """
     subclass_specific_attributes = {
         "EnzymeModuleForm": [
-            "enzyme_module_id", "bound_catalytic", "bound_effectors"],
+            "enzyme_module_id", "bound_metabolites"],
         "EnzymeModuleReaction": [
             "enzyme_module_id"],
     }.get(mass_obj.__class__.__name__)
@@ -2781,7 +2781,7 @@ def _write_enzyme_attr_info_to_notes(sbml_obj, mass_obj, f_replace,
     # Get the subclass specific attributes to write into the notes.
     attributes = {
         "EnzymeModuleForm": [
-            "enzyme_module_id", "bound_catalytic", "bound_effectors"],
+            "enzyme_module_id", "bound_metabolites"],
         "EnzymeModuleReaction": [
             "enzyme_module_id"],
     }.get(mass_obj.__class__.__name__)

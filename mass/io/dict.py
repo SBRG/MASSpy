@@ -73,7 +73,7 @@ _OPTIONAL_METABOLITE_ATTRIBUTES = {
 }
 
 _REQUIRED_ENZYMEMODULEFORM_ATTRIBUTES = [
-    "_bound_catalytic", "_bound_effectors", "enzyme_module_id"]
+    "_bound_metabolites", "enzyme_module_id"]
 _ORDERED_OPTIONAL_ENZYMEMODULEFORM_KEYS = []
 _OPTIONAL_ENZYMEMODULEFORM_ATTRIBUTES = {}
 

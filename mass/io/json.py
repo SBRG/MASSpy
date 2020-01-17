@@ -206,7 +206,7 @@ JSON_SCHEMA = {
                     },
                     "notes": {"type": "object"},
                     "annotation": {"type": "object"},
-                    "enzyme_id": {"type": "string"},
+                    "enzyme_module_id": {"type": "string"},
                 },
             },
             "required": ["id", "name", "reversible", "metabolites",
@@ -243,19 +243,13 @@ JSON_SCHEMA = {
                     },
                     "notes": {"type": "object"},
                     "annotation": {"type": "object"},
-                    "_bound_catalytic": {
+                    "_bound_metabolites": {
                         "type": "object",
                         "patternProperties": {
                             ".*": {"type": "number"},
                         },
                     },
-                    "_bound_effectors": {
-                        "type": "object",
-                        "patternProperties": {
-                            ".*": {"type": "number"},
-                        },
-                    },
-                    "enzyme_id": {"type": "string"},
+                    "enzyme_module_id": {"type": "string"},
 
                 },
                 "required": ["id", "name"],

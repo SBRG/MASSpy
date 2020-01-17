@@ -11,15 +11,11 @@ The enzyme specific attributes on the :class:`EnzymeModuleForm` are the
 following:
 
     * :attr:`~EnzymeModuleForm.enzyme_module_id`
-    * :attr:`~EnzymeModuleForm.bound_catalytic`
-    * :attr:`~EnzymeModuleForm.bound_effectors`
+    * :attr:`~EnzymeModuleForm."bound_metabolites"`
 
-The :class:`EnzymeModuleForm` contains the attributes
-:attr:`~EnzymeModuleForm.bound_catalytic` and
-:attr:`~EnzymeModuleForm.bound_effectors`, designed to hold the
-:class:`~.MassMetabolite`\ (s) that could be bound to the catalytic site and
-regularory sites. There are no differences between the attributes other than
-their name.
+The :class:`EnzymeModuleForm` contains the attribute
+:attr:`~EnzymeModuleForm."bound_metabolites", designed to hold the
+:class:`~.MassMetabolite`\ (s) that could be bound to the sites on the enzyme.
 
 Some other important points about the :class:`EnzymeModuleForm` include:
 
@@ -29,8 +25,7 @@ Some other important points about the :class:`EnzymeModuleForm` include:
     * If the :attr:`formula` or charge attributes are not set upon
       initialization, it is inferred using the formulas and charges set on the
       :class:`~.MassMetabolite`\ (s) found in
-      :attr:`~EnzymeModuleForm.bound_catalytic` and
-      :attr:`~EnzymeModuleForm.bound_effectors`. A moiety is also included
+      :attr:`~EnzymeModuleForm.bound_metabolites`. A moiety is also included
       for the formula using the :attr:`~EnzymeModuleForm.enzyme_module_id`.
 
     * The purpose of the generated formula and charge is to ensure reactions
@@ -63,15 +58,10 @@ class EnzymeModuleForm(MassMetabolite):
         same properties as the original metabolite.
     enzyme_module_id : str
         The identifier of the associated :class:`~.EnzymeModule`.
-    bound_catalytic : dict
-        A ``dict`` representing the ligands bound to the enzyme's active
-        site(s), with :class:`~.MassMetabolite`\ s as keys and number bound as
-        values. If the final coefficient for a metabolite is 0, it is removed.
-    bound_effectors : dict
-        A ``dict`` representing the ligands bound to the enzyme's
-        regulatory site(s), with :class:`~.MassMetabolite`\ s as keys and
-        number bound as values. If the final coefficient for a metabolite
-        is 0, it is removed.
+    bound_metabolites : dict
+        A ``dict`` representing the ligands bound to the enzyme,
+        with :class:`~.MassMetabolite`\ s or their identifiers as
+        keys and the number bound as values.
     **kwargs
         name :
             ``str`` representing a human readable name for the enzyme module
@@ -92,7 +82,7 @@ class EnzymeModuleForm(MassMetabolite):
     """
 
     def __init__(self, id_or_specie=None, enzyme_module_id="",
-                 bound_catalytic=None, bound_effectors=None, **kwargs):
+                 bound_metabolites=None, **kwargs):
         """Initialize the EnzymeModuleForm."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
@@ -110,13 +100,9 @@ class EnzymeModuleForm(MassMetabolite):
             # Set the id of the enzyme represented by the EnzymeModuleForm
             self.enzyme_module_id = enzyme_module_id
 
-            # Set metabolites bound to active site(s) of the enzyme form
-            self._bound_catalytic = {}
-            self.bound_catalytic = bound_catalytic
-
-            # Set metabolites bound to regulatory site(s) of the enzyme form
-            self._bound_effectors = {}
-            self.bound_effectors = bound_effectors
+            # Set metabolites bound to site(s) of the enzyme form
+            self._bound_metabolites = {}
+            self.bound_metabolites = bound_metabolites
 
             if not isinstance(id_or_specie, MassMetabolite):
                 # Set formula, charge, and compartment attributes if
@@ -129,62 +115,50 @@ class EnzymeModuleForm(MassMetabolite):
                     setattr(self, attr, val)
 
     @property
-    def bound_catalytic(self):
-        r"""Get or set ligands bound to the enzyme's active site(s).
+    def bound_metabolites(self):
+        r"""Get or set metabolites bound to the enzyme's site(s).
 
         Notes
         -----
         Assigning a ``dict`` to this property updates the current ``dict`` of
-        ligands bound at the active site(s) with the new values.
+        ligands bound at the enzyme site(s) with the new values.
 
         Parameters
         ----------
         value : dict
             A ``dict`` where keys are :class:`~.MassMetabolite` and values
-            are the number currently bound to the active site(s).
+            are the number currently bound to the site(s).
             An empty ``dict`` will reset the bound ligands.
 
         """
-        return getattr(self, "_bound_catalytic")
+        return getattr(self, "_bound_metabolites")
 
-    @bound_catalytic.setter
-    def bound_catalytic(self, value):
-        """Set the ``dict`` of ligands bound to the active site(s)."""
-        self._set_bound_dict("bound_catalytic", value)
+    @bound_metabolites.setter
+    def bound_metabolites(self, value):
+        """Set the ``dict`` of ligands bound to the enzyme site(s)."""
+        if not isinstance(value, dict) and value is not None:
+            raise TypeError("bound_metabolites must be a dict")
 
-    @property
-    def bound_effectors(self):
-        r"""Get or set ligands bound to the enzyme's regulatory site(s).
-
-        Notes
-        -----
-        Assigning a ``dict`` to this property updates the current ``dict`` of
-        ligands bound at the regulatory site(s) with the new values.
-
-        Parameters
-        ----------
-        value : dict
-            A ``dict`` where keys are :class:`~.MassMetabolite` and values
-            are the number currently bound to the regulatory site(s).
-            An empty ``dict`` will reset the bound ligands.
-
-        """
-        return getattr(self, "_bound_effectors")
-
-    @bound_effectors.setter
-    def bound_effectors(self, value):
-        """Set the ``dict`` of ligands bound to the active site(s)."""
-        self._set_bound_dict("bound_effectors", value)
+        if value:
+            bound_metabolites = {}
+            for met, num_bound in iteritems(value):
+                if not isinstance(met, MassMetabolite) or \
+                   not isinstance(num_bound, integer_types):
+                    raise ValueError("value must be a dict where keys are "
+                                     "MassMetabolites and values are ints")
+                if num_bound != 0:
+                    bound_metabolites[met] = num_bound
+            getattr(self, "_bound_metabolites").update(bound_metabolites)
+        else:
+            setattr(self, "_bound_metabolites", {})
 
     def generate_enzyme_module_form_name(self, update_enzyme=False):
         """Generate name for the enzyme module form based on bound ligands.
 
         Notes
         -----
-        * The :attr:`~EnzymeModuleForm.enzyme_module_id`,
-          :attr:`~EnzymeModuleForm.bound_catalytic`, and
-          :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
-          generating the name.
+        * The :attr:`~.EnzymeModuleForm.bound_metabolites` attribute is used
+          in generating the name.
         * If the :attr:`~EnzymeModuleForm.enzyme_module_id` attributes are
           not set, the string ``'Enzyme'`` will be used in its place.
 
@@ -207,16 +181,11 @@ class EnzymeModuleForm(MassMetabolite):
             name = "Enzyme"
 
         # Add the ligands bound to the active site(s)
-        catalytic_str = "-".join([met._remove_compartment_from_id_str()
-                                  for met in self.bound_catalytic])
-        if catalytic_str:
-            catalytic_str = "-" + catalytic_str + " complex"
-        name += catalytic_str
-
-        # Add the ligands bound to the effector site(s)
-        effector_str = _make_bound_attr_str_repr(self.bound_effectors)
-        if effector_str:
-            name += "; " + effector_str
+        bound_str = "-".join([met._remove_compartment_from_id_str()
+                              for met in self.bound_metabolites])
+        if bound_str:
+            bound_str = "-" + bound_str + " complex"
+        name += bound_str
 
         if update_enzyme:
             self.name = name
@@ -231,10 +200,8 @@ class EnzymeModuleForm(MassMetabolite):
 
         Notes
         -----
-        The :attr:`~EnzymeModuleForm.enzyme_module_id`,
-        :attr:`~EnzymeModuleForm.bound_catalytic`, and
-        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used in
-        generating the formula.
+        The :attr:`~.EnzymeModuleForm.bound_metabolites` attribute is used
+        in generating the formula.
 
         Parameters
         ----------
@@ -259,12 +226,11 @@ class EnzymeModuleForm(MassMetabolite):
             formula += "[" + moiety + "]"
 
         total_elements = defaultdict(list)
-        for dictionary in [self.bound_catalytic, self.bound_effectors]:
-            if not dictionary:
-                continue
-            elem_iters = [iteritems({k: v * num_bound
-                                     for k, v in iteritems(met.elements)})
-                          for met, num_bound in iteritems(dictionary)]
+        if self.bound_metabolites:
+            elem_iters = [
+                iteritems({
+                    k: v * num_bound for k, v in iteritems(met.elements)})
+                for met, num_bound in iteritems(self.bound_metabolites)]
 
             for k, v in chain(*elem_iters):
                 total_elements[k].append(v)
@@ -288,8 +254,7 @@ class EnzymeModuleForm(MassMetabolite):
 
         Notes
         -----
-        The attr:`~EnzymeModuleForm.bound_catalytic`, and
-        :attr:`~EnzymeModuleForm.bound_effectors` attributes are used
+        The :attr:`~.EnzymeModuleForm.bound_metabolites` attribute is used
         in generating the charge.
 
         Parameters
@@ -306,10 +271,8 @@ class EnzymeModuleForm(MassMetabolite):
 
         """
         charge = 0
-        for dictionary in [self.bound_catalytic, self.bound_effectors]:
-            if not dictionary:
-                continue
-            for met, num_bound in iteritems(dictionary):
+        if self.bound_metabolites:
+            for met, num_bound in iteritems(self.bound_metabolites):
                 if met.charge is not None:
                     charge += met.charge * num_bound
 
@@ -317,35 +280,6 @@ class EnzymeModuleForm(MassMetabolite):
             self.charge = charge
 
         return charge
-
-    # Internal
-    def _set_bound_dict(self, attribute, value):
-        """Set a ``dict`` of metabolites for a site.
-
-        Warnings
-        --------
-        This method is intended for internal use only.
-
-        """
-        if attribute not in {"bound_catalytic", "bound_effectors"}:
-            raise ValueError("Must be either {'bound_catalytic', "
-                             "'bound_effectors'}")
-
-        if not isinstance(value, dict) and value is not None:
-            raise TypeError(attribute + " must be a dict")
-
-        if value:
-            bound_dict = {}
-            for met, num_bound in iteritems(value):
-                if not isinstance(met, MassMetabolite) or \
-                   not isinstance(num_bound, integer_types):
-                    raise ValueError("value must be a dict where keys are "
-                                     "MassMetabolites and values are ints")
-                if num_bound != 0:
-                    bound_dict[met] = num_bound
-            getattr(self, "_" + attribute).update(bound_dict)
-        else:
-            setattr(self, "_" + attribute, {})
 
     def _set_id_with_model(self, value):
         """Set the id of the EnzymeModuleForm to the associated MassModel.
@@ -369,17 +303,13 @@ class EnzymeModuleForm(MassMetabolite):
 
         """
         if self.model is not None:
-            for attr in ["_bound_catalytic", "_bound_effectors"]:
-                bound_dict = getattr(self, attr)
-                try:
-                    bound_dict = {
-                        self.model.metabolites.get_by_id(str(met)): num
-                        for met, num in iteritems(bound_dict)}
-                except KeyError as e:
-                    raise KeyError("'{0}' does not exist in model metabolites."
-                                   .format(str(e)))
-                # Add the metabolites into the module that don't already exist
-                bound_dict = setattr(self, attr, bound_dict)
+            try:
+                self.bound_metabolites = {
+                    self.model.metabolites.get_by_id(str(met)): num
+                    for met, num in iteritems(self.bound_metabolites)}
+            except KeyError as e:
+                raise KeyError("'{0}' does not exist in model metabolites."
+                               .format(str(e)))
 
     def _repr_html_(self):
         """HTML representation of the overview for the EnzymeModuleForm.
@@ -407,11 +337,8 @@ class EnzymeModuleForm(MassMetabolite):
                 <td><strong>Compartment</strong></td>
                 <td>{compartment}</td>
             </tr><tr>
-                <td><strong>Bound Catalytic</strong></td>
-                <td>{catalytic}</td>
-            </tr><tr>
-                <td><strong>Bound Effectors</strong></td>
-                <td>{effectors}</td>
+                <td><strong>Bound Metabolites</strong></td>
+                <td>{bound}</td>
             </tr><tr>
                 <td><strong>Initial Condition</strong></td>
                 <td>{ic}</td>
@@ -422,8 +349,7 @@ class EnzymeModuleForm(MassMetabolite):
         </table>""".format(
             id=self.id, name=self.name, address='0x0%x' % id(self),
             enzyme=str(self.enzyme_module_id), compartment=self.compartment,
-            catalytic=_make_bound_attr_str_repr(self.bound_catalytic),
-            effectors=_make_bound_attr_str_repr(self.bound_effectors),
+            bound=_make_bound_attr_str_repr(self.bound_metabolites),
             ic=self._initial_condition, n_reactions=len(self.reactions),
             reactions=', '.join(r.id for r in self.reactions))
 

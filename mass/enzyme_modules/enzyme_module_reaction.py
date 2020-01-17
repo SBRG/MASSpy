@@ -84,9 +84,8 @@ class EnzymeModuleReaction(MassReaction):
 
         Notes
         -----
-        * The :attr:`~.EnzymeModuleForm.bound_catalytic` and
-          :attr:`~.EnzymeModuleForm.bound_effectors` attributes of the
-          associated :class:`~.EnzymeModuleForm` are used in generating
+        * The :attr:`~.EnzymeModuleForm.bound_metabolites` attribute of the
+          associated :class:`~.EnzymeModuleForm` is used in generating
           the name.
 
         Parameters
@@ -109,38 +108,38 @@ class EnzymeModuleReaction(MassReaction):
             key += " React" if met in self.reactants else " Prod"
             items[key].append(met)
 
-        for attr in ["bound_catalytic", "bound_effectors"]:
-            for enz_r, enz_p in zip(items["Enz React"], items["Enz Prod"]):
-                r_dict, p_dict = (getattr(enz_r, attr), getattr(enz_p, attr))
-                diff = {}
-                for key in list(set(p_dict).union(set(r_dict))):
-                    if key in p_dict and key in r_dict:
-                        coeff = abs(p_dict[key] - r_dict[key])
-                    elif key in p_dict or key in r_dict:
-                        coeff = [d[key] for d in [r_dict, p_dict]
-                                 if key in d].pop()
-                    if coeff != 0:
-                        diff[key] = coeff
+        for enz_r, enz_p in zip(items["Enz React"], items["Enz Prod"]):
+            r_dict, p_dict = (getattr(enz_r, "bound_metabolites"),
+                              getattr(enz_p, "bound_metabolites"))
+            diff = {}
+            for key in list(set(p_dict).union(set(r_dict))):
+                if key in p_dict and key in r_dict:
+                    coeff = abs(p_dict[key] - r_dict[key])
+                elif key in p_dict or key in r_dict:
+                    coeff = [d[key] for d in [r_dict, p_dict]
+                             if key in d].pop()
+                if coeff != 0:
+                    diff[key] = coeff
 
-                if diff:
-                    if list(diff) != list(items["Lig React"]) and \
-                       list(diff) != list(items["Lig Prod"]):
-                        name_str = enz_r._remove_compartment_from_id_str()
-                        name_str += " catalyzation"
-                    else:
-                        name_str = "-".join([
-                            m._remove_compartment_from_id_str()
-                            for m in [enz_r] + list(diff)])
-                        name_str += str(
-                            " binding"
-                            if list(diff) == list(items["Lig React"])
-                            else " release")
-                    name = name_str
+            if diff:
+                if list(diff) != list(items["Lig React"]) and \
+                   list(diff) != list(items["Lig Prod"]):
+                    name_str = enz_r._remove_compartment_from_id_str()
+                    name_str += " catalyzation"
+                else:
+                    name_str = "-".join([
+                        m._remove_compartment_from_id_str()
+                        for m in [enz_r] + list(diff)])
+                    name_str += str(
+                        " binding"
+                        if list(diff) == list(items["Lig React"])
+                        else " release")
+                name = name_str
 
-                if not name:
-                    name = "-".join([enz_form._remove_compartment_from_id_str()
-                                     for enz_form in [enz_r, enz_p]])
-                    name += " transition"
+            if not name:
+                name = "-".join([enz_form._remove_compartment_from_id_str()
+                                 for enz_form in [enz_r, enz_p]])
+                name += " transition"
 
         # Assign the new name to the name attribute
         if update_enzyme:

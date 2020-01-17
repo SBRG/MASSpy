@@ -386,17 +386,17 @@ class EnzymeModule(MassModel):
                                      to_filter="EnzymeModuleReactions")
 
     def make_enzyme_module_form(self, id=None, name="automatic",
-                                categories=None, bound_catalytic=None,
-                                bound_effectors=None, compartment=None):
+                                categories=None, bound_metabolites=None,
+                                compartment=None):
         r"""Create and add an :class:`~.EnzymeModuleForm` to the module.
 
         Notes
         -----
         * Upon creation, the :class:`~.EnzymeModuleForm` is added to the
           :class:`EnzymeModule`.
-        * If :class:`~.MassMetabolite`\ s in the ``bound_catalytic`` or the
-          ``bound_effectors`` arguments do not already exist in the
-          :class:`EnzymeModule`, they will also be added.
+        * If :class:`~.MassMetabolite`\ s in the ``bound_metabolites``
+          argument do not already exist in the :class:`EnzymeModule`,
+          they will also be added.
 
         Parameters
         ----------
@@ -410,14 +410,10 @@ class EnzymeModule(MassModel):
         categories : str or list
             A string representing the category, or a list of strings
             containing several categories for the enzyme module forms.
-        bound_catalytic : dict
-            A ``dict`` representing the ligands bound to the enzyme's active
-            site(s), with :class:`~.MassMetabolite`\ s or their identifiers as
+        bound_metabolites : dict
+            A ``dict`` representing the ligands bound to the enzyme,
+            with :class:`~.MassMetabolite`\ s or their identifiers as
             keys and the number bound as values.
-        bound_effectors : dict
-            A ``dict`` representing the ligands bound to the enzyme's
-            regulatory site(s), with :class:`~.MassMetabolite`\ s or their
-            identifiers as keys and the number bound as values.
         compartment : str
             The compartment where the enzyme module forms is located.
 
@@ -434,23 +430,26 @@ class EnzymeModule(MassModel):
 
         """
         # Ensure metabolites for EnzymeModuleForm exist in the EnzymeModule.
-        for bound_dict in [bound_catalytic, bound_effectors]:
-            if bound_dict is None:
-                bound_dict = {}
-                continue
+        if bound_metabolites is None:
+            bound_metabolites = {}
+        else:
             try:
-                bound_dict = {self.metabolites.get_by_id(str(met)): num
-                              for met, num in iteritems(bound_dict)}
+                bound_metabolites = {
+                    self.metabolites.get_by_id(str(met)): num
+                    for met, num in iteritems(bound_metabolites)}
             except KeyError:
                 # Add the metabolites into the module that don't already exist
-                self.add_metabolites([met for met in iterkeys(bound_dict)
-                                      if met not in self.metabolites])
-                bound_dict = {self.metabolites.get_by_id(str(met)): num
-                              for met, num in iteritems(bound_dict)}
+                self.add_metabolites([
+                    met for met in iterkeys(bound_metabolites)
+                    if met not in self.metabolites])
+                bound_metabolites = {
+                    self.metabolites.get_by_id(str(met)): num
+                    for met, num in iteritems(bound_metabolites)}
+
         # Make EnzymeModuleForm object
         enzyme_module_forms = EnzymeModuleForm(
             id_or_specie=id, name=name, enzyme_module_id=self.id,
-            bound_catalytic=bound_catalytic, bound_effectors=bound_effectors,
+            bound_metabolites=bound_metabolites,
             compartment=compartment)
         # Generate name for the EnzymeModuleForm if name set to "automatic"
         if _AUTOMATIC_RE.match(name.lower()):
