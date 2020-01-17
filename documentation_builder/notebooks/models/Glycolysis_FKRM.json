@@ -118,15 +118,15 @@
             ],
             "enzyme_module_forms_categorized": {
                 "HEX1_Active": [
-                    "hex1_G_c",
                     "hex1_AG_c",
+                    "hex1_G_c",
                     "hex1_A_c",
                     "hex1_c"
                 ],
                 "HEX1_Inhibited": [
+                    "hex1_G_CI_c",
                     "hex1_A_PI_c",
-                    "hex1_G_PI_c",
-                    "hex1_G_CI_c"
+                    "hex1_G_PI_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -145,8 +145,8 @@
                     "_23dpg_c"
                 ],
                 "HEX1_products": [
-                    "h_c",
                     "g6p_c",
+                    "h_c",
                     "adp_c"
                 ],
                 "HEX1_substrates": [
@@ -179,8 +179,8 @@
                     "HEX1_7"
                 ],
                 "HEX1_product_inhibition": [
-                    "HEX1_2",
-                    "HEX1_1"
+                    "HEX1_1",
+                    "HEX1_2"
                 ]
             },
             "enzyme_rate": 1.12,
@@ -216,28 +216,28 @@
             ],
             "enzyme_module_forms_categorized": {
                 "PFK_Active": [
-                    "pfk_R2_AF_c",
-                    "pfk_R0_c",
-                    "pfk_R3_c",
-                    "pfk_R2_c",
-                    "pfk_R0_AF_c",
-                    "pfk_R3_A_c",
+                    "pfk_R4_A_c",
                     "pfk_R1_c",
+                    "pfk_R2_A_c",
+                    "pfk_R0_c",
+                    "pfk_R0_AF_c",
+                    "pfk_R3_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R0_A_c",
                     "pfk_R3_AF_c",
-                    "pfk_R4_c",
                     "pfk_R1_A_c",
                     "pfk_R1_AF_c",
-                    "pfk_R4_A_c",
+                    "pfk_R3_A_c",
                     "pfk_R4_AF_c",
-                    "pfk_R2_A_c",
-                    "pfk_R0_A_c"
+                    "pfk_R4_c",
+                    "pfk_R2_c"
                 ],
                 "PFK_Inhibited": [
-                    "pfk_T1_c",
-                    "pfk_T2_c",
+                    "pfk_T0_c",
                     "pfk_T3_c",
+                    "pfk_T2_c",
                     "pfk_T4_c",
-                    "pfk_T0_c"
+                    "pfk_T1_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -259,9 +259,9 @@
                     "atp_c"
                 ],
                 "PFK_products": [
+                    "adp_c",
                     "fdp_c",
-                    "h_c",
-                    "adp_c"
+                    "h_c"
                 ],
                 "PFK_substrates": [
                     "f6p_c"
@@ -295,37 +295,37 @@
             ],
             "enzyme_module_reactions_categorized": {
                 "PFK_amp_c_activation": [
-                    "PFK_R30",
                     "PFK_R10",
+                    "PFK_R30",
                     "PFK_R40",
                     "PFK_R20"
                 ],
                 "PFK_atp_c_binding": [
-                    "PFK_R31",
-                    "PFK_R01",
-                    "PFK_R11",
                     "PFK_R21",
-                    "PFK_R41"
+                    "PFK_R31",
+                    "PFK_R41",
+                    "PFK_R11",
+                    "PFK_R01"
                 ],
                 "PFK_atp_c_inhibition": [
+                    "PFK_T3",
                     "PFK_T2",
                     "PFK_T1",
-                    "PFK_T3",
                     "PFK_T4"
                 ],
                 "PFK_catalyzation": [
-                    "PFK_R23",
-                    "PFK_R43",
                     "PFK_R33",
+                    "PFK_R43",
                     "PFK_R13",
+                    "PFK_R23",
                     "PFK_R03"
                 ],
                 "PFK_f6p_c_binding": [
                     "PFK_R02",
-                    "PFK_R32",
                     "PFK_R12",
-                    "PFK_R22",
-                    "PFK_R42"
+                    "PFK_R32",
+                    "PFK_R42",
+                    "PFK_R22"
                 ],
                 "PFK_rt_transition": [
                     "PFK_L"
@@ -370,32 +370,32 @@
             "enzyme_module_forms_categorized": {
                 "PYK_Active": [
                     "pyk_R3_AP_c",
-                    "pyk_R1_c",
-                    "pyk_R3_A_c",
-                    "pyk_R4_P_c",
+                    "pyk_R4_c",
                     "pyk_R1_P_c",
-                    "pyk_R4_AP_c",
-                    "pyk_R1_AP_c",
+                    "pyk_R1_A_c",
                     "pyk_R4_A_c",
+                    "pyk_R1_AP_c",
+                    "pyk_R4_P_c",
+                    "pyk_R0_AP_c",
+                    "pyk_R0_c",
+                    "pyk_R2_c",
+                    "pyk_R4_AP_c",
+                    "pyk_R2_P_c",
+                    "pyk_R2_A_c",
                     "pyk_R2_AP_c",
                     "pyk_R0_A_c",
-                    "pyk_R2_P_c",
-                    "pyk_R1_A_c",
-                    "pyk_R2_c",
-                    "pyk_R2_A_c",
-                    "pyk_R4_c",
-                    "pyk_R0_AP_c",
-                    "pyk_R3_P_c",
-                    "pyk_R0_c",
                     "pyk_R3_c",
-                    "pyk_R0_P_c"
+                    "pyk_R0_P_c",
+                    "pyk_R3_A_c",
+                    "pyk_R1_c",
+                    "pyk_R3_P_c"
                 ],
                 "PYK_Inhibited": [
+                    "pyk_T2_c",
                     "pyk_T4_c",
-                    "pyk_T3_c",
-                    "pyk_T1_c",
                     "pyk_T0_c",
-                    "pyk_T2_c"
+                    "pyk_T1_c",
+                    "pyk_T3_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -411,15 +411,15 @@
                     "fdp_c"
                 ],
                 "PYK_cofactors": [
-                    "h_c",
-                    "adp_c"
+                    "adp_c",
+                    "h_c"
                 ],
                 "PYK_inhibitors": [
                     "atp_c"
                 ],
                 "PYK_products": [
-                    "pyr_c",
-                    "atp_c"
+                    "atp_c",
+                    "pyr_c"
                 ],
                 "PYK_substrates": [
                     "pep_c"
@@ -463,47 +463,47 @@
             ],
             "enzyme_module_reactions_categorized": {
                 "PYK_adp_c_binding": [
-                    "PYK_R44",
-                    "PYK_R32",
-                    "PYK_R12",
                     "PYK_R22",
+                    "PYK_R34",
+                    "PYK_R42",
+                    "PYK_R24",
                     "PYK_R14",
                     "PYK_R04",
-                    "PYK_R34",
                     "PYK_R02",
-                    "PYK_R42",
-                    "PYK_R24"
+                    "PYK_R12",
+                    "PYK_R32",
+                    "PYK_R44"
                 ],
                 "PYK_atp_c_inhibition": [
-                    "PYK_T3",
-                    "PYK_T4",
                     "PYK_T2",
-                    "PYK_T1"
+                    "PYK_T3",
+                    "PYK_T1",
+                    "PYK_T4"
                 ],
                 "PYK_catalyzation": [
+                    "PYK_R15",
                     "PYK_R05",
-                    "PYK_R25",
-                    "PYK_R35",
                     "PYK_R45",
-                    "PYK_R15"
+                    "PYK_R25",
+                    "PYK_R35"
                 ],
                 "PYK_fdp_c_activation": [
-                    "PYK_R30",
-                    "PYK_R40",
                     "PYK_R10",
-                    "PYK_R20"
+                    "PYK_R20",
+                    "PYK_R30",
+                    "PYK_R40"
                 ],
                 "PYK_pep_c_binding": [
-                    "PYK_R11",
-                    "PYK_R33",
-                    "PYK_R01",
-                    "PYK_R23",
-                    "PYK_R43",
                     "PYK_R21",
-                    "PYK_R03",
-                    "PYK_R41",
                     "PYK_R31",
-                    "PYK_R13"
+                    "PYK_R33",
+                    "PYK_R23",
+                    "PYK_R41",
+                    "PYK_R11",
+                    "PYK_R43",
+                    "PYK_R13",
+                    "PYK_R03",
+                    "PYK_R01"
                 ],
                 "PYK_rt_transition": [
                     "PYK_L"

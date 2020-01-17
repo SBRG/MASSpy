@@ -81,48 +81,48 @@
             ],
             "enzyme_module_forms_categorized": {
                 "Complexed_ATP": [
-                    "pfk_R1_A_c",
+                    "pfk_R3_A_c",
+                    "pfk_R0_A_c",
                     "pfk_R2_A_c",
                     "pfk_R4_A_c",
-                    "pfk_R0_A_c",
-                    "pfk_R3_A_c"
+                    "pfk_R1_A_c"
                 ],
                 "Complexed_ATP_F6P": [
-                    "pfk_R1_AF_c",
-                    "pfk_R3_AF_c",
-                    "pfk_R4_AF_c",
                     "pfk_R0_AF_c",
-                    "pfk_R2_AF_c"
-                ],
-                "Free_Catalytic": [
-                    "pfk_R2_c",
-                    "pfk_R0_c",
-                    "pfk_R4_c",
-                    "pfk_R1_c",
-                    "pfk_R3_c"
-                ],
-                "Relaxed": [
-                    "pfk_R3_A_c",
+                    "pfk_R4_AF_c",
                     "pfk_R3_AF_c",
                     "pfk_R2_AF_c",
-                    "pfk_R1_AF_c",
-                    "pfk_R1_A_c",
-                    "pfk_R2_c",
-                    "pfk_R0_c",
-                    "pfk_R4_AF_c",
-                    "pfk_R2_A_c",
-                    "pfk_R4_A_c",
-                    "pfk_R0_A_c",
-                    "pfk_R0_AF_c",
+                    "pfk_R1_AF_c"
+                ],
+                "Free_Catalytic": [
+                    "pfk_R3_c",
                     "pfk_R4_c",
+                    "pfk_R0_c",
+                    "pfk_R2_c",
+                    "pfk_R1_c"
+                ],
+                "Relaxed": [
+                    "pfk_R1_A_c",
+                    "pfk_R3_c",
+                    "pfk_R3_A_c",
+                    "pfk_R0_AF_c",
                     "pfk_R1_c",
-                    "pfk_R3_c"
+                    "pfk_R4_AF_c",
+                    "pfk_R4_c",
+                    "pfk_R0_c",
+                    "pfk_R3_AF_c",
+                    "pfk_R0_A_c",
+                    "pfk_R2_A_c",
+                    "pfk_R2_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R4_A_c",
+                    "pfk_R1_AF_c"
                 ],
                 "Tense": [
                     "pfk_T2_c",
+                    "pfk_T1_c",
                     "pfk_T3_c",
                     "pfk_T0_c",
-                    "pfk_T1_c",
                     "pfk_T4_c"
                 ]
             },
@@ -145,9 +145,9 @@
                     "atp_c"
                 ],
                 "Products": [
+                    "h_c",
                     "fdp_c",
-                    "adp_c",
-                    "h_c"
+                    "adp_c"
                 ],
                 "Substrates": [
                     "f6p_c"
@@ -184,37 +184,37 @@
                     "PFK_L"
                 ],
                 "amp_c_activation": [
-                    "PFK_R20",
-                    "PFK_R30",
                     "PFK_R10",
+                    "PFK_R30",
+                    "PFK_R20",
                     "PFK_R40"
                 ],
                 "atp_c_binding": [
-                    "PFK_R11",
                     "PFK_R41",
+                    "PFK_R01",
+                    "PFK_R11",
                     "PFK_R31",
-                    "PFK_R21",
-                    "PFK_R01"
+                    "PFK_R21"
                 ],
                 "atp_c_inhibition": [
                     "PFK_T1",
+                    "PFK_T2",
                     "PFK_T3",
-                    "PFK_T4",
-                    "PFK_T2"
+                    "PFK_T4"
                 ],
                 "catalyzation": [
-                    "PFK_R13",
+                    "PFK_R33",
                     "PFK_R43",
-                    "PFK_R03",
+                    "PFK_R13",
                     "PFK_R23",
-                    "PFK_R33"
+                    "PFK_R03"
                 ],
                 "f6p_c_binding": [
                     "PFK_R22",
-                    "PFK_R12",
                     "PFK_R42",
+                    "PFK_R02",
                     "PFK_R32",
-                    "PFK_R02"
+                    "PFK_R12"
                 ]
             },
             "enzyme_rate": 1.12,
@@ -612,10 +612,7 @@
             "name": "Oxygen"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1
-            },
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 2.286785538671803e-07,
             "charge": -4,
             "compartment": "c",
@@ -625,8 +622,7 @@
             "name": "PFK-atp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 5.97423244535211e-08,
             "charge": 0,
             "compartment": "c",
@@ -636,11 +632,7 @@
             "name": "PFK"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1,
-                "f6p_c": 1
-            },
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 3.792073828466893e-08,
             "charge": -6,
             "compartment": "c",
@@ -650,10 +642,7 @@
             "name": "PFK-atp-f6p complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "amp_c": 1
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 5.065911902883983e-07,
             "charge": -2,
             "compartment": "c",
@@ -663,12 +652,7 @@
             "name": "PFK; 1 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 1
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.9391033384905293e-06,
             "charge": -6,
             "compartment": "c",
@@ -678,13 +662,7 @@
             "name": "PFK-atp complex; 1 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1,
-                "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 1
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 3.2155280397887915e-07,
             "charge": -8,
             "compartment": "c",
@@ -694,10 +672,7 @@
             "name": "PFK-atp-f6p complex; 1 amp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "amp_c": 2
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.6108845556227938e-06,
             "charge": -4,
             "compartment": "c",
@@ -707,12 +682,7 @@
             "name": "PFK; 2 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 2
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 6.166059891315408e-06,
             "charge": -8,
             "compartment": "c",
@@ -722,13 +692,7 @@
             "name": "PFK-atp complex; 2 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1,
-                "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 2
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.0224900386678658e-06,
             "charge": -10,
             "compartment": "c",
@@ -738,10 +702,7 @@
             "name": "PFK-atp-f6p complex; 2 amp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "amp_c": 3
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 2.276610236586571e-06,
             "charge": -6,
             "compartment": "c",
@@ -751,12 +712,7 @@
             "name": "PFK; 3 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 3
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 8.714289934046501e-06,
             "charge": -10,
             "compartment": "c",
@@ -766,13 +722,7 @@
             "name": "PFK-atp complex; 3 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1,
-                "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 3
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.4450515902668845e-06,
             "charge": -12,
             "compartment": "c",
@@ -782,10 +732,7 @@
             "name": "PFK-atp-f6p complex; 3 amp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "amp_c": 4
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.2065469289620354e-06,
             "charge": -8,
             "compartment": "c",
@@ -795,12 +742,7 @@
             "name": "PFK; 4 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 4
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 4.618357410960754e-06,
             "charge": -12,
             "compartment": "c",
@@ -810,13 +752,7 @@
             "name": "PFK-atp complex; 4 amp_c"
         },
         {
-            "_bound_catalytic": {
-                "atp_c": 1,
-                "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 4
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 7.658414823972581e-07,
             "charge": -14,
             "compartment": "c",
@@ -826,8 +762,7 @@
             "name": "PFK-atp-f6p complex; 4 amp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 6.571655689887322e-11,
             "charge": 0,
             "compartment": "c",
@@ -837,10 +772,7 @@
             "name": "PFK"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "atp_c": 1
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 3.2434082874960177e-09,
             "charge": -4,
             "compartment": "c",
@@ -850,10 +782,7 @@
             "name": "PFK; 1 atp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "atp_c": 2
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 6.002880675633619e-08,
             "charge": -8,
             "compartment": "c",
@@ -863,10 +792,7 @@
             "name": "PFK; 2 atp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "atp_c": 3
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 4.937820302566195e-07,
             "charge": -12,
             "compartment": "c",
@@ -876,10 +802,7 @@
             "name": "PFK; 3 atp_c"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
-                "atp_c": 4
-            },
+            "_bound_metabolites": {},
             "_initial_condition": 1.5231480511976172e-06,
             "charge": -16,
             "compartment": "c",

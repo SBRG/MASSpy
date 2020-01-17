@@ -12,4 +12,3 @@ cd $doc_builder_dir
 
 make clean
 make html
-make latex

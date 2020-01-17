@@ -92,33 +92,33 @@
             ],
             "enzyme_module_forms_categorized": {
                 "PYK_Active": [
-                    "pyk_R0_AP_c",
-                    "pyk_R4_A_c",
-                    "pyk_R1_c",
-                    "pyk_R3_A_c",
-                    "pyk_R0_c",
-                    "pyk_R0_P_c",
-                    "pyk_R3_c",
                     "pyk_R2_AP_c",
-                    "pyk_R3_AP_c",
-                    "pyk_R1_A_c",
-                    "pyk_R0_A_c",
-                    "pyk_R3_P_c",
-                    "pyk_R1_AP_c",
-                    "pyk_R2_c",
-                    "pyk_R4_P_c",
-                    "pyk_R4_c",
-                    "pyk_R1_P_c",
                     "pyk_R2_A_c",
+                    "pyk_R2_c",
+                    "pyk_R0_AP_c",
+                    "pyk_R1_AP_c",
+                    "pyk_R1_A_c",
+                    "pyk_R3_P_c",
+                    "pyk_R3_AP_c",
+                    "pyk_R0_c",
+                    "pyk_R4_c",
+                    "pyk_R0_P_c",
+                    "pyk_R4_A_c",
+                    "pyk_R3_c",
+                    "pyk_R0_A_c",
+                    "pyk_R1_P_c",
                     "pyk_R2_P_c",
-                    "pyk_R4_AP_c"
+                    "pyk_R3_A_c",
+                    "pyk_R4_P_c",
+                    "pyk_R4_AP_c",
+                    "pyk_R1_c"
                 ],
                 "PYK_Inhibited": [
                     "pyk_T3_c",
-                    "pyk_T0_c",
                     "pyk_T4_c",
-                    "pyk_T2_c",
-                    "pyk_T1_c"
+                    "pyk_T0_c",
+                    "pyk_T1_c",
+                    "pyk_T2_c"
                 ]
             },
             "enzyme_module_ligands": [
@@ -141,8 +141,8 @@
                     "atp_c"
                 ],
                 "PYK_products": [
-                    "pyr_c",
-                    "atp_c"
+                    "atp_c",
+                    "pyr_c"
                 ],
                 "PYK_substrates": [
                     "pep_c"
@@ -186,47 +186,47 @@
             ],
             "enzyme_module_reactions_categorized": {
                 "PYK_adp_c_binding": [
-                    "PYK_R22",
-                    "PYK_R24",
-                    "PYK_R32",
-                    "PYK_R04",
-                    "PYK_R44",
-                    "PYK_R14",
                     "PYK_R12",
-                    "PYK_R34",
+                    "PYK_R14",
+                    "PYK_R22",
+                    "PYK_R04",
                     "PYK_R42",
-                    "PYK_R02"
+                    "PYK_R34",
+                    "PYK_R02",
+                    "PYK_R32",
+                    "PYK_R44",
+                    "PYK_R24"
                 ],
                 "PYK_atp_c_inhibition": [
-                    "PYK_T2",
                     "PYK_T1",
-                    "PYK_T3",
-                    "PYK_T4"
+                    "PYK_T4",
+                    "PYK_T2",
+                    "PYK_T3"
                 ],
                 "PYK_catalyzation": [
-                    "PYK_R45",
-                    "PYK_R35",
                     "PYK_R25",
+                    "PYK_R15",
                     "PYK_R05",
-                    "PYK_R15"
+                    "PYK_R35",
+                    "PYK_R45"
                 ],
                 "PYK_fdp_c_activation": [
-                    "PYK_R20",
-                    "PYK_R40",
                     "PYK_R30",
+                    "PYK_R40",
+                    "PYK_R20",
                     "PYK_R10"
                 ],
                 "PYK_pep_c_binding": [
-                    "PYK_R11",
-                    "PYK_R01",
-                    "PYK_R13",
                     "PYK_R33",
-                    "PYK_R43",
+                    "PYK_R13",
                     "PYK_R21",
-                    "PYK_R41",
+                    "PYK_R43",
                     "PYK_R03",
+                    "PYK_R41",
+                    "PYK_R01",
                     "PYK_R31",
-                    "PYK_R23"
+                    "PYK_R23",
+                    "PYK_R11"
                 ],
                 "PYK_rt_transition": [
                     "PYK_L"

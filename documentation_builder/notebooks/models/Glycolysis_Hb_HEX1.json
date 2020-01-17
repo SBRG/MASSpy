@@ -43,8 +43,8 @@
             "enzyme_module_forms_categorized": {
                 "HEX1_Active": [
                     "hex1_AG_c",
-                    "hex1_c",
                     "hex1_G_c",
+                    "hex1_c",
                     "hex1_A_c"
                 ],
                 "HEX1_Inhibited": [
@@ -69,9 +69,9 @@
                     "_23dpg_c"
                 ],
                 "HEX1_products": [
-                    "h_c",
                     "g6p_c",
-                    "adp_c"
+                    "adp_c",
+                    "h_c"
                 ],
                 "HEX1_substrates": [
                     "glc__D_c"
@@ -99,8 +99,8 @@
                     "HEX1_5"
                 ],
                 "HEX1_glc__D_c_binding": [
-                    "HEX1_3",
-                    "HEX1_7"
+                    "HEX1_7",
+                    "HEX1_3"
                 ],
                 "HEX1_product_inhibition": [
                     "HEX1_2",

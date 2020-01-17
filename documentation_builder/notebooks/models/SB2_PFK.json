@@ -2,49 +2,49 @@
     "_enzyme_concentration_total": 3.3e-05,
     "_enzyme_module_forms_categorized": {
         "Complexed_ATP": [
-            "pfk_R3_A_c",
-            "pfk_R2_A_c",
-            "pfk_R4_A_c",
             "pfk_R1_A_c",
-            "pfk_R0_A_c"
+            "pfk_R2_A_c",
+            "pfk_R0_A_c",
+            "pfk_R4_A_c",
+            "pfk_R3_A_c"
         ],
         "Complexed_ATP_F6P": [
-            "pfk_R1_AF_c",
-            "pfk_R4_AF_c",
             "pfk_R2_AF_c",
+            "pfk_R1_AF_c",
             "pfk_R3_AF_c",
-            "pfk_R0_AF_c"
+            "pfk_R0_AF_c",
+            "pfk_R4_AF_c"
         ],
         "Free_Catalytic": [
             "pfk_R3_c",
             "pfk_R1_c",
-            "pfk_R4_c",
             "pfk_R0_c",
+            "pfk_R4_c",
             "pfk_R2_c"
         ],
         "Relaxed": [
+            "pfk_R1_A_c",
+            "pfk_R2_AF_c",
+            "pfk_R1_c",
             "pfk_R1_AF_c",
             "pfk_R3_c",
-            "pfk_R3_A_c",
-            "pfk_R1_c",
-            "pfk_R4_AF_c",
             "pfk_R2_A_c",
-            "pfk_R2_c",
-            "pfk_R2_AF_c",
-            "pfk_R4_c",
-            "pfk_R4_A_c",
-            "pfk_R1_A_c",
-            "pfk_R0_A_c",
+            "pfk_R0_AF_c",
             "pfk_R0_c",
             "pfk_R3_AF_c",
-            "pfk_R0_AF_c"
+            "pfk_R4_c",
+            "pfk_R0_A_c",
+            "pfk_R3_A_c",
+            "pfk_R4_A_c",
+            "pfk_R4_AF_c",
+            "pfk_R2_c"
         ],
         "Tense": [
-            "pfk_T4_c",
+            "pfk_T3_c",
             "pfk_T1_c",
-            "pfk_T0_c",
             "pfk_T2_c",
-            "pfk_T3_c"
+            "pfk_T4_c",
+            "pfk_T0_c"
         ]
     },
     "_enzyme_module_ligands_categorized": {
@@ -58,9 +58,9 @@
             "atp_c"
         ],
         "Products": [
-            "adp_c",
+            "h_c",
             "fdp_c",
-            "h_c"
+            "adp_c"
         ],
         "Substrates": [
             "f6p_c"
@@ -71,37 +71,37 @@
             "PFK_L"
         ],
         "amp_c_activation": [
-            "PFK_R10",
             "PFK_R30",
             "PFK_R40",
-            "PFK_R20"
+            "PFK_R20",
+            "PFK_R10"
         ],
         "atp_c_binding": [
             "PFK_R11",
-            "PFK_R31",
             "PFK_R41",
             "PFK_R01",
-            "PFK_R21"
+            "PFK_R21",
+            "PFK_R31"
         ],
         "atp_c_inhibition": [
+            "PFK_T1",
             "PFK_T3",
             "PFK_T2",
-            "PFK_T1",
             "PFK_T4"
         ],
         "catalyzation": [
-            "PFK_R33",
-            "PFK_R03",
-            "PFK_R23",
+            "PFK_R43",
             "PFK_R13",
-            "PFK_R43"
+            "PFK_R33",
+            "PFK_R23",
+            "PFK_R03"
         ],
         "f6p_c_binding": [
-            "PFK_R02",
-            "PFK_R42",
-            "PFK_R22",
             "PFK_R32",
-            "PFK_R12"
+            "PFK_R22",
+            "PFK_R12",
+            "PFK_R42",
+            "PFK_R02"
         ]
     },
     "_enzyme_rate": 1.12,
@@ -256,8 +256,7 @@
             "name": "H+"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 3.705684451779081e-08,
             "charge": 0,
             "compartment": "c",
@@ -267,10 +266,9 @@
             "name": "PFK"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
                 "atp_c": 1
             },
-            "_bound_effectors": {},
             "_initial_condition": 1.1270977736701491e-07,
             "charge": -4,
             "compartment": "c",
@@ -280,11 +278,10 @@
             "name": "PFK-atp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
                 "atp_c": 1,
                 "f6p_c": 1
             },
-            "_bound_effectors": {},
             "_initial_condition": 2.1036774576199985e-08,
             "charge": -6,
             "compartment": "c",
@@ -294,8 +291,7 @@
             "name": "PFK-atp-f6p complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "amp_c": 1
             },
             "_initial_condition": 3.895599656998077e-07,
@@ -304,14 +300,12 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C10H12N5O7P1",
             "id": "pfk_R1_c",
-            "name": "PFK; 1 amp_c"
+            "name": "PFK-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 1,
                 "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 1
             },
             "_initial_condition": 1.1848611930259641e-06,
             "charge": -6,
@@ -319,15 +313,13 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C20H24N10O20P4",
             "id": "pfk_R1_A_c",
-            "name": "PFK-atp complex; 1 amp_c"
+            "name": "PFK-atp-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 1,
                 "atp_c": 1,
                 "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 1
             },
             "_initial_condition": 2.2114902898450058e-07,
             "charge": -8,
@@ -335,11 +327,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C26H35N10O29P5",
             "id": "pfk_R1_AF_c",
-            "name": "PFK-atp-f6p complex; 1 amp_c"
+            "name": "PFK-atp-f6p-amp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "amp_c": 2
             },
             "_initial_condition": 1.5357179846004314e-06,
@@ -348,14 +339,12 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C20H24N10O14P2",
             "id": "pfk_R2_c",
-            "name": "PFK; 2 amp_c"
+            "name": "PFK-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 2,
                 "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 2
             },
             "_initial_condition": 4.670943637948869e-06,
             "charge": -8,
@@ -363,15 +352,13 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C30H36N15O27P5",
             "id": "pfk_R2_A_c",
-            "name": "PFK-atp complex; 2 amp_c"
+            "name": "PFK-atp-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 2,
                 "atp_c": 1,
                 "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 2
             },
             "_initial_condition": 8.71810686394121e-07,
             "charge": -10,
@@ -379,11 +366,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C36H47N15O36P6",
             "id": "pfk_R2_AF_c",
-            "name": "PFK-atp-f6p complex; 2 amp_c"
+            "name": "PFK-atp-f6p-amp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "amp_c": 3
             },
             "_initial_condition": 2.690705109903528e-06,
@@ -392,14 +378,12 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C30H36N15O21P3",
             "id": "pfk_R3_c",
-            "name": "PFK; 3 amp_c"
+            "name": "PFK-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 3,
                 "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 3
             },
             "_initial_condition": 8.183880139927137e-06,
             "charge": -10,
@@ -407,15 +391,13 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C40H48N20O34P6",
             "id": "pfk_R3_A_c",
-            "name": "PFK-atp complex; 3 amp_c"
+            "name": "PFK-atp-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 3,
                 "atp_c": 1,
                 "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 3
             },
             "_initial_condition": 1.5274845331446054e-06,
             "charge": -12,
@@ -423,11 +405,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C46H59N20O43P7",
             "id": "pfk_R3_AF_c",
-            "name": "PFK-atp-f6p complex; 3 amp_c"
+            "name": "PFK-atp-f6p-amp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "amp_c": 4
             },
             "_initial_condition": 1.7678768321380616e-06,
@@ -436,14 +417,12 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C40H48N20O28P4",
             "id": "pfk_R4_c",
-            "name": "PFK; 4 amp_c"
+            "name": "PFK-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 4,
                 "atp_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 4
             },
             "_initial_condition": 5.377063448209202e-06,
             "charge": -12,
@@ -451,15 +430,13 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C50H60N25O41P7",
             "id": "pfk_R4_A_c",
-            "name": "PFK-atp complex; 4 amp_c"
+            "name": "PFK-atp-amp complex"
         },
         {
-            "_bound_catalytic": {
+            "_bound_metabolites": {
+                "amp_c": 4,
                 "atp_c": 1,
                 "f6p_c": 1
-            },
-            "_bound_effectors": {
-                "amp_c": 4
             },
             "_initial_condition": 1.0036047828713532e-06,
             "charge": -14,
@@ -467,11 +444,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C56H71N25O50P8",
             "id": "pfk_R4_AF_c",
-            "name": "PFK-atp-f6p complex; 4 amp_c"
+            "name": "PFK-atp-f6p-amp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {},
+            "_bound_metabolites": {},
             "_initial_condition": 4.0762528969569896e-11,
             "charge": 0,
             "compartment": "c",
@@ -481,8 +457,7 @@
             "name": "PFK"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "atp_c": 1
             },
             "_initial_condition": 2.6088018540524733e-09,
@@ -491,11 +466,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C10H12N5O13P3",
             "id": "pfk_T1_c",
-            "name": "PFK; 1 atp_c"
+            "name": "PFK-atp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "atp_c": 2
             },
             "_initial_condition": 6.261124449725935e-08,
@@ -504,11 +478,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C20H24N10O26P6",
             "id": "pfk_T2_c",
-            "name": "PFK; 2 atp_c"
+            "name": "PFK-atp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "atp_c": 3
             },
             "_initial_condition": 6.678532746374332e-07,
@@ -517,11 +490,10 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C30H36N15O39P9",
             "id": "pfk_T3_c",
-            "name": "PFK; 3 atp_c"
+            "name": "PFK-atp complex"
         },
         {
-            "_bound_catalytic": {},
-            "_bound_effectors": {
+            "_bound_metabolites": {
                 "atp_c": 4
             },
             "_initial_condition": 2.6714130985497327e-06,
@@ -530,7 +502,7 @@
             "enzyme_module_id": "PFK",
             "formula": "[PFK]-C40H48N20O52P12",
             "id": "pfk_T4_c",
-            "name": "PFK; 4 atp_c"
+            "name": "PFK-atp complex"
         }
     ],
     "name": "Phosphofructokinase",
