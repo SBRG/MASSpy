@@ -148,6 +148,6 @@ intersphinx_mapping = {
     "http://docs.scipy.org/doc/numpy/": None,
     "https://pandas.pydata.org/pandas-docs/stable/": None,
     "http://docs.scipy.org/doc/scipy/reference": None,
-    "https://docs.sympy.org/1.5.1/": None,
+    "https://docs.sympy.org/latest": None,
     }
 intersphinx_cache_limit = 10  # days to keep the cached inventories
