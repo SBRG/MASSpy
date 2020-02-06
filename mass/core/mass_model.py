@@ -468,13 +468,6 @@ class MassModel(Model):
             elif isinstance(bound_cond, (sym.Basic, string_types)):
                 if isinstance(bound_cond, string_types):
                     bound_cond = sym.sympify(bound_cond)
-                for arg in list(bound_cond.atoms(sym.Function)):
-                    if arg.atoms(sym.Symbol) != {sym.Symbol("t")}:
-                        raise ValueError(
-                            "Function '{0}' for '{1}' has independent "
-                            "variables {2}, expecting only {{t}}".format(
-                                str(bound_cond), bound_met,
-                                str(arg.atoms(sym.Symbol))))
                 boundary_conditions_to_set[bound_met] = bound_cond
             # Boundary condition is an integer or float
             elif isinstance(bound_cond, (integer_types, float)):

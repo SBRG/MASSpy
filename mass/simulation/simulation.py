@@ -911,15 +911,8 @@ class Simulation(Object):
                 except (ValueError, TypeError):
                     # Value could not be interpreted as a float, therefore
                     # ensure it is valid as a sympy expression
-                    if key in self.reference_model.boundary_metabolites:
-                        value = sympify(value, locals={key: Symbol(key)})
-                        if any([arg.atoms(Symbol) != {Symbol("t")}
-                                for arg in list(value.atoms(Function))]):
-                            raise ValueError(
-                                "Function '{0}' for '{1}' has independent "
-                                "variables other than 't' for time".format(
-                                    value, key))
-                    elif key in str(value):
+                    if key in self.reference_model.boundary_metabolites \
+                       or key in str(value):
                         value = sympify(value, locals={key: Symbol(key)})
                     else:
                         raise ValueError(

@@ -31,7 +31,7 @@ import pandas as pd
 
 from scipy.interpolate import interp1d
 
-from six import iteritems, iterkeys, string_types
+from six import iteritems, iterkeys, itervalues, string_types
 
 from sympy import Symbol, lambdify, sympify
 
@@ -220,7 +220,7 @@ class MassSolution(DictWithID):
                     value, MASSCONFIGURATION.decimal_precision)
         setattr(self, "_initial_values", new_values)
 
-    def view_time_profile(self, deviation=False):
+    def view_time_profile(self, deviation=False, plot_function="loglog"):
         """Generate a quick view of the time profile for the solution.
 
         See :mod:`~mass.visualization` documentation for more information.
@@ -230,6 +230,17 @@ class MassSolution(DictWithID):
         deviation : bool
             Whether to plot time profiles as a deviation from their
             initial value.
+        plot_function : str
+            The plotting function to use. Accepted values are the following:
+
+              * ``"plot"`` for a linear x-axis and a linear y-axis
+                via :meth:`Axes.plot() <matplotlib.axes.Axes.plot>`
+              * ``"loglog"`` for a logarithmic x-axis and a logarithmic y-axis
+                via :meth:`Axes.loglog() <matplotlib.axes.Axes.loglog>`
+              * ``"semilogx``" for a logarithmic x-axis and a linear y-axis
+                via :meth:`Axes.semilogx() <matplotlib.axes.Axes.semilogx>`
+              * ``"semilogy"`` for a linear x-axis and a logarithmic y-axis
+                via :meth:`Axes.semilogy() <matplotlib.axes.Axes.semilogy>`
 
         Notes
         -----
@@ -247,7 +258,7 @@ class MassSolution(DictWithID):
 
         # Set plot options
         options = {
-            "plot_function": "loglog",
+            "plot_function": plot_function,
             "grid": ("major", "x"),
             "title": "Time Profile for {0}{1}".format(self.id, solution_type),
             "xlabel": "Time",
@@ -297,8 +308,14 @@ class MassSolution(DictWithID):
         sols = dict((k, v(self.time)) if self.interpolate
                     else (k, v) for k, v in iteritems(self))
         # Make dataframe and set time as index
-        df = pd.DataFrame.from_dict(sols)
-        df.index = pd.Series(self.time, name="Time")
+        try:
+            df = pd.DataFrame.from_dict(sols)
+        except ValueError:
+            df = pd.DataFrame(itervalues(sols), index=iterkeys(sols))
+            df.index.name = "ID"
+        else:
+            df.index = pd.Series(self.time, name="Time")
+
         return df
 
     def make_aggregate_solution(self, aggregate_id, equation, variables=None,

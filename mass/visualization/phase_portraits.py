@@ -160,7 +160,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         lines_and_labels = v_util._get_handles_and_labels(ax, False)
         legend = ax.legend(*lines_and_labels, **legend_kwargs)
 
-    if kwargs.get("annotate_time_points", None):
+    if kwargs.get("annotate_time_points", None) is not None:
         ax = v_util._set_annotated_time_points(
             ax, observable=xy, type_of_plot="phase_portrait",
             first_legend=(legend, legend_kwargs), time_range=xy.time,

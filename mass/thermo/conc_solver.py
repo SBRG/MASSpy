@@ -63,7 +63,7 @@ import pandas as pd
 
 from scipy.sparse import dok_matrix, lil_matrix
 
-from six import iteritems, itervalues, string_types
+from six import iteritems, string_types
 
 from sympy import Basic, Matrix, eye
 
@@ -128,10 +128,8 @@ class ConcSolver:
         they are specified in the :class:`ConcSolver.equilibrium_reactions`
     constraint_buffer : float or None
         A ``float`` value to use as a constraint buffer for all constraints.
-        How the buffer value is applied is depends on the
-        :attr:`ConcSolver.buffer_type` attribute.
 
-        Default is ``None`` to utilize the solver's tolerance value.
+        Default is `0.`.
     **kwargs
         exclude_infinite_Keqs :
             ``bool`` indicating whether to exclude reactions with equilibrium
@@ -235,7 +233,6 @@ class ConcSolver:
                 warn("Could not set `{0}` due to the following: {1}".format(
                     key, str(e)))
 
-        # Ensure model has Keq parameters and initial conditions defined
         # Ensure model has Keq parameters and initial conditions defined
         missing = self._check_for_missing_values(model)
         for key, missing_values in iteritems(missing):
@@ -640,10 +637,6 @@ class ConcSolver:
         * This involves changing solver variable bounds to ``[0, inf]``,
           setting the objective as a QP problem, and setting the
           :attr:`~ConcSolver.problem_type` to ``"feasible_qp"``.
-        * If a percent deviation value is large enough to create a negative
-          lower bound, it is set as the
-          :attr:`~.ConcSolver.zero_value_log_substitute` value to ensure
-          that returned values are not negative.
         * The :attr:`ConcSolver.solver` must have QP capabilities.
 
         Parameters
@@ -690,12 +683,6 @@ class ConcSolver:
                 "`ConcSolver.choose_solver` method to set a QP "
                 "capable solver.")
 
-        missing = self._check_for_missing_values(self.model)
-        if any(list(itervalues(missing))):
-            raise ValueError(
-                "Cannot populate solver due to the following missing values : "
-                "{0!r}".format(missing))
-
         kwargs = _check_kwargs({
             "fixed_conc_bounds": [],
             "fixed_Keq_bounds": [],
@@ -718,11 +705,16 @@ class ConcSolver:
             if var.name in metabolites:
                 # Set bounds if metabolite
                 met = metabolites.get_by_id(var.name)
+                if met.initial_condition is None:
+                    LOGGER.info("No initial conditions defined for '%s', will "
+                                "not be included in QP objective", met.id)
+                    continue
                 if any([m in fixed_conc_bounds for m in [met, met.id]]):
                     bounds = (met.initial_condition, met.initial_condition)
                 else:
                     bounds = (0, np.inf)
                 x_data.append(met.initial_condition)
+                x_vars.append(var)
             elif var.name in Keq_strs:
                 # Set bounds if reaction Keq variable
                 rxn = reactions[Keq_strs.index(var.name)]
@@ -731,6 +723,7 @@ class ConcSolver:
                 else:
                     bounds = (0, np.inf)
                 x_data.append(rxn.equilibrium_constant)
+                x_vars.append(var)
             else:
                 continue
             # Get log values of bounds and set
@@ -738,7 +731,6 @@ class ConcSolver:
                                      kwargs.get("decimal_precision"),
                                      self.zero_value_log_substitute)
             var.lb, var.ub = bounds
-            x_vars.append(var)
 
         # Set objective for feasible qp problem
         x_vars = Matrix(x_vars)

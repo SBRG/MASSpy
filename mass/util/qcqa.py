@@ -707,7 +707,8 @@ def _check_custom_for_standard(model, reaction):
 
     """
     customs = {}
-    if reaction in model.custom_rates:
+    if reaction in model.custom_rates and \
+       model.custom_rates[reaction] is not None:
         symbols = list(model.custom_rates[reaction].atoms(sym.Symbol))
         symbols = sorted([str(s) for s in symbols
                           if str(s) in [reaction.Keq_str, reaction.kf_str,

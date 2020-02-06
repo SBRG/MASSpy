@@ -304,7 +304,7 @@ class EnzymeModuleForm(MassMetabolite):
         """
         if self.model is not None:
             try:
-                self.bound_metabolites = {
+                self._bound_metabolites = {
                     self.model.metabolites.get_by_id(str(met)): num
                     for met, num in iteritems(self.bound_metabolites)}
             except KeyError as e:

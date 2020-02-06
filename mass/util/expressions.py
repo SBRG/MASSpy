@@ -185,12 +185,12 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
 
     """
     if not reaction.metabolites:
-        warn("No metabolites exist in reaction.")
+        warn("No metabolites exist in reaction '{0}'.".format(reaction.id))
         return None
 
     # Generate forward rate expression
     fwd_rate = generate_forward_mass_action_rate_expression(reaction,
-                                                           rate_type)
+                                                            rate_type)
 
     # Ignore reverse rate if it is mathematically equal to 0, or if
     # the equilibrium and rate constants are None and reaction is irreversible
@@ -241,7 +241,7 @@ def generate_forward_mass_action_rate_expression(reaction, rate_type=1):
 
     """
     if not reaction.metabolites:
-        warn("No metabolites exist in reaction.")
+        warn("No metabolites exist in reaction '{0}'.".format(reaction.id))
         return None
 
     if MASSCONFIGURATION.exclude_metabolites_from_rates\
@@ -295,7 +295,7 @@ def generate_reverse_mass_action_rate_expression(reaction, rate_type=1):
 
     """
     if not reaction.metabolites:
-        warn("No metabolites exist in reaction.")
+        warn("No metabolites exist in reaction '{0}'.".format(reaction.id))
         return None
 
     if MASSCONFIGURATION.exclude_metabolites_from_rates\
@@ -412,8 +412,8 @@ def create_custom_rate(reaction, custom_rate, custom_parameters=None):
     """
     # Check inputs
     if not reaction._metabolites:
-        warn("No metabolites associated with this reaction")
-        return None
+        warn("No metabolites exist in reaction '{0}'.".format(reaction.id))
+
     model = reaction.model
 
     if not isinstance(custom_rate, string_types):

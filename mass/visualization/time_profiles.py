@@ -153,7 +153,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         legend = ax.legend(*lines_and_labels, **legend_kwargs)
 
     # Annotate time points if desired
-    if kwargs.get("annotate_time_points", None):
+    if kwargs.get("annotate_time_points", None) is not None:
         ax = v_util._set_annotated_time_points(
             ax, observable=observable, type_of_plot="time_profile",
             first_legend=(legend, legend_kwargs), time_range=observable.time,

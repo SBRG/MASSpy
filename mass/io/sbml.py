@@ -335,7 +335,7 @@ def _f_moiety_formula_rev(metabolite):
             replacement = SBML_MOIETY_RE.pattern
             replacement += moiety.lstrip("[").rstrip("]").lower()
             if not re.match('^[A-Z]+[a-z]+$', replacement):
-                LOGGER.warning(
+                LOGGER.info(
                     "SBML user defined compounds must be in the form of a "
                     "single capital letter followed by zero or more lowercase "
                     "letters. Therefore removing all non-lowercase letters "
@@ -346,6 +346,8 @@ def _f_moiety_formula_rev(metabolite):
             sbml_formula += replacement
         # Replace any dashes
         sbml_formula = sbml_formula.replace("-", "")
+        # Replace any underscores
+        sbml_formula = sbml_formula.replace("_", "")
 
     return sbml_formula
 

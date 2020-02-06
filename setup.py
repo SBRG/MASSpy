@@ -36,7 +36,7 @@ if __name__ == "__main__":
         install_requires=[
             "cobra>=0.15.0",
             "depinfo",
-            "libroadrunner>=1.5",
+            "libroadrunner>=1.6",
             "numpy>=1.13.0",
             "pandas>=0.17.0",
             "optlang>=1.4.2",
