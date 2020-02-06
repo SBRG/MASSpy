@@ -94,7 +94,7 @@ import roadrunner
 
 from six import iteritems
 
-from sympy import Basic, Function, Symbol, sympify
+from sympy import Basic, Symbol, sympify
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_model import MassModel
