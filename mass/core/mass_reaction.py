@@ -67,7 +67,7 @@ from six import iteritems, itervalues, string_types
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, 
+    generate_disequilibrium_ratio,
     generate_forward_mass_action_rate_expression,
     generate_mass_action_rate_expression, generate_mass_action_ratio,
     generate_reverse_mass_action_rate_expression)
@@ -1110,7 +1110,8 @@ class MassReaction(Reaction):
                 "now has `reversible=True` due to the inferred reaction arrow "
                 "in `reaction_str`.".format(self.id))
 
-        if reverse_arrow_finder.search(reaction_str):
+        if reverse_arrow_finder.search(reaction_str) and not \
+           reversible_arrow_finder.search(reaction_str):
             # Reverse the stoichiometry of the reaction
             self.reverse_stoichiometry(inplace=True, reverse_bounds=True)
 
