@@ -139,7 +139,8 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
 
     # Plot lines onto axes using legend entries as labels (if legend valid).
     for label, sol in iteritems(observable):
-        plot_function(observable.time, sol, label=label)
+        plot_function(observable.time, sol, label=label,
+                      zorder=kwargs.get("zorder"))
 
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
@@ -426,6 +427,7 @@ def get_time_profile_default_kwargs(function_name):
         "deviation": False,
         "deviation_zero_centered": False,
         "deviation_normalization": "initial value",
+        "zorder": None,
     }
 
     if function_name == "plot_ensemble_time_profile":
