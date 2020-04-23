@@ -67,7 +67,7 @@ from six import iteritems, itervalues, string_types
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
 from mass.util.expressions import (
-    generate_disequilibrium_ratio, 
+    generate_disequilibrium_ratio,
     generate_forward_mass_action_rate_expression,
     generate_mass_action_rate_expression, generate_mass_action_ratio,
     generate_reverse_mass_action_rate_expression)
@@ -624,7 +624,7 @@ class MassReaction(Reaction):
         self.steady_state_flux = value
 
     def reverse_stoichiometry(self, inplace=False, reverse_parameters=False,
-                              reverse_bounds=True):
+                              reverse_bounds=True, reverse_flux=True):
         """Reverse the stoichiometry of the reaction.
 
         Reversing the stoichiometry will turn the products into the reactants
@@ -634,8 +634,10 @@ class MassReaction(Reaction):
         -----
         To avoid errors when reversing the reaction equilibrium constant:
 
-            * If ``self.Keq=0.`` then ``new_reaction.Keq=float("inf")``
-            * If ``self.Keq=float("inf")`` then ``new_reaction.Keq=0.``
+            * If ``self.equilibrium_constant=0.`` then
+              ``new_reaction.equilibrium_constant=float("inf")``
+            * If ``self.equilibrium_constant=float("inf")`` then
+              ``new_reaction.equilibrium_constant=0.``
 
         Parameters
         ----------
@@ -646,9 +648,9 @@ class MassReaction(Reaction):
             If ``True`` then also switch the reaction rate constants and
             inverse the equilibrium constants such that::
 
-                new_reaction.kf = self.kr
-                new_reaction.kr = self.kf
-                new_reaction.Keq = 1/self.Keq
+                new_reaction.forward_rate_constant = self.reverse_rate_constant
+                new_reaction.reverse_rate_constant = self.forward_rate_constant
+                new_reaction.equilibrium_constant = 1/self.equilibrium_constant
 
             Default is ``False``.
         reverse_bounds : bool
@@ -656,6 +658,12 @@ class MassReaction(Reaction):
             another such that::
 
                 new_reaction.bounds = (-self.upper_bound, -self.lower_bound)
+
+            Default is ``True``.
+        reverse_flux: bool
+             If ``True`` then also switch the direction of the flux such that::
+
+                new_reaction.steady_state_flux = -self.steady_state_flux
 
             Default is ``True``.
 
@@ -686,8 +694,16 @@ class MassReaction(Reaction):
                 Keq = 1 / Keq
             new_reaction.Keq = round(Keq, MASSCONFIGURATION.decimal_precision)
 
-        if reverse_bounds:
-            new_reaction.bounds = (-self.upper_bound, -self.lower_bound)
+        if reverse_bounds and self.bounds != (None, None):
+            if self.lower_bound is None:
+                new_reaction.bounds = (-self.upper_bound, None)
+            elif self.upper_bound is None:
+                new_reaction.bounds = (None, -self.lower_bound)
+            else:
+                new_reaction.bounds = (-self.upper_bound, -self.lower_bound)
+
+        if reverse_flux and self.steady_state_flux is not None:
+            new_reaction.steady_state_flux = -self.steady_state_flux
 
         new_reaction.get_mass_action_rate(update_reaction=True)
 
@@ -1110,7 +1126,8 @@ class MassReaction(Reaction):
                 "now has `reversible=True` due to the inferred reaction arrow "
                 "in `reaction_str`.".format(self.id))
 
-        if reverse_arrow_finder.search(reaction_str):
+        if reverse_arrow_finder.search(reaction_str) and not \
+           reversible_arrow_finder.search(reaction_str):
             # Reverse the stoichiometry of the reaction
             self.reverse_stoichiometry(inplace=True, reverse_bounds=True)
 

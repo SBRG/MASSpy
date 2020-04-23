@@ -15,6 +15,8 @@ simulation of models.
 """
 from warnings import warn
 
+import numpy as np
+
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.util import _check_kwargs
@@ -147,7 +149,7 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
     # Plot lines onto axes using legend entries as labels (if legend valid).
     for label, sols in iteritems(observable):
-        plot_function(*sols, label=label)
+        plot_function(*sols, label=label, zorder=kwargs.get("zorder"))
 
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
@@ -432,6 +434,11 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         kwargs)
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
+    if len(ax.child_axes) == len(observable)**2:
+        subaxes = np.reshape(
+            np.array(ax.child_axes), (len(observable), len(observable)))
+    else:
+        subaxes = None
 
     # Validate the MassSolution input, ensure it is not empty.
     mass_solution = v_util._validate_mass_solution(mass_solution)
@@ -458,10 +465,13 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     for j, y in enumerate(observable):
         for i, x in enumerate(observable):
             # [x0, y0, width, height] from lower left corner of inset axes
-            sub_ax = ax.inset_axes(
-                bounds=[i * sub_ax_placement_vals[0],
-                        1 - sub_ax_placement_vals[0] * (j + 1),
-                        sub_ax_placement_vals[1], sub_ax_placement_vals[1]])
+            if subaxes is not None:
+                sub_ax = subaxes[j, i]
+            else:
+                sub_ax = ax.inset_axes(bounds=[
+                    i * sub_ax_placement_vals[0],
+                    1 - sub_ax_placement_vals[0] * (j + 1),
+                    sub_ax_placement_vals[1], sub_ax_placement_vals[1]])
             # Create tile (either phase_portrait, data, or empty)
             sub_ax = _create_tiled_phase_portraits_tile(
                 sub_ax, observable, i, j, x, y, plot_tile_placement,
@@ -544,6 +554,7 @@ def get_phase_portrait_default_kwargs(function_name):
         "deviation": False,
         "deviation_zero_centered": False,
         "deviation_normalization": "initial value",
+        "zorder": None,
     }
 
     if function_name == "plot_phase_portrait":

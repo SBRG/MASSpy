@@ -1612,7 +1612,7 @@ class MassModel(Model):
         def calculate_sol(flux, rate_equation, perc):
             sol = sym.solveset(sym.Eq(flux, rate_equation),
                                perc, domain=sym.S.Reals)
-            if isinstance(sol, type(sym.S.Reals)) or sol.is_EmptySet \
+            if isinstance(sol, type(sym.S.Reals)) or sol.is_empty \
                or next(iter(sol)) == 0:
                 sol = float(at_equilibrium_default)
             else:
