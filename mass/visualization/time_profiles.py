@@ -84,6 +84,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         * annotate_time_points_markersize
         * annotate_time_points_labels
         * annotate_time_points_legend
+        * annotate_time_points_zorder
         * deviation
         * deviation_zero_centered
         * deviation_normalization
@@ -423,6 +424,7 @@ def get_time_profile_default_kwargs(function_name):
         "annotate_time_points_markersize": None,
         "annotate_time_points_labels": False,
         "annotate_time_points_legend": None,
+        "annotate_time_points_zorder": None,
         "prop_cycle": None,
         "deviation": False,
         "deviation_zero_centered": False,

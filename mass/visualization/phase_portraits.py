@@ -408,6 +408,7 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         * annotate_time_points_marker
         * annotate_time_points_markersize
         * annotate_time_points_legend
+        * annotate_time_points_zorder
         * tile_ticks_on
         * tile_xlabel_fontdict
         * tile_ylabel_fontdict
@@ -432,13 +433,8 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     kwargs = _check_kwargs(
         get_phase_portrait_default_kwargs("plot_tiled_phase_portraits"),
         kwargs)
-    # Get the axies instance
+    # Get the axes instance
     ax = v_util._validate_axes_instance(ax)
-    if len(ax.child_axes) == len(observable)**2:
-        subaxes = np.reshape(
-            np.array(ax.child_axes), (len(observable), len(observable)))
-    else:
-        subaxes = None
 
     # Validate the MassSolution input, ensure it is not empty.
     mass_solution = v_util._validate_mass_solution(mass_solution)
@@ -448,6 +444,12 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     # Get the solutions to be observed and validate time vector.
     observable = v_util._validate_plot_observables(mass_solution, observable,
                                                    **kwargs)
+    if ax.child_axes is not None\
+       and len(ax.child_axes) == len(observable)**2:
+        subaxes = np.reshape(
+            np.array(ax.child_axes), (len(observable), len(observable)))
+    else:
+        subaxes = None
     plot_tile_placement = v_util._validate_tile_placement(plot_tile_placement,
                                                           prefix="plot")
     # Split the tiled kwargs and the phase portrait kwargs into seperate dicts
@@ -550,6 +552,7 @@ def get_phase_portrait_default_kwargs(function_name):
         "annotate_time_points_markersize": None,
         "annotate_time_points_labels": False,
         "annotate_time_points_legend": None,
+        "annotate_time_points_zorder": None,
         "prop_cycle": None,
         "deviation": False,
         "deviation_zero_centered": False,

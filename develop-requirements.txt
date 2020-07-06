@@ -1,4 +1,5 @@
 # Requirements to develop MASSpy
 pytest
 pytest-benchmark
-bumpversion
+bump2version
+escher

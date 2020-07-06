@@ -14,7 +14,6 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
 extras = {
     "escher": "escher",
     "json": "simplejson",
-    "plotting": "matplotlib>=3.0.0",
 }
 extras["all"] = sorted(extras.values())
 
@@ -30,7 +29,7 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.0b4",
+        version="0.1.0",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
@@ -44,6 +43,7 @@ if __name__ == "__main__":
             "six>=1.11.0",
             "sympy>=1.0.0",
             "tabulate>=0.8.1",
+            "matplotlib>=3.2.0",
         ],
         tests_require=[
             "pytest",
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         # FIXME test_suite="mass.test.suite", Add when implemented
         download_url="https://pypi.python.org/pypi/masspy",
         classifiers=[
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Build Tools',
