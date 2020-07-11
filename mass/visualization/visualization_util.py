@@ -570,7 +570,7 @@ def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
         "grid_axis": rc.validate_grid_axis,
         "legend_loc": rc.validate_legend_loc,
         "legend_ncol": rc.validate_int_or_None,
-        "margin": rc.ValidateInterval(0, 1, closedmin=True, closedmax=True),
+        "margin": rc._range_validators["0 <= x <= 1"],
         "ticks_on": rc.validate_bool,
         "fontsize": rc.validate_fontsize,
     }
@@ -971,7 +971,8 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
                 items = observable[line.get_label()]
                 x, y = t, items[i]
 
-            plot_function(x, y, label=label)
+            plot_function(x, y, label=label,
+                          zorder=kwargs.get("annotate_time_points_zorder"))
             if kwargs.get("annotate_time_points_labels"):
                 ax.annotate(label, xy=(x, y),
                             xytext=(10, 10), textcoords='offset pixels',
@@ -1265,7 +1266,7 @@ def _get_dataframe_of_observables(x, y, compare, observable):
     # Check for NA values, raise warning
     diff = set(xy.index).symmetric_difference(set(xy.dropna().index))
     if diff:
-        warn("Ignoring {0}, they only exist in one set of given values".format(
+        warn("Ignoring {0}, only in one set of given values".format(
             diff))
         xy.dropna(inplace=True)
 

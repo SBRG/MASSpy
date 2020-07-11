@@ -595,7 +595,8 @@ class Simulation(Object):
         perturbations = self._format_perturbations_input(perturbations,
                                                          kwargs.get("verbose"))
         # Make the time course selection input and set the selections
-        selections = self._make_rr_selections(kwargs.get("verbose"))
+        selections = self._make_rr_selections(
+            selections=None, include_time=True, verbose=kwargs.get("verbose"))
         # Make DictLists for solution objects
         conc_sol_list = DictList()
         flux_sol_list = DictList()
@@ -792,10 +793,9 @@ class Simulation(Object):
         perturbations = self._format_perturbations_input(perturbations,
                                                          kwargs.get("verbose"))
 
-        # Set species to use for steady state calculations
-        selections = self._make_rr_selections(kwargs.get("verbose"))
-        # Remove time from selections
-        selections.remove("time")
+        # Set species to return in results
+        selections = self._make_rr_selections(
+            selections=None, include_time=False, verbose=kwargs.get("verbose"))
 
         # Make DictLists for solution objects
         conc_sol_list = DictList()
@@ -806,9 +806,18 @@ class Simulation(Object):
                     # Apply perturbations and set values in roadrunner
                     rr, reset = self._set_simulation_values(
                         model, perturbations, kwargs.get("verbose"))
-                    # Use simulate strategy
-                    rr.steadyStateSelections = selections
-                    results = steady_state_function(model, **kwargs)
+                    # Set species to use for steady state calculations
+                    rr.steadyStateSelections = self._make_rr_selections(
+                        rr.model.getFloatingSpeciesConcentrationIds(),
+                        include_time=False,
+                        verbose=kwargs.get("verbose"))
+                    # Use strategy
+                    steady_state_function(model, **kwargs)
+                    results = {
+                        k: rr[k]
+                        for k in rr.model.getFloatingSpeciesConcentrationIds()
+                        + rr.model.getReactionIds()}
+
                     # Map results to their identifiers and return MassSolutions
                     solutions = self._make_mass_solutions(
                         model, selections=selections, results=results,
@@ -860,7 +869,8 @@ class Simulation(Object):
 
         return conc_sol_list, flux_sol_list
 
-    def _make_rr_selections(self, selections=None, verbose=False):
+    def _make_rr_selections(self, selections=None, include_time=True,
+                            verbose=False):
         """Set the observable output of the simulation.
 
         Warnings
@@ -872,9 +882,14 @@ class Simulation(Object):
         rr_model = self.roadrunner.model
 
         _log_msg(LOGGER, logging.INFO, verbose, "Setting output selections")
-        rr_selections = ["time"]
-        rr_selections += rr_model.getFloatingSpeciesConcentrationIds()
-        rr_selections += rr_model.getReactionIds()
+        rr_selections = []
+        if include_time:
+            rr_selections += ["time"]
+        if selections is None:
+            rr_selections += rr_model.getFloatingSpeciesConcentrationIds()
+            rr_selections += rr_model.getReactionIds()
+        else:
+            rr_selections += selections
 
         return rr_selections
 
