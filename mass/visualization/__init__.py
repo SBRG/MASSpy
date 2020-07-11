@@ -2,15 +2,7 @@
 r"""Contains function for visualizing simulation results.
 
 This module contains the various functions for visualization of solutions
-returned in :class:`~.MassSolution`\ s after simulation of models. Note that
-to use the :mod:`mass.visualization` functions, additional packages
-for visualziation included during the :mod:`mass` installation process as
-follows::
-
-    # Installs plotting visualization packages.
-    pip install masspy["plotting"]
-    # Or to install all additional packages.
-    pip install masspy["all"]
+returned in :class:`~.MassSolution`\ s after simulation of models. 
 
 In general, it is recommended to pass an :class:`matplotlib.axes.Axes` instance
 into the visualization function in order to guaruntee more control over the
