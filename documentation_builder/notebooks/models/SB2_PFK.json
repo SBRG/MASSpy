@@ -2,49 +2,49 @@
     "_enzyme_concentration_total": 3.3e-05,
     "_enzyme_module_forms_categorized": {
         "Complexed_ATP": [
+            "pfk_R0_A_c",
             "pfk_R1_A_c",
             "pfk_R2_A_c",
-            "pfk_R0_A_c",
-            "pfk_R4_A_c",
-            "pfk_R3_A_c"
+            "pfk_R3_A_c",
+            "pfk_R4_A_c"
         ],
         "Complexed_ATP_F6P": [
-            "pfk_R2_AF_c",
-            "pfk_R1_AF_c",
-            "pfk_R3_AF_c",
             "pfk_R0_AF_c",
+            "pfk_R1_AF_c",
+            "pfk_R2_AF_c",
+            "pfk_R3_AF_c",
             "pfk_R4_AF_c"
         ],
         "Free_Catalytic": [
-            "pfk_R3_c",
-            "pfk_R1_c",
             "pfk_R0_c",
-            "pfk_R4_c",
-            "pfk_R2_c"
+            "pfk_R1_c",
+            "pfk_R2_c",
+            "pfk_R3_c",
+            "pfk_R4_c"
         ],
         "Relaxed": [
-            "pfk_R1_A_c",
-            "pfk_R2_AF_c",
-            "pfk_R1_c",
-            "pfk_R1_AF_c",
-            "pfk_R3_c",
-            "pfk_R2_A_c",
-            "pfk_R0_AF_c",
             "pfk_R0_c",
+            "pfk_R0_A_c",
+            "pfk_R0_AF_c",
+            "pfk_R1_c",
+            "pfk_R1_A_c",
+            "pfk_R1_AF_c",
+            "pfk_R2_c",
+            "pfk_R2_A_c",
+            "pfk_R2_AF_c",
+            "pfk_R3_c",
+            "pfk_R3_A_c",
             "pfk_R3_AF_c",
             "pfk_R4_c",
-            "pfk_R0_A_c",
-            "pfk_R3_A_c",
             "pfk_R4_A_c",
-            "pfk_R4_AF_c",
-            "pfk_R2_c"
+            "pfk_R4_AF_c"
         ],
         "Tense": [
-            "pfk_T3_c",
+            "pfk_T0_c",
             "pfk_T1_c",
             "pfk_T2_c",
-            "pfk_T4_c",
-            "pfk_T0_c"
+            "pfk_T3_c",
+            "pfk_T4_c"
         ]
     },
     "_enzyme_module_ligands_categorized": {
@@ -58,9 +58,9 @@
             "atp_c"
         ],
         "Products": [
-            "h_c",
             "fdp_c",
-            "adp_c"
+            "adp_c",
+            "h_c"
         ],
         "Substrates": [
             "f6p_c"
@@ -71,37 +71,37 @@
             "PFK_L"
         ],
         "amp_c_activation": [
-            "PFK_R30",
-            "PFK_R40",
+            "PFK_R10",
             "PFK_R20",
-            "PFK_R10"
+            "PFK_R30",
+            "PFK_R40"
         ],
         "atp_c_binding": [
-            "PFK_R11",
-            "PFK_R41",
             "PFK_R01",
+            "PFK_R11",
             "PFK_R21",
-            "PFK_R31"
+            "PFK_R31",
+            "PFK_R41"
         ],
         "atp_c_inhibition": [
             "PFK_T1",
-            "PFK_T3",
             "PFK_T2",
+            "PFK_T3",
             "PFK_T4"
         ],
         "catalyzation": [
-            "PFK_R43",
+            "PFK_R03",
             "PFK_R13",
-            "PFK_R33",
             "PFK_R23",
-            "PFK_R03"
+            "PFK_R33",
+            "PFK_R43"
         ],
         "f6p_c_binding": [
-            "PFK_R32",
-            "PFK_R22",
+            "PFK_R02",
             "PFK_R12",
-            "PFK_R42",
-            "PFK_R02"
+            "PFK_R22",
+            "PFK_R32",
+            "PFK_R42"
         ]
     },
     "_enzyme_rate": 1.12,
@@ -115,10 +115,10 @@
         "Keq_PFK_ACT": 30.3030303030303,
         "Keq_PFK_F": 10.0,
         "Keq_PFK_I": 10.0,
-        "kf_PFK": 307263.0,
-        "kf_PFK_A": 200325.0,
+        "kf_PFK": 307263,
+        "kf_PFK_A": 200325,
         "kf_PFK_ACT": 1000000.0,
-        "kf_PFK_F": 1000059.0,
+        "kf_PFK_F": 1000059,
         "kf_PFK_I": 1000000.0
     },
     "custom_rates": {
@@ -509,7 +509,7 @@
     "reactions": [
         {
             "_equilibrium_constant": 14.705882352941176,
-            "_forward_rate_constant": 200325.0,
+            "_forward_rate_constant": 200325,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -526,7 +526,7 @@
         },
         {
             "_equilibrium_constant": 10.0,
-            "_forward_rate_constant": 1000059.0,
+            "_forward_rate_constant": 1000059,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -543,7 +543,7 @@
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 307263.0,
+            "_forward_rate_constant": 307263,
             "_lower_bound": -1000.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -579,7 +579,7 @@
         },
         {
             "_equilibrium_constant": 14.705882352941176,
-            "_forward_rate_constant": 200325.0,
+            "_forward_rate_constant": 200325,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -596,7 +596,7 @@
         },
         {
             "_equilibrium_constant": 10.0,
-            "_forward_rate_constant": 1000059.0,
+            "_forward_rate_constant": 1000059,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -613,7 +613,7 @@
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 307263.0,
+            "_forward_rate_constant": 307263,
             "_lower_bound": -1000.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -649,7 +649,7 @@
         },
         {
             "_equilibrium_constant": 14.705882352941176,
-            "_forward_rate_constant": 200325.0,
+            "_forward_rate_constant": 200325,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -666,7 +666,7 @@
         },
         {
             "_equilibrium_constant": 10.0,
-            "_forward_rate_constant": 1000059.0,
+            "_forward_rate_constant": 1000059,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -683,7 +683,7 @@
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 307263.0,
+            "_forward_rate_constant": 307263,
             "_lower_bound": -1000.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -719,7 +719,7 @@
         },
         {
             "_equilibrium_constant": 14.705882352941176,
-            "_forward_rate_constant": 200325.0,
+            "_forward_rate_constant": 200325,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -736,7 +736,7 @@
         },
         {
             "_equilibrium_constant": 10.0,
-            "_forward_rate_constant": 1000059.0,
+            "_forward_rate_constant": 1000059,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -753,7 +753,7 @@
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 307263.0,
+            "_forward_rate_constant": 307263,
             "_lower_bound": -1000.0,
             "_reversible": false,
             "_upper_bound": 1000.0,
@@ -789,7 +789,7 @@
         },
         {
             "_equilibrium_constant": 14.705882352941176,
-            "_forward_rate_constant": 200325.0,
+            "_forward_rate_constant": 200325,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -806,7 +806,7 @@
         },
         {
             "_equilibrium_constant": 10.0,
-            "_forward_rate_constant": 1000059.0,
+            "_forward_rate_constant": 1000059,
             "_lower_bound": -1000.0,
             "_reversible": true,
             "_upper_bound": 1000.0,
@@ -823,7 +823,7 @@
         },
         {
             "_equilibrium_constant": "inf",
-            "_forward_rate_constant": 307263.0,
+            "_forward_rate_constant": 307263,
             "_lower_bound": -1000.0,
             "_reversible": false,
             "_upper_bound": 1000.0,

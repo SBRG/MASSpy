@@ -3,7 +3,7 @@ cobra>=0.15.0
 depinfo
 escher             # Optional for network visualization
 libroadrunner>=1.5.3
-matplotlib>=3.0.0  # Optional for plotting
+matplotlib>=3.2.0
 numpy>=1.13.0
 pandas>=0.17.0
 scipy>=1.2.0
