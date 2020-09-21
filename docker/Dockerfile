@@ -35,39 +35,40 @@ RUN echo \
     && git checkout ${branch_or_tag} --quiet \ 
     && pip install .
 
-# # Image to download and install a specific version of Gurobi Optimizer
-# FROM env_setup AS gurobi_setup
-# # TODO add labels
+# Image to download and install a specific version of Gurobi Optimizer
+FROM env_setup AS gurobi_setup
+# TODO add labels
 
-# WORKDIR /usr/src/${GUROBI_INSTALL}
-# RUN echo \
-#     # Get gurobi package from internet, unzip with tar and copy into the installation directory
-#     && wget -qO- 'https://packages.gurobi.com/'${GUROBI_MAJOR_VERSION}'/gurobi'${GUROBI_VERSION}'_linux64.tar.gz' \
-#     | tar xz -C . \
-#     && mv 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )'/linux64/' . \
-#     && for to_clean in "docs" "examples" "src" "matlab" "R" ; \
-#         do rm -rf 'linux64/'${to_clean} ; \
-#         done \
-#     && rm -rf 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )
+WORKDIR /usr/src/${GUROBI_INSTALL}
+RUN echo \
+    # Get gurobi package from internet, unzip with tar and copy into the installation directory
+    && wget -qO- 'https://packages.gurobi.com/'${GUROBI_MAJOR_VERSION}'/gurobi'${GUROBI_VERSION}'_linux64.tar.gz' \
+    | tar xz -C . \
+    && mv 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )'/linux64/' . \
+    && for to_clean in "docs" "examples" "src" "matlab" "R" ; \
+        do rm -rf 'linux64/'${to_clean} ; \
+        done \
+    && rm -rf 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )
 
-# # TODO Image to download and install a specific version of CPLEX Optimizer
+# TODO Image to download and install a specific version of CPLEX Optimizer
 
-# # Image to setup optimizers for MASSpy
-# FROM mass_setup AS mass_builder
-# # TODO add labels
+# Image to setup optimizers for MASSpy
+FROM mass_setup AS mass_builder
+# TODO add labels
 
-# # Install Gurobi Optimizer
+# Install Gurobi Optimizer
+WORKDIR /usr/src/
+COPY --from=gurobi_setup /usr/src/ ./
+WORKDIR /usr/src/${GUROBI_HOME}
+RUN python setup.py install
+
+# TODO Install CPLEX Optimizer
 # WORKDIR /usr/src/
-# COPY --from=gurobi_setup /usr/src/ ./
-# WORKDIR /usr/src/${GUROBI_HOME}
+# COPY --from=cplex_setip /usr/src/ ./
+# WORKDIR /usr/src/${CPLEX_HOME}
 # RUN python setup.py install
 
-# # Install CPLEX Optimizer
-# # WORKDIR /usr/src/
-# # COPY --from=cplex_setip /usr/src/ ./
-# # WORKDIR /usr/src/${CPLEX_HOME}
-# # RUN python setup.py install
-# WORKDIR /usr/
-# COPY --from=mass_setup /usr/src/${MASS_INSTALL}/docker/docker-entrypoint.sh ./bin
-# RUN chmod 755 ./bin/docker-entrypoint.sh
-# ENTRYPOINT [ "executable" ]
+WORKDIR /usr/
+COPY --from=mass_setup /usr/src/${MASS_INSTALL}/docker/docker-entrypoint.sh ./bin
+RUN chmod 755 ./bin/docker-entrypoint.sh
+ENTRYPOINT [ "./bin/docker-entrypoint.sh" ]
