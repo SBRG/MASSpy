@@ -51,6 +51,8 @@ autoapi_type = 'python'
 autoapi_dirs = ['../mass']
 autoapi_ignore = [
     '.tox', '.pytest_cache', 'scripts', 'benchmarks', "notebooks"]
+# Keep files for documentation preview in IDEs
+autoapi_keep_files = True
 
 autosectionlabel_prefix_document = True
 autodoc_mock_imports = [
