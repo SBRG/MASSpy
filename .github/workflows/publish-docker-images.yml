@@ -12,9 +12,9 @@ jobs:
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
+          username: ${{ secrets.SBRG_MACHINE_USERNAME }}
+          password: ${{ secrets.SBRG_MACHINE_GHCR_TOKEN }} 
+          registry: ghcr.io
           repository: sbrg/masspy/masspy
           tag_with_ref: true
       - name: Push to Docker Hub
