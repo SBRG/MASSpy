@@ -1,7 +1,7 @@
 MASSpy: Modeling Dynamic Biological Processes in Python
 =======================================================
 
-|PyPI|
+|PyVer| |PyPi| |RTD| |LIC| |GHDL|
 
 Welcome to MASSpy's Documentation!
 ----------------------------------
@@ -109,5 +109,17 @@ Indices and tables
 * :ref:`search`
 
 
-.. |PyPI| image:: https://badge.fury.io/py/masspy.svg
-    :target: https://pypi.python.org/pypi/masspy
+.. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
+    :target: https://www.python.org/downloads/
+
+.. |PyPi| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
+    :target: https://pypi.org/project/masspy/
+
+.. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
+    :target: https://masspy.readthedocs.io/en/latest/
+
+.. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
+    :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
+
+.. |GHDL| image:: https://img.shields.io/github/downloads/sbrg/masspy/total?logo=GitHub&style=social
+    :target: https://github.com/SBRG/MASSpy
