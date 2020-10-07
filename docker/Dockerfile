@@ -1,6 +1,7 @@
 ARG python_version=3.7
 # Image to checkout and install a specific version of MASSpy
 FROM python:${python_version} AS env_setup
+ARG python_version
 # Define build arguments
 # User information
 ARG user=mass_user
@@ -28,29 +29,30 @@ ENV MASS_INSTALL /opt/MASSpy
 # Verbosity of image build and entrypoint script
 ENV VERBOSE=${verbose:-0}
 
-RUN echo \
-    && [ ${verbose} -ne 0 ] \
+RUN [ ${VERBOSE} -ne 0 ] \
     && echo 'Building image using the following:\n' \
     && echo 'PYTHON_VERSION '${PYTHON_VERSION} \
     && echo 'MASS_VERSION: '${MASS_VERSION} \
     && echo 'USER (UID): '${USER}' ('${UID}')' \
     && echo 'GROUP (GID): '${GROUP}' ('${GID}')' \
-    && echo 'PROJECT_VOLUME: '${PROJECT_VOLUME}'\n' \
+    && echo 'PROJECT_VOLUME: '${PROJECT_VOLUME} \
+    && echo 'BIND_MOUNT: '${BIND_MOUNT}'\n' \
     || :
 
+# CPLEX environment variables
+ENV CPLEX_VERSION 12.10.0
+ENV CPLEX_INSTALL /opt/CPLEX
+ENV CPLEX_HOME ${CPLEX_INSTALL}/cplex/python/$python_version/x86-64_linux
+
 # Gurobi environment variables
-ENV GUROBI_MAJOR_VERSION 9.0
 ENV GUROBI_VERSION 9.0.3
 ENV GUROBI_INSTALL /opt/gurobi
-ENV GUROBI_HOME $GUROBI_INSTALL/linux64
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${HOME}$GUROBI_HOME/lib
-
+ENV GUROBI_HOME ${GUROBI_INSTALL}/linux64
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${HOME}${GUROBI_HOME}/lib
 
 FROM env_setup AS mass_setup
-# TODO Add labels
-
 # Clone MASSpy repository
-WORKDIR ${HOME}/opt/
+WORKDIR ${HOME}/opt
 RUN git clone https://github.com/SBRG/MASSpy.git $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
 
 # Checkout a specific version of MASSpy if desired and install
@@ -71,64 +73,94 @@ RUN echo \
     && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
     && pip install notebook $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
 
-# # Image to download and install a specific version of IBM CPLEX Optimization Studio
-# FROM mass_setup AS cplex_setup
-
-# Image to download and install a specific version of Gurobi Optimizer
-FROM env_setup AS gurobi_setup
-
-WORKDIR ${HOME}${GUROBI_INSTALL}
-RUN echo \
-    # Get gurobi package from internet, unzip with tar and copy into the installation directory
-    && wget -qO- 'https://packages.gurobi.com/'${GUROBI_MAJOR_VERSION}'/gurobi'${GUROBI_VERSION}'_linux64.tar.gz' \
-    | tar xz -C . \
-    && mv 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )'/linux64/' . \
-    && for to_clean in 'docs' 'examples' 'src' 'matlab' 'R' ; \
-        do rm -rf 'linux64/'${to_clean} ; \
-        done \
-    && rm -rf 'gurobi'$( echo $GUROBI_VERSION | sed -e 's/\.//g' )
-
-# Image to setup optimizers for MASSpy
-FROM mass_setup AS mass_builder
-# TODO add labels
-
-# Install gurobipy module (Python API) for the Gurobi Optimizer
+# Copy necessary files into container from build context
 WORKDIR ${HOME}
-COPY --from=gurobi_setup ${HOME} ./
-WORKDIR ${HOME}${GUROBI_HOME}
-RUN pwd && ls && python setup.py install
+COPY *.sh cplex* gurobi* tmp/
 
-# Copy all files from local to docker 
-WORKDIR ${HOME}${MASS_INSTALL}
-COPY ./docker-entrypoint.sh ./docker/
+RUN echo \
+    # Make directory for docker scripts and move helper scripts into it.
+    && mkdir opt/docker-scripts \
+    && mv tmp/*.sh opt/docker-scripts \
+    ## && cp ${HOME}${MASS_INSTALL}/docker/*.sh ./docker-scripts \
+    # Make directory for licenses volume and move license files into it
+    && mkdir opt/licenses \
+    # Copy license files and/or templates into license directory
+    && mv tmp/*.lic* opt/licenses
 
-# Copy token client gurobi license from local
-# License created based on gurobi.lic.template file
-COPY ./gurobi.lic* ./docker/
+# Install IBM CPLEX Optimization Studio if install.binfile present in build context
+WORKDIR ${HOME}
+RUN echo \
+    && cplex_installer=cplex_studio*.linux*.bin \
+    && if [ -f tmp/$cplex_installer ] ; then \
+        if [ ${VERBOSE} -ne 0 ] ; then echo "Installing CPLEX" ; fi \
+        && chmod a+rwx tmp/$cplex_installer \
+        && tmp/$cplex_installer \
+            -f ./cplex.installer.properties \
+            -DUSER_INSTALL_DIR=${HOME}${CPLEX_INSTALL} \
+        # Copy CPLEX license into license directory
+        && mkdir ./opt/licenses/CPLEX \
+        && mv ./${CPLEX_INSTALL}/license/*.txt ./opt/licenses/CPLEX/ \
+        # Clean files that aren't needed
+        && for to_clean in 'concert' 'cpoptimizer' 'doc' 'license' 'opl' 'python' 'Uninstall' ; \
+            do rm -rf ./${CPLEX_INSTALL}/$to_clean ; \
+            done \
+        && for to_clean in 'examples' 'matlab' 'readmeUNIX.html' ; \
+            do rm -rf ./${CPLEX_INSTALL}/cplex/$to_clean ; \
+            done ; \
+    else \
+        if [ ${VERBOSE} -ne 0 ] ; then echo "No installer found for CPLEX" ; fi \
+    fi
+
+# Install Gurobi Optimizer if gurobi.lic present
+WORKDIR ${HOME}
+RUN echo \
+    # Only build if gurobi.lic file present
+    && if [ -f opt/licenses/gurobi.lic ] ; then \
+        gurobi_package='gurobi'${GUROBI_VERSION}'_linux64.tar.gz' \
+        && if [ ! -f tmp/$gurobi_package ] ; then \
+            if [ ${VERBOSE} -ne 0 ] ; then echo 'Fetching Gurobi...' ; fi \
+            && wget -qP tmp/ 'https://packages.gurobi.com/'$( echo ${GUROBI_VERSION} | sed 's/\(^[0-9]*.[0-9]*\).*/\1/' )'/'$gurobi_package ; \
+        fi \
+        && mkdir -p ./${GUROBI_HOME} \
+        && tar xzf tmp/$gurobi_package -C ./tmp \
+        #Only keep what is necessary
+        && for to_keep in 'lib' 'include' 'bin' 'setup.py'; \
+            do mv './tmp/gurobi'$( echo ${GUROBI_VERSION} | sed -e 's/\.//g' )'/linux64/'$to_keep ./${GUROBI_HOME}/ ; \
+            done ; \
+    else \
+        if [ ${VERBOSE} -ne 0 ] ; then echo "No Gurobi license, skipping Gurobi installation" ; fi ; \
+    fi
+
+# Remove tmp
+RUN rm -rf tmp
+
+# Install cplex module (Python API) for the IBM CPLEX Optimization Studio
+RUN echo \
+    && ${HOME}/opt/docker-scripts/pyinstall-solver.sh \
+        --directory ${HOME}${CPLEX_HOME} \
+        --solver "CPLEX" \
+        --verbose ${VERBOSE} \
+    && ${HOME}/opt/docker-scripts/pyinstall-solver.sh \
+        --directory ${HOME}${GUROBI_HOME} \
+        --solver "Gurobi" \
+        --verbose ${VERBOSE}
+
+# Make directories for volume in product workspace
+WORKDIR ${HOME}/${PROJECT_VOLUME}
 
 # Set home as final work directory
 WORKDIR ${HOME}
-RUN echo \
-    # Move entrypoint script to home to avoid path issues
-    && cp ${HOME}${MASS_INSTALL}/docker/docker-entrypoint.sh . \
-    # Copy license files
-    && mkdir /opt/licenses \
-    && cp ${HOME}${MASS_INSTALL}/docker/gurobi.lic* /opt/licenses
-
 # Add user and set user permissions for everything in home folder
 RUN echo \
     && groupadd -g ${GID} ${GROUP} \
     && useradd -M -g ${GID} -G ${GROUP} -u ${UID} ${USER}
 RUN echo \
-    && mkdir ${HOME}${PROJECT_VOLUME} \
-    && chown -R ${USER} ${HOME} \
-    && chmod -R a+rxw ${HOME}
+    && chown -R ${USER} ${HOME}/ \
+    && chmod -R 777 ${HOME}/
 
 USER ${USER}
 
-# Make volume for licenses
-VOLUME licenses
-# Make volume for product
-VOLUME ${PROJECT_VOLUME}
+WORKDIR ${HOME}
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT [ "./opt/docker-scripts/docker-entrypoint.sh" ]
+CMD [ "sh" ]
