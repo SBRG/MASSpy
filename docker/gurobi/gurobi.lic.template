@@ -9,6 +9,7 @@
 
 # The minimum requirement for a token server client license is to set TOKENSERVER with the 
 # name or IP address of the token server computer.
+# All other options are optional and should be removed to utilize the default.
 TOKENSERVER=
 IDLETIMEOUT=
 QUEUETIMEOUT=
