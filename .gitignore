@@ -107,3 +107,7 @@ venv.bak/
 
 # vscode
 .vscode
+
+# Docker 
+docker/cplex/cplex_studio*.linux*.bin
+docker/gurobi/gurobi.lic
