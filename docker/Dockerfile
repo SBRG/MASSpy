@@ -1,7 +1,10 @@
 ARG python_version=3.7
+ARG mass_version=0.1.0
 # Image to checkout and install a specific version of MASSpy
-FROM python:${python_version} AS env_setup
+FROM python:${python_version} AS env-setup
 ARG python_version
+ARG mass_version
+
 # Define build arguments
 # User information
 ARG user=mass_user
@@ -11,9 +14,6 @@ ARG uid=1000
 ARG gid=1000
 # Verbosity of dockerfile output when possible
 ARG verbose
-
-# Version of MASSpy to checkout
-ARG mass_version=0.1.0
 
 # User environment variables
 ENV USER=${user} \
@@ -36,7 +36,7 @@ RUN [ ${VERBOSE} -ne 0 ] \
     && echo 'USER (UID): '${USER}' ('${UID}')' \
     && echo 'GROUP (GID): '${GROUP}' ('${GID}')' \
     && echo 'PROJECT_VOLUME: '${PROJECT_VOLUME} \
-    && echo 'BIND_MOUNT: '${BIND_MOUNT}'\n' \
+    && echo \
     || :
 
 # CPLEX environment variables
@@ -50,42 +50,57 @@ ENV GUROBI_INSTALL /opt/gurobi
 ENV GUROBI_HOME ${GUROBI_INSTALL}/linux64
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${HOME}${GUROBI_HOME}/lib
 
-FROM env_setup AS mass_setup
-# Clone MASSpy repository
-WORKDIR ${HOME}/opt
-RUN git clone https://github.com/SBRG/MASSpy.git $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
+# Build arg to determine how to install MASSpy (allows for a local version)
+FROM env-setup AS mass-setup
+# # Copy build context files into tmp
+WORKDIR ${HOME}/tmp/MASSpy
+COPY ./  ./
+
+WORKDIR ${HOME}
+RUN echo \
+    && mkdir opt \
+    && if [ "${MASS_VERSION}" != "local" ] ; then \
+        cd opt && git clone https://github.com/SBRG/MASSpy.git $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+    else \
+        # Copy local MASSpy files to expected install path
+        cp -R tmp/MASSpy ${HOME}/opt/ \
+        # Move solver files to highest level of tmp
+        && if [ -f "tmp/MASSpy/docker/*.sh" ] ; then mv tmp/MASSpy/docker/*.sh tmp/ ; fi \
+        && if [ -d "tmp/MASSpy/docker/cplex" ] ; then mv tmp/MASSpy/docker/cplex/* tmp/ ; fi \
+        && if [ -d "tmp/MASSpy/docker/gurobi" ] ; then mv tmp/MASSpy/docker/gurobi/* tmp/ ; fi ; \
+    fi
 
 # Checkout a specific version of MASSpy if desired and install
 WORKDIR ${HOME}${MASS_INSTALL}
 RUN echo \
-    # Determine version of MASSpy to checkout from from VCS
-    && if echo ${MASS_VERSION} | grep -Eq '^(latest|master)$' ; then \
-        # Use latest (master) branch
-        git_branch_or_tag=master ; \
-    # Check whether SemVer tag given (excluding pre-release & build metabdata)
-    elif echo ${MASS_VERSION} | grep -Pq '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)?$' ; then \
-        # Use version specified
-        git_branch_or_tag=v${MASS_VERSION} ; \
-    else \
-        git_branch_or_tag=${MASS_VERSION} ; \
+    # If a local version of MASSpy, do nothing with branch checkouts
+    && if [ "${MASS_VERSION}" != "local" ] ; then \
+        # Determine version of MASSpy to checkout from from VCS
+        if echo ${MASS_VERSION} | grep -Eq '^(latest|master)$' ; then \
+            # Use latest (master) branch
+            git checkout master $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+        # Check whether SemVer tag given (excluding pre-release & build metabdata)
+        elif echo ${MASS_VERSION} | grep -Pq '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)?$' ; then \
+            # Use version specified
+            git checkout v${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+        else \
+            # Assume branch name given otherwise
+            git checkout ${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+        fi ; \
     fi \
-    && git checkout ${git_branch_or_tag} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
     && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
     && pip install notebook $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
 
-# Copy necessary files into container from build context
 WORKDIR ${HOME}
-COPY *.sh cplex* gurobi* tmp/
-
 RUN echo \
     # Make directory for docker scripts and move helper scripts into it.
     && mkdir opt/docker-scripts \
-    && mv tmp/*.sh opt/docker-scripts \
-    ## && cp ${HOME}${MASS_INSTALL}/docker/*.sh ./docker-scripts \
+    && cp ${HOME}${MASS_INSTALL}/docker/*.sh ./opt/docker-scripts/ \
+    && mv tmp/docker-entrypoint.sh opt/docker-scripts/ \
     # Make directory for licenses volume and move license files into it
     && mkdir opt/licenses \
     # Copy license files and/or templates into license directory
-    && mv tmp/*.lic* opt/licenses
+    && mv tmp/*.lic* opt/licenses/
 
 # Install IBM CPLEX Optimization Studio if install.binfile present in build context
 WORKDIR ${HOME}
@@ -133,6 +148,10 @@ RUN echo \
 
 # Remove tmp
 RUN rm -rf tmp
+
+# Final build stage install Python API if they exist and adds new user with necessary permissions
+FROM mass-setup AS mass-builder
+WORKDIR ${HOME}
 
 # Install cplex module (Python API) for the IBM CPLEX Optimization Studio
 RUN echo \
