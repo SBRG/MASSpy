@@ -60,16 +60,21 @@ WORKDIR ${HOME}
 RUN echo \
     && mkdir opt \
     && if [ "${MASS_VERSION}" != "local" ] ; then \
-        cd opt && git clone https://github.com/SBRG/MASSpy.git $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+        cd opt \
+        && git clone https://github.com/SBRG/MASSpy.git $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
+        && dirpath=tmp/MASSpy ; \
     else \
         # Copy local MASSpy files to expected install path
-        cp -R tmp/MASSpy ${HOME}/opt/ \
-        # Move solver files to highest level of tmp
-        && if [ -f "tmp/MASSpy/docker/*.sh" ] ; then mv tmp/MASSpy/docker/*.sh tmp/ ; fi \
-        && if [ -d "tmp/MASSpy/docker/cplex" ] ; then mv tmp/MASSpy/docker/cplex/* tmp/ ; fi \
-        && if [ -d "tmp/MASSpy/docker/gurobi" ] ; then mv tmp/MASSpy/docker/gurobi/* tmp/ ; fi ; \
-    fi
-
+        cp -R tmp/MASSpy/ ${HOME}/opt/ \
+        && dirpath=tmp/MASSpy/docker ; \
+    fi \
+    # Ensure workdir is home again before checking paths
+    && cd ${HOME} \
+    # Move solver files and entrypoint to highest level of tmp for later
+    && if [ -d "$dirpath/cplex" ] ; then mv $dirpath/cplex/* tmp/ ; fi \
+    && if [ -d "$dirpath/gurobi" ] ; then mv $dirpath//gurobi/* tmp/ ; fi \
+    && if [ -e "$dirpath/docker-entrypoint.sh" ] ; then mv $dirpath/docker-entrypoint.sh tmp/ ; fi
+    
 # Checkout a specific version of MASSpy if desired and install
 WORKDIR ${HOME}${MASS_INSTALL}
 RUN echo \
@@ -102,7 +107,7 @@ RUN echo \
     # Copy license files and/or templates into license directory
     && mv tmp/*.lic* opt/licenses/
 
-# Install IBM CPLEX Optimization Studio if install.binfile present in build context
+# Install IBM CPLEX Optimization Studio if install.bin file present in build context
 WORKDIR ${HOME}
 RUN echo \
     && cplex_installer=cplex_studio*.linux*.bin \
