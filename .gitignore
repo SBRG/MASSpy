@@ -108,7 +108,6 @@ docs/_static/
 docs/_templates/
 docs/autoapi/
 !docs/gurobi.env
-docs/example_gallery/workflows/SB2_Glycolysis.*
 
 # Docker 
 docker/cplex/cplex_studio*.linux*.bin
