@@ -9,7 +9,7 @@ already been installed. The guide can be broken down into three key steps:
 
     1. :ref:`obtaining-the-image`: An image for the MASSpy Docker container must be either obtained from an online registry or by built.
     2. :ref:`creating-the-container`: Once obtained, a container must be created from the image. 
-    3. :ref:`running-the-container` : After the container is built, the final step is to run the container and get started using MASSpy!
+    3. :ref:`running-the-container`: After the container is built, the final step is to run the container and get started using MASSpy!
 
 **Important:** In order to use the *Gurobi Optimizer* or the *IBM ILOG CPLEX Optimization Studio*, the Docker image must be built locally
 from a Dockerfile and a "context" containing certain files. See the secion below on :ref:`building-the-image`

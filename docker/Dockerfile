@@ -101,7 +101,7 @@ WORKDIR ${HOME}
 RUN echo \
     # Make directory for docker scripts and move helper scripts into it.
     && mkdir opt/docker-scripts \
-    && cp ${HOME}${MASS_INSTALL}/docker/*.sh ./opt/docker-scripts/ \
+    && find {MASS_INSTALL}/docker -name '*.sh' -exec mv {} ./opt/docker-scripts \
     && mv tmp/docker-entrypoint.sh opt/docker-scripts/ \
     # Make directory for licenses volume and move license files into it
     && mkdir opt/licenses \
