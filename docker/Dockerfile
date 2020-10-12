@@ -56,6 +56,7 @@ FROM env-setup AS mass-setup
 WORKDIR ${HOME}/tmp/MASSpy
 COPY ./  ./
 
+# Make directory for MASSpy installation
 WORKDIR ${HOME}
 RUN echo \
     && mkdir opt \
@@ -74,7 +75,7 @@ RUN echo \
     && if [ -d "$dirpath/cplex" ] ; then mv $dirpath/cplex/* tmp/ ; fi \
     && if [ -d "$dirpath/gurobi" ] ; then mv $dirpath//gurobi/* tmp/ ; fi \
     && if [ -e "$dirpath/docker-entrypoint.sh" ] ; then mv $dirpath/docker-entrypoint.sh tmp/ ; fi
-    
+
 # Checkout a specific version of MASSpy if desired and install
 WORKDIR ${HOME}${MASS_INSTALL}
 RUN echo \
@@ -101,12 +102,12 @@ WORKDIR ${HOME}
 RUN echo \
     # Make directory for docker scripts and move helper scripts into it.
     && mkdir opt/docker-scripts \
-    && find {MASS_INSTALL}/docker -name '*.sh' -exec mv {} ./opt/docker-scripts \
-    && mv tmp/docker-entrypoint.sh opt/docker-scripts/ \
+    && find ${HOME}${MASS_INSTALL}/docker -name "*.sh" -exec cp {} ./opt/docker-scripts/ ";" \
+    && if [ -e "tmp/docker-entrypoint.sh" ] ; then mv tmp/docker-entrypoint.sh opt/docker-scripts/ ; fi \
     # Make directory for licenses volume and move license files into it
     && mkdir opt/licenses \
     # Copy license files and/or templates into license directory
-    && mv tmp/*.lic* opt/licenses/
+    && if [ -e tmp/*.lic* ] ; then mv tmp/*.lic* opt/licenses/ ; fi 
 
 # Install IBM CPLEX Optimization Studio if install.bin file present in build context
 WORKDIR ${HOME}

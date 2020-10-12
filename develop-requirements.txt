@@ -1,6 +1,6 @@
 # Requirements to develop MASSpy
 pytest
 pytest-benchmark
-bump2version
+bumpversion
 escher
 notebook
