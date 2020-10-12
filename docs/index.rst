@@ -1,7 +1,9 @@
 MASSpy: Modeling Dynamic Biological Processes in Python
 =======================================================
 
-|PyVer| |PyPi| |RTD| |LIC| |GHDL|
+|PyVer| |PyPiVer| |PyPiBld| 
+|RTD| |DocVer| |DocBld| 
+|LIC| 
 
 Welcome to MASSpy's Documentation!
 ----------------------------------
@@ -40,6 +42,7 @@ There are various ways to get started with the **MASSpy** package. The guides be
    :hidden:
 
    installation/quickstart.rst
+   installation/install_detailed.rst
    installation/solvers.rst
    installation/docker.rst
 
@@ -71,7 +74,7 @@ There are various ways to get started with the **MASSpy** package. The guides be
    :name: example-gallery
    :caption: Example Gallery
 
-   example_gallery/index.rst
+   gallery/index.rst
 
 
 .. toctree::
@@ -96,7 +99,7 @@ There are various ways to get started with the **MASSpy** package. The guides be
    :name: additional-toc
    :caption: Additional Resources:
    
-   additional/faqs/faqs.rst
+   additional/faqs.ipynb
    additional/code_repositories.rst
    zreferences.rst
 
@@ -112,14 +115,20 @@ Indices and tables
 .. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
     :target: https://www.python.org/downloads/
 
-.. |PyPi| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
+.. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
+
+.. |PyPiBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/python-publish
+    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/python-publish.yml
+
+.. |DocVer| image:: https://img.shields.io/docker/automated/sbrg/masspy
+    :target: https://hub.docker.com/r/sbrg/masspy
+
+.. |DocBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/publish-docker-images/master
+    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/publish-docker-images.yml
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/
 
 .. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
-
-.. |GHDL| image:: https://img.shields.io/github/downloads/sbrg/masspy/total?logo=GitHub&style=social
-    :target: https://github.com/SBRG/MASSpy
