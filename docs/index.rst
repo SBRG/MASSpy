@@ -42,9 +42,9 @@ There are various ways to get started with the **MASSpy** package. The guides be
    :hidden:
 
    installation/quickstart.rst
-   installation/install_detailed.rst
    installation/solvers.rst
    installation/docker.rst
+   installation/advanced_docker.rst
 
 
 .. toctree::
@@ -65,8 +65,6 @@ There are various ways to get started with the **MASSpy** package. The guides be
    tutorials/quality_assurance.ipynb
    tutorials/global_configuration.ipynb
    tutorials/cobra_to_mass.ipynb
-   tutorials/compartments.ipynb
-   tutorials/exporting_optimization_problems.ipynb
 
 
 .. toctree::
