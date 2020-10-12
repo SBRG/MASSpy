@@ -93,6 +93,7 @@ RUN echo \
             git checkout ${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         fi ; \
     fi \
+    && pip install -r requirements.txt $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
     && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
     && pip install notebook $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
 
