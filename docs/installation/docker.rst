@@ -108,7 +108,7 @@ Once the MASSpy image is obtained, the next step is to run the image as a contai
 To break down the above command:
 
     * ``--mount``
-        The ``--mount``flag creates a volume to allow data to persist even after a container has been stopped. 
+        The ``--mount`` flag creates a volume to allow data to persist even after a container has been stopped. 
         In this particular example, a mount of type ``volume` called ``mass_project"``is mounted to the container at
         the location ``/home/masspy_user/mass_project``. Not required for use, but highly recommended. 
     * ``--publish``
@@ -141,7 +141,7 @@ notebook or Python itself can be started by running one of the following from th
 To stop the inteactive shell and exit the container, run the ``exit`` command.
 
 Starting and stopping the container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To stop the container so that it can be resumed at a later point::
 
     docker stop masspy_container
