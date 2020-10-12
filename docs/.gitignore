@@ -4,3 +4,4 @@ _templates/
 autoapi/
 **.xml
 **.json
+!*gurobi.env

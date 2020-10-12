@@ -107,7 +107,6 @@ docs/_build/
 docs/_static/
 docs/_templates/
 docs/autoapi/
-!docs/gurobi.env
 
 # Docker 
 docker/cplex/cplex_studio*.linux*.bin
