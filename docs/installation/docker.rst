@@ -9,7 +9,7 @@ already been installed. The guide can be broken down into three key steps:
 
     1. :ref:`obtaining-the-image`: An image for the MASSpy Docker container must be either obtained from an online registry or by built.
     2. :ref:`creating-the-container`: Once obtained, a container must be created from the image. 
-    3. :ref:`running-the-container`: After the container is built, the final step is to run the container and get started using MASSpy!
+    3. :ref:`running-the-container` : After the container is built, the final step is to run the container and get started using MASSpy!
 
 **Important:** In order to use the *Gurobi Optimizer* or the *IBM ILOG CPLEX Optimization Studio*, the Docker image must be built locally
 from a Dockerfile and a "context" containing certain files. See the secion below on :ref:`building-the-image`
@@ -103,7 +103,7 @@ Once the MASSpy image is obtained, the next step is to run the image as a contai
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --publish 8888:8888 \
         --name masspy_container \
-        -t sbrg/masspy/masspy:latest
+        -it sbrg/masspy/masspy:latest
 
 To break down the above command:
 
@@ -116,39 +116,21 @@ To break down the above command:
         Required to utilize Jupyter (iPython) notebooks from inside the container.
     * ``--name``
         An optional name for the container. In this particular example, the container is given the name ``masspy_container``.
-    * ``-t`` Allocate a pseudo-TTY. Required.
+    * ``-it`` Allocate a pseudo-TTY and create an interactive shell in the container. 
     
 If optimization solvers are included when building the image, it is recommended to mount the ``licenses`` volume
 as well. This can be done via the following::
 
-    docker run\
-        --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
-        --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
-        --publish 8888:8888 \
-        --name masspy_container \
-        -t sbrg/masspy/masspy:latest
-
-.. _running-the-container:
-
-Running the container
-----------------------
-To start the container at the time of creation, the ``-i`` flag can be included in the run command::
-
-    docker run\
+    docker run \
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
         --name masspy_container \
         -it sbrg/masspy/masspy:latest
 
-If ``masspy_container`` was created without an interactive shell, or to resume a stopped container::
+.. _running-the-container:
 
-    docker start -i masspy_container
-
-.. _stopping-the-container:
-
-
-Running MASSpy from the container
+Running MASSpy with the container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Once a container has been started with an interactive shell allocated ( the ``-it`` flag ), either a Jupyter (iPython)
 notebook or Python itself can be started by running one of the following from the shell within the container
@@ -158,11 +140,15 @@ notebook or Python itself can be started by running one of the following from th
 
 To stop the inteactive shell and exit the container, run the ``exit`` command.
 
-Stopping and removing the container
------------------------------------
+Starting and stopping the container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To stop the container so that it can be resumed at a later point::
 
     docker stop masspy_container
+
+To resume the container after it has been stopped::
+
+    docker start -i masspy_container
 
 To remove the container entirely::
 
