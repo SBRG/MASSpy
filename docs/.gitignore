@@ -1,0 +1,7 @@
+_build/
+_static/
+_templates/
+autoapi/
+**.xml
+**.json
+!*gurobi.env

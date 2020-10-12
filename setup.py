@@ -33,22 +33,23 @@ if __name__ == "__main__":
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
-            "cobra>=0.15.0",
-            "depinfo",
-            "libroadrunner>=1.5",
-            "numpy>=1.13.0",
-            "pandas>=0.17.0",
-            "optlang>=1.4.2",
-            "scipy>=1.2.0",
-            "six>=1.11.0",
-            "sympy>=1.0.0",
-            "tabulate>=0.8.1",
-            "matplotlib>=3.2.0",
+            "cobra~=0.19.0",
+            "depinfo~=1.5",
+            "escher~=1.7",       # Optional for network visualiation
+            "libroadrunner~=1.5",
+            "matplotlib~=3.2",
+            "numpy~=1.19",
+            "pandas~=1.0",
+            "scipy~=1.2",
+            "six~=1.11",
+            "sympy~=1.0",
+            "tabulate~=0.8"
         ],
-        tests_require=[
-            "pytest",
-            "pytest-benchmark"
-        ],
+        # TODO Add when implemented
+        # tests_require=[
+        #     "pytest",
+        #     "pytest-benchmark"
+        # ],
         extras_require=extras,
         package_data={
             '': [
@@ -61,11 +62,11 @@ if __name__ == "__main__":
         maintainer_email="zhaiman@eng.ucsd.edu",
         description="MASSpy is a package for kinetic modeling and simulation "
                     "of biological networks",
-        license="LGPL/GPL v3+",
+        license="MIT",
         keywords=("metabolism biology kinetic modeling simulation programming"
                   "cobra"),
         url="https://github.com/SBRG/masspy",
-        # FIXME test_suite="mass.test.suite", Add when implemented
+        # TODO test_suite="mass.test.suite", Add when implemented
         download_url="https://pypi.python.org/pypi/masspy",
         classifiers=[
             'Development Status :: 5 - Production/Stable',

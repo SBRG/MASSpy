@@ -62,11 +62,6 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-documentation_builder/_build/
-documentation_builder/_static/
-documentation_builder/_template/
-
 # PyBuilder
 target/
 
@@ -106,3 +101,13 @@ venv.bak/
 
 # vscode
 .vscode
+
+# Sphinx documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+docs/autoapi/
+
+# Docker 
+docker/cplex/cplex_studio*.linux*.bin
+docker/gurobi/gurobi.lic

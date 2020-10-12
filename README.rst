@@ -1,7 +1,7 @@
 MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-|PyPI|
+|PyVer| |PyPi| |RTD| |LIC| |GHDL|
 
 What is MASSpy?
 ~~~~~~~~~~~~~~~
@@ -22,13 +22,14 @@ Additional information about **COBRApy** can be found in its
 Cite
 ----
 A manuscript is in preparation for publication and will be the proper reference
-for citing the **MASSpy** in the future.
+for citing the **MASSpy** in the future. In the meantime, feel free to cite the
+`preprint at bioRxiv  <https://www.biorxiv.org/content/10.1101/2020.07.31.230334v1>`_
 
 Installation
 ~~~~~~~~~~~~
 
 The recommended method is to install **MASSpy** is to use ``pip`` to
-`install masspy from PyPI <https://pypi.python.org/pypi/masspy>`_. It is
+`install MASSpy from PyPI <https://pypi.python.org/pypi/masspy>`_. It is
 recommended to do this inside a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
@@ -42,7 +43,7 @@ If you downloaded the source code, run::
 
 	pip install -e .
 
-in the ``masspy`` source directory. For additional information, please refer to the
+in the ``MASSpy`` source directory. For additional information, please refer to the
 the `detailed installation instructions <INSTALL.rst>`_.
 
 Contributing
@@ -55,22 +56,23 @@ to get started.
 License
 -------
 
-The **MASSpy** source is released under both the GPL and LGPL licenses. You
-may choose which license you choose to use the software under. However,
+The **MASSpy** source is released under the MIT license. However,
 please note that binary packages which include GLPK (such as the binary
 wheels distributed at https://pypi.python.org/pypi/cobra) and
 `libRoadRunner <https://pypi.org/project/libroadrunner/>`_ will be bound
 by their licenses as well.
+    
+.. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
+    :target: https://www.python.org/downloads/
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License or the Lesser GNU
-General Public License as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later version.
+.. |PyPi| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
+    :target: https://pypi.org/project/masspy/
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
+.. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
+    :target: https://masspy.readthedocs.io/en/latest/
 
-.. |PyPI| image:: https://badge.fury.io/py/masspy.svg
-    :target: https://pypi.python.org/pypi/masspy
+.. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
+    :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
+
+.. |GHDL| image:: https://img.shields.io/github/downloads/sbrg/masspy/total?logo=GitHub&style=social
+    :target: https://github.com/SBRG/MASSpy
