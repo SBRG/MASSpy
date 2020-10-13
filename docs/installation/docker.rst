@@ -58,8 +58,8 @@ Building the image
 ~~~~~~~~~~~~~~~~~~
 **Build Context**: The following directory stucture shows the minimal requirements needed as context when building the image::
 
-    MASSpy               # Current Directory
-    └── docker           # Root Directory for build context
+    MASSpy               # Source directory
+    └── docker           # Root directory for build context
         └── Dockerfile   # Dockerfile from VCS (https://github.com/SBRG/MASSpy)
 
 To build the image with tag ``latest``, navigate to the ``MASSpy`` directory and use the command line::

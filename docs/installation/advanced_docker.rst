@@ -9,9 +9,9 @@ Recognized Image Build Context
 The directory structure below outlines the expected build context with all optional aspects included when building a
 Docker image::
 
-    MASSpy                   # Current Directory
-    └── docker               # Root Directory for build context
-        ├── Dockerfile
+    MASSpy                   # Source directory
+    └── docker               # Root directory for build context
+        ├── Dockerfile       
         ├── cplex 
         │   ├── cplex_studio1210.linux-x86-64.bin
         │   └── cplex.install.properties
@@ -76,7 +76,7 @@ An example build command using all of the build-time variables::
         --build-arg python_version=3.7 \
         --build-arg mass_version=latest \
         --build-arg verbose=0 \
-        -t sbrg/masspy/masspy:latest ./docker
+        -t sbrg/masspy:latest ./docker
 
 
 Using a local installation of MASSpy
