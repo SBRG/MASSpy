@@ -18,7 +18,7 @@ or in conjunction with **COBRApy**, providing a vast assortment of modeling
 techniques and tools that enable different workflows. Additional information about
 **COBRApy** can be found in its
 `documentation <https://cobrapy.readthedocs.io/en/stable/>`__ or
-`github page <https://github.com/opencobra/cobrapy.>`__.
+`GitHub page <https://opencobra.github.io/cobrapy/>`__.
 
 
 Installation and Setup
@@ -47,11 +47,13 @@ There are various ways to get started with the **MASSpy** package. The guides be
    installation/advanced_docker.rst
 
 
+Once MASSpy is installed, check out the step-by-step tutorials below to learn how to use **MASSpy**!
+
 .. toctree::
    :numbered:
    :maxdepth: 1
-   :name: tutorial-toc
    :caption: Step-by-Step Tutorials
+   :hidden:
 
    tutorials/getting_started_with_masspy.ipynb
    tutorials/constructing_models.ipynb
@@ -65,38 +67,56 @@ There are various ways to get started with the **MASSpy** package. The guides be
    tutorials/quality_assurance.ipynb
    tutorials/global_configuration.ipynb
    tutorials/cobra_to_mass.ipynb
+   tutorials/compartments.ipynb
+   tutorials/exporting_optimization_problems.ipynb
 
+
+Gallery
+-------
+Interested in seeing more of **MASSpy** in action? Browse through the :ref:`Gallery </gallery/index.rst>`.
 
 .. toctree::
    :maxdepth: 1
-   :name: example-gallery
-   :caption: Example Gallery
+   :caption: Gallery
+   :hidden:
 
    gallery/index.rst
 
 
+Educational Resources
+---------------------
+Need to review the basic principles of dynamic simulation and analysis? Educational resources utilizing **MASSpy** are outlined below and available for academic purposes. 
+
+   - :ref:`/education/sb2/index.rst`
+
+
 .. toctree::
    :maxdepth: 1
-   :name: api-toc
-   :caption: API:
+   :caption: Educational Resources
+   :hidden:
+
+   education/sb2/index.rst
+
+
+API
+---
+Not sure how to use a specific method or function? Try searching the **MASSpy** :ref:`/autoapi/index.rst`!
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API
    :hidden:
 
    autoapi/index.rst
 
 
-.. toctree::
-   :maxdepth: 1
-   :name: education-toc
-   :caption: Educational Resources:
-
-   education/sb2/index.rst
-
+Additional Resources
+--------------------
 
 .. toctree::
    :maxdepth: 1
-   :name: additional-toc
    :caption: Additional Resources:
-   
+
    additional/faqs.ipynb
    additional/code_repositories.rst
    zreferences.rst
