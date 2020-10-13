@@ -1,5 +1,7 @@
+Various examples of MASSpy are provided below. 
+
 Visualization
-=============
+-------------
 The following are additional examples demonstrating how to generate various types of visualizations using MASSpy.
 
 .. toctree::
@@ -10,7 +12,7 @@ The following are additional examples demonstrating how to generate various type
    visualization/*
 
 Workflows
-=============
+---------
 The following are additional examples demonstrating how to generate various types of visualizations using MASSpy.
 
 .. toctree::

@@ -53,7 +53,6 @@ Once MASSpy is installed, check out the step-by-step tutorials below to learn ho
    :numbered:
    :maxdepth: 1
    :caption: Step-by-Step Tutorials
-   :hidden:
 
    tutorials/getting_started_with_masspy.ipynb
    tutorials/constructing_models.ipynb
@@ -71,8 +70,8 @@ Once MASSpy is installed, check out the step-by-step tutorials below to learn ho
    tutorials/exporting_optimization_problems.ipynb
 
 
-Gallery
--------
+Example Gallery
+----------------
 Interested in seeing more of **MASSpy** in action? Browse through the :ref:`Gallery </gallery/index.rst>`.
 
 .. toctree::
@@ -87,7 +86,7 @@ Educational Resources
 ---------------------
 Need to review the basic principles of dynamic simulation and analysis? Educational resources utilizing **MASSpy** are outlined below and available for academic purposes. 
 
-   - :ref:`/education/sb2/index.rst`
+   * :ref:`/education/sb2/index.rst`
 
 
 .. toctree::
@@ -109,9 +108,6 @@ Not sure how to use a specific method or function? Try searching the **MASSpy** 
 
    autoapi/index.rst
 
-
-Additional Resources
---------------------
 
 .. toctree::
    :maxdepth: 1
