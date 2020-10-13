@@ -1,4 +1,4 @@
-# Release notes for masspy x.y.z
+# Release notes for MASSpy x.y.z
 
 ## New features
 
