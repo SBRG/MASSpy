@@ -14,12 +14,12 @@ With Docker
 -----------
 To quickly get started with the latest version of MASSpy using Docker, run the following commands in a shell::
 
-    docker pull sbrg/masspy:latest
+    docker pull sbrg/masspy
     docker run -rm \
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
-        -it sbrg/masspy/masspy:latest
+        -it sbrg/masspy
 
 From within the container, either run ``python`` or ``jupyter notebook --ip=0.0.0.0 --port=8888`` depending on
 the desired Python workspace!

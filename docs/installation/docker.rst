@@ -18,6 +18,7 @@ About Docker
     Interested in learning more about Docker? Read more about containerization and getting started with Docker in the 
     `Docker Quick Start <https://docs.docker.com/get-started/>`_ in the official Docker documentation.
 
+
 .. _obtaining-the-image:
 
 Obtaining the image
@@ -30,6 +31,7 @@ can be built from a Dockerfile and the proper build "context".
     * To enable the use of a commercial optimization solver (e.g., Gurobi, CPLEX) inside the container, the
       MASSpy image must be built locally.
 
+
 .. _downloading-the-image:
 
 Downloading the image
@@ -38,16 +40,17 @@ Images for the MASSpy software are be found in the following registries:
 
 `SBRG DockerHub <https://hub.docker.com/r/sbrg/masspy>`_ : 
     * **Image Name**: ``sbrg/masspy``
-    * **Valid Tags**: ``latest`` | ``{MAJOR}.{MINOR}.{PATCH}`` (following `SemVer <https://semver.org/>`_ guidelines)
+    * **Tags**: A full list of tags can be found `here <https://hub.docker.com/r/sbrg/masspy/tags>`_
 
 To pull the MASSpy image ``sbrg/masspy``, run the following in a shell::
 
     docker pull sbrg/masspy
 
-By default, the ``latest`` version of MASSpy image is pulled from the registry. A tag must be included in order to download a specific image version.
-For example, to pull the ``sbrg/masspy`` image with the ``latest`` tag::
+A tag must be included in order to download a specific image version. For example, to pull the ``sbrg/masspy`` image with the ``latest`` tag::
 
     docker pull sbrg/masspy:latest
+
+By default, the ``latest`` version of MASSpy image is pulled from the registry. 
 
 .. _building-the-image:
 
@@ -63,11 +66,22 @@ To build the image with tag ``latest``, navigate to the ``MASSpy`` directory and
 
     docker build -t sbrg/masspy:latest ./docker
 
-Check out the :ref:`recognized-image-build-context` section for more information about the build context. 
 
-Including ILOG CPLEX Optimization Studio
-++++++++++++++++++++++++++++++++++++++++
-**Licensing**: To utilize the ILOG CPLEX Optimization Studio in a Docker container, a license must be obtained first.
+.. _including-cplex-optimizer:
+
+Including ILOG CPLEX Optimization Studio 12.10
+++++++++++++++++++++++++++++++++++++++++++++++
+To utilize the ILOG CPLEX Optimization Studio in a Docker container, a license must be obtained first.
+See :ref:`cplex-solver` for more information on obtaining an academic license.
+
+Once a CPLEX license has been obtained:
+
+    1. Download the installer ``cplex_studioXXXX.linux-x86-64.bin`` from CPLEX, replacing "XXXX" 
+       for the version number without punctuation (e.g., 1210).
+    2. Place the installer into the ``cplex`` directory in the build context as outlined below.
+    3. Place the file ``cplex.install.properties`` into the build context to accept the license
+       agreement and to enable silent install.
+
 **Build Context**: To include CPLEX, the build context must be modified to contain the ``cplex`` subdirectory as follows::
 
     MASSpy
@@ -77,12 +91,22 @@ Including ILOG CPLEX Optimization Studio
             ├── cplex_studio1210.linux-x86-64.bin
             └── cplex.install.properties
 
-See :ref:`cplex-solver` for more information on obtaining academic license.
 
-Including Gurobi Optimizer
-++++++++++++++++++++++++++
-To utilize the Gurobi Optimizer in a Docker container, a license must be obtained first.
-**Licensing**: To utilize the ILOG CPLEX Optimization Studio in a Docker container, a license must be obtained first.
+.. _including-gurobi-optimizer:
+
+Including Gurobi Optimizer 9.0.3
+++++++++++++++++++++++++++++++++
+To utilize the Gurobi Optimizer in a Docker container, a `floating license <https://www.gurobi.com/documentation/9.0/quickstart_linux/setting_up_and_using_a_flo.html>`_
+must be obtained first. See :ref:`gurobi-solver` for more information on obtaining a floating license.
+
+Once a floating Gurobi license has been obtained:
+
+    1. Copy the `gurobi.lic.template <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_ and
+       rename the file ``gurobi.lic``.
+    2. Modify the license file according to the
+       `Gurobi documentation <https://www.gurobi.com/documentation/9.0/quickstart_linux/creating_a_token_server_cl.html>`_.
+    3. Place the license file into the ``gurobi`` directory in the build context as outlined below.
+
 **Build Context**: To include Gurobi, the build context must be modified to contain the ``gurobi`` subdirectory as follows::
 
     MASSpy
@@ -91,13 +115,15 @@ To utilize the Gurobi Optimizer in a Docker container, a license must be obtaine
         └── gurobi
             └── gurobi.lic
 
-See :ref:`gurobi-solver` for more information on obtaining an academic license.
+Additional information
+++++++++++++++++++++++
+For more information about the build context for the MASSpy image, see the :ref:`recognized-image-build-context` section.
 
 .. _creating-the-container:
 
 Creating the container
 ----------------------
-Once the MASSpy image is obtained, the next step is to run the image as a container using the following command:
+Once the MASSpy image is obtained, the next step is to run the image as a container using the following command::
 
     docker run \
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
@@ -107,16 +133,17 @@ Once the MASSpy image is obtained, the next step is to run the image as a contai
 
 To break down the above command:
 
-    * ``--mount``
+    * --mount :
         The ``--mount`` flag creates a volume to allow data to persist even after a container has been stopped. 
-        In this particular example, a mount of type ``volume` called ``mass_project"``is mounted to the container at
+        In this particular example, a mount of type ``volume` called ``mass_project"`` is mounted to the container at
         the location ``/home/masspy_user/mass_project``. Not required for use, but highly recommended. 
-    * ``--publish``
+    * --publish : 
         The ``--publish`` flag publishes the container’s port  ``8888``, binding it to the host port at ``8888``.
         Required to utilize Jupyter (iPython) notebooks from inside the container.
-    * ``--name``
+    * --name :
         An optional name for the container. In this particular example, the container is given the name ``masspy_container``.
-    * ``-it`` Allocate a pseudo-TTY and create an interactive shell in the container. 
+    * -it : 
+        Allocate a pseudo-TTY and create an interactive shell in the container. 
     
 If optimization solvers are included when building the image, it is recommended to mount the ``licenses`` volume
 as well. This can be done via the following::
@@ -128,6 +155,7 @@ as well. This can be done via the following::
         --name masspy_container \
         -it sbrg/masspy/masspy:latest
 
+
 .. _running-the-container:
 
 Running MASSpy with the container
@@ -136,9 +164,10 @@ Once a container has been started with an interactive shell allocated ( the ``-i
 notebook or Python itself can be started by running one of the following from the shell within the container
 
     * To start python, run ``python`` 
-    * To start an Jupyter notebook, run ``jupyter notebook --ip=0.0.0.0 --port=8888``. 
+    * To start a Jupyter notebook, run ``jupyter notebook --ip=0.0.0.0 --port=8888``. 
 
 To stop the inteactive shell and exit the container, run the ``exit`` command.
+
 
 Starting and stopping the container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

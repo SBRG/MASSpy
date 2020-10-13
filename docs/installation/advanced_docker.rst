@@ -7,7 +7,7 @@ This page contains additional information about the MASSpy Docker image and cont
 Recognized Image Build Context
 ------------------------------
 The directory structure below outlines the expected build context with all optional aspects included when building a
-Docker image from the `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_ ::
+Docker image::
 
     MASSpy                   # Current Directory
     └── docker               # Root Directory for build context
@@ -18,6 +18,33 @@ Docker image from the `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/ma
         ├── gurobi
         │   └── gurobi.lic
         └── docker-entrypoint.sh
+
+The MASSpy image only requires the Dockerfile in its "context" to be built. Anything else is optional and will add specific funtionality
+as outlined below:
+
+**Dockerfile** :
+    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_ required to build the image.
+
+**cplex** : 
+    Directory used to install IBM CPLEX Optimization studio 12.10
+
+    - **cplex_studio1210.linux-x86-64.bin**:
+        The installer binary for CPLEX. The presence of this file triggers the CPLEX installation process.
+    - **cplex.install.properties**:
+        Installer properties for CPLEX. Acecpts license agreement and sets silent install. Ignored if no installer exists in build context.
+
+**gurobi** : 
+    Directory used to install Gurobi Optimizer 9.0.3
+
+    - **gurobi.lic**: 
+        Gurobi license file. The presence of this file triggers the Gurobi installation process.
+    - **gurobi.lic.template**: 
+        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_.
+        Can be included to configure the token client license at a later point from within the container.
+
+**docker-entrypoint.sh** :
+    A shell script for the `container entrypoint <https://docs.docker.com/engine/reference/builder/#entrypoint>`_ to replace
+    the customize the standard docker entrypoint behavior. Must be named ``docker-entrypoint.sh`` to work.
 
 Build-time variables
 --------------------
@@ -50,3 +77,17 @@ An example build command using all of the build-time variables::
         --build-arg mass_version=latest \
         --build-arg verbose=0 \
         -t sbrg/masspy/masspy:latest ./docker
+
+
+Using a local installation of MASSpy
+------------------------------------
+To use the local installation of MASSpy when building the docker image, navigate to the directory containing the local installation of MASSpy
+and run the following build command::
+
+    docker build \
+        --build-arg mass_version=local \
+        -t sbrg/masspy:local \
+        -f ./docker/Dockerfile ./
+
+The resulting image ``sbrg/masspy:local`` can then be used to build a container using ``docker run``.
+Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`_.
