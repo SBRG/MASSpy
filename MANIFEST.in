@@ -1,4 +1,4 @@
-include README.rst INSTALL.rst LICENSE
+include README.rst LICENSE
 include mass
 include mass/test/data/maps/*.json
 include mass/test/data/models/*.json

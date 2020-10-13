@@ -1,7 +1,9 @@
 MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-|PyVer| |PyPi| |RTD| |LIC| |GHDL|
+|PyVer| |PyPiVer| |PyPiBld| 
+|RTD| |DocVer| |DocBld| 
+|LIC| 
 
 What is MASSpy?
 ~~~~~~~~~~~~~~~
@@ -19,12 +21,6 @@ Additional information about **COBRApy** can be found in its
 `documentation <https://cobrapy.readthedocs.io/en/latest/index.html>`_ or
 `github page <https://github.com/opencobra/cobrapy>`_.
 
-Cite
-----
-A manuscript is in preparation for publication and will be the proper reference
-for citing the **MASSpy** in the future. In the meantime, feel free to cite the
-`preprint at bioRxiv  <https://www.biorxiv.org/content/10.1101/2020.07.31.230334v1>`_
-
 Installation
 ~~~~~~~~~~~~
 
@@ -35,16 +31,20 @@ recommended to do this inside a `virtual environment
 
 	pip install masspy
 
-You can install all packages, including optional dependencies, directly by::
+Check out :ref:`/installation/quickstart.rst` to quickly get started using **MASSpy**.
 
-    pip install masspy[all]
+Documentation
+~~~~~~~~~~~~~
+The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_.
 
-If you downloaded the source code, run::
+All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_. 
 
-	pip install -e .
+Cite
+----
+A manuscript is in preparation for publication and will be the proper reference
+for citing the **MASSpy** in the future. In the meantime, feel free to cite the
+`preprint at bioRxiv  <https://www.biorxiv.org/content/10.1101/2020.07.31.230334v1>`_
 
-in the ``MASSpy`` source directory. For additional information, please refer to the
-the `detailed installation instructions <INSTALL.rst>`_.
 
 Contributing
 ~~~~~~~~~~~~
@@ -62,17 +62,24 @@ wheels distributed at https://pypi.python.org/pypi/cobra) and
 `libRoadRunner <https://pypi.org/project/libroadrunner/>`_ will be bound
 by their licenses as well.
     
+    
 .. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
     :target: https://www.python.org/downloads/
 
-.. |PyPi| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
+.. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
+
+.. |PyPiBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/python-publish
+    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/python-publish.yml
+
+.. |DocVer| image:: https://img.shields.io/docker/automated/sbrg/masspy
+    :target: https://hub.docker.com/r/sbrg/masspy
+
+.. |DocBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/publish-docker-images/master
+    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/publish-docker-images.yml
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/
 
 .. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
-
-.. |GHDL| image:: https://img.shields.io/github/downloads/sbrg/masspy/total?logo=GitHub&style=social
-    :target: https://github.com/SBRG/MASSpy
