@@ -24,14 +24,7 @@ Additional information about **COBRApy** can be found in its
 Installation
 ~~~~~~~~~~~~
 
-The recommended method is to install **MASSpy** is to use ``pip`` to
-`install MASSpy from PyPI <https://pypi.python.org/pypi/masspy>`_. It is
-recommended to do this inside a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
-
-	pip install masspy
-
-Check out :ref:`/installation/quickstart.rst` to quickly get started using **MASSpy**.
+.. include:: docs/installation/quickstart.rst
 
 Documentation
 ~~~~~~~~~~~~~

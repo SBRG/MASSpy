@@ -44,7 +44,7 @@ There are various ways to get started with the **MASSpy** package. The guides be
    installation/quickstart.rst
    installation/solvers.rst
    installation/docker.rst
-   installation/advanced_docker.rst
+   installation/docker_detailed.rst
 
 
 Once MASSpy is installed, check out the step-by-step tutorials below to learn how to use **MASSpy**!
