@@ -56,9 +56,7 @@ section on `solvers <https://masspy.readthedocs.io/en/latest/installation/quicks
 
 Documentation
 -------------
-The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_.
-
-All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_. 
+The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_. All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_. 
 
 Cite
 ----
@@ -66,8 +64,9 @@ A manuscript is in preparation for publication and will be the proper reference
 for citing the **MASSpy** in the future. In the meantime, feel free to cite the
 `preprint at bioRxiv <https://www.biorxiv.org/content/10.1101/2020.07.31.230334v1>`_.
 
-.. block::
-
+    MASSpy: Building, simulating, and visualizing dynamic biological models in Python using mass action kinetics
+    Zachary B. Haiman, Daniel C. Zielinski, Yuko Koike, James T. Yurkovich, Bernhard O. Palsson
+    bioRxiv 2020.07.31.230334; doi: https://doi.org/10.1101/2020.07.31.230334
 
 Contributing
 ------------
