@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "cobra~=0.19.0",
             "depinfo~=1.5",
             "escher~=1.7",       # Optional for network visualiation
-            "libroadrunner~=1.5",
+            "libroadrunner~=2.0",
             "matplotlib~=3.2",
             "numpy~=1.19",
             "pandas~=1.0",
