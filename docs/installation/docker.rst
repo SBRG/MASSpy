@@ -1,5 +1,5 @@
-Docker
-=======
+Using MASSpy with Docker
+========================
 **MASSpy** comes in deployable `Docker <https://docs.docker.com/>`_ container, allowing for quick access
 to an isolated Python environment prepackaged the MASSpy software, all within a virtual machine that can run
 in a variety of environments.
