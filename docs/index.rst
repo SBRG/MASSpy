@@ -99,7 +99,7 @@ Need to review the basic principles of dynamic simulation and analysis? Educatio
 
 API
 ---
-Not sure how to use a specific method or function? Try searching the **MASSpy** :ref:`/autoapi/index.rst`!
+Not sure how to use a specific method or function? Try searching the :ref:`/autoapi/index.rst`!
 
 .. toctree::
    :maxdepth: 1
