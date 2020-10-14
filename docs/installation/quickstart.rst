@@ -4,7 +4,7 @@ To quickly get started with the latest version of MASSpy, check out the informat
 
 With Python
 -----------
-THe recommended method is to install **MASSpy** is to use ``pip`` to
+The recommended method is to install **MASSpy** is to use ``pip`` to
 install the software from the `Python Package Index <https://pypi.python.org/pypi/masspy>`_.
 It is recommended to do this inside a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
