@@ -169,16 +169,12 @@ notebook or Python itself can be started by running one of the following from th
 To stop the inteactive shell and exit the container, run the ``exit`` command.
 
 
-Starting and stopping the container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To stop the container so that it can be resumed at a later point::
-
-    docker stop masspy_container
-
-To resume the container after it has been stopped::
+Resuming the container
+~~~~~~~~~~~~~~~~~~~~~~
+To resume the container named ``masspy_container`` after it has been stopped::
 
     docker start -i masspy_container
 
-To remove the container entirely::
+To remove the ``masspy_container`` entirely::
 
     docker rm masspy_container

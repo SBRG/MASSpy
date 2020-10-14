@@ -22,7 +22,7 @@ To quickly get started with the latest version of MASSpy using Docker, run the f
         -it sbrg/masspy
 
 From within the container, either run ``python`` or ``jupyter notebook --ip=0.0.0.0 --port=8888`` depending on
-the desired Python workspace!
+the desired Python workspace.
 
 Optimization in MASSpy
 ----------------------
