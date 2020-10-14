@@ -610,7 +610,7 @@ class Simulation(Object):
                     rr.timeCourseSelections = selections
                     _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
                              "Simulating '%s'", str(model))
-                    results = rr.simulate(*time)
+                    results = rr.simulate(*time[0], **time[1])
 
                     # Map results to their identifiers and return MassSolutions
                     _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
@@ -1152,7 +1152,7 @@ class Simulation(Object):
             # Simulate for a long time
             _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
                      "Simulating '%s'", str(model))
-            simulation_results = rr.simulate(*time)
+            simulation_results = rr.simulate(*time[0], **time[1])
         except (RuntimeError, TypeError) as e:
             raise MassSimulationError(
                 str(e.__class__.__name__) + ": " + str(e))
@@ -1462,9 +1462,9 @@ def _format_time_input(time, steps=None, verbose=False):
     if steps is not None:
         steps = int(steps)
 
-    time = (t0, tf, numpoints, None, steps)
+    time_input = ((t0, tf, numpoints, None, None), {"steps": steps})
 
-    return time
+    return time_input
 
 
 def _round_values(values, decimal_precision=True):
