@@ -20,7 +20,7 @@ jobs:
         id: prep-tags
         run: |
           DOCKER_IMAGE=$GITHUB_REPOSITORY
-          if [[ "$GITHUB_REF" == "refs/tags/*"" ]] ; then
+          if [[ "$GITHUB_REF" == "refs/tags/*" ]] ; then
             VERSION=${GITHUB_REF#refs/tags/}
           else
           elif [[ "$GITHUB_REF" == "refs/heads/${{ github.event.repository.default_branch }}" ]] ; then 
