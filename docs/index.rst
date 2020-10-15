@@ -1,9 +1,8 @@
 MASSpy: Modeling Dynamic Biological Processes in Python
 =======================================================
 
-|PyVer| |PyPiVer| |PyPiBld| 
-|RTD| |DocVer| |DocBld| 
-|LIC| 
+|PyVer| |PyPiVer| |DocVer| |RTD| |LIC| 
+
 
 Welcome to MASSpy's Documentation!
 ----------------------------------
@@ -132,14 +131,8 @@ Indices and tables
 .. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
 
-.. |PyPiBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/python-publish
-    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/python-publish.yml
-
-.. |DocVer| image:: https://img.shields.io/docker/automated/sbrg/masspy
+.. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
-
-.. |DocBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/publish-docker-images/master
-    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/publish-docker-images.yml
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/

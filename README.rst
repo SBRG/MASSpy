@@ -1,9 +1,8 @@
 MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-|PyVer| |PyPiVer| |PyPiBld| 
-|RTD| |DocVer| |DocBld| 
-|LIC| 
+|PyVer| |PyPiVer| |DocVer| |RTD| |LIC| 
+
 
 What is MASSpy?
 --------------
@@ -21,10 +20,12 @@ Additional information about **COBRApy** can be found in its
 `documentation <https://cobrapy.readthedocs.io/en/latest/index.html>`_ or
 `github page <https://github.com/opencobra/cobrapy>`_.
 
+
 Installation
 ------------
 To quickly get started with the latest version of MASSpy, check out the information below taken from the
 `Quick Start <https://masspy.readthedocs.io/en/latest/installation/quickstart.html>`_ guide!
+
 
 With Python
 ~~~~~~~~~~~
@@ -33,6 +34,7 @@ install the software from the `Python Package Index <https://pypi.python.org/pyp
 It is recommended to do this inside a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
     pip install masspy
+
 
 With Docker
 ~~~~~~~~~~~
@@ -48,15 +50,18 @@ To quickly get started with the latest version of MASSpy using Docker, run the f
 From within the container, either run ``python`` or ``jupyter notebook --ip=0.0.0.0 --port=8888`` depending on
 the desired Python workspace.
 
+
 Optimization in MASSpy
 ~~~~~~~~~~~~~~~~~~~~~~
 By default, **MASSpy** comes with the `GLPK <https://www.gnu.org/software/glpk/>`__ solver. However, specific features of
 **MASSpy** require a commercial optimization solver with additional solving capabilities. For more information, check out the
 section on `solvers <https://masspy.readthedocs.io/en/latest/installation/quickstart.html>`_.
 
+
 Documentation
 -------------
 The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_. All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_. 
+
 
 Cite
 ----
@@ -67,6 +72,7 @@ for citing the **MASSpy** in the future. In the meantime, feel free to cite the
     MASSpy: Building, simulating, and visualizing dynamic biological models in Python using mass action kinetics
     Zachary B. Haiman, Daniel C. Zielinski, Yuko Koike, James T. Yurkovich, Bernhard O. Palsson
     bioRxiv 2020.07.31.230334; doi: https://doi.org/10.1101/2020.07.31.230334
+
 
 Contributing
 ------------
@@ -90,14 +96,8 @@ by their licenses as well.
 .. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
 
-.. |PyPiBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/python-publish
-    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/python-publish.yml
-
-.. |DocVer| image:: https://img.shields.io/docker/automated/sbrg/masspy
+.. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
-
-.. |DocBld| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/publish-docker-images/master
-    :target: https://github.com/SBRG/MASSpy/blob/master/.github/workflows/publish-docker-images.yml
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/
