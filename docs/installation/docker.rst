@@ -129,7 +129,7 @@ Once the MASSpy image is obtained, the next step is to run the image as a contai
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --publish 8888:8888 \
         --name masspy_container \
-        -it sbrg/masspy/masspy:latest
+        -it sbrg/masspy:latest
 
 To break down the above command:
 
@@ -153,7 +153,7 @@ as well. This can be done via the following::
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
         --name masspy_container \
-        -it sbrg/masspy/masspy:latest
+        -it sbrg/masspy:latest
 
 
 .. _running-the-container:
