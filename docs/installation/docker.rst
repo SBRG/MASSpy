@@ -135,7 +135,7 @@ To break down the above command:
 
     * --mount :
         The ``--mount`` flag creates a volume to allow data to persist even after a container has been stopped. 
-        In this particular example, a mount of type ``volume` called ``mass_project"`` is mounted to the container at
+        In this particular example, a mount of type ``volume`` called ``mass_project"`` is mounted to the container at
         the location ``/home/masspy_user/mass_project``. Not required for use, but highly recommended. 
     * --publish : 
         The ``--publish`` flag publishes the container’s port  ``8888``, binding it to the host port at ``8888``.
