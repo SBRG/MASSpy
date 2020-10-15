@@ -12,6 +12,10 @@ jobs:
         python-version: [3.6, 3.7]
     steps:
       - 
+        name: Checkout
+        id: checkout
+        uses: actions/checkout@v2
+      - 
         name: Setup Python
         id: setup
         uses: actions/setup-python@v2
