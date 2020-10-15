@@ -7,9 +7,6 @@ jobs:
   build-and-deploy:
     name: Publish packages to the Python Packaging Index (PyPi)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7]
     steps:
       - 
         name: Checkout
@@ -20,7 +17,7 @@ jobs:
         id: setup
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.7
       - 
         name: Install dependencies
         id: install-deps
