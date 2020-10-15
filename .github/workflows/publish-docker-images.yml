@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
   push-to-registries:
     name: Build and push Docker images to registries
@@ -12,6 +14,23 @@ jobs:
         name: Checkout
         id: checkout
         uses: actions/checkout@v2
+
+      - 
+        name: Prepare image tag
+        id: prep-tags
+        run: |
+          DOCKER_IMAGE=$GITHUB_REPOSITORY
+          if [[ "$GITHUB_REF" == "refs/tags/*"" ]] ; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+          elif [[ "$GITHUB_REF" == "refs/heads/${{ github.event.repository.default_branch }}" ]] ; then 
+            VERSION=latest
+          else
+            VERSION=${GITHUB_REF#refs/heads/}
+          fi
+          TAGS=${DOCKER_IMAGE}:${VERSION}
+          echo ::set-output name=tags::${TAGS}
+  
       - 
         name: Set up Docker Buildx
         id: docker-buildx-setup
@@ -23,6 +42,7 @@ jobs:
         with:
           username: ${{ secrets.SBRG_MACHINE_USERNAME_DOCKERHUB }}
           password: ${{ secrets.SBRG_MACHINE_DOCKERHUB_TOKEN }}
+  
       - 
         name: Build and push image to registry
         id: docker-build-push
@@ -31,5 +51,4 @@ jobs:
           context: ./docker
           file: ./docker/Dockerfile
           push: true
-          tags: |
-            sbrg/masspy:latest
+          tags: ${{ steps.prep-tags.outputs.tags }}
