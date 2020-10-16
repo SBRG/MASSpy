@@ -66,7 +66,7 @@ Once MASSpy is installed, check out the step-by-step tutorials below to learn ho
    tutorials/global_configuration.ipynb
    tutorials/cobra_to_mass.ipynb
    tutorials/compartments.ipynb
-   tutorials/exporting_optimization_problems.ipynb
+   tutorials/import_export_optimization.ipynb
 
 
 Example Gallery

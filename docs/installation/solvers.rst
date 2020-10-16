@@ -38,5 +38,5 @@ To use Gurobi with Docker, a floating license is required.
 
 Working with other solvers
 --------------------------
-Prefer to work with a different optimization solver? It is possible to export the optimization problem for use in other solvers.
-Read more at :ref:`/tutorials/exporting_optimization_problems.ipynb`.
+Prefer to work with a different optimization solver? It is possible to import/export optimization problems for use in other solvers.
+Read more at :ref:`/tutorials/import_export_optimization.ipynb`.
