@@ -126,9 +126,8 @@ Creating the container
 Once the MASSpy image is obtained, the next step is to run the image as a container using the following command::
 
     docker run \
-        --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
+        --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
-        --name masspy_container \
         -it sbrg/masspy:latest
 
 To break down the above command:
@@ -140,8 +139,6 @@ To break down the above command:
     * --publish : 
         The ``--publish`` flag publishes the container’s port  ``8888``, binding it to the host port at ``8888``.
         Required to utilize Jupyter (iPython) notebooks from inside the container.
-    * --name :
-        An optional name for the container. In this particular example, the container is given the name ``masspy_container``.
     * -it : 
         Allocate a pseudo-TTY and create an interactive shell in the container. 
     
@@ -152,7 +149,6 @@ as well. This can be done via the following::
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
-        --name masspy_container \
         -it sbrg/masspy:latest
 
 
@@ -171,10 +167,10 @@ To stop the inteactive shell and exit the container, run the ``exit`` command.
 
 Resuming the container
 ~~~~~~~~~~~~~~~~~~~~~~
-To resume the container named ``masspy_container`` after it has been stopped::
+To resume the container ``sbrg/masspy:latest`` after it has been stopped::
 
-    docker start -i masspy_container
+    docker start -i sbrg/masspy:latest
 
-To remove the ``masspy_container`` entirely::
+To remove the container ``sbrg/masspy:latest`` entirely::
 
-    docker rm masspy_container
+    docker rm sbrg/masspy:latest
