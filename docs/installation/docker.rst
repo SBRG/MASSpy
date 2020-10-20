@@ -12,7 +12,7 @@ already been installed. The guide can be broken down into three key steps:
     3. :ref:`running-the-container`: After the container is built, the final step is to run the container and get started using MASSpy!
 
 **Important:** In order to use the *Gurobi Optimizer* or the *IBM ILOG CPLEX Optimization Studio*, the Docker image must be built locally
-from a Dockerfile and a "context" containing certain files. See the secion below on :ref:`building-the-image`
+from a Dockerfile and a "context" containing certain files. See the secion below on :ref:`building-the-image`.
 
 About Docker
     Interested in learning more about Docker? Read more about containerization and getting started with Docker in the 
@@ -126,22 +126,19 @@ Creating the container
 Once the MASSpy image is obtained, the next step is to run the image as a container using the following command::
 
     docker run \
-        --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
+        --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
-        --name masspy_container \
-        -it sbrg/masspy/masspy:latest
+        -it sbrg/masspy:latest
 
 To break down the above command:
 
     * --mount :
         The ``--mount`` flag creates a volume to allow data to persist even after a container has been stopped. 
-        In this particular example, a mount of type ``volume` called ``mass_project"`` is mounted to the container at
+        In this particular example, a mount of type ``volume`` called ``mass_project`` is mounted to the container at
         the location ``/home/masspy_user/mass_project``. Not required for use, but highly recommended. 
     * --publish : 
         The ``--publish`` flag publishes the container’s port  ``8888``, binding it to the host port at ``8888``.
         Required to utilize Jupyter (iPython) notebooks from inside the container.
-    * --name :
-        An optional name for the container. In this particular example, the container is given the name ``masspy_container``.
     * -it : 
         Allocate a pseudo-TTY and create an interactive shell in the container. 
     
@@ -152,8 +149,7 @@ as well. This can be done via the following::
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
-        --name masspy_container \
-        -it sbrg/masspy/masspy:latest
+        -it sbrg/masspy:latest
 
 
 .. _running-the-container:
@@ -171,10 +167,10 @@ To stop the inteactive shell and exit the container, run the ``exit`` command.
 
 Resuming the container
 ~~~~~~~~~~~~~~~~~~~~~~
-To resume the container named ``masspy_container`` after it has been stopped::
+To resume the container ``sbrg/masspy:latest`` after it has been stopped::
 
-    docker start -i masspy_container
+    docker start -i sbrg/masspy:latest
 
-To remove the ``masspy_container`` entirely::
+To remove the container ``sbrg/masspy:latest`` entirely::
 
-    docker rm masspy_container
+    docker rm sbrg/masspy:latest

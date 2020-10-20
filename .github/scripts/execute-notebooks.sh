@@ -14,6 +14,7 @@ if [ "$#" -eq 0 ] ; then \
     visualization_dir='gallery/visualization'
     workflow_dir='gallery/workflows'
     inplace='--inplace'
+    cleanup='true'
 else
     # Parse  arguments
     while [ "$#" -ne 0 ] ; do
@@ -56,6 +57,9 @@ else
             --allow-errors )
                 allow_errors='--allow-errors'
                 ;;
+            --cleanup )
+                cleanup='true'
+                ;;
         esac
         shift 
     done 
@@ -81,3 +85,9 @@ for directory in $additional_dir \
         done
     fi 
     done
+
+if [ ! -z cleanup ] ;  then \
+    echo "Cleaning up..." 
+    sh $( cd "$(dirname "$0")" ; pwd -P )/clean.sh
+fi 
+echo "Finished"
