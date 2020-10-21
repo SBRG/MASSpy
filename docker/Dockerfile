@@ -102,10 +102,7 @@ RUN echo \
     # Make directory for docker scripts and move helper scripts into it.
     && mkdir opt/docker-scripts \
     && find ${HOME}${MASS_INSTALL}/docker -name "*.sh" -exec cp {} ./opt/docker-scripts/ ";" \
-    && if [ -e "tmp/docker-entrypoint.sh" ] ; then mv tmp/docker-entrypoint.sh opt/docker-scripts/ ; fi \
-    # Ensure scripts are Unix compatible using dos2unix
-    && apt-get update && apt-get install -y dos2unix \
-    && find ${HOME}${MASS_INSTALL}/docker -name "*.sh" -exec dos2unix {} ";" \
+    && if [ -e "tmp/docker-entrypoint.sh" ] ; then mv tmp/docker-entrypoint.sh ./opt/docker-scripts/ ; fi \
     # Make directory for licenses volume and move license files into it
     && mkdir .${LICENSE_DIR} \
     # Copy license files into license directory
@@ -158,10 +155,11 @@ RUN echo \
 # Remove tmp & remove dos2unix
 RUN echo \
     && rm -rf tmp \
+    # Ensure scripts are Unix compatible using dos2unix
+    && apt-get update && apt-get install -y dos2unix \
+    && find ./opt/docker-scripts/ -name "*.sh" -exec dos2unix {} ";" \
     && apt-get --purge remove -y dos2unix \
-    && rm -rf /var/lib/apt/lists/* \
-    # Remove license directory if empty
-    && if [ ! "$(ls -A .${LICENSE_DIR})" ] ; then rmdir .${LICENSE_DIR} ; fi 
+    && rm -rf /var/lib/apt/lists/*
 
 # Final build stage install Python API if they exist and adds new user with necessary permissions
 FROM mass-setup AS mass-builder

@@ -66,6 +66,8 @@ To build the image with tag ``latest``, navigate to the ``MASSpy`` directory and
 
     docker build -t sbrg/masspy:latest ./docker
 
+**Windows Users:** Please note the following issue about `running linux containers using Docker for Windows <https://github.com/docker/for-win/issues/1340>`_.
+
 
 .. _including-cplex-optimizer:
 
@@ -126,12 +128,16 @@ Creating the container
 Once the MASSpy image is obtained, the next step is to run the image as a container using the following command::
 
     docker run \
+        --name mass-container \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
         -it sbrg/masspy:latest
 
 To break down the above command:
 
+    * --name : 
+        The ``--name`` flag sets an optional name for the container that can be used to reference the container
+        with the Docker Client. Here, the container is named ``mass-container``.
     * --mount :
         The ``--mount`` flag creates a volume to allow data to persist even after a container has been stopped. 
         In this particular example, a mount of type ``volume`` called ``mass_project`` is mounted to the container at
@@ -141,15 +147,19 @@ To break down the above command:
         Required to utilize Jupyter (iPython) notebooks from inside the container.
     * -it : 
         Allocate a pseudo-TTY and create an interactive shell in the container. 
-    
+
 If optimization solvers are included when building the image, it is recommended to mount the ``licenses`` volume
 as well. This can be done via the following::
 
     docker run \
+        --name mass-container \
         --mount type=volume,src=licenses,dst=/home/masspy_user/opt/licenses \
         --mount type=volume,src=mass_project,dst=/home/masspy_user/mass_project \
         --publish 8888:8888 \
         -it sbrg/masspy:latest
+
+.. note::
+    Containers names must be unique. To re-use a name for a new container, the previous container must first be removed.
 
 
 .. _running-the-container:
@@ -167,10 +177,26 @@ To stop the inteactive shell and exit the container, run the ``exit`` command.
 
 Resuming the container
 ~~~~~~~~~~~~~~~~~~~~~~
-To resume the container ``sbrg/masspy:latest`` after it has been stopped::
+To resume the container ``mass-container`` after it has been stopped::
 
-    docker start -i sbrg/masspy:latest
+    docker start -i mass-container
 
-To remove the container ``sbrg/masspy:latest`` entirely::
 
-    docker rm sbrg/masspy:latest
+Cleanup
+~~~~~~~
+To remove the container ```mass-container`` entirely::
+
+    docker rm mass-container
+
+To remove the image ``sbrg/masspy:latest`` entirely::
+
+    docker rmi sbrg/masspy:latest
+
+
+Troubleshooting
+---------------
+Need help trouble shooting Docker for your system? Try searching the official Docker resources:
+
+    `Docker CE for Linux <https://github.com/docker/for-linux/>`__ |
+    `Docker Desktop for Mac <https://github.com/docker/for-mac/>`__ |
+    `Docker Desktop for Windows <https://github.com/docker/for-win/>`__
