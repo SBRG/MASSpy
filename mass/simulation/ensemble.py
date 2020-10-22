@@ -297,8 +297,6 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
         Whether to update the model with the steady state results.
         Default is ``False``. Only updates models that reached steady state.
     **kwargs
-        simulation :
-            A :class:`.Simulation` object to use for the sim
         verbose :
             ``bool`` indicating the verbosity of the method.
 
@@ -452,7 +450,7 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
         See :mod:`~.simulation.simulation` documentation for more
         information on valid perturbations.
 
-        Ignored if ``steady_state_strategy=None``.
+        Ignored if ``strategy=None``.
     **kwargs
         solver_options :
             ``dict`` of options to pass to the solver utilized in determining
