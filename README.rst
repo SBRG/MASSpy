@@ -1,7 +1,7 @@
 MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-|PyVer| |PyPiVer| |DocVer| |RTD| |LIC| 
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| 
 
 
 What is MASSpy?
@@ -97,6 +97,9 @@ by their licenses as well.
     :target: https://pypi.org/project/masspy/
 
 .. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
+    :target: https://hub.docker.com/r/sbrg/masspy
+
+.. |DocImgSz| image:: https://img.shields.io/docker/image-size/sbrg/masspy?logo=docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic

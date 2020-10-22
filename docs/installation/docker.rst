@@ -79,10 +79,14 @@ See :ref:`cplex-solver` for more information on obtaining an academic license.
 Once a CPLEX license has been obtained:
 
     1. Download the installer ``cplex_studioXXXX.linux-x86-64.bin`` from CPLEX, replacing "XXXX" 
-       for the version number without punctuation (e.g., 1210).
+       for the version number without punctuation (e.g., 1210). 
     2. Place the installer into the ``cplex`` directory in the build context as outlined below.
     3. Place the file ``cplex.install.properties`` into the build context to accept the license
        agreement and to enable silent install.
+
+.. note::
+    The CPLEX installer must be for **LINUX** to be compatible with the containers built using the
+    `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_.
 
 **Build Context**: To include CPLEX, the build context must be modified to contain the ``cplex`` subdirectory as follows::
 

@@ -1,7 +1,7 @@
 MASSpy: Modeling Dynamic Biological Processes in Python
 =======================================================
 
-|PyVer| |PyPiVer| |DocVer| |RTD| |LIC| 
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| 
 
 
 Welcome to MASSpy's Documentation!
@@ -19,13 +19,20 @@ techniques and tools that enable different workflows. Additional information abo
 `documentation <https://cobrapy.readthedocs.io/en/stable/>`__ or
 `GitHub page <https://opencobra.github.io/cobrapy/>`__.
 
+Citation
+~~~~~~~~
+A manuscript is in preparation for publication and will be the proper reference for citing the MASSpy software package in the future.
+In the meantime, feel free to cite the preprint :cite:`HZK+20`, which can be found at bioRxiv.
+
+   The code and instsructions to reproduce the results presented in the publication is located
+   in the `MASSpy-publication GitHub Repository <https://github.com/SBRG/MASSpy-publication>`__.
 
 Installation and Setup
 ----------------------
 There are various ways to get started with the **MASSpy** package. The guides below provide instructions on how to set up a **MASSpy** environment best suited to your needs.
 
 **Quick Start Guide**:
-   Ready to dive into **MASSpy** right away? Check out the :ref:`/installation/quickstart.rst` 
+   Ready to dive into **MASSpy** right away? Check out the :ref:`/installation/quickstart.rst`.
 
 **Optimization Solvers**:
    In order to utilize certain **MASSpy** features, additional optimization capabilities (e.g., quadratic programming) are necessary. 
@@ -132,6 +139,9 @@ Indices and tables
     :target: https://pypi.org/project/masspy/
 
 .. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
+    :target: https://hub.docker.com/r/sbrg/masspy
+
+.. |DocImgSz| image:: https://img.shields.io/docker/image-size/sbrg/masspy?logo=docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
