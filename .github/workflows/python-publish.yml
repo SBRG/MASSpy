@@ -1,6 +1,8 @@
 name: Upload Python Package to PyPi
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
@@ -8,32 +10,43 @@ jobs:
     name: Publish packages to the Python Packaging Index (PyPi)
     runs-on: ubuntu-latest
     steps:
-      - 
+      -
         name: Checkout
         id: checkout
         uses: actions/checkout@v2
-      - 
+      -
         name: Setup Python
         id: setup
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - 
+      -
         name: Install dependencies
         id: install-deps
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel
-      - 
-        name: Build distribitions
+      -
+        name: Build package distribitions
         id: build-distribitions
         run: |
           python setup.py sdist bdist_wheel
       -
-        name: Publish distribution to Test PyPI
-        id: test-publish
+        name: Publish package to Test PyPI
+        id: test-publish-pkg
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
+          skip_existing: true
+      -
+        name: Publish package to PyPI
+        id: publish-pkg
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: ${{ secrets.PYPI_USERNAME }}
+          password: ${{ secrets.PYPI_PASSWORD }}
+          repository_url: https://test.pypi.org/legacy/
+          skip_existing: true
