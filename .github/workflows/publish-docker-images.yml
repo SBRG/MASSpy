@@ -9,42 +9,54 @@ jobs:
   push-to-registries:
     name: Build and push Docker images to registries
     runs-on: ubuntu-latest
-    steps: 
-      - 
+    steps:
+      -
         name: Checkout
         id: checkout
         uses: actions/checkout@v2
-      - 
+      -
         name: Prepare image tag
         id: prep-tags
         run: |
           DOCKER_IMAGE="sbrg/masspy"
           if [[ "$GITHUB_REF" == refs/tags/* ]] ; then
             VERSION=$( echo $GITHUB_REF | sed 's/refs\/tags\/v//g' )
-          elif [[ "$GITHUB_REF" == "refs/heads/${{ github.event.repository.default_branch }}" ]] ; then 
+          elif [[ "$GITHUB_REF" == "refs/heads/${{ github.event.repository.default_branch }}" ]] ; then
             VERSION=latest
           else
             exit 1
           fi
-          TAGS=${DOCKER_IMAGE}:${VERSION}
-          echo ::set-output name=tags::${TAGS}
-      - 
+          DOCKER_TAGS=${DOCKER_IMAGE}:${VERSION}
+          GITHUB_PKGS_TAGS=docker.pkg.github.com/${DOCKER_TAGS}
+          echo ::set-output name=docker-tags::${DOCKER_TAGS}
+          echo ::set-output name=ghpkg-tags::${GITHUB_PKGS_TAGS}
+      -
         name: Set up Docker Buildx
         id: docker-buildx-setupx
         uses: docker/setup-buildx-action@v1
-      - 
+      -
         name: Login to DockerHub
         id: docker-login
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.SBRG_MACHINE_USERNAME_DOCKERHUB }}
           password: ${{ secrets.SBRG_MACHINE_DOCKERHUB_TOKEN }}
-      - 
-        name: Build and push image to registry
+      -
+        name: Login to GitHub Packages
+        id: github-packages-login
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ secrets.SBRG_MACHINE_USERNAME_GITHUB }}
+          password: ${{ secrets.SBRG_MACHINE_GITHUB_TOKEN }}
+      -
+        name: Build and push image to registries
         id: docker-build-push
         uses: docker/build-push-action@v2
         with:
           context: ./docker
           file: ./docker/Dockerfile
           push: true
-          tags: ${{ steps.prep-tags.outputs.tags }}
+          tags: |
+            ${{ steps.prep-tags.outputs.docker-tags }}
+            ${{ steps.prep-tags.outputs.ghpkg-tags }}
