@@ -36,10 +36,10 @@ jobs:
         id: test-publish-pkg
         uses: pypa/gh-action-pypi-publish@master
         with:
+          skip_existing: true
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
-          skip_existing: true
       -
         name: Publish package to PyPI
         id: publish-pkg

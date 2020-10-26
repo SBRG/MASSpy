@@ -26,10 +26,8 @@ jobs:
           else
             exit 1
           fi
-          DOCKER_TAGS=${DOCKER_IMAGE}:${VERSION}
-          GITHUB_PKGS_TAGS=docker.pkg.github.com/${DOCKER_TAGS}
-          echo ::set-output name=docker-tags::${DOCKER_TAGS}
-          echo ::set-output name=ghpkg-tags::${GITHUB_PKGS_TAGS}
+          TAGS=${DOCKER_IMAGE}:${VERSION}
+          echo ::set-output name=tags::${TAGS}
       -
         name: Set up Docker Buildx
         id: docker-buildx-setupx
@@ -42,21 +40,11 @@ jobs:
           username: ${{ secrets.SBRG_MACHINE_USERNAME_DOCKERHUB }}
           password: ${{ secrets.SBRG_MACHINE_DOCKERHUB_TOKEN }}
       -
-        name: Login to GitHub Packages
-        id: github-packages-login
-        uses: docker/login-action@v1
-        with:
-          registry: docker.pkg.github.com
-          username: ${{ secrets.SBRG_MACHINE_USERNAME_GITHUB }}
-          password: ${{ secrets.SBRG_MACHINE_GITHUB_TOKEN }}
-      -
-        name: Build and push image to registries
+        name: Build and push image to registry
         id: docker-build-push
         uses: docker/build-push-action@v2
         with:
           context: ./docker
           file: ./docker/Dockerfile
           push: true
-          tags: |
-            ${{ steps.prep-tags.outputs.docker-tags }}
-            ${{ steps.prep-tags.outputs.ghpkg-tags }}
+          tags: ${{ steps.prep-tags.outputs.tags }}
