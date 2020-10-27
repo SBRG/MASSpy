@@ -31,15 +31,15 @@ jobs:
         id: build-distribitions
         run: |
           python setup.py sdist bdist_wheel
-      -
-        name: Publish package to Test PyPI
-        id: test-publish-pkg
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          skip_existing: true
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.PYPI_PASSWORD }}
-          repository_url: https://test.pypi.org/legacy/
+      # -
+        # name: Publish package to Test PyPI
+        # id: test-publish-pkg
+        # uses: pypa/gh-action-pypi-publish@master
+        # with:
+        #   user: ${{ secrets.PYPI_USERNAME }}
+        #   password: ${{ secrets.PYPI_PASSWORD }}
+        #   repository_url: https://test.pypi.org/legacy/
+        #   skip_existing: true
       -
         name: Publish package to PyPI
         id: publish-pkg
@@ -48,4 +48,3 @@ jobs:
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
-          repository_url: https://test.pypi.org/legacy/
