@@ -207,9 +207,10 @@ def generate_mass_action_rate_expression(reaction, rate_type=1):
         rate_expression = sym.collect(rate_expression, reaction.kf_str)
 
     # Try to group compartments in the rate
-    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates:
-        for c in list(reaction.compartments):
-            rate_expression = sym.collect(rate_expression, "volume_" + c)
+    if not MASSCONFIGURATION.exclude_compartment_volumes_in_rates\
+       and len(reaction.compartments) == 1:
+        c = list(reaction.compartments)[0]
+        rate_expression = sym.collect(rate_expression, "volume_" + c)
 
     return rate_expression
 
