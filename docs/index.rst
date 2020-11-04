@@ -1,21 +1,23 @@
-MASSpy: Modeling Dynamic Biological Processes in Python
-=======================================================
+Welcome to MASSpy's Documentation!
+==================================
+
+.. image:: images/masspy-logo.svg
+   :width: 400
+   :align: center
 
 |PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| 
 
 
-Welcome to MASSpy's Documentation!
-----------------------------------
+What is MASSpy?
+---------------
 The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
 (**MASSpy**) package contains modules for the construction, simulation, and
-analysis of kinetic models of biochemical reaction systems.
-
-**MASSpy** is built to integrate seamlessly with **COBRApy** :cite:`ELPH13`, a widely used
-modeling software package for constraint-based reconstruction and analysis of
-biochemical reaction systems. **MASSpy**  can be used separately from
-or in conjunction with **COBRApy**, providing a vast assortment of modeling
-techniques and tools that enable different workflows. Additional information about
-**COBRApy** can be found in its
+analysis of kinetic models of biochemical reaction systems. **MASSpy** is built to 
+integrate seamlessly with **COBRApy** :cite:`ELPH13`, a widely used modeling
+software package for constraint-based reconstruction and analysis of biochemical
+reaction systems. **MASSpy**  can be used separately from or in conjunction with 
+**COBRApy**, providing a vast assortment of modeling techniques and tools that enable 
+different workflows. Additional information about **COBRApy** can be found in its
 `documentation <https://cobrapy.readthedocs.io/en/stable/>`__ or
 `GitHub page <https://opencobra.github.io/cobrapy/>`__.
 
