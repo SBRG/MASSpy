@@ -1,5 +1,5 @@
-Welcome to MASSpy's Documentation!
-==================================
+MASSpy: Modeling Dynamic Biological Processes in Python
+=======================================================
 
 .. image:: images/masspy-logo.svg
    :width: 400
