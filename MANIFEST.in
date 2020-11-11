@@ -1,5 +1,0 @@
-include README.rst LICENSE
-include mass
-include mass/test/data/maps/*.json
-include mass/test/data/models/*.json
-include mass/test/data/models/*.xml

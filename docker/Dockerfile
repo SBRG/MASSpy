@@ -89,10 +89,8 @@ RUN echo \
             # Assume branch name given otherwise
             git checkout ${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         fi \
-        && pip install -r requirements.txt $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
         && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
     else \
-        pip install -r requirements.txt $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
         pip install -e . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
     fi \
     && pip install notebook $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
@@ -106,7 +104,7 @@ RUN echo \
     # Make directory for licenses volume and move license files into it
     && mkdir .${LICENSE_DIR} \
     # Copy license files into license directory
-    && if [ -e tmp/*.lic ] ; then mv tmp/*.lic .${LICENSE_DIR}/ ; fi 
+    && if [ -e tmp/*.lic ] ; then mv tmp/*.lic .${LICENSE_DIR}/ ; fi
 
 # Install IBM CPLEX Optimization Studio if install.bin file present in build context
 WORKDIR ${HOME}
