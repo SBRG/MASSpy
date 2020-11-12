@@ -60,7 +60,7 @@ section on `solvers <https://masspy.readthedocs.io/en/latest/installation/quicks
 
 Documentation
 -------------
-The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_. All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_. 
+The documentation for **MASSpy** can be found `here <https://masspy.readthedocs.io/>`_. All documentation is generated using `Sphinx <https://www.sphinx-doc.org/>`_ and hosted by `ReadTheDocs <https://readthedocs.org/>`_.
 
 
 Cite
@@ -88,25 +88,32 @@ please note that binary packages which include GLPK (such as the binary
 wheels distributed at https://pypi.python.org/pypi/cobra) and
 `libRoadRunner <https://pypi.org/project/libroadrunner/>`_ will be bound
 by their licenses as well.
-    
+
 
 .. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
     :target: https://www.python.org/downloads/
+    :alt: Supported Python Versions
 
 .. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
+    :alt: Current PyPi version
 
 .. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
+    :alt: Current Docker version
 
 .. |DocImgSz| image:: https://img.shields.io/docker/image-size/sbrg/masspy?logo=docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
+    :alt: Current Docker image size
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/
+    :alt: Current documentation status
 
 .. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
+    :alt: MIT License
 
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
+    :alt: Black
