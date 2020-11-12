@@ -188,7 +188,7 @@ To resume the container ``mass-container`` after it has been stopped::
 
 Cleanup
 ~~~~~~~
-To remove the container ```mass-container`` entirely::
+To remove the container ``mass-container`` entirely::
 
     docker rm mass-container
 
