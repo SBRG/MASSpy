@@ -18,8 +18,7 @@ import numpy as np
 from optlang.interface import OPTIMAL
 
 from mass.core.mass_configuration import MassConfiguration
-from mass.thermo.conc_solver import (
-    ConcSolver, concentration_constraint_matricies)
+from mass.thermo.conc_solver import ConcSolver, concentration_constraint_matricies
 from mass.util.matrix import nullspace
 from mass.util.util import _make_logger, ensure_non_negative_value
 
@@ -89,13 +88,13 @@ class ConcHRSampler:
     def __init__(self, concentration_solver, thinning, nproj=None, seed=None):
         """Initialize a new sampler."""
         if not isinstance(concentration_solver, ConcSolver):
-            raise TypeError(
-                "`concentration_solver` must be a ConcSolver instance")
+            raise TypeError("`concentration_solver` must be a ConcSolver instance")
         if concentration_solver.problem_type != "sampling":
             raise ValueError(
                 "The given `concentration_solver` is not set up for sampling. "
                 "To set up the concentration solver for sampling, utilize the "
-                "ConcSolver.setup_sampling_problem.")
+                "ConcSolver.setup_sampling_problem."
+            )
         # Set a copy of the solver to prevent changes to the original
         self.concentration_solver = deepcopy(concentration_solver)
 
@@ -151,7 +150,7 @@ class ConcHRSampler:
 
         # Set value
         if value is None:
-            value = int(min(len(self.concentration_solver.variables)**3, 1e6))
+            value = int(min(len(self.concentration_solver.variables) ** 3, 1e6))
 
         setattr(self, "_nproj", value)
 
@@ -213,28 +212,32 @@ class ConcHRSampler:
                 c_solver.slim_optimize()
 
                 if not c_solver.solver.status == OPTIMAL:
-                    LOGGER.info("Can not %simize metabolite %s, skipping it",
-                                sense, met.id)
+                    LOGGER.info(
+                        "Can not %simize metabolite %s, skipping it", sense, met.id
+                    )
                     c_solver.objective.set_linear_coefficients({variable: 0})
                     continue
 
                 primals = c_solver.solver.primal_values
                 sol = [primals[v.name] for v in c_solver.variables]
-                self.warmup[self.n_warmup, ] = sol
+                self.warmup[
+                    self.n_warmup,
+                ] = sol
                 self.n_warmup += 1
 
                 # Reset objective
                 c_solver.objective.set_linear_coefficients({variable: 0})
 
         # Shrink to measure
-        self.warmup = self.warmup[0:self.n_warmup, :]
+        self.warmup = self.warmup[0 : self.n_warmup, :]
         if self.warmup.size == 0:
             raise OptimizationError(
                 "CVA warmup found no feasible solutions. Ensure the systems "
                 "has the appropriate variables and constraints by excluding "
                 "certain metabolites (e.g. hydrogen) and reactions "
                 "(e.g. boundary reactions), and by indicating the "
-                "equilibrium reactions.")
+                "equilibrium reactions."
+            )
         # Remove redundant search directions
         keep = np.logical_not(self._is_redundant(self.warmup))
         self.warmup = self.warmup[keep, :]
@@ -242,12 +245,13 @@ class ConcHRSampler:
 
         # Catch some special cases
         if len(self.warmup.shape) == 1 or self.warmup.shape[0] == 1:
-            raise ValueError(
-                "The concentration cone consists only of a single point.")
+            raise ValueError("The concentration cone consists only of a single point.")
         if self.n_warmup == 2:
             if not self.problem.homogeneous:
-                raise ValueError("Can not sample from an inhomogenous problem"
-                                 " with only 2 search directions.")
+                raise ValueError(
+                    "Can not sample from an inhomogenous problem"
+                    " with only 2 search directions."
+                )
             LOGGER.info("All search directions on a line, adding another one.")
             newdir = self.warmup.T.dot([0.25, 0.25])
             self.warmup = np.vstack([self.warmup, newdir])
@@ -255,7 +259,8 @@ class ConcHRSampler:
 
         # Shrink warmup points to measure
         self.warmup = shared_np_array(
-            (self.n_warmup, len(c_solver.variables)), self.warmup)
+            (self.n_warmup, len(c_solver.variables)), self.warmup
+        )
 
     def sample(self, n, concs=True):
         """Abstract sampling function.
@@ -317,20 +322,22 @@ class ConcHRSampler:
         equalities = self.problem.equalities
 
         # Don't reproject if the point is feasible
-        if np.allclose(equalities.dot(p), self.problem.b,
-                       rtol=0, atol=self.feasibility_tol):
+        if np.allclose(
+            equalities.dot(p), self.problem.b, rtol=0, atol=self.feasibility_tol
+        ):
             new = p
         else:
             LOGGER.info(
-                "feasibility violated in sample %d, trying to reproject",
-                self.n_samples)
+                "feasibility violated in sample %d, trying to reproject", self.n_samples
+            )
             new = nulls.dot(nulls.T.dot(p))
 
         # If projection may violate bounds, set to random point in space
         if any(new != p):
             LOGGER.info(
-                "Reprojection failed in sample %d, using random point in "
-                "space", self.n_samples)
+                "Reprojection failed in sample %d, using random point in " "space",
+                self.n_samples,
+            )
             new = self._random_point()
 
         return new
@@ -343,8 +350,9 @@ class ConcHRSampler:
         This method is intended for internal use only.
 
         """
-        idx = np.random.randint(self.n_warmup,
-                                size=min(2, np.ceil(np.sqrt(self.n_warmup))))
+        idx = np.random.randint(
+            self.n_warmup, size=min(2, np.ceil(np.sqrt(self.n_warmup)))
+        )
         return self.warmup[idx, :].mean(axis=0)
 
     def _is_redundant(self, matrix, cutoff=None):
@@ -376,13 +384,33 @@ class ConcHRSampler:
 
         """
         problem = self.problem
-        lb_dist = (p - problem.variable_bounds[0, ]).min()
-        ub_dist = (problem.variable_bounds[1, ] - p).min()
+        lb_dist = (
+            p
+            - problem.variable_bounds[
+                0,
+            ]
+        ).min()
+        ub_dist = (
+            problem.variable_bounds[
+                1,
+            ]
+            - p
+        ).min()
 
         if problem.bounds.shape[0] > 0:
             const = problem.inequalities.dot(p)
-            const_lb_dist = (const - problem.bounds[0, ]).min()
-            const_ub_dist = (problem.bounds[1, ] - const).min()
+            const_lb_dist = (
+                const
+                - problem.bounds[
+                    0,
+                ]
+            ).min()
+            const_ub_dist = (
+                problem.bounds[
+                    1,
+                ]
+                - const
+            ).min()
 
             lb_dist = min(lb_dist, const_lb_dist)
             ub_dist = min(ub_dist, const_ub_dist)
@@ -398,7 +426,8 @@ class ConcHRSampler:
 
         """
         problem = concentration_constraint_matricies(
-            self.concentration_solver, zero_tol=self.feasibility_tol)
+            self.concentration_solver, zero_tol=self.feasibility_tol
+        )
 
         equalities = problem.equalities
         b = problem.b
@@ -416,12 +445,12 @@ class ConcHRSampler:
             b=shared_np_array(b.shape, b),
             inequalities=shared_np_array(inequalities.shape, inequalities),
             bounds=shared_np_array(bounds.shape, bounds),
-            variable_fixed=shared_np_array(variable_fixed.shape,
-                                           variable_fixed, integer=True),
-            variable_bounds=shared_np_array(variable_bounds.shape,
-                                            variable_bounds),
+            variable_fixed=shared_np_array(
+                variable_fixed.shape, variable_fixed, integer=True
+            ),
+            variable_bounds=shared_np_array(variable_bounds.shape, variable_bounds),
             nullspace=shared_np_array(nulls.shape, nulls),
-            homogeneous=False  # Conc sampling is never homogeneous
+            homogeneous=False,  # Conc sampling is never homogeneous
         )
 
 
@@ -459,20 +488,21 @@ def step(sampler, x, delta, fraction=None, tries=0):
 
     """
     problem = sampler.problem
-    valid = ((np.abs(delta) > sampler.feasibility_tol) &
-             np.logical_not(problem.variable_fixed))
+    valid = (np.abs(delta) > sampler.feasibility_tol) & np.logical_not(
+        problem.variable_fixed
+    )
 
     # Permisible alphas for staying in variable bounds
-    valphas = (
-        (1.0 - sampler.bounds_tol) * problem.variable_bounds - x)[:, valid]
+    valphas = ((1.0 - sampler.bounds_tol) * problem.variable_bounds - x)[:, valid]
     valphas = (valphas / delta[valid]).flatten()
 
     if problem.bounds.shape[0] > 0:
         # Permissible alphas for staying in constraint bounds
         ineqs = problem.inequalities.dot(delta)
         valid = np.abs(ineqs) > sampler.feasibility_tol
-        balphas = ((1.0 - sampler.bounds_tol) * problem.bounds -
-                   problem.inequalities.dot(x))[:, valid]
+        balphas = (
+            (1.0 - sampler.bounds_tol) * problem.bounds - problem.inequalities.dot(x)
+        )[:, valid]
         balphas = (balphas / ineqs[valid]).flatten()
 
         # Combined alphas
@@ -483,8 +513,12 @@ def step(sampler, x, delta, fraction=None, tries=0):
     pos_alphas = alphas[alphas > 0.0]
     neg_alphas = alphas[alphas <= 0.0]
 
-    alpha_range = np.array([neg_alphas.max() if neg_alphas.size > 0 else 0,
-                            pos_alphas.min() if pos_alphas.size > 0 else 0])
+    alpha_range = np.array(
+        [
+            neg_alphas.max() if neg_alphas.size > 0 else 0,
+            pos_alphas.min() if pos_alphas.size > 0 else 0,
+        ]
+    )
 
     if fraction:
         alpha = alpha_range[0] + fraction * (alpha_range[1] - alpha_range[0])
@@ -496,20 +530,22 @@ def step(sampler, x, delta, fraction=None, tries=0):
     # Numerical instabilities may cause bounds invalidation. If so,
     # reset sampler and sample from one of the original warmup directions
     # if that occurs. Also reset if it got stuck.
-    if np.any(sampler._bounds_dist(p) < -sampler.bounds_tol) or\
-       np.abs(np.abs(alpha_range).max() * delta).max() < sampler.bounds_tol:
+    if (
+        np.any(sampler._bounds_dist(p) < -sampler.bounds_tol)
+        or np.abs(np.abs(alpha_range).max() * delta).max() < sampler.bounds_tol
+    ):
         if tries > MAX_TRIES:
-            raise RuntimeError("Can not escape sampling region, model seems "
-                               "numerically unstable. Reporting the model to "
-                               "https://github.com/SBRG/masspy/issues "
-                               "will help us to fix this.")
-        LOGGER.info(
-            "found bounds infeasibility in sample, resetting to center")
+            raise RuntimeError(
+                "Can not escape sampling region, model seems "
+                "numerically unstable. Reporting the model to "
+                "https://github.com/SBRG/masspy/issues "
+                "will help us to fix this."
+            )
+        LOGGER.info("found bounds infeasibility in sample, resetting to center")
         newdir = sampler.warmup[np.random.randint(sampler.n_warmup)]
         sampler.retries += 1
 
-        return step(sampler, sampler.center, newdir - sampler.center, None,
-                    tries + 1)
+        return step(sampler, sampler.center, newdir - sampler.center, None, tries + 1)
     return p
 
 

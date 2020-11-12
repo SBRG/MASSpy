@@ -4,10 +4,16 @@ from os import name as _name
 from os.path import abspath as _abspath
 from os.path import dirname as _dirname
 
-from mass import (io, enzyme_modules)
+from mass import io, enzyme_modules
 from mass.core import (
-    MassConfiguration, MassMetabolite, MassModel, MassReaction,
-    MassSolution, Unit, UnitDefinition)
+    MassConfiguration,
+    MassMetabolite,
+    MassModel,
+    MassReaction,
+    MassSolution,
+    Unit,
+    UnitDefinition,
+)
 from mass.simulation import Simulation
 from mass.util import show_versions, strip_time, qcqa_model
 
@@ -29,4 +35,4 @@ def _warn_format(message, category, filename, lineno, file=None, line=None):
 
 _warnings.formatwarning = _warn_format
 
-__all__ = ("_warn_format")
+__all__ = "_warn_format"

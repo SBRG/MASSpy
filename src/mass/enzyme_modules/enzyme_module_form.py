@@ -81,8 +81,9 @@ class EnzymeModuleForm(MassMetabolite):
 
     """
 
-    def __init__(self, id_or_specie=None, enzyme_module_id="",
-                 bound_metabolites=None, **kwargs):
+    def __init__(
+        self, id_or_specie=None, enzyme_module_id="", bound_metabolites=None, **kwargs
+    ):
         """Initialize the EnzymeModuleForm."""
         # Initialize MassMetabolite parent class
         super(EnzymeModuleForm, self).__init__(
@@ -91,7 +92,8 @@ class EnzymeModuleForm(MassMetabolite):
             formula=kwargs.get("formula", None),
             charge=kwargs.get("charge", None),
             compartment=kwargs.get("compartment", None),
-            fixed=kwargs.get("fixed", False))
+            fixed=kwargs.get("fixed", False),
+        )
         if isinstance(id_or_specie, EnzymeModuleForm):
             # Instiantiate a new EnzymeModuleForm with state identical to
             # the provided EnzymeModuleForm object.
@@ -110,8 +112,7 @@ class EnzymeModuleForm(MassMetabolite):
                 for attr in ["formula", "charge"]:
                     val = kwargs.get(attr, None)
                     if val is None:
-                        val = self.__class__.__dict__[
-                            "generate_form_" + attr](self)
+                        val = self.__class__.__dict__["generate_form_" + attr](self)
                     setattr(self, attr, val)
 
     @property
@@ -142,10 +143,13 @@ class EnzymeModuleForm(MassMetabolite):
         if value:
             bound_metabolites = {}
             for met, num_bound in iteritems(value):
-                if not isinstance(met, MassMetabolite) or \
-                   not isinstance(num_bound, integer_types):
-                    raise ValueError("value must be a dict where keys are "
-                                     "MassMetabolites and values are ints")
+                if not isinstance(met, MassMetabolite) or not isinstance(
+                    num_bound, integer_types
+                ):
+                    raise ValueError(
+                        "value must be a dict where keys are "
+                        "MassMetabolites and values are ints"
+                    )
                 if num_bound != 0:
                     bound_metabolites[met] = num_bound
             getattr(self, "_bound_metabolites").update(bound_metabolites)
@@ -181,8 +185,9 @@ class EnzymeModuleForm(MassMetabolite):
             name = "Enzyme"
 
         # Add the ligands bound to the active site(s)
-        bound_str = "-".join([met._remove_compartment_from_id_str()
-                              for met in self.bound_metabolites])
+        bound_str = "-".join(
+            [met._remove_compartment_from_id_str() for met in self.bound_metabolites]
+        )
         if bound_str:
             bound_str = "-" + bound_str + " complex"
         name += bound_str
@@ -220,7 +225,7 @@ class EnzymeModuleForm(MassMetabolite):
         formula = ""
         if self.enzyme_module_id:
             moiety = self.enzyme_module_id.upper()
-            if not re.match('^[A-Z]+[a-z]+$', moiety):
+            if not re.match("^[A-Z]+[a-z]+$", moiety):
                 moiety = re.sub("[0-9]", "", moiety)
 
             formula += "[" + moiety + "]"
@@ -228,9 +233,9 @@ class EnzymeModuleForm(MassMetabolite):
         total_elements = defaultdict(list)
         if self.bound_metabolites:
             elem_iters = [
-                iteritems({
-                    k: v * num_bound for k, v in iteritems(met.elements)})
-                for met, num_bound in iteritems(self.bound_metabolites)]
+                iteritems({k: v * num_bound for k, v in iteritems(met.elements)})
+                for met, num_bound in iteritems(self.bound_metabolites)
+            ]
 
             for k, v in chain(*elem_iters):
                 total_elements[k].append(v)
@@ -306,10 +311,12 @@ class EnzymeModuleForm(MassMetabolite):
             try:
                 self._bound_metabolites = {
                     self.model.metabolites.get_by_id(str(met)): num
-                    for met, num in iteritems(self.bound_metabolites)}
+                    for met, num in iteritems(self.bound_metabolites)
+                }
             except KeyError as e:
-                raise KeyError("'{0}' does not exist in model metabolites."
-                               .format(str(e)))
+                raise KeyError(
+                    "'{0}' does not exist in model metabolites.".format(str(e))
+                )
 
     def _repr_html_(self):
         """HTML representation of the overview for the EnzymeModuleForm.
@@ -347,11 +354,16 @@ class EnzymeModuleForm(MassMetabolite):
                 <td>{reactions}</td>
             </tr>
         </table>""".format(
-            id=self.id, name=self.name, address='0x0%x' % id(self),
-            enzyme=str(self.enzyme_module_id), compartment=self.compartment,
+            id=self.id,
+            name=self.name,
+            address="0x0%x" % id(self),
+            enzyme=str(self.enzyme_module_id),
+            compartment=self.compartment,
             bound=_make_bound_attr_str_repr(self.bound_metabolites),
-            ic=self._initial_condition, n_reactions=len(self.reactions),
-            reactions=', '.join(r.id for r in self.reactions))
+            ic=self._initial_condition,
+            n_reactions=len(self.reactions),
+            reactions=", ".join(r.id for r in self.reactions),
+        )
 
 
 def _make_bound_attr_str_repr(attribute_dict):
@@ -362,9 +374,9 @@ def _make_bound_attr_str_repr(attribute_dict):
     This method is intended for internal use only.
 
     """
-    return "; ".join([
-        "{0} {1}".format(v, k)
-        for k, v in iteritems(attribute_dict) if v != 0])
+    return "; ".join(
+        ["{0} {1}".format(v, k) for k, v in iteritems(attribute_dict) if v != 0]
+    )
 
 
 __all__ = ("EnzymeModuleForm",)

@@ -104,8 +104,13 @@ from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
 from mass.util.qcqa import is_simulatable, qcqa_model
 from mass.util.util import (
-    _check_kwargs, _log_msg, _make_logger, apply_decimal_precision,
-    ensure_iterable)
+    _check_kwargs,
+    _log_msg,
+    _make_logger,
+    apply_decimal_precision,
+    ensure_iterable,
+)
+
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()
 # If working in Python application (e.g. iPython notebooks), enable logging
@@ -122,9 +127,13 @@ STEADY_STATE_SOLVERS = list(roadrunner.steadyStateSolvers)
 """list: Possible solver routines for :class:`roadrunner.SteadyStateSolver`."""
 
 # SBML writing kwargs
-_SBML_KWARGS = {"use_fbc_package": True, "use_groups_package": True,
-                "units": False, "local_parameters": False,
-                "write_objective": False}
+_SBML_KWARGS = {
+    "use_fbc_package": True,
+    "use_groups_package": True,
+    "units": False,
+    "local_parameters": False,
+    "write_objective": False,
+}
 
 
 class Simulation(Object):
@@ -164,31 +173,32 @@ class Simulation(Object):
 
     """
 
-    def __init__(self, reference_model, id=None, name=None, verbose=False,
-                 **kwargs):
+    def __init__(self, reference_model, id=None, name=None, verbose=False, **kwargs):
         """Initialize the Simulation."""
         if not isinstance(reference_model, MassModel):
             raise TypeError(
-                "'{0}' is not a valid MassModel instance".format(
-                    str(reference_model)))
+                "'{0}' is not a valid MassModel instance".format(str(reference_model))
+            )
 
         if id is None:
             id = "{0}_Simulation".format(str(reference_model))
-        kwargs = _check_kwargs({
-            "variable_step_size": True,
-            "allow_approx": True,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "variable_step_size": True,
+                "allow_approx": True,
+            },
+            kwargs,
+        )
 
         try:
             # QCQA check model
-            _assess_model_quality_for_simulation(
-                reference_model, verbose, verbose)
+            _assess_model_quality_for_simulation(reference_model, verbose, verbose)
             # Load model into RoadRunner
-            rr = _load_model_into_roadrunner(reference_model, rr=None,
-                                             verbose=verbose, **_SBML_KWARGS)
+            rr = _load_model_into_roadrunner(
+                reference_model, rr=None, verbose=verbose, **_SBML_KWARGS
+            )
         except MassSimulationError as e:
-            msg = "Could not load MassModel '{0}'".format(
-                str(reference_model))
+            msg = "Could not load MassModel '{0}'".format(str(reference_model))
             if verbose:
                 msg += ": " + str(e)
             raise MassSimulationError(msg)
@@ -202,8 +212,7 @@ class Simulation(Object):
 
         # Storing model values for simulations
         self._simulation_values = DictList()
-        self._simulation_values.add(
-            _get_sim_values_from_model(reference_model))
+        self._simulation_values.add(_get_sim_values_from_model(reference_model))
 
         # Storing concentration and flux solutions in simulations
         self._concentration_solutions = DictList()
@@ -308,8 +317,8 @@ class Simulation(Object):
         if isinstance(new_model, MassModel):
             setattr(self, "_reference_model", new_model)
             self._roadrunner = _load_model_into_roadrunner(
-                new_model, rr=self.roadrunner, verbose=verbose,
-                **_SBML_KWARGS)
+                new_model, rr=self.roadrunner, verbose=verbose, **_SBML_KWARGS
+            )
 
     def get_model_simulation_values(self, model):
         """Return two dictionaries containing initial and parameter values.
@@ -331,12 +340,13 @@ class Simulation(Object):
 
         """
         try:
-            values_dict = self._simulation_values.get_by_id(
-                str(model) + "_values")
+            values_dict = self._simulation_values.get_by_id(str(model) + "_values")
         except KeyError:
             raise ValueError(
-                "MassModel '{0}' does not exist in the Simulation object."
-                .format(str(model)))
+                "MassModel '{0}' does not exist in the Simulation object.".format(
+                    str(model)
+                )
+            )
 
         return (values_dict["init_conds"], values_dict["parameters"])
 
@@ -379,14 +389,18 @@ class Simulation(Object):
         # Ensure model input is valid and does not include reference model ID
         models = ensure_iterable(models)
         invalid_values = [
-            model for model in models if not isinstance(model, MassModel)
-            or str(model) == str(self.reference_model)]
+            model
+            for model in models
+            if not isinstance(model, MassModel)
+            or str(model) == str(self.reference_model)
+        ]
 
         if invalid_values:
             raise ValueError(
-                'Invalid models found: {0}. Ensure all models are MassModel '
-                'objects with IDs different from the reference model before '
-                'adding'.format(repr(invalid_values)))
+                "Invalid models found: {0}. Ensure all models are MassModel "
+                "objects with IDs different from the reference model before "
+                "adding".format(repr(invalid_values))
+            )
 
         for model in models:
             # Check ODEs for equivalence
@@ -395,17 +409,27 @@ class Simulation(Object):
                 continue
 
             if not self.reference_model.has_equivalent_odes(model, verbose):
-                _log_msg(LOGGER, logging.WARN, verbose,
-                         "Could not load MassModel '%s', ODEs are not "
-                         "equivalent to the reference model.", str(model))
+                _log_msg(
+                    LOGGER,
+                    logging.WARN,
+                    verbose,
+                    "Could not load MassModel '%s', ODEs are not "
+                    "equivalent to the reference model.",
+                    str(model),
+                )
                 continue
             # Assess whether model can be simulated
             try:
                 _assess_model_quality_for_simulation(model, verbose, False)
             except MassSimulationError as e:
-                _log_msg(LOGGER, logging.WARN, verbose,
-                         "Could not load MassModel '%s': %s",
-                         str(model), str(e))
+                _log_msg(
+                    LOGGER,
+                    logging.WARN,
+                    verbose,
+                    "Could not load MassModel '%s': %s",
+                    str(model),
+                    str(e),
+                )
                 continue
             self._add_model_values_to_simulation(model, verbose)
 
@@ -433,15 +457,19 @@ class Simulation(Object):
         models = [str(m) for m in ensure_iterable(models)]
         for model in models:
             try:
-                values_dict = self._simulation_values.get_by_id(
-                    str(model) + "_values")
+                values_dict = self._simulation_values.get_by_id(str(model) + "_values")
             except KeyError:
                 warn("MassModel '{0}' does not exist.".format(model))
             else:
                 # Remove model values if model exists
                 self._simulation_values -= [values_dict]
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "Successfully removed MassModel '%s.", str(model))
+                _log_msg(
+                    LOGGER,
+                    logging.INFO,
+                    verbose,
+                    "Successfully removed MassModel '%s.",
+                    str(model),
+                )
 
     def get_model_objects(self, models=None):
         r"""Return the loaded models as :class:`~.MassModel`\ s.
@@ -573,12 +601,16 @@ class Simulation(Object):
 
         """
         # Check kwargs
-        kwargs = _check_kwargs({
-            "verbose": False,
-            "steps": None,
-            "interpolate": False,
-            "update_solutions": True,
-            "decimal_precision": False}, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "verbose": False,
+                "steps": None,
+                "interpolate": False,
+                "update_solutions": True,
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
         # Set all models for simulation if None provided.
         if models is None:
             models = self.models
@@ -588,15 +620,18 @@ class Simulation(Object):
         rr = self.roadrunner
 
         # Parse the time and format the input for the roadrunner
-        time = _format_time_input(time, steps=kwargs.get("steps"),
-                                  verbose=kwargs.get("verbose"))
+        time = _format_time_input(
+            time, steps=kwargs.get("steps"), verbose=kwargs.get("verbose")
+        )
 
         # Parse the perturbations and format the input to be used
-        perturbations = self._format_perturbations_input(perturbations,
-                                                         kwargs.get("verbose"))
+        perturbations = self._format_perturbations_input(
+            perturbations, kwargs.get("verbose")
+        )
         # Make the time course selection input and set the selections
         selections = self._make_rr_selections(
-            selections=None, include_time=True, verbose=kwargs.get("verbose"))
+            selections=None, include_time=True, verbose=kwargs.get("verbose")
+        )
         # Make DictLists for solution objects
         conc_sol_list = DictList()
         flux_sol_list = DictList()
@@ -605,40 +640,59 @@ class Simulation(Object):
                 try:
                     # Apply perturbations and set values in roadrunner
                     rr, reset = self._set_simulation_values(
-                        model, perturbations, kwargs.get("verbose"))
+                        model, perturbations, kwargs.get("verbose")
+                    )
                     # Simulate
                     rr.timeCourseSelections = selections
-                    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                             "Simulating '%s'", str(model))
+                    _log_msg(
+                        LOGGER,
+                        logging.INFO,
+                        kwargs.get("verbose"),
+                        "Simulating '%s'",
+                        str(model),
+                    )
                     results = rr.simulate(*time[0], **time[1])
 
                     # Map results to their identifiers and return MassSolutions
-                    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                             "Simulation for '%s' successful", str(model))
+                    _log_msg(
+                        LOGGER,
+                        logging.INFO,
+                        kwargs.get("verbose"),
+                        "Simulation for '%s' successful",
+                        str(model),
+                    )
                     solutions = self._make_mass_solutions(
-                        model, selections=selections, results=results,
-                        **kwargs)
+                        model, selections=selections, results=results, **kwargs
+                    )
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    warn("One or more simulations failed. Check the log "
-                         "for more details.")
+                    warn(
+                        "One or more simulations failed. Check the log "
+                        "for more details."
+                    )
                     if kwargs.get("verbose"):
                         print("Failed simulation for '{0}'".format(model))
                     LOGGER.error(
-                        "Failed simulation for '%s' due the following error: "
-                        "%s", model, str(e))
+                        "Failed simulation for '%s' due the following error: " "%s",
+                        model,
+                        str(e),
+                    )
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, selections=selections, results=None,
-                        **kwargs)
+                        model, selections=selections, results=None, **kwargs
+                    )
                     reset = False
 
                 finally:
                     # Add solutions to overall simulation output
-                    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                             "Adding '%s' simulation solutions to output",
-                             str(model))
+                    _log_msg(
+                        LOGGER,
+                        logging.INFO,
+                        kwargs.get("verbose"),
+                        "Adding '%s' simulation solutions to output",
+                        str(model),
+                    )
                     conc_sol_list += [solutions[0]]
                     flux_sol_list += [solutions[1]]
                     # Reset the roadrunner state
@@ -649,12 +703,16 @@ class Simulation(Object):
             # If an error occurs, raise it as a MassSimulationError
             raise MassSimulationError(
                 "Critical simulation fail due to the following:\n"
-                + str(e.__class__.__name__) + ": " + str(e))
+                + str(e.__class__.__name__)
+                + ": "
+                + str(e)
+            )
 
         # Update the solutions stored in the Simulation
         if kwargs.get("update_solutions"):
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Updating stored solutions")
+            _log_msg(
+                LOGGER, logging.INFO, kwargs.get("verbose"), "Updating stored solutions"
+            )
             self._update_stored_solutions(_CONC_STR, conc_sol_list)
             self._update_stored_solutions(_FLUX_STR, flux_sol_list)
 
@@ -663,8 +721,14 @@ class Simulation(Object):
 
         return conc_sol_list, flux_sol_list
 
-    def find_steady_state(self, models=None, strategy="nleq2",
-                          perturbations=None, update_values=False, **kwargs):
+    def find_steady_state(
+        self,
+        models=None,
+        strategy="nleq2",
+        perturbations=None,
+        update_values=False,
+        **kwargs
+    ):
         r"""Find steady states for models.
 
         The steady state is found by carrying out the provided strategy.
@@ -765,12 +829,16 @@ class Simulation(Object):
 
         """
         # Check kwargs
-        kwargs = _check_kwargs({
-            "verbose": False,
-            "steps": None,
-            "tfinal": 1e8,
-            "num_attempts": 2,
-            "decimal_precision": False}, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "verbose": False,
+                "steps": None,
+                "tfinal": 1e8,
+                "num_attempts": 2,
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
         # Set all models for simulation if None provided.
         if models is None:
             models = self.models
@@ -781,8 +849,7 @@ class Simulation(Object):
 
         # Ensure strategy input is valid
         if strategy not in STEADY_STATE_SOLVERS and strategy != "simulate":
-            raise ValueError(
-                "Invalid steady state strategy: '{0}'".format(strategy))
+            raise ValueError("Invalid steady state strategy: '{0}'".format(strategy))
         if strategy == "simulate":
             steady_state_function = self._find_steady_state_simulate
         else:
@@ -790,12 +857,14 @@ class Simulation(Object):
             rr.setSteadyStateSolver(strategy)
 
         # Parse the perturbations and format the input to be used
-        perturbations = self._format_perturbations_input(perturbations,
-                                                         kwargs.get("verbose"))
+        perturbations = self._format_perturbations_input(
+            perturbations, kwargs.get("verbose")
+        )
 
         # Set species to return in results
         selections = self._make_rr_selections(
-            selections=None, include_time=False, verbose=kwargs.get("verbose"))
+            selections=None, include_time=False, verbose=kwargs.get("verbose")
+        )
 
         # Make DictLists for solution objects
         conc_sol_list = DictList()
@@ -805,46 +874,65 @@ class Simulation(Object):
                 try:
                     # Apply perturbations and set values in roadrunner
                     rr, reset = self._set_simulation_values(
-                        model, perturbations, kwargs.get("verbose"))
+                        model, perturbations, kwargs.get("verbose")
+                    )
                     # Set species to use for steady state calculations
                     rr.steadyStateSelections = self._make_rr_selections(
                         rr.model.getFloatingSpeciesConcentrationIds(),
                         include_time=False,
-                        verbose=kwargs.get("verbose"))
+                        verbose=kwargs.get("verbose"),
+                    )
                     # Use strategy
                     steady_state_function(model, **kwargs)
                     results = {
                         k: rr[k]
                         for k in rr.model.getFloatingSpeciesConcentrationIds()
-                        + rr.model.getReactionIds()}
+                        + rr.model.getReactionIds()
+                    }
 
                     # Map results to their identifiers and return MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, selections=selections, results=results,
-                        update_values=update_values, **kwargs)
+                        model,
+                        selections=selections,
+                        results=results,
+                        update_values=update_values,
+                        **kwargs
+                    )
 
                 # Handle MassSimulationErrors
                 except (RuntimeError, MassSimulationError) as e:
-                    warn("Unable to find a steady state for one or more "
-                         "models. Check the log for more details.")
+                    warn(
+                        "Unable to find a steady state for one or more "
+                        "models. Check the log for more details."
+                    )
                     if kwargs.get("verbose"):
-                        print("Failed to find steady state for {0}'".format(
-                            model))
+                        print("Failed to find steady state for {0}'".format(model))
                     LOGGER.error(
                         "Unable to find a steady state for '%s' "
                         "using strategy '%s' due to the following: %s",
-                        model, strategy, str(e))
+                        model,
+                        strategy,
+                        str(e),
+                    )
                     # Make empty MassSolutions
                     solutions = self._make_mass_solutions(
-                        model, selections=selections, results=None,
-                        update_values=False, **kwargs)
+                        model,
+                        selections=selections,
+                        results=None,
+                        update_values=False,
+                        **kwargs
+                    )
                     reset = False
 
                 finally:
                     # Add solutions to overall simulation output
-                    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                             "Adding '%s' simulation solutions to output",
-                             str(model))
+                    _log_msg(
+                        LOGGER,
+                        logging.INFO,
+                        kwargs.get("verbose"),
+                        "Adding '%s' simulation solutions to output",
+                        str(model),
+                    )
                     # Add solutions to output lists
                     conc_sol_list += [solutions[0]]
                     flux_sol_list += [solutions[1]]
@@ -856,7 +944,10 @@ class Simulation(Object):
             # If an error occurs, raise it as a MassSimulationError
             raise MassSimulationError(
                 "Critical simulation fail due to the following:\n"
-                + str(e.__class__.__name__) + ": " + str(e))
+                + str(e.__class__.__name__)
+                + ": "
+                + str(e)
+            )
 
         # Update reference model to have the new values
         if update_values:
@@ -869,8 +960,7 @@ class Simulation(Object):
 
         return conc_sol_list, flux_sol_list
 
-    def _make_rr_selections(self, selections=None, include_time=True,
-                            verbose=False):
+    def _make_rr_selections(self, selections=None, include_time=True, verbose=False):
         """Set the observable output of the simulation.
 
         Warnings
@@ -919,20 +1009,22 @@ class Simulation(Object):
                 if key not in sim_values:
                     raise ValueError(
                         "Invalid Perturbation: '{0}' not found in model "
-                        "simulation values".format(key))
+                        "simulation values".format(key)
+                    )
                 # Try to set value as float
                 try:
                     value = float(value)
                 except (ValueError, TypeError):
                     # Value could not be interpreted as a float, therefore
                     # ensure it is valid as a sympy expression
-                    if key in self.reference_model.boundary_metabolites \
-                       or key in str(value):
+                    if key in self.reference_model.boundary_metabolites or key in str(
+                        value
+                    ):
                         value = sympify(value, locals={key: Symbol(key)})
                     else:
                         raise ValueError(
-                            "Invalid Perturbation {{'{0}': '{1}'}}".format(
-                                key, value))
+                            "Invalid Perturbation {{'{0}': '{1}'}}".format(key, value)
+                        )
 
                 formatted_perturbations[key] = value
         return formatted_perturbations
@@ -947,8 +1039,13 @@ class Simulation(Object):
         """
         # Get roadrunner
         rr = self.roadrunner
-        _log_msg(LOGGER, logging.INFO, verbose,
-                 "Setting simulation values for '%s'", str(model))
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            verbose,
+            "Setting simulation values for '%s'",
+            str(model),
+        )
         try:
             # Ensure values exist for the model
             sim_values_to_set = self._get_all_values_for_sim(model)
@@ -997,11 +1094,12 @@ class Simulation(Object):
             new_model = self.reference_model.copy()
             new_model.id = model
             new_model = self._update_mass_model_with_values(
-                new_model, sim_values_to_set)
+                new_model, sim_values_to_set
+            )
 
             rr = _load_model_into_roadrunner(
-                new_model, rr=self.roadrunner, verbose=False,
-                **_SBML_KWARGS)
+                new_model, rr=self.roadrunner, verbose=False, **_SBML_KWARGS
+            )
         else:
             # Set values for the model in the roadrunner
             for key, value in iteritems(sim_values_to_set):
@@ -1014,8 +1112,9 @@ class Simulation(Object):
 
         return rr
 
-    def _make_mass_solutions(self, model, selections, results,
-                             update_values=False, **kwargs):
+    def _make_mass_solutions(
+        self, model, selections, results, update_values=False, **kwargs
+    ):
         """Make the MassSolutions using the results of the Simulation.
 
         Warnings
@@ -1042,37 +1141,52 @@ class Simulation(Object):
                 elif sol_key in species_list:
                     # Add solution to concentration solutions if specie
                     result_array = _round_values(
-                        results[sol_key], kwargs.get("decimal_precision"))
+                        results[sol_key], kwargs.get("decimal_precision")
+                    )
                     conc_sol[_strip_conc(sol_key)] = result_array
                 elif sol_key in reaction_list:
                     # Add solution to flux solutions if reaction
                     result_array = _round_values(
-                        results[sol_key], kwargs.get("decimal_precision"))
+                        results[sol_key], kwargs.get("decimal_precision")
+                    )
                     flux_sol[sol_key] = result_array
                 else:
                     pass
         init_conds, parameters = self.get_model_simulation_values(model)
         parameters = {
-            param[2:]: value for param, value in iteritems(parameters)
-            if param.startswith("v_") and param[2:] in flux_sol}
+            param[2:]: value
+            for param, value in iteritems(parameters)
+            if param.startswith("v_") and param[2:] in flux_sol
+        }
         # Make a MassSolution object of the concentration solution dict.
         conc_sol = MassSolution(
             id_or_model="{0}_{1}Sols".format(model, _CONC_STR),
-            data_dict=conc_sol, solution_type=_CONC_STR, time=time,
+            data_dict=conc_sol,
+            solution_type=_CONC_STR,
+            time=time,
             interpolate=kwargs.get("interpolate", False),
-            initial_values=dict(init_conds))
+            initial_values=dict(init_conds),
+        )
 
         # Make a MassSolution object of the concentration solution dict.
         flux_sol = MassSolution(
             id_or_model="{0}_{1}Sols".format(model, _FLUX_STR),
-            data_dict=flux_sol, solution_type=_FLUX_STR, time=time,
+            data_dict=flux_sol,
+            solution_type=_FLUX_STR,
+            time=time,
             interpolate=kwargs.get("interpolate", False),
-            initial_values=dict(parameters))
+            initial_values=dict(parameters),
+        )
 
         values = (conc_sol, flux_sol)
         if update_values:
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Updating '%s' values", model)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "Updating '%s' values",
+                model,
+            )
             # Update current model values with new simulation values
             sim_values = self.get_model_simulation_values(model)
 
@@ -1096,7 +1210,8 @@ class Simulation(Object):
         # Determine where solutions are stored
         stored_solution_dictlist = {
             "Conc": self._concentration_solutions,
-            "Flux": self._flux_solutions}[solution_type]
+            "Flux": self._flux_solutions,
+        }[solution_type]
 
         # Add solutions to their corresponding DictList
         for solution in solutions:
@@ -1123,8 +1238,8 @@ class Simulation(Object):
         if reset:
             # Reloat model into roadrunner
             self._roadrunner = _load_model_into_roadrunner(
-                self.reference_model, rr=self.roadrunner, verbose=False,
-                **_SBML_KWARGS)
+                self.reference_model, rr=self.roadrunner, verbose=False, **_SBML_KWARGS
+            )
         else:
             # Otherwise reset roadrunner to the origin
             self.roadrunner.resetToOrigin()
@@ -1146,39 +1261,58 @@ class Simulation(Object):
         steps = kwargs.get("steps")
         if steps is None:
             steps = int(max(kwargs.get("tfinal") / 1000, 10000))
-        time = _format_time_input((0, kwargs.get("tfinal")), steps=steps,
-                                  verbose=kwargs.get("verbose"))
+        time = _format_time_input(
+            (0, kwargs.get("tfinal")), steps=steps, verbose=kwargs.get("verbose")
+        )
         try:
             # Simulate for a long time
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Simulating '%s'", str(model))
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "Simulating '%s'",
+                str(model),
+            )
             simulation_results = rr.simulate(*time[0], **time[1])
         except (RuntimeError, TypeError) as e:
-            raise MassSimulationError(
-                str(e.__class__.__name__) + ": " + str(e))
+            raise MassSimulationError(str(e.__class__.__name__) + ": " + str(e))
 
         # Get the absolute difference between the final two simulation points
-        final_points = np.array([simulation_results[key][-2:]
-                                 for key in rr.timeCourseSelections])
+        final_points = np.array(
+            [simulation_results[key][-2:] for key in rr.timeCourseSelections]
+        )
         abs_diff = np.abs(final_points[:, 0] - final_points[:, -1])
         if kwargs.get("decimal_precision"):
             abs_diff = apply_decimal_precision(
-                abs_diff, MASSCONFIGURATION.decimal_precision)
+                abs_diff, MASSCONFIGURATION.decimal_precision
+            )
 
         abs_diff = abs_diff < MASSCONFIGURATION.steady_state_threshold
         if not all(abs_diff):
             # Raise error if steady state could not be found
             raise MassSimulationError(
                 'For MassModel "{0}", absolute difference for "{1!r}" is '
-                'greater than the steady state threshold.'.format(model, [
-                    key for i, key in enumerate(rr.timeCourseSelections)
-                    if not abs_diff[i]]))
+                "greater than the steady state threshold.".format(
+                    model,
+                    [
+                        key
+                        for i, key in enumerate(rr.timeCourseSelections)
+                        if not abs_diff[i]
+                    ],
+                )
+            )
 
-        _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                 "Found steady state for '%s'.", str(model))
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            kwargs.get("verbose"),
+            "Found steady state for '%s'.",
+            str(model),
+        )
         # Get steady state resulls to return
-        ss_results = {key: final_points[i, -1]
-                      for i, key in enumerate(rr.timeCourseSelections)}
+        ss_results = {
+            key: final_points[i, -1] for i, key in enumerate(rr.timeCourseSelections)
+        }
 
         return ss_results
 
@@ -1199,7 +1333,8 @@ class Simulation(Object):
             # Round value before comparision
             if kwargs.get("decimal_precision"):
                 is_ss_value = apply_decimal_precision(
-                    is_ss_value, MASSCONFIGURATION.decimal_precision)
+                    is_ss_value, MASSCONFIGURATION.decimal_precision
+                )
             if is_ss_value <= MASSCONFIGURATION.steady_state_threshold:
                 return True
             return False
@@ -1210,29 +1345,39 @@ class Simulation(Object):
         try:
             # Keep trying to find a steady state as long as attempts remain
             while not success and i < kwargs.get("num_attempts"):
-                _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                         "Attempt %s to calculate steady state for '%s'",
-                         str(i + 1), str(model))
+                _log_msg(
+                    LOGGER,
+                    logging.INFO,
+                    kwargs.get("verbose"),
+                    "Attempt %s to calculate steady state for '%s'",
+                    str(i + 1),
+                    str(model),
+                )
                 success = is_steady_state(rr)
                 i += 1
         except RuntimeError as e:
-            raise MassSimulationError(
-                str(e.__class__.__name__) + ": " + str(e))
+            raise MassSimulationError(str(e.__class__.__name__) + ": " + str(e))
 
         if not success:
             raise MassSimulationError(
                 "Could not find steady state for MassModel '{0}' after {1:d} "
-                "attempts, steady state threshold always exceeded.".format(
-                    model, i))
+                "attempts, steady state threshold always exceeded.".format(model, i)
+            )
 
-        _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                 "Found steady state for '%s'.", str(model))
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            kwargs.get("verbose"),
+            "Found steady state for '%s'.",
+            str(model),
+        )
         # Zip the solutions with their IDs into a dict and return
         results = zip(rr.steadyStateSelections, rr.getSteadyStateValues())
         return dict(results)
 
-    def update_model_simulation_values(self, model, initial_conditions=None,
-                                       parameters=None, verbose=False):
+    def update_model_simulation_values(
+        self, model, initial_conditions=None, parameters=None, verbose=False
+    ):
         """Update the simulation values for a given model.
 
         Parameters
@@ -1248,8 +1393,10 @@ class Simulation(Object):
         """
         if str(model) + "_values" not in self._simulation_values:
             raise ValueError(
-                "MassModel '{0}' does not exist in the Simulation object."
-                .format(str(model)))
+                "MassModel '{0}' does not exist in the Simulation object.".format(
+                    str(model)
+                )
+            )
 
         if isinstance(model, MassModel):
             values = _get_sim_values_from_model(model)
@@ -1258,16 +1405,20 @@ class Simulation(Object):
 
         # Fix identifiers before adding to values for updating
         if initial_conditions is not None:
-            values[0].update({
-                str(met): ic for met, ic in iteritems(initial_conditions)
-            })
+            values[0].update(
+                {str(met): ic for met, ic in iteritems(initial_conditions)}
+            )
 
         if parameters is not None:
-            values[1].update({
-                param: value for param, value in iteritems(parameters)})
+            values[1].update({param: value for param, value in iteritems(parameters)})
 
-        _log_msg(LOGGER, logging.INFO, verbose,
-                 "Replacing existing values for MassModel '%s'", str(model))
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            verbose,
+            "Replacing existing values for MassModel '%s'",
+            str(model),
+        )
         self._simulation_values._replace_on_id(values)
 
     def _update_mass_model_with_values(self, mass_model, value_dict=None):
@@ -1321,17 +1472,25 @@ class Simulation(Object):
         """
         # Get the simulation values
         if str(model) + "_values" in self._simulation_values:
-            _log_msg(LOGGER, logging.INFO, verbose,
-                     "Replacing existing values for MassModel '%s'",
-                     str(model))
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                verbose,
+                "Replacing existing values for MassModel '%s'",
+                str(model),
+            )
             self.update_model_simulation_values(model)
         else:
             # Otherwise add to simulation values
-            self._simulation_values.add(
-                _get_sim_values_from_model(model))
+            self._simulation_values.add(_get_sim_values_from_model(model))
 
-        _log_msg(LOGGER, logging.INFO, verbose,
-                 "Successfully loaded MassModel '%s'.", str(model))
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            verbose,
+            "Successfully loaded MassModel '%s'.",
+            str(model),
+        )
 
 
 def _assess_model_quality_for_simulation(mass_model, verbose, report):
@@ -1348,16 +1507,22 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
         # Raise error if model can not simulate
         msg = ""
         if verbose:
-            msg += "MassModel is missing numerical values that are " + \
-                   "necessary for simulation."
+            msg += (
+                "MassModel is missing numerical values that are "
+                + "necessary for simulation."
+            )
         if report:
             # Display QCQA report if desired.
-            qcqa_model(mass_model, **{
-                "parameters": True,
-                "concentrations": True,
-                "fluxes": True,
-                "superfluous": True,
-                "elemental": True})
+            qcqa_model(
+                mass_model,
+                **{
+                    "parameters": True,
+                    "concentrations": True,
+                    "fluxes": True,
+                    "superfluous": True,
+                    "elemental": True,
+                }
+            )
 
         raise MassSimulationError(msg)
 
@@ -1365,8 +1530,10 @@ def _assess_model_quality_for_simulation(mass_model, verbose, report):
     if not consistency_check:
         msg = "MassModel has numerical consistency issues, use with caution."
         if verbose:
-            msg += " To help determine which values are not numerically " + \
-                   "consistent, use the `qcqa_model` method in mass.util.qcqa."
+            msg += (
+                " To help determine which values are not numerically "
+                + "consistent, use the `qcqa_model` method in mass.util.qcqa."
+            )
         LOGGER.warning(msg)
 
 
@@ -1387,11 +1554,13 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
         # Raise error if errors occured in validation of SBML model
         msg = "Cannot load SBML Model '" + str(mass_model) + "' "
         if verbose:
-            msg += str("into RoadRunner due to error:\n" + error + " Make "
-                       "sure the model can be exported to a valid SBML model "
-                       "using the 'validate_model_to_SBML' method in the SBML "
-                       "submodule to ensure there are no SBML compliance "
-                       "issues with the model.")
+            msg += str(
+                "into RoadRunner due to error:\n" + error + " Make "
+                "sure the model can be exported to a valid SBML model "
+                "using the 'validate_model_to_SBML' method in the SBML "
+                "submodule to ensure there are no SBML compliance "
+                "issues with the model."
+            )
         raise MassSimulationError(msg)
 
     if rr is None:
@@ -1404,16 +1573,24 @@ def _load_model_into_roadrunner(mass_model, rr=None, verbose=False, **kwargs):
             rr.load(sbml_str)
         # Sometimes roadrunner fails to load a model for unknown reasons
         except Exception:
-            _log_msg(LOGGER, logging.ERROR, verbose,
-                     "Something unexpected occurred and the model could not be"
-                     " loaded into the current RoadRunner instance. Therefore"
-                     " initializing a new RoadRunner instance for the"
-                     " Simulation.")
+            _log_msg(
+                LOGGER,
+                logging.ERROR,
+                verbose,
+                "Something unexpected occurred and the model could not be"
+                " loaded into the current RoadRunner instance. Therefore"
+                " initializing a new RoadRunner instance for the"
+                " Simulation.",
+            )
             rr = roadrunner.RoadRunner(sbml_str)
 
-    _log_msg(LOGGER, logging.INFO, verbose,
-             "Successfully loaded MassModel '%s' into RoadRunner.",
-             str(mass_model))
+    _log_msg(
+        LOGGER,
+        logging.INFO,
+        verbose,
+        "Successfully loaded MassModel '%s' into RoadRunner.",
+        str(mass_model),
+    )
 
     return rr
 
@@ -1431,11 +1608,13 @@ def _get_sim_values_from_model(mass_model):
 
     values = {
         "init_conds": DictWithID(
-            id=mass_model.id + "_init_conds", data_dict={
-                str(met): ic for met, ic in iteritems(init_conds)}),
+            id=mass_model.id + "_init_conds",
+            data_dict={str(met): ic for met, ic in iteritems(init_conds)},
+        ),
         "parameters": DictWithID(
-            id=mass_model.id + "_parameters", data_dict={
-                param: value for param, value in iteritems(parameters)}),
+            id=mass_model.id + "_parameters",
+            data_dict={param: value for param, value in iteritems(parameters)},
+        ),
     }
 
     return DictWithID(id=mass_model.id + "_values", data_dict=values)
@@ -1457,8 +1636,10 @@ def _format_time_input(time, steps=None, verbose=False):
         t0, tf, numpoints = time
         numpoints = int(numpoints)
     else:
-        raise TypeError("The 'time' input mut be one of the following: "
-                        "'(t0, tf)' or '(t0, tf, numpoints)'")
+        raise TypeError(
+            "The 'time' input mut be one of the following: "
+            "'(t0, tf)' or '(t0, tf, numpoints)'"
+        )
     if steps is not None:
         steps = int(steps)
 
@@ -1476,8 +1657,7 @@ def _round_values(values, decimal_precision=True):
 
     """
     if decimal_precision:
-        values = apply_decimal_precision(values,
-                                         MASSCONFIGURATION.decimal_precision)
+        values = apply_decimal_precision(values, MASSCONFIGURATION.decimal_precision)
 
     return values
 
@@ -1526,4 +1706,8 @@ def _make_ss_flux(reaction_str):
     return "v_" + reaction_str
 
 
-__all__ = ("Simulation", "LOGGER", "RR_LOGGER",)
+__all__ = (
+    "Simulation",
+    "LOGGER",
+    "RR_LOGGER",
+)

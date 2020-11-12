@@ -55,8 +55,7 @@ import pandas as pd
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID
-from mass.util.matrix import (
-    _get_matrix_constructor, convert_matrix, matrix_rank)
+from mass.util.matrix import _get_matrix_constructor, convert_matrix, matrix_rank
 from mass.util.util import _mk_new_dictlist
 
 
@@ -79,7 +78,8 @@ class EnzymeModuleDict(OrderedDictWithID):
         # Instiantiate new EnzymeModuleDict object if given an EnzymeModuleDict
         if isinstance(id_or_enzyme, (EnzymeModuleDict, dict)):
             super(EnzymeModuleDict, self).__init__(
-                id_or_enzyme["id"], data_dict=dict(id_or_enzyme))
+                id_or_enzyme["id"], data_dict=dict(id_or_enzyme)
+            )
         # Initialize an EnzymeModuleDict using an EnzymeModule
         elif id_or_enzyme.__class__.__name__ == "EnzymeModule":
             super(EnzymeModuleDict, self).__init__(id_or_enzyme.id)
@@ -91,7 +91,8 @@ class EnzymeModuleDict(OrderedDictWithID):
                     continue
                 elif nkey == "S":
                     self[nkey] = id_or_enzyme._mk_stoich_matrix(
-                        array_type="DataFrame", update_model=False)
+                        array_type="DataFrame", update_model=False
+                    )
                 elif "_equation" in nkey:
                     self[nkey] = getattr(id_or_enzyme, nkey, None)
                 else:
@@ -109,8 +110,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         # No references to the MassModel when copying the EnzymeModuleDict
         model = self.model
         setattr(self, "model", None)
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
-                     "enzyme_module_reactions"]:
+        for attr in [
+            "enzyme_module_ligands",
+            "enzyme_module_forms",
+            "enzyme_module_reactions",
+        ]:
             for i in getattr(self, attr):
                 setattr(i, "_model", None)
             for dictlist in itervalues(self[attr + "_categorized"]):
@@ -121,8 +125,11 @@ class EnzymeModuleDict(OrderedDictWithID):
         enzyme_dict_copy = deepcopy(self)
         # Restore references for the original EnzymeModuleDict
         setattr(self, "model", model)
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
-                     "enzyme_module_reactions"]:
+        for attr in [
+            "enzyme_module_ligands",
+            "enzyme_module_forms",
+            "enzyme_module_reactions",
+        ]:
             for i in getattr(self, attr):
                 setattr(i, "_model", model)
             for dictlist in itervalues(self[attr + "_categorized"]):
@@ -154,12 +161,16 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         if model is None:
             model = self.model
-        for attr in ["enzyme_module_ligands", "enzyme_module_forms",
-                     "enzyme_module_reactions"]:
+        for attr in [
+            "enzyme_module_ligands",
+            "enzyme_module_forms",
+            "enzyme_module_reactions",
+        ]:
             model_dictlist = {
                 "enzyme_module_ligands": model.metabolites,
                 "enzyme_module_forms": model.metabolites,
-                "enzyme_module_reactions": model.reactions}.get(attr)
+                "enzyme_module_reactions": model.reactions,
+            }.get(attr)
             attr_value = getattr(self, attr)
             self[attr] = _mk_new_dictlist(model_dictlist, attr_value)
             attr += "_categorized"
@@ -167,7 +178,8 @@ class EnzymeModuleDict(OrderedDictWithID):
             if isinstance(attr_value, dict):
                 attr_value = [
                     Group(category, members=model_dictlist.get_by_any(obj_ids))
-                    for category, obj_ids in iteritems(attr_value)]
+                    for category, obj_ids in iteritems(attr_value)
+                ]
                 model.add_groups(attr_value)
             self[attr] = _mk_new_dictlist(model.groups, attr_value)
 
@@ -184,14 +196,20 @@ class EnzymeModuleDict(OrderedDictWithID):
         """
         # Set up for matrix construction.
         (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
-            array_type="DataFrame", dtype=np.float_)
+            array_type="DataFrame", dtype=np.float_
+        )
 
-        metabolites = DictList([
-            met for attr in ["enzyme_module_ligands", "enzyme_module_forms"]
-            for met in self[attr]])
+        metabolites = DictList(
+            [
+                met
+                for attr in ["enzyme_module_ligands", "enzyme_module_forms"]
+                for met in self[attr]
+            ]
+        )
 
-        stoich_mat = matrix_constructor((len(metabolites),
-                                         len(self.enzyme_module_reactions)))
+        stoich_mat = matrix_constructor(
+            (len(metabolites), len(self.enzyme_module_reactions))
+        )
         # Get the indicies for the forms and reactions
         m_ind = metabolites.index
         r_ind = self.enzyme_module_reactions.index
@@ -203,9 +221,12 @@ class EnzymeModuleDict(OrderedDictWithID):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, array_type=array_type, dtype=dtype,
+            stoich_mat,
+            array_type=array_type,
+            dtype=dtype,
             row_ids=[m.id for m in metabolites],
-            col_ids=[r.id for r in self.enzyme_module_reactions])
+            col_ids=[r.id for r in self.enzyme_module_reactions],
+        )
 
         if update:
             self["S"] = stoich_mat
@@ -271,14 +292,18 @@ class EnzymeModuleDict(OrderedDictWithID):
                     <td>{enz_flux}</td>
                 </tr>
             </table>
-        """.format(name=self.id, address='0x0%x' % id(self),
-                   dim_stoich_mat=dim_S, mat_rank=rank,
-                   subsystem=self.subsystem,
-                   num_enzyme_module_ligands=len(self.enzyme_module_ligands),
-                   num_enz_forms=len(self.enzyme_module_forms),
-                   num_enz_reactions=len(self.enzyme_module_reactions),
-                   enz_conc=self.enzyme_concentration_total,
-                   enz_flux=self.enzyme_rate)
+        """.format(
+            name=self.id,
+            address="0x0%x" % id(self),
+            dim_stoich_mat=dim_S,
+            mat_rank=rank,
+            subsystem=self.subsystem,
+            num_enzyme_module_ligands=len(self.enzyme_module_ligands),
+            num_enz_forms=len(self.enzyme_module_forms),
+            num_enz_reactions=len(self.enzyme_module_reactions),
+            enz_conc=self.enzyme_concentration_total,
+            enz_flux=self.enzyme_rate,
+        )
 
     # Dunders
     def __getattr__(self, name):
@@ -329,8 +354,9 @@ class EnzymeModuleDict(OrderedDictWithID):
         This method is intended for internal use only.
 
         """
-        return sorted(set(
-            list(iterkeys(self)) + super(EnzymeModuleDict, self).__dir__()))
+        return sorted(
+            set(list(iterkeys(self)) + super(EnzymeModuleDict, self).__dir__())
+        )
 
     def __copy__(self):
         """Create a copy of the EnzymeModuleDict.
@@ -353,20 +379,22 @@ class EnzymeModuleDict(OrderedDictWithID):
         return deepcopy(super(EnzymeModuleDict, self), memo)
 
 
-_ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict({
-    "id": None,
-    "name": "",
-    "subsystem": "",
-    "enzyme_module_ligands": DictList(),
-    "enzyme_module_forms": DictList(),
-    "enzyme_module_reactions": DictList(),
-    "enzyme_module_ligands_categorized": DictList(),
-    "enzyme_module_forms_categorized": DictList(),
-    "enzyme_module_reactions_categorized": DictList(),
-    "enzyme_concentration_total": None,
-    "enzyme_rate": None,
-    "enzyme_concentration_total_equation": None,
-    "enzyme_rate_equation": None,
-    "S": pd.DataFrame(),
-    "model": None,
-})
+_ORDERED_ENZYMEMODULE_DICT_DEFAULTS = OrderedDict(
+    {
+        "id": None,
+        "name": "",
+        "subsystem": "",
+        "enzyme_module_ligands": DictList(),
+        "enzyme_module_forms": DictList(),
+        "enzyme_module_reactions": DictList(),
+        "enzyme_module_ligands_categorized": DictList(),
+        "enzyme_module_forms_categorized": DictList(),
+        "enzyme_module_reactions_categorized": DictList(),
+        "enzyme_concentration_total": None,
+        "enzyme_rate": None,
+        "enzyme_concentration_total_equation": None,
+        "enzyme_rate_equation": None,
+        "S": pd.DataFrame(),
+        "model": None,
+    }
+)

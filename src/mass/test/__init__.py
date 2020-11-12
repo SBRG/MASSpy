@@ -57,15 +57,15 @@ def create_test_model(model_name, io="json"):
         The loaded :class:`~.MassModel`
 
     """
-    load_dict = {"sbml": (read_sbml_model, ".xml"),
-                 "json": (load_json_model, ".json")}
+    load_dict = {"sbml": (read_sbml_model, ".xml"), "json": (load_json_model, ".json")}
 
     try:
         load_function, ext = load_dict[io]
     except KeyError as e:
         raise ValueError(
             "Unrecognized value {0} for io. Value must be a str of one of "
-            "the following {1}".format(e, str(set(load_dict))))
+            "the following {1}".format(e, str(set(load_dict)))
+        )
     if not model_name.endswith(ext):
         model_name = model_name + ext
     filepath = join(MODELS_DIR, model_name)
@@ -86,12 +86,12 @@ def view_test_maps():
 def test_all(args=None):
     """Alias for running all unit-tests on installed :mod:`mass`."""
     if pytest is None:
-        raise ImportError('missing package pytest and pytest_benchmark'
-                          ' required for testing')
+        raise ImportError(
+            "missing package pytest and pytest_benchmark" " required for testing"
+        )
 
     args = args if args else []
-    return pytest.main(
-        ['--pyargs', 'mass', '--benchmark-skip', '-v', '-rs'] + args)
+    return pytest.main(["--pyargs", "mass", "--benchmark-skip", "-v", "-rs"] + args)
 
 
 def _get_directory_files(directory):
@@ -108,5 +108,13 @@ def _get_directory_files(directory):
 
 
 __all__ = (
-    "FILE_EXTENSIONS", "MASS_DIR", "DATA_DIR", "MODELS_DIR", "MAPS_DIR",
-    "create_test_model", "view_test_models", "view_test_maps", "test_all")
+    "FILE_EXTENSIONS",
+    "MASS_DIR",
+    "DATA_DIR",
+    "MODELS_DIR",
+    "MAPS_DIR",
+    "create_test_model",
+    "view_test_models",
+    "view_test_maps",
+    "test_all",
+)

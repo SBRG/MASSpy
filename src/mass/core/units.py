@@ -26,7 +26,8 @@ from tabulate import tabulate
 from mass.util.dict_with_id import DictWithID
 
 SBML_BASE_UNIT_KINDS_DICT = DictWithID(
-    id="SBML Base Unit Kinds", data_dict={
+    id="SBML Base Unit Kinds",
+    data_dict={
         "ampere": libsbml.UNIT_KIND_AMPERE,
         "avogadro": libsbml.UNIT_KIND_AVOGADRO,
         "becquerel": libsbml.UNIT_KIND_BECQUEREL,
@@ -63,12 +64,13 @@ SBML_BASE_UNIT_KINDS_DICT = DictWithID(
         "watt": libsbml.UNIT_KIND_WATT,
         "weber": libsbml.UNIT_KIND_WEBER,
         "invalid": libsbml.UNIT_KIND_INVALID,
-    }
+    },
 )
 """:class:`~.DictWithID`: Contains SBML base units and their ``int`` values."""
 
 SI_PREFIXES_DICT = DictWithID(
-    id="SI Unit Scale Prefixes", data_dict={
+    id="SI Unit Scale Prefixes",
+    data_dict={
         "atto": -18,
         "femto": -15,
         "pico": -12,
@@ -85,7 +87,7 @@ SI_PREFIXES_DICT = DictWithID(
         "tera": 12,
         "peta": 15,
         "exa": 18,
-    }
+    },
 )
 """:class:`~.DictWithID`: Contains SI unit prefixes and scale values."""
 
@@ -119,8 +121,10 @@ class Unit:
         self._scale = None
         self._multiplier = None
 
-        for name, value in zip(["kind", "exponent", "scale", "multiplier"],
-                               [kind, exponent, scale, multiplier]):
+        for name, value in zip(
+            ["kind", "exponent", "scale", "multiplier"],
+            [kind, exponent, scale, multiplier],
+        ):
             setattr(self, name, value)
 
     @property
@@ -156,7 +160,8 @@ class Unit:
                 "Invalid SBML Base Unit Kind '{0}'. Allowable values can be "
                 "viewed by passing the string 'BaseUnitKinds' to the function "
                 "'print_defined_unit_values' from the mass.core.units "
-                "submodule.".format(kind))
+                "submodule.".format(kind)
+            )
         setattr(self, "_kind", kind)
 
     @property
@@ -174,8 +179,10 @@ class Unit:
     @exponent.setter
     def exponent(self, exponent):
         """Set the exponent of the :class:`Unit`."""
-        if isinstance(exponent, (integer_types, float))\
-           and float(exponent).is_integer():
+        if (
+            isinstance(exponent, (integer_types, float))
+            and float(exponent).is_integer()
+        ):
             setattr(self, "_exponent", int(exponent))
         else:
             raise TypeError("exponent must be an integer")
@@ -202,11 +209,11 @@ class Unit:
                     "Invalid SI Scale Prefix '{0}'. Allowable values can be "
                     "viewed by passing the string 'Scales' to the function "
                     "'print_defined_unit_values' from the mass.core.units "
-                    "submodule.".format(scale))
+                    "submodule.".format(scale)
+                )
             scale = SI_PREFIXES_DICT[scale.lower()]
 
-        if isinstance(scale, (integer_types, float))\
-           and float(scale).is_integer():
+        if isinstance(scale, (integer_types, float)) and float(scale).is_integer():
             setattr(self, "_scale", int(scale))
         else:
             raise TypeError("scale must be an integer")
@@ -240,7 +247,11 @@ class Unit:
 
         """
         return "kind: %s; exponent: %s; scale: %s; multiplier: %s" % (
-            self.kind, self.exponent, self.scale, self.multiplier)
+            self.kind,
+            self.exponent,
+            self.scale,
+            self.multiplier,
+        )
 
     def __repr__(self):
         """Override of default :func:`repr` implementation.
@@ -250,31 +261,22 @@ class Unit:
         This method is intended for internal use only.
 
         """
-        return "<%s at 0x%x %s>" % (
-            self.__class__.__name__, id(self), str(self))
+        return "<%s at 0x%x %s>" % (self.__class__.__name__, id(self), str(self))
 
 
 PREDEFINED_UNITS_DICT = DictWithID(
-    id="Pre-defined Units", data_dict={
-        "mole": Unit(
-            kind="mole", exponent=1, scale=0, multiplier=1),
-        "millimole": Unit(
-            kind="mole", exponent=1, scale=-3, multiplier=1),
-        "litre": Unit(
-            kind="litre", exponent=1, scale=0, multiplier=1),
-        "per_litre": Unit(
-            kind="litre", exponent=-1, scale=0, multiplier=1),
-        "second": Unit(
-            kind="second", exponent=1, scale=0, multiplier=1),
-        "per_second": Unit(
-            kind="second", exponent=-1, scale=0, multiplier=1),
-        "hour": Unit(
-            kind="second", exponent=1, scale=0, multiplier=3600),
-        "per_hour": Unit(
-            kind="second", exponent=-1, scale=0, multiplier=3600),
-        "per_gDW": Unit(
-            kind="gram", exponent=-1, scale=0, multiplier=1),
-    }
+    id="Pre-defined Units",
+    data_dict={
+        "mole": Unit(kind="mole", exponent=1, scale=0, multiplier=1),
+        "millimole": Unit(kind="mole", exponent=1, scale=-3, multiplier=1),
+        "litre": Unit(kind="litre", exponent=1, scale=0, multiplier=1),
+        "per_litre": Unit(kind="litre", exponent=-1, scale=0, multiplier=1),
+        "second": Unit(kind="second", exponent=1, scale=0, multiplier=1),
+        "per_second": Unit(kind="second", exponent=-1, scale=0, multiplier=1),
+        "hour": Unit(kind="second", exponent=1, scale=0, multiplier=3600),
+        "per_hour": Unit(kind="second", exponent=-1, scale=0, multiplier=3600),
+        "per_gDW": Unit(kind="gram", exponent=-1, scale=0, multiplier=1),
+    },
 )
 r""":class:`~.DictWithID`: Contains pre-built :class:`Unit`\ s."""
 
@@ -327,8 +329,7 @@ class UnitDefinition(Object):
             Default is ``1.``
 
         """
-        unit = Unit(
-            kind=kind, exponent=exponent, scale=scale, multiplier=multiplier)
+        unit = Unit(kind=kind, exponent=exponent, scale=scale, multiplier=multiplier)
         self.add_units([unit])
 
     def add_units(self, new_units):
@@ -454,7 +455,9 @@ def print_defined_unit_values(value="Units"):
     if value not in predefined_items:
         raise ValueError(
             "'{0}' not recognized, must be one of the following '{1}'.".format(
-                str(value), str(predefined_items)))
+                str(value), str(predefined_items)
+            )
+        )
 
     # Make a list of the pre-defined items to print.
     if value.lower() == "all":
@@ -468,17 +471,20 @@ def print_defined_unit_values(value="Units"):
         value_dict, headers = {
             "Units": (PREDEFINED_UNITS_DICT, ["Unit", "Definition"]),
             "Scales": (SI_PREFIXES_DICT, ["Prefix", "Scale Value"]),
-            "BaseUnitKinds": (
-                SBML_BASE_UNIT_KINDS_DICT, ["Base Unit", "SBML Value"])
+            "BaseUnitKinds": (SBML_BASE_UNIT_KINDS_DICT, ["Base Unit", "SBML Value"]),
         }.get(item)
         # Format dictionary items into table
         content = [[k, str(v)] for k, v in iteritems(value_dict)]
         # Add to final tables
         table = [tabulate(content, headers=headers, tablefmt="Simple")]
-        print(tabulate(
-            [table], headers=[value_dict.id], tablefmt="fancy_grid"))
+        print(tabulate([table], headers=[value_dict.id], tablefmt="fancy_grid"))
 
 
 __all__ = (
-    "SBML_BASE_UNIT_KINDS_DICT", "SI_PREFIXES_DICT", "Unit",
-    "PREDEFINED_UNITS_DICT", "UnitDefinition", "print_defined_unit_values")
+    "SBML_BASE_UNIT_KINDS_DICT",
+    "SI_PREFIXES_DICT",
+    "Unit",
+    "PREDEFINED_UNITS_DICT",
+    "UnitDefinition",
+    "print_defined_unit_values",
+)

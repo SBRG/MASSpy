@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 """Provide unified interfaces for optimization solutions for concentrations.
@@ -16,7 +15,10 @@ from pandas import DataFrame, Series, option_context
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.util import (
-    _check_kwargs, apply_decimal_precision, get_public_attributes_and_methods)
+    _check_kwargs,
+    apply_decimal_precision,
+    get_public_attributes_and_methods,
+)
 
 MASSCONFIGURATION = MassConfiguration()
 
@@ -53,9 +55,16 @@ class ConcSolution:
 
     """
 
-    def __init__(self, objective_value, status, concentrations, Keqs,
-                 concentration_reduced_costs=None, Keq_reduced_costs=None,
-                 shadow_prices=None):
+    def __init__(
+        self,
+        objective_value,
+        status,
+        concentrations,
+        Keqs,
+        concentration_reduced_costs=None,
+        Keq_reduced_costs=None,
+        shadow_prices=None,
+    ):
         """Initialize the ConcSolution."""
         super(ConcSolution, self).__init__()
         # For solver objective value and status
@@ -73,21 +82,27 @@ class ConcSolution:
 
     def concentrations_to_frame(self):
         """Get a :class:`pandas.DataFrame` of concs. and reduced costs."""
-        return DataFrame({'concentrations': self.concentrations,
-                          'reduced_costs': self.concentration_reduced_costs})
+        return DataFrame(
+            {
+                "concentrations": self.concentrations,
+                "reduced_costs": self.concentration_reduced_costs,
+            }
+        )
 
     def Keqs_to_frame(self):
         """Get a :class:`pandas.DataFrame` of Keqs and reduced costs."""
-        return DataFrame({'Keqs': self.Keqs,
-                          'reduced_costs': self.Keq_reduced_costs})
+        return DataFrame({"Keqs": self.Keqs, "reduced_costs": self.Keq_reduced_costs})
 
     def to_frame(self):
         """Get a :class:`pandas.DataFrame` of variables and reduced costs."""
-        return DataFrame({
-            'variables': self.concentrations.append(self.Keqs),
-            'reduced_costs': self.concentration_reduced_costs.append(
-                self.Keq_reduced_costs)
-        })
+        return DataFrame(
+            {
+                "variables": self.concentrations.append(self.Keqs),
+                "reduced_costs": self.concentration_reduced_costs.append(
+                    self.Keq_reduced_costs
+                ),
+            }
+        )
 
     def _repr_html_(self):
         """HTML representation of the overview for the ConcSolution.
@@ -98,13 +113,15 @@ class ConcSolution:
 
         """
         if self.status == OPTIMAL:
-            with option_context('display.max_rows', 10):
-                html = ('<strong><em>Optimal</em> solution with objective '
-                        'value {:.3f}</strong><br>{}'
-                        .format(self.objective_value,
-                                self.to_frame()._repr_html_()))
+            with option_context("display.max_rows", 10):
+                html = (
+                    "<strong><em>Optimal</em> solution with objective "
+                    "value {:.3f}</strong><br>{}".format(
+                        self.objective_value, self.to_frame()._repr_html_()
+                    )
+                )
         else:
-            html = '<strong><em>{}</em> solution</strong>'.format(self.status)
+            html = "<strong><em>{}</em> solution</strong>".format(self.status)
         return html
 
     def __repr__(self):
@@ -117,8 +134,7 @@ class ConcSolution:
         """
         if self.status != OPTIMAL:
             return "<Solution {0:s} at 0x{1:x}>".format(self.status, id(self))
-        return "<Solution {0:.3f} at 0x{1:x}>".format(self.objective_value,
-                                                      id(self))
+        return "<Solution {0:.3f} at 0x{1:x}>".format(self.objective_value, id(self))
 
     def __getitem__(self, variable):
         """Return the value of a metabolite concentration or reaction Keq.
@@ -142,8 +158,8 @@ class ConcSolution:
             return self.Keqs[str(variable)]
         except KeyError as e:
             raise ValueError(
-                "{0!r} is not a str ID of a ConcSolution variable.".format(
-                    str(e)))
+                "{0!r} is not a str ID of a ConcSolution variable.".format(str(e))
+            )
 
     def __dir__(self):
         """Override default dir() implementation to list only public items.
@@ -158,9 +174,9 @@ class ConcSolution:
     get_primal_by_id = __getitem__
 
 
-def get_concentration_solution(concentration_solver, metabolites=None,
-                               reactions=None, raise_error=False,
-                               **kwargs):
+def get_concentration_solution(
+    concentration_solver, metabolites=None, reactions=None, raise_error=False, **kwargs
+):
     """Generate a solution representation of a :class:`.ConcSolver` state.
 
     Parameters
@@ -189,30 +205,29 @@ def get_concentration_solution(concentration_solver, metabolites=None,
         The solution of the optimization as a :class:`ConcSolution` object.
 
     """
-    kwargs = _check_kwargs({
-        "decimal_precision": False,
-    }, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "decimal_precision": False,
+        },
+        kwargs,
+    )
 
-    check_solver_status(concentration_solver.solver.status,
-                        raise_error=raise_error)
+    check_solver_status(concentration_solver.solver.status, raise_error=raise_error)
 
     # Get included metabolites and reactions
     metabolites = concentration_solver._get_included_metabolites(metabolites)
     reactions = concentration_solver._get_included_reactions(reactions)
 
     # Get variable IDs, metabolites, and reactions for Keqs and constraints
-    metabolites = [m.id for m in metabolites
-                   if m.id in concentration_solver.variables]
-    Keq_ids = [r.Keq_str for r in reactions
-               if r.Keq_str in concentration_solver.variables]
-    reactions = [r.id for r in reactions
-                 if r.id in concentration_solver.constraints]
+    metabolites = [m.id for m in metabolites if m.id in concentration_solver.variables]
+    Keq_ids = [
+        r.Keq_str for r in reactions if r.Keq_str in concentration_solver.variables
+    ]
+    reactions = [r.id for r in reactions if r.id in concentration_solver.constraints]
 
     # Get metabolite and Keq primal values
-    concs = array([concentration_solver.solver.primal_values[m]
-                   for m in metabolites])
-    Keqs = array([concentration_solver.solver.primal_values[Keq]
-                  for Keq in Keq_ids])
+    concs = array([concentration_solver.solver.primal_values[m] for m in metabolites])
+    Keqs = array([concentration_solver.solver.primal_values[Keq] for Keq in Keq_ids])
 
     if concentration_solver.solver.is_integer:
         # Fill irrelevant arrays with nan
@@ -221,22 +236,25 @@ def get_concentration_solution(concentration_solver, metabolites=None,
         shadow = array([nan] * len(reactions))
     else:
         # Get reduced cost values and shadow prices
-        reduced_concs = array([concentration_solver.solver.reduced_costs[m]
-                               for m in metabolites])
-        reduced_Keqs = array([concentration_solver.solver.reduced_costs[Keq]
-                              for Keq in Keq_ids])
-        shadow = array([concentration_solver.solver.shadow_prices[r]
-                        for r in reactions])
+        reduced_concs = array(
+            [concentration_solver.solver.reduced_costs[m] for m in metabolites]
+        )
+        reduced_Keqs = array(
+            [concentration_solver.solver.reduced_costs[Keq] for Keq in Keq_ids]
+        )
+        shadow = array(
+            [concentration_solver.solver.shadow_prices[r] for r in reactions]
+        )
 
     def transform_values(arr, **kwargs):
         """Transform array from logs to linear space and round if desired."""
         if kwargs.get("decimal_precision"):
-            arr = apply_decimal_precision(
-                arr, MASSCONFIGURATION.decimal_precision)
+            arr = apply_decimal_precision(arr, MASSCONFIGURATION.decimal_precision)
         return arr
 
     objective_value = transform_values(
-        exp(concentration_solver.solver.objective.value), **kwargs)
+        exp(concentration_solver.solver.objective.value), **kwargs
+    )
     concs = transform_values(exp(concs), **kwargs)
     Keqs = transform_values(exp(Keqs), **kwargs)
     reduced_concs = transform_values(reduced_concs, **kwargs)
@@ -244,17 +262,19 @@ def get_concentration_solution(concentration_solver, metabolites=None,
     shadow = transform_values(shadow, **kwargs)
 
     return ConcSolution(
-        objective_value, concentration_solver.solver.status,
+        objective_value,
+        concentration_solver.solver.status,
         Series(concs, metabolites, name="concentrations"),
         Series(Keqs, Keq_ids, name="Keqs"),
         Series(reduced_concs, metabolites, name="concentration_reduced_costs"),
         Series(reduced_Keqs, Keq_ids, name="Keq_reduced_costs"),
-        Series(shadow, reactions, name="shadow_prices"))
+        Series(shadow, reactions, name="shadow_prices"),
+    )
 
 
-def update_model_with_concentration_solution(model, concentration_solution,
-                                             concentrations=True, Keqs=True,
-                                             inplace=True):
+def update_model_with_concentration_solution(
+    model, concentration_solution, concentrations=True, Keqs=True, inplace=True
+):
     """Update a :mod:`mass` model with values from a :class:`ConcSolution`.
 
     Parameters
@@ -287,14 +307,16 @@ def update_model_with_concentration_solution(model, concentration_solution,
 
     if concentrations:
         model.update_initial_conditions(
-            concentration_solution.concentrations.to_dict(), verbose=False)
+            concentration_solution.concentrations.to_dict(), verbose=False
+        )
     if Keqs:
-        model.update_parameters(
-            concentration_solution.Keqs.to_dict(), verbose=False)
+        model.update_parameters(concentration_solution.Keqs.to_dict(), verbose=False)
 
     return model
 
 
 __all__ = (
-    "ConcSolution", "get_concentration_solution",
-    "update_model_with_concentration_solution")
+    "ConcSolution",
+    "get_concentration_solution",
+    "update_model_with_concentration_solution",
+)

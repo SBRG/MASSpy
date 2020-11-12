@@ -72,7 +72,8 @@ class EnzymeModuleReaction(MassReaction):
             name=kwargs.get("name", ""),
             subsystem=kwargs.get("subsystem", ""),
             reversible=kwargs.get("reversible", True),
-            steady_state_flux=kwargs.get("steady_state_flux", None))
+            steady_state_flux=kwargs.get("steady_state_flux", None),
+        )
         if isinstance(id_or_reaction, EnzymeModuleReaction):
             self.__dict__.update(id_or_reaction.__dict__)
         else:
@@ -109,36 +110,46 @@ class EnzymeModuleReaction(MassReaction):
             items[key].append(met)
 
         for enz_r, enz_p in zip(items["Enz React"], items["Enz Prod"]):
-            r_dict, p_dict = (getattr(enz_r, "bound_metabolites"),
-                              getattr(enz_p, "bound_metabolites"))
+            r_dict, p_dict = (
+                getattr(enz_r, "bound_metabolites"),
+                getattr(enz_p, "bound_metabolites"),
+            )
             diff = {}
             for key in list(set(p_dict).union(set(r_dict))):
                 if key in p_dict and key in r_dict:
                     coeff = abs(p_dict[key] - r_dict[key])
                 elif key in p_dict or key in r_dict:
-                    coeff = [d[key] for d in [r_dict, p_dict]
-                             if key in d].pop()
+                    coeff = [d[key] for d in [r_dict, p_dict] if key in d].pop()
                 if coeff != 0:
                     diff[key] = coeff
 
             if diff:
-                if list(diff) != list(items["Lig React"]) and \
-                   list(diff) != list(items["Lig Prod"]):
+                if list(diff) != list(items["Lig React"]) and list(diff) != list(
+                    items["Lig Prod"]
+                ):
                     name_str = enz_r._remove_compartment_from_id_str()
                     name_str += " catalyzation"
                 else:
-                    name_str = "-".join([
-                        m._remove_compartment_from_id_str()
-                        for m in [enz_r] + list(diff)])
+                    name_str = "-".join(
+                        [
+                            m._remove_compartment_from_id_str()
+                            for m in [enz_r] + list(diff)
+                        ]
+                    )
                     name_str += str(
                         " binding"
                         if list(diff) == list(items["Lig React"])
-                        else " release")
+                        else " release"
+                    )
                 name = name_str
 
             if not name:
-                name = "-".join([enz_form._remove_compartment_from_id_str()
-                                 for enz_form in [enz_r, enz_p]])
+                name = "-".join(
+                    [
+                        enz_form._remove_compartment_from_id_str()
+                        for enz_form in [enz_r, enz_p]
+                    ]
+                )
                 name += " transition"
 
         # Assign the new name to the name attribute

@@ -10,8 +10,9 @@ from mass.thermo.conc_sampling.conc_achr import ConcACHRSampler
 from mass.thermo.conc_sampling.conc_optgp import ConcOptGPSampler
 
 
-def sample_concentrations(concentration_solver, n, method="optgp",
-                          thinning=100, processes=1, seed=None):
+def sample_concentrations(
+    concentration_solver, n, method="optgp", thinning=100, processes=1, seed=None
+):
     """Sample valid concentration distributions from a :mod:`mass` model.
 
     This function samples valid concentration distributions from a
@@ -68,16 +69,17 @@ def sample_concentrations(concentration_solver, n, method="optgp",
 
     """
     if method == "optgp":
-        sampler = ConcOptGPSampler(concentration_solver, processes=processes,
-                                   thinning=thinning, seed=seed)
+        sampler = ConcOptGPSampler(
+            concentration_solver, processes=processes, thinning=thinning, seed=seed
+        )
     elif method == "achr":
-        sampler = ConcACHRSampler(concentration_solver, thinning=thinning,
-                                  seed=seed)
+        sampler = ConcACHRSampler(concentration_solver, thinning=thinning, seed=seed)
     else:
         raise ValueError("method must be either 'optgp' or 'achr'.")
 
-    return pd.DataFrame(columns=concentration_solver.included_metabolites,
-                        data=sampler.sample(n))
+    return pd.DataFrame(
+        columns=concentration_solver.included_metabolites, data=sampler.sample(n)
+    )
 
 
 __all__ = ("sample_concentrations",)

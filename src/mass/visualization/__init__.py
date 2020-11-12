@@ -442,13 +442,21 @@ of the :mod:`~mass.visualiation` module.
 """  # noqa
 from mass.visualization.comparison import plot_comparison
 from mass.visualization.time_profiles import (
-    plot_ensemble_time_profile, plot_time_profile)
+    plot_ensemble_time_profile,
+    plot_time_profile,
+)
 from mass.visualization.phase_portraits import (
-    plot_ensemble_phase_portrait, plot_phase_portrait,
-    plot_tiled_phase_portraits)
+    plot_ensemble_phase_portrait,
+    plot_phase_portrait,
+    plot_tiled_phase_portraits,
+)
 
 
 __all__ = (
-    "plot_comparison", "plot_time_profile", "plot_ensemble_time_profile", 
-    "plot_ensemble_phase_portrait", "plot_phase_portrait",
-    "plot_tiled_phase_portraits")
+    "plot_comparison",
+    "plot_time_profile",
+    "plot_ensemble_time_profile",
+    "plot_ensemble_phase_portrait",
+    "plot_phase_portrait",
+    "plot_tiled_phase_portraits",
+)

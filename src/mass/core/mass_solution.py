@@ -77,14 +77,20 @@ class MassSolution(DictWithID):
 
     """
 
-    def __init__(self, id_or_model, solution_type="", data_dict=None,
-                 time=None, interpolate=False, initial_values=None):
+    def __init__(
+        self,
+        id_or_model,
+        solution_type="",
+        data_dict=None,
+        time=None,
+        interpolate=False,
+        initial_values=None,
+    ):
         """Initialize MassSolution."""
         if isinstance(id_or_model, MassModel):
             id_or_model = "{0}_{1}Sols".format(str(id_or_model), solution_type)
         if not isinstance(id_or_model, string_types):
-            raise TypeError(
-                "'id_or_model' must be a MassModel instance or a string")
+            raise TypeError("'id_or_model' must be a MassModel instance or a string")
 
         super(MassSolution, self).__init__(id=id_or_model, data_dict=data_dict)
         self.solution_type = solution_type
@@ -177,14 +183,17 @@ class MassSolution(DictWithID):
         if not isinstance(value, bool):
             raise ValueError("value must be a bool")
         if self.time is None:
-            warn("No time points associated with MassSolution. Cannot convert "
-                 "between numerical arrays and interpolating functions.")
+            warn(
+                "No time points associated with MassSolution. Cannot convert "
+                "between numerical arrays and interpolating functions."
+            )
             return
 
         for key, sol in iteritems(self):
             if value and not isinstance(sol, interp1d):
-                self[key] = interp1d(self.time, sol, kind='cubic',
-                                     fill_value='extrapolate')
+                self[key] = interp1d(
+                    self.time, sol, kind="cubic", fill_value="extrapolate"
+                )
             if not value and isinstance(sol, interp1d):
                 self[key] = sol(self.time)
 
@@ -217,7 +226,8 @@ class MassSolution(DictWithID):
                 if key not in self:
                     continue
                 new_values[key] = apply_decimal_precision(
-                    value, MASSCONFIGURATION.decimal_precision)
+                    value, MASSCONFIGURATION.decimal_precision
+                )
         setattr(self, "_initial_values", new_values)
 
     def view_time_profile(self, deviation=False, plot_function="loglog"):
@@ -289,14 +299,14 @@ class MassSolution(DictWithID):
         ax.cla()
         # Set options
         options = {
-            "title": (
-                "Tiled Phase portraits for " + self.id, {"size": "large"}),
+            "title": ("Tiled Phase portraits for " + self.id, {"size": "large"}),
             "annotate_time_points": "endpoints",
             "annotate_time_points_color": ["r", "b"],
             "annotate_time_points_marker": ["o", "D"],
             "tile_xlabel_fontdict": {"size": "large"},
             "tile_ylabel_fontdict": {"size": "large"},
-            "annotate_time_points_legend_loc": "right outside"}
+            "annotate_time_points_legend_loc": "right outside",
+        }
         # Plot with kwargs
         ax = plot_tiled_phase_portraits(self, ax=ax, **options)
         # Set figure size
@@ -305,8 +315,10 @@ class MassSolution(DictWithID):
     def to_frame(self):
         """Return the stored solutions as a :class:`pandas.DataFrame`."""
         # Ensure solutions are data points
-        sols = dict((k, v(self.time)) if self.interpolate
-                    else (k, v) for k, v in iteritems(self))
+        sols = dict(
+            (k, v(self.time)) if self.interpolate else (k, v)
+            for k, v in iteritems(self)
+        )
         # Make dataframe and set time as index
         try:
             df = pd.DataFrame.from_dict(sols)
@@ -318,8 +330,9 @@ class MassSolution(DictWithID):
 
         return df
 
-    def make_aggregate_solution(self, aggregate_id, equation, variables=None,
-                                parameters=None, update=True):
+    def make_aggregate_solution(
+        self, aggregate_id, equation, variables=None, parameters=None, update=True
+    ):
         """Make a new aggregate variable and its solution from an equation.
 
         Parameters
@@ -362,8 +375,7 @@ class MassSolution(DictWithID):
             variables = sorted([getattr(var, "_id", var) for var in variables])
             invalid = [var for var in variables if var not in self]
             if invalid:
-                raise ValueError(
-                    "'{0!r}' not found in MassSolution".format(invalid))
+                raise ValueError("'{0!r}' not found in MassSolution".format(invalid))
         local_syms = list(variables)
         if parameters is None:
             parameters = {}
@@ -374,17 +386,18 @@ class MassSolution(DictWithID):
         equation = lambdify(args=variables, expr=equation.subs(parameters))
 
         if self.time is not None:
-            values = array([
-                self[k](self.time) if self.interpolate
-                else self[k] for k in variables])
+            values = array(
+                [self[k](self.time) if self.interpolate else self[k] for k in variables]
+            )
         else:
             values = array([self[k] for k in variables])
 
         solution = equation(*values)
         # # Return solution as type in the MassSolution
         if self.interpolate and self.time is not None:
-            solution = interp1d(self.time, solution, kind='cubic',
-                                fill_value='extrapolate')
+            solution = interp1d(
+                self.time, solution, kind="cubic", fill_value="extrapolate"
+            )
         elif solution.size == 1:
             solution = solution.item()
 
@@ -394,8 +407,9 @@ class MassSolution(DictWithID):
         if update:
             self.update(solution)
             try:
-                self.initial_values[aggregate_id] = equation(*array([
-                    self.initial_values[k] for k in variables]))
+                self.initial_values[aggregate_id] = equation(
+                    *array([self.initial_values[k] for k in variables])
+                )
             except KeyError:
                 # Not all initial values have been set
                 pass

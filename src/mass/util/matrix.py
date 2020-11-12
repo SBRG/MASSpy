@@ -47,8 +47,9 @@ MASSCONFIGURATION = MassConfiguration()
 
 
 # Public
-def gradient(model, use_parameter_values=True, use_concentration_values=True,
-             array_type="dense"):
+def gradient(
+    model, use_parameter_values=True, use_concentration_values=True, array_type="dense"
+):
     """Create the gradient matrix for a given model.
 
     Parameters
@@ -98,8 +99,9 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
             values.update(model._get_all_parameters())
 
         if use_concentration_values:
-            values.update({_mk_met_func(k): v
-                           for k, v in iteritems(model.initial_conditions)})
+            values.update(
+                {_mk_met_func(k): v for k, v in iteritems(model.initial_conditions)}
+            )
 
         # Substitute values into the matrix
         gradient_mat = gradient_mat.subs(values)
@@ -110,15 +112,19 @@ def gradient(model, use_parameter_values=True, use_concentration_values=True,
     else:
         dtype = np.float64
 
-    gradient_mat = convert_matrix(gradient_mat, array_type=array_type,
-                                  dtype=dtype,
-                                  row_ids=[r.id for r in model.reactions],
-                                  col_ids=[m.id for m in model.metabolites])
+    gradient_mat = convert_matrix(
+        gradient_mat,
+        array_type=array_type,
+        dtype=dtype,
+        row_ids=[r.id for r in model.reactions],
+        col_ids=[m.id for m in model.metabolites],
+    )
     return gradient_mat
 
 
-def kappa(model, use_parameter_values=True, use_concentration_values=True,
-          array_type="dense"):
+def kappa(
+    model, use_parameter_values=True, use_concentration_values=True, array_type="dense"
+):
     """Create the kappa matrix for a given model.
 
     Notes
@@ -151,20 +157,26 @@ def kappa(model, use_parameter_values=True, use_concentration_values=True,
         The kappa matrix for the model.
 
     """
-    gradient_matrix = gradient(model, use_parameter_values,
-                               use_concentration_values, array_type)
-    kappa_matrix = sym.diag(*[gradient_matrix[row, :].norm()
-                              for row in range(gradient_matrix.rows)])
+    gradient_matrix = gradient(
+        model, use_parameter_values, use_concentration_values, array_type
+    )
+    kappa_matrix = sym.diag(
+        *[gradient_matrix[row, :].norm() for row in range(gradient_matrix.rows)]
+    )
     kappa_matrix = kappa_matrix.subs({sym.nan: sym.S.Zero})
-    kappa_matrix = convert_matrix(kappa_matrix, array_type=array_type,
-                                  dtype=np.float64,
-                                  row_ids=[r.id for r in model.reactions],
-                                  col_ids=[r.id for r in model.reactions])
+    kappa_matrix = convert_matrix(
+        kappa_matrix,
+        array_type=array_type,
+        dtype=np.float64,
+        row_ids=[r.id for r in model.reactions],
+        col_ids=[r.id for r in model.reactions],
+    )
     return kappa_matrix
 
 
-def gamma(model, use_parameter_values=True, use_concentration_values=True,
-          array_type="dense"):
+def gamma(
+    model, use_parameter_values=True, use_concentration_values=True, array_type="dense"
+):
     """Create the gamma matrix for a given model.
 
     Notes
@@ -196,20 +208,30 @@ def gamma(model, use_parameter_values=True, use_concentration_values=True,
         The gamma matrix for the model.
 
     """
-    gradient_matrix = gradient(model, use_parameter_values,
-                               use_concentration_values, array_type)
-    gamma_matrix = sym.Matrix([gradient_matrix[row, :].normalized()
-                               for row in range(gradient_matrix.rows)])
+    gradient_matrix = gradient(
+        model, use_parameter_values, use_concentration_values, array_type
+    )
+    gamma_matrix = sym.Matrix(
+        [gradient_matrix[row, :].normalized() for row in range(gradient_matrix.rows)]
+    )
     gamma_matrix = gamma_matrix.subs({sym.nan: sym.S.Zero})
-    gamma_matrix = convert_matrix(gamma_matrix, array_type=array_type,
-                                  dtype=np.float64,
-                                  row_ids=[r.id for r in model.reactions],
-                                  col_ids=[m.id for m in model.metabolites])
+    gamma_matrix = convert_matrix(
+        gamma_matrix,
+        array_type=array_type,
+        dtype=np.float64,
+        row_ids=[r.id for r in model.reactions],
+        col_ids=[m.id for m in model.metabolites],
+    )
     return gamma_matrix
 
 
-def jacobian(model, jacobian_type="species", use_parameter_values=True,
-             use_concentration_values=True, array_type="dense"):
+def jacobian(
+    model,
+    jacobian_type="species",
+    use_parameter_values=True,
+    use_concentration_values=True,
+    array_type="dense",
+):
     """Get the jacobian matrix for a given model.
 
     Parameters
@@ -243,14 +265,12 @@ def jacobian(model, jacobian_type="species", use_parameter_values=True,
 
     """
     if jacobian_type not in {"species", "reactions"}:
-        raise ValueError(
-            "jacobian_type must be either 'species' or 'reactions'")
+        raise ValueError("jacobian_type must be either 'species' or 'reactions'")
 
-    gradient_matrix = gradient(model, use_parameter_values,
-                               use_concentration_values,
-                               array_type="symbolic")
-    stoich_matrix = model._mk_stoich_matrix(array_type="symbolic",
-                                            update_model=False)
+    gradient_matrix = gradient(
+        model, use_parameter_values, use_concentration_values, array_type="symbolic"
+    )
+    stoich_matrix = model._mk_stoich_matrix(array_type="symbolic", update_model=False)
     if jacobian_type == "species":
         jacobian_matrix = stoich_matrix * gradient_matrix
         identifiers = [m.id for m in model.metabolites]
@@ -258,10 +278,13 @@ def jacobian(model, jacobian_type="species", use_parameter_values=True,
         jacobian_matrix = gradient_matrix * stoich_matrix
         identifiers = [r.id for r in model.reactions]
 
-    jacobian_matrix = convert_matrix(jacobian_matrix, array_type=array_type,
-                                     dtype=np.float64,
-                                     row_ids=identifiers,
-                                     col_ids=identifiers)
+    jacobian_matrix = convert_matrix(
+        jacobian_matrix,
+        array_type=array_type,
+        dtype=np.float64,
+        row_ids=identifiers,
+        col_ids=identifiers,
+    )
     return jacobian_matrix
 
 
@@ -321,11 +344,10 @@ def nullspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     # Apply zero singular value tolerance
     for i, row in enumerate(ns):
         for j, val in enumerate(row):
-            if decimal_precision\
-               and MASSCONFIGURATION.decimal_precision is not None:
+            if decimal_precision and MASSCONFIGURATION.decimal_precision is not None:
                 val = round(val, MASSCONFIGURATION.decimal_precision)
             if abs(val) <= tol:
-                ns[i, j] = 0.
+                ns[i, j] = 0.0
     return ns
 
 
@@ -420,7 +442,7 @@ def columnspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     """
     matrix = _ensure_dense_matrix(matrix)
     q = linalg.qr(matrix)[0]
-    cs = q[:, :matrix_rank(matrix, atol, rtol)]
+    cs = q[:, : matrix_rank(matrix, atol, rtol)]
 
     # Apply zero singular value tolerance
     s = linalg.svd(matrix, compute_uv=False)
@@ -429,11 +451,10 @@ def columnspace(matrix, atol=1e-13, rtol=0, decimal_precision=False):
     # Apply zero singular value tolerance
     for i, row in enumerate(cs):
         for j, val in enumerate(row):
-            if decimal_precision\
-               and MASSCONFIGURATION.decimal_precision is not None:
+            if decimal_precision and MASSCONFIGURATION.decimal_precision is not None:
                 val = round(val, MASSCONFIGURATION.decimal_precision)
             if abs(val) <= tol:
-                cs[i, j] = 0.
+                cs[i, j] = 0.0
 
     return cs
 
@@ -633,8 +654,9 @@ def convert_matrix(matrix, array_type, dtype, row_ids=None, col_ids=None):
         raise ValueError("Unrecognized array_type.")
 
     # Convert the matrix type
-    conversion_method_dict = dict(zip(
-        _ARRAY_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense]))
+    conversion_method_dict = dict(
+        zip(_ARRAY_TYPES, [_to_dense, _to_dok, _to_lil, _to_dense, _to_dense])
+    )
 
     try:
         matrix = conversion_method_dict[array_type](matrix)
@@ -670,17 +692,22 @@ def _ensure_dense_matrix(matrix):
         try:
             matrix = np.array(matrix).astype(np.float64)
         except TypeError:
-            raise ValueError("Cannot have sympy symbols in the matrix. Try "
-                             "substituting numerical values in first")
+            raise ValueError(
+                "Cannot have sympy symbols in the matrix. Try "
+                "substituting numerical values in first"
+            )
     else:
-        raise TypeError("Matrix must be one of the following formats: "
-                        "numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
-                        "pandas.DataFrame, or sympy.Matrix.")
+        raise TypeError(
+            "Matrix must be one of the following formats: "
+            "numpy.ndarray, scipy.dok_matrix, scipy.lil_matrix, "
+            "pandas.DataFrame, or sympy.Matrix."
+        )
     return matrix
 
 
-def _get_matrix_constructor(array_type, dtype, array_type_default="dense",
-                            dtype_default=np.float64):
+def _get_matrix_constructor(
+    array_type, dtype, array_type_default="dense", dtype_default=np.float64
+):
     """Create a matrix constructor for the specified matrix type.
 
     Parameters
@@ -715,9 +742,9 @@ def _get_matrix_constructor(array_type, dtype, array_type_default="dense",
         dtype = dtype_default
 
     # Dictionary of options for constructing the matrix
-    matrix_constructor = dict(zip(_ARRAY_TYPES,
-                                  [np.zeros, dok_matrix, lil_matrix,
-                                   np.zeros, np.zeros]))
+    matrix_constructor = dict(
+        zip(_ARRAY_TYPES, [np.zeros, dok_matrix, lil_matrix, np.zeros, np.zeros])
+    )
     constructor = matrix_constructor[array_type]
     return (constructor, array_type, dtype)
 
@@ -752,6 +779,16 @@ def _to_dok(matrix):
 
 
 __all__ = (
-    "columnspace", "eig", "gamma", "gradient", "jacobian", "kappa",
-    "left_nullspace", "matrix_rank", "nullspace", "rowspace", "svd",
-    "convert_matrix")
+    "columnspace",
+    "eig",
+    "gamma",
+    "gradient",
+    "jacobian",
+    "kappa",
+    "left_nullspace",
+    "matrix_rank",
+    "nullspace",
+    "rowspace",
+    "svd",
+    "convert_matrix",
+)

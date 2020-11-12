@@ -23,20 +23,20 @@ sys.path.insert(0, SRC_PATH)
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.autosectionlabel',
-    'autoapi.extension',
-    'sphinxcontrib.bibtex',
+    "nbsphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autosectionlabel",
+    "autoapi.extension",
+    "sphinxcontrib.bibtex",
 ]
 
 # Automated documention of Python Code (autoapi)
-autoapi_type = 'python'
+autoapi_type = "python"
 autoapi_dirs = [SRC_PATH]
 # Keep files for documentation preview in IDEs
 autoapi_keep_files = True
@@ -54,7 +54,7 @@ autodoc_mock_imports = [
     "scipy",
     "six",
     "sympy",
-    "tabulate"
+    "tabulate",
 ]
 
 # Napoleon settings
@@ -62,20 +62,20 @@ napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # -- Project information ------------------------------------------------------
 
-project = 'MASSpy'
-copyright = '2019, Z. Haiman'
-author = 'Z. Haiman'
+project = "MASSpy"
+copyright = "2019, Z. Haiman"
+author = "Z. Haiman"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -91,12 +91,13 @@ version = ".".join(release.split(".")[:2])
 # a list of builtin themes.
 # on_rtd is whether we are on readthedocs.org,
 # this line of code grabbed from docs.readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 # Only import and set the theme if we're building docs locally. Otherwise,
 # readthedocs.org uses their theme by default, so no need to specify it.
 if not on_rtd:
     import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
+
+    html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # A list of paths that contain extra files not directly related to the
@@ -115,13 +116,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  (
-      'index',
-      'MASSpy.tex',
-      u'MASSpy Documentation',
-      u'Z. Haiman',
-      'manual'
-    ),
+    ("index", "MASSpy.tex", u"MASSpy Documentation", u"Z. Haiman", "manual"),
 ]
 
 
@@ -129,15 +124,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (
-        'index',
-        'MASSpy',
-        u'MASSpy Documentation',
-        [u'Z. Haiman'],
-        1
-    )
-]
+man_pages = [("index", "MASSpy", u"MASSpy Documentation", [u"Z. Haiman"], 1)]
 
 # -- Options for Texinfo output -----------------------------------------------
 
@@ -159,7 +146,7 @@ texinfo_documents = [
 # -- NBSphinx -----------------------------------------------------------------
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = 'never'
+nbsphinx_execute = "never"
 nbsphinx_execute_arguments = [
     "--Application.log_level=CRITICAL",
 ]
@@ -177,5 +164,5 @@ intersphinx_mapping = {
     "https://pandas.pydata.org/pandas-docs/stable/": None,
     "http://docs.scipy.org/doc/scipy/reference": None,
     "https://docs.sympy.org/latest": None,
-    }
+}
 intersphinx_cache_limit = 10  # days to keep the cached inventories

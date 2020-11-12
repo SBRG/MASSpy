@@ -40,7 +40,9 @@ def _sample_chain(args):
     np.random.seed((sampler._seed + idx) % np.iinfo(np.int32).max)
     pi = np.random.randint(sampler.n_warmup)
 
-    prev = sampler.warmup[pi, ]
+    prev = sampler.warmup[
+        pi,
+    ]
     prev = step(sampler, center, prev - center, 0.95)
 
     n_samples = max(sampler.n_samples, 1)
@@ -48,20 +50,27 @@ def _sample_chain(args):
 
     for i in range(1, sampler.thinning * n + 1):
         pi = np.random.randint(sampler.n_warmup)
-        delta = sampler.warmup[pi, ] - center
+        delta = (
+            sampler.warmup[
+                pi,
+            ]
+            - center
+        )
 
         prev = step(sampler, prev, delta)
 
         if sampler.problem.homogeneous and (
-                n_samples * sampler.thinning % sampler.nproj == 0):
+            n_samples * sampler.thinning % sampler.nproj == 0
+        ):
             prev = sampler._reproject(prev)
             center = sampler._reproject(center)
 
         if i % sampler.thinning == 0:
-            samples[i // sampler.thinning - 1, ] = prev
+            samples[
+                i // sampler.thinning - 1,
+            ] = prev
 
-        center = ((n_samples * center) / (n_samples + 1) +
-                  prev / (n_samples + 1))
+        center = (n_samples * center) / (n_samples + 1) + prev / (n_samples + 1)
         n_samples += 1
 
     return (sampler.retries, samples)
@@ -156,11 +165,13 @@ class ConcOptGPSampler(ConcHRSampler):
 
     """
 
-    def __init__(self, concentration_solver, processes=None, thinning=100,
-                 nproj=None, seed=None):
+    def __init__(
+        self, concentration_solver, processes=None, thinning=100, nproj=None, seed=None
+    ):
         """Initialize a new ConcOptGPSampler."""
-        super(ConcOptGPSampler, self).__init__(concentration_solver, thinning,
-                                               nproj=nproj, seed=seed)
+        super(ConcOptGPSampler, self).__init__(
+            concentration_solver, thinning, nproj=nproj, seed=seed
+        )
         self.generate_cva_warmup()
 
         if processes is None:
@@ -171,7 +182,8 @@ class ConcOptGPSampler(ConcHRSampler):
         # This maps our saved center into shared memory,
         # meaning they are synchronized across processes
         self.center = shared_np_array(
-            (len(concentration_solver.variables), ), self.warmup.mean(axis=0))
+            (len(concentration_solver.variables),), self.warmup.mean(axis=0)
+        )
 
     def sample(self, n, concs=True):
         """Generate a set of samples.
@@ -212,8 +224,7 @@ class ConcOptGPSampler(ConcHRSampler):
 
             # The cast to list is weird but not doing it gives recursion
             # limit errors, something weird going on with multiprocessing
-            args = list(zip(
-                [n_process] * self.processes, range(self.processes)))
+            args = list(zip([n_process] * self.processes, range(self.processes)))
 
             # No with statement or starmap here since Python 2.x
             # does not support it :(
@@ -230,8 +241,9 @@ class ConcOptGPSampler(ConcHRSampler):
             chains = results[1]
 
         # Update the global center
-        self.center = (self.n_samples * self.center +
-                       np.atleast_2d(chains).sum(0)) / (self.n_samples + n)
+        self.center = (self.n_samples * self.center + np.atleast_2d(chains).sum(0)) / (
+            self.n_samples + n
+        )
         self.n_samples += n
 
         names = [v.name for v in self.concentration_solver.variables]
@@ -254,7 +266,7 @@ class ConcOptGPSampler(ConcHRSampler):
 
         """
         d = dict(self.__dict__)
-        del d['model']
+        del d["model"]
         return d
 
 

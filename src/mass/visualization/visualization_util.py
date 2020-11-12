@@ -78,7 +78,8 @@ def _validate_visualization_packages(package):
         raise ValueError(
             "The " + package + " has not been installed. To utilize the "
             "mass visualization functions, all visualization packages must be"
-            "installed.")
+            "installed."
+        )
 
 
 def _validate_axes_instance(ax):
@@ -109,8 +110,9 @@ def _validate_mass_solution(mass_solution):
         raise TypeError("mass_solution must be a mass.MassSolution.")
 
     if not mass_solution:
-        warn("MassSolution '" + mass_solution.id + "' does not contain "
-             "any solutions.")
+        warn(
+            "MassSolution '" + mass_solution.id + "' does not contain " "any solutions."
+        )
 
     return mass_solution
 
@@ -126,8 +128,7 @@ def _validate_time_vector(time_vector, default_time_vector):
     # Ensure time_vector is valid
     if time_vector is None:
         return np.array(sorted(default_time_vector))
-    if isinstance(time_vector, Iterable)\
-       and not isinstance(time_vector, string_types):
+    if isinstance(time_vector, Iterable) and not isinstance(time_vector, string_types):
         return np.array(sorted(time_vector))
 
     raise ValueError("Invalid input for `time_vector`.")
@@ -141,8 +142,7 @@ def _validate_plot_observables(mass_solution, observable, **kwargs):
     This method is intended for internal use only.
 
     """
-    time_vector = _validate_time_vector(kwargs.get("time_vector"),
-                                        mass_solution.time)
+    time_vector = _validate_time_vector(kwargs.get("time_vector"), mass_solution.time)
     # Return all items in the solution if no observables are provided.
     if observable is None:
         observable = list(iterkeys(mass_solution))
@@ -171,8 +171,11 @@ def _validate_plot_observables(mass_solution, observable, **kwargs):
         time=mass_solution.time,
         interpolate=mass_solution.interpolate,
         initial_values={
-            x: mass_solution.initial_values.get(x) for x in observable
-            if mass_solution.initial_values.get(x, None) is not None})
+            x: mass_solution.initial_values.get(x)
+            for x in observable
+            if mass_solution.initial_values.get(x, None) is not None
+        },
+    )
 
     # Change the time points and solutions if the time_vector has changed
     if not np.array_equal(observable.time, time_vector):
@@ -188,8 +191,7 @@ def _validate_plot_observables(mass_solution, observable, **kwargs):
     return observable
 
 
-def _validate_ensemble_plot_observables(mass_solution_list, observable,
-                                        **kwargs):
+def _validate_ensemble_plot_observables(mass_solution_list, observable, **kwargs):
     """Validate the given observables and observable solutions in DataFrames.
 
     Warnings
@@ -202,8 +204,9 @@ def _validate_ensemble_plot_observables(mass_solution_list, observable,
     time_vector_lens = [len(sol.time) for sol in mass_solution_list]
     idx = time_vector_lens.index(max(time_vector_lens))
     # Use time vector with most points as default time vector for all solutions
-    time_vector = _validate_time_vector(kwargs.get("time_vector"),
-                                        mass_solution_list[idx].time)
+    time_vector = _validate_time_vector(
+        kwargs.get("time_vector"), mass_solution_list[idx].time
+    )
 
     # Replace mass objects with their identifiers.
     observable = [getattr(x, "id", x) for x in ensure_iterable(observable)]
@@ -211,26 +214,34 @@ def _validate_ensemble_plot_observables(mass_solution_list, observable,
     # Raise error if solutions are missing observables
     missing_observables = [
         mass_solution_list[idx]
-        for idx, x in enumerate([
-            set(observable).issubset(set(iterkeys(sol)))
-            for sol in mass_solution_list])
-        if not x]
+        for idx, x in enumerate(
+            [set(observable).issubset(set(iterkeys(sol))) for sol in mass_solution_list]
+        )
+        if not x
+    ]
     if missing_observables:
         raise ValueError(
             "The following MassSolution objects are missing the specified "
-            "observables:\n{1!r}".format([s.id for s in missing_observables]))
+            "observables:\n{1!r}".format([s.id for s in missing_observables])
+        )
 
     # Turn observable into a copy of the MassSolution containing only
     # the observable values as interpolating functions
     mass_solution_list = [
         sol.__class__(
-            id_or_model=sol.id, solution_type=sol.solution_type,
+            id_or_model=sol.id,
+            solution_type=sol.solution_type,
             data_dict={x: sol[x] for x in observable},
-            time=sol.time, interpolate=True,
+            time=sol.time,
+            interpolate=True,
             initial_values={
-                x: sol.initial_values.get(x) for x in observable
-                if sol.initial_values.get(x) is not None})
-        for sol in mass_solution_list]
+                x: sol.initial_values.get(x)
+                for x in observable
+                if sol.initial_values.get(x) is not None
+            },
+        )
+        for sol in mass_solution_list
+    ]
 
     for sol in mass_solution_list:
         sol.time = time_vector
@@ -241,10 +252,11 @@ def _validate_ensemble_plot_observables(mass_solution_list, observable,
     # Make DataFrames for each observable solution with timepoints as columns
     observable_dataframes = {
         sol_key: pd.DataFrame(
-            data=[sol[sol_key] for sol in mass_solution_list
-                  if sol_key in sol],
-            columns=time_vector)
-        for sol_key in observable}
+            data=[sol[sol_key] for sol in mass_solution_list if sol_key in sol],
+            columns=time_vector,
+        )
+        for sol_key in observable
+    }
 
     return observable_dataframes, time_vector
 
@@ -300,8 +312,7 @@ def _calculate_confidence_interval(ci_value, sol_df, CI_distribution):
     return lower_bound, upper_bound, mean
 
 
-def _calculate_deviation_solutions(observable, initial_values=None,
-                                   **kwargs):
+def _calculate_deviation_solutions(observable, initial_values=None, **kwargs):
     """Calculate the new deviated solution using the deviation kwargs.
 
     Warnings
@@ -325,8 +336,10 @@ def _calculate_deviation_solutions(observable, initial_values=None,
         if deviation_normalization == "initial value":
             # Avoid plotting solutions that produce a divide by 0 error
             if initial_values[label] == 0:
-                warn("Initial value for '{0}' is 0, therefore cannot plot "
-                     "deviation from initial value.".format(label))
+                warn(
+                    "Initial value for '{0}' is 0, therefore cannot plot "
+                    "deviation from initial value.".format(label)
+                )
                 del observable[label]
                 continue
             sol = sol / initial_values[label]
@@ -334,7 +347,8 @@ def _calculate_deviation_solutions(observable, initial_values=None,
         if deviation_normalization == "range":
             # Avoid plotting solutions that produce a divide by 0 error
             value_range = apply_decimal_precision(
-                sol.max() - sol.min(), MASSCONFIGURATION.decimal_precision)
+                sol.max() - sol.min(), MASSCONFIGURATION.decimal_precision
+            )
             if value_range == 0:
                 sol.fill(0)
             else:
@@ -355,7 +369,7 @@ def _validate_legend_input_fmt(legend, observable):
     """
     # Ensure legend is iterable and get default labels and legend location
     legend = ensure_iterable(legend)
-    default_loc = rc.defaultParams['legend.loc'][0]
+    default_loc = rc.defaultParams["legend.loc"][0]
 
     # Get lengths of observables and legend arguments for comparisions.
     n_obs, n_leg = len(observable), len(legend)
@@ -367,8 +381,9 @@ def _validate_legend_input_fmt(legend, observable):
         """Valdidate legend locations in this function."""
         try:
             if poss_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-                poss_loc = _validate_kwarg_input("legend_loc", poss_loc,
-                                                 as_warning=False)
+                poss_loc = _validate_kwarg_input(
+                    "legend_loc", poss_loc, as_warning=False
+                )
         except ValueError:
             items = labels, def_loc
         else:
@@ -378,8 +393,9 @@ def _validate_legend_input_fmt(legend, observable):
 
     # Legend location is an integer
     if isinstance(possible_loc, (integer_types, float)):
-        if legend[0] != possible_loc and\
-           (isinstance(legend[0], list) or n_obs <= n_leg <= n_obs + 1):
+        if legend[0] != possible_loc and (
+            isinstance(legend[0], list) or n_obs <= n_leg <= n_obs + 1
+        ):
             items = ensure_iterable(legend[0]), possible_loc
         elif legend[0] == possible_loc:
             items = list(observable), possible_loc
@@ -387,8 +403,10 @@ def _validate_legend_input_fmt(legend, observable):
             items = None, possible_loc
 
     # Legend format includes iterable of labels and a location as a str
-    elif n_leg == 2 and (not isinstance(legend[0], string_types)
-                         and isinstance(possible_loc, string_types)):
+    elif n_leg == 2 and (
+        not isinstance(legend[0], string_types)
+        and isinstance(possible_loc, string_types)
+    ):
         items = legend[0], legend[-1]
     # Only one observable value or legend value
     elif 1 in [n_obs, n_leg]:
@@ -396,13 +414,14 @@ def _validate_legend_input_fmt(legend, observable):
         if n_leg == n_obs + 1:
             items = ensure_iterable(legend[0]), possible_loc
         elif n_leg in [n_obs, 1]:
-            items = _validate_legend_loc(legend, possible_loc,
-                                         def_labels=list(observable),
-                                         def_loc=default_loc)
+            items = _validate_legend_loc(
+                legend, possible_loc, def_labels=list(observable), def_loc=default_loc
+            )
     # Either only labels provided or bad label input and location
     elif n_leg == n_obs:
-        items = _validate_legend_loc(legend, possible_loc,
-                                     def_labels=None, def_loc=default_loc)
+        items = _validate_legend_loc(
+            legend, possible_loc, def_labels=None, def_loc=default_loc
+        )
     # Bad legend input, return None to set off warnings
     else:
         items = None, None
@@ -414,11 +433,12 @@ def _validate_legend_input_fmt(legend, observable):
 
     # Ensure legend location is valid
     try:
-        items[1] = _validate_kwarg_input("legend_loc", items[1],
-                                         as_warning=False)
+        items[1] = _validate_kwarg_input("legend_loc", items[1], as_warning=False)
     except (AttributeError, ValueError):
-        valid_bool = bool(items[1] in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS
-                          or items[1] in list(range(0, 11)))
+        valid_bool = bool(
+            items[1] in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS
+            or items[1] in list(range(0, 11))
+        )
         items[1] = items[1] if valid_bool else None
 
     return items[0], items[1]
@@ -438,8 +458,7 @@ def _validate_annotate_time_points_input(*args):
     t_max = max(time_vector)
 
     # Get the start and finish points
-    if isinstance(time_points, string_types) and\
-       time_points.lower() == "endpoints":
+    if isinstance(time_points, string_types) and time_points.lower() == "endpoints":
         time_points = [t_min, t_max]
         default_markers = ["o", "D"]
         default_colors = ["r", "b"]
@@ -450,8 +469,7 @@ def _validate_annotate_time_points_input(*args):
         default_colors = ["k"] * len(time_points)
 
     # Get the default marker sizes
-    default_sizes = [
-        rc.defaultParams["lines.markersize"][0]] * len(default_markers)
+    default_sizes = [rc.defaultParams["lines.markersize"][0]] * len(default_markers)
 
     # Ensure time points are in the time vector
     outside_t_range = []
@@ -470,22 +488,22 @@ def _validate_annotate_time_points_input(*args):
             _raise_kwarg_warning(
                 "marker",
                 msg=", therefore utilizing default `markers` values instead",
-                kwarg_prefix="annotate_time_points")
+                kwarg_prefix="annotate_time_points",
+            )
             markers = None
 
         # Assign value dependning on whether validation was successful
         markers = default_markers if not markers else markers
 
         # Validate marker sizes
-        marker_sizes = _validate_time_points_marker_properties("markersize",
-                                                               marker_sizes,
-                                                               len(markers))
+        marker_sizes = _validate_time_points_marker_properties(
+            "markersize", marker_sizes, len(markers)
+        )
         # Assign value dependning on whether validation was successful
         marker_sizes = default_sizes if not marker_sizes else marker_sizes
 
     # Validate time points colors
-    colors = _validate_time_points_marker_properties("color", colors,
-                                                     len(time_points))
+    colors = _validate_time_points_marker_properties("color", colors, len(time_points))
     if colors is None:
         colors = default_colors
 
@@ -507,22 +525,26 @@ def _validate_time_points_marker_properties(marker_prop, values, num_expected):
             # Check whether the values are valid
             values = [
                 _validate_kwarg_input(
-                    marker_prop, v, prefix="annotate_time_points",
-                    as_warning=False) for v in values]
+                    marker_prop, v, prefix="annotate_time_points", as_warning=False
+                )
+                for v in values
+            ]
             # Ensure that the number of values is equal to the number expected
             if len(values) == 1:
                 values = values * num_expected
             elif len(values) != num_expected:
                 raise ValueError(
-                    "wrong number of values for '{0}' provided".format(
-                        marker_prop))
+                    "wrong number of values for '{0}' provided".format(marker_prop)
+                )
         except ValueError as e:
             # Raise warning and set marker defaults if invalid input.
             msg = str(e).lower()
             msg += ", therefore utilizing default {0} values instead".format(
-                marker_prop)
-            _raise_kwarg_warning(marker_prop, msg=msg,
-                                 kwarg_prefix="annotate_time_points")
+                marker_prop
+            )
+            _raise_kwarg_warning(
+                marker_prop, msg=msg, kwarg_prefix="annotate_time_points"
+            )
             # Returning None causes defaults to be used.
             values = None
 
@@ -545,13 +567,15 @@ def _validate_tile_placement(tile_placement, prefix=None):
             arg_name = "_".join(("plot", arg_name))
         raise ValueError(
             "Invalid `{0}` input '{1}'. Can only be one of the following: "
-            "{2}.".format(arg_name, tile_placement, str(valid)))
+            "{2}.".format(arg_name, tile_placement, str(valid))
+        )
 
     return tile_placement.lower()
 
 
-def _validate_kwarg_input(arg_name, arg_value, prefix=None, as_warning=True,
-                          alt_arg_name=None):
+def _validate_kwarg_input(
+    arg_name, arg_value, prefix=None, as_warning=True, alt_arg_name=None
+):
     """Validate whether the given ``input`` can be interpreted.
 
     Warnings
@@ -605,15 +629,18 @@ def _get_plotting_function(ax, plot_function_str, valid):
         "plot": ax.plot,
         "semilogx": ax.semilogx,
         "semilogy": ax.semilogy,
-        "loglog": ax.loglog
+        "loglog": ax.loglog,
     }
 
     # Ensure plotting function is valid
-    if plot_function_str not in plotting_functions_dict\
-       or plot_function_str not in valid:
+    if (
+        plot_function_str not in plotting_functions_dict
+        or plot_function_str not in valid
+    ):
         raise ValueError(
             "'{0}' not a valid plotting option. Must be one of the "
-            "following options: '{1}'.".format(plot_function_str, valid))
+            "following options: '{1}'.".format(plot_function_str, valid)
+        )
 
     return plotting_functions_dict[plot_function_str]
 
@@ -630,15 +657,17 @@ def _get_legend_args(ax, legend, observable, **kwargs):
     legend_labels, legend_loc = _validate_legend_input_fmt(legend, observable)
     if legend_labels is None:
         _raise_kwarg_warning(
-            "legend",
-            msg="therefore utilizing keys from the MassSolution instead")
+            "legend", msg="therefore utilizing keys from the MassSolution instead"
+        )
         legend_labels = list(observable)
 
     if legend_loc is None:
         _raise_kwarg_warning(
-            "loc", msg="therefore utilizing default legend `loc` instead",
-            kwarg_prefix="legend")
-        legend_loc = rc.defaultParams['legend.loc'][0]
+            "loc",
+            msg="therefore utilizing default legend `loc` instead",
+            kwarg_prefix="legend",
+        )
+        legend_loc = rc.defaultParams["legend.loc"][0]
 
     if legend_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
         legend_loc, anchor = OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[legend_loc]
@@ -653,8 +682,7 @@ def _get_legend_args(ax, legend, observable, **kwargs):
     if ncols is None:
         ncols = int(np.ceil(np.sqrt(len(observable) + n_current) / 3))
 
-    legend_kwargs = {
-        "loc": legend_loc, "bbox_to_anchor": anchor, "ncol": ncols}
+    legend_kwargs = {"loc": legend_loc, "bbox_to_anchor": anchor, "ncol": ncols}
 
     return legend_labels, legend_kwargs
 
@@ -700,7 +728,7 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
             "linestyle": [rc.defaultParams["lines.linestyle"][0]] * n_new,
             "linewidth": [rc.defaultParams["lines.linewidth"][0]] * n_new,
             "marker": [rc.defaultParams["lines.marker"][0]] * n_new,
-            "markersize": [rc.defaultParams["lines.markersize"][0]] * n_new
+            "markersize": [rc.defaultParams["lines.markersize"][0]] * n_new,
         }
 
         for k in default_cycler_values:
@@ -713,9 +741,9 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
             # Validate values using appropriate validation method.
             try:
                 values = [
-                    _validate_kwarg_input(
-                        k, v, prefix=kwarg_prefix, as_warning=False)
-                    for v in values]
+                    _validate_kwarg_input(k, v, prefix=kwarg_prefix, as_warning=False)
+                    for v in values
+                ]
             except ValueError as e:
                 # Catch error and append to warning message
                 msg += str(e)
@@ -779,8 +807,11 @@ def _set_axes_labels(ax, **kwargs):
             try:
                 getattr(ax, "set_" + label_type)(label_str, fontdict=fontdict)
             except ValueError as e:
-                warn("Could not set `{0}` due to the following: '{1}'.".format(
-                    label_type, e))
+                warn(
+                    "Could not set `{0}` due to the following: '{1}'.".format(
+                        label_type, e
+                    )
+                )
 
 
 def _set_axes_limits(ax, **kwargs):
@@ -805,8 +836,11 @@ def _set_axes_limits(ax, **kwargs):
             try:
                 getattr(ax, "set_" + limit_type)(tuple(limit_values))
             except ValueError as e:
-                warn("Could not set `{0}` due to the following: '{1}'".format(
-                    limit_type, e))
+                warn(
+                    "Could not set `{0}` due to the following: '{1}'".format(
+                        limit_type, e
+                    )
+                )
 
 
 def _set_axes_gridlines(ax, **kwargs):
@@ -884,22 +918,25 @@ def _set_axes_margins(ax, x_default=None, y_default=None, tile=False, **kwargs):
         margin_value = kwargs.get(prefix + margin_arg, None)
         if margin_value is not None:
             margin_value = _validate_kwarg_input(
-                "margin", margin_value, prefix=prefix.rstrip("_"),
-                alt_arg_name=margin_arg)
+                "margin",
+                margin_value,
+                prefix=prefix.rstrip("_"),
+                alt_arg_name=margin_arg,
+            )
 
         # Use default value if None
         if margin_value is None:
             # Use default from rcsetup
             if margin_default is None:
-                margin_default = rc.defaultParams['axes.' + margin_arg][0]
+                margin_default = rc.defaultParams["axes." + margin_arg][0]
             margin_value = margin_default
         # Set the margin value
         getattr(ax, "set_" + margin_arg)(margin_value)
 
 
-def _set_annotated_time_points(ax, observable, type_of_plot=None,
-                               first_legend=None, time_range=None,
-                               **kwargs):
+def _set_annotated_time_points(
+    ax, observable, type_of_plot=None, first_legend=None, time_range=None, **kwargs
+):
     """Set the given ``time_points`` and kwargs.
 
     Warnings
@@ -908,25 +945,31 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
 
     """
     items = _validate_annotate_time_points_input(
-        time_range, kwargs.get("annotate_time_points"),
+        time_range,
+        kwargs.get("annotate_time_points"),
         kwargs.get("annotate_time_points_color"),
         kwargs.get("annotate_time_points_marker"),
-        kwargs.get("annotate_time_points_markersize"))
+        kwargs.get("annotate_time_points_markersize"),
+    )
 
     if items[-1]:
         # Invalid time points, end function early
         _raise_kwarg_warning(
             "annotate_time_points",
             msg="points '{1}' outside of time range {0}".format(
-                items[-1].pop(-1), items[-1]))
+                items[-1].pop(-1), items[-1]
+            ),
+        )
 
         return ax
 
     time_points, colors, markers, marker_sizes = items[0]
 
     plot_function = _get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "semilogx", "semilogy", "loglog"})
+        ax,
+        plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"},
+    )
 
     if hasattr(observable, "time"):
         # Change the time points of the MassSolution to make the MassSolution
@@ -936,28 +979,34 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
         # Interpolate mean solution at time points to annotate
         for label, df in iteritems(observable):
             func = interpolate.interp1d(
-                time_range, df.mean(axis=0), kind="cubic",
-                fill_value="extrapolate")
+                time_range, df.mean(axis=0), kind="cubic", fill_value="extrapolate"
+            )
             observable[label] = np.array(func(time_points))
 
     lines = _get_ax_current(ax)
     if type_of_plot == "phase_portrait":
-        lines = lines[len(lines) - 1:]
+        lines = lines[len(lines) - 1 :]
     else:
-        lines = lines[len(lines) - len(observable):]
+        lines = lines[len(lines) - len(observable) :]
 
     for line in lines:
         # Set up the prop_cycler arguments for the time points
         if colors is None:
             colors = [line.get_color()] * len(time_points)
         # Make and set the prop_cycler for the time points
-        ax.set_prop_cycle(_validate_kwarg_input(
-            "cycler", cycler(**{
-                "color": colors,
-                "linestyle": [" "] * len(time_points),
-                "marker": markers,
-                "markersize": marker_sizes
-            })))
+        ax.set_prop_cycle(
+            _validate_kwarg_input(
+                "cycler",
+                cycler(
+                    **{
+                        "color": colors,
+                        "linestyle": [" "] * len(time_points),
+                        "marker": markers,
+                        "markersize": marker_sizes,
+                    }
+                ),
+            )
+        )
 
         for i, t in enumerate(time_points):
             label = "t=" + str(t)
@@ -971,19 +1020,26 @@ def _set_annotated_time_points(ax, observable, type_of_plot=None,
                 items = observable[line.get_label()]
                 x, y = t, items[i]
 
-            plot_function(x, y, label=label,
-                          zorder=kwargs.get("annotate_time_points_zorder"))
+            plot_function(
+                x, y, label=label, zorder=kwargs.get("annotate_time_points_zorder")
+            )
             if kwargs.get("annotate_time_points_labels"):
-                ax.annotate(label, xy=(x, y),
-                            xytext=(10, 10), textcoords='offset pixels',
-                            horizontalalignment="left",
-                            verticalalignment="top")
+                ax.annotate(
+                    label,
+                    xy=(x, y),
+                    xytext=(10, 10),
+                    textcoords="offset pixels",
+                    horizontalalignment="left",
+                    verticalalignment="top",
+                )
 
     # Add the legend to the axes.
     if kwargs.get("annotate_time_points_legend") is not None:
         items = _get_annotated_time_points_legend_args(
-            ax, desired_loc=kwargs.get("annotate_time_points_legend"),
-            taken_loc=first_legend[1])
+            ax,
+            desired_loc=kwargs.get("annotate_time_points_legend"),
+            taken_loc=first_legend[1],
+        )
 
         ax = _set_additional_legend_box(ax, items, first_legend[0])
 
@@ -1010,10 +1066,7 @@ def _check_second_legend_location(desired_loc, taken_loc):
     # Make sure desired location is not already taken
     if desired_loc is not None and desired_loc == taken_loc:
         msg = " location already used, utilizing default value instead"
-        _raise_kwarg_warning(
-            "legend_loc",
-            msg=msg,
-            kwarg_prefix="annotate_time_points")
+        _raise_kwarg_warning("legend_loc", msg=msg, kwarg_prefix="annotate_time_points")
         desired_loc = None
 
     # Validate desired location
@@ -1023,8 +1076,7 @@ def _check_second_legend_location(desired_loc, taken_loc):
     return desired_loc, taken_loc
 
 
-def _get_annotated_time_points_legend_args(ax, desired_loc=None,
-                                           taken_loc=None):
+def _get_annotated_time_points_legend_args(ax, desired_loc=None, taken_loc=None):
     """Get the arguments needed for a legend box of the annotated time points.
 
     Warnings
@@ -1042,8 +1094,7 @@ def _get_annotated_time_points_legend_args(ax, desired_loc=None,
     points = list(itervalues(labels_and_points))
     labels = list(iterkeys(labels_and_points))
 
-    desired_loc, taken_loc = _check_second_legend_location(desired_loc,
-                                                           taken_loc)
+    desired_loc, taken_loc = _check_second_legend_location(desired_loc, taken_loc)
     anchor = None
     # Get kwargs for legend location
     if desired_loc in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
@@ -1087,7 +1138,7 @@ def _get_default_cycler():
     This method is intended for internal use only.
 
     """
-    return rc.defaultParams['axes.prop_cycle'][0]
+    return rc.defaultParams["axes.prop_cycle"][0]
 
 
 def _get_default_colors(n_items):
@@ -1104,11 +1155,13 @@ def _get_default_colors(n_items):
     if len(default_color_cycler) < n_items <= 20:
         colors = mpl.cm.get_cmap("tab20")(points)
     elif len(default_color_cycler) < n_items <= 60:
-        colors = np.vstack((
-            mpl.cm.get_cmap("tab20")(points),
-            mpl.cm.get_cmap("tab20b")(points),
-            mpl.cm.get_cmap("tab20c")(points)
-        ))
+        colors = np.vstack(
+            (
+                mpl.cm.get_cmap("tab20")(points),
+                mpl.cm.get_cmap("tab20b")(points),
+                mpl.cm.get_cmap("tab20c")(points),
+            )
+        )
     elif len(default_color_cycler) < n_items:
         # A large number of items exists, cannot use distinct tab20 colors,
         # use a different colormap altogether
@@ -1128,15 +1181,19 @@ def _get_ax_current(ax, time_points=False):
     This method is intended for internal use only.
 
     """
-    lines_with_labels = [
-        l for l in ax.get_lines() if "_line" not in l.get_label()]
+    lines_with_labels = [l for l in ax.get_lines() if "_line" not in l.get_label()]
     if time_points:
         return [l for l in lines_with_labels if l.get_label().startswith("t=")]
 
     lines_with_labels = [
-        l for l in lines_with_labels if not (
-            l.get_label().endswith("_lb") or l.get_label().endswith("_ub")
-            or l.get_label().startswith("t="))]
+        l
+        for l in lines_with_labels
+        if not (
+            l.get_label().endswith("_lb")
+            or l.get_label().endswith("_ub")
+            or l.get_label().startswith("t=")
+        )
+    ]
 
     return lines_with_labels
 
@@ -1201,20 +1258,25 @@ def _get_values_as_series(obj, compare, name=None):
     def _validate_compare_type(compare, valid):
         """Ensure ``compare`` is valid."""
         if compare is None or compare not in valid:
-            raise ValueError("Invalid `compare` '{0}' given, cannot access "
-                             "'{1}' values.".format(compare, cls_.__name__))
+            raise ValueError(
+                "Invalid `compare` '{0}' given, cannot access "
+                "'{1}' values.".format(compare, cls_.__name__)
+            )
 
     if cls_.__name__ == "Series":
         series = obj.copy()
 
     elif "MassModel" in [cls_.__name__, cls_.__base__.__name__]:
-        _validate_compare_type(compare, [
-            "concentrations", "Keqs", "fluxes", "kfs"])
-        values = getattr(obj, {
-            "concentrations": "initial_conditions",
-            "fluxes": "steady_state_fluxes",
-            "Keqs": "parameters",
-            "kfs": "parameters"}[compare])
+        _validate_compare_type(compare, ["concentrations", "Keqs", "fluxes", "kfs"])
+        values = getattr(
+            obj,
+            {
+                "concentrations": "initial_conditions",
+                "fluxes": "steady_state_fluxes",
+                "Keqs": "parameters",
+                "kfs": "parameters",
+            }[compare],
+        )
         if compare in ["Keqs", "kfs"]:
             values = values[compare[:-1]]
         else:
@@ -1251,23 +1313,25 @@ def _get_dataframe_of_observables(x, y, compare, observable):
     if observable is not None:
         if compare in ["Keqs", "kfs"]:
             p_type = compare[:-1]
-            observable = [getattr(x, p_type + "_str", "_".join((p_type, x)))
-                          for x in ensure_iterable(observable)]
+            observable = [
+                getattr(x, p_type + "_str", "_".join((p_type, x)))
+                for x in ensure_iterable(observable)
+            ]
         else:
-            observable = [getattr(x, "id", x)
-                          for x in ensure_iterable(observable)]
+            observable = [getattr(x, "id", x) for x in ensure_iterable(observable)]
         if set(observable).difference(xy.index):
             raise ValueError(
                 "Invalid `observable` values: '{0}'".format(
-                    set(observable).difference(xy.index)))
+                    set(observable).difference(xy.index)
+                )
+            )
         else:
             xy = xy.loc[observable]
 
     # Check for NA values, raise warning
     diff = set(xy.index).symmetric_difference(set(xy.dropna().index))
     if diff:
-        warn("Ignoring {0}, only in one set of given values".format(
-            diff))
+        warn("Ignoring {0}, only in one set of given values".format(diff))
         xy.dropna(inplace=True)
 
     return xy

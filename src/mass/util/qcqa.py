@@ -64,13 +64,17 @@ def qcqa_model(model, **kwargs):
             Default is ``True``.
 
     """
-    kwargs = _check_kwargs({
-        "parameters": False,
-        "concentrations": False,
-        "fluxes": False,
-        "superfluous": False,
-        "elemental": False,
-        "simulation_only": True}, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "parameters": False,
+            "concentrations": False,
+            "fluxes": False,
+            "superfluous": False,
+            "elemental": False,
+            "simulation_only": True,
+        },
+        kwargs,
+    )
 
     # Set up empty lists for storing QC/QA report items.
     table_items = [[], [], []]
@@ -98,8 +102,7 @@ def qcqa_model(model, **kwargs):
     print(report)
 
 
-def get_missing_reaction_parameters(model, reaction_list=None,
-                                    simulation_only=True):
+def get_missing_reaction_parameters(model, reaction_list=None, simulation_only=True):
     r"""Identify the missing parameters for reactions in a model.
 
     Notes
@@ -144,8 +147,9 @@ def get_missing_reaction_parameters(model, reaction_list=None,
                     pass
                 else:
                     missing_params.append(key)
-        missing_params = "; ".join([
-            k.split("_")[0] for k in missing_params]).rstrip("; ")
+        missing_params = "; ".join([k.split("_")[0] for k in missing_params]).rstrip(
+            "; "
+        )
 
         # Remove missing equilibrium and reverse rate constants
         # for irreversible reactions
@@ -162,8 +166,7 @@ def get_missing_reaction_parameters(model, reaction_list=None,
     return missing
 
 
-def get_missing_custom_parameters(model, reaction_list=None,
-                                  simulation_only=True):
+def get_missing_custom_parameters(model, reaction_list=None, simulation_only=True):
     r"""Identify the missing custom parameters in a model.
 
     Notes
@@ -199,16 +202,22 @@ def get_missing_custom_parameters(model, reaction_list=None,
 
     missing = {}
     # Filter out reactions without custom rates
-    reaction_list = [reaction for reaction in reaction_list
-                     if reaction in model.custom_rates]
+    reaction_list = [
+        reaction for reaction in reaction_list if reaction in model.custom_rates
+    ]
     for rxn in reaction_list:
         rate = model.custom_rates[rxn]
-        symbols = [str(symbol) for symbol in list(rate.atoms(sym.Symbol))
-                   if str(symbol) not in model.metabolites]
+        symbols = [
+            str(symbol)
+            for symbol in list(rate.atoms(sym.Symbol))
+            if str(symbol) not in model.metabolites
+        ]
         customs = []
         for parameter in symbols:
-            if parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str] \
-               and parameter != "t":
+            if (
+                parameter not in [rxn.Keq_str, rxn.kf_str, rxn.kr_str]
+                and parameter != "t"
+            ):
                 try:
                     value = model.custom_parameters[parameter]
                     if value is None:
@@ -250,8 +259,7 @@ def get_missing_steady_state_fluxes(model, reaction_list=None):
     return missing
 
 
-def get_missing_initial_conditions(model, metabolite_list=None,
-                                   simulation_only=True):
+def get_missing_initial_conditions(model, metabolite_list=None, simulation_only=True):
     r"""Identify the missing initial conditions for metabolites in a model.
 
     Notes
@@ -278,11 +286,13 @@ def get_missing_initial_conditions(model, metabolite_list=None,
     metabolite_list = _get_objs_to_check(model, "metabolites", metabolite_list)
 
     # Filter out 'boundary metabolites'
-    missing = [met for met in metabolite_list
-               if met not in model.boundary_conditions]
+    missing = [met for met in metabolite_list if met not in model.boundary_conditions]
 
-    missing = [met for met in missing if met not in model.initial_conditions
-               or model.initial_conditions[met] is None]
+    missing = [
+        met
+        for met in missing
+        if met not in model.initial_conditions or model.initial_conditions[met] is None
+    ]
 
     if simulation_only and missing:
         missing = _check_if_conc_needed(model, missing)
@@ -290,8 +300,7 @@ def get_missing_initial_conditions(model, metabolite_list=None,
     return missing
 
 
-def get_missing_boundary_conditions(model, metabolite_list=None,
-                                    simulation_only=True):
+def get_missing_boundary_conditions(model, metabolite_list=None, simulation_only=True):
     r"""Identify the missing boundary conditions for metabolites in a model.
 
     Parameters
@@ -322,11 +331,14 @@ def get_missing_boundary_conditions(model, metabolite_list=None,
     metabolite_list = ensure_iterable(metabolite_list)
 
     # Filter out initial concentrations
-    missing = [met for met in metabolite_list
-               if met not in model.initial_conditions]
+    missing = [met for met in metabolite_list if met not in model.initial_conditions]
 
-    missing = [met for met in missing if met not in model.boundary_conditions
-               or model.boundary_conditions[met] is None]
+    missing = [
+        met
+        for met in missing
+        if met not in model.boundary_conditions
+        or model.boundary_conditions[met] is None
+    ]
 
     if simulation_only and missing:
         missing = _check_if_conc_needed(model, missing)
@@ -368,8 +380,9 @@ def check_superfluous_consistency(model, reaction_list=None):
     superfluous = {}
     for rxn in reaction_list:
         try:
-            args = [rxn.parameters[key]
-                    for key in [rxn.kf_str, rxn.Keq_str, rxn.kr_str]]
+            args = [
+                rxn.parameters[key] for key in [rxn.kf_str, rxn.Keq_str, rxn.kr_str]
+            ]
             superfluous[rxn] = _is_consistent(*args)
         except KeyError:
             pass
@@ -448,11 +461,14 @@ def check_reaction_parameters(model, reaction_list=None, simulation_only=True):
         if rxn in model.custom_rates:
             missing_customs = _check_custom_for_standard(model, rxn)
             if missing_customs:
-                customs.update(dict(
-                    (rxn, "; ".join([missing]))
-                    if isinstance(missing, string_types)
-                    else (rxn, "; ".join(missing))
-                    for rxn, missing in iteritems(missing_customs)))
+                customs.update(
+                    dict(
+                        (rxn, "; ".join([missing]))
+                        if isinstance(missing, string_types)
+                        else (rxn, "; ".join(missing))
+                        for rxn, missing in iteritems(missing_customs)
+                    )
+                )
         # Always check if forward rate constant defined
         elif rxn.forward_rate_constant is None:
             missing.append(rxn)
@@ -467,11 +483,9 @@ def check_reaction_parameters(model, reaction_list=None, simulation_only=True):
             pass
 
     if missing and simulation_only:
-        missing = get_missing_reaction_parameters(model, missing,
-                                                  simulation_only)
+        missing = get_missing_reaction_parameters(model, missing, simulation_only)
     elif missing:
-        missing = get_missing_reaction_parameters(model, None,
-                                                  simulation_only)
+        missing = get_missing_reaction_parameters(model, None, simulation_only)
     else:
         missing = {}
 
@@ -537,16 +551,22 @@ def _mk_parameter_content(model, **kwargs):
     if parameters:
         headers.append("Reaction Parameters")
         missing_params = check_reaction_parameters(
-            model, simulation_only=kwargs.get("simulation_only"))[0]
-        missing_params = ["{0}: {1}".format(rxn.id, params)
-                          for rxn, params in iteritems(missing_params)]
+            model, simulation_only=kwargs.get("simulation_only")
+        )[0]
+        missing_params = [
+            "{0}: {1}".format(rxn.id, params)
+            for rxn, params in iteritems(missing_params)
+        ]
         missing.append("\n".join(missing_params))
         # Check custom parameters
         headers.append("Custom Parameters")
         missing_params = get_missing_custom_parameters(
-            model, simulation_only=kwargs.get("simulation_only"))
-        missing_params = ["{0}: {1}".format(rxn.id, params)
-                          for rxn, params in iteritems(missing_params)]
+            model, simulation_only=kwargs.get("simulation_only")
+        )
+        missing_params = [
+            "{0}: {1}".format(rxn.id, params)
+            for rxn, params in iteritems(missing_params)
+        ]
         missing.append("\n".join(missing_params))
 
     # Check steady state fluxes if desired.
@@ -569,23 +589,26 @@ def _mk_concentration_content(model, **kwargs):
 
     """
     missing = []
-    for i, function in enumerate([get_missing_initial_conditions,
-                                  get_missing_boundary_conditions]):
+    for i, function in enumerate(
+        [get_missing_initial_conditions, get_missing_boundary_conditions]
+    ):
         missing_conc = [
-            m for m in function(
-                model, simulation_only=kwargs.get("simulation_only"))]
+            m for m in function(model, simulation_only=kwargs.get("simulation_only"))
+        ]
         for j, met in enumerate(missing_conc):
             if i == 0:
                 # Identify reactions for missing initial conditions
                 associated_rxns = sorted([r.id for r in met.reactions])
             else:
                 # Identify reactions for missing boundary conditions
-                associated_rxns = sorted([r.id for r in model.boundary
-                                          if r.boundary_metabolite == met])
+                associated_rxns = sorted(
+                    [r.id for r in model.boundary if r.boundary_metabolite == met]
+                )
             # Format string
             associated_rxn_str = ", ".join(associated_rxns)
             missing_conc[j] = "{0} (in {1})".format(
-                str(met), format_long_string(associated_rxn_str, 30))
+                str(met), format_long_string(associated_rxn_str, 30)
+            )
         # Join all strings together.
         missing.append("\n".join(missing_conc))
 
@@ -603,8 +626,7 @@ def _mk_consistency_content(model, **kwargs):
     This method is intended for internal use only.
 
     """
-    superfluous, elemental = tuple(
-        kwargs.get(k) for k in ["superfluous", "elemental"])
+    superfluous, elemental = tuple(kwargs.get(k) for k in ["superfluous", "elemental"])
 
     missing = []
     headers = []
@@ -612,9 +634,12 @@ def _mk_consistency_content(model, **kwargs):
     if superfluous:
         headers.append("Superfluous Parameters")
         inconsistent = check_reaction_parameters(
-            model, simulation_only=kwargs.get("simulation_only"))[1]
-        inconsistent = ["{0}: {1}".format(rxn.id, consistency)
-                        for rxn, consistency in iteritems(inconsistent)]
+            model, simulation_only=kwargs.get("simulation_only")
+        )[1]
+        inconsistent = [
+            "{0}: {1}".format(rxn.id, consistency)
+            for rxn, consistency in iteritems(inconsistent)
+        ]
         missing.append("\n".join(inconsistent))
     # Check elemental consistency if desired
     if elemental:
@@ -622,7 +647,8 @@ def _mk_consistency_content(model, **kwargs):
         inconsistent = check_elemental_consistency(model)
         inconsistent = [
             "{0}: {{{1}}}".format(reaction.id, unbalanced)
-            for reaction, unbalanced in iteritems(inconsistent)]
+            for reaction, unbalanced in iteritems(inconsistent)
+        ]
         missing.append("\n".join(inconsistent))
 
     section = "CONSISTENCY CHECKS"
@@ -661,11 +687,11 @@ def _format_table_for_print(table_items, checks, model_id):
     This method is intended for internal use only.
 
     """
-    def make_formatted_table(content, header_list, table_format,
-                             str_alignment):
-        formatted_table = tabulate(content, headers=header_list,
-                                   tablefmt=table_format,
-                                   stralign=str_alignment)
+
+    def make_formatted_table(content, header_list, table_format, str_alignment):
+        formatted_table = tabulate(
+            content, headers=header_list, tablefmt=table_format, stralign=str_alignment
+        )
         return formatted_table
 
     simulate_check, consistency_check = checks
@@ -673,28 +699,39 @@ def _format_table_for_print(table_items, checks, model_id):
     content_lists, columns, sections = table_items
 
     # Create tables
-    tables = [make_formatted_table([content], header, 'simple', u'left')
-              for content, header in zip(content_lists, columns)]
+    tables = [
+        make_formatted_table([content], header, "simple", u"left")
+        for content, header in zip(content_lists, columns)
+    ]
     # Format based on longest string in the inner tables if content exists
     if tables:
         # Determine longest line in the table, minimum length of 42 characters
-        max_l = max([len(table.split('\n')[1]) for table in tables] + [42])
+        max_l = max([len(table.split("\n")[1]) for table in tables] + [42])
         sections = [
-            ["{0}{1}{2}".format(" " * ceil((max_l - len(sect)) / 2),
-                                sect, " " * floor((max_l - len(sect)) / 2))]
-            for sect in sections]
+            [
+                "{0}{1}{2}".format(
+                    " " * ceil((max_l - len(sect)) / 2),
+                    sect,
+                    " " * floor((max_l - len(sect)) / 2),
+                )
+            ]
+            for sect in sections
+        ]
 
     # Format all indivual pieces of the report
-    tables = [make_formatted_table([[table]], section, 'rst', u'left')
-              for table, section in zip(tables, sections)]
+    tables = [
+        make_formatted_table([[table]], section, "rst", u"left")
+        for table, section in zip(tables, sections)
+    ]
     tables = [[table] for table in tables]
     report_head = ""
 
     # Create and print report
     report_head += (
         "MODEL ID: {0}\nSIMULATABLE: {1}\nPARAMETERS NUMERICALY CONSISTENT:"
-        " {2}".format(model_id, simulate_check, consistency_check))
-    report = make_formatted_table(tables, [report_head], 'fancy_grid', u'left')
+        " {2}".format(model_id, simulate_check, consistency_check)
+    )
+    report = make_formatted_table(tables, [report_head], "fancy_grid", u"left")
     return report
 
 
@@ -707,12 +744,15 @@ def _check_custom_for_standard(model, reaction):
 
     """
     customs = {}
-    if reaction in model.custom_rates and \
-       model.custom_rates[reaction] is not None:
+    if reaction in model.custom_rates and model.custom_rates[reaction] is not None:
         symbols = list(model.custom_rates[reaction].atoms(sym.Symbol))
-        symbols = sorted([str(s) for s in symbols
-                          if str(s) in [reaction.Keq_str, reaction.kf_str,
-                                        reaction.kr_str]])
+        symbols = sorted(
+            [
+                str(s)
+                for s in symbols
+                if str(s) in [reaction.Keq_str, reaction.kf_str, reaction.kr_str]
+            ]
+        )
         for param in symbols:
             try:
                 reaction.parameters[param]
@@ -753,9 +793,11 @@ def _check_if_conc_needed(model, missing):
         needed.update(rate.atoms(sym.Function))
         needed.update(rate.atoms(sym.Symbol))
 
-    missing = [met for met in missing
-               if sym.Symbol(str(met)) in needed
-               or _mk_met_func(str(met)) in needed]
+    missing = [
+        met
+        for met in missing
+        if sym.Symbol(str(met)) in needed or _mk_met_func(str(met)) in needed
+    ]
 
     return missing
 
@@ -776,12 +818,14 @@ def _check_if_param_needed(model, missing, customs=False):
         missing_params = missing_values_str.split("; ")
         if customs:
             missing_params = [
-                param for param in missing_params
-                if sym.Symbol(param) in needed]
+                param for param in missing_params if sym.Symbol(param) in needed
+            ]
         else:
             missing_params = [
-                param for param in missing_params
-                if sym.Symbol("_".join((param, reaction.id))) in needed]
+                param
+                for param in missing_params
+                if sym.Symbol("_".join((param, reaction.id))) in needed
+            ]
 
         if missing_params:
             missing[reaction] = "; ".join(missing_params)
@@ -816,8 +860,14 @@ def _get_objs_to_check(model, attribute, object_list):
 
 
 __all__ = (
-    "qcqa_model", "get_missing_reaction_parameters",
-    "get_missing_custom_parameters", "get_missing_steady_state_fluxes",
-    "get_missing_initial_conditions", "get_missing_boundary_conditions",
-    "check_superfluous_consistency", "check_elemental_consistency",
-    "check_reaction_parameters", "is_simulatable",)
+    "qcqa_model",
+    "get_missing_reaction_parameters",
+    "get_missing_custom_parameters",
+    "get_missing_steady_state_fluxes",
+    "get_missing_initial_conditions",
+    "get_missing_boundary_conditions",
+    "check_superfluous_consistency",
+    "check_elemental_consistency",
+    "check_reaction_parameters",
+    "is_simulatable",
+)

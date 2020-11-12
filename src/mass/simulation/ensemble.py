@@ -33,17 +33,20 @@ from six import iteritems, string_types
 from mass.core.mass_model import MassModel
 from mass.exceptions import MassEnsembleError
 from mass.simulation.simulation import (
-    STEADY_STATE_SOLVERS, Simulation, _get_sim_values_from_model)
-from mass.util.util import (
-    _check_kwargs, _log_msg, _make_logger, ensure_iterable)
+    STEADY_STATE_SOLVERS,
+    Simulation,
+    _get_sim_values_from_model,
+)
+from mass.util.util import _check_kwargs, _log_msg, _make_logger, ensure_iterable
 
 # Set the logger
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~mass.thermo.ensemble` submodule."""
 
 
-def create_models_from_flux_data(reference_model, data=None,
-                                 raise_error=False, **kwargs):
+def create_models_from_flux_data(
+    reference_model, data=None, raise_error=False, **kwargs
+):
     """Generate ensemble of models for a given set of flux data.
 
     Parameters
@@ -79,37 +82,52 @@ def create_models_from_flux_data(reference_model, data=None,
         Raised if generation of a model fails and ``raise_error=True``.
 
     """
-    kwargs = _check_kwargs({
-        "verbose": False,
-        "suffix": "_F",
-    }, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "verbose": False,
+            "suffix": "_F",
+        },
+        kwargs,
+    )
 
     if not isinstance(reference_model, MassModel):
         raise TypeError("`reference_model` must be a MassModel")
 
-    data, id_array = _validate_data_input(reference_model, data,
-                                          "reactions", kwargs.get("verbose"))
+    data, id_array = _validate_data_input(
+        reference_model, data, "reactions", kwargs.get("verbose")
+    )
     new_models = []
     for i, values in enumerate(data.values):
         # Create new model
         new_model = reference_model.copy()
         new_model.id += kwargs.get("suffix") + str(i)
         try:
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "New model '%s' created", new_model.id)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "New model '%s' created",
+                new_model.id,
+            )
 
             # Update the model parameters
-            new_model.update_parameters(dict(zip(id_array, values)),
-                                        verbose=False)
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Updated flux values for '%s'", new_model.id)
+            new_model.update_parameters(dict(zip(id_array, values)), verbose=False)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "Updated flux values for '%s'",
+                new_model.id,
+            )
 
             # Add model to the ensemble
             new_models.append(new_model)
 
         except Exception as e:
-            msg = str("Could not create '{0}' for the ensemble due to the "
-                      "following error: {1!r}".format(new_model.id, str(e)))
+            msg = str(
+                "Could not create '{0}' for the ensemble due to the "
+                "following error: {1!r}".format(new_model.id, str(e))
+            )
             if raise_error:
                 raise MassEnsembleError(msg)
             _log_msg(LOGGER, logging.ERROR, kwargs.get("verbose"), msg)
@@ -117,8 +135,9 @@ def create_models_from_flux_data(reference_model, data=None,
     return new_models
 
 
-def create_models_from_concentration_data(reference_model, data=None,
-                                          raise_error=False, **kwargs):
+def create_models_from_concentration_data(
+    reference_model, data=None, raise_error=False, **kwargs
+):
     """Generate ensemble of models for a given set of concentration data.
 
     Parameters
@@ -155,37 +174,54 @@ def create_models_from_concentration_data(reference_model, data=None,
         Raised if generation of a model fails and ``raise_error=True``.
 
     """
-    kwargs = _check_kwargs({
-        "verbose": False,
-        "suffix": "_C",
-    }, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "verbose": False,
+            "suffix": "_C",
+        },
+        kwargs,
+    )
 
     if not isinstance(reference_model, MassModel):
         raise TypeError("`reference_model` must be a MassModel")
 
-    data, id_array = _validate_data_input(reference_model, data,
-                                          "metabolites", kwargs.get("verbose"))
+    data, id_array = _validate_data_input(
+        reference_model, data, "metabolites", kwargs.get("verbose")
+    )
     new_models = []
     for i, values in enumerate(data.values):
         # Create new model
         new_model = reference_model.copy()
         new_model.id += kwargs.get("suffix") + str(i)
         try:
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "New model '%s' created", new_model.id)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "New model '%s' created",
+                new_model.id,
+            )
 
             # Update the model parameters
-            new_model.update_initial_conditions(dict(zip(id_array, values)),
-                                                verbose=False)
-            _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-                     "Updated initial conditions for '%s'", new_model.id)
+            new_model.update_initial_conditions(
+                dict(zip(id_array, values)), verbose=False
+            )
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                kwargs.get("verbose"),
+                "Updated initial conditions for '%s'",
+                new_model.id,
+            )
 
             # Add model to the ensemble
             new_models.append(new_model)
 
         except Exception as e:
-            msg = str("Could not create '{0}' for the ensemble due to the "
-                      "following error: {1!r}".format(new_model.id, str(e)))
+            msg = str(
+                "Could not create '{0}' for the ensemble due to the "
+                "following error: {1!r}".format(new_model.id, str(e))
+            )
             if raise_error:
                 raise MassEnsembleError(msg)
             _log_msg(LOGGER, logging.ERROR, kwargs.get("verbose"), msg)
@@ -193,8 +229,9 @@ def create_models_from_concentration_data(reference_model, data=None,
     return new_models
 
 
-def ensure_positive_percs(models, reactions=None, raise_error=False,
-                          update_values=False, **kwargs):
+def ensure_positive_percs(
+    models, reactions=None, raise_error=False, update_values=False, **kwargs
+):
     """Seperate models based on whether all calculated PERCs are positive.
 
     Parameters
@@ -238,10 +275,13 @@ def ensure_positive_percs(models, reactions=None, raise_error=False,
         Raised if PERC calculation fails and ``raise_error=True``.
 
     """
-    kwargs = _check_kwargs({
-        "verbose": False,
-        "at_equilibrium_default": 100000,
-    }, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "verbose": False,
+            "at_equilibrium_default": 100000,
+        },
+        kwargs,
+    )
     positive = []
     negative = []
 
@@ -251,20 +291,35 @@ def ensure_positive_percs(models, reactions=None, raise_error=False,
 
     for model in models:
         model, is_positive = _ensure_positive_percs_for_model(
-            model, reactions, kwargs.get("verbose"), raise_error,
-            update_values, kwargs.get("at_equilibrium_default"))
+            model,
+            reactions,
+            kwargs.get("verbose"),
+            raise_error,
+            update_values,
+            kwargs.get("at_equilibrium_default"),
+        )
         if is_positive:
             positive.append(model)
         else:
             negative.append(model)
 
-    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-             "Finished PERC calculations, returning seperated models.")
+    _log_msg(
+        LOGGER,
+        logging.INFO,
+        kwargs.get("verbose"),
+        "Finished PERC calculations, returning seperated models.",
+    )
     return positive, negative
 
 
-def ensure_steady_state(models, strategy="simulate", perturbations=None,
-                        solver_options=None, update_values=False, **kwargs):
+def ensure_steady_state(
+    models,
+    strategy="simulate",
+    perturbations=None,
+    solver_options=None,
+    update_values=False,
+    **kwargs
+):
     """Seperate models based on whether a steady state can be reached.
 
     All ``kwargs`` are passed to :meth:`~.Simulation.find_steady_state`.
@@ -340,12 +395,16 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
         reach a steady state.
 
     """
-    kwargs = _check_kwargs({
-        "verbose": False,
-        "steps": None,
-        "tfinal": 1e8,
-        "num_attempts": 2,
-        "decimal_precision": True}, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "verbose": False,
+            "steps": None,
+            "tfinal": 1e8,
+            "num_attempts": 2,
+            "decimal_precision": True,
+        },
+        kwargs,
+    )
 
     models = ensure_iterable(models)
     if any([not isinstance(model, MassModel) for model in models]):
@@ -353,17 +412,18 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
 
     # Ensure strategy input is valid
     if strategy not in STEADY_STATE_SOLVERS and strategy != "simulate":
-        raise ValueError(
-            "Invalid steady state strategy: '{0}'".format(strategy))
+        raise ValueError("Invalid steady state strategy: '{0}'".format(strategy))
 
-    simulation = _initialize_simulation(models[0], strategy, solver_options,
-                                        kwargs.get("verbose"))
+    simulation = _initialize_simulation(
+        models[0], strategy, solver_options, kwargs.get("verbose")
+    )
 
     if len(models) > 1:
         simulation.add_models(models[1:], verbose=kwargs.get("verbose"))
 
     conc_sol_list, flux_sol_list = simulation.find_steady_state(
-        models, strategy, perturbations, update_values, **kwargs)
+        models, strategy, perturbations, update_values, **kwargs
+    )
 
     feasible = []
     infeasible = []
@@ -375,22 +435,36 @@ def ensure_steady_state(models, strategy="simulate", perturbations=None,
         if conc_sol and flux_sol:
             ics, params = simulation.get_model_simulation_values(model)
             model.update_initial_conditions(ics)
-            model.update_parameters({
-                param: value for param, value in params.items()
-                if param in model.reactions.list_attr("flux_symbol_str")})
+            model.update_parameters(
+                {
+                    param: value
+                    for param, value in params.items()
+                    if param in model.reactions.list_attr("flux_symbol_str")
+                }
+            )
             feasible.append(model)
         else:
             infeasible.append(model)
 
-    _log_msg(LOGGER, logging.INFO, kwargs.get("verbose"),
-             "Finished finding steady states, returning seperated models.")
+    _log_msg(
+        LOGGER,
+        logging.INFO,
+        kwargs.get("verbose"),
+        "Finished finding steady states, returning seperated models.",
+    )
 
     return feasible, infeasible
 
 
-def generate_ensemble_of_models(reference_model, flux_data=None,
-                                conc_data=None, ensure_positive_percs=None,
-                                strategy=None, perturbations=None, **kwargs):
+def generate_ensemble_of_models(
+    reference_model,
+    flux_data=None,
+    conc_data=None,
+    ensure_positive_percs=None,
+    strategy=None,
+    perturbations=None,
+    **kwargs
+):
     """Generate an ensemble of models for given data sets.
 
     This function is optimized for performance when generating a large
@@ -505,15 +579,18 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
     """
     # Check all inputs at beginning to ensure that ensemble generation is not
     # disrupted near the end due to invalid input format
-    kwargs = _check_kwargs({
-        "verbose": False,
-        "decimal_precision": False,
-        "flux_suffix": "_F",
-        "conc_suffix": "_C",
-        "at_equilibrium_default": 100000,
-        "solver_options": None,
-        "return_infeasible": False,
-    }, kwargs)
+    kwargs = _check_kwargs(
+        {
+            "verbose": False,
+            "decimal_precision": False,
+            "flux_suffix": "_F",
+            "conc_suffix": "_C",
+            "at_equilibrium_default": 100000,
+            "solver_options": None,
+            "return_infeasible": False,
+        },
+        kwargs,
+    )
     verbose = kwargs.pop("verbose")
     _log_msg(LOGGER, logging.INFO, verbose, "Validating input")
     # Validate model input
@@ -524,7 +601,8 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
     if flux_data is not None:
         # Validate flux data if provided
         flux_data, flux_ids = _validate_data_input(
-            reference_model, flux_data, "reactions", verbose)
+            reference_model, flux_data, "reactions", verbose
+        )
     else:
         # Set a value to allow for iteration
         flux_data = pd.DataFrame([0])
@@ -533,26 +611,28 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
     if conc_data is not None:
         # Validate conc data if provided
         conc_data, conc_ids = _validate_data_input(
-            reference_model, conc_data, "metabolites", verbose)
+            reference_model, conc_data, "metabolites", verbose
+        )
     else:
         # Set a value to allow for iteration
         conc_data = pd.DataFrame([0])
         conc_ids = np.array([])
 
     if conc_ids.size == 0 and flux_ids.size == 0:
-        raise ValueError("No flux data or concentration data provided. "
-                         "At least one data set must be provided to generate "
-                         "the ensemble.")
+        raise ValueError(
+            "No flux data or concentration data provided. "
+            "At least one data set must be provided to generate "
+            "the ensemble."
+        )
     # Ensure strategy input and perturbation input is valid
     simulation = None
     if strategy is not None:
-        simulation = _initialize_simulation(reference_model, strategy,
-                                            kwargs.get("solver_options"),
-                                            verbose)
+        simulation = _initialize_simulation(
+            reference_model, strategy, kwargs.get("solver_options"), verbose
+        )
         _log_msg(LOGGER, logging.INFO, verbose, "Creating Simulation")
         if strategy not in STEADY_STATE_SOLVERS and strategy != "simulate":
-            raise ValueError(
-                "Invalid steady state strategy: '{0}'".format(strategy))
+            raise ValueError("Invalid steady state strategy: '{0}'".format(strategy))
 
         if perturbations is not None:
             if isinstance(perturbations, dict):
@@ -561,7 +641,8 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             for i, perturbation in enumerate(perturbations):
                 # Parse the perturbations and format the input to be used
                 perturbations[i] = simulation._format_perturbations_input(
-                    perturbation, verbose)
+                    perturbation, verbose
+                )
 
     if perturbations is None:
         perturbations = []
@@ -597,20 +678,29 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
             # Make a copy of the model
             model = reference_model.copy()
             model.id += f_suffix + c_suffix
-            _log_msg(LOGGER, logging.INFO, verbose,
-                     "New model '%s' created", model.id)
+            _log_msg(LOGGER, logging.INFO, verbose, "New model '%s' created", model.id)
 
             # Update the model steady state flux values
             if flux_values:
                 model.update_parameters(flux_values, verbose=False)
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "Updated flux values for '%s'", model.id)
+                _log_msg(
+                    LOGGER,
+                    logging.INFO,
+                    verbose,
+                    "Updated flux values for '%s'",
+                    model.id,
+                )
 
             # Update model concentration values
             if conc_values:
                 model.update_initial_conditions(conc_values, verbose=False)
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "Updated initial conditions for '%s'", model.id)
+                _log_msg(
+                    LOGGER,
+                    logging.INFO,
+                    verbose,
+                    "Updated initial conditions for '%s'",
+                    model.id,
+                )
 
             if ensure_positive_percs is None:
                 feasible_models.append(model)
@@ -618,8 +708,13 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
 
             # Ensure PERCs are positive, updating model if they are
             model, is_feasible = _ensure_positive_percs_for_model(
-                model, ensure_positive_percs, verbose, False, True,
-                kwargs.get("at_equilibrium_default"))
+                model,
+                ensure_positive_percs,
+                verbose,
+                False,
+                True,
+                kwargs.get("at_equilibrium_default"),
+            )
 
             if is_feasible:
                 # Add feasible model to ensemble
@@ -634,21 +729,31 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
         # Add models to simulation, all models are copies of the original
         # and can be directly added for performance
         simulation._simulation_values += [
-            _get_sim_values_from_model(model) for model in feasible_models]
+            _get_sim_values_from_model(model) for model in feasible_models
+        ]
 
-        _log_msg(LOGGER, logging.INFO, verbose,
-                 "Successfully loaded feasible models into Simulation.")
+        _log_msg(
+            LOGGER,
+            logging.INFO,
+            verbose,
+            "Successfully loaded feasible models into Simulation.",
+        )
 
         # Define helper function for determining steady state feasibility
-        def ensure_steady_state_success(check_type, perturbation=None,
-                                        update_values=False):
+        def ensure_steady_state_success(
+            check_type, perturbation=None, update_values=False
+        ):
             """Function to determine whether a steady state can be found."""
             models = [m for m in feasible_models if m.id in simulation.models]
             with warnings.catch_warnings():
                 conc_sol_list, flux_sol_list = simulation.find_steady_state(
-                    models, strategy=strategy, perturbations=perturbation,
-                    update_values=update_values, verbose=verbose,
-                    decimal_precision=kwargs.get("decimal_precision"))
+                    models,
+                    strategy=strategy,
+                    perturbations=perturbation,
+                    update_values=update_values,
+                    verbose=verbose,
+                    decimal_precision=kwargs.get("decimal_precision"),
+                )
 
             # Add failed count to final report
             numbers[check_type] = 0
@@ -658,56 +763,73 @@ def generate_ensemble_of_models(reference_model, flux_data=None,
                 else:
                     conc_sol, flux_sol = conc_sol_list[i], flux_sol_list[i]
                 if conc_sol and flux_sol:
-                    _log_msg(LOGGER, logging.INFO, verbose,
-                             "Successfully found steady state for '%s'",
-                             model)
+                    _log_msg(
+                        LOGGER,
+                        logging.INFO,
+                        verbose,
+                        "Successfully found steady state for '%s'",
+                        model,
+                    )
                     if update_values:
-                        ics, params = simulation.get_model_simulation_values(
-                            model)
+                        ics, params = simulation.get_model_simulation_values(model)
                         model.update_initial_conditions(ics)
-                        model.update_parameters({
-                            param: value for param, value in params.items()
-                            if param in model.reactions.list_attr(
-                                "flux_symbol_str")})
+                        model.update_parameters(
+                            {
+                                param: value
+                                for param, value in params.items()
+                                if param in model.reactions.list_attr("flux_symbol_str")
+                            }
+                        )
                         model.update_parameters(params)
                     continue
 
                 # Remove from feasible models and add to infeasible models
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "No steady state found for '%s', "
-                         "adding to infeasible models", model)
+                _log_msg(
+                    LOGGER,
+                    logging.INFO,
+                    verbose,
+                    "No steady state found for '%s', " "adding to infeasible models",
+                    model,
+                )
                 simulation.remove_models([model], verbose=verbose)
                 numbers[check_type] += 1
 
             return
 
         # Ensure models can reach a steady state
-        ensure_steady_state_success("Infeasible, no steady state found",
-                                    update_values=True)
+        ensure_steady_state_success(
+            "Infeasible, no steady state found", update_values=True
+        )
         # Ensure models can reach a steady state with the given perturbations
         for i, perturbation in enumerate(perturbations):
             perturbation_str = "pertubration " + str(i + 1)
-            _log_msg(LOGGER, logging.INFO, verbose,
-                     "Attempting to find steady state with %s",
-                     perturbation_str)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                verbose,
+                "Attempting to find steady state with %s",
+                perturbation_str,
+            )
             ensure_steady_state_success(
-                "Infeasible, no steady state with " + perturbation_str,
-                perturbation)
+                "Infeasible, no steady state with " + perturbation_str, perturbation
+            )
 
     if simulation is not None:
-        infeasible_models += [model for model in feasible_models
-                              if model.id not in simulation.models]
-        feasible_models = [model for model in feasible_models
-                           if model.id in simulation.models]
+        infeasible_models += [
+            model for model in feasible_models if model.id not in simulation.models
+        ]
+        feasible_models = [
+            model for model in feasible_models if model.id in simulation.models
+        ]
 
     # Format numbers to display
     num_str = "\n" if verbose else ""
     num_str += "Total models generated: {0}".format(
-        len(feasible_models) + len(infeasible_models))
+        len(feasible_models) + len(infeasible_models)
+    )
     if numbers:
         num_str += "\nFeasible: {0}\n".format(str(len(feasible_models)))
-        num_str += "\n".join(["{0}: {1}".format(k, v)
-                              for k, v in iteritems(numbers)])
+        num_str += "\n".join(["{0}: {1}".format(k, v) for k, v in iteritems(numbers)])
 
     _log_msg(LOGGER, logging.INFO, True, num_str)
     if kwargs.get("return_infeasible"):
@@ -737,15 +859,15 @@ def _validate_data_input(reference_model, data, id_type, verbose):
 
     obj_list = {
         "metabolites": reference_model.metabolites,
-        "reactions": reference_model.reactions
+        "reactions": reference_model.reactions,
     }[id_type]
 
     if not all([obj_id in obj_list for obj_id in values]):
         msg = "Invalid {0}".format(id_type)
         if verbose:
-            msg += " {0!r}".format([
-                getattr(obj, "_id", obj) for obj in values
-                if obj not in obj_list])
+            msg += " {0!r}".format(
+                [getattr(obj, "_id", obj) for obj in values if obj not in obj_list]
+            )
         msg += " in data columns."
         raise ValueError(msg)
 
@@ -756,8 +878,9 @@ def _validate_data_input(reference_model, data, id_type, verbose):
     return data, values
 
 
-def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
-                                     update_values, at_equilibrium_default):
+def _ensure_positive_percs_for_model(
+    model, reactions, verbose, raise_error, update_values, at_equilibrium_default
+):
     """Ensure calculated PERCs for a model are positive.
 
     Warnings
@@ -770,32 +893,49 @@ def _ensure_positive_percs_for_model(model, reactions, verbose, raise_error,
 
     reactions = [getattr(r, "_id", r) for r in reactions]
     try:
-        _log_msg(LOGGER, logging.INFO, verbose,
-                 "Calculating PERCs for '%s'", model.id)
+        _log_msg(LOGGER, logging.INFO, verbose, "Calculating PERCs for '%s'", model.id)
         # Calculate PERCs
-        percs = model.calculate_PERCs(at_equilibrium_default, fluxes={
-            r: v for r, v in iteritems(model.steady_state_fluxes)
-            if r.id in reactions})
+        percs = model.calculate_PERCs(
+            at_equilibrium_default,
+            fluxes={
+                r: v
+                for r, v in iteritems(model.steady_state_fluxes)
+                if r.id in reactions
+            },
+        )
         negative_percs = [kf for kf, v in iteritems(percs) if v < 0]
         if negative_percs:
             # Found negative percs
-            _log_msg(LOGGER, logging.WARN, verbose,
-                     "Negative PERCs '%s' calculated for '%s'",
-                     str(negative_percs), model.id)
+            _log_msg(
+                LOGGER,
+                logging.WARN,
+                verbose,
+                "Negative PERCs '%s' calculated for '%s'",
+                str(negative_percs),
+                model.id,
+            )
             is_feasible = False
         else:
             # No negative PERCs
-            _log_msg(LOGGER, logging.INFO, verbose,
-                     "All PERCs are positive for '%s'", model.id)
+            _log_msg(
+                LOGGER,
+                logging.INFO,
+                verbose,
+                "All PERCs are positive for '%s'",
+                model.id,
+            )
             if update_values:
-                _log_msg(LOGGER, logging.INFO, verbose,
-                         "Updating PERCs for '%s'", model.id)
+                _log_msg(
+                    LOGGER, logging.INFO, verbose, "Updating PERCs for '%s'", model.id
+                )
                 model.update_parameters(percs, verbose=False)
             is_feasible = True
 
     except ValueError as e:
-        msg = str("Could not calculate PERCs for '{0}' due to the "
-                  "following error: {1!r}".format(model.id, str(e)))
+        msg = str(
+            "Could not calculate PERCs for '{0}' due to the "
+            "following error: {1!r}".format(model.id, str(e))
+        )
         if raise_error:
             raise MassEnsembleError(msg)
         _log_msg(LOGGER, logging.ERROR, verbose, msg)
@@ -824,11 +964,16 @@ def _initialize_simulation(reference_model, strategy, solver_options, verbose):
             else:
                 warnings.warn(
                     "Unrecognized option '{0}' for '{1}' solver.".format(
-                        option, solver.getName()))
+                        option, solver.getName()
+                    )
+                )
     return simulation
 
 
 __all__ = (
-    "generate_ensemble_of_models", "create_models_from_flux_data",
-    "create_models_from_concentration_data", "ensure_positive_percs",
-    "ensure_steady_state")
+    "generate_ensemble_of_models",
+    "create_models_from_flux_data",
+    "create_models_from_concentration_data",
+    "ensure_positive_percs",
+    "ensure_steady_state",
+)

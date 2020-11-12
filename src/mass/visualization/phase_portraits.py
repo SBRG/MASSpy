@@ -107,8 +107,8 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_phase_portrait_default_kwargs("plot_phase_portrait"),
-        kwargs)
+        get_phase_portrait_default_kwargs("plot_phase_portrait"), kwargs
+    )
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
 
@@ -118,13 +118,14 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
         return ax
 
     # Get the solutions to be observed and validate time vector.
-    xy = v_util._validate_plot_observables(mass_solution, (x, y),
-                                           **kwargs)
+    xy = v_util._validate_plot_observables(mass_solution, (x, y), **kwargs)
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "semilogx", "semilogy", "loglog"})
+        ax,
+        plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"},
+    )
 
     label = "{0} vs. {1}".format(*v_util._group_xy_items(xy, iterkeys))
     sols = v_util._group_xy_items(xy, itervalues)
@@ -132,17 +133,17 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
     # Get the legend arguments if desired.
     if legend is not None:
-        legend_labels, legend_kwargs = v_util._get_legend_args(ax, legend,
-                                                               observable,
-                                                               **kwargs)
+        legend_labels, legend_kwargs = v_util._get_legend_args(
+            ax, legend, observable, **kwargs
+        )
         observable = v_util._map_labels_to_solutions(observable, legend_labels)
     else:
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
     prop_cycler = v_util._get_line_property_cycler(
-        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
-        **kwargs)
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable), **kwargs
+    )
 
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
@@ -164,9 +165,13 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
 
     if kwargs.get("annotate_time_points", None) is not None:
         ax = v_util._set_annotated_time_points(
-            ax, observable=xy, type_of_plot="phase_portrait",
-            first_legend=(legend, legend_kwargs), time_range=xy.time,
-            **kwargs)
+            ax,
+            observable=xy,
+            type_of_plot="phase_portrait",
+            first_legend=(legend, legend_kwargs),
+            time_range=xy.time,
+            **kwargs
+        )
 
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
@@ -174,8 +179,9 @@ def plot_phase_portrait(mass_solution, x, y, ax=None, legend=None, **kwargs):
     return ax
 
 
-def plot_ensemble_phase_portrait(mass_solution_list, x, y, ax=None,
-                                 legend=None, **kwargs):
+def plot_ensemble_phase_portrait(
+    mass_solution_list, x, y, ax=None, legend=None, **kwargs
+):
     """Plot a phase portrait for an ensemble of class:`~.MassSolution` objects.
 
     The plotted lines represent the mean for the values of a particular
@@ -262,21 +268,23 @@ def plot_ensemble_phase_portrait(mass_solution_list, x, y, ax=None,
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_phase_portrait_default_kwargs("plot_ensemble_phase_portrait"),
-        kwargs)
+        get_phase_portrait_default_kwargs("plot_ensemble_phase_portrait"), kwargs
+    )
     # Get the axes instance
     ax = v_util._validate_axes_instance(ax)
 
     # Validate MassSolutions
-    mass_solution_list = [sol for sol in mass_solution_list
-                          if v_util._validate_mass_solution(sol)]
+    mass_solution_list = [
+        sol for sol in mass_solution_list if v_util._validate_mass_solution(sol)
+    ]
     if not mass_solution_list:
         warn("No valid MassSolution objects given")
         return ax
 
     # Get the solutions to be observed and validate time vector.
     xy, time_vector = v_util._validate_ensemble_plot_observables(
-        mass_solution_list, (x, y), **kwargs)
+        mass_solution_list, (x, y), **kwargs
+    )
 
     label = "{0} vs. {1}".format(*v_util._group_xy_items(xy, iterkeys))
     sols = v_util._group_xy_items(xy, itervalues)
@@ -284,17 +292,17 @@ def plot_ensemble_phase_portrait(mass_solution_list, x, y, ax=None,
 
     # Get the legend arguments if desired.
     if legend is not None:
-        legend_labels, legend_kwargs = v_util._get_legend_args(ax, legend,
-                                                               observable,
-                                                               **kwargs)
+        legend_labels, legend_kwargs = v_util._get_legend_args(
+            ax, legend, observable, **kwargs
+        )
         observable = v_util._map_labels_to_solutions(observable, legend_labels)
     else:
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
     prop_cycler = v_util._get_line_property_cycler(
-        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
-        **kwargs)
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable), **kwargs
+    )
 
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
@@ -314,9 +322,13 @@ def plot_ensemble_phase_portrait(mass_solution_list, x, y, ax=None,
 
     if kwargs.get("annotate_time_points", None):
         ax = v_util._set_annotated_time_points(
-            ax, observable=xy, type_of_plot="phase_portrait",
-            first_legend=(legend, legend_kwargs), time_range=time_vector,
-            **kwargs)
+            ax,
+            observable=xy,
+            type_of_plot="phase_portrait",
+            first_legend=(legend, legend_kwargs),
+            time_range=time_vector,
+            **kwargs
+        )
 
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
@@ -334,17 +346,23 @@ def _plot_ensemble_lines(ax, observable, **kwargs):
     """
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "semilogx", "semilogy", "loglog"})
+        ax,
+        plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"},
+    )
 
     for label, (x_sol_df, y_sol_df) in iteritems(observable):
-        plot_function(x_sol_df.mean(axis=0), y_sol_df.mean(axis=0),
-                      label=label)
+        plot_function(x_sol_df.mean(axis=0), y_sol_df.mean(axis=0), label=label)
 
 
-def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
-                               plot_tile_placement="all",
-                               additional_data=None, **kwargs):
+def plot_tiled_phase_portraits(
+    mass_solution,
+    observable=None,
+    ax=None,
+    plot_tile_placement="all",
+    additional_data=None,
+    **kwargs
+):
     """Plot phase portraits of solutions in a given :class:`~.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various matplotlib methods in utilized
@@ -431,8 +449,8 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_phase_portrait_default_kwargs("plot_tiled_phase_portraits"),
-        kwargs)
+        get_phase_portrait_default_kwargs("plot_tiled_phase_portraits"), kwargs
+    )
     # Get the axes instance
     ax = v_util._validate_axes_instance(ax)
 
@@ -442,16 +460,16 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
         return ax
 
     # Get the solutions to be observed and validate time vector.
-    observable = v_util._validate_plot_observables(mass_solution, observable,
-                                                   **kwargs)
-    if ax.child_axes is not None\
-       and len(ax.child_axes) == len(observable)**2:
+    observable = v_util._validate_plot_observables(mass_solution, observable, **kwargs)
+    if ax.child_axes is not None and len(ax.child_axes) == len(observable) ** 2:
         subaxes = np.reshape(
-            np.array(ax.child_axes), (len(observable), len(observable)))
+            np.array(ax.child_axes), (len(observable), len(observable))
+        )
     else:
         subaxes = None
-    plot_tile_placement = v_util._validate_tile_placement(plot_tile_placement,
-                                                          prefix="plot")
+    plot_tile_placement = v_util._validate_tile_placement(
+        plot_tile_placement, prefix="plot"
+    )
     # Split the tiled kwargs and the phase portrait kwargs into seperate dicts
     tile_kwargs, pp_kwargs = _sep_kwargs_for_tiled_phase_portraits(**kwargs)
 
@@ -470,14 +488,27 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
             if subaxes is not None:
                 sub_ax = subaxes[j, i]
             else:
-                sub_ax = ax.inset_axes(bounds=[
-                    i * sub_ax_placement_vals[0],
-                    1 - sub_ax_placement_vals[0] * (j + 1),
-                    sub_ax_placement_vals[1], sub_ax_placement_vals[1]])
+                sub_ax = ax.inset_axes(
+                    bounds=[
+                        i * sub_ax_placement_vals[0],
+                        1 - sub_ax_placement_vals[0] * (j + 1),
+                        sub_ax_placement_vals[1],
+                        sub_ax_placement_vals[1],
+                    ]
+                )
             # Create tile (either phase_portrait, data, or empty)
             sub_ax = _create_tiled_phase_portraits_tile(
-                sub_ax, observable, i, j, x, y, plot_tile_placement,
-                additional_data, tile_kwargs, pp_kwargs)
+                sub_ax,
+                observable,
+                i,
+                j,
+                x,
+                y,
+                plot_tile_placement,
+                additional_data,
+                tile_kwargs,
+                pp_kwargs,
+            )
             # If tile_ticks is not True, remove them
             if not tile_kwargs.get("tile_ticks_on"):
                 sub_ax.set_xticks([])
@@ -491,10 +522,12 @@ def plot_tiled_phase_portraits(mass_solution, observable=None, ax=None,
 
     if kwargs.get("annotate_time_points_legend"):
         for sub_ax in ax.get_children():
-            if sub_ax.__class__.__name__ == "Axes"\
-               and v_util._get_ax_current(sub_ax, time_points=True):
+            if sub_ax.__class__.__name__ == "Axes" and v_util._get_ax_current(
+                sub_ax, time_points=True
+            ):
                 leg_args = v_util._get_annotated_time_points_legend_args(
-                    sub_ax, kwargs.get("annotate_time_points_legend"))
+                    sub_ax, kwargs.get("annotate_time_points_legend")
+                )
                 break
 
         ax = v_util._set_additional_legend_box(ax, leg_args, first_legend=None)
@@ -527,7 +560,8 @@ def get_phase_portrait_default_kwargs(function_name):
     if function_name not in __all__[:-1]:
         raise ValueError(
             "Invalid 'function_name'. Valid values include the following: "
-            + str(__all__[:-1]))
+            + str(__all__[:-1])
+        )
 
     default_kwargs = {
         "time_vector": None,
@@ -561,29 +595,35 @@ def get_phase_portrait_default_kwargs(function_name):
     }
 
     if function_name == "plot_phase_portrait":
-        default_kwargs.update({
-            "xlabel": None,
-            "ylabel": None,
-            "legend_ncol": None,
-        })
+        default_kwargs.update(
+            {
+                "xlabel": None,
+                "ylabel": None,
+                "legend_ncol": None,
+            }
+        )
 
     if function_name == "plot_ensemble_phase_portrait":
-        default_kwargs.update({
-            "xlabel": None,
-            "ylabel": None,
-            "legend_ncol": None,
-        })
+        default_kwargs.update(
+            {
+                "xlabel": None,
+                "ylabel": None,
+                "legend_ncol": None,
+            }
+        )
 
     if function_name == "plot_tiled_phase_portraits":
-        default_kwargs.update({
-            "tile_ticks_on": False,
-            "tile_xlabel_fontdict": None,
-            "tile_ylabel_fontdict": None,
-            "data_tile_fontsize": "large",
-            "data_tile_color": None,
-            "diag_tile_color": None,
-            "empty_tile_color": None,
-        })
+        default_kwargs.update(
+            {
+                "tile_ticks_on": False,
+                "tile_xlabel_fontdict": None,
+                "tile_ylabel_fontdict": None,
+                "data_tile_fontsize": "large",
+                "data_tile_color": None,
+                "diag_tile_color": None,
+                "empty_tile_color": None,
+            }
+        )
 
     return default_kwargs
 
@@ -604,13 +644,13 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
         if "tile" in key:
             # Validate some tile kwargs while others are validated later on.
             if "ticks_on" in key:
-                value = v_util._validate_kwarg_input(
-                    "ticks_on", value, prefix="tile")
+                value = v_util._validate_kwarg_input("ticks_on", value, prefix="tile")
 
             # Validate tile colors
             if "color" in key:
                 value = v_util._validate_kwarg_input(
-                    "color", value, prefix=key.replace("_color", ""))
+                    "color", value, prefix=key.replace("_color", "")
+                )
             # Add to the tile kwargs
             tile_kwargs[key] = value
         # Get tile kwarge that is not exclusive to tiled phase portraits
@@ -625,8 +665,9 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
             pp_kwargs[key] = value
 
     # Iterate through tile colors, setting defaults if no color provided.
-    for key, default_color in zip(["data", "diag", "empty"],
-                                  ["lightgray", "black", "white"]):
+    for key, default_color in zip(
+        ["data", "diag", "empty"], ["lightgray", "black", "white"]
+    ):
         color = tile_kwargs.get(key + "_tile_color")
         if color is None:
             color = default_color
@@ -649,13 +690,12 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     This method is intended for internal use only.
 
     """
+
     def get_plot_tile_bool(i, j, plot_tile_placement):
         """Get a bool indicating if a plot should be made."""
-        return {
-            "all": i < j or i > j,
-            "lower": i < j,
-            "upper": i > j
-        }.get(plot_tile_placement)
+        return {"all": i < j or i > j, "lower": i < j, "upper": i > j}.get(
+            plot_tile_placement
+        )
 
     i, j, x, y, plot_tile_placement, data_matrix, tile_kwargs, pp_kwargs = args
     plot_tile_bool = get_plot_tile_bool(i, j, plot_tile_placement)
@@ -663,8 +703,8 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     # Validate fontsize and set default data tile fontsize as large if needed.
     if data_matrix is not None and tile_kwargs.get("data_tile_fontsize"):
         tile_kwargs["data_tile_fontsize"] = v_util._validate_kwarg_input(
-            "fontsize", tile_kwargs.get("data_tile_fontsize"),
-            prefix="data_tile")
+            "fontsize", tile_kwargs.get("data_tile_fontsize"), prefix="data_tile"
+        )
         if not tile_kwargs.get("data_tile_fontsize"):
             tile_kwargs["data_tile_fontsize"] = "large"
 
@@ -673,8 +713,7 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
         ax.set_facecolor(tile_kwargs.get("diag_tile_color"))
     # Create a phase portrait for the tile
     elif plot_tile_bool:
-        ax = plot_phase_portrait(observable, x=x, y=y, ax=ax, legend=None,
-                                 **pp_kwargs)
+        ax = plot_phase_portrait(observable, x=x, y=y, ax=ax, legend=None, **pp_kwargs)
     # Create the data tile
     elif data_matrix is not None and not plot_tile_bool:
         # Create the data tile only if there is information,
@@ -684,9 +723,13 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
         else:
             # Place data onto tile and set facecolor
             ax.annotate(
-                str(data_matrix[j][i]), xy=(0.5, 0.5),
-                xycoords="axes fraction", va="center", ha="center",
-                fontsize=tile_kwargs.get("data_tile_fontsize"))
+                str(data_matrix[j][i]),
+                xy=(0.5, 0.5),
+                xycoords="axes fraction",
+                va="center",
+                ha="center",
+                fontsize=tile_kwargs.get("data_tile_fontsize"),
+            )
             ax.set_facecolor(tile_kwargs.get("data_tile_color"))
     else:
         ax.set_facecolor(tile_kwargs.get("empty_tile_color"))
@@ -695,5 +738,8 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
 
 
 __all__ = (
-    "plot_phase_portrait", "plot_ensemble_phase_portrait",
-    "plot_tiled_phase_portraits", "get_phase_portrait_default_kwargs")
+    "plot_phase_portrait",
+    "plot_ensemble_phase_portrait",
+    "plot_tiled_phase_portraits",
+    "get_phase_portrait_default_kwargs",
+)

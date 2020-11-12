@@ -20,8 +20,7 @@ from mass.util.util import _check_kwargs
 from mass.visualization import visualization_util as v_util
 
 
-def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
-                      **kwargs):
+def plot_time_profile(mass_solution, observable=None, ax=None, legend=None, **kwargs):
     """Plot time profiles of solutions in a given :class:`~.MassSolution`.
 
     Accepted ``kwargs`` are passed onto various :mod:`matplotlib` methods
@@ -102,9 +101,7 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     # Validate whether necessary packages are installed.
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
-    kwargs = _check_kwargs(
-        get_time_profile_default_kwargs("plot_time_profile"),
-        kwargs)
+    kwargs = _check_kwargs(get_time_profile_default_kwargs("plot_time_profile"), kwargs)
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
 
@@ -114,34 +111,34 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
         return ax
 
     # Get the solutions to be observed and validate time vector.
-    observable = v_util._validate_plot_observables(mass_solution, observable,
-                                                   **kwargs)
+    observable = v_util._validate_plot_observables(mass_solution, observable, **kwargs)
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "semilogx", "semilogy", "loglog"})
+        ax,
+        plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"},
+    )
 
     # Get the legend arguments if desired.
     if legend is not None:
-        legend_labels, legend_kwargs = v_util._get_legend_args(ax, legend,
-                                                               observable,
-                                                               **kwargs)
+        legend_labels, legend_kwargs = v_util._get_legend_args(
+            ax, legend, observable, **kwargs
+        )
         observable = v_util._map_labels_to_solutions(observable, legend_labels)
     else:
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
     prop_cycler = v_util._get_line_property_cycler(
-        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
-        **kwargs)
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable), **kwargs
+    )
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
 
     # Plot lines onto axes using legend entries as labels (if legend valid).
     for label, sol in iteritems(observable):
-        plot_function(observable.time, sol, label=label,
-                      zorder=kwargs.get("zorder"))
+        plot_function(observable.time, sol, label=label, zorder=kwargs.get("zorder"))
 
     # Set the axes options including axis labels, limits, and gridlines.
     v_util._set_axes_labels(ax, **kwargs)
@@ -157,17 +154,22 @@ def plot_time_profile(mass_solution, observable=None, ax=None, legend=None,
     # Annotate time points if desired
     if kwargs.get("annotate_time_points", None) is not None:
         ax = v_util._set_annotated_time_points(
-            ax, observable=observable, type_of_plot="time_profile",
-            first_legend=(legend, legend_kwargs), time_range=observable.time,
-            **kwargs)
+            ax,
+            observable=observable,
+            type_of_plot="time_profile",
+            first_legend=(legend, legend_kwargs),
+            time_range=observable.time,
+            **kwargs
+        )
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
 
     return ax
 
 
-def plot_ensemble_time_profile(mass_solution_list, observable, ax=None,
-                               legend=None, interval_type=None, **kwargs):
+def plot_ensemble_time_profile(
+    mass_solution_list, observable, ax=None, legend=None, interval_type=None, **kwargs
+):
     """Plot time profiles for an ensemble of class:`~.MassSolution` objects.
 
     The plotted lines represent the mean for the values of a particular
@@ -266,36 +268,38 @@ def plot_ensemble_time_profile(mass_solution_list, observable, ax=None,
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
     kwargs = _check_kwargs(
-        get_time_profile_default_kwargs("plot_ensemble_time_profile"),
-        kwargs)
+        get_time_profile_default_kwargs("plot_ensemble_time_profile"), kwargs
+    )
     # Get the axes instance and validate the interval type
     ax = v_util._validate_axes_instance(ax)
     interval_type = v_util._validate_interval_type(interval_type)
 
     # Validate MassSolutions
-    mass_solution_list = [sol for sol in mass_solution_list
-                          if v_util._validate_mass_solution(sol)]
+    mass_solution_list = [
+        sol for sol in mass_solution_list if v_util._validate_mass_solution(sol)
+    ]
     if not mass_solution_list:
         warn("No valid MassSolution objects given")
         return ax
 
     # Get the solutions to be observed and validate time vector.
     observable, time_vector = v_util._validate_ensemble_plot_observables(
-        mass_solution_list, observable, **kwargs)
+        mass_solution_list, observable, **kwargs
+    )
 
     # Get the legend arguments if desired.
     if legend is not None:
-        legend_labels, legend_kwargs = v_util._get_legend_args(ax, legend,
-                                                               observable,
-                                                               **kwargs)
+        legend_labels, legend_kwargs = v_util._get_legend_args(
+            ax, legend, observable, **kwargs
+        )
         observable = v_util._map_labels_to_solutions(observable, legend_labels)
     else:
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
     prop_cycler = v_util._get_line_property_cycler(
-        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
-        **kwargs)
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable), **kwargs
+    )
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
 
@@ -316,9 +320,13 @@ def plot_ensemble_time_profile(mass_solution_list, observable, ax=None,
     # Annotate time points if desired
     if kwargs.get("annotate_time_points", None):
         ax = v_util._set_annotated_time_points(
-            ax, observable=observable, type_of_plot="time_profile",
-            first_legend=(legend, legend_kwargs), time_range=time_vector,
-            **kwargs)
+            ax,
+            observable=observable,
+            type_of_plot="time_profile",
+            first_legend=(legend, legend_kwargs),
+            time_range=time_vector,
+            **kwargs
+        )
 
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
@@ -337,8 +345,10 @@ def _plot_ensemble_lines(ax, observable, interval_type, **kwargs):
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "semilogx", "semilogy", "loglog"})
+        ax,
+        plot_function_str=kwargs.get("plot_function"),
+        valid={"plot", "semilogx", "semilogy", "loglog"},
+    )
 
     # Plot lines onto axes using legend entries as labels (if legend valid).
     for label, sol_df in iteritems(observable):
@@ -346,8 +356,9 @@ def _plot_ensemble_lines(ax, observable, interval_type, **kwargs):
 
         # Only plot the mean if no interval type specified
         if interval_type is None:
-            plot_function(sol_df.columns, mean, label=label,
-                          alpha=kwargs.get("mean_line_alpha"))
+            plot_function(
+                sol_df.columns, mean, label=label, alpha=kwargs.get("mean_line_alpha")
+            )
             continue
 
         if interval_type == "range":
@@ -357,23 +368,40 @@ def _plot_ensemble_lines(ax, observable, interval_type, **kwargs):
         else:
             # Compute the confidence interval
             lb, ub, mean = v_util._calculate_confidence_interval(
-                interval_type, sol_df, kwargs.get("CI_distribution").lower())
+                interval_type, sol_df, kwargs.get("CI_distribution").lower()
+            )
 
         # Plot mean and get line color
-        lines = plot_function(sol_df.columns, mean, label=label,
-                              alpha=kwargs.get("mean_line_alpha"))
+        lines = plot_function(
+            sol_df.columns, mean, label=label, alpha=kwargs.get("mean_line_alpha")
+        )
         color = lines[0].get_color()
 
         # Plot lower and upper bound lines
-        plot_function(sol_df.columns, lb, label=label + "_lb", color=color,
-                      alpha=kwargs.get("interval_border_alpha"))
-        plot_function(sol_df.columns, ub, label=label + "_ub", color=color,
-                      alpha=kwargs.get("interval_border_alpha"))
+        plot_function(
+            sol_df.columns,
+            lb,
+            label=label + "_lb",
+            color=color,
+            alpha=kwargs.get("interval_border_alpha"),
+        )
+        plot_function(
+            sol_df.columns,
+            ub,
+            label=label + "_ub",
+            color=color,
+            alpha=kwargs.get("interval_border_alpha"),
+        )
         # Shade between lower and upper bound lines
-        ax.fill_between(sol_df.columns, lb, ub, where=lb <= ub,
-                        facecolor=color,
-                        alpha=kwargs.get("interval_fill_alpha"),
-                        interpolate=True)
+        ax.fill_between(
+            sol_df.columns,
+            lb,
+            ub,
+            where=lb <= ub,
+            facecolor=color,
+            alpha=kwargs.get("interval_fill_alpha"),
+            interpolate=True,
+        )
 
 
 def get_time_profile_default_kwargs(function_name):
@@ -396,7 +424,8 @@ def get_time_profile_default_kwargs(function_name):
     if function_name not in __all__[:-1]:
         raise ValueError(
             "Invalid 'function_name'. Valid values include the following: "
-            + str(__all__[:-1]))
+            + str(__all__[:-1])
+        )
 
     default_kwargs = {
         "time_vector": None,
@@ -433,16 +462,20 @@ def get_time_profile_default_kwargs(function_name):
     }
 
     if function_name == "plot_ensemble_time_profile":
-        default_kwargs.update({
-            "mean_line_alpha": 1.0,
-            "interval_fill_alpha": 0.5,
-            "interval_border_alpha": 0.5,
-            "CI_distribution": "t"
-        })
+        default_kwargs.update(
+            {
+                "mean_line_alpha": 1.0,
+                "interval_fill_alpha": 0.5,
+                "interval_border_alpha": 0.5,
+                "CI_distribution": "t",
+            }
+        )
 
     return default_kwargs
 
 
 __all__ = (
-    "plot_time_profile", "plot_ensemble_time_profile",
-    "get_time_profile_default_kwargs")
+    "plot_time_profile",
+    "plot_ensemble_time_profile",
+    "get_time_profile_default_kwargs",
+)

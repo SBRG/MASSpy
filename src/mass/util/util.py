@@ -43,8 +43,7 @@ def ensure_iterable(item):
     # Make list iterable if necessary
     if item is None:
         item = list()
-    if not hasattr(item, "__iter__") or \
-       isinstance(item, string_types):
+    if not hasattr(item, "__iter__") or isinstance(item, string_types):
         item = [item]
 
     item = list(item)
@@ -75,7 +74,7 @@ def ensure_non_negative_value(value, exclude_zero=False):
             comparision = lt
             msg = "Must be a non-negative number"
 
-        if comparision(value, 0.):
+        if comparision(value, 0.0):
             raise ValueError(msg)
 
     return value
@@ -96,11 +95,15 @@ def get_public_attributes_and_methods(obj, exclude_parent=False):
         all_public = [i for i in obj.__dict__ if not i.startswith("_")]
     except AttributeError:
         all_public = []
-    all_public += [i for i in obj.__class__.__dict__
-                   if i not in all_public and not i.startswith("_")]
+    all_public += [
+        i
+        for i in obj.__class__.__dict__
+        if i not in all_public and not i.startswith("_")
+    ]
     if not exclude_parent:
         parent_public = get_public_attributes_and_methods(
-            obj.__class__.__base__(), exclude_parent=True)
+            obj.__class__.__base__(), exclude_parent=True
+        )
         all_public += [i for i in parent_public if i not in all_public]
 
     return sorted(all_public, key=str.lower)
@@ -150,14 +153,17 @@ def _check_kwargs(default_kwargs, kwargs):
                     type_ = (list, np.ndarray)
                 if not isinstance(kwargs[key], type_):
                     raise TypeError(
-                        "'{0}' must be of type: {1}.".format(
-                            key, str(type_)))
+                        "'{0}' must be of type: {1}.".format(key, str(type_))
+                    )
             else:
                 # Set the kwarg as the default
                 kwargs[key] = value
         if len(kwargs) != len(default_kwargs):
-            warnings.warn("Unrecognized kwargs: {0}".format(
-                str([key for key in kwargs if key not in default_kwargs])))
+            warnings.warn(
+                "Unrecognized kwargs: {0}".format(
+                    str([key for key in kwargs if key not in default_kwargs])
+                )
+            )
     else:
         # Set the kwargs as the defaults
         kwargs = default_kwargs
@@ -167,8 +173,9 @@ def _check_kwargs(default_kwargs, kwargs):
 
 def _mk_new_dictlist(ref_dictlist, old_dictlist, ensure_unique=False):
     """Return a new DictList with object references updated."""
-    items = ref_dictlist.get_by_any([i.id if hasattr(i, "id") else str(i)
-                                     for i in old_dictlist])
+    items = ref_dictlist.get_by_any(
+        [i.id if hasattr(i, "id") else str(i) for i in old_dictlist]
+    )
     if ensure_unique:
         items = set(items)
     return DictList(items)
@@ -192,15 +199,13 @@ class ColorFormatter(logging.Formatter):
             color, reset = LOG_COLORS[new_record.levelno], LOG_COLORS[-1]
             # Set the levelname color
             new_record.levelname = "{color}{level}:{reset}".format(
-                color=color,
-                level=new_record.levelname,
-                reset=reset)
+                color=color, level=new_record.levelname, reset=reset
+            )
 
             # Set the message color
             new_record.msg = "{color}{msg}{reset}".format(
-                color=color,
-                msg=new_record.msg,
-                reset=reset)
+                color=color, msg=new_record.msg, reset=reset
+            )
 
         return super(ColorFormatter, self).format(new_record, *args, **kwargs)
 
@@ -233,5 +238,9 @@ def _log_msg(logger, level, verbose, msg, *args):
 
 
 __all__ = (
-    "show_versions", "ensure_iterable", "ensure_non_negative_value",
-    "LOG_COLORS", "ColorFormatter")
+    "show_versions",
+    "ensure_iterable",
+    "ensure_non_negative_value",
+    "LOG_COLORS",
+    "ColorFormatter",
+)

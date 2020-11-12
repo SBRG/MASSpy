@@ -115,7 +115,9 @@ def __doc__(self):
         If provided, the new {0} will contain the key:value pairs from
         "data_dict". Otherwise the new {0} is initialized as empty.
 
-    """.format(cls_name, supercls_str, str(tuple(all_subclasses)))
+    """.format(
+        cls_name, supercls_str, str(tuple(all_subclasses))
+    )
 
 
 def __make_class_constructor(ordered=False):
@@ -142,16 +144,20 @@ def __make_class_constructor(ordered=False):
     else:
         cls_name, obj = ("DictWithID", dict)
 
-    constructor = type(cls_name, (obj,), {
-        "__init__": __constructor,
-        "id": __id,
-        "copy": __copy,
-        "_set_id_with_model": __set_id_with_model,
-        "__copy__": __copy__,
-        "__repr__": __repr__,
-        "__str__": __str__,
-        "__doc__": __doc__,
-    })
+    constructor = type(
+        cls_name,
+        (obj,),
+        {
+            "__init__": __constructor,
+            "id": __id,
+            "copy": __copy,
+            "_set_id_with_model": __set_id_with_model,
+            "__copy__": __copy__,
+            "__repr__": __repr__,
+            "__str__": __str__,
+            "__doc__": __doc__,
+        },
+    )
 
     return constructor
 

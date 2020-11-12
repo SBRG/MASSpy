@@ -59,7 +59,7 @@ def to_json(mass_model, sort=False, **kwargs):
 
     """
     obj = model_to_dict(mass_model, sort=sort)
-    obj[u'version'] = JSON_SPEC
+    obj[u"version"] = JSON_SPEC
     return json.dumps(obj, allow_nan=False, **kwargs)
 
 
@@ -114,14 +114,22 @@ def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
 
     """
     obj = model_to_dict(mass_model, sort=sort)
-    obj[u'version'] = JSON_SPEC
+    obj[u"version"] = JSON_SPEC
 
     if pretty:
-        dump_opts = {"indent": 4, "separators": (",", ": "),
-                     "sort_keys": True, "allow_nan": False}
+        dump_opts = {
+            "indent": 4,
+            "separators": (",", ": "),
+            "sort_keys": True,
+            "allow_nan": False,
+        }
     else:
-        dump_opts = {"indent": 4, "separators": (",", ": "),
-                     "sort_keys": True, "allow_nan": False}
+        dump_opts = {
+            "indent": 4,
+            "separators": (",", ": "),
+            "sort_keys": True,
+            "allow_nan": False,
+        }
     dump_opts.update(**kwargs)
 
     if isinstance(filename, string_types):
@@ -199,7 +207,7 @@ JSON_SCHEMA = {
                     "variable_kind": {
                         "type": "string",
                         "pattern": "integer|continuous",
-                        "default": "continuous"
+                        "default": "continuous",
                     },
                     "_rate": {
                         "type": "string",
@@ -209,8 +217,15 @@ JSON_SCHEMA = {
                     "enzyme_module_id": {"type": "string"},
                 },
             },
-            "required": ["id", "name", "reversible", "metabolites",
-                         "lower_bound", "upper_bound", "gene_reaction_rule"],
+            "required": [
+                "id",
+                "name",
+                "reversible",
+                "metabolites",
+                "lower_bound",
+                "upper_bound",
+                "gene_reaction_rule",
+            ],
             "additionalProperties": False,
         },
         "metabolites": {
@@ -250,7 +265,6 @@ JSON_SCHEMA = {
                         },
                     },
                     "enzyme_module_id": {"type": "string"},
-
                 },
                 "required": ["id", "name"],
                 "additionalProperties": False,
@@ -280,36 +294,27 @@ JSON_SCHEMA = {
                     "subsystem": {"type": "string"},
                     "enzyme_module_ligands": {
                         "type": "array",
-                        "allOf": {"type": "string"}
+                        "allOf": {"type": "string"},
                     },
                     "enzyme_module_forms": {
                         "type": "array",
-                        "allOf": {"type": "string"}
+                        "allOf": {"type": "string"},
                     },
                     "enzyme_module_reactions": {
                         "type": "array",
-                        "allOf": {"type": "string"}
+                        "allOf": {"type": "string"},
                     },
                     "enzyme_module_ligands_categorized": {
                         "type": "object",
-                        "allOf": {
-                            "type": "array",
-                            "allOf": {"type": "string"}
-                        },
+                        "allOf": {"type": "array", "allOf": {"type": "string"}},
                     },
                     "enzyme_module_forms_categorized": {
                         "type": "object",
-                        "allOf": {
-                            "type": "array",
-                            "allOf": {"type": "string"}
-                        },
+                        "allOf": {"type": "array", "allOf": {"type": "string"}},
                     },
                     "enzyme_module_reactions_categorized": {
                         "type": "object",
-                        "allOf": {
-                            "type": "array",
-                            "allOf": {"type": "string"}
-                        },
+                        "allOf": {"type": "array", "allOf": {"type": "string"}},
                     },
                     "enzyme_concentration_total": {
                         "type": "number",
@@ -363,38 +368,20 @@ JSON_SCHEMA = {
         },
         "notes": {"type": "object"},
         "annotation": {"type": "object"},
-        "enzyme_module_ligands": {
-            "type": "array",
-            "allOf": {"type": "string"}
-        },
-        "enzyme_module_forms": {
-            "type": "array",
-            "allOf": {"type": "string"}
-        },
-        "enzyme_module_reactions": {
-            "type": "array",
-            "allOf": {"type": "string"}
-        },
+        "enzyme_module_ligands": {"type": "array", "allOf": {"type": "string"}},
+        "enzyme_module_forms": {"type": "array", "allOf": {"type": "string"}},
+        "enzyme_module_reactions": {"type": "array", "allOf": {"type": "string"}},
         "_enzyme_module_ligands_categorized": {
             "type": "object",
-            "allOf": {
-                "type": "array",
-                "allOf": {"type": "string"}
-            },
+            "allOf": {"type": "array", "allOf": {"type": "string"}},
         },
         "_enzyme_module_forms_categorized": {
             "type": "object",
-            "allOf": {
-                "type": "array",
-                "allOf": {"type": "string"}
-            },
+            "allOf": {"type": "array", "allOf": {"type": "string"}},
         },
         "_enzyme_module_reactions_categorized": {
             "type": "object",
-            "allOf": {
-                "type": "array",
-                "allOf": {"type": "string"}
-            },
+            "allOf": {"type": "array", "allOf": {"type": "string"}},
         },
         "_enzyme_concentration_total": {
             "type": "number",
@@ -409,6 +396,4 @@ JSON_SCHEMA = {
 }
 """dict: The generic JSON schema for representing a model in :mod:`mass`."""
 
-__all__ = (
-    "to_json", "from_json", "save_json_model", "load_json_model",
-    "JSON_SCHEMA")
+__all__ = ("to_json", "from_json", "save_json_model", "load_json_model", "JSON_SCHEMA")

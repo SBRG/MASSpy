@@ -14,4 +14,8 @@ class MassEnsembleError(Exception):
     """Simulation error class."""
 
 
-__all__ = ("MassSBMLError", "MassSimulationError", "MassEnsembleError",)
+__all__ = (
+    "MassSBMLError",
+    "MassSimulationError",
+    "MassEnsembleError",
+)

@@ -16,8 +16,9 @@ from mass.util.util import _check_kwargs
 from mass.visualization import visualization_util as v_util
 
 
-def plot_comparison(x, y, compare=None, observable=None, ax=None,
-                    legend=None, **kwargs):
+def plot_comparison(
+    x, y, compare=None, observable=None, ax=None, legend=None, **kwargs
+):
     """Plot values of two objects for comparision.
 
     This function can take two :class:`.MassModel`, :class:`.ConcSolution`,
@@ -109,35 +110,33 @@ def plot_comparison(x, y, compare=None, observable=None, ax=None,
     # Validate whether necessary packages are installed.
     v_util._validate_visualization_packages("matplotlib")
     # Check kwargs
-    kwargs = _check_kwargs(
-        get_comparison_default_kwargs("plot_comparison"),
-        kwargs)
+    kwargs = _check_kwargs(get_comparison_default_kwargs("plot_comparison"), kwargs)
     kwargs["linestyle"] = " "
     # Get the axies instance
     ax = v_util._validate_axes_instance(ax)
 
     x = v_util._get_values_as_series(x, compare, name="x")
     y = v_util._get_values_as_series(y, compare, name="y")
-    observable = v_util._get_dataframe_of_observables(x, y, compare,
-                                                      observable)
+    observable = v_util._get_dataframe_of_observables(x, y, compare, observable)
 
     # Get the plotting function or raise an error if invalid.
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "loglog"})
+        ax, plot_function_str=kwargs.get("plot_function"), valid={"plot", "loglog"}
+    )
 
     # Get the legend arguments if desired.
     if legend is not None:
         legend_labels, legend_kwargs = v_util._get_legend_args(
-            ax, legend, list(observable.index), **kwargs)
+            ax, legend, list(observable.index), **kwargs
+        )
         observable = v_util._map_labels_to_solutions(observable, legend_labels)
     else:
         legend_kwargs = None
 
     # Set line colors and styles using a custom cycler
     prop_cycler = v_util._get_line_property_cycler(
-        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable),
-        **kwargs)
+        n_current=len(v_util._get_ax_current(ax)), n_new=len(observable), **kwargs
+    )
     if prop_cycler:
         ax.set_prop_cycle(prop_cycler)
 
@@ -159,13 +158,16 @@ def plot_comparison(x, y, compare=None, observable=None, ax=None,
     if kwargs.get("xy_line"):
         # Get min and max value, make line extend slightly past those values.
         if kwargs.get("plot_function") == "plot":
-            limits = (int(math.floor(observable.values.min()) / 1.05 - 1),
-                      int(math.ceil(observable.values.max()) * 1.05 + 1))
+            limits = (
+                int(math.floor(observable.values.min()) / 1.05 - 1),
+                int(math.ceil(observable.values.max()) * 1.05 + 1),
+            )
         else:
-            limits = (int(math.floor(observable.values.min()) / 10),
-                      int(math.ceil(observable.values.max()) * 10))
-        ax = _plot_xy_line(ax, limits, first_legend=(legend, legend_kwargs),
-                           **kwargs)
+            limits = (
+                int(math.floor(observable.values.min()) / 10),
+                int(math.ceil(observable.values.max()) * 10),
+            )
+        ax = _plot_xy_line(ax, limits, first_legend=(legend, legend_kwargs), **kwargs)
     # Reset default prop_cycle
     ax.set_prop_cycle(v_util._get_default_cycler())
 
@@ -182,34 +184,44 @@ def _plot_xy_line(ax, limits, first_legend=None, **kwargs):
     """
     # Validate color
     linecolor = v_util._validate_kwarg_input(
-        "color", kwargs.get("xy_linecolor"), prefix="xy",
-        alt_arg_name="linecolor")
+        "color", kwargs.get("xy_linecolor"), prefix="xy", alt_arg_name="linecolor"
+    )
     if linecolor is None:
         linecolor = "grey"
 
     # Validate linestyle
     linestyle = v_util._validate_kwarg_input(
-        "linestyle", kwargs.get("xy_linestyle"), prefix="xy")
+        "linestyle", kwargs.get("xy_linestyle"), prefix="xy"
+    )
     if linestyle is None:
         linestyle = "--"
 
     # Validate linewidth
     linewidth = v_util._validate_kwarg_input(
-        "linewidth", kwargs.get("xy_linewidth"), prefix="xy")
+        "linewidth", kwargs.get("xy_linewidth"), prefix="xy"
+    )
 
     plot_function = v_util._get_plotting_function(
-        ax, plot_function_str=kwargs.get("plot_function"),
-        valid={"plot", "loglog"})
+        ax, plot_function_str=kwargs.get("plot_function"), valid={"plot", "loglog"}
+    )
 
     # Plot the line using the set kwarg options, set zorder to 1.9 so that
     # it is below original points (default is 2.)
-    line = plot_function(limits, limits, label="y=x", color=linecolor,
-                         linestyle=linestyle, linewidth=linewidth,
-                         marker="", zorder=1.9)
+    line = plot_function(
+        limits,
+        limits,
+        label="y=x",
+        color=linecolor,
+        linestyle=linestyle,
+        linewidth=linewidth,
+        marker="",
+        zorder=1.9,
+    )
 
     if kwargs.get("xy_legend") is not None:
         desired, taken = v_util._check_second_legend_location(
-            kwargs.get("xy_legend"), first_legend[1])
+            kwargs.get("xy_legend"), first_legend[1]
+        )
         # Set default desired location
         if desired is None:
             desired = "best" if taken != "best" else "right outside"
@@ -218,10 +230,10 @@ def _plot_xy_line(ax, limits, first_legend=None, **kwargs):
         if desired in v_util.OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
             desired, anch = v_util.OUTSIDE_LEGEND_LOCATION_AND_ANCHORS[desired]
 
-        legend_args = (line, ["y=x"],
-                       {"loc": desired, "bbox_to_anchor": anch})
-        ax = v_util._set_additional_legend_box(ax, legend_args,
-                                               first_legend=first_legend[0])
+        legend_args = (line, ["y=x"], {"loc": desired, "bbox_to_anchor": anch})
+        ax = v_util._set_additional_legend_box(
+            ax, legend_args, first_legend=first_legend[0]
+        )
 
     return ax
 
@@ -246,7 +258,8 @@ def get_comparison_default_kwargs(function_name):
     if function_name not in __all__[:-1]:
         raise ValueError(
             "Invalid 'function_name'. Valid values include the following: "
-            + str(__all__[:-1]))
+            + str(__all__[:-1])
+        )
 
     default_kwargs = {
         "plot_function": "plot",

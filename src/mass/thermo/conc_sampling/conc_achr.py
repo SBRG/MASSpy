@@ -88,11 +88,11 @@ class ConcACHRSampler(ConcHRSampler):
 
     """
 
-    def __init__(self, concentration_solver, thinning=100, nproj=None,
-                 seed=None):
+    def __init__(self, concentration_solver, thinning=100, nproj=None, seed=None):
         """Initialize a new ConcACHRSampler."""
-        super(ConcACHRSampler, self).__init__(concentration_solver, thinning,
-                                              nproj=nproj, seed=seed)
+        super(ConcACHRSampler, self).__init__(
+            concentration_solver, thinning, nproj=nproj, seed=seed
+        )
         self.generate_cva_warmup()
         self.prev = self.center = self.warmup.mean(axis=0)
         np.random.seed(self.seed)
@@ -131,7 +131,9 @@ class ConcACHRSampler(ConcHRSampler):
             self.__single_iteration()
 
             if i % self.thinning == 0:
-                samples[i // self.thinning - 1, ] = self.prev
+                samples[
+                    i // self.thinning - 1,
+                ] = self.prev
 
         names = [v.name for v in self.concentration_solver.variables]
         df = pd.DataFrame(samples, columns=names)
@@ -154,11 +156,17 @@ class ConcACHRSampler(ConcHRSampler):
         pi = np.random.randint(self.n_warmup)
 
         # Mix in the original warmup points to not get stuck
-        delta = self.warmup[pi, ] - self.center
+        delta = (
+            self.warmup[
+                pi,
+            ]
+            - self.center
+        )
         self.prev = step(self, self.prev, delta)
 
-        self.center = ((self.n_samples * self.center) / (self.n_samples + 1) +
-                       self.prev / (self.n_samples + 1))
+        self.center = (self.n_samples * self.center) / (
+            self.n_samples + 1
+        ) + self.prev / (self.n_samples + 1)
         self.n_samples += 1
 
 

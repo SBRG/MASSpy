@@ -58,17 +58,19 @@ from mass.core.mass_metabolite import MassMetabolite
 from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.util.expressions import create_custom_rate, strip_time
-from mass.util.matrix import (
-    _get_matrix_constructor, convert_matrix, matrix_rank)
+from mass.util.matrix import _get_matrix_constructor, convert_matrix, matrix_rank
 from mass.util.util import (
-    _check_kwargs, _make_logger, ensure_iterable,
-    get_public_attributes_and_methods)
+    _check_kwargs,
+    _make_logger,
+    ensure_iterable,
+    get_public_attributes_and_methods,
+)
 
 # Set the logger
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~mass.core.mass_model` submodule."""
 
-CHOPNSQ = ['C', 'H', 'O', 'P', 'N', 'S', 'q']
+CHOPNSQ = ["C", "H", "O", "P", "N", "S", "q"]
 """list: Contains the six most abundant elements and charge for molecules."""
 
 MASSCONFIGURATION = MassConfiguration()
@@ -148,15 +150,15 @@ class MassModel(Model):
 
     """
 
-    def __init__(self, id_or_model=None, name=None, array_type="dense",
-                 dtype=np.float64):
+    def __init__(
+        self, id_or_model=None, name=None, array_type="dense", dtype=np.float64
+    ):
         """Initialize the MassModel."""
         # Instiantiate a new MassModel with state identical to
         # the provided Model or MassModel object via cobra model initialization
         # and its call to the __setstate__ method.
         super(MassModel, self).__init__(id_or_model, name)
-        if isinstance(id_or_model, Model)\
-           and not isinstance(id_or_model, MassModel):
+        if isinstance(id_or_model, Model) and not isinstance(id_or_model, MassModel):
             # Turn cobra objects into mass objects and fix groups.
             self._cobra_to_mass_repair()
 
@@ -175,15 +177,17 @@ class MassModel(Model):
             # Store the stoichiometric matrix, its matrix type, and data type
             self._array_type = array_type
             self._dtype = dtype
-            self._S = self._mk_stoich_matrix(array_type=self._array_type,
-                                             dtype=self._dtype,
-                                             update_model=True)
+            self._S = self._mk_stoich_matrix(
+                array_type=self._array_type, dtype=self._dtype, update_model=True
+            )
+
     # Public
     @property
     def stoichiometric_matrix(self):
         """Return the stoichiometric matrix."""
-        return self.update_S(array_type=self._array_type, dtype=self._dtype,
-                             update_model=False)
+        return self.update_S(
+            array_type=self._array_type, dtype=self._dtype, update_model=False
+        )
 
     @property
     def S(self):
@@ -203,8 +207,11 @@ class MassModel(Model):
     @property
     def initial_conditions(self):
         r"""Get ``dict`` of :attr:`.MassMetabolite.initial_condition`\ s."""
-        return {met: met.initial_condition for met in self.metabolites
-                if met.initial_condition is not None}
+        return {
+            met: met.initial_condition
+            for met in self.metabolites
+            if met.initial_condition is not None
+        }
 
     @property
     def ics(self):
@@ -214,8 +221,7 @@ class MassModel(Model):
     @property
     def fixed(self):
         """Return a ``dict`` of all metabolite fixed conditions."""
-        return {met: ic for met, ic in iteritems(self.initial_conditions)
-                if met.fixed}
+        return {met: ic for met, ic in iteritems(self.initial_conditions) if met.fixed}
 
     @property
     def rates(self):
@@ -230,8 +236,11 @@ class MassModel(Model):
     @property
     def steady_state_fluxes(self):
         """Return a ``dict`` of all reaction steady state fluxes."""
-        return {rxn: rxn.steady_state_flux for rxn in self.reactions
-                if rxn.steady_state_flux is not None}
+        return {
+            rxn: rxn.steady_state_flux
+            for rxn in self.reactions
+            if rxn.steady_state_flux is not None
+        }
 
     @property
     def v(self):
@@ -252,8 +261,9 @@ class MassModel(Model):
         :attr:`.MassReaction.boundary_metabolite`
 
         """
-        return sorted(list(set(rxn.boundary_metabolite
-                               for rxn in self.reactions if rxn.boundary)))
+        return sorted(
+            list(set(rxn.boundary_metabolite for rxn in self.reactions if rxn.boundary))
+        )
 
     @property
     def exchanges(self):
@@ -302,9 +312,14 @@ class MassModel(Model):
                     p_type_dict.update({p_sym: rxn.parameters[p_sym]})
             parameters.update({p_type: p_type_dict})
         # Add fluxes, custom parameters, and fixed concentrations.
-        parameters.update({"v": {
-            rxn.flux_symbol_str: flux
-            for rxn, flux in iteritems(self.steady_state_fluxes)}})
+        parameters.update(
+            {
+                "v": {
+                    rxn.flux_symbol_str: flux
+                    for rxn, flux in iteritems(self.steady_state_fluxes)
+                }
+            }
+        )
         parameters.update({"Custom": self.custom_parameters})
         parameters.update({"Boundary": self.boundary_conditions})
 
@@ -336,8 +351,7 @@ class MassModel(Model):
     def compartments(self, compartment_dict):
         """Set the ``dict`` of current compartment descriptions."""
         if compartment_dict:
-            super(MassModel, self.__class__).compartments.fset(
-                self, compartment_dict)
+            super(MassModel, self.__class__).compartments.fset(self, compartment_dict)
         else:
             setattr(self, "_compartments", {})
 
@@ -389,7 +403,8 @@ class MassModel(Model):
         # If a matrix has not been constructed yet, or if there are no changes
         # to the reactions, return a newly constructed stoichiometric matrix.
         stoich_mat = self._mk_stoich_matrix(
-            array_type=array_type, dtype=dtype, update_model=update_model)
+            array_type=array_type, dtype=dtype, update_model=update_model
+        )
         # Internally update the model if desired
         if update_model:
             self._S = stoich_mat
@@ -430,8 +445,7 @@ class MassModel(Model):
             :class:`~.MassReaction`\ s from the model.
 
         """
-        super(MassModel, self).remove_metabolites(metabolite_list,
-                                                  destructive)
+        super(MassModel, self).remove_metabolites(metabolite_list, destructive)
 
     def add_boundary_conditions(self, boundary_conditions):
         """Add boundary conditions values for the given boundary metabolites.
@@ -458,10 +472,14 @@ class MassModel(Model):
 
         boundary_conditions_to_set = boundary_conditions.copy()
         for bound_met, bound_cond in iteritems(boundary_conditions_to_set):
-            if bound_met not in self.boundary_metabolites and \
-               bound_met not in self.metabolites:
-                raise ValueError("Did not find {0} in model metabolites or in "
-                                 "boundary reactions.".format(bound_met))
+            if (
+                bound_met not in self.boundary_metabolites
+                and bound_met not in self.metabolites
+            ):
+                raise ValueError(
+                    "Did not find {0} in model metabolites or in "
+                    "boundary reactions.".format(bound_met)
+                )
             if bound_cond in ["", None]:
                 boundary_conditions_to_set[bound_met] = None
             # Boundary condition is a function
@@ -475,21 +493,25 @@ class MassModel(Model):
             else:
                 raise TypeError(
                     "Invalid boundary value for '{0}'. Boundary conditions can"
-                    "only be numerical values or functions of time.".format(
-                        bound_met))
+                    "only be numerical values or functions of time.".format(bound_met)
+                )
         # Keep track of existing concentrations for context management.
         context = get_context(self)
         if context:
-            existing_concs = {bound_met: self.boundary_conditions[bound_met]
-                              for bound_met in boundary_conditions
-                              if bound_met in self.boundary_conditions}
+            existing_concs = {
+                bound_met: self.boundary_conditions[bound_met]
+                for bound_met in boundary_conditions
+                if bound_met in self.boundary_conditions
+            }
 
         self.boundary_conditions.update(boundary_conditions_to_set)
 
         if context:
-            context(partial(self.boundary_conditions.pop, key)
-                    for key in iterkeys(boundary_conditions)
-                    if key not in existing_concs)
+            context(
+                partial(self.boundary_conditions.pop, key)
+                for key in iterkeys(boundary_conditions)
+                if key not in existing_concs
+            )
             context(partial(self.boundary_conditions.update, existing_concs))
 
     def remove_boundary_conditions(self, boundary_metabolite_list):
@@ -511,15 +533,19 @@ class MassModel(Model):
         # Check whether a metabolite already exists in the model,
         # ignoring those that do not.
         boundary_metabolite_list = [
-            bound_met for bound_met in boundary_metabolite_list
-            if bound_met in self.boundary_conditions]
+            bound_met
+            for bound_met in boundary_metabolite_list
+            if bound_met in self.boundary_conditions
+        ]
 
         # Keep track of existing concentrations for context management.
         context = get_context(self)
         if context:
-            existing_concs = {bound_met: self.boundary_conditions[bound_met]
-                              for bound_met in boundary_metabolite_list
-                              if bound_met in self.boundary_conditions}
+            existing_concs = {
+                bound_met: self.boundary_conditions[bound_met]
+                for bound_met in boundary_metabolite_list
+                if bound_met in self.boundary_conditions
+            }
         # Remove the initial conditions
         for bound_met in boundary_metabolite_list:
             del self.boundary_conditions[bound_met]
@@ -564,7 +590,8 @@ class MassModel(Model):
                 # Convert reaction to a MassReaction and raise a warning
                 warnings.warn(
                     "'{0}' is not a mass.MassReaction, therefore "
-                    "converting reaction before adding.".format(reaction.id))
+                    "converting reaction before adding.".format(reaction.id)
+                )
                 mass_reaction = MassReaction(reaction)
                 reaction_list[i] = mass_reaction
             else:
@@ -603,14 +630,21 @@ class MassModel(Model):
         # the orphaned custom parameters if set
         for reaction in reactions:
             if reaction in self.custom_rates:
-                self.remove_custom_rate(
-                    reaction, remove_orphans=remove_orphans)
-            if reaction.boundary\
-               and reaction.boundary_metabolite in self.boundary_conditions:
+                self.remove_custom_rate(reaction, remove_orphans=remove_orphans)
+            if (
+                reaction.boundary
+                and reaction.boundary_metabolite in self.boundary_conditions
+            ):
                 self.remove_boundary_conditions([reaction.boundary_metabolite])
 
-    def add_boundary(self, metabolite, boundary_type="exchange",
-                     reaction_id=None, boundary_condition=0., **kwargs):
+    def add_boundary(
+        self,
+        metabolite,
+        boundary_type="exchange",
+        reaction_id=None,
+        boundary_condition=0.0,
+        **kwargs
+    ):
         """Add a boundary reaction for a given metabolite.
 
         Accepted ``kwargs`` are passed to the underlying function for boundary
@@ -690,42 +724,49 @@ class MassModel(Model):
             The :class:`~.MassReaction` of the new boundary reaction.
 
         """
-        kwargs = _check_kwargs({
-            "subsystem": "",
-            "lb": MASSCONFIGURATION.lower_bound,
-            "ub": MASSCONFIGURATION.upper_bound,
-            "sbo_term": None,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "subsystem": "",
+                "lb": MASSCONFIGURATION.lower_bound,
+                "ub": MASSCONFIGURATION.upper_bound,
+                "sbo_term": None,
+            },
+            kwargs,
+        )
         # Check for existance of the metabolite
         try:
             metabolite = self.metabolites.get_by_id(str(metabolite))
         except KeyError as e:
-            raise ValueError(
-                "'{0}' does not exist in the model.".format(str(e)))
+            raise ValueError("'{0}' does not exist in the model.".format(str(e)))
 
         # Create boundary reaction
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",
-                                    ".*is not a mass.MassReaction, therefore "
-                                    "converting reaction.*")
+            warnings.filterwarnings(
+                "ignore",
+                ".*is not a mass.MassReaction, therefore " "converting reaction.*",
+            )
             reaction = super(MassModel, self).add_boundary(
-                metabolite, type=boundary_type, reaction_id=reaction_id,
-                lb=kwargs.get("lb", None), ub=kwargs.get("ub", None),
-                sbo_term=kwargs.get("sbo_term", None))
+                metabolite,
+                type=boundary_type,
+                reaction_id=reaction_id,
+                lb=kwargs.get("lb", None),
+                ub=kwargs.get("ub", None),
+                sbo_term=kwargs.get("sbo_term", None),
+            )
         # Get the added MassReaction
         reaction = self.reactions.get_by_id(reaction.id)
         # Add subsystem or boundary condition
         reaction.subsystem = kwargs.get("subsystem")
-        self.add_boundary_conditions({
-            reaction.boundary_metabolite: boundary_condition})
+        self.add_boundary_conditions({reaction.boundary_metabolite: boundary_condition})
 
         if boundary_type == "demand":
             reaction.reversible = False
 
         return reaction
 
-    def get_rate_expressions(self, reaction_list=None, rate_type=0,
-                             update_reactions=False):
+    def get_rate_expressions(
+        self, reaction_list=None, rate_type=0, update_reactions=False
+    ):
         r"""Get the rate expressions for a ``list`` of reactions in the model.
 
         Notes
@@ -779,7 +820,8 @@ class MassModel(Model):
         else:
             rate_dict = {
                 rxn: rxn.get_mass_action_rate(rate_type, update_reactions)
-                for rxn in reaction_list}
+                for rxn in reaction_list
+            }
 
         return rate_dict
 
@@ -809,9 +851,12 @@ class MassModel(Model):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = dict((rxn, rxn.get_mass_action_ratio()) if sympy_expr
-                          else (rxn, str(rxn.get_disequilibrium_ratio()))
-                          for rxn in reaction_list)
+        ratio_dict = dict(
+            (rxn, rxn.get_mass_action_ratio())
+            if sympy_expr
+            else (rxn, str(rxn.get_disequilibrium_ratio()))
+            for rxn in reaction_list
+        )
         return ratio_dict
 
     def get_disequilibrium_ratios(self, reaction_list=None, sympy_expr=True):
@@ -840,9 +885,12 @@ class MassModel(Model):
         # Ensure list is iterable.
         reaction_list = ensure_iterable(reaction_list)
 
-        ratio_dict = dict((rxn, rxn.get_disequilibrium_ratio()) if sympy_expr
-                          else (rxn, str(rxn.get_disequilibrium_ratio()))
-                          for rxn in reaction_list)
+        ratio_dict = dict(
+            (rxn, rxn.get_disequilibrium_ratio())
+            if sympy_expr
+            else (rxn, str(rxn.get_disequilibrium_ratio()))
+            for rxn in reaction_list
+        )
         return ratio_dict
 
     def add_custom_rate(self, reaction, custom_rate, custom_parameters=None):
@@ -895,21 +943,26 @@ class MassModel(Model):
         existing_customs = self.custom_parameters
         if existing_customs:
             for custom_parameter in iterkeys(existing_customs):
-                if re.search(custom_parameter, custom_rate) and \
-                   custom_parameter not in custom_parameter_list:
+                if (
+                    re.search(custom_parameter, custom_rate)
+                    and custom_parameter not in custom_parameter_list
+                ):
                     custom_parameter_list.append(custom_parameter)
         # Create the custom rate expression
-        custom_rate = create_custom_rate(reaction, custom_rate,
-                                         custom_parameter_list)
+        custom_rate = create_custom_rate(reaction, custom_rate, custom_parameter_list)
         self.custom_rates.update({reaction: custom_rate})
         self.custom_parameters.update(custom_parameters)
 
         context = get_context(self)
         if context:
             context(partial(self.custom_rates.pop, reaction))
-            context(partial((self.custom_parameters.pop, key)
-                            for key in custom_parameter_list
-                            if key in iterkeys(self.custom_parameters)))
+            context(
+                partial(
+                    (self.custom_parameters.pop, key)
+                    for key in custom_parameter_list
+                    if key in iterkeys(self.custom_parameters)
+                )
+            )
             context(partial(self.custom_parameters.update, existing_customs))
 
     def remove_custom_rate(self, reaction, remove_orphans=True):
@@ -930,20 +983,23 @@ class MassModel(Model):
         try:
             rate_to_remove = self.custom_rates[reaction]
         except KeyError:
-            warnings.warn("Did not find a custom custom rate expression "
-                          "associated with reaction {0}.".format(reaction.id))
+            warnings.warn(
+                "Did not find a custom custom rate expression "
+                "associated with reaction {0}.".format(reaction.id)
+            )
             return
         # Remove the rate
         del self.custom_rates[reaction]
 
         # Remove orphaned custom parameters if desired.
         args = rate_to_remove.atoms(sym.Symbol)
-        standards = [
-            sym.Symbol(arg) for arg in reaction.all_parameter_ids + ["t"]]
+        standards = [sym.Symbol(arg) for arg in reaction.all_parameter_ids + ["t"]]
         # Save currently existing parameters for context management if needed.
-        existing = {str(arg): self.custom_parameters[str(arg)]
-                    for arg in args if arg in self.custom_parameters and
-                    arg not in standards}
+        existing = {
+            str(arg): self.custom_parameters[str(arg)]
+            for arg in args
+            if arg in self.custom_parameters and arg not in standards
+        }
 
         if remove_orphans and self.custom_rates:
             # Determine symbols still in use.
@@ -962,8 +1018,7 @@ class MassModel(Model):
 
         context = get_context(self)
         if context:
-            context(partial(self.custom_rates.update,
-                            {reaction: rate_to_remove}))
+            context(partial(self.custom_rates.update, {reaction: rate_to_remove}))
             if remove_orphans:
                 context(partial(self.custom_parameters.update, existing))
 
@@ -988,14 +1043,11 @@ class MassModel(Model):
 
         self.custom_rates = {}
         self.custom_parameters = {}
-        LOGGER.info(
-            "All custom rate expressions and parameters have been reset")
+        LOGGER.info("All custom rate expressions and parameters have been reset")
 
         if context:
-            context(partial(self.custom_parameters.update,
-                            existing_parameters))
-            context(partial(self.custom_parameters.update,
-                            existing_customs))
+            context(partial(self.custom_parameters.update, existing_parameters))
+            context(partial(self.custom_parameters.update, existing_customs))
 
     def add_units(self, unit_defs):
         r"""Add a :class:`~.UnitDefinition` to the model :attr:`units`.
@@ -1019,11 +1071,13 @@ class MassModel(Model):
         for unit in list(unit_defs):
             if not isinstance(unit, UnitDefinition):
                 raise ValueError(
-                    "'{0}' is not a valid UnitDefinition.".format(str(unit)))
+                    "'{0}' is not a valid UnitDefinition.".format(str(unit))
+                )
             # Skip existing units.
             if unit.id in self.units.list_attr("id"):
-                warnings.warn("Skipping '{0}' for it already exists in the"
-                              " model.".format(unit))
+                warnings.warn(
+                    "Skipping '{0}' for it already exists in the" " model.".format(unit)
+                )
                 unit_defs.remove(unit)
         # Add new unit definitions to the units attribute
         self.units += unit_defs
@@ -1055,8 +1109,7 @@ class MassModel(Model):
             try:
                 unit = self.units.get_by_id(unit)
             except KeyError as e:
-                raise ValueError(
-                    "'{0}' does not exist in the model.".format(str(e)))
+                raise ValueError("'{0}' does not exist in the model.".format(str(e)))
         # Remove unit definitions to the units attribute
         self.units -= unit_defs
         context = get_context(self)
@@ -1110,7 +1163,8 @@ class MassModel(Model):
         """
         # Set up for matrix construction if matrix types are correct.
         (matrix_constructor, array_type, dtype) = _get_matrix_constructor(
-            array_type=array_type, dtype=dtype)
+            array_type=array_type, dtype=dtype
+        )
 
         # Build the elemental matrix
         elem_mat = matrix_constructor((len(CHOPNSQ), len(self.metabolites)))
@@ -1131,16 +1185,18 @@ class MassModel(Model):
                     amount = 0
                 elem_mat[e_ind(element), m_ind(met)] = amount
             # Get any additional moieties
-            moieties.extend([
-                element for element in iterkeys(element_dict)
-                if "[" in element and "]" in element
-                and element not in moieties])
+            moieties.extend(
+                [
+                    element
+                    for element in iterkeys(element_dict)
+                    if "[" in element and "]" in element and element not in moieties
+                ]
+            )
 
         row_ids = CHOPNSQ.copy()
         # Add additional moieties to the elemental matrix
         if moieties:
-            moiety_mat = matrix_constructor((
-                len(moieties), len(self.metabolites)))
+            moiety_mat = matrix_constructor((len(moieties), len(self.metabolites)))
             # Create additional matrix for moieties
             for met in self.metabolites:
                 element_dict = met.elements
@@ -1155,9 +1211,13 @@ class MassModel(Model):
             row_ids.extend(moieties)
 
         # Convert matrix to a dataframe if matrix type is a dataframe
-        elem_mat = convert_matrix(elem_mat, array_type=array_type,
-                                  dtype=dtype, row_ids=row_ids,
-                                  col_ids=[m.id for m in self.metabolites])
+        elem_mat = convert_matrix(
+            elem_mat,
+            array_type=array_type,
+            dtype=dtype,
+            row_ids=row_ids,
+            col_ids=[m.id for m in self.metabolites],
+        )
 
         return elem_mat
 
@@ -1194,9 +1254,13 @@ class MassModel(Model):
         if dtype is None:
             dtype = np.float64
 
-        charge_mat = convert_matrix(charge_mat, array_type=array_type,
-                                    dtype=dtype, row_ids=row_ids,
-                                    col_ids=[r.id for r in self.reactions])
+        charge_mat = convert_matrix(
+            charge_mat,
+            array_type=array_type,
+            dtype=dtype,
+            row_ids=row_ids,
+            col_ids=[r.id for r in self.reactions],
+        )
         return charge_mat
 
     def repair(self, rebuild_index=True, rebuild_relationships=True):
@@ -1250,9 +1314,19 @@ class MassModel(Model):
         new_model = self.__class__()
         # Define items that will not be copied by their references
         do_not_copy_by_ref = [
-            "metabolites", "reactions", "genes", "enzyme_modules", "groups",
-            "_S", "custom_rates", "units", "boundary_conditions",
-            "custom_parameters", "notes", "annotation"]
+            "metabolites",
+            "reactions",
+            "genes",
+            "enzyme_modules",
+            "groups",
+            "_S",
+            "custom_rates",
+            "units",
+            "boundary_conditions",
+            "custom_parameters",
+            "notes",
+            "annotation",
+        ]
         for attr in self.__dict__:
             if attr not in do_not_copy_by_ref:
                 new_model.__dict__[attr] = self.__dict__[attr]
@@ -1268,9 +1342,12 @@ class MassModel(Model):
         new_model.reactions += self._copy_model_reactions(new_model)
         # Copy the custom rate for the reaction:
         if self.custom_rates:
-            new_model.custom_rates.update({
-                new_model.reactions.get_by_id(reaction.id): custom_rate
-                for reaction, custom_rate in iteritems(self.custom_rates)})
+            new_model.custom_rates.update(
+                {
+                    new_model.reactions.get_by_id(reaction.id): custom_rate
+                    for reaction, custom_rate in iteritems(self.custom_rates)
+                }
+            )
         # Copy custom parameters
         if self.custom_parameters:
             new_model.custom_parameters.update(self.custom_parameters)
@@ -1281,9 +1358,9 @@ class MassModel(Model):
         # Copy any existing enzyme_modules
         new_model.enzyme_modules += self._copy_model_enzyme_modules(new_model)
         # Create the new stoichiometric matrix for the model.
-        new_model._S = self._mk_stoich_matrix(array_type=self._array_type,
-                                              dtype=self._dtype,
-                                              update_model=True)
+        new_model._S = self._mk_stoich_matrix(
+            array_type=self._array_type, dtype=self._dtype, update_model=True
+        )
 
         solvers_dict = {"_solver": self.solver}
         if hasattr(self, "_conc_solver"):
@@ -1302,8 +1379,7 @@ class MassModel(Model):
 
         return new_model
 
-    def merge(self, right, prefix_existing=None, inplace=True,
-              objective='left'):
+    def merge(self, right, prefix_existing=None, inplace=True, objective="left"):
         """Merge two models into one model with the objects from both.
 
         The reactions, metabolites, genes, enzyme modules, boundary conditions,
@@ -1357,51 +1433,62 @@ class MassModel(Model):
         """
         # Check whether two MassModels are being merged,
         # or if a MassModel and a MassModel subclass are being merged.
-        if right.__class__ is not MassModel \
-           and issubclass(right.__class__, MassModel):
-            return right._add_self_to_model(self, prefix_existing, inplace,
-                                            objective)
+        if right.__class__ is not MassModel and issubclass(right.__class__, MassModel):
+            return right._add_self_to_model(self, prefix_existing, inplace, objective)
 
         # Set the merged model object and its ID,
         # then add the module attribute of the right model into the left
         new_model = super(MassModel, self).merge(
-            right, prefix_existing, inplace, objective)
+            right, prefix_existing, inplace, objective
+        )
 
         # Add boundary conditions from right to left model.
         existing = [bc for bc in iterkeys(new_model.boundary_conditions)]
-        new_model.add_boundary_conditions({
-            m: bc for m, bc in iteritems(right.boundary_conditions)
-            if bc not in existing})
+        new_model.add_boundary_conditions(
+            {
+                m: bc
+                for m, bc in iteritems(right.boundary_conditions)
+                if bc not in existing
+            }
+        )
 
         # Add custom parameters from right to left model.
         existing = [cp for cp in iterkeys(new_model.custom_parameters)]
-        new_model.custom_parameters.update({
-            cp: v for cp, v in iteritems(right.custom_parameters)
-            if cp not in existing})
+        new_model.custom_parameters.update(
+            {
+                cp: v
+                for cp, v in iteritems(right.custom_parameters)
+                if cp not in existing
+            }
+        )
 
         def prefix_existing_id(to_prefix):
             """Prefix the ID and return it."""
-            return '{0}{1}'.format(prefix_existing, to_prefix)
+            return "{0}{1}".format(prefix_existing, to_prefix)
 
         # Add custom rates from right to left model,
         # prefixing any existing reactions if necessary
         if prefix_existing is not None:
-            existing = dict((prefix_existing_id(r.id), rate)
-                            if prefix_existing_id(r.id) in new_model.reactions
-                            else (r.id, rate)
-                            for r, rate in iteritems(right.custom_rates))
+            existing = dict(
+                (prefix_existing_id(r.id), rate)
+                if prefix_existing_id(r.id) in new_model.reactions
+                else (r.id, rate)
+                for r, rate in iteritems(right.custom_rates)
+            )
         else:
             existing = {}
 
         existing.update(right.custom_rates)
-        new_model.custom_rates.update({
-            new_model.reactions.get_by_id(getattr(r, "_id", r)): rate
-            for r, rate in iteritems(existing)})
+        new_model.custom_rates.update(
+            {
+                new_model.reactions.get_by_id(getattr(r, "_id", r)): rate
+                for r, rate in iteritems(existing)
+            }
+        )
 
         new_items = deepcopy(right.groups)
         if prefix_existing is not None:
-            existing = new_items.query(
-                lambda group: group.id in self.groups)
+            existing = new_items.query(lambda group: group.id in self.groups)
             for group in existing:
                 group.id = prefix_existing_id(group.id)
         new_model.add_groups(new_items)
@@ -1410,8 +1497,8 @@ class MassModel(Model):
             """Filter existing EnzymeModules."""
             if enzyme.id in self.enzyme_modules:
                 LOGGER.warning(
-                    "Ignoring enzyme module '%s' since it already exists.",
-                    enzyme.id)
+                    "Ignoring enzyme module '%s' since it already exists.", enzyme.id
+                )
                 return False
             return True
 
@@ -1420,8 +1507,7 @@ class MassModel(Model):
             new_items = deepcopy(right.enzyme_modules)
             # Prefix enzyme_modules if necessary
             if prefix_existing is not None:
-                existing = new_items.query(
-                    lambda e: e.id in self.enzyme_modules)
+                existing = new_items.query(lambda e: e.id in self.enzyme_modules)
                 for enzyme in existing:
                     enzyme.__dict__["_id"] = prefix_existing_id(enzyme.id)
 
@@ -1431,8 +1517,7 @@ class MassModel(Model):
             for enzyme in new_model.enzyme_modules:
                 enzyme.model = new_model
 
-        new_model.add_units([
-            u for u in right.units if u not in new_model.units])
+        new_model.add_units([u for u in right.units if u not in new_model.units])
 
         for attr in ["_compartments", "notes", "annotation"]:
             existing = getattr(new_model, attr).copy()
@@ -1441,8 +1526,9 @@ class MassModel(Model):
 
         return new_model
 
-    def compute_steady_state_fluxes(self, pathways, independent_fluxes,
-                                    update_reactions=False):
+    def compute_steady_state_fluxes(
+        self, pathways, independent_fluxes, update_reactions=False
+    ):
         r"""Calculate the unique steady state flux for each reaction.
 
         The unique steady state flux for each reaction in the
@@ -1490,12 +1576,16 @@ class MassModel(Model):
         """
         # Check inputs:
         if not isinstance(pathways, (np.ndarray, list)):
-            raise TypeError("Pathways must be numpy.ndarrays or array-like, "
-                            "such as a list of lists.")
+            raise TypeError(
+                "Pathways must be numpy.ndarrays or array-like, "
+                "such as a list of lists."
+            )
         pathways = np.array(pathways)
         if len(self.reactions) != pathways.shape[1]:
-            raise ValueError("Pathways must have the same number of columns as"
-                             " the number of reactions in the model.")
+            raise ValueError(
+                "Pathways must have the same number of columns as"
+                " the number of reactions in the model."
+            )
         if not isinstance(independent_fluxes, dict):
             raise TypeError("independent_fluxes must be a dict")
         if not isinstance(update_reactions, bool):
@@ -1523,8 +1613,13 @@ class MassModel(Model):
 
         return steady_state_fluxes
 
-    def calculate_PERCs(self, at_equilibrium_default=100000,
-                        update_reactions=False, verbose=False, **kwargs):
+    def calculate_PERCs(
+        self,
+        at_equilibrium_default=100000,
+        update_reactions=False,
+        verbose=False,
+        **kwargs
+    ):
         r"""Calculate pseudo-order rate constants for reactions in the model.
 
         Pseudo-order rate constants (PERCs) are considered to be the same as
@@ -1575,18 +1670,17 @@ class MassModel(Model):
             values are the calculated PERC values.
 
         """
-        kwargs = _check_kwargs({
-            "fluxes": None,
-            "concentrations": None
-        }, kwargs)
+        kwargs = _check_kwargs({"fluxes": None, "concentrations": None}, kwargs)
         # Get the model steady state concentrations if None are provided.
         if kwargs.get("concentrations") is None:
             concentrations = self.boundary_conditions.copy()
-            concentrations.update({
-                str(m): ic for m, ic in iteritems(self.initial_conditions)})
+            concentrations.update(
+                {str(m): ic for m, ic in iteritems(self.initial_conditions)}
+            )
         else:
             concentrations = {
-                str(m): v for m, v in iteritems(kwargs.get("concentrations"))}
+                str(m): v for m, v in iteritems(kwargs.get("concentrations"))
+            }
 
         # Get the model reactions and fluxes if None are provided.
         if kwargs.get("fluxes") is None:
@@ -1594,9 +1688,11 @@ class MassModel(Model):
         else:
             fluxes = kwargs.get("fluxes")
             invalid = {
-                rxn: flux for rxn, flux in iteritems(fluxes)
+                rxn: flux
+                for rxn, flux in iteritems(fluxes)
                 if not isinstance(rxn, MassReaction)
-                or not isinstance(flux, (float, integer_types))}
+                or not isinstance(flux, (float, integer_types))
+            }
             if invalid:
                 raise TypeError("Invalid ``fluxes``: '{0!r}'".format(invalid))
 
@@ -1605,15 +1701,18 @@ class MassModel(Model):
             str(param): value
             for p_type, subdict in iteritems(self.parameters)
             for param, value in iteritems(subdict)
-            if p_type not in ["kf", "v"]}
+            if p_type not in ["kf", "v"]
+        }
         numerical_values.update(concentrations)
 
         # Function to calculate the solution
         def calculate_sol(flux, rate_equation, perc):
-            sol = sym.solveset(sym.Eq(flux, rate_equation),
-                               perc, domain=sym.S.Reals)
-            if isinstance(sol, type(sym.S.Reals)) or sol.is_empty \
-               or next(iter(sol)) == 0:
+            sol = sym.solveset(sym.Eq(flux, rate_equation), perc, domain=sym.S.Reals)
+            if (
+                isinstance(sol, type(sym.S.Reals))
+                or sol.is_empty
+                or next(iter(sol)) == 0
+            ):
                 sol = float(at_equilibrium_default)
             else:
                 sol = float(next(iter(sol)))
@@ -1625,26 +1724,29 @@ class MassModel(Model):
         for reaction, flux in iteritems(fluxes):
             rate_eq = strip_time(reaction.rate)
             if reaction.kf_str not in str(rate_eq):
-                msg = "Skipping reaction {0}, no PERC in rate".format(
-                    reaction.id)
+                msg = "Skipping reaction {0}, no PERC in rate".format(reaction.id)
                 LOGGER.info(msg)
                 if verbose:
                     print(msg)
                 continue
 
             # Get arguments
-            args = [a for a in list(rate_eq.atoms(sym.Symbol))
-                    if str(a) != reaction.kf_str]
+            args = [
+                a for a in list(rate_eq.atoms(sym.Symbol)) if str(a) != reaction.kf_str
+            ]
 
             # Get numerical values for arguments
-            vals = {a: numerical_values[str(a)] for a in args
-                    if str(a) in numerical_values}
+            vals = {
+                a: numerical_values[str(a)] for a in args if str(a) in numerical_values
+            }
 
             if len(args) != len(vals):
                 warnings.warn(
                     "Cannot calculate the PERC for reaction '{0}' missing "
                     "values for {1!r}.".format(
-                        reaction.id, [str(a) for a in args if a not in vals]))
+                        reaction.id, [str(a) for a in args if a not in vals]
+                    )
+                )
                 continue
 
             # Substitute values into rate equation
@@ -1657,9 +1759,14 @@ class MassModel(Model):
 
         return percs_dict
 
-    def build_model_from_string(self, model_str, verbose=True,
-                                reaction_split=";", reaction_id_split=":",
-                                **kwargs):
+    def build_model_from_string(
+        self,
+        model_str,
+        verbose=True,
+        reaction_split=";",
+        reaction_id_split=":",
+        **kwargs
+    ):
         """Create a :class:`MassModel` from strings of reaction equations.
 
         Accepted ``kwargs`` are passed to the underlying function for reaction
@@ -1716,9 +1823,11 @@ class MassModel(Model):
 
         """
         # Use the reaction split arguments to get the reactions and strip them
-        reaction_list = [reaction_str.strip()
-                         for reaction_str in model_str.split(reaction_split)
-                         if reaction_str.strip()]
+        reaction_list = [
+            reaction_str.strip()
+            for reaction_str in model_str.split(reaction_split)
+            if reaction_str.strip()
+        ]
 
         # Iterate through reaction strings
         for orig_reaction_str in reaction_list:
@@ -1726,14 +1835,16 @@ class MassModel(Model):
             split = orig_reaction_str.split(reaction_id_split)
             try:
                 if len(split) != 2:
-                    raise ValueError("Could not parse '{0}' for the reaction "
-                                     "ID and formula (equation).".format(
-                                         orig_reaction_str))
+                    raise ValueError(
+                        "Could not parse '{0}' for the reaction "
+                        "ID and formula (equation).".format(orig_reaction_str)
+                    )
                 reaction_id, reaction_str = (s.strip() for s in split)
                 # Cannot build reaction without an ID
                 if not reaction_id:
-                    raise ValueError("No reaction ID found in '{0}'"
-                                     .format(orig_reaction_str))
+                    raise ValueError(
+                        "No reaction ID found in '{0}'".format(orig_reaction_str)
+                    )
                 # Create a new reaction if one does not already exist.
                 try:
                     reaction = self.reactions.get_by_id(reaction_id)
@@ -1744,12 +1855,14 @@ class MassModel(Model):
                 self.add_reactions(reaction)
                 # Build the reaction from the reaction string
                 reaction.build_reaction_from_string(
-                    reaction_str, verbose=verbose, **kwargs)
+                    reaction_str, verbose=verbose, **kwargs
+                )
             except ValueError as e:
                 # Raise warnings for reactions that could not be built.
                 warnings.warn(
                     "Failed to build reaction '{0}' due to the following:\n"
-                    "{1}".format(orig_reaction_str, str(e)))
+                    "{1}".format(orig_reaction_str, str(e))
+                )
                 continue
         # Ensure all pointers are updated.
         self.repair(rebuild_index=True, rebuild_relationships=True)
@@ -1799,8 +1912,7 @@ class MassModel(Model):
 
         for key, value in iteritems(parameters):
             if not isinstance(key, string_types):
-                raise TypeError(
-                    "Keys must be strings. '{0}' not a string.".format(key))
+                raise TypeError("Keys must be strings. '{0}' not a string.".format(key))
 
         for key, value in iteritems(parameters):
             # Check the parameter type
@@ -1815,8 +1927,8 @@ class MassModel(Model):
                     with warnings.catch_warnings():
                         if not verbose:
                             warnings.filterwarnings(
-                                "ignore",
-                                ".*constant for an irreversible reaction.*")
+                                "ignore", ".*constant for an irreversible reaction.*"
+                            )
                         setattr(reaction, p_type, value)
                 except (KeyError, ValueError):
                     self.custom_parameters.update({key: value})
@@ -1863,7 +1975,8 @@ class MassModel(Model):
                 if verbose:
                     warnings.warn(
                         "Cannot set initial condition for {0} due to the "
-                        "following: {1}".format(metabolite.id, str(e)))
+                        "following: {1}".format(metabolite.id, str(e))
+                    )
                 continue
 
     def update_custom_rates(self, custom_rates, custom_parameters=None):
@@ -1909,8 +2022,9 @@ class MassModel(Model):
                 self.add_custom_rate(reaction, custom_rate=custom_rate)
             except sym.SympifyError:
                 # Warn if fail
-                warnings.warn("Unable to sympify rate equation for "
-                              "'{0}'.".format(reaction.id))
+                warnings.warn(
+                    "Unable to sympify rate equation for " "'{0}'.".format(reaction.id)
+                )
 
     def has_equivalent_odes(self, right, verbose=False):
         """Determine whether :attr:`odes` between two models are equivalent.
@@ -1952,15 +2066,18 @@ class MassModel(Model):
 
         if not equivalent and verbose:
             msg_out = "{0} vs. {1}:\n".format(self.id, right.id)
-            for i, (l_dict, r_dict) in enumerate(zip(l_odes_and_rates,
-                                                     r_odes_and_rates)):
+            for i, (l_dict, r_dict) in enumerate(
+                zip(l_odes_and_rates, r_odes_and_rates)
+            ):
                 # Determine which metabolites do not exist in both models
                 missing = set(l_dict)
                 missing.symmetric_difference_update(set(r_dict))
                 # Determine which metabolites have different ODEs
                 diff_equations = set(
-                    l_key for l_key, l_value in iteritems(l_dict)
-                    if l_key in r_dict and l_value != r_dict[l_key])
+                    l_key
+                    for l_key, l_value in iteritems(l_dict)
+                    if l_key in r_dict and l_value != r_dict[l_key]
+                )
 
                 # Format and return messages for differences
                 if i == 0:
@@ -1968,8 +2085,10 @@ class MassModel(Model):
                 else:
                     msgs = ["Reactions", "rates"]
 
-                msgs = ["{0} in one model only: ".format(msgs[0]),
-                        "{0} with different {1}: ".format(*msgs)]
+                msgs = [
+                    "{0} in one model only: ".format(msgs[0]),
+                    "{0} with different {1}: ".format(*msgs),
+                ]
 
                 for item, msg in zip([missing, diff_equations], msgs):
                     if item:
@@ -2000,15 +2119,17 @@ class MassModel(Model):
         """
         # Convert Metabolites into MassMetabolites
         if self.metabolites:
-            self.metabolites = DictList([
-                MassMetabolite(metabolite) for metabolite in self.metabolites])
+            self.metabolites = DictList(
+                [MassMetabolite(metabolite) for metabolite in self.metabolites]
+            )
         # Copy genes
         if self.genes:
             self.genes = DictList([gene.copy() for gene in self.genes])
         # Convert Reactions into MassReactions
         if self.reactions:
-            self.reactions = DictList([
-                MassReaction(reaction) for reaction in self.reactions])
+            self.reactions = DictList(
+                [MassReaction(reaction) for reaction in self.reactions]
+            )
         # Convert groups containing metabolites and reactions
         # into groups containing MassMetabolites and MassReactions
         if self.groups:
@@ -2016,11 +2137,13 @@ class MassModel(Model):
                 old_members = list(group.members)
                 new_members = []
                 for member in old_members:
-                    if isinstance(member, Metabolite)\
-                       and not isinstance(member, MassMetabolite):
+                    if isinstance(member, Metabolite) and not isinstance(
+                        member, MassMetabolite
+                    ):
                         new_members.append(MassMetabolite(member))
-                    if isinstance(member, Reaction)\
-                       and not isinstance(member, MassReaction):
+                    if isinstance(member, Reaction) and not isinstance(
+                        member, MassReaction
+                    ):
                         new_members.append(MassReaction(member))
                     if not isinstance(member, (Metabolite, Reaction)):
                         new_members.append(member)
@@ -2029,8 +2152,7 @@ class MassModel(Model):
         # Ensure all objects in the model point to the MassModel
         self.__setstate__(self.__dict__)
 
-    def _mk_stoich_matrix(self, array_type=None, dtype=None,
-                          update_model=True):
+    def _mk_stoich_matrix(self, array_type=None, dtype=None, update_model=True):
         """Return the stoichiometric matrix for a given MassModel.
 
         The rows represent the chemical species and the columns represent the
@@ -2057,9 +2179,12 @@ class MassModel(Model):
 
         # Convert the matrix to the desired type
         stoich_mat = convert_matrix(
-            stoich_mat, array_type=array_type, dtype=dtype,
+            stoich_mat,
+            array_type=array_type,
+            dtype=dtype,
             row_ids=[m.id for m in self.metabolites],
-            col_ids=[r.id for r in self.reactions])
+            col_ids=[r.id for r in self.reactions],
+        )
         # Update the stored stoichiometric matrix for the model if True
         if update_model:
             self._S = stoich_mat
@@ -2076,8 +2201,11 @@ class MassModel(Model):
         This method is intended for internal use only.
 
         """
-        return {str(param): value for subdict in itervalues(self.parameters)
-                for param, value in iteritems(subdict)}
+        return {
+            str(param): value
+            for subdict in itervalues(self.parameters)
+            for param, value in iteritems(subdict)
+        }
 
     def _copy_model_metabolites(self, new_model):
         """Copy the metabolites in creating a partial "deepcopy" of model.
@@ -2095,8 +2223,9 @@ class MassModel(Model):
             new_metabolite = metabolite.__class__()
             for attr, value in iteritems(metabolite.__dict__):
                 if attr not in do_not_copy_by_ref:
-                    new_metabolite.__dict__[attr] = copy(
-                        value) if attr == "formula" else value
+                    new_metabolite.__dict__[attr] = (
+                        copy(value) if attr == "formula" else value
+                    )
             new_metabolite._model = new_model
             new_metabolites.append(new_metabolite)
 
@@ -2118,8 +2247,9 @@ class MassModel(Model):
             new_gene = gene.__class__(None)
             for attr, value in iteritems(gene.__dict__):
                 if attr not in do_not_copy_by_ref:
-                    new_gene.__dict__[attr] = copy(
-                        value) if attr == "formula" else value
+                    new_gene.__dict__[attr] = (
+                        copy(value) if attr == "formula" else value
+                    )
             new_gene._model = new_model
             new_genes.append(new_gene)
 
@@ -2218,7 +2348,8 @@ class MassModel(Model):
                     raise TypeError(
                         "The group member {!r} is unexpectedly not a "
                         "metabolite, reaction, gene, enzyme module, nor "
-                        "another group.".format(member))
+                        "another group.".format(member)
+                    )
                 new_objects.append(new_object)
             new_group.add_members(new_objects)
 
@@ -2277,18 +2408,22 @@ class MassModel(Model):
                     <td>{compartments}</td>
                 </tr>
             </table>
-        """.format(name=self.id, address='0x0%x' % id(self),
-                   dim_stoich_mat=dim_S, mat_rank=rank,
-                   num_metabolites=len(self.metabolites),
-                   num_ic=len(self.initial_conditions),
-                   num_reactions=len(self.reactions),
-                   num_genes=len(self.genes),
-                   num_enzyme_modules=len(self.enzyme_modules),
-                   num_groups=len(self.groups),
-                   objective=format_long_string(
-                       str(self.objective.expression), 100),
-                   compartments=", ".join(v if v else k for k, v in
-                                          iteritems(self.compartments)))
+        """.format(
+            name=self.id,
+            address="0x0%x" % id(self),
+            dim_stoich_mat=dim_S,
+            mat_rank=rank,
+            num_metabolites=len(self.metabolites),
+            num_ic=len(self.initial_conditions),
+            num_reactions=len(self.reactions),
+            num_genes=len(self.genes),
+            num_enzyme_modules=len(self.enzyme_modules),
+            num_groups=len(self.groups),
+            objective=format_long_string(str(self.objective.expression), 100),
+            compartments=", ".join(
+                v if v else k for k, v in iteritems(self.compartments)
+            ),
+        )
 
     def __setstate__(self, state):
         """Ensure all objects in the model point to the MassModel.

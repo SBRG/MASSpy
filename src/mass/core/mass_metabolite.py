@@ -24,16 +24,14 @@ listed below:
 import re
 from warnings import warn
 
-from cobra.core.metabolite import (
-    Metabolite, element_re, elements_and_molecular_weights)
+from cobra.core.metabolite import Metabolite, element_re, elements_and_molecular_weights
 from cobra.util.context import resettable
 from cobra.util.util import format_long_string
 
 from six import iteritems
 
 from mass.util.expressions import generate_ode
-from mass.util.util import (
-    ensure_non_negative_value, get_public_attributes_and_methods)
+from mass.util.util import ensure_non_negative_value, get_public_attributes_and_methods
 
 
 class MassMetabolite(Metabolite):
@@ -60,12 +58,23 @@ class MassMetabolite(Metabolite):
 
     """
 
-    def __init__(self, id_or_specie=None, name="", formula=None,
-                 charge=None, compartment=None, fixed=False):
+    def __init__(
+        self,
+        id_or_specie=None,
+        name="",
+        formula=None,
+        charge=None,
+        compartment=None,
+        fixed=False,
+    ):
         """Initialize the MassMetabolite."""
         super(MassMetabolite, self).__init__(
-            id=str(id_or_specie), formula=formula, name=name, charge=charge,
-            compartment=compartment)
+            id=str(id_or_specie),
+            formula=formula,
+            name=name,
+            charge=charge,
+            compartment=compartment,
+        )
         if isinstance(id_or_specie, (Metabolite, MassMetabolite)):
             # Instiantiate a new MassMetabolite with state identical to
             # the provided Metabolite/MassMetabolite object.
@@ -106,8 +115,7 @@ class MassMetabolite(Metabolite):
         if tmp_formula is None:
             return {}
         if "*" in tmp_formula:
-            warn("invalid character '*' found in formula '{0}'"
-                 .format(self.formula))
+            warn("invalid character '*' found in formula '{0}'".format(self.formula))
             tmp_formula = tmp_formula.replace("*", "")
         composition = {}
         # Identify any moieties
@@ -128,11 +136,17 @@ class MassMetabolite(Metabolite):
                     if count == int(count):
                         count = int(count)
                     else:
-                        warn("{0} is not an integer (in formula {1})"
-                             .format(count, self.formula))
+                        warn(
+                            "{0} is not an integer (in formula {1})".format(
+                                count, self.formula
+                            )
+                        )
                 except ValueError:
-                    warn("failed to parse {0} (in formula {1})"
-                         .format(count, self.formula))
+                    warn(
+                        "failed to parse {0} (in formula {1})".format(
+                            count, self.formula
+                        )
+                    )
                     return None
             if element in composition:
                 composition[element] += count
@@ -144,11 +158,13 @@ class MassMetabolite(Metabolite):
     @elements.setter
     def elements(self, elements_dict):
         """Set the formula using a ``dict`` of elements."""
+
         def stringify(element, number):
             return element if number == 1 else element + str(number)
 
-        self.formula = ''.join(stringify(e, n) for e, n in
-                               sorted(iteritems(elements_dict)))
+        self.formula = "".join(
+            stringify(e, n) for e, n in sorted(iteritems(elements_dict))
+        )
 
     @property
     def initial_condition(self):
@@ -235,15 +251,21 @@ class MassMetabolite(Metabolite):
 
         """
         # Remove moieties
-        element_dict = {k: v for k, v in iteritems(self.elements)
-                        if not (k.startswith("[") and k.endswith("]"))}
+        element_dict = {
+            k: v
+            for k, v in iteritems(self.elements)
+            if not (k.startswith("[") and k.endswith("]"))
+        }
         # Calculate formula weight
         try:
-            return sum([count * elements_and_molecular_weights[element]
-                        for element, count in sorted(iteritems(element_dict))])
+            return sum(
+                [
+                    count * elements_and_molecular_weights[element]
+                    for element, count in sorted(iteritems(element_dict))
+                ]
+            )
         except KeyError as e:
-            warn("The element {0} does not appear in the periodic table"
-                 .format(e))
+            warn("The element {0} does not appear in the periodic table".format(e))
 
     @property
     def model(self):
@@ -311,15 +333,17 @@ class MassMetabolite(Metabolite):
                 <td><strong>In {n_reactions} reaction(s)</strong></td>
                 <td>{reactions}</td>
             </tr>
-        </table>""".format(id=self.id, name=format_long_string(self.name),
-                           formula=self.formula,
-                           address='0x0%x' % id(self),
-                           compartment=self.compartment,
-                           fixed="Fixed at " if self.fixed else "",
-                           ic=self.initial_condition,
-                           n_reactions=len(self.reactions),
-                           reactions=format_long_string(
-                               ', '.join(r.id for r in self.reactions), 200))
+        </table>""".format(
+            id=self.id,
+            name=format_long_string(self.name),
+            formula=self.formula,
+            address="0x0%x" % id(self),
+            compartment=self.compartment,
+            fixed="Fixed at " if self.fixed else "",
+            ic=self.initial_condition,
+            n_reactions=len(self.reactions),
+            reactions=format_long_string(", ".join(r.id for r in self.reactions), 200),
+        )
 
     def __dir__(self):
         """Override default dir() implementation to list only public items.

@@ -67,13 +67,15 @@ class MassBaseConfiguration:
         self._irreversible_Keq = float("inf")
         self._irreversible_kr = None
         self._exclude_metabolites_from_rates = {
-            "elements": [{"H": 2, "O": 1}, {"H": 1}]}
+            "elements": [{"H": 2, "O": 1}, {"H": 1}]
+        }
         self._exclude_compartment_volumes_in_rates = True
         self._model_creator = {
             "familyName": "",
             "givenName": "",
             "organization": "",
-            "email": ""}
+            "email": "",
+        }
 
         # Model simulation options
         self._decimal_precision = None
@@ -146,7 +148,7 @@ class MassBaseConfiguration:
         if value is not None:
             if not isinstance(value, (integer_types, float)):
                 raise TypeError("Must be an int or float")
-            if value < 0.:
+            if value < 0.0:
                 raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_Keq", value)
 
@@ -178,7 +180,7 @@ class MassBaseConfiguration:
         if value is not None:
             if not isinstance(value, (integer_types, float)):
                 raise TypeError("Must be an int or float")
-            if value < 0.:
+            if value < 0.0:
                 raise ValueError("Must be a non-negative number")
         setattr(self, "_irreversible_kr", value)
 
@@ -212,14 +214,18 @@ class MassBaseConfiguration:
     @model_creator.setter
     def model_creator(self, creator_dict):
         """Set the information in the dict representing the model creator."""
-        valid = {'familyName', 'givenName', 'organization', 'email'}
+        valid = {"familyName", "givenName", "organization", "email"}
         for k, v in iteritems(creator_dict):
             if k not in valid:
-                raise ValueError("Invalid key '{0}'. Keys can only be the"
-                                 " following: {1:r}".format(k, str(valid)))
+                raise ValueError(
+                    "Invalid key '{0}'. Keys can only be the"
+                    " following: {1:r}".format(k, str(valid))
+                )
             if v is not None and not isinstance(v, string_types):
-                raise TypeError("'{0}' not a string. Values must be strings or"
-                                " None.".format(str(v)))
+                raise TypeError(
+                    "'{0}' not a string. Values must be strings or"
+                    " None.".format(str(v))
+                )
 
         self._model_creator.update(creator_dict)
 
@@ -338,7 +344,7 @@ class MassBaseConfiguration:
         """Set the default decimal precision when rounding."""
         if not isinstance(threshold, (integer_types, float)):
             raise TypeError("Must be an int or float")
-        if threshold < 0.:
+        if threshold < 0.0:
             raise ValueError("Must be a non-negative number")
         setattr(self, "_steady_state_threshold", threshold)
 
@@ -459,8 +465,7 @@ class MassBaseConfiguration:
     @property
     def shared_state(self):
         """Return a read-only ``dict`` for shared configuration attributes."""
-        return {k.lstrip("_"): v
-                for k, v in iteritems(getattr(self, "_shared_state"))}
+        return {k.lstrip("_"): v for k, v in iteritems(getattr(self, "_shared_state"))}
 
     def _repr_html_(self):
         """Return the HTML representation of the MassConfiguration.
@@ -517,15 +522,16 @@ class MassBaseConfiguration:
             </tr>
         </table>""".format(
             boundary_compartment=[
-                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
-                    self.boundary_compartment)][0],
+                "{0} ({1})".format(v, k) if v else k
+                for k, v in iteritems(self.boundary_compartment)
+            ][0],
             default_compartment=[
-                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
-                    self.default_compartment)][0],
+                "{0} ({1})".format(v, k) if v else k
+                for k, v in iteritems(self.default_compartment)
+            ][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
-            excluded_metabolites_in_rates=bool(
-                self.exclude_metabolites_from_rates),
+            excluded_metabolites_in_rates=bool(self.exclude_metabolites_from_rates),
             exclude_comp_vols=self.exclude_compartment_volumes_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
@@ -534,7 +540,8 @@ class MassBaseConfiguration:
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound,
-            processes=self.processes)
+            processes=self.processes,
+        )
 
     def __repr__(self):
         """Override default :func:`repr` for the MassConfiguration.
@@ -560,15 +567,16 @@ class MassBaseConfiguration:
         upper_bound: {upper_bound}
         processes: {processes}""".format(
             boundary_compartment=[
-                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
-                    self.boundary_compartment)][0],
+                "{0} ({1})".format(v, k) if v else k
+                for k, v in iteritems(self.boundary_compartment)
+            ][0],
             default_compartment=[
-                "{0} ({1})".format(v, k) if v else k for k, v in iteritems(
-                    self.default_compartment)][0],
+                "{0} ({1})".format(v, k) if v else k
+                for k, v in iteritems(self.default_compartment)
+            ][0],
             irreversible_Keq=self.irreversible_Keq,
             irreversible_kr=self.irreversible_kr,
-            excluded_metabolites_in_rates=bool(
-                self.exclude_metabolites_from_rates),
+            excluded_metabolites_in_rates=bool(self.exclude_metabolites_from_rates),
             exclude_comp_vols=self.exclude_compartment_volumes_in_rates,
             model_creator=bool(any(itervalues(self.model_creator))),
             decimal_precision=self.decimal_precision,
@@ -577,11 +585,15 @@ class MassBaseConfiguration:
             tolerance=self.tolerance,
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound,
-            processes=self.processes)
+            processes=self.processes,
+        )
 
 
 class MassConfiguration(MassBaseConfiguration, metaclass=Singleton):
     """Define the configuration to be :class:`.Singleton` based."""
 
 
-__all__ = ("MassConfiguration", "MassBaseConfiguration",)
+__all__ = (
+    "MassConfiguration",
+    "MassBaseConfiguration",
+)

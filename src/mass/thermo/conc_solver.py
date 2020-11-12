@@ -49,10 +49,12 @@ from warnings import warn
 
 from cobra.core.dictlist import DictList
 from cobra.exceptions import (
-    OPTLANG_TO_EXCEPTIONS_DICT, OptimizationError, SolverNotFound)
+    OPTLANG_TO_EXCEPTIONS_DICT,
+    OptimizationError,
+    SolverNotFound,
+)
 from cobra.util.context import get_context, resettable
-from cobra.util.solver import (
-    get_solver_name, interface_to_str, qp_solvers, solvers)
+from cobra.util.solver import get_solver_name, interface_to_str, qp_solvers, solvers
 
 import numpy as np
 
@@ -69,13 +71,22 @@ from sympy import Basic, Matrix, eye
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.thermo.conc_solution import (
-    get_concentration_solution, update_model_with_concentration_solution)
+    get_concentration_solution,
+    update_model_with_concentration_solution,
+)
 from mass.util.qcqa import (
-    get_missing_initial_conditions, get_missing_reaction_parameters,
-    get_missing_steady_state_fluxes)
+    get_missing_initial_conditions,
+    get_missing_reaction_parameters,
+    get_missing_steady_state_fluxes,
+)
 from mass.util.util import (
-    _check_kwargs, _make_logger, apply_decimal_precision, ensure_iterable,
-    ensure_non_negative_value, get_public_attributes_and_methods)
+    _check_kwargs,
+    _make_logger,
+    apply_decimal_precision,
+    ensure_iterable,
+    ensure_non_negative_value,
+    get_public_attributes_and_methods,
+)
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~.conc_hr_sampler` submodule."""
@@ -177,17 +188,26 @@ class ConcSolver:
 
     """
 
-    def __init__(self, model, excluded_metabolites=None,
-                 excluded_reactions=None, equilibrium_reactions=None,
-                 constraint_buffer=0, **kwargs):
+    def __init__(
+        self,
+        model,
+        excluded_metabolites=None,
+        excluded_reactions=None,
+        equilibrium_reactions=None,
+        constraint_buffer=0,
+        **kwargs
+    ):
         """Initialize the ConcSolver."""
-        kwargs = _check_kwargs({
-            "exclude_infinite_Keqs": True,
-            "fixed_conc_bounds": [],
-            "fixed_Keq_bounds": [],
-            "decimal_precision": False,
-            "zero_value_log_substitute": 1e-10
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "exclude_infinite_Keqs": True,
+                "fixed_conc_bounds": [],
+                "fixed_Keq_bounds": [],
+                "decimal_precision": False,
+                "zero_value_log_substitute": 1e-10,
+            },
+            kwargs,
+        )
         self._model = model
         model._conc_solver = self
 
@@ -206,39 +226,43 @@ class ConcSolver:
         self.constraint_buffer = ensure_non_negative_value(constraint_buffer)
 
         self._zero_value_log_substitute = ensure_non_negative_value(
-            kwargs.pop("zero_value_log_substitute"), exclude_zero=True)
+            kwargs.pop("zero_value_log_substitute"), exclude_zero=True
+        )
 
         # Try setting excluded and equilibrium attributes specified in kwargs
         if excluded_reactions is not None:
-            excluded_reactions = [getattr(r, "_id", str(r))
-                                  for r in excluded_reactions]
+            excluded_reactions = [getattr(r, "_id", str(r)) for r in excluded_reactions]
         else:
             excluded_reactions = []
-        excluded_reactions += [r.id for r in model.boundary
-                               if r.id not in excluded_reactions]
+        excluded_reactions += [
+            r.id for r in model.boundary if r.id not in excluded_reactions
+        ]
         if kwargs.pop("exclude_infinite_Keqs"):
             excluded_reactions += [
-                r.id for r in model.reactions
-                if r.Keq == float("inf") and r.id not in excluded_reactions]
+                r.id
+                for r in model.reactions
+                if r.Keq == float("inf") and r.id not in excluded_reactions
+            ]
 
         exclude_and_equilibrium = {
             "excluded_metabolites": excluded_metabolites,
             "excluded_reactions": excluded_reactions,
-            "equilibrium_reactions": equilibrium_reactions}
+            "equilibrium_reactions": equilibrium_reactions,
+        }
         for key, value in iteritems(exclude_and_equilibrium):
             try:
                 if value is not None:
                     getattr(self, "add_" + key)(value)
             except ValueError as e:
-                warn("Could not set `{0}` due to the following: {1}".format(
-                    key, str(e)))
+                warn(
+                    "Could not set `{0}` due to the following: {1}".format(key, str(e))
+                )
 
         # Ensure model has Keq parameters and initial conditions defined
         missing = self._check_for_missing_values(model)
         for key, missing_values in iteritems(missing):
             if missing_values:
-                LOGGER.warning(
-                    "Missing %s for the following: %r", key, missing_values)
+                LOGGER.warning("Missing %s for the following: %r", key, missing_values)
 
         self._initialize_solver(**kwargs)
 
@@ -281,15 +305,17 @@ class ConcSolver:
     def solver(self, value):
         """Set the attached solver of the :class:`ConcSolver`."""
         not_valid_interface = SolverNotFound(
-            '{0} is not a valid solver interface. Pick from {1}.'.format(
-                value, str(list(solvers))))
+            "{0} is not a valid solver interface. Pick from {1}.".format(
+                value, str(list(solvers))
+            )
+        )
 
         if isinstance(value, string_types):
             try:
                 interface = solvers[interface_to_str(value)]
             except KeyError:
                 raise not_valid_interface
-        elif isinstance(value, types.ModuleType) and hasattr(value, 'Model'):
+        elif isinstance(value, types.ModuleType) and hasattr(value, "Model"):
             interface = value
         elif isinstance(value, optlang.interface.Model):
             interface = value.interface
@@ -324,20 +350,23 @@ class ConcSolver:
         try:
             solver_tolerances.feasibility = value
         except AttributeError:
-            LOGGER.info("The current solver doesn't allow setting"
-                        "feasibility tolerance.")
+            LOGGER.info(
+                "The current solver doesn't allow setting" "feasibility tolerance."
+            )
 
         try:
             solver_tolerances.optimality = value
         except AttributeError:
-            LOGGER.info("The current solver doesn't allow setting"
-                        "optimality tolerance.")
+            LOGGER.info(
+                "The current solver doesn't allow setting" "optimality tolerance."
+            )
 
         try:
             solver_tolerances.integrality = value
         except AttributeError:
-            LOGGER.info("The current solver doesn't allow setting"
-                        "integrality tolerance.")
+            LOGGER.info(
+                "The current solver doesn't allow setting" "integrality tolerance."
+            )
 
         setattr(self, "_tolerance", value)
 
@@ -478,8 +507,11 @@ class ConcSolver:
         :attr:`ConcSolver.excluded_metabolites` attribute.
 
         """
-        return [m.id for m in self.model.metabolites
-                if m.id not in self.excluded_metabolites]
+        return [
+            m.id
+            for m in self.model.metabolites
+            if m.id not in self.excluded_metabolites
+        ]
 
     @property
     def included_reactions(self):
@@ -489,8 +521,9 @@ class ConcSolver:
         :attr:`ConcSolver.excluded_reactions` attribute.
 
         """
-        return [r.id for r in self.model.reactions
-                if r.id not in self.excluded_reactions]
+        return [
+            r.id for r in self.model.reactions if r.id not in self.excluded_reactions
+        ]
 
     @property
     def zero_value_log_substitute(self):
@@ -514,9 +547,14 @@ class ConcSolver:
         value = ensure_non_negative_value(value, exclude_zero=True)
         setattr(self, "_zero_value_log_substitute", value)
 
-    def setup_sampling_problem(self, metabolites=None, reactions=None,
-                               conc_percent_deviation=0.2,
-                               Keq_percent_deviation=0.2, **kwargs):
+    def setup_sampling_problem(
+        self,
+        metabolites=None,
+        reactions=None,
+        conc_percent_deviation=0.2,
+        Keq_percent_deviation=0.2,
+        **kwargs
+    ):
         """Set up the solver's mathematical problem for concentraiton sampling.
 
         Notes
@@ -572,11 +610,14 @@ class ConcSolver:
                 Default is ``False``.
 
         """
-        kwargs = _check_kwargs({
-            "fixed_conc_bounds": [],
-            "fixed_Keq_bounds": [],
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "fixed_conc_bounds": [],
+                "fixed_Keq_bounds": [],
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
 
         # Get fixed variables
         fixed_conc_bounds = kwargs.pop("fixed_conc_bounds")
@@ -593,24 +634,26 @@ class ConcSolver:
                 met = metabolites.get_by_id(var.name)
                 if met.initial_condition is None:
                     bounds = (0, np.inf)
-                    LOGGER.info("No initial conditions defined for '%s', no "
-                                "variable bounds set", met.id)
+                    LOGGER.info(
+                        "No initial conditions defined for '%s', no "
+                        "variable bounds set",
+                        met.id,
+                    )
                 elif any([m in fixed_conc_bounds for m in [met, met.id]]):
                     bounds = (met.initial_condition, met.initial_condition)
                 else:
                     bounds = (conc_percent_deviation, conc_percent_deviation)
-                    bounds = _get_deviation_values(met.initial_condition,
-                                                   *bounds)
+                    bounds = _get_deviation_values(met.initial_condition, *bounds)
                 upper_def = np.inf
             elif var.name in Keq_strs:
                 # Set bounds if reaction Keq variable
                 rxn = reactions[Keq_strs.index(var.name)]
                 if rxn.Keq is None:
                     bounds = (0, np.inf)
-                    LOGGER.info("No Keq defined for '%s', no variable bounds "
-                                "set", rxn.id)
-                elif any([r in fixed_Keq_bounds
-                          for r in [rxn, rxn.id, rxn.Keq_str]]):
+                    LOGGER.info(
+                        "No Keq defined for '%s', no variable bounds " "set", rxn.id
+                    )
+                elif any([r in fixed_Keq_bounds for r in [rxn, rxn.id, rxn.Keq_str]]):
                     bounds = (rxn.Keq, rxn.Keq)
                 else:
                     bounds = (Keq_percent_deviation, Keq_percent_deviation)
@@ -619,17 +662,19 @@ class ConcSolver:
             else:
                 continue
             # Get log values of bounds and set
-            bounds = _get_log_bounds(bounds, upper_def,
-                                     kwargs.get("decimal_precision"),
-                                     self.zero_value_log_substitute)
+            bounds = _get_log_bounds(
+                bounds,
+                upper_def,
+                kwargs.get("decimal_precision"),
+                self.zero_value_log_substitute,
+            )
             var.lb, var.ub = bounds
 
         # Ensure objective is zero for sampling
         self.objective = Zero
         self.problem_type = "sampling"
 
-    def setup_feasible_qp_problem(self, metabolites=None, reactions=None,
-                                  **kwargs):
+    def setup_feasible_qp_problem(self, metabolites=None, reactions=None, **kwargs):
         """Set up the solver's mathematical problem for feasible conc. QP.
 
         Notes
@@ -681,13 +726,17 @@ class ConcSolver:
             raise TypeError(
                 "Solver does not have QP capabilities. Utilize the "
                 "`ConcSolver.choose_solver` method to set a QP "
-                "capable solver.")
+                "capable solver."
+            )
 
-        kwargs = _check_kwargs({
-            "fixed_conc_bounds": [],
-            "fixed_Keq_bounds": [],
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "fixed_conc_bounds": [],
+                "fixed_Keq_bounds": [],
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
 
         # Get fixed variables
         fixed_conc_bounds = kwargs.pop("fixed_conc_bounds")
@@ -706,8 +755,11 @@ class ConcSolver:
                 # Set bounds if metabolite
                 met = metabolites.get_by_id(var.name)
                 if met.initial_condition is None:
-                    LOGGER.info("No initial conditions defined for '%s', will "
-                                "not be included in QP objective", met.id)
+                    LOGGER.info(
+                        "No initial conditions defined for '%s', will "
+                        "not be included in QP objective",
+                        met.id,
+                    )
                     continue
                 if any([m in fixed_conc_bounds for m in [met, met.id]]):
                     bounds = (met.initial_condition, met.initial_condition)
@@ -727,9 +779,12 @@ class ConcSolver:
             else:
                 continue
             # Get log values of bounds and set
-            bounds = _get_log_bounds(bounds, np.inf,
-                                     kwargs.get("decimal_precision"),
-                                     self.zero_value_log_substitute)
+            bounds = _get_log_bounds(
+                bounds,
+                np.inf,
+                kwargs.get("decimal_precision"),
+                self.zero_value_log_substitute,
+            )
             var.lb, var.ub = bounds
 
         # Set objective for feasible qp problem
@@ -865,11 +920,9 @@ class ConcSolver:
         """
         metabolites = ensure_iterable(metabolites)
         # First check whether the metabolites exist in the model
-        bad_ids = [m for m in metabolites
-                   if str(m) not in self.model.metabolites]
+        bad_ids = [m for m in metabolites if str(m) not in self.model.metabolites]
         if bad_ids:
-            raise ValueError(
-                "Invalid metabolite identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid metabolite identifiers in {0!r}".format(bad_ids))
 
         metabolites = self.model.metabolites.get_by_any(metabolites)
         # Add new metabolites to excluded list, ignoring those that exist
@@ -903,11 +956,9 @@ class ConcSolver:
         """
         metabolites = ensure_iterable(metabolites)
         # First check whether the metabolites exist in the model
-        bad_ids = [m for m in metabolites
-                   if str(m) not in self.excluded_metabolites]
+        bad_ids = [m for m in metabolites if str(m) not in self.excluded_metabolites]
         if bad_ids:
-            raise ValueError(
-                "Invalid metabolite identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid metabolite identifiers in {0!r}".format(bad_ids))
 
         metabolites = self.model.metabolites.get_by_any(metabolites)
         # Remove metabolites from excluded list
@@ -939,11 +990,11 @@ class ConcSolver:
         """
         reactions = ensure_iterable(reactions)
         # First check whether the reactions exist in the model
-        bad_ids = [r for r in reactions
-                   if getattr(r, "id", str(r)) not in self.model.reactions]
+        bad_ids = [
+            r for r in reactions if getattr(r, "id", str(r)) not in self.model.reactions
+        ]
         if bad_ids:
-            raise ValueError(
-                "Invalid reaction identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid reaction identifiers in {0!r}".format(bad_ids))
 
         reactions = self.model.reactions.get_by_any(reactions)
 
@@ -980,12 +1031,14 @@ class ConcSolver:
         """
         reactions = ensure_iterable(reactions)
         # First check whether the reactions exist in the model
-        bad_ids = [r for r in reactions
-                   if getattr(r, "id", str(r)) not in self.excluded_reactions]
+        bad_ids = [
+            r
+            for r in reactions
+            if getattr(r, "id", str(r)) not in self.excluded_reactions
+        ]
 
         if bad_ids:
-            raise ValueError(
-                "Invalid reaction identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid reaction identifiers in {0!r}".format(bad_ids))
 
         reactions = self.model.metabolites.get_by_any(reactions)
 
@@ -1017,18 +1070,20 @@ class ConcSolver:
         """
         reactions = ensure_iterable(reactions)
         # First check whether the reactions exist in the model
-        bad_ids = [r for r in reactions
-                   if getattr(r, "id", str(r)) not in self.model.reactions]
+        bad_ids = [
+            r for r in reactions if getattr(r, "id", str(r)) not in self.model.reactions
+        ]
         if bad_ids:
-            raise ValueError(
-                "Invalid reaction identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid reaction identifiers in {0!r}".format(bad_ids))
 
         reactions = self.model.reactions.get_by_any(reactions)
         # Add new reactions to excluded list, ignoring those that exist
         for rxn in reactions:
             if rxn.id in self.equilibrium_reactions:
-                warn("Reaction '{0}' already exists as an equilibrium "
-                     "reaction.".format(rxn.id))
+                warn(
+                    "Reaction '{0}' already exists as an equilibrium "
+                    "reaction.".format(rxn.id)
+                )
             else:
                 self.equilibrium_reactions.append(rxn.id)
 
@@ -1057,12 +1112,13 @@ class ConcSolver:
         reactions = ensure_iterable(reactions)
         # First check whether the reactions exist in the model
         bad_ids = [
-            r for r in reactions
-            if getattr(r, "id", str(r)) not in self.equilibrium_reactions]
+            r
+            for r in reactions
+            if getattr(r, "id", str(r)) not in self.equilibrium_reactions
+        ]
 
         if bad_ids:
-            raise ValueError(
-                "Invalid reaction identifiers in {0!r}".format(bad_ids))
+            raise ValueError("Invalid reaction identifiers in {0!r}".format(bad_ids))
 
         reactions = self.model.metabolites.get_by_any(reactions)
 
@@ -1073,8 +1129,7 @@ class ConcSolver:
         if reset_problem:
             self._initialize_solver(reset_problem=reset_problem)
 
-    def optimize(self, objective_sense=None, raise_error=False,
-                 **kwargs):
+    def optimize(self, objective_sense=None, raise_error=False, **kwargs):
         """Optimize the :class:`ConcSolver`.
 
         Notes
@@ -1101,18 +1156,20 @@ class ConcSolver:
                 Default is ``False``.
 
         """
-        kwargs = _check_kwargs({
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
         original_direction = self.objective.direction
-        self.objective.direction = {
-            "maximize": "max", "minimize": "min"}.get(
-                objective_sense, original_direction)
+        self.objective.direction = {"maximize": "max", "minimize": "min"}.get(
+            objective_sense, original_direction
+        )
         # Optimize
         self.slim_optimize(**kwargs)
         # Format the solution as a ConcSolution object
-        solution = get_concentration_solution(self, raise_error=raise_error,
-                                              **kwargs)
+        solution = get_concentration_solution(self, raise_error=raise_error, **kwargs)
         # Reset the objective direction
         self.objective.direction = original_direction
         return solution
@@ -1158,21 +1215,24 @@ class ConcSolver:
             The objective value.
 
         """
-        kwargs = _check_kwargs({
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
         self.solver.optimize()
         status = self.solver.status
         if status == optlang.interface.OPTIMAL:
             value = np.exp(self.solver.objective.value)
             if kwargs.get("decimal_precision"):
                 value = apply_decimal_precision(
-                    value, MASSCONFIGURATION.decimal_precision)
+                    value, MASSCONFIGURATION.decimal_precision
+                )
             return value
 
         if error_value is None:
-            exception_cls = OPTLANG_TO_EXCEPTIONS_DICT.get(
-                status, OptimizationError)
+            exception_cls = OPTLANG_TO_EXCEPTIONS_DICT.get(status, OptimizationError)
             raise exception_cls("{0} ({1})".format(message, status))
 
         return error_value
@@ -1195,27 +1255,30 @@ class ConcSolver:
         interface = self.problem
         reverse_value = self.solver.objective.expression
         reverse_value = interface.Objective(
-            reverse_value, direction=self.solver.objective.direction,
-            sloppy=True)
+            reverse_value, direction=self.solver.objective.direction, sloppy=True
+        )
 
         if isinstance(value, dict):
             if not self.objective.is_Linear:
                 raise ValueError(
                     "Can only update non-linear objectives additively using "
                     "object of class self.problem.Objective, not {0}".format(
-                        type(value)))
+                        type(value)
+                    )
+                )
 
             if not additive:
                 self.solver.objective = interface.Objective(
-                    Zero, direction=self.solver.objective.direction)
+                    Zero, direction=self.solver.objective.direction
+                )
 
             self.solver.objective.set_linear_coefficients(value)
 
         elif isinstance(value, (Basic, optlang.interface.Objective)):
             if isinstance(value, Basic):
                 value = interface.Objective(
-                    value, direction=self.solver.objective.direction,
-                    sloppy=False)
+                    value, direction=self.solver.objective.direction, sloppy=False
+                )
             # Check whether expression only uses variables from current
             # clone the objective if not, faster than cloning without checking
             atoms = value.expression.atoms(optlang.interface.Variable)
@@ -1228,18 +1291,21 @@ class ConcSolver:
                 self.solver.objective += value.expression
         else:
             raise TypeError(
-                '{0!r} is not a valid objective for {1!r}.'.format(
-                    value, self.solver))
+                "{0!r} is not a valid objective for {1!r}.".format(value, self.solver)
+            )
 
         context = get_context(self)
         if context:
+
             def reset():
                 self.model.solver.objective = reverse_value
                 self.solver.objective.direction = reverse_value.direction
+
             context(reset)
 
-    def add_metabolite_var_to_problem(self, metabolite, lower_bound=None,
-                                      upper_bound=None, **kwargs):
+    def add_metabolite_var_to_problem(
+        self, metabolite, lower_bound=None, upper_bound=None, **kwargs
+    ):
         """Add a metabolite concentration variable to the problem.
 
         The variable in linear space is represented as::
@@ -1289,20 +1355,23 @@ class ConcSolver:
                 Default is ``False``.
 
         """
-        kwargs = _check_kwargs({
-            "concentration": metabolite.initial_condition,
-            "bound_type": "deviation",
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "concentration": metabolite.initial_condition,
+                "bound_type": "deviation",
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
         # Create and return log variable
-        variable = self._create_variable(metabolite, lower_bound, upper_bound,
-                                         **kwargs)
+        variable = self._create_variable(metabolite, lower_bound, upper_bound, **kwargs)
         self.add_cons_vars([variable])
 
         return variable
 
-    def add_reaction_Keq_var_to_problem(self, reaction, lower_bound=None,
-                                        upper_bound=None, **kwargs):
+    def add_reaction_Keq_var_to_problem(
+        self, reaction, lower_bound=None, upper_bound=None, **kwargs
+    ):
         """Add a reaction equilibrium constant variable to the problem.
 
         The variable in linear space is represented as::
@@ -1359,32 +1428,34 @@ class ConcSolver:
                 Default is ``False``.
 
         """
-        kwargs = _check_kwargs({
-            "Keq": reaction.Keq,
-            "steady_state_flux": reaction.steady_state_flux,
-            "decimal_precision": False,
-            "bound_type": "deviation",
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "Keq": reaction.Keq,
+                "steady_state_flux": reaction.steady_state_flux,
+                "decimal_precision": False,
+                "bound_type": "deviation",
+            },
+            kwargs,
+        )
 
         steady_state_flux = kwargs.pop("steady_state_flux")
         if kwargs.get("decimal_precision"):
-            steady_state_flux = round(steady_state_flux,
-                                      MASSCONFIGURATION.decimal_precision)
-        if steady_state_flux == 0\
-           and reaction.id not in self.equilibrium_reactions:
+            steady_state_flux = round(
+                steady_state_flux, MASSCONFIGURATION.decimal_precision
+            )
+        if steady_state_flux == 0 and reaction.id not in self.equilibrium_reactions:
             raise ValueError(
                 "Steady state flux is at equilibrium for reaction '{0}' and "
-                "not in `equilibrium_reactions` attribute".format(reaction.id))
+                "not in `equilibrium_reactions` attribute".format(reaction.id)
+            )
 
         # Create and return log variable
-        variable = self._create_variable(reaction, lower_bound, upper_bound,
-                                         **kwargs)
+        variable = self._create_variable(reaction, lower_bound, upper_bound, **kwargs)
         self.add_cons_vars([variable])
 
         return variable
 
-    def add_concentration_Keq_cons_to_problem(self, reaction, epsilon=None,
-                                              **kwargs):
+    def add_concentration_Keq_cons_to_problem(self, reaction, epsilon=None, **kwargs):
         """Add constraint using the reaction metabolite stoichiometry and Keq.
 
         The constraint in linear space is represented as::
@@ -1437,21 +1508,27 @@ class ConcSolver:
                 Default is ``False``.
 
         """
-        kwargs = _check_kwargs({
-            "bound_type": "deviation",
-            "steady_state_flux": reaction.steady_state_flux,
-            "decimal_precision": False,
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {
+                "bound_type": "deviation",
+                "steady_state_flux": reaction.steady_state_flux,
+                "decimal_precision": False,
+            },
+            kwargs,
+        )
 
         steady_state_flux = kwargs.get("steady_state_flux")
         if steady_state_flux is None:
-            warn("No flux defined for '{0}', no constraint "
-                 "can be made.".format(reaction.id))
+            warn(
+                "No flux defined for '{0}', no constraint "
+                "can be made.".format(reaction.id)
+            )
             return None
 
         if kwargs.get("decimal_precision"):
-            steady_state_flux = round(steady_state_flux,
-                                      MASSCONFIGURATION.decimal_precision)
+            steady_state_flux = round(
+                steady_state_flux, MASSCONFIGURATION.decimal_precision
+            )
 
         if epsilon is None:
             epsilon = self.constraint_buffer
@@ -1465,7 +1542,8 @@ class ConcSolver:
         else:
             raise ValueError(
                 "Steady state flux is at equilibrium for reaction '{0}' and "
-                "not in `equilibrium_reactions` attribute".format(reaction.id))
+                "not in `equilibrium_reactions` attribute".format(reaction.id)
+            )
 
         var_and_coeffs = {}
         for metabolite, coefficient in iteritems(reaction.metabolites):
@@ -1475,18 +1553,19 @@ class ConcSolver:
                 var = self.variables[metabolite.id]
             except KeyError:
                 var = self.add_metabolite_var_to_problem(
-                    metabolite, bound_type=kwargs.get("bound_type"))
+                    metabolite, bound_type=kwargs.get("bound_type")
+                )
             var_and_coeffs[var] = coefficient
 
         try:
             var = self.variables[reaction.Keq_str]
         except KeyError:
             var = self.add_reaction_Keq_var_to_problem(
-                reaction, bound_type=kwargs.get("bound_type"))
+                reaction, bound_type=kwargs.get("bound_type")
+            )
         var_and_coeffs[var] = -1
 
-        constraint = self.problem.Constraint(
-            Zero, name=reaction.id, lb=lb, ub=ub)
+        constraint = self.problem.Constraint(Zero, name=reaction.id, lb=lb, ub=ub)
         self.add_cons_vars([constraint], sloppy=True)
         constraint = self.constraints[reaction.id]
         constraint.set_linear_coefficients(var_and_coeffs)
@@ -1524,23 +1603,22 @@ class ConcSolver:
                 Default is ``True``.
 
         """
-        kwargs = _check_kwargs({
-            "concentrations": True,
-            "Keqs": True,
-            "inplace": True
-        }, kwargs)
+        kwargs = _check_kwargs(
+            {"concentrations": True, "Keqs": True, "inplace": True}, kwargs
+        )
         if not kwargs.get("inplace"):
             # Remove association to prevent excessive replication
             setattr(self.model, "_conc_solver", None)
             self._model = update_model_with_concentration_solution(
-                self.model, concentration_solution, **kwargs)
+                self.model, concentration_solution, **kwargs
+            )
             setattr(self.model, "_conc_solver", self)
         else:
             update_model_with_concentration_solution(
-                self.model, concentration_solution, **kwargs)
+                self.model, concentration_solution, **kwargs
+            )
 
-    def _create_variable(self, mass_obj, lower_bound, upper_bound,
-                         **kwargs):
+    def _create_variable(self, mass_obj, lower_bound, upper_bound, **kwargs):
         """Create an optlang variable for the solver.
 
         Warnings
@@ -1564,16 +1642,19 @@ class ConcSolver:
             value = kwargs.get(var_type)
             if value < 0 or value is None:
                 raise ValueError(
-                    "'{0}' {1} must be a non-negative number".format(
-                        var_id, var_type))
+                    "'{0}' {1} must be a non-negative number".format(var_id, var_type)
+                )
         # Get deviation values
         bounds = lower_bound, upper_bound
         if bound_type in {"deviation", "dev"}:
             bounds = _get_deviation_values(value, *bounds)
 
-        bounds = _get_log_bounds(bounds, upper_default,
-                                 kwargs.get("decimal_precision"),
-                                 self.zero_value_log_substitute)
+        bounds = _get_log_bounds(
+            bounds,
+            upper_default,
+            kwargs.get("decimal_precision"),
+            self.zero_value_log_substitute,
+        )
 
         # Create variable and return
         variable = self.problem.Variable(var_id, lb=bounds[0], ub=bounds[1])
@@ -1634,7 +1715,8 @@ class ConcSolver:
             LOGGER.warning(
                 "No Keq variables or reaction constraints created for the "
                 "following reactions not defined as equilibrium reactions but "
-                "with steady state fluxes of 0.:\n{0!r}".format(ignored_rxns))
+                "with steady state fluxes of 0.:\n{0!r}".format(ignored_rxns)
+            )
 
         self.problem_type = "generic"
 
@@ -1652,10 +1734,12 @@ class ConcSolver:
         else:
             # Get concentration variables for the solver,
             # filtering out those to be excluded.
-            metabolites = [m for m in ensure_iterable(metabolites)
-                           if m.id not in self.excluded_metabolites]
-        metabolites = self.model.metabolites.get_by_any(
-            self.included_metabolites)
+            metabolites = [
+                m
+                for m in ensure_iterable(metabolites)
+                if m.id not in self.excluded_metabolites
+            ]
+        metabolites = self.model.metabolites.get_by_any(self.included_metabolites)
 
         return DictList(metabolites)
 
@@ -1673,15 +1757,22 @@ class ConcSolver:
         else:
             # Get Keq variables for the solver,
             # filtering out those to be excluded.
-            reactions = [r for r in ensure_iterable(reactions)
-                         if r.id not in self.excluded_reactions]
+            reactions = [
+                r
+                for r in ensure_iterable(reactions)
+                if r.id not in self.excluded_reactions
+            ]
         reactions = self.model.reactions.get_by_any(self.included_reactions)
 
         return DictList(reactions)
 
-    def _check_for_missing_values(self, model, concentrations=True,
-                                  equilibrium_constants=True,
-                                  steady_state_fluxes=True):
+    def _check_for_missing_values(
+        self,
+        model,
+        concentrations=True,
+        equilibrium_constants=True,
+        steady_state_fluxes=True,
+    ):
         """Determine missing values that prevent setup of a problem.
 
         Warnings
@@ -1692,24 +1783,44 @@ class ConcSolver:
         missing = {}
         if concentrations:
             missing["concentrations"] = [
-                m.id for m in get_missing_initial_conditions(
-                    model, metabolite_list=[
-                        met for met in model.metabolites
-                        if met.id not in self.excluded_metabolites])]
+                m.id
+                for m in get_missing_initial_conditions(
+                    model,
+                    metabolite_list=[
+                        met
+                        for met in model.metabolites
+                        if met.id not in self.excluded_metabolites
+                    ],
+                )
+            ]
         if equilibrium_constants:
             missing["equilibrium constants"] = [
-                r.id for r, v in iteritems(get_missing_reaction_parameters(
-                    model, reaction_list=[
-                        rxn for rxn in model.reactions
-                        if rxn.id not in self.excluded_reactions]))
-                if "Keq" in v]
+                r.id
+                for r, v in iteritems(
+                    get_missing_reaction_parameters(
+                        model,
+                        reaction_list=[
+                            rxn
+                            for rxn in model.reactions
+                            if rxn.id not in self.excluded_reactions
+                        ],
+                    )
+                )
+                if "Keq" in v
+            ]
 
         if steady_state_fluxes:
             missing["steady state fluxes"] = [
-                r.id for r in get_missing_steady_state_fluxes(
-                    model, reaction_list=[
-                        rxn for rxn in model.reactions
-                        if rxn.id not in self.excluded_reactions])]
+                r.id
+                for r in get_missing_steady_state_fluxes(
+                    model,
+                    reaction_list=[
+                        rxn
+                        for rxn in model.reactions
+                        if rxn.id not in self.excluded_reactions
+                    ],
+                )
+            ]
 
         return missing
 
@@ -1731,8 +1842,7 @@ class ConcSolver:
         This method is intended for internal use only.
 
         """
-        return "<%s %s at 0x%x>" % (
-            self.__class__.__name__, self.model.id, id(self))
+        return "<%s %s at 0x%x>" % (self.__class__.__name__, self.model.id, id(self))
 
     def __enter__(self):
         """Record all future changes, undoing them when __exit__ is called.
@@ -1755,8 +1865,9 @@ class ConcSolver:
         self.model.__exit__(type, value, traceback)
 
 
-def concentration_constraint_matricies(concentration_solver,
-                                       array_type="dense", zero_tol=1e-6):
+def concentration_constraint_matricies(
+    concentration_solver, array_type="dense", zero_tol=1e-6
+):
     """Create a matrix representation of the problem.
 
     This is used for alternative solution approaches that do not use optlang.
@@ -1800,25 +1911,37 @@ def concentration_constraint_matricies(concentration_solver,
     """
     try:
         matrix_constructor = {
-            "dense": np.array, "dok": dok_matrix, "lil": lil_matrix,
-            "DataFrame": pd.DataFrame, "symbolic": Matrix
+            "dense": np.array,
+            "dok": dok_matrix,
+            "lil": lil_matrix,
+            "DataFrame": pd.DataFrame,
+            "symbolic": Matrix,
         }[array_type]
     except KeyError as e:
         raise ValueError("Unrecognized `array_type` '{0}'.".format(str(e)))
 
-    problem = namedtuple("Problem",
-                         ["equalities", "b", "inequalities", "bounds",
-                          "variable_fixed", "variable_bounds"])
+    problem = namedtuple(
+        "Problem",
+        [
+            "equalities",
+            "b",
+            "inequalities",
+            "bounds",
+            "variable_fixed",
+            "variable_bounds",
+        ],
+    )
     equality_rows = []
     b = []
     inequality_rows = []
     inequality_bounds = []
 
     for constraint in concentration_solver.constraints:
-        bounds = [-np.inf if constraint.lb is None else constraint.lb,
-                  np.inf if constraint.ub is None else constraint.ub]
-        coefs = constraint.get_linear_coefficients(
-            concentration_solver.variables)
+        bounds = [
+            -np.inf if constraint.lb is None else constraint.lb,
+            np.inf if constraint.ub is None else constraint.ub,
+        ]
+        coefs = constraint.get_linear_coefficients(concentration_solver.variables)
         coefs = [coefs[v] for v in concentration_solver.variables]
         if (bounds[-1] - bounds[0]) < zero_tol:
             b.append(bounds[0] if abs(bounds[0]) > zero_tol else 0.0)
@@ -1827,8 +1950,7 @@ def concentration_constraint_matricies(concentration_solver,
             inequality_rows.append(coefs)
             inequality_bounds.append(bounds)
 
-    var_bounds = np.array([
-        [v.lb, v.ub] for v in concentration_solver.variables])
+    var_bounds = np.array([[v.lb, v.ub] for v in concentration_solver.variables])
     fixed = var_bounds[:, 1] - var_bounds[:, 0] < zero_tol
 
     return problem(
@@ -1837,7 +1959,8 @@ def concentration_constraint_matricies(concentration_solver,
         inequalities=matrix_constructor(inequality_rows),
         bounds=matrix_constructor(inequality_bounds),
         variable_fixed=np.array(fixed),
-        variable_bounds=matrix_constructor(var_bounds))
+        variable_bounds=matrix_constructor(var_bounds),
+    )
 
 
 def _validate_bound_type(bound_type):
@@ -1855,8 +1978,7 @@ def _validate_bound_type(bound_type):
     return bound_type
 
 
-def _validate_bounds(lower_bound, upper_bound, prefix="", suffix="",
-                     exclude_zero=True):
+def _validate_bounds(lower_bound, upper_bound, prefix="", suffix="", exclude_zero=True):
     """Valdiate the bound value input.
 
     Warnings
@@ -1869,8 +1991,9 @@ def _validate_bounds(lower_bound, upper_bound, prefix="", suffix="",
         try:
             value = ensure_non_negative_value(value, exclude_zero=exclude_zero)
         except (ValueError, TypeError) as e:
-            raise e.__class__("The {1}bounds{2} {0}.".format(
-                str(e).lower(), prefix, suffix))
+            raise e.__class__(
+                "The {1}bounds{2} {0}.".format(str(e).lower(), prefix, suffix)
+            )
 
     return lower_bound, upper_bound
 
@@ -1891,9 +2014,9 @@ def _get_deviation_values(value, lower_bound_percent, upper_bound_percent):
     if upper_bound_percent is None:
         upper_bound_percent = MASSCONFIGURATION.percent_deviation
 
-    lower_bound, upper_bound = _validate_bounds(lower_bound_percent,
-                                                upper_bound_percent,
-                                                suffix=" percentage")
+    lower_bound, upper_bound = _validate_bounds(
+        lower_bound_percent, upper_bound_percent, suffix=" percentage"
+    )
     if value == np.inf:
         lower_bound = 0
         upper_bound = np.inf
@@ -1906,8 +2029,9 @@ def _get_deviation_values(value, lower_bound_percent, upper_bound_percent):
     return lower_bound, upper_bound
 
 
-def _get_log_bounds(bounds, upper_default, decimal_precision,
-                    zero_value_log_substitute):
+def _get_log_bounds(
+    bounds, upper_default, decimal_precision, zero_value_log_substitute
+):
     """Calculate the bound values in logspace and return them.
 
     Warnings
@@ -1916,11 +2040,12 @@ def _get_log_bounds(bounds, upper_default, decimal_precision,
 
     """
     # Set defaults for None values
-    bounds = [b if b is not None else default
-              for b, default in zip(bounds, [0, upper_default])]
+    bounds = [
+        b if b is not None else default
+        for b, default in zip(bounds, [0, upper_default])
+    ]
     # Substitute for zero values to prevent math domain error in logspace
-    bounds = [b if b != 0 else zero_value_log_substitute
-              for b in bounds]
+    bounds = [b if b != 0 else zero_value_log_substitute for b in bounds]
     # Validate bounds before taking log
     bounds = _validate_bounds(*bounds, exclude_zero=True)
     # Take log of bound values
@@ -1929,10 +2054,10 @@ def _get_log_bounds(bounds, upper_default, decimal_precision,
     if decimal_precision:
         bounds = [
             apply_decimal_precision(b, MASSCONFIGURATION.decimal_precision)
-            for b in bounds]
+            for b in bounds
+        ]
 
     return bounds
 
 
-__all__ = (
-    "ConcSolver", "concentration_constraint_matricies")
+__all__ = ("ConcSolver", "concentration_constraint_matricies")
