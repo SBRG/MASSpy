@@ -7,7 +7,6 @@ MASSpy: Modeling Dynamic Biological Processes in Python
 
 |PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| |Black|
 
-
 What is MASSpy?
 ---------------
 The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
