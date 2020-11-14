@@ -1,10 +1,13 @@
 name: Publish Docker images
 on:
   push:
-    branches:
-      - master
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - '^v[0-9]+.[0-9]+.[0-9]+$'
+
+env:
+  GHCR: ghcr.io
+  DOCKER_IMAGE: sbrg/masspy
+
 jobs:
   push-to-registries:
     name: Build and push Docker images to registries
@@ -15,19 +18,15 @@ jobs:
         id: checkout
         uses: actions/checkout@v2
       -
-        name: Prepare image tag
-        id: prep-tags
-        run: |
-          DOCKER_IMAGE="sbrg/masspy"
-          if [[ "$GITHUB_REF" == refs/tags/* ]] ; then
-            VERSION=$( echo $GITHUB_REF | sed 's/refs\/tags\/v//g' )
-          elif [[ "$GITHUB_REF" == "refs/heads/${{ github.event.repository.default_branch }}" ]] ; then
-            VERSION=latest
-          else
-            exit 1
-          fi
-          TAGS=${DOCKER_IMAGE}:${VERSION}
-          echo ::set-output name=tags::${TAGS}
+        name: Docker meta
+        id: docker-meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: |
+            ${{ env.DOCKER_IMAGE }}
+            ${{ env.GHCR }}/${{ env.DOCKER_IMAGE }}
+          tag-sha: true
+          tag-match: '[0-9]+.[0-9]+.[0-9]+'  # e.g., v{MAJOR}.{MINOR}.{PATCH}
       -
         name: Set up Docker Buildx
         id: docker-buildx-setupx
@@ -37,8 +36,16 @@ jobs:
         id: docker-login
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.SBRG_MACHINE_USERNAME_DOCKERHUB }}
+          username: ${{ secrets.SBRG_MACHINE_DOCKERHUB_USERNAME }}
           password: ${{ secrets.SBRG_MACHINE_DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        id: ghcr-login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.GHCR }}
+          username: ${{ secrets.SBRG_MACHINE_GHCR_USERNAME }}
+          password: ${{ secrets.SBRG_MACHINE_GHCR_TOKEN }}
       -
         name: Build and push image to registry
         id: docker-build-push
@@ -47,4 +54,4 @@ jobs:
           context: ./docker
           file: ./docker/Dockerfile
           push: true
-          tags: ${{ steps.prep-tags.outputs.tags }}
+          tags: ${{ steps.docker-meta.outputs.tags }}
