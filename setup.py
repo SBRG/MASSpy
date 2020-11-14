@@ -74,7 +74,7 @@ if __name__ == "__main__":
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Build Tools',
             'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: MIT,
+            'License :: OSI Approved :: MIT',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
