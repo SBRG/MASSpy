@@ -16,7 +16,6 @@ simulation of models.
 from warnings import warn
 
 import numpy as np
-
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.util import _check_kwargs

@@ -15,15 +15,13 @@ Please send a PR if you want to add something to the pre-built
 """
 from warnings import warn
 
-from cobra.core.object import Object
-
 import libsbml
-
+from cobra.core.object import Object
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
-
 from tabulate import tabulate
 
 from mass.util.dict_with_id import DictWithID
+
 
 SBML_BASE_UNIT_KINDS_DICT = DictWithID(
     id="SBML Base Unit Kinds",

@@ -47,6 +47,9 @@ from collections import namedtuple
 from functools import partial
 from warnings import warn
 
+import numpy as np
+import optlang
+import pandas as pd
 from cobra.core.dictlist import DictList
 from cobra.exceptions import (
     OPTLANG_TO_EXCEPTIONS_DICT,
@@ -55,18 +58,9 @@ from cobra.exceptions import (
 )
 from cobra.util.context import get_context, resettable
 from cobra.util.solver import get_solver_name, interface_to_str, qp_solvers, solvers
-
-import numpy as np
-
-import optlang
 from optlang.symbolics import Zero
-
-import pandas as pd
-
 from scipy.sparse import dok_matrix, lil_matrix
-
 from six import iteritems, string_types
-
 from sympy import Basic, Matrix, eye
 
 from mass.core.mass_configuration import MassConfiguration
@@ -87,6 +81,7 @@ from mass.util.util import (
     ensure_non_negative_value,
     get_public_attributes_and_methods,
 )
+
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~.conc_hr_sampler` submodule."""

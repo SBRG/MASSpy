@@ -45,13 +45,10 @@ constructing :class:`.EnzymeModule`\ s.
 from collections import OrderedDict
 from copy import copy, deepcopy
 
+import numpy as np
+import pandas as pd
 from cobra.core.dictlist import DictList
 from cobra.core.group import Group
-
-import numpy as np
-
-import pandas as pd
-
 from six import iteritems, iterkeys, itervalues
 
 from mass.util.dict_with_id import OrderedDictWithID

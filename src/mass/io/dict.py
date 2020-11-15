@@ -11,15 +11,11 @@ Converting objects into dictionaries allow for the exportation of
 from collections import OrderedDict
 from operator import attrgetter, itemgetter
 
+import numpy as np
+import pandas as pd
 from cobra.io.dict import gene_from_dict, gene_to_dict
 from cobra.util.solver import set_objective
-
-import numpy as np
-
-import pandas as pd
-
 from six import iteritems, iterkeys, string_types
-
 from sympy import Basic, sympify
 
 from mass.core.mass_metabolite import MassMetabolite
@@ -28,11 +24,12 @@ from mass.core.mass_reaction import MassReaction
 from mass.core.units import UnitDefinition
 from mass.enzyme_modules.enzyme_module import EnzymeModule
 from mass.enzyme_modules.enzyme_module_dict import (
-    EnzymeModuleDict,
     _ORDERED_ENZYMEMODULE_DICT_DEFAULTS,
+    EnzymeModuleDict,
 )
 from mass.enzyme_modules.enzyme_module_form import EnzymeModuleForm
 from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
+
 
 # Global
 _INF = float("inf")

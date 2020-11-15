@@ -83,22 +83,17 @@ models, the :class:`roadrunner.Logger` can be accessed via the
 import logging
 from warnings import warn
 
+import numpy as np
+import roadrunner
 from cobra.core.dictlist import DictList
 from cobra.core.object import Object
-
 from libsbml import writeSBMLToString
-
-import numpy as np
-
-import roadrunner
-
 from six import iteritems
-
 from sympy import Basic, Symbol, sympify
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_model import MassModel
-from mass.core.mass_solution import MassSolution, _CONC_STR, _FLUX_STR
+from mass.core.mass_solution import _CONC_STR, _FLUX_STR, MassSolution
 from mass.exceptions import MassSimulationError
 from mass.io.sbml import _model_to_sbml
 from mass.util.dict_with_id import DictWithID
@@ -110,6 +105,7 @@ from mass.util.util import (
     apply_decimal_precision,
     ensure_iterable,
 )
+
 
 # Set the logger
 MASSCONFIGURATION = MassConfiguration()

@@ -28,18 +28,15 @@ These methods include:
 import warnings
 
 import numpy as np
-
 import pandas as pd
-
+import sympy as sym
 from scipy import linalg
 from scipy.sparse import dok_matrix, lil_matrix
-
 from six import iteritems
-
-import sympy as sym
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.expressions import _mk_met_func
+
 
 _ARRAY_TYPES = ["dense", "dok", "lil", "DataFrame", "symbolic"]
 

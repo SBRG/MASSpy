@@ -24,15 +24,10 @@ created.
 from warnings import warn
 
 import matplotlib.pyplot as plt
-
-from numpy import array
-
 import pandas as pd
-
+from numpy import array
 from scipy.interpolate import interp1d
-
 from six import iteritems, iterkeys, itervalues, string_types
-
 from sympy import Symbol, lambdify, sympify
 
 from mass.core.mass_configuration import MassConfiguration
@@ -40,6 +35,7 @@ from mass.core.mass_model import MassModel
 from mass.util.dict_with_id import DictWithID
 from mass.util.util import apply_decimal_precision, ensure_iterable
 from mass.visualization import plot_tiled_phase_portraits, plot_time_profile
+
 
 # Strings of valid solution types
 _CONC_STR = "Conc"

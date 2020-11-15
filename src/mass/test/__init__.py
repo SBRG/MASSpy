@@ -14,6 +14,7 @@ maps that correspond to certain pre-defined models.
 from os import listdir
 from os.path import abspath, dirname, join
 
+
 try:
     import pytest
     import pytest_benchmark
@@ -22,6 +23,7 @@ except ImportError:
 
 from mass.io.json import load_json_model
 from mass.io.sbml import read_sbml_model
+
 
 FILE_EXTENSIONS = [".xml", ".json"]
 """list: list of recognized file extensions."""

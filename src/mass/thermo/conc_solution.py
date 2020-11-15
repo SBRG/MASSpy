@@ -6,11 +6,8 @@ Based on solution implementations in :mod:`cobra.core.solution`
 
 """
 from cobra.util.solver import check_solver_status
-
 from numpy import array, exp, nan
-
 from optlang.interface import OPTIMAL
-
 from pandas import DataFrame, Series, option_context
 
 from mass.core.mass_configuration import MassConfiguration
@@ -19,6 +16,7 @@ from mass.util.util import (
     apply_decimal_precision,
     get_public_attributes_and_methods,
 )
+
 
 MASSCONFIGURATION = MassConfiguration()
 

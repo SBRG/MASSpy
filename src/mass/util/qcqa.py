@@ -2,17 +2,15 @@
 """Module containing functions to assess the quality of a model."""
 from math import ceil, floor
 
-from cobra.util.util import format_long_string
-
-from six import iteritems, itervalues, string_types
-
 import sympy as sym
-
+from cobra.util.util import format_long_string
+from six import iteritems, itervalues, string_types
 from tabulate import tabulate
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.expressions import _mk_met_func
 from mass.util.util import _check_kwargs, ensure_iterable
+
 
 # Global
 MASSCONFIGURTION = MassConfiguration()

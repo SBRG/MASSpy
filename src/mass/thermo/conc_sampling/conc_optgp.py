@@ -6,14 +6,13 @@ Based on sampling implementations in :mod:`cobra.sampling.optgp`
 """
 from multiprocessing import Pool
 
-from cobra.sampling.hr_sampler import shared_np_array
-
 import numpy as np
-
 import pandas as pd
+from cobra.sampling.hr_sampler import shared_np_array
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.thermo.conc_sampling.conc_hr_sampler import ConcHRSampler, step
+
 
 MASSCONFIGURATION = MassConfiguration()
 

@@ -10,17 +10,16 @@ Based on sampling implementations in :mod:`cobra.sampling.hr_sampler`.
 from copy import deepcopy
 from time import time
 
+import numpy as np
 from cobra.exceptions import OptimizationError
 from cobra.sampling.hr_sampler import Problem, shared_np_array
-
-import numpy as np
-
 from optlang.interface import OPTIMAL
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.thermo.conc_solver import ConcSolver, concentration_constraint_matricies
 from mass.util.matrix import nullspace
 from mass.util.util import _make_logger, ensure_non_negative_value
+
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for :mod:`~.conc_hr_sampler` submodule."""

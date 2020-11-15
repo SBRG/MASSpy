@@ -25,9 +25,7 @@ import logging
 import warnings
 
 import numpy as np
-
 import pandas as pd
-
 from six import iteritems, string_types
 
 from mass.core.mass_model import MassModel
@@ -38,6 +36,7 @@ from mass.simulation.simulation import (
     _get_sim_values_from_model,
 )
 from mass.util.util import _check_kwargs, _log_msg, _make_logger, ensure_iterable
+
 
 # Set the logger
 LOGGER = _make_logger(__name__)

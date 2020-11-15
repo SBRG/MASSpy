@@ -16,8 +16,8 @@ jobs:
         id: checkout
         uses: actions/checkout@v2
       -
-        name: Setup Python
-        id: setup
+        name: Set up Python
+        id: set-up
         uses: actions/setup-python@v2
         with:
           python-version: 3.7

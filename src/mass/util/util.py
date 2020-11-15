@@ -5,12 +5,9 @@ import warnings
 from copy import copy
 from operator import le, lt
 
-from cobra import DictList
-
-from depinfo import print_dependencies
-
 import numpy as np
-
+from cobra import DictList
+from depinfo import print_dependencies
 from six import integer_types, iteritems, string_types
 
 

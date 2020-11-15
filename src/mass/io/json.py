@@ -29,6 +29,7 @@ from six import string_types
 
 from mass.io.dict import model_from_dict, model_to_dict
 
+
 JSON_SPEC = "1"
 
 

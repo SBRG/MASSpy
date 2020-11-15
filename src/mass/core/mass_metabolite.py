@@ -27,7 +27,6 @@ from warnings import warn
 from cobra.core.metabolite import Metabolite, element_re, elements_and_molecular_weights
 from cobra.util.context import resettable
 from cobra.util.util import format_long_string
-
 from six import iteritems
 
 from mass.util.expressions import generate_ode

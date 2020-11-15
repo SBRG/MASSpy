@@ -69,13 +69,13 @@ import re
 from collections import defaultdict
 from io import StringIO
 
+import libsbml
 from cobra.core.dictlist import DictList
 from cobra.core.gene import Gene
 from cobra.core.group import Group
 from cobra.io.sbml import (
     BOUND_MINUS_INF,
     BOUND_PLUS_INF,
-    CobraSBMLError,
     LONG_SHORT_DIRECTION,
     LOWER_BOUND_ID,
     SBO_DEFAULT_FLUX_BOUND,
@@ -83,19 +83,16 @@ from cobra.io.sbml import (
     SHORT_LONG_DIRECTION,
     UPPER_BOUND_ID,
     ZERO_BOUND_ID,
+    CobraSBMLError,
     _create_bound,
     _error_string,
-    _get_doc_from_filename as _cobra_get_doc_from_filename,
-    _parse_annotations,
-    _sbase_annotations as _cobra_sbase_annotations,
-    _sbase_notes_dict,
 )
+from cobra.io.sbml import _get_doc_from_filename as _cobra_get_doc_from_filename
+from cobra.io.sbml import _parse_annotations
+from cobra.io.sbml import _sbase_annotations as _cobra_sbase_annotations
+from cobra.io.sbml import _sbase_notes_dict
 from cobra.util.solver import linear_reaction_coefficients, set_objective
-
-import libsbml
-
 from six import integer_types, iteritems, itervalues, raise_from, string_types
-
 from sympy import Symbol, SympifyError, mathml, sympify
 
 from mass.core.mass_configuration import MassConfiguration
@@ -105,8 +102,8 @@ from mass.core.mass_reaction import MassReaction
 from mass.core.units import SBML_BASE_UNIT_KINDS_DICT, Unit, UnitDefinition
 from mass.enzyme_modules.enzyme_module import EnzymeModule
 from mass.enzyme_modules.enzyme_module_dict import (
-    EnzymeModuleDict,
     _ORDERED_ENZYMEMODULE_DICT_DEFAULTS,
+    EnzymeModuleDict,
 )
 from mass.enzyme_modules.enzyme_module_form import (
     EnzymeModuleForm,
@@ -116,6 +113,7 @@ from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.exceptions import MassSBMLError
 from mass.util.expressions import strip_time
 from mass.util.util import _check_kwargs, _make_logger
+
 
 LOGGER = _make_logger(__name__)
 """logging.Logger: Logger for the :mod:`~mass.io.sbml` submodule."""

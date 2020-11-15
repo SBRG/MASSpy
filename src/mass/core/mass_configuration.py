@@ -42,8 +42,8 @@ Notes
 from cobra.core.configuration import Configuration
 from cobra.core.singleton import Singleton
 from cobra.util.solver import interface_to_str
-
 from six import integer_types, iteritems, itervalues, string_types
+
 
 COBRA_CONFIGURATION = Configuration()
 

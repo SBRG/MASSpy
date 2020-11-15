@@ -53,15 +53,12 @@ from copy import copy, deepcopy
 from functools import partial
 from warnings import warn
 
+import numpy as np
+import sympy as sym
 from cobra.core.dictlist import DictList
 from cobra.core.group import Group
 from cobra.util.context import get_context
-
-import numpy as np
-
 from six import integer_types, iteritems, iterkeys, string_types
-
-import sympy as sym
 
 from mass.core.mass_model import MassModel
 from mass.enzyme_modules.enzyme_module_dict import EnzymeModuleDict
@@ -70,6 +67,7 @@ from mass.enzyme_modules.enzyme_module_reaction import EnzymeModuleReaction
 from mass.util.expressions import _mk_met_func, strip_time
 from mass.util.matrix import matrix_rank
 from mass.util.util import _mk_new_dictlist, ensure_iterable, ensure_non_negative_value
+
 
 _AUTOMATIC_RE = re.compile("^automatic$")
 _EQUATION_RE = re.compile("^Equation$")

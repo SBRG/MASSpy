@@ -64,7 +64,6 @@ from cobra.core.reaction import (
 )
 from cobra.util.context import get_context, resettable
 from cobra.util.util import format_long_string
-
 from six import iteritems, itervalues, string_types
 
 from mass.core.mass_configuration import MassConfiguration

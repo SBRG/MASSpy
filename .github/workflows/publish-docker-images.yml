@@ -9,7 +9,7 @@ env:
   DOCKER_IMAGE: sbrg/masspy
 
 jobs:
-  push-to-registries:
+  build-push-to-registries:
     name: Build and push Docker images to registries
     runs-on: ubuntu-latest
     steps:

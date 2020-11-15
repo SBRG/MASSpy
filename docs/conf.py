@@ -10,8 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute.
 
-import sys
 import os
+import sys
+
 
 SRC_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, SRC_PATH)
@@ -82,6 +83,7 @@ author = "Z. Haiman"
 # built documents.
 # This import has to be here.
 from mass import __version__ as release  # noqa: E402
+
 
 version = ".".join(release.split(".")[:2])
 

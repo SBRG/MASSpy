@@ -36,6 +36,8 @@ import warnings
 from copy import copy, deepcopy
 from functools import partial
 
+import numpy as np
+import sympy as sym
 from cobra.core.dictlist import DictList
 from cobra.core.gene import Gene
 from cobra.core.group import Group
@@ -46,12 +48,7 @@ from cobra.exceptions import SolverNotFound
 from cobra.util.array import create_stoichiometric_matrix
 from cobra.util.context import get_context
 from cobra.util.util import format_long_string
-
-import numpy as np
-
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
-
-import sympy as sym
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.core.mass_metabolite import MassMetabolite
@@ -65,6 +62,7 @@ from mass.util.util import (
     ensure_iterable,
     get_public_attributes_and_methods,
 )
+
 
 # Set the logger
 LOGGER = _make_logger(__name__)

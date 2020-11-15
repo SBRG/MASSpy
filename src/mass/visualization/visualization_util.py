@@ -9,27 +9,25 @@ The functions found in this module are NOT intended for direct use.
 from collections.abc import Iterable
 from warnings import warn
 
-try:
-    from cycler import cycler
 
+try:
     import matplotlib as mpl
-    from matplotlib import rcsetup as rc
     import matplotlib.pyplot as plt
+    from cycler import cycler
+    from matplotlib import rcsetup as rc
 except ImportError:
     mpl = None
     rc = None
     cycler = None
 
 import numpy as np
-
 import pandas as pd
-
 from scipy import interpolate, stats
-
 from six import integer_types, iteritems, iterkeys, itervalues, string_types
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.util import apply_decimal_precision, ensure_iterable
+
 
 MASSCONFIGURATION = MassConfiguration()
 
@@ -222,7 +220,7 @@ def _validate_ensemble_plot_observables(mass_solution_list, observable, **kwargs
     if missing_observables:
         raise ValueError(
             "The following MassSolution objects are missing the specified "
-            "observables:\n{1!r}".format([s.id for s in missing_observables])
+            "observables:\n{0!r}".format([s.id for s in missing_observables])
         )
 
     # Turn observable into a copy of the MassSolution containing only
@@ -695,7 +693,7 @@ def _map_labels_to_solutions(obs, labels, initial_values=None):
     This method is intended for internal use only.
 
     """
-    labels = [l.lstrip("_") for l in labels]
+    labels = [label.lstrip("_") for label in labels]
     if isinstance(obs, pd.DataFrame):
         obs.index = labels
     else:
@@ -1181,17 +1179,21 @@ def _get_ax_current(ax, time_points=False):
     This method is intended for internal use only.
 
     """
-    lines_with_labels = [l for l in ax.get_lines() if "_line" not in l.get_label()]
+    lines_with_labels = [
+        label for label in ax.get_lines() if "_line" not in label.get_label()
+    ]
     if time_points:
-        return [l for l in lines_with_labels if l.get_label().startswith("t=")]
+        return [
+            label for label in lines_with_labels if label.get_label().startswith("t=")
+        ]
 
     lines_with_labels = [
-        l
-        for l in lines_with_labels
+        label
+        for label in lines_with_labels
         if not (
-            l.get_label().endswith("_lb")
-            or l.get_label().endswith("_ub")
-            or l.get_label().startswith("t=")
+            label.get_label().endswith("_lb")
+            or label.get_label().endswith("_ub")
+            or label.get_label().startswith("t=")
         )
     ]
 

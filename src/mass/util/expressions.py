@@ -3,12 +3,12 @@
 import re
 from warnings import warn
 
-from six import iteritems, iterkeys, string_types
-
 import sympy as sym
+from six import iteritems, iterkeys, string_types
 from sympy.physics.vector import dynamicsymbols
 
 from mass.core.mass_configuration import MassConfiguration
+
 
 MASSCONFIGURATION = MassConfiguration()
 

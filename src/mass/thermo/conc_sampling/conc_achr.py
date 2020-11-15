@@ -5,7 +5,6 @@ Based on sampling implementations in :mod:`cobra.sampling.achr`
 
 """
 import numpy as np
-
 import pandas as pd
 
 from mass.thermo.conc_sampling.conc_hr_sampler import ConcHRSampler, step

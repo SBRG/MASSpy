@@ -5,7 +5,7 @@ MASSpy: Modeling Dynamic Biological Processes in Python
    :width: 400
    :align: center
 
-|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| |Black|
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| |Black| |Precom|
 
 What is MASSpy?
 ---------------
@@ -160,3 +160,7 @@ Indices and tables
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     :alt: Black
+
+.. |Precom| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
