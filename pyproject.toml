@@ -43,7 +43,6 @@ deps =
 
 [testenv:lint]
 description = lint code using pre-commit hook to activate isort, black, and flake8
-basepython = python3
 passenv = *
 skip_install = true
 deps =
@@ -55,7 +54,6 @@ commands =
 
 [testenv:safety]
 description = safety check installed dependencies for known security vulnerabilities.
-basepython = python3
 deps =
     safety
 commands =
@@ -64,7 +62,6 @@ commands =
 
 [testenv:docs]
 description = build sphinx documentation
-basepython = python3
 extras =
     docs
 allowlist_externals =
