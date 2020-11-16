@@ -32,7 +32,7 @@ skip_missing_interpreters = true
 [gh-actions]
 python =
     3.6: lint, safety, py36, docs
-    3.7: safety, py37
+    3.7: safety, py37, docs
 
 
 [testenv]

@@ -12,6 +12,7 @@ on:
     branches:
     - master
     - devel
+  workflow_dispatch:
 
 jobs:
   test:
