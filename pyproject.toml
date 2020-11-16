@@ -62,8 +62,7 @@ commands =
 
 [testenv:docs]
 description = build sphinx documentation
-deps =
-    pandoc
+sitepackages=true
 extras =
     docs
 allowlist_externals =
