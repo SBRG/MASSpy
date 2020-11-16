@@ -23,7 +23,6 @@ envlist = lint,
           safety,
           py36,
           py37,
-          docs
 isolated_build = true
 skip_missing_interpreters = true
 
@@ -31,8 +30,8 @@ skip_missing_interpreters = true
 
 [gh-actions]
 python =
-    3.6: lint, safety, py36, docs
-    3.7: safety, py37, docs
+    3.6: lint, safety, py36
+    3.7: safety, py37
 
 
 [testenv]
@@ -58,16 +57,5 @@ deps =
     safety
 commands =
     safety check --full-report
-
-
-[testenv:docs]
-description = build sphinx documentation
-sitepackages=true
-extras =
-    docs
-allowlist_externals =
-    make
-commands =
-    make -C {toxinidir}/docs html
 
 """
