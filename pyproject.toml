@@ -67,6 +67,7 @@ extras =
 allowlist_externals =
     make
 commands =
+    python -m pip install pandoc
     make -C {toxinidir}/docs html
 
 """
