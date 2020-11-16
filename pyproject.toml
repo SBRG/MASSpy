@@ -1,19 +1,39 @@
+title = "MASSpy TOML configuration file"
+
+################################################################################
+# Build tools configuration                                                    #
+################################################################################
+
 [build-system]
-requires = ["setuptools >= 40.9.0", "wheel"]
+requires = [
+    "setuptools >= 40.9.0",
+    "wheel"
+]
 build-backend = "setuptools.build_meta"
 
 
+################################################################################
+# Lint tools configuration                                                     #
+################################################################################
 [tool.black]
 line-length = 88
-python-version = ['py36', 'py37']
+python-version = [
+    "py36",
+    "py37"
+]
 
 
 [tool.isort]
 profile = "black"
-src_paths = ["src/mass"]
+src_paths = [
+    "src/mass"
+]
 indent = 4
 lines_after_imports = 2
 
+################################################################################
+# Testing configuration                                                        #
+################################################################################
 
 [tool.tox]
 legacy_tox_ini = """
@@ -26,8 +46,6 @@ envlist = lint,
 isolated_build = true
 skip_missing_interpreters = true
 
-
-
 [gh-actions]
 python =
     3.6: lint, safety, py36
@@ -38,6 +56,11 @@ python =
 description = run the tests with pytest under {basepython}
 deps =
     pytest
+    pytest-cov
+    pytest-raises
+    coverage[toml]
+commands =
+    pytest --cov=mass --cov-report=term
 
 
 [testenv:lint]
@@ -48,8 +71,7 @@ deps =
     pre-commit
 commands =
     pre-commit install
-    pre-commit run -a --show-diff-on-failure
-
+    pre-commit run --all-files
 
 [testenv:safety]
 description = safety check installed dependencies for known security vulnerabilities.
@@ -59,3 +81,39 @@ commands =
     safety check --full-report
 
 """
+
+################################################################################
+# Testing tools configuration                                                  #
+################################################################################
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "src/mass/test"
+]
+
+
+[tool.coverage.paths]
+source = [
+    "src/mass",
+    "*/site-packages/mass"
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+concurrency = [
+    "multiprocessing"
+]
+omit = [
+    "*/mass/test/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover", # Have to re-enable the standard pragma
+]
+precision = 2
+omit = [
+    "*/mass/test/*"
+]

@@ -5,7 +5,20 @@ repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v3.3.0
       hooks:
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-xml
       - id: check-yaml
+      - id: end-of-file-fixer
+      - id: name-tests-test
+      - id: trailing-whitespace
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: v1.7.0
+      hooks:
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
     - repo: https://github.com/pycqa/isort
       rev: 5.6.4
       hooks:
@@ -18,4 +31,3 @@ repos:
       rev: 3.8.4
       hooks:
       - id: flake8
-

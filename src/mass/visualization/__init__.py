@@ -2,7 +2,7 @@
 r"""Contains function for visualizing simulation results.
 
 This module contains the various functions for visualization of solutions
-returned in :class:`~.MassSolution`\ s after simulation of models. 
+returned in :class:`~.MassSolution`\ s after simulation of models.
 
 In general, it is recommended to pass an :class:`matplotlib.axes.Axes` instance
 into the visualization function in order to guaruntee more control over the
@@ -255,19 +255,19 @@ of the :mod:`~mass.visualiation` module.
       Default is ``None``. Not valid for :func:`~.plot_tiled_phase_portraits`
   deviation :
       ``bool`` indicating whether to plot the deviation from the initial value
-      for the observable variables. 
+      for the observable variables.
 
       Default is ``False``.
   deviation_zero_centered :
       ``bool`` indicating whether to center deviations around zero for
-      for the observable variables. 
+      for the observable variables.
 
       Default is ``False``.
       Ignored if the kwarg ``deviation=False``.
   deviation_normalization :
       ``str`` indicating how to normalize the plotted deviation values. Can be
       one of the following:
-      
+
         * 'initial' to normalize the solution by dividing by the initial value
           of the solution variable
         * 'range' to normalize the solution through dividing by the range of
@@ -314,7 +314,7 @@ of the :mod:`~mass.visualiation` module.
   annotate_time_points_labels :
       ``bool`` indicating whether to annotate the time points with their
       labels on the plot itself.
-      
+
       Default is ``False``.
   annotate_time_points_legend :
       A ``str`` representing the location of the legend, or an ``int``
@@ -431,10 +431,10 @@ of the :mod:`~mass.visualiation` module.
   xy_legend :
       ``str`` indicating where to place a legend for the ``y=x`` line.
 
-      Default is ``None``. 
+      Default is ``None``.
       Ignored if the kwarg ``xy_line=False``.
       Only valid for functions in the :mod:`~.comparison` submodule.
-  
+
 
 .. _marker:  https://matplotlib.org/api/markers_api.html
 .. _linestyles: https://matplotlib.org/gallery/lines_bars_and_markers/linestyles

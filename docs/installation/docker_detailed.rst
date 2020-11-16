@@ -11,8 +11,8 @@ Docker image::
 
     MASSpy                   # Source directory
     └── docker               # Root directory for build context
-        ├── Dockerfile       
-        ├── cplex 
+        ├── Dockerfile
+        ├── cplex
         │   ├── cplex_studio1210.linux-x86-64.bin
         │   └── cplex.install.properties
         ├── gurobi
@@ -25,7 +25,7 @@ as outlined below:
 **Dockerfile** :
     The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_ required to build the image.
 
-**cplex** : 
+**cplex** :
     Directory used to install IBM CPLEX Optimization studio 12.10
 
     - **cplex_studio1210.linux-x86-64.bin**:
@@ -33,12 +33,12 @@ as outlined below:
     - **cplex.install.properties**:
         Installer properties for CPLEX. Acecpts license agreement and sets silent install. Ignored if no installer exists in build context.
 
-**gurobi** : 
+**gurobi** :
     Directory used to install Gurobi Optimizer 9.0.3
 
-    - **gurobi.lic**: 
+    - **gurobi.lic**:
         Gurobi license file. The presence of this file triggers the Gurobi installation process.
-    - **gurobi.lic.template**: 
+    - **gurobi.lic.template**:
         `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_.
         Can be included to configure the token client license at a later point from within the container.
 
@@ -56,15 +56,15 @@ The following build-time variables can be utilized by the MASSpy Dockerfile at t
 
 **verbose**
     Integer 0 or 1 determining whether to include additional output as the image builds.
-    Can be either the value ``0`` to disabled verbosity, or ``1`` to enabled it.  
+    Can be either the value ``0`` to disabled verbosity, or ``1`` to enabled it.
     Primarily for debugging purposes. Default value is ``0``.
 
 **python_version**
     Indicates python base image to use. Must be Python 3.6+. Default is ``3.7``.
 
 **mass_version**
-    The branch or tagged version of MASSpy to use in the Docker container. Value will be passed to ``git checkout``. Must be one of the following: 
-    
+    The branch or tagged version of MASSpy to use in the Docker container. Value will be passed to ``git checkout``. Must be one of the following:
+
     * A branch on the MASSpy GitHub Repository.
     * ``{MAJOR}.{MINOR}.{PATCH}`` to use a specific version of MASSpy.
 

@@ -1,4 +1,4 @@
-Various examples of MASSpy are provided below. 
+Various examples of MASSpy are provided below.
 
 Visualization
 -------------

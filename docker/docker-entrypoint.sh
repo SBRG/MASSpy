@@ -14,8 +14,8 @@ fi
 
 # Set expected license directory
 license_dir=${HOME}/opt/licenses
-# Let user know which optimizer licenses, and by extension, 
-# which optimizers are available in container. 
+# Let user know which optimizer licenses, and by extension,
+# which optimizers are available in container.
 for solver in 'CPLEX' 'Gurobi' ; do
     case $solver in
         'CPLEX')
@@ -36,5 +36,5 @@ for solver in 'CPLEX' 'Gurobi' ; do
 if [ -e $license_dir/gurobi.lic ] ; then
     export GRB_LICENSE_FILE=$license_dir/gurobi.lic ;
 fi
-    
+
 exec "$@"

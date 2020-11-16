@@ -14,20 +14,20 @@ COBRA Repositories
 ------------------
 Links to repositories for COnstraint-Based Reconstruction and Analysis (COBRA) packages compatible with MASSpy:
 
-* **openCOBRA**: 
+* **openCOBRA**:
   `Homepage <https://opencobra.github.io/>`__
 
-* **COBRApy**: 
-  `Homepage <https://opencobra.github.io/cobrapy/>`__ | 
+* **COBRApy**:
+  `Homepage <https://opencobra.github.io/cobrapy/>`__ |
   `GitHub <https://cobrapy.readthedocs.io/en/stable/>`__ |
   `Documentation <https://cobrapy.readthedocs.io/en/stable/>`__
 
-* **Escher**: 
+* **Escher**:
   `Homepage <https://escher.github.io/>`__ |
   `GitHub <https://github.com/zakandrewking/escher/>`__ |
   `Documentation <https://escher.readthedocs.io/>`__
 
-* **Optlang**: 
+* **Optlang**:
   `GitHub <https://github.com/opencobra/optlang/>`__ |
   `Documentation <https://optlang.readthedocs.io/>`__
 
@@ -43,6 +43,6 @@ As a helpful reference, links to the documentation homepages are provided for a 
 * `Matplotlib <https://matplotlib.org/>`__
 * `pandas <https://pandas.pydata.org/>`__
 * `SymPy <https://www.sympy.org/>`__
-* `libRoadRunner <http://libroadrunner.org/>`__ 
+* `libRoadRunner <http://libroadrunner.org/>`__
 * `iPython <http://ipython.org/>`__ (`Jupyter <https://jupyter.org/>`__)
 * `Docker <https://docs.docker.com/>`__
