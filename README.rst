@@ -1,7 +1,7 @@
 MASSpy - Mass Action Stoichiometric Simulation in Python
 ========================================================
 
-|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| |Black| |Precom|
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |LIC| |RTD| |Tests| |Black| |Precom| |CodeCov|
 
 
 What is MASSpy?
@@ -114,6 +114,10 @@ by their licenses as well.
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
     :alt: MIT License
 
+.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/run-tests
+    :target: https://github.com/SBRG/MASSpy/actions?query=workflow%3A%22Run+tests+using+tox%22
+    :alt: CI-CD testing status
+
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     :alt: Black
@@ -121,3 +125,7 @@ by their licenses as well.
 .. |Precom| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
+
+.. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/SBRG/MASSpy
+    :alt: Codecov
