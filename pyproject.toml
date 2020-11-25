@@ -41,19 +41,18 @@ legacy_tox_ini = """
 minversion = 3.20
 envlist = lint,
           safety,
-          py36,
-          py37,
+          py3{6,7},
 isolated_build = true
 skip_missing_interpreters = true
 
 [gh-actions]
 python =
     3.6: lint, safety, py36
-    3.7: safety, py37
+    3.7: lint, safety, py37
 
 
 [testenv]
-description = run the tests with pytest under {basepython}
+description = run the tests with pytest under given python version
 deps =
     pytest
     pytest-cov
@@ -64,7 +63,7 @@ commands =
 
 
 [testenv:lint]
-description = lint code using pre-commit hook to activate isort, black, and flake8
+description = lint code using isort, black, and flake8 via pre-commit
 passenv = *
 skip_install = true
 deps =

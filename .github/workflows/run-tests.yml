@@ -1,4 +1,4 @@
-name: Run tests using tox
+name: CI-CD test
 
 on:
   push:

@@ -12,6 +12,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: name-tests-test
+        args: ['--django']
       - id: trailing-whitespace
     - repo: https://github.com/pre-commit/pygrep-hooks
       rev: v1.7.0
