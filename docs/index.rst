@@ -157,7 +157,7 @@ Indices and tables
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
     :alt: MIT License
 
-.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/CI-CD%20test
+.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/CI-CD%20test?label=CI-CD%20test&logo=GitHub%20Actions&style=plastic
     :target: https://github.com/SBRG/MASSpy/actions?query=workflow%3A%22CI-CD+test%22
     :alt: CI-CD testing status
 
