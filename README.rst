@@ -114,8 +114,8 @@ by their licenses as well.
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
     :alt: MIT License
 
-.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/run-tests
-    :target: https://github.com/SBRG/MASSpy/actions?query=workflow%3A%22Run+tests+using+tox%22
+.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/CI-CD%20test
+    :target: https://github.com/SBRG/MASSpy/actions?query=workflow%3A%22CI-CD+test%22
     :alt: CI-CD testing status
 
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
