@@ -1,20 +1,20 @@
 title = "MASSpy TOML configuration file"
 
-################################################################################
+##############################################################################
 # Build tools configuration                                                    #
 ################################################################################
 
 [build-system]
 requires = [
-    "setuptools >= 40.9.0",
+    "setuptools >= 46.4.0",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
 
-
 ################################################################################
 # Lint tools configuration                                                     #
 ################################################################################
+
 [tool.black]
 line-length = 88
 python-version = [
@@ -32,6 +32,41 @@ indent = 4
 lines_after_imports = 2
 
 ################################################################################
+# Testing tools configuration                                                  #
+################################################################################
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra --strict-markers"
+testpaths = [
+    "tests"
+]
+python_files = [
+    "test_*.py"
+]
+
+
+[tool.coverage.paths]
+source = [
+   "src",
+   "*/site-packages"
+]
+
+
+[tools.coverage.run]
+branch = true
+parallel = true
+source = [
+    "mass",
+]
+
+
+[tools.coverage.report]
+show_missing = true
+precision = 2
+
+
+################################################################################
 # Testing configuration                                                        #
 ################################################################################
 
@@ -39,80 +74,78 @@ lines_after_imports = 2
 legacy_tox_ini = """
 [tox]
 minversion = 3.20
-envlist = lint,
-          safety,
-          py3{6,7},
+envlist =
+    clean,
+    lint,
+    safety,
+    py3{6,7}-{cover,nocov},
+    report
 isolated_build = true
 skip_missing_interpreters = true
 
 [gh-actions]
 python =
-    3.6: lint, safety, py36
-    3.7: lint, safety, py37
-
+    3.6: py36
+    3.7: py37
 
 [testenv]
-description = run the tests with pytest under given python version
+description = Run tests under {basepython}.
+setenv =
+    PYTHONPATH={toxinidir}/tests
+    PYTHONUNBUFFERED=yes
+usedevelop =
+    cover: true
+    nocov: false
 deps =
     pytest
-    pytest-cov
-    pytest-raises
+    cover: pytest-cov
+    cover: pytest-xdist
+    cover: coverage[toml]
+depends =
+    py3{6,7}-{cover}: clean
+    py3{6,7}-{nocov}: py3{6,7}-{cover}
+    report: py3{6,7}-{cover}
+commands =
+    cover: {posargs:pytest --cov=mass --cov-report=term-missing --cov-append -vv}
+    nocov: {posargs:pytest -vv --ignore=src}
+
+
+[testenv:clean]
+description = Clean previous coverage reports.
+skip_install = true
+deps =
     coverage[toml]
 commands =
-    pytest --cov=mass --cov-report=term
+    coverage erase
 
 
 [testenv:lint]
-description = lint code using isort, black, and flake8 via pre-commit
-passenv = *
+description = Lint code via pre-commit hooks, finishing with isort --> black --> flake8
 skip_install = true
+passenv = *
 deps =
     pre-commit
 commands =
     pre-commit install
     pre-commit run --all-files
 
+
 [testenv:safety]
-description = safety check installed dependencies for known security vulnerabilities.
+description = Safety check installed dependencies for known security vulnerabilities.
 deps =
     safety
 commands =
     safety check --full-report
 
+
+[testenv:report]
+description = Report coverage over all test runs.
+skip_install = true
+deps =
+    coverage[toml]
+commands =
+    coverage report
+    coverage xml
+
+
 """
-
-################################################################################
-# Testing tools configuration                                                  #
-################################################################################
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-testpaths = [
-    "src/mass/test"
-]
-
-
-[tool.coverage.paths]
-source = [
-    "src/mass",
-    "*/site-packages/mass"
-]
-
-[tool.coverage.run]
-branch = true
-parallel = true
-concurrency = [
-    "multiprocessing"
-]
-omit = [
-    "*/mass/test/*"
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover", # Have to re-enable the standard pragma
-]
-precision = 2
-omit = [
-    "*/mass/test/*"
-]

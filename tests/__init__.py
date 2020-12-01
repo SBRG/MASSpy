@@ -14,13 +14,6 @@ maps that correspond to certain pre-defined models.
 from os import listdir
 from os.path import abspath, dirname, join
 
-
-try:
-    import pytest
-    import pytest_benchmark
-except ImportError:
-    pytest = None
-
 from mass.io.json import load_json_model
 from mass.io.sbml import read_sbml_model
 
@@ -85,17 +78,6 @@ def view_test_maps():
     return _get_directory_files(MAPS_DIR)
 
 
-def test_all(args=None):
-    """Alias for running all unit-tests on installed :mod:`mass`."""
-    if pytest is None:
-        raise ImportError(
-            "missing package pytest and pytest_benchmark" " required for testing"
-        )
-
-    args = args if args else []
-    return pytest.main(["--pyargs", "mass", "--benchmark-skip", "-v", "-rs"] + args)
-
-
 def _get_directory_files(directory):
     """Return a list of files in a given directory."""
     all_filenames = []
@@ -118,5 +100,4 @@ __all__ = (
     "create_test_model",
     "view_test_models",
     "view_test_maps",
-    "test_all",
 )

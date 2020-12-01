@@ -41,7 +41,7 @@ Note that this class is not intended to be used for construction of an
 :class:`.EnzymeModule`, but rather a representation of one after construction.
 See the :mod:`.enzyme_module` documentation for more information on
 constructing :class:`.EnzymeModule`\ s.
-"""  # noqa
+"""
 from collections import OrderedDict
 from copy import copy, deepcopy
 

@@ -137,3 +137,10 @@ docker/gurobi/gurobi.lic
 
 # vscode
 .vscode
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

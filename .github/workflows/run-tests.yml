@@ -6,6 +6,7 @@ on:
     - master
     - devel
     - devel-0.2.0
+    - workflows
     tags:
     - '^v[0-9]+.[0-9]+.[0-9]+$'
   pull_request:
@@ -43,7 +44,7 @@ jobs:
       -
         name: Test with tox
         run: |
-          tox -- --cov-report=xml
+          tox
       -
         name: Report coverage
         shell: bash

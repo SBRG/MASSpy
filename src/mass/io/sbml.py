@@ -61,7 +61,7 @@ Some SBML related issues are still open, please refer to the respective issue:
 * support compression on file handles (depends on solution for
   https://github.com/opencobra/cobrapy/issues/812)
 
-"""  # noqa
+"""
 
 import datetime
 import logging
@@ -1562,13 +1562,13 @@ def _read_reaction_flux_bounds_from_sbml(model, reaction, set_missing_bounds):
         # bounds in fbc
         lb_id = reaction_fbc.getLowerFluxBound()
         if lb_id:
-            p_lb = model.getParameter(lb_id)  # type: libsbml.Parameter
+            p_lb = model.getParameter(lb_id)
             if p_lb and p_lb.getConstant() and p_lb.getValue() is not None:
                 lower_bound = p_lb.getValue()
 
         ub_id = reaction_fbc.getUpperFluxBound()
         if ub_id:
-            p_ub = model.getParameter(ub_id)  # type: libsbml.Parameter
+            p_ub = model.getParameter(ub_id)
             if p_ub and p_ub.getConstant() and p_ub.getValue() is not None:
                 upper_bound = p_ub.getValue()
 

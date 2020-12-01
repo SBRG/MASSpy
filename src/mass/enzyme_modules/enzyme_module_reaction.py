@@ -23,7 +23,7 @@ Some other important points about the :class:`EnzymeModuleReaction` include:
       reactions that involve :class:`~.EnzymeModuleForm`\ (s) and are
       associated with an :class:`~.EnzymeModule`.
 
-"""  # noqa
+"""
 from collections import defaultdict
 
 from mass.core.mass_reaction import MassReaction

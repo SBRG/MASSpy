@@ -1,0 +1,13 @@
+graft docker
+graft docs
+graft src
+graft tests
+
+include *.yaml
+include *.yml
+
+include pyproject.toml
+include LICENSE
+include README.rst
+
+global-exclude *.py[cod] __pycache__

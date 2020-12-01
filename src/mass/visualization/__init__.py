@@ -439,7 +439,7 @@ of the :mod:`~mass.visualiation` module.
 .. _marker:  https://matplotlib.org/api/markers_api.html
 .. _linestyles: https://matplotlib.org/gallery/lines_bars_and_markers/linestyles
 
-"""  # noqa
+"""
 from mass.visualization.comparison import plot_comparison
 from mass.visualization.phase_portraits import (
     plot_ensemble_phase_portrait,
