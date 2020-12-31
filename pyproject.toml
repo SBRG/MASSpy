@@ -79,7 +79,8 @@ envlist =
     lint,
     safety,
     py3{6,7}-{cover,nocov},
-    report
+    report,
+    docs
 isolated_build = true
 skip_missing_interpreters = true
 
@@ -147,5 +148,13 @@ commands =
     coverage report
     coverage xml
 
+
+[testenv:docs]
+description = Test documentation build.
+extras =
+    docs
+commands =
+    make html -C {toxinidir}/docs
+    make linkcheck -C {toxinidir}/docs
 
 """
