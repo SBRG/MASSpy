@@ -1,13 +1,17 @@
+include \
+    *.yml \
+    *.yaml \
+    .bumpversion.cfg \
+    .dockerignore
+
 graft docker
-graft docs
+graft release-notes
 graft src
-graft tests
 
-include *.yaml
-include *.yml
+global-exclude \
+    *.bin \
+    *.py[cod] \
+    __pycache__
 
-include pyproject.toml
-include LICENSE
-include README.rst
-
-global-exclude *.py[cod] __pycache__
+prune docs
+prune tests

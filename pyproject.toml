@@ -1,6 +1,6 @@
 title = "MASSpy TOML configuration file"
 
-##############################################################################
+################################################################################
 # Build tools configuration                                                    #
 ################################################################################
 
@@ -37,7 +37,7 @@ lines_after_imports = 2
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --tb=short"
 testpaths = [
     "tests"
 ]
@@ -48,23 +48,22 @@ python_files = [
 
 [tool.coverage.paths]
 source = [
-   "src",
-   "*/site-packages"
+    "src"
 ]
 
 
-[tools.coverage.run]
+[tool.coverage.run]
 branch = true
 parallel = true
 source = [
-    "mass",
+    "src",
+    "tests"
 ]
 
 
-[tools.coverage.report]
+[tool.coverage.report]
 show_missing = true
 precision = 2
-
 
 ################################################################################
 # Testing configuration                                                        #
@@ -78,37 +77,32 @@ envlist =
     clean,
     lint,
     safety,
-    py3{6,7}-{cover,nocov},
-    report,
-    docs
+    py3{6,7},
+    pypi-description,
+    docs,
+    report
 isolated_build = true
 skip_missing_interpreters = true
+
 
 [gh-actions]
 python =
     3.6: py36
     3.7: py37
 
+
 [testenv]
-description = Run tests under {basepython}.
+description = Base test environment configuration.
+passenv =
+    PY_COLORS
 setenv =
     PYTHONPATH={toxinidir}/tests
     PYTHONUNBUFFERED=yes
-usedevelop =
-    cover: true
-    nocov: false
-deps =
-    pytest
-    cover: pytest-cov
-    cover: pytest-xdist
-    cover: coverage[toml]
+    PY_COLORS={env:PY_COLORS:1}
+install_command = python -m pip install --upgrade --upgrade-strategy eager {opts} {packages}
 depends =
-    py3{6,7}-{cover}: clean
-    py3{6,7}-{nocov}: py3{6,7}-{cover}
-    report: py3{6,7}-{cover}
-commands =
-    cover: {posargs:pytest --cov=mass --cov-report=term-missing --cov-append -vv}
-    nocov: {posargs:pytest -vv --ignore=src}
+    py3{6,7}: clean
+    report: py3{6,7}
 
 
 [testenv:clean]
@@ -124,11 +118,14 @@ commands =
 description = Lint code via pre-commit hooks, finishing with isort --> black --> flake8
 skip_install = true
 passenv = *
+setenv =
+    PRE_COMMIT_COLOR={env:PRE_COMMIT_COLOR:auto}
 deps =
     pre-commit
 commands =
     pre-commit install
-    pre-commit run --all-files
+    pre-commit autoupdate
+    pre-commit run --show-diff-on-failure --all-files
 
 
 [testenv:safety]
@@ -139,6 +136,35 @@ commands =
     safety check --full-report
 
 
+[testenv:py3{6,7}]
+description = Run tests under {basepython}.
+usedevelop = true
+extras = tests
+commands =
+    pytest {posargs: --cov --cov-report=term-missing --cov-append -vv}
+
+
+[testenv:pypi-description]
+description = Ensure README.rst renders on PyPI via twine.
+basepython = python3
+skip_install = true
+deps =
+    build
+    setuptools
+    twine
+    wheel
+commands =
+    python -m build -s -w -x -n {toxinidir} -o {envtmpdir}/build
+    twine check {envtmpdir}/build/*
+
+[testenv:docs]
+description = Use Sphinx to build and check the documentation.
+extras = docs
+commands =
+	sphinx-build --color -W -b html -d {envtmpdir}/doctrees docs docs/_build/html
+    sphinx-build --color -W -b linkcheck -d {envtmpdir}/doctrees docs docs/_build/html
+
+
 [testenv:report]
 description = Report coverage over all test runs.
 skip_install = true
@@ -146,15 +172,6 @@ deps =
     coverage[toml]
 commands =
     coverage report
-    coverage xml
-
-
-[testenv:docs]
-description = Test documentation build.
-extras =
-    docs
-commands =
-    make html -C {toxinidir}/docs
-    make linkcheck -C {toxinidir}/docs
+    coverage html
 
 """

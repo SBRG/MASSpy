@@ -40,7 +40,7 @@ extensions = [
 autoapi_type = "python"
 autoapi_dirs = [SRC_PATH]
 # Keep files for documentation preview in IDEs
-autoapi_keep_files = True
+autoapi_keep_files = False
 # Automated section labeling (autosectionlabel)
 autosectionlabel_prefix_document = True
 autodoc_mock_imports = [
