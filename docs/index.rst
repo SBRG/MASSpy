@@ -122,7 +122,7 @@ Not sure how to use a specific method or function? Try searching the :ref:`/auto
 
    additional/faqs.ipynb
    additional/code_repositories.rst
-   zreferences.rst
+   references.rst
 
 
 Indices and tables

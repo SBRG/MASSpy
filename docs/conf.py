@@ -17,8 +17,14 @@ import sys
 SRC_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, SRC_PATH)
 
+import sphinx_rtd_theme  # noqa: E402
+
+# This import has to be here below inserting SRC path.
+from mass import __version__ as release  # noqa: E402
+
 
 # -- General configuration ----------------------------------------------------
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -34,13 +40,13 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "autoapi.extension",
     "sphinxcontrib.bibtex",
+    "sphinx_rtd_theme",
 ]
 
 # Automated documention of Python Code (autoapi)
 autoapi_type = "python"
 autoapi_dirs = [SRC_PATH]
-# Keep files for documentation preview in IDEs
-autoapi_keep_files = False
+
 # Automated section labeling (autosectionlabel)
 autosectionlabel_prefix_document = True
 autodoc_mock_imports = [
@@ -72,6 +78,8 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 pygments_style = "sphinx"
 
+bibtex_bibfiles = ["references.bib"]
+
 # -- Project information ------------------------------------------------------
 
 project = "MASSpy"
@@ -81,27 +89,17 @@ author = "Z. Haiman"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# This import has to be here.
-from mass import __version__ as release  # noqa: E402
-
-
 version = ".".join(release.split(".")[:2])
 
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# on_rtd is whether we are on readthedocs.org,
-# this line of code grabbed from docs.readthedocs.org
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-# Only import and set the theme if we're building docs locally. Otherwise,
-# readthedocs.org uses their theme by default, so no need to specify it.
-if not on_rtd:
-    import sphinx_rtd_theme
+html_theme = "sphinx_rtd_theme"
 
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
+# Image file path for logo placed at the top of the sidebar;
+# its width should therefore not exceed 200 pixels
+html_logo = "images/masspy-logo.svg"
 # A list of paths that contain extra files not directly related to the
 # documentation, such as robots.txt or .htaccess. Relative paths are taken as
 # relative to the configuration directory. They are copied to the output

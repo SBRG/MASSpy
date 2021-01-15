@@ -2,7 +2,7 @@
 """Create or load models in `JSON <https://www.json.org/>`_ format.
 
 Models created in JSON format can also be viewed using the
-`Escher <https://escher.github.io/#/>`_ network visualization tool. See the
+`Escher <https://escher.github.io/>`_ network visualization tool. See the
 Escher `web-based tool <https://escher.readthedocs.io/en/stable/index.html>`_
 or the
 `Python package <https://escher.readthedocs.io/en/stable/escher-python.html>`_

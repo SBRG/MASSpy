@@ -1,6 +1,6 @@
 Using MASSpy with Docker
 ========================
-**MASSpy** comes in deployable `Docker <https://docs.docker.com/>`_ container, allowing for quick access
+**MASSpy** comes in deployable `Docker <https://docs.docker.com/>`__ container, allowing for quick access
 to an isolated Python environment prepackaged the MASSpy software, all within a virtual machine that can run
 in a variety of environments.
 
@@ -16,7 +16,7 @@ from a Dockerfile and a "context" containing certain files. See the secion below
 
 About Docker
     Interested in learning more about Docker? Read more about containerization and getting started with Docker in the
-    `Docker Quick Start <https://docs.docker.com/get-started/>`_ in the official Docker documentation.
+    `Docker Quick Start <https://docs.docker.com/get-started/>`__ in the official Docker documentation.
 
 
 .. _obtaining-the-image:
@@ -38,9 +38,9 @@ Downloading the image
 ~~~~~~~~~~~~~~~~~~~~~
 Images for the MASSpy software are be found in the following registries:
 
-`SBRG DockerHub <https://hub.docker.com/r/sbrg/masspy>`_ :
+`SBRG DockerHub <https://hub.docker.com/r/sbrg/masspy>`__ :
     * **Image Name**: ``sbrg/masspy``
-    * **Tags**: A full list of tags can be found `here <https://hub.docker.com/r/sbrg/masspy/tags>`_
+    * **Tags**: A full list of tags can be found `here <https://hub.docker.com/r/sbrg/masspy/tags>`__
 
 To pull the MASSpy image ``sbrg/masspy``, run the following in a shell::
 
@@ -66,7 +66,7 @@ To build the image with tag ``latest``, navigate to the ``MASSpy`` directory and
 
     docker build -t sbrg/masspy:latest ./docker
 
-**Windows Users:** Please note the following issue about `running linux containers using Docker for Windows <https://github.com/docker/for-win/issues/1340>`_.
+**Windows Users:** Please note the following issue about `running linux containers using Docker for Windows <https://github.com/docker/for-win/issues/1340>`__.
 
 
 .. _including-cplex-optimizer:
@@ -86,7 +86,7 @@ Once a CPLEX license has been obtained:
 
 .. note::
     The CPLEX installer must be for **LINUX** to be compatible with the containers built using the
-    `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_.
+    `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`__.
 
 **Build Context**: To include CPLEX, the build context must be modified to contain the ``cplex`` subdirectory as follows::
 
@@ -102,15 +102,15 @@ Once a CPLEX license has been obtained:
 
 Including Gurobi Optimizer 9.0.3
 ++++++++++++++++++++++++++++++++
-To utilize the Gurobi Optimizer in a Docker container, a `floating license <https://www.gurobi.com/documentation/9.0/quickstart_linux/setting_up_and_using_a_flo.html>`_
+To utilize the Gurobi Optimizer in a Docker container, a `floating license <https://www.gurobi.com/documentation/9.0/quickstart_linux/setting_up_and_using_a_flo.html>`__
 must be obtained first. See :ref:`gurobi-solver` for more information on obtaining a floating license.
 
 Once a floating Gurobi license has been obtained:
 
-    1. Copy the `gurobi.lic.template <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_ and
+    1. Copy the `gurobi.lic.template <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`__ and
        rename the file ``gurobi.lic``.
     2. Modify the license file according to the
-       `Gurobi documentation <https://www.gurobi.com/documentation/9.0/quickstart_linux/creating_a_token_server_cl.html>`_.
+       `Gurobi documentation <https://www.gurobi.com/documentation/9.0/quickstart_linux/creating_a_token_server_cl.html>`__.
     3. Place the license file into the ``gurobi`` directory in the build context as outlined below.
 
 **Build Context**: To include Gurobi, the build context must be modified to contain the ``gurobi`` subdirectory as follows::

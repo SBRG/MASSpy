@@ -30,7 +30,7 @@ The *IBM ILOG CPLEX Optimization Studio* (CPLEX) can be utilized through the
 
 Gurobi Optimizer
 ----------------
-The *Gurobi Optimizer* (Gurobi) is utilized through the `Gurobi Python Interface <https://www.gurobi.com/documentation/9.0/quickstart_linux/the_grb_python_interface_f.html?>`__.
+The *Gurobi Optimizer* (Gurobi) is utilized through the `Gurobi Python Interface <https://www.gurobi.com/documentation/9.0/quickstart_linux/the_grb_python_interface_f.html>`__.
 
 * To use Gurobi, a license must be obtained. Free academic licences are available.
 * To use Gurobi with Docker, a floating license is required.

@@ -23,7 +23,7 @@ The MASSpy image only requires the Dockerfile in its "context" to be built. Anyt
 as outlined below:
 
 **Dockerfile** :
-    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_ required to build the image.
+    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`__ required to build the image.
 
 **cplex** :
     Directory used to install IBM CPLEX Optimization studio 12.10
@@ -39,16 +39,16 @@ as outlined below:
     - **gurobi.lic**:
         Gurobi license file. The presence of this file triggers the Gurobi installation process.
     - **gurobi.lic.template**:
-        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_.
+        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`__.
         Can be included to configure the token client license at a later point from within the container.
 
 **docker-entrypoint.sh** :
-    A shell script for the `container entrypoint <https://docs.docker.com/engine/reference/builder/#entrypoint>`_ to replace
+    A shell script for the `container entrypoint <https://docs.docker.com/engine/reference/builder/#entrypoint>`__ to replace
     the customize the standard docker entrypoint behavior. Must be named ``docker-entrypoint.sh`` to work.
 
 Build-time variables
 --------------------
-Certain `build-time variables <https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg>`_ are set and passed as arguments
+Certain `build-time variables <https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg>`__ are set and passed as arguments
 when building the image. Build-time variables are passed to ``--build-arg`` flag in the form of ``VARIABLE=VALUE``.
 All build-args are optional and are not required to be defined at the time when the image is built.
 
@@ -90,4 +90,4 @@ and run the following build command::
         -f ./docker/Dockerfile ./
 
 The resulting image ``sbrg/masspy:local`` can then be used to build a container using ``docker run``.
-Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`_.
+Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`__.
