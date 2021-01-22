@@ -27,6 +27,8 @@ env:
   ACTIONS_SETUP_PY3: ${{ github.event.inputs.py-act || '3.7' }}
   PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade --upgrade-strategy eager' }}
   PY_COLORS: 1
+  DOCKER_IMAGE: sbrg/masspy
+
 
 jobs:
   lint:
@@ -137,7 +139,7 @@ jobs:
     needs: [test, docs]
     runs-on: ubuntu-latest
     name: Publish package to Python Packaging Index (PyPi)
-    if: github.event_name == 'push' && ( startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/tags/v') )
+    if: github.event_name == 'push' && ( startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v') )
     steps:
       -
         name: Checkout
@@ -183,3 +185,71 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.SBRG_MACHINE_PYPI_TOKEN }}
+
+  publish-docker:
+    needs: [test, docs]
+    runs-on: ubuntu-latest
+    name: Build and push Docker images to registries
+    if: github.event_name == 'push' && ( startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v') )
+    steps:
+      -
+        name: Checkout
+        id: checkout
+        uses: actions/checkout@v2
+      -
+        name: Docker meta
+        id: docker-meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: |
+            ${{ env.DOCKER_IMAGE }}
+            ghcr.io/${{ env.DOCKER_IMAGE }}
+          tag-semver: |
+            {{version}}
+            {{major}}.{{minor}}.{{patch}}
+      -
+        name: Set up Docker Buildx
+        id: docker-buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      -
+        name: Login to DockerHub
+        id: docker-login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.SBRG_MACHINE_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.SBRG_MACHINE_DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        id: ghcr-login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.SBRG_MACHINE_GHCR_USERNAME }}
+          password: ${{ secrets.SBRG_MACHINE_GHCR_TOKEN }}
+      -
+        name: Build and push image to registry
+        id: docker-build-push
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.docker-buildx.outputs.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          context: ./docker
+          file: ./docker/Dockerfile
+          push: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          tags: ${{ steps.docker-meta.outputs.tags }}
+          build-args: |
+            python_version=${{ env.ACTIONS_SETUP_PY3 }}
+      -
+        name: Image digest
+        id: img-digest
+        run: |
+          echo ${{ steps.docker-build-push.outputs.digest }}

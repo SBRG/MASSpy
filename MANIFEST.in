@@ -5,13 +5,16 @@ include \
     .dockerignore
 
 graft docker
+graft docs
 graft release-notes
 graft src
+graft tests
 
 global-exclude \
     *.bin \
     *.py[cod] \
-    __pycache__
+    __pycache__ \
+    .DS_Store \
 
-prune docs
-prune tests
+prune docs/_build
+prune docs/**/.ipynb_checkpoints
