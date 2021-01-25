@@ -5,7 +5,7 @@ MASSpy - Mass Action Stoichiometric Simulation in Python
 
 
 What is MASSpy?
---------------
+---------------
 The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
 (**MASSpy**) package contains modules for the construction, simulation, and
 analysis of kinetic models of biochemical reaction systems.

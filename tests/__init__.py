@@ -21,10 +21,7 @@ from mass.io.sbml import read_sbml_model
 FILE_EXTENSIONS = [".xml", ".json"]
 """list: list of recognized file extensions."""
 
-MASS_DIR = abspath(join(dirname(abspath(__file__)), ".."))
-"""str: The directory location of where :mod:`mass` is installed."""
-
-DATA_DIR = join(MASS_DIR, "test", "data", "")
+DATA_DIR = join(abspath(join(dirname(abspath(__file__)), "data", "")))
 """str: The directory location of the test data model files and maps."""
 
 MODELS_DIR = join(DATA_DIR, "models", "")
@@ -93,7 +90,6 @@ def _get_directory_files(directory):
 
 __all__ = (
     "FILE_EXTENSIONS",
-    "MASS_DIR",
     "DATA_DIR",
     "MODELS_DIR",
     "MAPS_DIR",
