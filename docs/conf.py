@@ -106,42 +106,12 @@ html_logo = "images/masspy-logo.svg"
 # directory. They will overwrite any existing file of the same name.
 html_extra_path = ["robots.txt"]
 
-# -- Options for LaTeX output -------------------------------------------------
-
-latex_elements = {
-    "papersize": "a4paper",
-    "preamble": r"\usepackage{amsmath,amssymb}",
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-    ("index", "MASSpy.tex", u"MASSpy Documentation", u"Z. Haiman", "manual"),
+# -- Options for linkcheck --------------------------------------------------
+linkcheck_ignore = [
+    r"^https://doi.org/+",  # Always redirects
+    r"https://portlandpress.com/biochemj/article/342/3/567/35333/+",  # 403 Client Error: Forbidden for url
 ]
 
-
-# -- Options for manual page output -------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [("index", "MASSpy", u"MASSpy Documentation", [u"Z. Haiman"], 1)]
-
-# -- Options for Texinfo output -----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        "index",
-        "MASSpy",
-        "MASSpy Documentation",
-        "Z. Haiman",
-        "MASSpy",
-        "A package for dynamic modeling of biological processes",
-        "Miscellaneous",
-    )
-]
 
 # -- NBSphinx -----------------------------------------------------------------
 

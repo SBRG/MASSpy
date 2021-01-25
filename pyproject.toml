@@ -76,9 +76,9 @@ minversion = 3.20
 envlist =
     clean,
     lint,
+    pypi-description,
     safety,
     py3{6,7},
-    pypi-description,
     docs,
     report
 isolated_build = true
@@ -158,13 +158,18 @@ commands =
     python -m build -s -w -x -n {toxinidir} -o {envtmpdir}/build
     twine check {envtmpdir}/build/*
 
+
 [testenv:docs]
 description = Use Sphinx to build and check the documentation.
 extras = docs
-changedir = docs
+allowlist_externals=make
+setenv =
+    BUILDDIR={env:DOCS_BUILDDIR:{envdir}/docs_build}
+    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color -W'}
 commands =
-	sphinx-build --color -W -d {envtmpdir}/doctrees -b html . _build/html
-    sphinx-build --color -W -d {envtmpdir}/doctrees -b linkcheck . _build/html
+    make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs html
+    make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs linkcheck
+    python -c 'import pathlib; print(r"Documentation available under file://\\{0\\}".format(pathlib.Path(r"{env:BUILDDIR}/html/index.html")))'
 
 
 [testenv:report]

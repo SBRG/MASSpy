@@ -73,6 +73,10 @@ docs/_build/
 docs/_static/
 docs/_templates/
 docs/autoapi/
+docs/**.xml
+docs/**.json
+docs/**.lp
+!docs/*gurobi.env
 
 # PyBuilder
 target/
@@ -132,7 +136,7 @@ dmypy.json
 .pyre/
 
 # Docker
-docker/cplex/cplex_studio*.linux*.bin
+docker/cplex/*.bin
 docker/gurobi/gurobi.lic
 
 # vscode
