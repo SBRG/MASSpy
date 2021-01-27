@@ -128,7 +128,7 @@ jobs:
         with:
           path: |
             ${{ env.pythonLocation }}
-            ${{ runner.pythonLocation }}
+            ${{ runner.temp }}
           key: ${{ runner.os }}-pydeps-${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}
       -
         name : Install dependencies
