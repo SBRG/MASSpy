@@ -1,0 +1,3070 @@
+{
+    "boundary_conditions": {
+        "amp_b": 1.0,
+        "glc__D_b": 1.0,
+        "h2o_b": 1.0,
+        "h_b": 8.99757e-05,
+        "lac__L_b": 1.0,
+        "o2_b": 0.0200788,
+        "pi_b": 2.5,
+        "pyr_b": 0.06
+    },
+    "compartments": {
+        "c": "Cytosol"
+    },
+    "custom_parameters": {
+        "Keq_HEX1": 313.12,
+        "Keq_HEX1_A": 0.485437,
+        "Keq_HEX1_G": 26.3158,
+        "Keq_PFK": "inf",
+        "Keq_PFK_A": 14.7059,
+        "Keq_PFK_ACT": 30.303,
+        "Keq_PFK_F": 10.0,
+        "Keq_PFK_I": 10.0,
+        "Keq_PYK": "inf",
+        "Keq_PYK_A": 2.1097,
+        "Keq_PYK_ACT": 200.0,
+        "Keq_PYK_I": 0.294985,
+        "Keq_PYK_P": 4.44444,
+        "kf_HEX1": 100000000.0,
+        "kf_HEX1_A": 9376585.0,
+        "kf_HEX1_G": 52001.0,
+        "kf_PFK": 307000.0,
+        "kf_PFK_A": 125000.0,
+        "kf_PFK_ACT": 1000000.0,
+        "kf_PFK_F": 505000.0,
+        "kf_PFK_I": 1000000.0,
+        "kf_PYK": 21500.0,
+        "kf_PYK_A": 4000000.0,
+        "kf_PYK_ACT": 1000000.0,
+        "kf_PYK_I": 1000000.0,
+        "kf_PYK_P": 4000000.0
+    },
+    "custom_rates": {
+        "HEX1_3": "kf_HEX1_G*(glc__D_c(t)*hex1_c(t) - hex1_G_c(t)/Keq_HEX1_G)",
+        "HEX1_4": "kf_HEX1_A*(atp_c(t)*hex1_c(t) - hex1_A_c(t)/Keq_HEX1_A)",
+        "HEX1_6": "kf_HEX1_A*(atp_c(t)*hex1_G_c(t) - hex1_AG_c(t)/Keq_HEX1_A)",
+        "HEX1_7": "kf_HEX1_G*(glc__D_c(t)*hex1_A_c(t) - hex1_AG_c(t)/Keq_HEX1_G)",
+        "HEX1_8": "kf_HEX1*(hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t)/Keq_HEX1)",
+        "PFK_R01": "kf_PFK_A*(atp_c(t)*pfk_R0_c(t) - pfk_R0_A_c(t)/Keq_PFK_A)",
+        "PFK_R02": "kf_PFK_F*(f6p_c(t)*pfk_R0_A_c(t) - pfk_R0_AF_c(t)/Keq_PFK_F)",
+        "PFK_R03": "kf_PFK*pfk_R0_AF_c(t)",
+        "PFK_R10": "kf_PFK_ACT*(4*amp_c(t)*pfk_R0_c(t) - pfk_R1_c(t)/Keq_PFK_ACT)",
+        "PFK_R11": "kf_PFK_A*(atp_c(t)*pfk_R1_c(t) - pfk_R1_A_c(t)/Keq_PFK_A)",
+        "PFK_R12": "kf_PFK_F*(f6p_c(t)*pfk_R1_A_c(t) - pfk_R1_AF_c(t)/Keq_PFK_F)",
+        "PFK_R13": "kf_PFK*pfk_R1_AF_c(t)",
+        "PFK_R20": "kf_PFK_ACT*(3*amp_c(t)*pfk_R1_c(t) - 2*pfk_R2_c(t)/Keq_PFK_ACT)",
+        "PFK_R21": "kf_PFK_A*(atp_c(t)*pfk_R2_c(t) - pfk_R2_A_c(t)/Keq_PFK_A)",
+        "PFK_R22": "kf_PFK_F*(f6p_c(t)*pfk_R2_A_c(t) - pfk_R2_AF_c(t)/Keq_PFK_F)",
+        "PFK_R23": "kf_PFK*pfk_R2_AF_c(t)",
+        "PFK_R30": "kf_PFK_ACT*(2*amp_c(t)*pfk_R2_c(t) - 3*pfk_R3_c(t)/Keq_PFK_ACT)",
+        "PFK_R31": "kf_PFK_A*(atp_c(t)*pfk_R3_c(t) - pfk_R3_A_c(t)/Keq_PFK_A)",
+        "PFK_R32": "kf_PFK_F*(f6p_c(t)*pfk_R3_A_c(t) - pfk_R3_AF_c(t)/Keq_PFK_F)",
+        "PFK_R33": "kf_PFK*pfk_R3_AF_c(t)",
+        "PFK_R40": "kf_PFK_ACT*(amp_c(t)*pfk_R3_c(t) - 4*pfk_R4_c(t)/Keq_PFK_ACT)",
+        "PFK_R41": "kf_PFK_A*(atp_c(t)*pfk_R4_c(t) - pfk_R4_A_c(t)/Keq_PFK_A)",
+        "PFK_R42": "kf_PFK_F*(f6p_c(t)*pfk_R4_A_c(t) - pfk_R4_AF_c(t)/Keq_PFK_F)",
+        "PFK_R43": "kf_PFK*pfk_R4_AF_c(t)",
+        "PFK_T1": "kf_PFK_I*(4*atp_c(t)*pfk_T0_c(t) - pfk_T1_c(t)/Keq_PFK_I)",
+        "PFK_T2": "kf_PFK_I*(3*atp_c(t)*pfk_T1_c(t) - 2*pfk_T2_c(t)/Keq_PFK_I)",
+        "PFK_T3": "kf_PFK_I*(2*atp_c(t)*pfk_T2_c(t) - 3*pfk_T3_c(t)/Keq_PFK_I)",
+        "PFK_T4": "kf_PFK_I*(atp_c(t)*pfk_T3_c(t) - 4*pfk_T4_c(t)/Keq_PFK_I)",
+        "PYK_R01": "kf_PYK_P*(pep_c(t)*pyk_R0_c(t) - pyk_R0_P_c(t)/Keq_PYK_P)",
+        "PYK_R02": "kf_PYK_A*(adp_c(t)*pyk_R0_c(t) - pyk_R0_A_c(t)/Keq_PYK_A)",
+        "PYK_R03": "kf_PYK_P*(pep_c(t)*pyk_R0_A_c(t) - pyk_R0_AP_c(t)/Keq_PYK_P)",
+        "PYK_R04": "kf_PYK_A*(adp_c(t)*pyk_R0_P_c(t) - pyk_R0_AP_c(t)/Keq_PYK_A)",
+        "PYK_R05": "kf_PYK*pyk_R0_AP_c(t)",
+        "PYK_R10": "kf_PYK_ACT*(4*fdp_c(t)*pyk_R0_c(t) - pyk_R1_c(t)/Keq_PYK_ACT)",
+        "PYK_R11": "kf_PYK_P*(pep_c(t)*pyk_R1_c(t) - pyk_R1_P_c(t)/Keq_PYK_P)",
+        "PYK_R12": "kf_PYK_A*(adp_c(t)*pyk_R1_c(t) - pyk_R1_A_c(t)/Keq_PYK_A)",
+        "PYK_R13": "kf_PYK_P*(pep_c(t)*pyk_R1_A_c(t) - pyk_R1_AP_c(t)/Keq_PYK_P)",
+        "PYK_R14": "kf_PYK_A*(adp_c(t)*pyk_R1_P_c(t) - pyk_R1_AP_c(t)/Keq_PYK_A)",
+        "PYK_R15": "kf_PYK*pyk_R1_AP_c(t)",
+        "PYK_R20": "kf_PYK_ACT*(3*fdp_c(t)*pyk_R1_c(t) - 2*pyk_R2_c(t)/Keq_PYK_ACT)",
+        "PYK_R21": "kf_PYK_P*(pep_c(t)*pyk_R2_c(t) - pyk_R2_P_c(t)/Keq_PYK_P)",
+        "PYK_R22": "kf_PYK_A*(adp_c(t)*pyk_R2_c(t) - pyk_R2_A_c(t)/Keq_PYK_A)",
+        "PYK_R23": "kf_PYK_P*(pep_c(t)*pyk_R2_A_c(t) - pyk_R2_AP_c(t)/Keq_PYK_P)",
+        "PYK_R24": "kf_PYK_A*(adp_c(t)*pyk_R2_P_c(t) - pyk_R2_AP_c(t)/Keq_PYK_A)",
+        "PYK_R25": "kf_PYK*pyk_R2_AP_c(t)",
+        "PYK_R30": "kf_PYK_ACT*(2*fdp_c(t)*pyk_R2_c(t) - 3*pyk_R3_c(t)/Keq_PYK_ACT)",
+        "PYK_R31": "kf_PYK_P*(pep_c(t)*pyk_R3_c(t) - pyk_R3_P_c(t)/Keq_PYK_P)",
+        "PYK_R32": "kf_PYK_A*(adp_c(t)*pyk_R3_c(t) - pyk_R3_A_c(t)/Keq_PYK_A)",
+        "PYK_R33": "kf_PYK_P*(pep_c(t)*pyk_R3_A_c(t) - pyk_R3_AP_c(t)/Keq_PYK_P)",
+        "PYK_R34": "kf_PYK_A*(adp_c(t)*pyk_R3_P_c(t) - pyk_R3_AP_c(t)/Keq_PYK_A)",
+        "PYK_R35": "kf_PYK*pyk_R3_AP_c(t)",
+        "PYK_R40": "kf_PYK_ACT*(fdp_c(t)*pyk_R3_c(t) - 4*pyk_R4_c(t)/Keq_PYK_ACT)",
+        "PYK_R41": "kf_PYK_P*(pep_c(t)*pyk_R4_c(t) - pyk_R4_P_c(t)/Keq_PYK_P)",
+        "PYK_R42": "kf_PYK_A*(adp_c(t)*pyk_R4_c(t) - pyk_R4_A_c(t)/Keq_PYK_A)",
+        "PYK_R43": "kf_PYK_P*(pep_c(t)*pyk_R4_A_c(t) - pyk_R4_AP_c(t)/Keq_PYK_P)",
+        "PYK_R44": "kf_PYK_A*(adp_c(t)*pyk_R4_P_c(t) - pyk_R4_AP_c(t)/Keq_PYK_A)",
+        "PYK_R45": "kf_PYK*pyk_R4_AP_c(t)",
+        "PYK_T1": "kf_PYK_I*(4*atp_c(t)*pyk_T0_c(t) - pyk_T1_c(t)/Keq_PYK_I)",
+        "PYK_T2": "kf_PYK_I*(3*atp_c(t)*pyk_T1_c(t) - 2*pyk_T2_c(t)/Keq_PYK_I)",
+        "PYK_T3": "kf_PYK_I*(2*atp_c(t)*pyk_T2_c(t) - 3*pyk_T3_c(t)/Keq_PYK_I)",
+        "PYK_T4": "kf_PYK_I*(atp_c(t)*pyk_T3_c(t) - 4*pyk_T4_c(t)/Keq_PYK_I)"
+    },
+    "enzyme_modules": [
+        {
+            "enzyme_concentration_total": 2.4e-05,
+            "enzyme_concentration_total_equation": "hex1_AG_c(t) + hex1_A_PI_c(t) + hex1_A_c(t) + hex1_G_CI_c(t) + hex1_G_PI_c(t) + hex1_G_c(t) + hex1_c(t)",
+            "enzyme_module_forms": [
+                "hex1_c",
+                "hex1_A_c",
+                "hex1_G_c",
+                "hex1_AG_c",
+                "hex1_G_CI_c",
+                "hex1_A_PI_c",
+                "hex1_G_PI_c"
+            ],
+            "enzyme_module_forms_categorized": {
+                "HEX1_Active": [
+                    "hex1_AG_c",
+                    "hex1_G_c",
+                    "hex1_A_c",
+                    "hex1_c"
+                ],
+                "HEX1_Inhibited": [
+                    "hex1_G_CI_c",
+                    "hex1_A_PI_c",
+                    "hex1_G_PI_c"
+                ]
+            },
+            "enzyme_module_ligands": [
+                "glc__D_c",
+                "g6p_c",
+                "_23dpg_c",
+                "atp_c",
+                "adp_c",
+                "h_c"
+            ],
+            "enzyme_module_ligands_categorized": {
+                "HEX1_cofactors": [
+                    "atp_c"
+                ],
+                "HEX1_inhibitors": [
+                    "_23dpg_c"
+                ],
+                "HEX1_products": [
+                    "g6p_c",
+                    "h_c",
+                    "adp_c"
+                ],
+                "HEX1_substrates": [
+                    "glc__D_c"
+                ]
+            },
+            "enzyme_module_reactions": [
+                "HEX1_1",
+                "HEX1_2",
+                "HEX1_3",
+                "HEX1_4",
+                "HEX1_5",
+                "HEX1_6",
+                "HEX1_7",
+                "HEX1_8"
+            ],
+            "enzyme_module_reactions_categorized": {
+                "HEX1_atp_c_binding": [
+                    "HEX1_4",
+                    "HEX1_6"
+                ],
+                "HEX1_catalyzation": [
+                    "HEX1_8"
+                ],
+                "HEX1_competitive_inhibition": [
+                    "HEX1_5"
+                ],
+                "HEX1_glc__D_c_binding": [
+                    "HEX1_3",
+                    "HEX1_7"
+                ],
+                "HEX1_product_inhibition": [
+                    "HEX1_1",
+                    "HEX1_2"
+                ]
+            },
+            "enzyme_rate": 1.12,
+            "enzyme_rate_equation": "kf_HEX1*(Keq_HEX1*hex1_AG_c(t) - adp_c(t)*g6p_c(t)*hex1_c(t))/Keq_HEX1",
+            "id": "HEX1",
+            "name": "Hexokinase (D-glucose:ATP)",
+            "subsystem": "Glycolysis"
+        },
+        {
+            "enzyme_concentration_total": 3.3e-05,
+            "enzyme_concentration_total_equation": "pfk_R0_AF_c(t) + pfk_R0_A_c(t) + pfk_R0_c(t) + pfk_R1_AF_c(t) + pfk_R1_A_c(t) + pfk_R1_c(t) + pfk_R2_AF_c(t) + pfk_R2_A_c(t) + pfk_R2_c(t) + pfk_R3_AF_c(t) + pfk_R3_A_c(t) + pfk_R3_c(t) + pfk_R4_AF_c(t) + pfk_R4_A_c(t) + pfk_R4_c(t) + pfk_T0_c(t) + pfk_T1_c(t) + pfk_T2_c(t) + pfk_T3_c(t) + pfk_T4_c(t)",
+            "enzyme_module_forms": [
+                "pfk_R0_c",
+                "pfk_R0_A_c",
+                "pfk_R0_AF_c",
+                "pfk_R1_c",
+                "pfk_R1_A_c",
+                "pfk_R1_AF_c",
+                "pfk_R2_c",
+                "pfk_R2_A_c",
+                "pfk_R2_AF_c",
+                "pfk_R3_c",
+                "pfk_R3_A_c",
+                "pfk_R3_AF_c",
+                "pfk_R4_c",
+                "pfk_R4_A_c",
+                "pfk_R4_AF_c",
+                "pfk_T0_c",
+                "pfk_T1_c",
+                "pfk_T2_c",
+                "pfk_T3_c",
+                "pfk_T4_c"
+            ],
+            "enzyme_module_forms_categorized": {
+                "PFK_Active": [
+                    "pfk_R4_A_c",
+                    "pfk_R1_c",
+                    "pfk_R2_A_c",
+                    "pfk_R0_c",
+                    "pfk_R0_AF_c",
+                    "pfk_R3_c",
+                    "pfk_R2_AF_c",
+                    "pfk_R0_A_c",
+                    "pfk_R3_AF_c",
+                    "pfk_R1_A_c",
+                    "pfk_R1_AF_c",
+                    "pfk_R3_A_c",
+                    "pfk_R4_AF_c",
+                    "pfk_R4_c",
+                    "pfk_R2_c"
+                ],
+                "PFK_Inhibited": [
+                    "pfk_T0_c",
+                    "pfk_T3_c",
+                    "pfk_T2_c",
+                    "pfk_T4_c",
+                    "pfk_T1_c"
+                ]
+            },
+            "enzyme_module_ligands": [
+                "f6p_c",
+                "fdp_c",
+                "amp_c",
+                "adp_c",
+                "atp_c",
+                "h_c"
+            ],
+            "enzyme_module_ligands_categorized": {
+                "PFK_activators": [
+                    "amp_c"
+                ],
+                "PFK_cofactors": [
+                    "atp_c"
+                ],
+                "PFK_inhibitors": [
+                    "atp_c"
+                ],
+                "PFK_products": [
+                    "adp_c",
+                    "fdp_c",
+                    "h_c"
+                ],
+                "PFK_substrates": [
+                    "f6p_c"
+                ]
+            },
+            "enzyme_module_reactions": [
+                "PFK_R01",
+                "PFK_R02",
+                "PFK_R03",
+                "PFK_R10",
+                "PFK_R11",
+                "PFK_R12",
+                "PFK_R13",
+                "PFK_R20",
+                "PFK_R21",
+                "PFK_R22",
+                "PFK_R23",
+                "PFK_R30",
+                "PFK_R31",
+                "PFK_R32",
+                "PFK_R33",
+                "PFK_R40",
+                "PFK_R41",
+                "PFK_R42",
+                "PFK_R43",
+                "PFK_L",
+                "PFK_T1",
+                "PFK_T2",
+                "PFK_T3",
+                "PFK_T4"
+            ],
+            "enzyme_module_reactions_categorized": {
+                "PFK_amp_c_activation": [
+                    "PFK_R10",
+                    "PFK_R30",
+                    "PFK_R40",
+                    "PFK_R20"
+                ],
+                "PFK_atp_c_binding": [
+                    "PFK_R21",
+                    "PFK_R31",
+                    "PFK_R41",
+                    "PFK_R11",
+                    "PFK_R01"
+                ],
+                "PFK_atp_c_inhibition": [
+                    "PFK_T3",
+                    "PFK_T2",
+                    "PFK_T1",
+                    "PFK_T4"
+                ],
+                "PFK_catalyzation": [
+                    "PFK_R33",
+                    "PFK_R43",
+                    "PFK_R13",
+                    "PFK_R23",
+                    "PFK_R03"
+                ],
+                "PFK_f6p_c_binding": [
+                    "PFK_R02",
+                    "PFK_R12",
+                    "PFK_R32",
+                    "PFK_R42",
+                    "PFK_R22"
+                ],
+                "PFK_rt_transition": [
+                    "PFK_L"
+                ]
+            },
+            "enzyme_rate": 1.12,
+            "enzyme_rate_equation": "kf_PFK*(pfk_R0_AF_c(t) + pfk_R1_AF_c(t) + pfk_R2_AF_c(t) + pfk_R3_AF_c(t) + pfk_R4_AF_c(t))",
+            "id": "PFK",
+            "name": "Phosphofructokinase",
+            "subsystem": "Glycolysis"
+        },
+        {
+            "enzyme_concentration_total": 6.9e-05,
+            "enzyme_concentration_total_equation": "pyk_R0_AP_c(t) + pyk_R0_A_c(t) + pyk_R0_P_c(t) + pyk_R0_c(t) + pyk_R1_AP_c(t) + pyk_R1_A_c(t) + pyk_R1_P_c(t) + pyk_R1_c(t) + pyk_R2_AP_c(t) + pyk_R2_A_c(t) + pyk_R2_P_c(t) + pyk_R2_c(t) + pyk_R3_AP_c(t) + pyk_R3_A_c(t) + pyk_R3_P_c(t) + pyk_R3_c(t) + pyk_R4_AP_c(t) + pyk_R4_A_c(t) + pyk_R4_P_c(t) + pyk_R4_c(t) + pyk_T0_c(t) + pyk_T1_c(t) + pyk_T2_c(t) + pyk_T3_c(t) + pyk_T4_c(t)",
+            "enzyme_module_forms": [
+                "pyk_R0_c",
+                "pyk_R0_A_c",
+                "pyk_R0_P_c",
+                "pyk_R0_AP_c",
+                "pyk_T0_c",
+                "pyk_R1_c",
+                "pyk_R1_A_c",
+                "pyk_R1_P_c",
+                "pyk_R1_AP_c",
+                "pyk_T1_c",
+                "pyk_R2_c",
+                "pyk_R2_A_c",
+                "pyk_R2_P_c",
+                "pyk_R2_AP_c",
+                "pyk_T2_c",
+                "pyk_R3_c",
+                "pyk_R3_A_c",
+                "pyk_R3_P_c",
+                "pyk_R3_AP_c",
+                "pyk_T3_c",
+                "pyk_R4_c",
+                "pyk_R4_A_c",
+                "pyk_R4_P_c",
+                "pyk_R4_AP_c",
+                "pyk_T4_c"
+            ],
+            "enzyme_module_forms_categorized": {
+                "PYK_Active": [
+                    "pyk_R3_AP_c",
+                    "pyk_R4_c",
+                    "pyk_R1_P_c",
+                    "pyk_R1_A_c",
+                    "pyk_R4_A_c",
+                    "pyk_R1_AP_c",
+                    "pyk_R4_P_c",
+                    "pyk_R0_AP_c",
+                    "pyk_R0_c",
+                    "pyk_R2_c",
+                    "pyk_R4_AP_c",
+                    "pyk_R2_P_c",
+                    "pyk_R2_A_c",
+                    "pyk_R2_AP_c",
+                    "pyk_R0_A_c",
+                    "pyk_R3_c",
+                    "pyk_R0_P_c",
+                    "pyk_R3_A_c",
+                    "pyk_R1_c",
+                    "pyk_R3_P_c"
+                ],
+                "PYK_Inhibited": [
+                    "pyk_T2_c",
+                    "pyk_T4_c",
+                    "pyk_T0_c",
+                    "pyk_T1_c",
+                    "pyk_T3_c"
+                ]
+            },
+            "enzyme_module_ligands": [
+                "pep_c",
+                "adp_c",
+                "fdp_c",
+                "atp_c",
+                "pyr_c",
+                "h_c"
+            ],
+            "enzyme_module_ligands_categorized": {
+                "PYK_activators": [
+                    "fdp_c"
+                ],
+                "PYK_cofactors": [
+                    "adp_c",
+                    "h_c"
+                ],
+                "PYK_inhibitors": [
+                    "atp_c"
+                ],
+                "PYK_products": [
+                    "atp_c",
+                    "pyr_c"
+                ],
+                "PYK_substrates": [
+                    "pep_c"
+                ]
+            },
+            "enzyme_module_reactions": [
+                "PYK_R01",
+                "PYK_R02",
+                "PYK_R03",
+                "PYK_R04",
+                "PYK_R05",
+                "PYK_R10",
+                "PYK_R11",
+                "PYK_R12",
+                "PYK_R13",
+                "PYK_R14",
+                "PYK_R15",
+                "PYK_R20",
+                "PYK_R21",
+                "PYK_R22",
+                "PYK_R23",
+                "PYK_R24",
+                "PYK_R25",
+                "PYK_R30",
+                "PYK_R31",
+                "PYK_R32",
+                "PYK_R33",
+                "PYK_R34",
+                "PYK_R35",
+                "PYK_R40",
+                "PYK_R41",
+                "PYK_R42",
+                "PYK_R43",
+                "PYK_R44",
+                "PYK_R45",
+                "PYK_L",
+                "PYK_T1",
+                "PYK_T2",
+                "PYK_T3",
+                "PYK_T4"
+            ],
+            "enzyme_module_reactions_categorized": {
+                "PYK_adp_c_binding": [
+                    "PYK_R22",
+                    "PYK_R34",
+                    "PYK_R42",
+                    "PYK_R24",
+                    "PYK_R14",
+                    "PYK_R04",
+                    "PYK_R02",
+                    "PYK_R12",
+                    "PYK_R32",
+                    "PYK_R44"
+                ],
+                "PYK_atp_c_inhibition": [
+                    "PYK_T2",
+                    "PYK_T3",
+                    "PYK_T1",
+                    "PYK_T4"
+                ],
+                "PYK_catalyzation": [
+                    "PYK_R15",
+                    "PYK_R05",
+                    "PYK_R45",
+                    "PYK_R25",
+                    "PYK_R35"
+                ],
+                "PYK_fdp_c_activation": [
+                    "PYK_R10",
+                    "PYK_R20",
+                    "PYK_R30",
+                    "PYK_R40"
+                ],
+                "PYK_pep_c_binding": [
+                    "PYK_R21",
+                    "PYK_R31",
+                    "PYK_R33",
+                    "PYK_R23",
+                    "PYK_R41",
+                    "PYK_R11",
+                    "PYK_R43",
+                    "PYK_R13",
+                    "PYK_R03",
+                    "PYK_R01"
+                ],
+                "PYK_rt_transition": [
+                    "PYK_L"
+                ]
+            },
+            "enzyme_rate": 2.24,
+            "enzyme_rate_equation": "kf_PYK*(pyk_R0_AP_c(t) + pyk_R1_AP_c(t) + pyk_R2_AP_c(t) + pyk_R3_AP_c(t) + pyk_R4_AP_c(t))",
+            "id": "PYK",
+            "name": "Pyruvate Kinase",
+            "subsystem": "Glycolysis"
+        }
+    ],
+    "genes": [],
+    "id": "Glycolysis_FKRM",
+    "metabolites": [
+        {
+            "_initial_condition": 1.0502280887939421,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C6H12O6",
+            "id": "glc__D_c",
+            "name": "D-Glucose"
+        },
+        {
+            "_initial_condition": 0.3235369852921536,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O9P",
+            "id": "g6p_c",
+            "name": "D-Glucose 6-phosphate"
+        },
+        {
+            "_initial_condition": 0.1325241638161246,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C6H11O9P",
+            "id": "f6p_c",
+            "name": "D-Fructose 6-phosphate"
+        },
+        {
+            "_initial_condition": 0.011471327070873056,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C6H10O12P2",
+            "id": "fdp_c",
+            "name": "D-Fructose 1,6-bisphosphate"
+        },
+        {
+            "_initial_condition": 0.14342213295249312,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C3H5O6P",
+            "id": "dhap_c",
+            "name": "Dihydroxyacetone phosphate"
+        },
+        {
+            "_initial_condition": 0.00633269653089093,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C3H5O6P",
+            "id": "g3p_c",
+            "name": "Glyceraldehyde 3-phosphate"
+        },
+        {
+            "_initial_condition": 0.00024087891118879383,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C3H4O10P2",
+            "id": "_13dpg_c",
+            "name": "3-Phospho-D-glyceroyl phosphate"
+        },
+        {
+            "_initial_condition": 0.08506873651158549,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H4O7P",
+            "id": "_3pg_c",
+            "name": "3-Phospho-D-glycerate"
+        },
+        {
+            "_initial_condition": 0.012442476249096572,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H4O7P",
+            "id": "_2pg_c",
+            "name": "D-Glycerate 2-phosphate"
+        },
+        {
+            "_initial_condition": 0.018936454020701425,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C3H2O6P",
+            "id": "pep_c",
+            "name": "Phosphoenolpyruvate"
+        },
+        {
+            "_initial_condition": 0.060301066984590077,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C3H3O3",
+            "id": "pyr_c",
+            "name": "Pyruvate"
+        },
+        {
+            "_initial_condition": 1.3599911008925345,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "C3H5O3",
+            "id": "lac__L_c",
+            "name": "L-Lactate"
+        },
+        {
+            "_initial_condition": 0.0674912015409974,
+            "charge": -1,
+            "compartment": "c",
+            "formula": "[NAD]-C21H26N7O14P2",
+            "id": "nad_c",
+            "name": "Nicotinamide adenine dinucleotide"
+        },
+        {
+            "_initial_condition": 0.030106698459002795,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "[NAD]-C21H27N7O14P2",
+            "id": "nadh_c",
+            "name": "Nicotinamide adenine dinucleotide - reduced"
+        },
+        {
+            "_initial_condition": 0.08672811973433632,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O7P",
+            "id": "amp_c",
+            "name": "AMP"
+        },
+        {
+            "_initial_condition": 0.2603419053899737,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP"
+        },
+        {
+            "_initial_condition": 1.2894727575208746,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP"
+        },
+        {
+            "_initial_condition": 2.4999999999978697,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "HPO4",
+            "id": "pi_c",
+            "name": "Phosphate"
+        },
+        {
+            "_initial_condition": 0.00011685669669980532,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "H",
+            "id": "h_c",
+            "name": "H+"
+        },
+        {
+            "_initial_condition": 1.0,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "H2O",
+            "id": "h2o_c",
+            "name": "H2O"
+        },
+        {
+            "_initial_condition": 3.055983772178573,
+            "charge": -5,
+            "compartment": "c",
+            "formula": "C3H3O10P2",
+            "id": "_23dpg_c",
+            "name": "2,3-Disphospho-D-glycerate"
+        },
+        {
+            "_initial_condition": 0.05008976378931634,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[HB]-O2",
+            "id": "hb_1o2_c",
+            "name": "Oxyhemoglobin (1)"
+        },
+        {
+            "_initial_condition": 0.059630627607645634,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[HB]",
+            "id": "hb_c",
+            "name": "Hemoglobin"
+        },
+        {
+            "_initial_condition": 0.0200788,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "O2",
+            "id": "o2_c",
+            "name": "Oxygen"
+        },
+        {
+            "_initial_condition": 0.0736319059964736,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[HB]-O4",
+            "id": "hb_2o2_c",
+            "name": "Oxyhemoglobin (2)"
+        },
+        {
+            "_initial_condition": 0.26286520941057645,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[HB]-O6",
+            "id": "hb_3o2_c",
+            "name": "Oxyhemoglobin (3)"
+        },
+        {
+            "_initial_condition": 6.808220935622539,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "[HB]-O8",
+            "id": "hb_4o2_c",
+            "name": "Oxyhemoglobin (4)"
+        },
+        {
+            "_initial_condition": 0.045557557573447156,
+            "charge": -5,
+            "compartment": "c",
+            "formula": "[HB]-C3H3O10P2",
+            "id": "dhb_c",
+            "name": "Deoxyhemoglobin"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 3.2877733174403955e-06,
+            "charge": -3,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C10H12N5O10P2",
+            "id": "hex1_A_PI_c",
+            "name": "HEX1-adp complex"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {},
+            "_initial_condition": 1.2628675020702271e-05,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]",
+            "id": "hex1_c",
+            "name": "HEX1"
+        },
+        {
+            "_bound_catalytic": {
+                "g6p_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 6.128765166648506e-08,
+            "charge": -2,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C6H11O9P1",
+            "id": "hex1_G_PI_c",
+            "name": "HEX1-g6p complex"
+        },
+        {
+            "_bound_catalytic": {
+                "glc__D_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 8.034877253539198e-08,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C6H12O6",
+            "id": "hex1_G_c",
+            "name": "HEX1-glc__D complex"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 7.88273151919677e-06,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C10H12N5O13P3",
+            "id": "hex1_A_c",
+            "name": "HEX1-atp complex"
+        },
+        {
+            "_bound_catalytic": {
+                "_23dpg_c": 1,
+                "glc__D_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 4.4644418079651154e-08,
+            "charge": -5,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C9H15O16P2",
+            "id": "hex1_G_CI_c",
+            "name": "HEX1-glc__D-_23dpg complex"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "glc__D_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 1.459715210602457e-08,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "HEX1",
+            "formula": "[HEX]-C16H24O19N5P3",
+            "id": "hex1_AG_c",
+            "name": "HEX1-glc__D-atp complex"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 1.1247127324522939e-07,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C10H12N5O13P3",
+            "id": "pfk_R0_A_c",
+            "name": "PFK-atp complex"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {},
+            "_initial_condition": 4.603333612761457e-08,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]",
+            "id": "pfk_R0_c",
+            "name": "PFK"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "f6p_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 2.1054843432951734e-08,
+            "charge": -6,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C16H23N5O22P4",
+            "id": "pfk_R0_AF_c",
+            "name": "PFK-atp-f6p complex"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "amp_c": 1
+            },
+            "_initial_condition": 4.839249327347919e-07,
+            "charge": -2,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C10H12N5O7P1",
+            "id": "pfk_R1_c",
+            "name": "PFK; 1 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 1
+            },
+            "_initial_condition": 1.1823530058501225e-06,
+            "charge": -6,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C20H24N10O20P4",
+            "id": "pfk_R1_A_c",
+            "name": "PFK-atp complex; 1 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "f6p_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 1
+            },
+            "_initial_condition": 2.2133880681136604e-07,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C26H35N10O29P5",
+            "id": "pfk_R1_AF_c",
+            "name": "PFK-atp-f6p complex; 1 amp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "amp_c": 2
+            },
+            "_initial_condition": 1.9077207972161017e-06,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C20H24N10O14P2",
+            "id": "pfk_R2_c",
+            "name": "PFK; 2 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 2
+            },
+            "_initial_condition": 4.661052296198598e-06,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C30H36N15O27P5",
+            "id": "pfk_R2_A_c",
+            "name": "PFK-atp complex; 2 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "f6p_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 2
+            },
+            "_initial_condition": 8.725581519405823e-07,
+            "charge": -10,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C36H47N15O36P6",
+            "id": "pfk_R2_AF_c",
+            "name": "PFK-atp-f6p complex; 2 amp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "amp_c": 3
+            },
+            "_initial_condition": 3.342482268032402e-06,
+            "charge": -6,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C30H36N15O21P3",
+            "id": "pfk_R3_c",
+            "name": "PFK; 3 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 3
+            },
+            "_initial_condition": 8.166543381584126e-06,
+            "charge": -10,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C40H48N20O34P6",
+            "id": "pfk_R3_A_c",
+            "name": "PFK-atp complex; 3 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "f6p_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 3
+            },
+            "_initial_condition": 1.528792973764571e-06,
+            "charge": -12,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C46H59N20O43P7",
+            "id": "pfk_R3_AF_c",
+            "name": "PFK-atp-f6p complex; 3 amp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "amp_c": 4
+            },
+            "_initial_condition": 2.1961129732167227e-06,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C40H48N20O28P4",
+            "id": "pfk_R4_c",
+            "name": "PFK; 4 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 4
+            },
+            "_initial_condition": 5.365668514732785e-06,
+            "charge": -12,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C50H60N25O41P7",
+            "id": "pfk_R4_A_c",
+            "name": "PFK-atp complex; 4 amp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "atp_c": 1,
+                "f6p_c": 1
+            },
+            "_bound_effectors": {
+                "amp_c": 4
+            },
+            "_initial_condition": 1.0044636930933765e-06,
+            "charge": -14,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C56H71N25O50P8",
+            "id": "pfk_R4_AF_c",
+            "name": "PFK-atp-f6p complex; 4 amp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {},
+            "_initial_condition": 5.0636669740376036e-11,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]",
+            "id": "pfk_T0_c",
+            "name": "PFK"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 1
+            },
+            "_initial_condition": 2.611784246471865e-09,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C10H12N5O13P3",
+            "id": "pfk_T1_c",
+            "name": "PFK; 1 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 2
+            },
+            "_initial_condition": 5.0517369515214616e-08,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C20H24N10O26P6",
+            "id": "pfk_T2_c",
+            "name": "PFK; 2 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 3
+            },
+            "_initial_condition": 4.3427181180989684e-07,
+            "charge": -12,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C30H36N15O39P9",
+            "id": "pfk_T3_c",
+            "name": "PFK; 3 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 4
+            },
+            "_initial_condition": 1.3999541767202308e-06,
+            "charge": -16,
+            "compartment": "c",
+            "enzyme_module_id": "PFK",
+            "formula": "[PFK]-C40H48N20O52P12",
+            "id": "pfk_T4_c",
+            "name": "PFK; 4 atp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "pep_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 1.6198875067189535e-06,
+            "charge": -3,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C3H2O6P1",
+            "id": "pyk_R0_P_c",
+            "name": "PYK-pep complex"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {},
+            "_initial_condition": 1.9373797725339543e-05,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]",
+            "id": "pyk_R0_c",
+            "name": "PYK"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 1.0635952035905649e-05,
+            "charge": -3,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C10H12N5O10P2",
+            "id": "pyk_R0_A_c",
+            "name": "PYK-adp complex"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1,
+                "pep_c": 1
+            },
+            "_bound_effectors": {},
+            "_initial_condition": 8.846575973590888e-07,
+            "charge": -6,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C13H14N5O16P3",
+            "id": "pyk_R0_AP_c",
+            "name": "PYK-adp-pep complex"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "fdp_c": 1
+            },
+            "_initial_condition": 0.00017779453624984477,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C6H10O12P2",
+            "id": "pyk_R1_c",
+            "name": "PYK; 1 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 1
+            },
+            "_initial_condition": 1.486580752607531e-05,
+            "charge": -7,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C9H12O18P3",
+            "id": "pyk_R1_P_c",
+            "name": "PYK-pep complex; 1 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 1
+            },
+            "_initial_condition": 9.760678761119348e-05,
+            "charge": -7,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C16H22N5O22P4",
+            "id": "pyk_R1_A_c",
+            "name": "PYK-adp complex; 1 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1,
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 1
+            },
+            "_initial_condition": 8.118557316031055e-06,
+            "charge": -10,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C19H24N5O28P5",
+            "id": "pyk_R1_AP_c",
+            "name": "PYK-adp-pep complex; 1 fdp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "fdp_c": 2
+            },
+            "_initial_condition": 0.0006118617830208491,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C12H20O24P4",
+            "id": "pyk_R2_c",
+            "name": "PYK; 2 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 2
+            },
+            "_initial_condition": 5.115916209127674e-05,
+            "charge": -11,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C15H22O30P5",
+            "id": "pyk_R2_P_c",
+            "name": "PYK-pep complex; 2 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 2
+            },
+            "_initial_condition": 0.0003359038155075722,
+            "charge": -11,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C22H32N5O34P6",
+            "id": "pyk_R2_A_c",
+            "name": "PYK-adp complex; 2 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1,
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 2
+            },
+            "_initial_condition": 2.793918789474644e-05,
+            "charge": -14,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C25H34N5O40P7",
+            "id": "pyk_R2_AP_c",
+            "name": "PYK-adp-pep complex; 2 fdp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "fdp_c": 3
+            },
+            "_initial_condition": 0.0009358488846932959,
+            "charge": -12,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C18H30O36P6",
+            "id": "pyk_R3_c",
+            "name": "PYK; 3 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 3
+            },
+            "_initial_condition": 7.824846413611264e-05,
+            "charge": -15,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C21H32O42P7",
+            "id": "pyk_R3_P_c",
+            "name": "PYK-pep complex; 3 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 3
+            },
+            "_initial_condition": 0.0005137683376055419,
+            "charge": -15,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C28H42N5O46P8",
+            "id": "pyk_R3_A_c",
+            "name": "PYK-adp complex; 3 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1,
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 3
+            },
+            "_initial_condition": 4.2733274991361814e-05,
+            "charge": -18,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C31H44N5O52P9",
+            "id": "pyk_R3_AP_c",
+            "name": "PYK-adp-pep complex; 3 fdp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "fdp_c": 4
+            },
+            "_initial_condition": 0.0005367714322614281,
+            "charge": -16,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C24H40O48P8",
+            "id": "pyk_R4_c",
+            "name": "PYK; 4 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 4
+            },
+            "_initial_condition": 4.4880686244941376e-05,
+            "charge": -19,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C27H42O54P9",
+            "id": "pyk_R4_P_c",
+            "name": "PYK-pep complex; 4 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 4
+            },
+            "_initial_condition": 0.00029468023196659526,
+            "charge": -19,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C34H52N5O58P10",
+            "id": "pyk_R4_A_c",
+            "name": "PYK-adp complex; 4 fdp_c"
+        },
+        {
+            "_bound_catalytic": {
+                "adp_c": 1,
+                "pep_c": 1
+            },
+            "_bound_effectors": {
+                "fdp_c": 4
+            },
+            "_initial_condition": 2.451036871177357e-05,
+            "charge": -22,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C37H54N5O64P11",
+            "id": "pyk_R4_AP_c",
+            "name": "PYK-adp-pep complex; 4 fdp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {},
+            "_initial_condition": 0.00036810215678145135,
+            "charge": 0,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]",
+            "id": "pyk_T0_c",
+            "name": "PYK"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 1
+            },
+            "_initial_condition": 0.0005600676102599539,
+            "charge": -4,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C10H12N5O13P3",
+            "id": "pyk_T1_c",
+            "name": "PYK; 1 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 2
+            },
+            "_initial_condition": 0.0003195536778481821,
+            "charge": -8,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C20H24N10O26P6",
+            "id": "pyk_T2_c",
+            "name": "PYK; 2 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 3
+            },
+            "_initial_condition": 8.103351266537553e-05,
+            "charge": -12,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C30H36N15O39P9",
+            "id": "pyk_T3_c",
+            "name": "PYK; 3 atp_c"
+        },
+        {
+            "_bound_catalytic": {},
+            "_bound_effectors": {
+                "atp_c": 4
+            },
+            "_initial_condition": 7.705783053930202e-06,
+            "charge": -16,
+            "compartment": "c",
+            "enzyme_module_id": "PYK",
+            "formula": "[PYK]-C40H48N20O52P12",
+            "id": "pyk_T4_c",
+            "name": "PYK; 4 atp_c"
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": 0.41,
+            "_forward_rate_constant": 3644.44,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGI",
+            "metabolites": {
+                "f6p_c": 1,
+                "g6p_c": -1
+            },
+            "name": "Glucose-6-phosphate isomerase",
+            "steady_state_flux": 1.1199999999965964,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.082,
+            "_forward_rate_constant": 2834.57,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "FBA",
+            "metabolites": {
+                "dhap_c": 1,
+                "fdp_c": -1,
+                "g3p_c": 1
+            },
+            "name": "Fructose-bisphosphate aldolase",
+            "steady_state_flux": 1.1199999999961638,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.0571429,
+            "_forward_rate_constant": 34.3558,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "TPI",
+            "metabolites": {
+                "dhap_c": -1,
+                "g3p_c": 1
+            },
+            "name": "Triose-phosphate isomerase",
+            "steady_state_flux": 1.1199999999961543,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.0179,
+            "_forward_rate_constant": 3376.75,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "GAPD",
+            "metabolites": {
+                "_13dpg_c": 1,
+                "g3p_c": -1,
+                "h_c": 1,
+                "nad_c": -1,
+                "nadh_c": 1,
+                "pi_c": -1
+            },
+            "name": "Glyceraldehyde-3-phosphate dehydrogenase",
+            "steady_state_flux": 2.2399999999923046,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 1800.0,
+            "_forward_rate_constant": 1020000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGK",
+            "metabolites": {
+                "_13dpg_c": -1,
+                "_3pg_c": 1,
+                "adp_c": -1,
+                "atp_c": 1
+            },
+            "name": "Phosphoglycerate kinase",
+            "steady_state_flux": 1.8052618605297484,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.147059,
+            "_forward_rate_constant": 4869.57,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PGM",
+            "metabolites": {
+                "_2pg_c": 1,
+                "_3pg_c": -1
+            },
+            "name": "Phosphoglycerate mutase",
+            "steady_state_flux": 2.2399999999923397,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 1.69492,
+            "_forward_rate_constant": 1763.78,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ENO",
+            "metabolites": {
+                "_2pg_c": -1,
+                "h2o_c": 1,
+                "pep_c": 1
+            },
+            "name": "Enolase",
+            "steady_state_flux": 2.2399999999923477,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 26300.0,
+            "_forward_rate_constant": 1112.57,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "LDH_L",
+            "metabolites": {
+                "h_c": -1,
+                "lac__L_c": 1,
+                "nad_c": 1,
+                "nadh_c": -1,
+                "pyr_c": -1
+            },
+            "name": "L-lactate dehydrogenase",
+            "steady_state_flux": 2.015950164998193,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.161424,
+            "_lower_bound": 0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000628"
+            },
+            "gene_reaction_rule": "",
+            "id": "DM_amp_c",
+            "metabolites": {
+                "amp_c": -1
+            },
+            "name": "AMP demand",
+            "steady_state_flux": 0.013999999999995506,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.65,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADK1",
+            "metabolites": {
+                "adp_c": -2,
+                "amp_c": 1,
+                "atp_c": 1
+            },
+            "name": "Adenylate kinase",
+            "steady_state_flux": 6.587857678486571e-12,
+            "subsystem": "Misc."
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 744.186,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_pyr_c",
+            "metabolites": {
+                "pyr_c": -1
+            },
+            "name": "Pyruvate sink",
+            "steady_state_flux": 0.22404983499415365,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 5.6,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_lac__L_c",
+            "metabolites": {
+                "lac__L_c": -1
+            },
+            "name": "L-Lactate sink",
+            "steady_state_flux": 2.0159501649981935,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 1.4,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ATPM",
+            "metabolites": {
+                "adp_c": 1,
+                "atp_c": -1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 1
+            },
+            "name": "ATP maintenance requirement",
+            "steady_state_flux": 1.8052618605292243,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 7.44186,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_nadh",
+            "metabolites": {
+                "h_c": 1,
+                "nad_c": 1,
+                "nadh_c": -1
+            },
+            "name": "Demand NADH",
+            "steady_state_flux": 0.22404983499411454,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 1.12,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_glc__D_c",
+            "metabolites": {
+                "glc__D_c": 1
+            },
+            "name": "D-Glucose sink",
+            "steady_state_flux": 1.12,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.014,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_amp_c",
+            "metabolites": {
+                "amp_c": 1
+            },
+            "name": "AMP sink",
+            "steady_state_flux": 0.014,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_h_c",
+            "metabolites": {
+                "h_c": -1
+            },
+            "name": "H+ sink",
+            "steady_state_flux": 2.6880996699805317,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_h2o_c",
+            "metabolites": {
+                "h2o_c": -1
+            },
+            "name": "H2O sink",
+            "steady_state_flux": 0.0,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 0.23,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_pi_c",
+            "metabolites": {
+                "pi_c": -1
+            },
+            "name": "Phosphate sink",
+            "steady_state_flux": -4.900027760233037e-13,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 2300000.0,
+            "_forward_rate_constant": 1814.81,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DPGM",
+            "metabolites": {
+                "_13dpg_c": -1,
+                "_23dpg_c": 1,
+                "h_c": 1
+            },
+            "name": "Diphosphoglyceromutase",
+            "steady_state_flux": 0.43473813946254036,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.142258,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DPGase",
+            "metabolites": {
+                "_23dpg_c": -1,
+                "_3pg_c": 1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "Diphosphoglycerate phosphatase",
+            "steady_state_flux": 0.4347381394625794,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 41.8352,
+            "_forward_rate_constant": 506935.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HBO1",
+            "metabolites": {
+                "hb_1o2_c": 1,
+                "hb_c": -1,
+                "o2_c": -1
+            },
+            "name": "Oxygen Loading (1)",
+            "steady_state_flux": 4.9696661194101025e-15,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 73.2115,
+            "_forward_rate_constant": 511077.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HBO2",
+            "metabolites": {
+                "hb_1o2_c": -1,
+                "hb_2o2_c": 1,
+                "o2_c": -1
+            },
+            "name": "Oxygen Loading (2)",
+            "steady_state_flux": 0.0,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 177.799,
+            "_forward_rate_constant": 509243.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HBO3",
+            "metabolites": {
+                "hb_2o2_c": -1,
+                "hb_3o2_c": 1,
+                "o2_c": -1
+            },
+            "name": "Oxygen Loading (3)",
+            "steady_state_flux": 0.0,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 1289.92,
+            "_forward_rate_constant": 501595.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HBO4",
+            "metabolites": {
+                "hb_3o2_c": -1,
+                "hb_4o2_c": 1,
+                "o2_c": -1
+            },
+            "name": "Oxygen Loading (4)",
+            "steady_state_flux": 0.0,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 0.25,
+            "_forward_rate_constant": 519613.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "HBDPG",
+            "metabolites": {
+                "_23dpg_c": -1,
+                "dhb_c": 1,
+                "hb_c": -1
+            },
+            "name": "Hemoglobin-23dpg binding",
+            "steady_state_flux": 7.172285983010642e-12,
+            "subsystem": "Hemoglobin"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 509726.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_o2_c",
+            "metabolites": {
+                "o2_c": -1
+            },
+            "name": "Oxygen sink",
+            "steady_state_flux": 0.0,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1.0,
+            "_forward_rate_constant": 1000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_1",
+            "metabolites": {
+                "adp_c": -1,
+                "hex1_A_PI_c": 1,
+                "hex1_c": -1
+            },
+            "name": "hex1-adp binding",
+            "steady_state_flux": -3.637965491630761e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.015,
+            "_forward_rate_constant": 1000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_2",
+            "metabolites": {
+                "g6p_c": -1,
+                "hex1_G_PI_c": 1,
+                "hex1_c": -1
+            },
+            "name": "hex1-g6p binding",
+            "steady_state_flux": 7.658874719222666e-17,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_3",
+            "metabolites": {
+                "glc__D_c": -1,
+                "hex1_G_c": 1,
+                "hex1_c": -1
+            },
+            "name": "hex1-glc__D binding",
+            "steady_state_flux": 0.6895299308365377,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_4",
+            "metabolites": {
+                "atp_c": -1,
+                "hex1_A_c": 1,
+                "hex1_c": -1
+            },
+            "name": "hex1-atp binding",
+            "steady_state_flux": 0.43047006915998076,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.181818,
+            "_forward_rate_constant": 1000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_5",
+            "metabolites": {
+                "_23dpg_c": -1,
+                "hex1_G_CI_c": 1,
+                "hex1_G_c": -1
+            },
+            "name": "hex1_G-_23dpg binding",
+            "steady_state_flux": -9.69326331651617e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_6",
+            "metabolites": {
+                "atp_c": -1,
+                "hex1_AG_c": 1,
+                "hex1_G_c": -1
+            },
+            "name": "hex1_G-atp binding",
+            "steady_state_flux": 0.6895299308365378,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_7",
+            "metabolites": {
+                "glc__D_c": -1,
+                "hex1_AG_c": 1,
+                "hex1_A_c": -1
+            },
+            "name": "hex1_A-glc__D binding",
+            "steady_state_flux": 0.43047006916019553,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "HEX1",
+            "gene_reaction_rule": "",
+            "id": "HEX1_8",
+            "metabolites": {
+                "adp_c": 1,
+                "g6p_c": 1,
+                "h_c": 1,
+                "hex1_AG_c": -1,
+                "hex1_c": 1
+            },
+            "name": "hex1_AG catalyzation",
+            "steady_state_flux": 1.1199999999967314,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R01",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_R0_A_c": 1,
+                "pfk_R0_c": -1
+            },
+            "name": "pfk_R0-atp binding",
+            "steady_state_flux": 0.006463836933916218,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R02",
+            "metabolites": {
+                "f6p_c": -1,
+                "pfk_R0_AF_c": 1,
+                "pfk_R0_A_c": -1
+            },
+            "name": "pfk_R0_A-f6p binding",
+            "steady_state_flux": 0.0064638369339161785,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R03",
+            "metabolites": {
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R0_AF_c": -1,
+                "pfk_R0_c": 1
+            },
+            "name": "pfk_R0_AF catalyzation",
+            "steady_state_flux": 0.006463836933916182,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R10",
+            "metabolites": {
+                "amp_c": -1,
+                "pfk_R0_c": -1,
+                "pfk_R1_c": 1
+            },
+            "name": "pfk_R0-amp binding",
+            "steady_state_flux": -5.852427161078103e-17,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R11",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_R1_A_c": 1,
+                "pfk_R1_c": -1
+            },
+            "name": "pfk_R1-atp binding",
+            "steady_state_flux": 0.06795101369108963,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R12",
+            "metabolites": {
+                "f6p_c": -1,
+                "pfk_R1_AF_c": 1,
+                "pfk_R1_A_c": -1
+            },
+            "name": "pfk_R1_A-f6p binding",
+            "steady_state_flux": 0.06795101369108934,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R13",
+            "metabolites": {
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R1_AF_c": -1,
+                "pfk_R1_c": 1
+            },
+            "name": "pfk_R1_AF catalyzation",
+            "steady_state_flux": 0.06795101369108937,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R20",
+            "metabolites": {
+                "amp_c": -1,
+                "pfk_R1_c": -1,
+                "pfk_R2_c": 1
+            },
+            "name": "pfk_R1-amp binding",
+            "steady_state_flux": -1.937228685759544e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R21",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_R2_A_c": 1,
+                "pfk_R2_c": -1
+            },
+            "name": "pfk_R2-atp binding",
+            "steady_state_flux": 0.2678753526457593,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R22",
+            "metabolites": {
+                "f6p_c": -1,
+                "pfk_R2_AF_c": 1,
+                "pfk_R2_A_c": -1
+            },
+            "name": "pfk_R2_A-f6p binding",
+            "steady_state_flux": 0.26787535264575874,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R23",
+            "metabolites": {
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R2_AF_c": -1,
+                "pfk_R2_c": 1
+            },
+            "name": "pfk_R2_AF catalyzation",
+            "steady_state_flux": 0.2678753526457588,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R30",
+            "metabolites": {
+                "amp_c": -1,
+                "pfk_R2_c": -1,
+                "pfk_R3_c": 1
+            },
+            "name": "pfk_R2-amp binding",
+            "steady_state_flux": -6.22283570936841e-17,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R31",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_R3_A_c": 1,
+                "pfk_R3_c": -1
+            },
+            "name": "pfk_R3-atp binding",
+            "steady_state_flux": 0.46933944294572355,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R32",
+            "metabolites": {
+                "f6p_c": -1,
+                "pfk_R3_AF_c": 1,
+                "pfk_R3_A_c": -1
+            },
+            "name": "pfk_R3_A-f6p binding",
+            "steady_state_flux": 0.4693394429457233,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R33",
+            "metabolites": {
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R3_AF_c": -1,
+                "pfk_R3_c": 1
+            },
+            "name": "pfk_R3_AF catalyzation",
+            "steady_state_flux": 0.46933944294572333,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R40",
+            "metabolites": {
+                "amp_c": -1,
+                "pfk_R3_c": -1,
+                "pfk_R4_c": 1
+            },
+            "name": "pfk_R3-amp binding",
+            "steady_state_flux": 4.068777194587046e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R41",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_R4_A_c": 1,
+                "pfk_R4_c": -1
+            },
+            "name": "pfk_R4-atp binding",
+            "steady_state_flux": 0.3083703537796663,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R42",
+            "metabolites": {
+                "f6p_c": -1,
+                "pfk_R4_AF_c": 1,
+                "pfk_R4_A_c": -1
+            },
+            "name": "pfk_R4_A-f6p binding",
+            "steady_state_flux": 0.3083703537796666,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_R43",
+            "metabolites": {
+                "adp_c": 1,
+                "fdp_c": 1,
+                "h_c": 1,
+                "pfk_R4_AF_c": -1,
+                "pfk_R4_c": 1
+            },
+            "name": "pfk_R4_AF catalyzation",
+            "steady_state_flux": 0.3083703537796666,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 0.0011,
+            "_forward_rate_constant": 1000000000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_L",
+            "metabolites": {
+                "pfk_R0_c": -1,
+                "pfk_T0_c": 1
+            },
+            "name": "pfk_R0-pfk_T0 transition",
+            "steady_state_flux": -6.318270106704586e-12,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_T1",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_T0_c": -1,
+                "pfk_T1_c": 1
+            },
+            "name": "pfk_T0-atp binding",
+            "steady_state_flux": -4.361289751938544e-19,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_T2",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_T1_c": -1,
+                "pfk_T2_c": 1
+            },
+            "name": "pfk_T1-atp binding",
+            "steady_state_flux": 4.166009002545926e-17,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_T3",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_T2_c": -1,
+                "pfk_T3_c": 1
+            },
+            "name": "pfk_T2-atp binding",
+            "steady_state_flux": 4.714994749021457e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PFK",
+            "gene_reaction_rule": "",
+            "id": "PFK_T4",
+            "metabolites": {
+                "atp_c": -1,
+                "pfk_T3_c": -1,
+                "pfk_T4_c": 1
+            },
+            "name": "pfk_T3-atp binding",
+            "steady_state_flux": 1.7471807953226685e-15,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R01",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R0_P_c": 1,
+                "pyk_R0_c": -1
+            },
+            "name": "pyk_R0-pep binding",
+            "steady_state_flux": 0.009583905381776564,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R02",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R0_A_c": 1,
+                "pyk_R0_c": -1
+            },
+            "name": "pyk_R0-adp binding",
+            "steady_state_flux": 0.009436232961498604,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R03",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R0_AP_c": 1,
+                "pyk_R0_A_c": -1
+            },
+            "name": "pyk_R0_A-pep binding",
+            "steady_state_flux": 0.009436232961438355,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R04",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R0_AP_c": 1,
+                "pyk_R0_P_c": -1
+            },
+            "name": "pyk_R0_P-adp binding",
+            "steady_state_flux": 0.00958390538178409,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R05",
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R0_AP_c": -1,
+                "pyk_R0_c": 1,
+                "pyr_c": 1
+            },
+            "name": "pyk_R0_AP catalyzation",
+            "steady_state_flux": 0.01902013834322041,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R10",
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R0_c": -1,
+                "pyk_R1_c": 1
+            },
+            "name": "pyk_R0-fdp binding",
+            "steady_state_flux": 1.4509689909702675e-15,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R11",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R1_P_c": 1,
+                "pyk_R1_c": -1
+            },
+            "name": "pyk_R1-pep binding",
+            "steady_state_flux": 0.08795209060054347,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R12",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R1_A_c": 1,
+                "pyk_R1_c": -1
+            },
+            "name": "pyk_R1-adp binding",
+            "steady_state_flux": 0.0865968916943409,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R13",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R1_AP_c": 1,
+                "pyk_R1_A_c": -1
+            },
+            "name": "pyk_R1_A-pep binding",
+            "steady_state_flux": 0.0865968916940996,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R14",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R1_AP_c": 1,
+                "pyk_R1_P_c": -1
+            },
+            "name": "pyk_R1_P-adp binding",
+            "steady_state_flux": 0.08795209060057396,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R15",
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R1_AP_c": -1,
+                "pyk_R1_c": 1,
+                "pyr_c": 1
+            },
+            "name": "pyk_R1_AP catalyzation",
+            "steady_state_flux": 0.17454898229466767,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R20",
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R1_c": -1,
+                "pyk_R2_c": 1
+            },
+            "name": "pyk_R1-fdp binding",
+            "steady_state_flux": 3.8203239033317176e-15,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R21",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R2_P_c": 1,
+                "pyk_R2_c": -1
+            },
+            "name": "pyk_R2-pep binding",
+            "steady_state_flux": 0.30267815935381387,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R22",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R2_A_c": 1,
+                "pyk_R2_c": -1
+            },
+            "name": "pyk_R2-adp binding",
+            "steady_state_flux": 0.2980143803834625,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R23",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R2_AP_c": 1,
+                "pyk_R2_A_c": -1
+            },
+            "name": "pyk_R2_A-pep binding",
+            "steady_state_flux": 0.2980143803832133,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R24",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R2_AP_c": 1,
+                "pyk_R2_P_c": -1
+            },
+            "name": "pyk_R2_P-adp binding",
+            "steady_state_flux": 0.3026781593538084,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R25",
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R2_AP_c": -1,
+                "pyk_R2_c": 1,
+                "pyr_c": 1
+            },
+            "name": "pyk_R2_AP catalyzation",
+            "steady_state_flux": 0.6006925397370484,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R30",
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R2_c": -1,
+                "pyk_R3_c": 1
+            },
+            "name": "pyk_R2-fdp binding",
+            "steady_state_flux": 3.8203239033317176e-15,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R31",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R3_P_c": 1,
+                "pyk_R3_c": -1
+            },
+            "name": "pyk_R3-pep binding",
+            "steady_state_flux": 0.46294935508770696,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R32",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R3_A_c": 1,
+                "pyk_R3_c": -1
+            },
+            "name": "pyk_R3-adp binding",
+            "steady_state_flux": 0.45581605722603885,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R33",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R3_AP_c": 1,
+                "pyk_R3_A_c": -1
+            },
+            "name": "pyk_R3_A-pep binding",
+            "steady_state_flux": 0.45581605722661656,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R34",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R3_AP_c": 1,
+                "pyk_R3_P_c": -1
+            },
+            "name": "pyk_R3_P-adp binding",
+            "steady_state_flux": 0.46294935508756674,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R35",
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R3_AP_c": -1,
+                "pyk_R3_c": 1,
+                "pyr_c": 1
+            },
+            "name": "pyk_R3_AP catalyzation",
+            "steady_state_flux": 0.918765412314279,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R40",
+            "metabolites": {
+                "fdp_c": -1,
+                "pyk_R3_c": -1,
+                "pyk_R4_c": 1
+            },
+            "name": "pyk_R3-fdp binding",
+            "steady_state_flux": 4.686459394329741e-16,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R41",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R4_P_c": 1,
+                "pyk_R4_c": -1
+            },
+            "name": "pyk_R4-pep binding",
+            "steady_state_flux": 0.26553217347307634,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R42",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R4_A_c": 1,
+                "pyk_R4_c": -1
+            },
+            "name": "pyk_R4-adp binding",
+            "steady_state_flux": 0.2614407538291608,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R43",
+            "metabolites": {
+                "pep_c": -1,
+                "pyk_R4_AP_c": 1,
+                "pyk_R4_A_c": -1
+            },
+            "name": "pyk_R4_A-pep binding",
+            "steady_state_flux": 0.26144075383013615,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R44",
+            "metabolites": {
+                "adp_c": -1,
+                "pyk_R4_AP_c": 1,
+                "pyk_R4_P_c": -1
+            },
+            "name": "pyk_R4_P-adp binding",
+            "steady_state_flux": 0.2655321734729063,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_R45",
+            "metabolites": {
+                "atp_c": 1,
+                "h_c": -1,
+                "pyk_R4_AP_c": -1,
+                "pyk_R4_c": 1,
+                "pyr_c": 1
+            },
+            "name": "pyk_R4_AP catalyzation",
+            "steady_state_flux": 0.5269729273031317,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_equilibrium_constant": 19.0,
+            "_forward_rate_constant": 1000000000000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_L",
+            "metabolites": {
+                "pyk_R0_c": -1,
+                "pyk_T0_c": 1
+            },
+            "name": "pyk_R0-pyk_T0 transition",
+            "steady_state_flux": -3.3881317890172014e-09,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_T1",
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T0_c": -1,
+                "pyk_T1_c": 1
+            },
+            "name": "pyk_T0-atp binding",
+            "steady_state_flux": 3.0598147302725485e-12,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_T2",
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T1_c": -1,
+                "pyk_T2_c": 1
+            },
+            "name": "pyk_T1-atp binding",
+            "steady_state_flux": 2.6296334284897255e-12,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_T3",
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T2_c": -1,
+                "pyk_T3_c": 1
+            },
+            "name": "pyk_T2-atp binding",
+            "steady_state_flux": 3.278292867583726e-13,
+            "subsystem": "Glycolysis"
+        },
+        {
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "enzyme_module_id": "PYK",
+            "gene_reaction_rule": "",
+            "id": "PYK_T4",
+            "metabolites": {
+                "atp_c": -1,
+                "pyk_T3_c": -1,
+                "pyk_T4_c": 1
+            },
+            "name": "pyk_T3-atp binding",
+            "steady_state_flux": 2.4508399101512533e-15,
+            "subsystem": "Glycolysis"
+        }
+    ],
+    "units": [
+        {
+            "_id": "mM",
+            "list_of_units": [
+                {
+                    "_exponent": -1,
+                    "_kind": "litre",
+                    "_multiplier": 1,
+                    "_scale": 0
+                },
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Millimolar"
+        },
+        {
+            "_id": "hr",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 3600,
+                    "_scale": 0
+                }
+            ],
+            "name": "hour"
+        }
+    ],
+    "version": "1"
+}

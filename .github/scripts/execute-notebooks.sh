@@ -5,7 +5,7 @@ set -e
 docs_dir=$( cd "$(dirname "$0")/../../docs" ; pwd -P )
 
 # Default arguments if none provided
-to='notebook'
+to='notebook' 
 if [ "$#" -eq 0 ] ; then \
     additional_dir='additional'
     sb2_chapters_dir='education/sb2/chapters'
@@ -50,7 +50,7 @@ else
                 if echo $to | grep -Ev "^(webpdf)$" ; then \
                     allow_chromium_download="--allow-chromium-download"
                 elif echo $to | grep -Ev "^(html|webpdf|notebook)$" ; then \
-                    echo "Bad '--to' value, defaulting to notebook"
+                    echo "Bad '--to' value, defaulting to notebook" 
                     to='notebook'
                 fi
                 ;;
@@ -61,8 +61,8 @@ else
                 cleanup='true'
                 ;;
         esac
-        shift
-    done
+        shift 
+    done 
 fi
 
 options=$( \
@@ -81,13 +81,13 @@ for directory in $additional_dir \
     if [ $directory ] ; then \
         for notebook in $(find $docs_dir/$directory -type f -name "*.ipynb" | sort -u ); do \
             echo "Executing $( basename $notebook )"
-            jupyter nbconvert --execute $notebook $options
+            jupyter nbconvert --execute $notebook $options 
         done
-    fi
+    fi 
     done
 
 if [ ! -z cleanup ] ;  then \
-    echo "Cleaning up..."
+    echo "Cleaning up..." 
     sh $( cd "$(dirname "$0")" ; pwd -P )/clean.sh
-fi
+fi 
 echo "Finished"

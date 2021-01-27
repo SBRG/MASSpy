@@ -1,0 +1,403 @@
+{
+    "boundary_conditions": {},
+    "compartments": {
+        "l": "Large",
+        "m": "Medium",
+        "s": "Small"
+    },
+    "custom_parameters": {
+        "volume_l": 10,
+        "volume_m": 5,
+        "volume_s": 1
+    },
+    "custom_rates": {
+        "SK_x1_l": "kf_SK_x1_l",
+        "SK_y1_m": "kf_SK_y1_m",
+        "SK_z1_s": "kf_SK_z1_s"
+    },
+    "enzyme_modules": [],
+    "genes": [],
+    "id": "MultiCompartment",
+    "metabolites": [
+        {
+            "_initial_condition": 0.1,
+            "compartment": "l",
+            "id": "x1_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.0037915854572904543,
+            "compartment": "l",
+            "id": "x2_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.1875,
+            "compartment": "l",
+            "id": "x3_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 1.978064343922148,
+            "compartment": "l",
+            "id": "y2_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.02193565607785344,
+            "compartment": "l",
+            "id": "y3_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 3.5000000000062013,
+            "compartment": "l",
+            "id": "x4_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.03750000000000512,
+            "compartment": "l",
+            "id": "x5_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 2.6666666671522097,
+            "compartment": "l",
+            "id": "z1_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.05000000000015002,
+            "compartment": "l",
+            "id": "z2_l",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.15,
+            "compartment": "m",
+            "id": "y1_m",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.6838181610234225,
+            "compartment": "m",
+            "id": "y2_m",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.15,
+            "compartment": "m",
+            "id": "y3_m",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0.05,
+            "compartment": "m",
+            "id": "y4_m",
+            "name": ""
+        },
+        {
+            "_initial_condition": 26.76666667152239,
+            "compartment": "s",
+            "id": "z1_s",
+            "name": ""
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SK_x1_l",
+            "metabolites": {
+                "x1_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 2.5,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_x1_l",
+            "metabolites": {
+                "x1_l": -1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 7.5,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R1_X",
+            "metabolites": {
+                "x1_l": -1,
+                "x2_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 100,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R_XY",
+            "metabolites": {
+                "x2_l": -1,
+                "x3_l": 1,
+                "y2_l": -1,
+                "y3_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 4,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R2_X",
+            "metabolites": {
+                "x3_l": -1,
+                "x4_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.5,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R3_X",
+            "metabolites": {
+                "x4_l": -1,
+                "x5_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R_XZ",
+            "metabolites": {
+                "x4_l": 1,
+                "x5_l": -1,
+                "z1_l": -1,
+                "z2_l": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 20,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_x5_l",
+            "metabolites": {
+                "x5_l": -1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 5,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SK_y1_m",
+            "metabolites": {
+                "y1_m": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R1_Y",
+            "metabolites": {
+                "y1_m": -1,
+                "y2_m": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R_Ytr",
+            "metabolites": {
+                "y2_l": 1,
+                "y2_m": -1,
+                "y3_l": -1,
+                "y3_m": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R2_Y",
+            "metabolites": {
+                "y3_m": -1,
+                "y4_m": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R3_Y",
+            "metabolites": {
+                "y1_m": 1,
+                "y4_m": -1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 20,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_y4_m",
+            "metabolites": {
+                "y4_m": -1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 10,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "SK_z1_s",
+            "metabolites": {
+                "z1_s": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "R_Ztr",
+            "metabolites": {
+                "z1_l": 1,
+                "z1_s": -1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 20,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "DM_z2_l",
+            "metabolites": {
+                "z2_l": -1
+            },
+            "name": ""
+        }
+    ],
+    "units": [
+        {
+            "_id": "min",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 60,
+                    "_scale": 1
+                }
+            ],
+            "name": "Minute"
+        },
+        {
+            "_id": "mmol",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "mole"
+        },
+        {
+            "_id": "mL",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "liter",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Milliliters"
+        },
+        {
+            "_id": "mol_per_mL",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "gram",
+                    "_multiplier": 1,
+                    "_scale": 1
+                },
+                {
+                    "_exponent": -1,
+                    "_kind": "liter",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Concentration"
+        }
+    ],
+    "version": "1"
+}

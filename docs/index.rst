@@ -5,17 +5,18 @@ MASSpy: Modeling Dynamic Biological Processes in Python
    :width: 400
    :align: center
 
-|PyVer| |PyPiVer| |DocVer| |DocImgSz| |LIC| |RTD| |Tests| |Black| |Precom| |CodeCov|
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |RTD| |LIC| 
+
 
 What is MASSpy?
 ---------------
 The **M**\ass **A**\ction **S**\toichiometric **S**\imulation **py**\thon
 (**MASSpy**) package contains modules for the construction, simulation, and
-analysis of kinetic models of biochemical reaction systems. **MASSpy** is built to
+analysis of kinetic models of biochemical reaction systems. **MASSpy** is built to 
 integrate seamlessly with **COBRApy** :cite:`ELPH13`, a widely used modeling
 software package for constraint-based reconstruction and analysis of biochemical
-reaction systems. **MASSpy**  can be used separately from or in conjunction with
-**COBRApy**, providing a vast assortment of modeling techniques and tools that enable
+reaction systems. **MASSpy**  can be used separately from or in conjunction with 
+**COBRApy**, providing a vast assortment of modeling techniques and tools that enable 
 different workflows. Additional information about **COBRApy** can be found in its
 `documentation <https://cobrapy.readthedocs.io/en/stable/>`__ or
 `GitHub page <https://opencobra.github.io/cobrapy/>`__.
@@ -36,11 +37,11 @@ There are various ways to get started with the **MASSpy** package. The guides be
    Ready to dive into **MASSpy** right away? Check out the :ref:`/installation/quickstart.rst`.
 
 **Optimization Solvers**:
-   In order to utilize certain **MASSpy** features, additional optimization capabilities (e.g., quadratic programming) are necessary.
+   In order to utilize certain **MASSpy** features, additional optimization capabilities (e.g., quadratic programming) are necessary. 
    Read more at :ref:`/installation/solvers.rst`.
 
 **Docker Containers**:
-   Need a standardized, ready-to-deploy container for your project? Learn how to set up :ref:`/installation/docker.rst` for **MASSpy**.
+   Need a standardized, ready-to-deploy container for your project? Learn how to set up :ref:`/installation/docker.rst` for **MASSpy**.  
 
 .. toctree::
    :maxdepth: 1
@@ -91,7 +92,7 @@ Interested in seeing more of **MASSpy** in action? Browse through the :ref:`Gall
 
 Educational Resources
 ---------------------
-Need to review the basic principles of dynamic simulation and analysis? Educational resources utilizing **MASSpy** are outlined below and available for academic purposes.
+Need to review the basic principles of dynamic simulation and analysis? Educational resources utilizing **MASSpy** are outlined below and available for academic purposes. 
 
    * :ref:`/education/sb2/index.rst`
 
@@ -122,7 +123,7 @@ Not sure how to use a specific method or function? Try searching the :ref:`/auto
 
    additional/faqs.ipynb
    additional/code_repositories.rst
-   references.rst
+   zreferences.rst
 
 
 Indices and tables
@@ -135,40 +136,18 @@ Indices and tables
 
 .. |PyVer| image:: https://img.shields.io/pypi/pyversions/masspy?logo=Python&style=plastic
     :target: https://www.python.org/downloads/
-    :alt: Supported Python Versions
 
 .. |PyPiVer| image:: https://img.shields.io/pypi/v/masspy?logo=PyPi&style=plastic
     :target: https://pypi.org/project/masspy/
-    :alt: Current PyPi version
 
 .. |DocVer| image:: https://img.shields.io/docker/v/sbrg/masspy?label=Docker&logo=Docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
-    :alt: Current Docker version
 
 .. |DocImgSz| image:: https://img.shields.io/docker/image-size/sbrg/masspy?logo=docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/masspy
-    :alt: Current Docker image size
 
 .. |RTD| image:: https://img.shields.io/readthedocs/masspy/latest?logo=Read%20The%20Docs&style=plastic
     :target: https://masspy.readthedocs.io/en/latest/
-    :alt: Current documentation status
 
 .. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
     :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
-    :alt: MIT License
-
-.. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/CI-CD%20test?label=CI-CD%20test&logo=GitHub%20Actions&style=plastic
-    :target: https://github.com/SBRG/MASSpy/actions?query=workflow%3A%22CI-CD+test%22
-    :alt: CI-CD testing status
-
-.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
-    :alt: Black
-
-.. |Precom| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-   :target: https://github.com/pre-commit/pre-commit
-   :alt: pre-commit
-
-.. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/SBRG/MASSpy
-    :alt: Codecov

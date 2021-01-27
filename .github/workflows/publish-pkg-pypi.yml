@@ -1,0 +1,51 @@
+name: Publish package to Python Packaging Index (PyPi)
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '^v[0-9]+.[0-9]+.[0-9]+$'
+
+jobs:
+  build-and-publish:
+    name: Build package and publish to PyPi
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        id: checkout
+        uses: actions/checkout@v2
+      -
+        name: Setup Python
+        id: setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      -
+        name: Install dependencies
+        id: install-deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel
+      -
+        name: Build package distribitions
+        id: build-distribitions
+        run: |
+          python setup.py sdist bdist_wheel
+      -
+        name: Publish package to Test PyPI
+        id: test-publish
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.SBRG_MACHINE_PYPI_TEST_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          skip_existing: true
+      -
+        name: Publish package to PyPI
+        id: publish
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.SBRG_MACHINE_PYPI_TOKEN }}
