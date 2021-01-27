@@ -1,13 +1,13 @@
 # This is a template license for creating a token server client license for the MASSpy Docker container
 # The following options can be configured (see https://www.gurobi.com/documentation/9.0/quickstart_linux/creating_a_token_server_cl.html#subsection:clientlicensetoken ).
-# Remove an option or leave blank to use the default value. 
+# Remove an option or leave blank to use the default value.
 # At a minimum, the TOKENSERVER value must be set to the IP or name of the token server computer
-# Note: The MASSpy Docker container can ONLY work with floating licenses. 
+# Note: The MASSpy Docker container can ONLY work with floating licenses.
 
 # See https://www.gurobi.com/documentation/9.0/quickstart_linux/retrieving_a_floating_lice.html on retrieving a floating licence
 # See https://www.gurobi.com/documentation/9.0/quickstart_linux/retrieving_a_compute_serve.html on Creating a token server client license
 
-# The minimum requirement for a token server client license is to set TOKENSERVER with the 
+# The minimum requirement for a token server client license is to set TOKENSERVER with the
 # name or IP address of the token server computer.
 # All other options are optional and should be removed to utilize the default.
 TOKENSERVER=

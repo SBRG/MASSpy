@@ -5,25 +5,23 @@
 # Required
 version: 2
 
+# Docker image for build
+build:
+  image: latest
+
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
   configuration: docs/conf.py
 
-# Build documentation with MkDocs
-#mkdocs:
-#  configuration: mkdocs.yml
-
-# Optionally build docs in additional formats such as PDF and ePub
 formats:
   - htmlzip
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.7
+  version: 3
   install:
-    - requirements: docs/requirements.txt
-    - requirements: requirements.txt
     - method: pip
       path: .
-  system_packages: true
+      extra_requirements:
+        - docs

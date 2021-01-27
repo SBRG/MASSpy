@@ -1,5 +1,20 @@
-include README.rst LICENSE
-include mass
-include mass/test/data/maps/*.json
-include mass/test/data/models/*.json
-include mass/test/data/models/*.xml
+include \
+    *.yml \
+    *.yaml \
+    .bumpversion.cfg \
+    .dockerignore
+
+graft docker
+graft docs
+graft release-notes
+graft src
+graft tests
+
+global-exclude \
+    *.bin \
+    *.py[cod] \
+    __pycache__ \
+    .DS_Store \
+
+prune docs/_build
+prune docs/**/.ipynb_checkpoints
