@@ -113,28 +113,27 @@ jobs:
         uses: actions/checkout@v2
       -
         name: Set up Python ${{ env.ACTIONS_SETUP_PY3 }}
-        id: setup-py
+        id: setup
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.ACTIONS_SETUP_PY3 }}
       -
-        name: Set up Pandoc
-        id: setup-pandoc
-        uses: r-lib/actions/setup-pandoc@v1
-      -
-        name: Set Python ${{ env.ACTIONS_SETUP_PY3 }} and Pandoc cache
+        name: Set Python ${{ env.ACTIONS_SETUP_PY3 }} cache
         id: cache
         uses: actions/cache@v2
         with:
           path: |
             ${{ env.pythonLocation }}
-            ${{ runner.temp }}
           key: ${{ runner.os }}-pydeps-${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}
       -
         name : Install dependencies
         id: install-deps
         run: |
           python -m pip install ${{ env.PIP_INSTALL_OPTS }} pip setuptools tox
+      -
+        name: Set up pandoc
+        id: pandoc
+        uses: r-lib/actions/setup-pandoc@v1
       -
         name: Run additional checks via tox
         id: run-tox
