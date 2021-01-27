@@ -11,8 +11,8 @@ Docker image::
 
     MASSpy                   # Source directory
     └── docker               # Root directory for build context
-        ├── Dockerfile
-        ├── cplex
+        ├── Dockerfile       
+        ├── cplex 
         │   ├── cplex_studio1210.linux-x86-64.bin
         │   └── cplex.install.properties
         ├── gurobi
@@ -23,9 +23,9 @@ The MASSpy image only requires the Dockerfile in its "context" to be built. Anyt
 as outlined below:
 
 **Dockerfile** :
-    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`__ required to build the image.
+    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`_ required to build the image.
 
-**cplex** :
+**cplex** : 
     Directory used to install IBM CPLEX Optimization studio 12.10
 
     - **cplex_studio1210.linux-x86-64.bin**:
@@ -33,22 +33,22 @@ as outlined below:
     - **cplex.install.properties**:
         Installer properties for CPLEX. Acecpts license agreement and sets silent install. Ignored if no installer exists in build context.
 
-**gurobi** :
+**gurobi** : 
     Directory used to install Gurobi Optimizer 9.0.3
 
-    - **gurobi.lic**:
+    - **gurobi.lic**: 
         Gurobi license file. The presence of this file triggers the Gurobi installation process.
-    - **gurobi.lic.template**:
-        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`__.
+    - **gurobi.lic.template**: 
+        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`_.
         Can be included to configure the token client license at a later point from within the container.
 
 **docker-entrypoint.sh** :
-    A shell script for the `container entrypoint <https://docs.docker.com/engine/reference/builder/#entrypoint>`__ to replace
+    A shell script for the `container entrypoint <https://docs.docker.com/engine/reference/builder/#entrypoint>`_ to replace
     the customize the standard docker entrypoint behavior. Must be named ``docker-entrypoint.sh`` to work.
 
 Build-time variables
 --------------------
-Certain `build-time variables <https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg>`__ are set and passed as arguments
+Certain `build-time variables <https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg>`_ are set and passed as arguments
 when building the image. Build-time variables are passed to ``--build-arg`` flag in the form of ``VARIABLE=VALUE``.
 All build-args are optional and are not required to be defined at the time when the image is built.
 
@@ -56,15 +56,15 @@ The following build-time variables can be utilized by the MASSpy Dockerfile at t
 
 **verbose**
     Integer 0 or 1 determining whether to include additional output as the image builds.
-    Can be either the value ``0`` to disabled verbosity, or ``1`` to enabled it.
+    Can be either the value ``0`` to disabled verbosity, or ``1`` to enabled it.  
     Primarily for debugging purposes. Default value is ``0``.
 
 **python_version**
     Indicates python base image to use. Must be Python 3.6+. Default is ``3.7``.
 
 **mass_version**
-    The branch or tagged version of MASSpy to use in the Docker container. Value will be passed to ``git checkout``. Must be one of the following:
-
+    The branch or tagged version of MASSpy to use in the Docker container. Value will be passed to ``git checkout``. Must be one of the following: 
+    
     * A branch on the MASSpy GitHub Repository.
     * ``{MAJOR}.{MINOR}.{PATCH}`` to use a specific version of MASSpy.
 
@@ -90,4 +90,4 @@ and run the following build command::
         -f ./docker/Dockerfile ./
 
 The resulting image ``sbrg/masspy:local`` can then be used to build a container using ``docker run``.
-Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`__.
+Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`_.

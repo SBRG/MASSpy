@@ -1,0 +1,76 @@
+{
+    "boundary_conditions": {},
+    "custom_parameters": {},
+    "custom_rates": {},
+    "enzyme_modules": [],
+    "genes": [],
+    "id": "Simple_Toy",
+    "metabolites": [
+        {
+            "_initial_condition": 1,
+            "id": "x1",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0,
+            "id": "x2",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0,
+            "id": "x3",
+            "name": ""
+        },
+        {
+            "_initial_condition": 0,
+            "id": "x4",
+            "name": ""
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 1,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "v1",
+            "metabolites": {
+                "x1": -1,
+                "x2": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 0.01,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "v2",
+            "metabolites": {
+                "x2": -1,
+                "x3": 1
+            },
+            "name": ""
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.0001,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "v3",
+            "metabolites": {
+                "x3": -1,
+                "x4": 1
+            },
+            "name": ""
+        }
+    ],
+    "units": [],
+    "version": "1"
+}

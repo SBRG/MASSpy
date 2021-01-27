@@ -1,0 +1,6 @@
+# Requirements to develop MASSpy
+pytest
+pytest-benchmark
+bumpversion
+escher
+notebook
