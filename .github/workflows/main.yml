@@ -5,14 +5,14 @@ on:
     branches:
     - master
     - devel
-    - devel-0.2.0
+    - devel-*
     tags:
     - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches:
     - master
     - devel
-    - devel-0.2.0
+    - devel-*
   workflow_dispatch:
       inputs:
         py-act:
@@ -113,16 +113,22 @@ jobs:
         uses: actions/checkout@v2
       -
         name: Set up Python ${{ env.ACTIONS_SETUP_PY3 }}
-        id: setup
+        id: setup-py
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.ACTIONS_SETUP_PY3 }}
       -
-        name: Set Python ${{ env.ACTIONS_SETUP_PY3 }} cache
+        name: Set up Pandoc
+        id: setup-pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+      -
+        name: Set Python ${{ env.ACTIONS_SETUP_PY3 }} and Pandoc cache
         id: cache
         uses: actions/cache@v2
         with:
-          path: ${{ env.pythonLocation }}
+          path: |
+            ${{ env.pythonLocation }}
+            ${{ runner.pythonLocation }}
           key: ${{ runner.os }}-pydeps-${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}
       -
         name : Install dependencies
