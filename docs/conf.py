@@ -31,13 +31,13 @@ from mass import __version__ as release  # noqa: E402
 # ones.
 extensions = [
     "nbsphinx",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
     "autoapi.extension",
     "sphinxcontrib.bibtex",
     "sphinx_rtd_theme",
