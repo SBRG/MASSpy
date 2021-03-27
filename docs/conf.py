@@ -9,9 +9,11 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute.
-
+import datetime
 import os
 import sys
+
+import pkg_resources
 
 
 SRC_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -19,8 +21,14 @@ sys.path.insert(0, SRC_PATH)
 
 import sphinx_rtd_theme  # noqa: E402
 
-# This import has to be here below inserting SRC path.
-from mass import __version__ as release  # noqa: E402
+
+# -- Project information ------------------------------------------------------
+
+project = "MASSpy"
+author = "Z. Haiman"
+version = pkg_resources.get_distribution("masspy").version
+release = version
+copyright = ", ".join((datetime.date.today().year, author))
 
 
 # -- General configuration ----------------------------------------------------
@@ -79,17 +87,6 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 pygments_style = "sphinx"
 
 bibtex_bibfiles = ["references.bib"]
-
-# -- Project information ------------------------------------------------------
-
-project = "MASSpy"
-copyright = "2019, Z. Haiman"
-author = "Z. Haiman"
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-version = ".".join(release.split(".")[:2])
 
 # -- Options for HTML output --------------------------------------------------
 

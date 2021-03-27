@@ -19,7 +19,9 @@ build-backend = "setuptools.build_meta"
 line-length = 88
 python-version = [
     "py36",
-    "py37"
+    "py37",
+    "py38",
+    "py39"
 ]
 
 
@@ -66,7 +68,7 @@ show_missing = true
 precision = 2
 
 ################################################################################
-# Testing configuration                                                        #
+# Tox configuration                                                            #
 ################################################################################
 
 [tool.tox]
@@ -78,7 +80,7 @@ envlist =
     lint,
     pypi-description,
     safety,
-    py3{6,7},
+    py3{6,7,8,9},
     docs,
     report
 isolated_build = true
@@ -89,6 +91,8 @@ skip_missing_interpreters = true
 python =
     3.6: py36
     3.7: py37
+    3.8: py38
+    3.9: py39
 
 
 [testenv]
@@ -102,8 +106,8 @@ setenv =
 usedevelop = true
 install_command = python -m pip install --upgrade --upgrade-strategy eager {opts} {packages}
 depends =
-    py3{6,7}: clean
-    report: py3{6,7}
+    py3{6,7,8,9}: clean
+    report: py3{6,7,8,9}
 
 
 [testenv:clean]
@@ -138,7 +142,7 @@ commands =
     safety check --full-report
 
 
-[testenv:py3{6,7}]
+[testenv:py3{6,7,8,9}]
 description = Run tests under {basepython}.
 extras = tests
 commands =
