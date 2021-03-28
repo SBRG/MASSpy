@@ -6,13 +6,12 @@
 [![Read the Docs][4]](https://masspy.readthedocs.io/)
 [![Codecov][5]](https://app.codecov.io/gh/SBRG/MASSpy)
 [![GitHub License][6]](https://github.com/SBRG/MASSpy/blob/master/LICENSE)
-
-<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/master/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="100" height="100"/></p>
-
 [![Docker Image Size (latest semver)][7]](https://hub.docker.com/r/sbrg/masspy)
 [![Code style: black][8]](https://github.com/psf/black)
 [![pre-commit][9]](https://github.com/pre-commit/pre-commit)
 [![MASSpy Publication][10]](https://doi.org/10.1371/journal.pcbi.1008208)
+
+<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/master/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
 
 ## What is MASSpy?
 
