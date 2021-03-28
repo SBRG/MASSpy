@@ -32,7 +32,7 @@ lines_after_imports = 2
 
 
 [tool.towncrier]
-package = "masspy"
+package = "mass"
 package_dir = "src"
 filename = "NEWS.rst"
 directory = "news/"
