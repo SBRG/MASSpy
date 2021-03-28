@@ -27,7 +27,7 @@ import sphinx_rtd_theme  # noqa: E402
 project = "MASSpy"
 author = "Z. Haiman"
 version = pkg_resources.get_distribution("masspy").version
-release = version
+release = ".".join(version.split(".")[:2])
 copyright = ", ".join((datetime.date.today().year, author))
 
 
