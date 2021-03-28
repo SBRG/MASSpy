@@ -1,7 +1,7 @@
 title = "MASSpy TOML configuration file"
 
 ################################################################################
-# Build tools configuration                                                    #
+# Build and lint tools configuration                                           #
 ################################################################################
 
 [build-system]
@@ -11,9 +11,6 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
-################################################################################
-# Lint tools configuration                                                     #
-################################################################################
 
 [tool.black]
 line-length = 88
@@ -33,6 +30,21 @@ src_paths = [
 indent = 4
 lines_after_imports = 2
 
+
+[tool.towncrier]
+package = "masspy"
+package_dir = "src"
+filename = "NEWS.rst"
+directory = "news/"
+title_format = "{version} ({project_date})"
+issue_format = "`#{issue} <https://github.com/sbrg/masspy/issues/{issue}>`_"
+type = [
+  { name = "Features",                  directory = "feature", showcontent = true },
+  { name = "Bug Fixes",                 directory = "bugfix",  showcontent = true },
+  { name = "Improved Documentation",    directory = "doc",     showcontent = true },
+  { name = "Deprecations and Removals", directory = "removal", showcontent = true },
+  { name = "Miscellaneous",             directory = "misc",    showcontent = false },
+]
 ################################################################################
 # Testing tools configuration                                                  #
 ################################################################################

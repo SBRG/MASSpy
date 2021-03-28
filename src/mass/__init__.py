@@ -4,8 +4,6 @@ from os import name as _name
 from os.path import abspath as _abspath
 from os.path import dirname as _dirname
 
-import pkg_resources
-
 from mass import enzyme_modules, io
 from mass.core import (
     MassConfiguration,
@@ -20,7 +18,7 @@ from mass.simulation import Simulation
 from mass.util import qcqa_model, show_versions, strip_time
 
 
-__version__ = pkg_resources.get_distribution("masspy").version
+__version__ = "0.2.0.dev5"
 
 # set the warning format to be prettier and fit on one line
 _MASS_PATH = _dirname(_abspath(__file__))
