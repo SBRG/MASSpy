@@ -1,4 +1,4 @@
-# MASSpy - Mass Action Stoichiometric Simulation in Python 
+# MASSpy - Mass Action Stoichiometric Simulation in Python
 
 [![MASSpy release (latest SemVer)][1]](https://github.com/SBRG/MASSpy/releases)
 [![PyPI - Python Version][2]](https://pypi.org/project/masspy/)
@@ -37,7 +37,7 @@ install the software from the [Python Package Index](https://pypi.org/project/ma
 It is recommended to do this inside a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/)::
 
     pip install "masspy"
-    
+
 To install **MASSpy** with all optional dependencies:
 
     pip install "masspy[all]"
@@ -66,11 +66,11 @@ The documentation for **MASSpy** is found at https://masspy.rtfd.io with install
 
 To cite the **MASSpy** software publication:
 
-> Haiman ZB, Zielinski DC, Koike Y, Yurkovich JT, Palsson BO (2021) 
-> MASSpy: Building, simulating, and visualizing dynamic biological models in Python using mass action kinetics. 
+> Haiman ZB, Zielinski DC, Koike Y, Yurkovich JT, Palsson BO (2021)
+> MASSpy: Building, simulating, and visualizing dynamic biological models in Python using mass action kinetics.
 > PLOS Computational Biology 17(1): e1008208. https://doi.org/10.1371/journal.pcbi.1008208
 
-Additionally, please consider citing **COBRApy**, **libRoadRunner**, and other software dependencies of MASSpy! Citations and links to several dependencies as well as other useful literature sources are found in [Works Cited](https://masspy.readthedocs.io/en/latest/references.html) and [Code Repositories](https://masspy.readthedocs.io/en/latest/additional/code_repositories.html) sections of the documentation.
+Additionally, please consider citing **COBRApy**, **libRoadRunner**, and other software dependencies of MASSpy! Citations and links to several dependencies as well as other useful literature sources are found in the [Works Cited](https://masspy.readthedocs.io/en/latest/references.html) and [Code Repositories](https://masspy.readthedocs.io/en/latest/additional/code_repositories.html) sections of the documentation.
 
 ## Support
 
@@ -78,7 +78,7 @@ Not sure how to [file an issue](.github/SUPPORT.md), want to [contribute](.githu
 
 ## License
 
-The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/master/LICENSE). However, please note that binary packages (e.g., GLPK) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc) will be bound by their licenses as well.
+The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/master/LICENSE). However, please note that binary packages (e.g., GLPK) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc.) will be bound by their respective license agreements as well.
 
 [1]: https://img.shields.io/github/v/release/sbrg/masspy?label=MASSpy&sort=semver&style=plastic
 [2]: https://img.shields.io/pypi/pyversions/masspy?logo=python&style=plastic
