@@ -78,7 +78,7 @@ Not sure how to [file an issue](.github/SUPPORT.md), want to [contribute](.githu
 
 ## License
 
-The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/master/LICENSE). However, please note that binary packages (e.g., GLPK) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc.) will be bound by their respective license agreements as well.
+The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/master/LICENSE). However, please note that binary packages (e.g., GLPK, CPLEX, etc.) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc.) will be bound by their respective license agreements as well.
 
 [1]: https://img.shields.io/github/v/release/sbrg/masspy?label=MASSpy&sort=semver&style=plastic
 [2]: https://img.shields.io/pypi/pyversions/masspy?logo=python&style=plastic
