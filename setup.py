@@ -29,20 +29,20 @@ except IOError:
 if __name__ == "__main__":
     setup(
         name="masspy",
-        version="0.1.1",
+        version="0.1.2",
         packages=find_packages(),
         setup_requires=setup_requirements,
         install_requires=[
-            "cobra~=0.19.0",
-            "depinfo~=1.5",
-            "escher~=1.7",       # Optional for network visualiation
-            "libroadrunner~=2.0",
-            "matplotlib~=3.2",
-            "numpy~=1.19",
-            "pandas~=1.0",
-            "scipy~=1.2",
-            "six~=1.11",
-            "sympy~=1.0",
+            "cobra",
+            "depinfo",
+            "escher",       # Optional for network visualiation
+            "libroadrunner",
+            "matplotlib==3.2",
+            "numpy",
+            "pandas",
+            "scipy",
+            "six",
+            "sympy",
             "tabulate~=0.8"
         ],
         # TODO Add when implemented
@@ -74,7 +74,6 @@ if __name__ == "__main__":
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Build Tools',
             'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: MIT',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
