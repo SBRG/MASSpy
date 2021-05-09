@@ -126,7 +126,7 @@ deps =
 commands =
     pre-commit install
     pre-commit autoupdate
-    pre-commit run --show-diff-on-failure --all-files
+    pre-commit run --all-files --show-diff-on-failure
 
 
 [testenv:safety]
