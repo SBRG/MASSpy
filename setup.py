@@ -12,8 +12,8 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
     setup_requirements.append("pytest-runner")
 
 extras = {
-    "escher": "escher",
-    "json": "simplejson",
+    "escher": ["escher"],
+    "json": ["simplejson"],
 }
 extras["all"] = sorted(extras.values())
 
@@ -35,7 +35,6 @@ if __name__ == "__main__":
         install_requires=[
             "cobra",
             "depinfo",
-            "escher",       # Optional for network visualiation
             "libroadrunner",
             "matplotlib==3.2",
             "numpy",
