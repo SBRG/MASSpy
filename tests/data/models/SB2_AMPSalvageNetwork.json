@@ -1,0 +1,523 @@
+{
+    "boundary_conditions": {
+        "ade_b": 0.001,
+        "adn_b": 0.0012,
+        "amp_b": 0.0867281,
+        "h2o_b": 1.0,
+        "h_b": 6.30957e-05,
+        "hxan_b": 0.002,
+        "ins_b": 0.001,
+        "nh3_b": 0.091002,
+        "pi_b": 2.5
+    },
+    "compartments": {
+        "c": "Cytosol"
+    },
+    "custom_parameters": {},
+    "custom_rates": {},
+    "enzyme_modules": [],
+    "genes": [],
+    "id": "AMPSalvageNetwork",
+    "metabolites": [
+        {
+            "_initial_condition": 0.0012,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C10H13N5O4",
+            "id": "adn_c",
+            "name": "Adenosine"
+        },
+        {
+            "_initial_condition": 0.001,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H5N5",
+            "id": "ade_c",
+            "name": "Adenine"
+        },
+        {
+            "_initial_condition": 0.01,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H11N4O8P",
+            "id": "imp_c",
+            "name": "Inosine monophosphate"
+        },
+        {
+            "_initial_condition": 0.001,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C10H12N4O5",
+            "id": "ins_c",
+            "name": "Inosine"
+        },
+        {
+            "_initial_condition": 0.002,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "C5H4N4O",
+            "id": "hxan_c",
+            "name": "Hypoxanthine"
+        },
+        {
+            "_initial_condition": 0.06,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "r1p_c",
+            "name": "Alpha-D-Ribose 1-phosphate"
+        },
+        {
+            "_initial_condition": 0.00494,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C5H9O8P",
+            "id": "r5p_c",
+            "name": "Alpha-D-Ribose 5-phosphate"
+        },
+        {
+            "_initial_condition": 0.005,
+            "charge": -5,
+            "compartment": "c",
+            "formula": "C5H8O14P3",
+            "id": "prpp_c",
+            "name": "5-Phospho-alpha-D-ribose 1-diphosphate"
+        },
+        {
+            "_initial_condition": 1.6,
+            "charge": -4,
+            "compartment": "c",
+            "formula": "C10H12N5O13P3",
+            "id": "atp_c",
+            "name": "ATP"
+        },
+        {
+            "_initial_condition": 0.29,
+            "charge": -3,
+            "compartment": "c",
+            "formula": "C10H12N5O10P2",
+            "id": "adp_c",
+            "name": "ADP"
+        },
+        {
+            "_initial_condition": 0.0867281,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "C10H12N5O7P",
+            "id": "amp_c",
+            "name": "AMP"
+        },
+        {
+            "_initial_condition": 2.5,
+            "charge": -2,
+            "compartment": "c",
+            "formula": "HPO4",
+            "id": "pi_c",
+            "name": "Phosphate"
+        },
+        {
+            "_initial_condition": 0.091002,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "H3N",
+            "id": "nh3_c",
+            "name": "Ammonia"
+        },
+        {
+            "_initial_condition": 6.30957e-05,
+            "charge": 1,
+            "compartment": "c",
+            "formula": "H",
+            "id": "h_c",
+            "name": "H+"
+        },
+        {
+            "_initial_condition": 1,
+            "charge": 0,
+            "compartment": "c",
+            "formula": "H2O",
+            "id": "h2o_c",
+            "name": "H2O"
+        }
+    ],
+    "reactions": [
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 62.5,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADNK1",
+            "metabolites": {
+                "adn_c": -1,
+                "adp_c": 1,
+                "amp_c": 1,
+                "atp_c": -1,
+                "h_c": 1
+            },
+            "name": "Adenosine kinase",
+            "steady_state_flux": 0.12,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 1.3836346005504558,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NTD7",
+            "metabolites": {
+                "adn_c": 1,
+                "amp_c": -1,
+                "h2o_c": -1,
+                "pi_c": 1
+            },
+            "name": "5'-nucleotidase (AMP)",
+            "steady_state_flux": 0.12,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.16142403673088654,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "AMPDA",
+            "metabolites": {
+                "amp_c": -1,
+                "h2o_c": -1,
+                "imp_c": 1,
+                "nh3_c": 1
+            },
+            "name": "Adenosine monophosphate deaminase",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 1.4,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "NTD11",
+            "metabolites": {
+                "h2o_c": -1,
+                "imp_c": -1,
+                "ins_c": 1,
+                "pi_c": 1
+            },
+            "name": "5'-nucleotidase (IMP)",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 8.333333333333334,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADA",
+            "metabolites": {
+                "adn_c": -1,
+                "h2o_c": -1,
+                "ins_c": 1,
+                "nh3_c": 1
+            },
+            "name": "Adenosine deaminase",
+            "steady_state_flux": 0.01,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": 0.09,
+            "_forward_rate_constant": 12.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PUNP5",
+            "metabolites": {
+                "hxan_c": 1,
+                "ins_c": -1,
+                "pi_c": -1,
+                "r1p_c": 1
+            },
+            "name": "Purine-nucleoside phosphorylase (Inosine)",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": 13.3,
+            "_forward_rate_constant": 0.2347867752755151,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PPM",
+            "metabolites": {
+                "r1p_c": -1,
+                "r5p_c": 1
+            },
+            "name": "Phosphopentomutase",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 1.1070344129554655,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "PRPPS",
+            "metabolites": {
+                "adp_c": 2,
+                "atp_c": -2,
+                "h_c": 1,
+                "prpp_c": 1,
+                "r5p_c": -1
+            },
+            "name": "Phosphoribosylpyrophosphate synthetase",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 2800.0,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ADPT",
+            "metabolites": {
+                "ade_c": -1,
+                "amp_c": 1,
+                "h2o_c": -1,
+                "h_c": 1,
+                "pi_c": 2,
+                "prpp_c": -1
+            },
+            "name": "",
+            "steady_state_flux": 0.014,
+            "subsystem": "AMPSalvageNetwork"
+        },
+        {
+            "_equilibrium_constant": "inf",
+            "_forward_rate_constant": 0.20413793103448274,
+            "_lower_bound": -1000.0,
+            "_reversible": false,
+            "_upper_bound": 1000.0,
+            "gene_reaction_rule": "",
+            "id": "ATPM",
+            "metabolites": {
+                "adp_c": -1,
+                "atp_c": 1,
+                "h2o_c": 1,
+                "h_c": -1,
+                "pi_c": -1
+            },
+            "name": "ATP maintenance requirement",
+            "steady_state_flux": 0.148,
+            "subsystem": "Misc."
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_adn_c",
+            "metabolites": {
+                "adn_c": -1
+            },
+            "name": "Adenosine sink",
+            "steady_state_flux": -0.009999999999999995,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_ade_c",
+            "metabolites": {
+                "ade_c": -1
+            },
+            "name": "Adenine sink",
+            "steady_state_flux": -0.014,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_ins_c",
+            "metabolites": {
+                "ins_c": -1
+            },
+            "name": "Inosine sink",
+            "steady_state_flux": 0.01,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_hxan_c",
+            "metabolites": {
+                "hxan_c": -1
+            },
+            "name": "Hypoxanthine sink",
+            "steady_state_flux": 0.014,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_nh3_c",
+            "metabolites": {
+                "nh3_c": -1
+            },
+            "name": "Ammonia sink",
+            "steady_state_flux": 0.024,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_pi_c",
+            "metabolites": {
+                "pi_c": -1
+            },
+            "name": "Phosphate sink",
+            "steady_state_flux": 0.0,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_amp_c",
+            "metabolites": {
+                "amp_c": -1
+            },
+            "name": "AMP sink",
+            "steady_state_flux": 0.0,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_h_c",
+            "metabolites": {
+                "h_c": -1
+            },
+            "name": "H+ sink",
+            "steady_state_flux": 0.0,
+            "subsystem": "Pseudoreaction"
+        },
+        {
+            "_equilibrium_constant": 1,
+            "_forward_rate_constant": 100000.0,
+            "_lower_bound": -1000.0,
+            "_reversible": true,
+            "_upper_bound": 1000.0,
+            "annotation": {
+                "sbo": "SBO:0000632"
+            },
+            "gene_reaction_rule": "",
+            "id": "SK_h2o_c",
+            "metabolites": {
+                "h2o_c": -1
+            },
+            "name": "H2O sink",
+            "steady_state_flux": -0.024000000000000007,
+            "subsystem": "Pseudoreaction"
+        }
+    ],
+    "units": [
+        {
+            "_id": "mM",
+            "list_of_units": [
+                {
+                    "_exponent": -1,
+                    "_kind": "litre",
+                    "_multiplier": 1,
+                    "_scale": 0
+                },
+                {
+                    "_exponent": 1,
+                    "_kind": "mole",
+                    "_multiplier": 1,
+                    "_scale": -3
+                }
+            ],
+            "name": "Millimolar"
+        },
+        {
+            "_id": "hr",
+            "list_of_units": [
+                {
+                    "_exponent": 1,
+                    "_kind": "second",
+                    "_multiplier": 3600,
+                    "_scale": 0
+                }
+            ],
+            "name": "hour"
+        }
+    ],
+    "version": "1"
+}

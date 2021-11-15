@@ -1,0 +1,200 @@
+title = "MASSpy TOML configuration file"
+
+################################################################################
+# Build and lint tools configuration                                           #
+################################################################################
+
+[build-system]
+requires = [
+    "setuptools >= 46.4.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+
+[tool.black]
+line-length = 88
+python-version = [
+    "py36",
+    "py37",
+    "py38",
+    "py39"
+]
+
+
+[tool.isort]
+profile = "black"
+src_paths = [
+    "src/mass"
+]
+indent = 4
+lines_after_imports = 2
+
+
+[tool.towncrier]
+package = "mass"
+package_dir = "src"
+filename = "NEWS.rst"
+directory = "news/"
+title_format = "{version} ({project_date})"
+issue_format = "`#{issue} <https://github.com/sbrg/masspy/issues/{issue}>`_"
+type = [
+  { name = "Features",                  directory = "feature", showcontent = true },
+  { name = "Bug Fixes",                 directory = "bugfix",  showcontent = true },
+  { name = "Improved Documentation",    directory = "doc",     showcontent = true },
+  { name = "Deprecations and Removals", directory = "removal", showcontent = true },
+  { name = "Miscellaneous",             directory = "misc",    showcontent = false },
+]
+################################################################################
+# Testing tools configuration                                                  #
+################################################################################
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra --strict-markers --tb=short"
+testpaths = [
+    "tests"
+]
+python_files = [
+    "test_*.py"
+]
+
+
+[tool.coverage.paths]
+source = [
+    "src"
+]
+
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = [
+    "src",
+    "tests"
+]
+
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+
+################################################################################
+# Tox configuration                                                            #
+################################################################################
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+minversion = 3.20
+envlist =
+    clean,
+    lint,
+    pypi-description,
+    safety,
+    py3{6,7,8,9},
+    docs,
+    report
+isolated_build = true
+skip_missing_interpreters = true
+
+
+[gh-actions]
+python =
+    3.6: py36
+    3.7: py37
+    3.8: py38
+    3.9: py39
+
+
+[testenv]
+description = Base test environment configuration.
+passenv =
+    PY_COLORS
+setenv =
+    PYTHONPATH={toxinidir}/tests
+    PYTHONUNBUFFERED=yes
+    PY_COLORS={env:PY_COLORS:1}
+usedevelop = true
+install_command = python -m pip install --upgrade --upgrade-strategy eager {opts} {packages}
+depends =
+    py3{6,7,8,9}: clean
+    report: py3{6,7,8,9}
+
+
+[testenv:clean]
+description = Clean previous coverage reports.
+skip_install = true
+deps =
+    coverage[toml]
+commands =
+    coverage erase
+
+
+[testenv:lint]
+description = Lint code via pre-commit hooks, finishing with isort --> black --> flake8
+skip_install = true
+passenv = *
+setenv =
+    PRE_COMMIT_COLOR={env:PRE_COMMIT_COLOR:auto}
+deps =
+    pre-commit
+commands =
+    pre-commit install
+    pre-commit autoupdate
+    pre-commit run --all-files --show-diff-on-failure
+
+
+[testenv:safety]
+description = Safety check installed dependencies for known security vulnerabilities.
+usedevelop = false
+deps =
+    safety
+commands =
+    safety check --full-report
+
+
+[testenv:py3{6,7,8,9}]
+description = Run tests under {basepython}.
+extras = tests
+commands =
+    pytest {posargs: --cov --cov-report=term-missing --cov-append -vv}
+
+
+[testenv:pypi-description]
+description = Ensure README.rst renders on PyPI via twine.
+basepython = python3
+skip_install = true
+deps =
+    build
+    setuptools
+    twine
+    wheel
+commands =
+    python -m build -s -w -x -n {toxinidir} -o {envtmpdir}/build
+    twine check {envtmpdir}/build/*
+
+
+[testenv:docs]
+description = Use Sphinx to build and check the documentation.
+extras = docs
+allowlist_externals=make
+setenv =
+    BUILDDIR={env:DOCS_BUILDDIR:{envdir}/docs_build}
+    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color -W'}
+commands =
+    make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs html
+    make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs linkcheck
+    python -c 'import pathlib; print(r"Documentation available under file://\\{0\\}".format(pathlib.Path(r"{env:BUILDDIR}/html/index.html")))'
+
+
+[testenv:report]
+description = Report coverage over all test runs.
+skip_install = true
+deps =
+    coverage[toml]
+commands =
+    coverage report
+    coverage html
+
+"""
