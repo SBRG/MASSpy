@@ -1,5 +1,5 @@
 ARG python_version=3.7
-ARG mass_version=0.2.0.dev5
+ARG mass_version=0.1.3.a1
 # Image to checkout and install a specific version of MASSpy
 FROM python:${python_version} AS env-setup
 ARG python_version
