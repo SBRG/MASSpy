@@ -22,8 +22,8 @@ Links to repositories for COnstraint-Based Reconstruction and Analysis (COBRA) p
 
 * **COBRApy**:
   `Homepage <https://opencobra.github.io/cobrapy/>`__ |
-  `GitHub <https://cobrapy.readthedocs.io/en/stable/>`__ |
-  `Documentation <https://cobrapy.readthedocs.io/en/stable/>`__
+  `GitHub <https://cobrapy.readthedocs.io/en/latest/>`__ |
+  `Documentation <https://cobrapy.readthedocs.io/en/latest/>`__
 
 * **Escher**:
   `Homepage <https://escher.github.io/>`__ |

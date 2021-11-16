@@ -86,7 +86,7 @@ Once a CPLEX license has been obtained:
 
 .. note::
     The CPLEX installer must be for **LINUX** to be compatible with the containers built using the
-    `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`__.
+    `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/main/docker/Dockerfile>`__.
 
 **Build Context**: To include CPLEX, the build context must be modified to contain the ``cplex`` subdirectory as follows::
 
@@ -107,7 +107,7 @@ must be obtained first. See :ref:`gurobi-solver` for more information on obtaini
 
 Once a floating Gurobi license has been obtained:
 
-    1. Copy the `gurobi.lic.template <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`__ and
+    1. Copy the `gurobi.lic.template <https://github.com/SBRG/MASSpy/blob/main/docker/gurobi/gurobi.lic.template>`__ and
        rename the file ``gurobi.lic``.
     2. Modify the license file according to the
        `Gurobi documentation <https://www.gurobi.com/documentation/9.0/quickstart_linux/creating_a_token_server_cl.html>`__.

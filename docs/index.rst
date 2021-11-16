@@ -17,16 +17,20 @@ software package for constraint-based reconstruction and analysis of biochemical
 reaction systems. **MASSpy**  can be used separately from or in conjunction with
 **COBRApy**, providing a vast assortment of modeling techniques and tools that enable
 different workflows. Additional information about **COBRApy** can be found in its
-`documentation <https://cobrapy.readthedocs.io/en/stable/>`__ or
+`documentation <https://cobrapy.readthedocs.io/en/latest/>`__ or
 `GitHub page <https://opencobra.github.io/cobrapy/>`__.
 
 Citation
 ~~~~~~~~
-A manuscript is in preparation for publication and will be the proper reference for citing the MASSpy software package in the future.
-In the meantime, feel free to cite the preprint :cite:`HZK+20`, which can be found at bioRxiv.
+To cite the **MASSpy** software publication :cite:`HZK+21`:
 
-   The code and instsructions to reproduce the results presented in the publication is located
-   in the `MASSpy-publication GitHub Repository <https://github.com/SBRG/MASSpy-publication>`__.
+   Haiman ZB, Zielinski DC, Koike Y, Yurkovich JT, Palsson BO (2021)
+   MASSpy: Building, simulating, and visualizing dynamic biological models in Python using mass action kinetics.
+   PLOS Computational Biology 17(1): e1008208. https://doi.org/10.1371/journal.pcbi.1008208
+
+Additionally, please consider citing **COBRApy**, **libRoadRunner**, and other software dependencies of MASSpy! Citations and links to several
+dependencies as well as other useful literature sources are found in the :ref:`/references.rst`
+and :ref:`/additional/code_repositories.rst` sections of the documentation.
 
 Installation and Setup
 ----------------------
@@ -115,10 +119,17 @@ Not sure how to use a specific method or function? Try searching the :ref:`/auto
 
    autoapi/index.rst
 
+Additional Resources
+--------------------
+
+The code and instsructions to reproduce the results presented in the publication is located
+in the `MASSpy-publication GitHub Repository <https://github.com/SBRG/MASSpy-publication>`__.
 
 .. toctree::
    :maxdepth: 1
    :caption: Additional Resources:
+   :hidden:
+
 
    additional/faqs.ipynb
    additional/code_repositories.rst
@@ -170,5 +181,5 @@ Indices and tables
    :alt: pre-commit
 
 .. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/SBRG/MASSpy
+    :target: https://app.codecov.io/gh/SBRG/MASSpy
     :alt: Codecov

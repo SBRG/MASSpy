@@ -23,7 +23,7 @@ The MASSpy image only requires the Dockerfile in its "context" to be built. Anyt
 as outlined below:
 
 **Dockerfile** :
-    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/master/docker/Dockerfile>`__ required to build the image.
+    The `MASSpy Dockerfile <https://github.com/SBRG/MASSpy/blob/main/docker/Dockerfile>`__ required to build the image.
 
 **cplex** :
     Directory used to install IBM CPLEX Optimization studio 12.10
@@ -39,7 +39,7 @@ as outlined below:
     - **gurobi.lic**:
         Gurobi license file. The presence of this file triggers the Gurobi installation process.
     - **gurobi.lic.template**:
-        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/master/docker/gurobi/gurobi.lic.template>`__.
+        `Template for Gurobi license <https://github.com/SBRG/MASSpy/blob/main/docker/gurobi/gurobi.lic.template>`__.
         Can be included to configure the token client license at a later point from within the container.
 
 **docker-entrypoint.sh** :
@@ -68,7 +68,7 @@ The following build-time variables can be utilized by the MASSpy Dockerfile at t
     * A branch on the MASSpy GitHub Repository.
     * ``{MAJOR}.{MINOR}.{PATCH}`` to use a specific version of MASSpy.
 
-    Default is ``latest`` to use the latest stable release (master branch) of MASSpy.
+    Default is ``latest`` to use the latest stable release (main branch) of MASSpy.
 
 An example build command using all of the build-time variables::
 
@@ -90,4 +90,4 @@ and run the following build command::
         -f ./docker/Dockerfile ./
 
 The resulting image ``sbrg/masspy:local`` can then be used to build a container using ``docker run``.
-Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`__.
+Note that will install the local version of **MASSpy** in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs>`__.

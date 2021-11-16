@@ -19,8 +19,6 @@ import pkg_resources
 SRC_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, SRC_PATH)
 
-import sphinx_rtd_theme  # noqa: E402
-
 
 # -- Project information ------------------------------------------------------
 
@@ -28,7 +26,7 @@ project = "MASSpy"
 author = "Z. Haiman"
 version = pkg_resources.get_distribution("masspy").version
 release = ".".join(version.split(".")[:2])
-copyright = ", ".join((datetime.date.today().year, author))
+copyright = ", ".join((str(datetime.date.today().year), author))
 
 
 # -- General configuration ----------------------------------------------------

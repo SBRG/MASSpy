@@ -3,7 +3,7 @@ default_language_version:
     python: python3
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v3.4.0
+      rev: v4.0.1
       hooks:
       - id: check-merge-conflict
       - id: check-toml
@@ -13,7 +13,7 @@ repos:
         args: ['--django']
       - id: trailing-whitespace
     - repo: https://github.com/pre-commit/pygrep-hooks
-      rev: v1.8.0
+      rev: v1.9.0
       hooks:
       - id: python-check-blanket-noqa
       - id: python-no-eval
@@ -28,14 +28,14 @@ repos:
     #   - id: check-manifest
     #     args: [--no-build-isolation]
     - repo: https://github.com/pycqa/isort
-      rev: 5.8.0
+      rev: 5.10.1
       hooks:
       - id: isort
     - repo: https://github.com/psf/black
-      rev: 20.8b1
+      rev: 21.10b0
       hooks:
       - id: black
     - repo: https://gitlab.com/pycqa/flake8
-      rev: 3.9.0
+      rev: 3.9.2
       hooks:
       - id: flake8

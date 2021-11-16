@@ -3,28 +3,26 @@ name: CI-CD
 on:
   push:
     branches:
-    - master
+    - main
     - devel
-    - devel-*
     tags:
     - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches:
-    - master
+    - main
     - devel
-    - devel-*
   workflow_dispatch:
       inputs:
         py-act:
           description: 'Python 3.X for GH Actions'
           required: false
-          default: '3.7'
+          default: '3.9'
         pip_opts:
           description: Install options (pip)
           required: false
           default: '--upgrade --upgrade-strategy eager'
 env:
-  ACTIONS_SETUP_PY3: ${{ github.event.inputs.py-act || '3.7' }}
+  ACTIONS_SETUP_PY3: ${{ github.event.inputs.py-act || '3.9' }}
   PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade --upgrade-strategy eager' }}
   PY_COLORS: 1
   DOCKER_IMAGE: sbrg/masspy
@@ -55,11 +53,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Test code (Python ${{ matrix.py }} - ${{ matrix.os }})
     strategy:
-      max-parallel: 2
+      max-parallel: 4
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        py: [3.6, 3.7]
+        py: [3.6, 3.7, 3.8, 3.9]
     steps:
       -
         name: Checkout repository
@@ -101,6 +99,7 @@ jobs:
           name: "py${{ matrix.py }}-${{ matrix.os }}"
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
+
 
   docs:
     needs: [lint]
