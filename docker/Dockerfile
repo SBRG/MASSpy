@@ -1,5 +1,5 @@
 ARG python_version=3.7
-ARG mass_version=0.1.2
+ARG mass_version=0.1.3.a2
 # Image to checkout and install a specific version of MASSpy
 FROM python:${python_version} AS env-setup
 ARG python_version
@@ -50,7 +50,6 @@ ENV GUROBI_INSTALL /opt/gurobi
 ENV GUROBI_HOME ${GUROBI_INSTALL}/linux64
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${HOME}${GUROBI_HOME}/lib
 
-# Build arg to determine how to install MASSpy (allows for a local version)
 FROM env-setup AS mass-setup
 # # Copy build context files into tmp
 WORKDIR ${HOME}/tmp/MASSpy
@@ -67,10 +66,10 @@ RUN echo \
         cp -R ../tmp/MASSpy/ ${HOME}/opt/ \
         && dirpath=../tmp/MASSpy/docker ; \
     fi \
-    # Move solver files and entrypoint to highest level of tmp for later
-    && if [ -d "$dirpath/cplex" ] ; then mv $dirpath/cplex/* ../tmp/ ; fi \
-    && if [ -d "$dirpath/gurobi" ] ; then mv $dirpath/gurobi/* ../tmp/ ; fi \
-    && if [ -e "$dirpath/docker-entrypoint.sh" ] ; then mv $dirpath/docker-entrypoint.sh ../tmp/ ; fi
+    # Make directory for licenses volume and move license files into it
+    && mkdir ..${LICENSE_DIR} \
+    # Copy license files into license directory
+    && if [ -e $dirpath/**/*.lic ] ; then mv $dirpath/**/*.lic ..${LICENSE_DIR}/ ; fi
 
 # Checkout a specific version of MASSpy if desired and install
 WORKDIR ${HOME}${MASS_INSTALL}
@@ -89,33 +88,20 @@ RUN echo \
             # Assume branch name given otherwise
             git checkout ${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         fi \
-        && pip install -r requirements.txt $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
         && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
     else \
-        pip install -r requirements.txt $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) \
         pip install -e . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
     fi \
     && pip install notebook $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' )
-
-WORKDIR ${HOME}
-RUN echo \
-    # Make directory for docker scripts and move helper scripts into it.
-    && mkdir opt/docker-scripts \
-    && find ${HOME}${MASS_INSTALL}/docker -name "*.sh" -exec cp {} ./opt/docker-scripts/ ";" \
-    && if [ -e "tmp/docker-entrypoint.sh" ] ; then mv tmp/docker-entrypoint.sh ./opt/docker-scripts/ ; fi \
-    # Make directory for licenses volume and move license files into it
-    && mkdir .${LICENSE_DIR} \
-    # Copy license files into license directory
-    && if [ -e tmp/*.lic ] ; then mv tmp/*.lic .${LICENSE_DIR}/ ; fi 
 
 # Install IBM CPLEX Optimization Studio if install.bin file present in build context
 WORKDIR ${HOME}
 RUN echo \
     && cplex_installer=cplex_studio*.linux*.bin \
-    && if [ -f tmp/$cplex_installer ] ; then \
+    && if [ -f $dirpath/cplex/$cplex_installer ] ; then \
         if [ ${VERBOSE} -ne 0 ] ; then echo "Installing CPLEX" ; fi \
-        && chmod a+rwx tmp/$cplex_installer \
-        && tmp/$cplex_installer \
+        && chmod a+rwx $dirpath/cplex/$cplex_installer \
+        && $dirpath/cplex/$cplex_installer \
             -f ./cplex.installer.properties \
             -DUSER_INSTALL_DIR=${HOME}${CPLEX_INSTALL} \
         # Copy CPLEX license into license directory
@@ -157,7 +143,7 @@ RUN echo \
     && rm -rf tmp \
     # Ensure scripts are Unix compatible using dos2unix
     && apt-get update && apt-get install -y dos2unix \
-    && find ./opt/docker-scripts/ -name "*.sh" -exec dos2unix {} ";" \
+    && find .${MASS_INSTALL}/docker/docker-scripts/ -name "*.sh" -exec dos2unix {} ";" \
     && apt-get --purge remove -y dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
@@ -166,12 +152,12 @@ FROM mass-setup AS mass-builder
 WORKDIR ${HOME}
 RUN echo \
     # Install cplex module (Python API) for the IBM CPLEX Optimization Studio if present
-    && ${HOME}/opt/docker-scripts/pyinstall-solver.sh \
+    && .${MASS_INSTALL}/docker/docker-scripts/pyinstall-solver.sh \
         --directory ${HOME}${CPLEX_HOME} \
         --solver "CPLEX" \
         --verbose ${VERBOSE} \
     # Install gurobipy module (Python API) for the Gurobi Optimizer if present
-    && ${HOME}/opt/docker-scripts/pyinstall-solver.sh \
+    && .${MASS_INSTALL}/docker/docker-scripts/pyinstall-solver.sh \
         --directory ${HOME}${GUROBI_HOME} \
         --solver "Gurobi" \
         --verbose ${VERBOSE}
@@ -190,5 +176,5 @@ RUN echo \
     && chmod -R 777 ${HOME}/
 
 USER ${USER}
-ENTRYPOINT [ "./opt/docker-scripts/docker-entrypoint.sh" ]
+ENTRYPOINT [ "./opt/MASSpy/docker/docker-scripts/docker-entrypoint.sh" ]
 CMD [ "sh" ]
