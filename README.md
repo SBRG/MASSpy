@@ -5,13 +5,13 @@
 [![GitHub Workflow Status - Tests][3]](https://github.com/SBRG/MASSpy/actions)
 [![Read the Docs][4]](https://masspy.readthedocs.io/)
 [![Codecov][5]](https://app.codecov.io/gh/SBRG/MASSpy)
-[![GitHub License][6]](https://github.com/SBRG/MASSpy/blob/master/LICENSE)
+[![GitHub License][6]](https://github.com/SBRG/MASSpy/blob/main/LICENSE)
 [![Docker Image Size (latest semver)][7]](https://hub.docker.com/r/sbrg/masspy)
 [![Code style: black][8]](https://github.com/psf/black)
 [![pre-commit][9]](https://github.com/pre-commit/pre-commit)
 [![MASSpy Publication][10]](https://doi.org/10.1371/journal.pcbi.1008208)
 
-<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/master/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/main/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
 
 ## What is MASSpy?
 
@@ -78,7 +78,7 @@ Not sure how to [file an issue](.github/SUPPORT.md), want to [contribute](.githu
 
 ## License
 
-The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/master/LICENSE). However, please note that binary packages (e.g., GLPK, CPLEX, etc.) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc.) will be bound by their respective license agreements as well.
+The **MASSpy** source is released under the [MIT license](https://github.com/SBRG/MASSpy/blob/main/LICENSE). However, please note that binary packages (e.g., GLPK, CPLEX, etc.) and other dependencies (e.g. [openCOBRA packages](https://opencobra.github.io/), [libRoadRunner](http://libroadrunner.org/), etc.) will be bound by their respective license agreements as well.
 
 [1]: https://img.shields.io/github/v/release/sbrg/masspy?label=MASSpy&sort=semver&style=plastic
 [2]: https://img.shields.io/pypi/pyversions/masspy?logo=python&style=plastic
