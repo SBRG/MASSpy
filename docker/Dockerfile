@@ -80,13 +80,9 @@ RUN echo \
         if echo ${MASS_VERSION} | grep -Eq '^(latest|main)$' ; then \
             # Use latest (main) branch
             git checkout main $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
-        # Check whether SemVer tag given (excluding pre-release & build metabdata)
-        elif echo ${MASS_VERSION} | grep -Pq '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)?$' ; then \
-            # Use version specified
-            git checkout v${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         else \
-            # Assume branch name given otherwise
-            git checkout ${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+            # Assume SemVer given otherwise
+            git checkout v${MASS_VERSION} $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         fi \
         && pip install . $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
     else \
