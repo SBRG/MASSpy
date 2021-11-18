@@ -12,6 +12,7 @@ repos:
       - id: name-tests-test
         args: ['--django']
       - id: trailing-whitespace
+        exclude: setup.cfg
     - repo: https://github.com/pre-commit/pygrep-hooks
       rev: v1.9.0
       hooks:
