@@ -249,7 +249,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: ./docker
           file: ./docker/Dockerfile
-          push: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
           tags: ${{ steps.docker-meta.outputs.tags }}
           build-args: |
             python_version=${{ env.ACTIONS_SETUP_PY3 }}
