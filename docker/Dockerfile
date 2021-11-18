@@ -77,9 +77,9 @@ RUN echo \
     # If a local version of MASSpy, do nothing with branch checkouts
     && if [ "${MASS_VERSION}" != "local" ] ; then \
         # Determine version of MASSpy to checkout from from VCS
-        if echo ${MASS_VERSION} | grep -Eq '^(latest|master)$' ; then \
-            # Use latest (master) branch
-            git checkout master $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
+        if echo ${MASS_VERSION} | grep -Eq '^(latest|main)$' ; then \
+            # Use latest (main) branch
+            git checkout main $( [ ${VERBOSE} -eq 0 ] && echo '--quiet' ) ; \
         # Check whether SemVer tag given (excluding pre-release & build metabdata)
         elif echo ${MASS_VERSION} | grep -Pq '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)?$' ; then \
             # Use version specified
