@@ -194,7 +194,7 @@ jobs:
     needs: [test, docs]
     runs-on: ubuntu-latest
     name: Build and push Docker images to registries
-    if: startsWith(github.ref, 'refs/heads/main') || ( github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') )
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       -
         name: Checkout
@@ -203,14 +203,14 @@ jobs:
       -
         name: Docker meta
         id: docker-meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: docker/metadata-action@v3
         with:
           images: |
             ${{ env.DOCKER_IMAGE }}
             ghcr.io/${{ env.DOCKER_IMAGE }}
-          tag-semver: |
-            {{version}}
-            {{major}}.{{minor}}.{{patch}}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
       -
         name: Set up Docker Buildx
         id: docker-buildx
