@@ -252,7 +252,6 @@ jobs:
           tags: ${{ steps.docker-meta.outputs.tags }}
           build-args: |
             python_version=${{ env.ACTIONS_SETUP_PY3 }}
-            mass_version=${{ steps.docker-meta.outputs.tags }}
       -
         name: Image digest
         id: img-digest
