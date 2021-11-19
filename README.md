@@ -38,6 +38,10 @@ It is recommended to do this inside a [virtual environment](http://docs.python-g
 
     pip install "masspy"
 
+To install **MASSpy** with visualization dependencies:
+
+    pip install "masspy[visualization]"
+
 To install **MASSpy** with all optional dependencies:
 
     pip install "masspy[all]"
