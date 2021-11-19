@@ -1,0 +1,19 @@
+name: Update BioSimulators interface and Docker image
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  updateBioSimulatorsCliAndDockerImage:
+    name: Trigger the building and release of the BioSimulators interface to MASSpy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger a GitHub action that will build and release the BioSimulators interface to MASSpy
+        run: |
+          PACKAGE_VERSION="${GITHUB_REF/refs\/tags\/v/}"
+          curl -X POST \
+               -u ${{ secrets.BIOSIMULATORS_GH_USERNAME }}:${{ secrets.BIOSIMULATORS_GH_TOKEN }} \
+               -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/biosimulators/Biosimulators_MASSpy/actions/workflows/ci.yml/dispatches \
+               -d "{\"ref\": \"dev\", \"inputs\": {\"simulatorVersion\": \"${PACKAGE_VERSION}\", \"simulatorVersionLatest\": \"true\"}}"
