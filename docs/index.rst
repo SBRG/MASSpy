@@ -5,7 +5,7 @@ MASSpy: Modeling Dynamic Biological Processes in Python
    :width: 400
    :align: center
 
-|PyVer| |PyPiVer| |DocVer| |DocImgSz| |LIC| |RTD| |Tests| |Black| |Precom| |CodeCov|
+|PyVer| |PyPiVer| |DocVer| |DocImgSz| |LIC| |RTD| |Tests| |Black| |Precom| |CodeCov| |Publication|
 
 What is MASSpy?
 ---------------
@@ -183,3 +183,7 @@ Indices and tables
 .. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/master/graph/badge.svg
     :target: https://app.codecov.io/gh/SBRG/MASSpy
     :alt: Codecov
+
+.. |Publication| image:: https://img.shields.io/badge/DOI-10.1371%2Fjournal.pcbi.1008208-blue?style=plastic
+    :target: https://doi.org/10.1371/journal.pcbi.1008208
+    :alt: MASSpy Publication
