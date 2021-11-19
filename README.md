@@ -2,7 +2,7 @@
 
 [![MASSpy release (latest SemVer)][1]](https://github.com/SBRG/MASSpy/releases)
 [![PyPI - Python Version][2]](https://pypi.org/project/masspy/)
-[![GitHub Workflow Status - Tests][3]](https://github.com/SBRG/MASSpy/actions)
+[![GitHub Workflow Status - Tests][3]](https://github.com/SBRG/MASSpy/actions/workflows/main.yml)
 [![Read the Docs][4]](https://masspy.readthedocs.io/)
 [![Codecov][5]](https://app.codecov.io/gh/SBRG/MASSpy)
 [![GitHub License][6]](https://github.com/SBRG/MASSpy/blob/main/LICENSE)
