@@ -194,7 +194,7 @@ jobs:
     needs: [test, docs]
     runs-on: ubuntu-latest
     name: Build and push Docker images to registries
-    if: endsWith(github.ref, github.event.repository.default_branch) || ( github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') )
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       -
         name: Checkout
@@ -209,8 +209,7 @@ jobs:
             ${{ env.DOCKER_IMAGE }}
             ghcr.io/${{ env.DOCKER_IMAGE }}
           tags: |
-            type=ref,event=branch,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
-            type=semver,pattern={{major}}.{{minor}}.{{patch}},enable=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
       -
         name: Set up Docker Buildx
         id: docker-buildx
@@ -248,7 +247,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: ./docker
           file: ./docker/Dockerfile
-          push: ${{ !endsWith(github.ref, github.event.repository.default_branch) }}
+          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
           tags: ${{ steps.docker-meta.outputs.tags }}
           build-args: |
             python_version=${{ env.ACTIONS_SETUP_PY3 }}
