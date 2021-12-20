@@ -367,27 +367,12 @@ def _validate_legend_input_fmt(legend, observable):
     """
     # Ensure legend is iterable and get default labels and legend location
     legend = ensure_iterable(legend)
-    default_loc = rc.defaultParams["legend.loc"][0]
 
     # Get lengths of observables and legend arguments for comparisions.
     n_obs, n_leg = len(observable), len(legend)
 
     # Get the possible location value in the input.
     possible_loc = legend[-1]
-
-    def _validate_legend_loc(labels, poss_loc, def_labels=None, def_loc=None):
-        """Valdidate legend locations in this function."""
-        try:
-            if poss_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-                poss_loc = _validate_kwarg_input(
-                    "legend_loc", poss_loc, as_warning=False
-                )
-        except ValueError:
-            items = labels, def_loc
-        else:
-            items = def_labels, poss_loc
-
-        return items
 
     # Legend location is an integer
     if isinstance(possible_loc, (integer_types, float)):
@@ -412,32 +397,13 @@ def _validate_legend_input_fmt(legend, observable):
         if n_leg == n_obs + 1:
             items = ensure_iterable(legend[0]), possible_loc
         elif n_leg in [n_obs, 1]:
-            items = _validate_legend_loc(
-                legend, possible_loc, def_labels=list(observable), def_loc=default_loc
-            )
+            items = list(observable), possible_loc
     # Either only labels provided or bad label input and location
     elif n_leg == n_obs:
-        items = _validate_legend_loc(
-            legend, possible_loc, def_labels=None, def_loc=default_loc
-        )
+        items = legend, possible_loc
     # Bad legend input, return None to set off warnings
     else:
         items = None, None
-
-    items = ensure_iterable(items)
-    # Ensure number of legend labels is equal to the number of observables
-    valid_bool = bool(items[0] is not None and len(items[0]) == n_obs)
-    items[0] = items[0] if valid_bool else None
-
-    # Ensure legend location is valid
-    try:
-        items[1] = _validate_kwarg_input("legend_loc", items[1], as_warning=False)
-    except (AttributeError, ValueError):
-        valid_bool = bool(
-            items[1] in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS
-            or items[1] in list(range(0, 11))
-        )
-        items[1] = items[1] if valid_bool else None
 
     return items[0], items[1]
 
@@ -521,12 +487,6 @@ def _validate_time_points_marker_properties(marker_prop, values, num_expected):
         values = ensure_iterable(values)
         try:
             # Check whether the values are valid
-            values = [
-                _validate_kwarg_input(
-                    marker_prop, v, prefix="annotate_time_points", as_warning=False
-                )
-                for v in values
-            ]
             # Ensure that the number of values is equal to the number expected
             if len(values) == 1:
                 values = values * num_expected
@@ -569,50 +529,6 @@ def _validate_tile_placement(tile_placement, prefix=None):
         )
 
     return tile_placement.lower()
-
-
-def _validate_kwarg_input(
-    arg_name, arg_value, prefix=None, as_warning=True, alt_arg_name=None
-):
-    """Validate whether the given ``input`` can be interpreted.
-
-    Warnings
-    --------
-    This method is intended for internal use only.
-
-    """
-    kwarg_validation_functions = {
-        "cycler": rc.cycler,
-        "color": rc.validate_color,
-        "linestyle": rc._validate_linestyle,
-        "linewidth": rc.validate_float,
-        "marker": rc.validate_string,
-        "markersize": rc.validate_float,
-        "axis_locator": rc.validate_axis_locator,
-        "grid_axis": rc.validate_grid_axis,
-        "legend_loc": rc.validate_legend_loc,
-        "legend_ncol": rc.validate_int_or_None,
-        "margin": rc._range_validators["0 <= x <= 1"],
-        "ticks_on": rc.validate_bool,
-        "fontsize": rc.validate_fontsize,
-    }
-    # Allow None to be returned
-    if arg_value is not None:
-        # Check input validity based on the arg_name
-        validator = kwarg_validation_functions[arg_name]
-        try:
-            arg_value = validator(arg_value)
-        except (ValueError, RuntimeError) as e:
-            # Return as error if warning disabled
-            if not as_warning:
-                raise ValueError(e)
-            if alt_arg_name is not None:
-                arg_name = alt_arg_name
-            # Otherwise raise warning and set arg_value to None
-            _raise_kwarg_warning(arg_name, msg=e, kwarg_prefix=prefix)
-            arg_value = None
-
-    return arg_value
 
 
 def _get_plotting_function(ax, plot_function_str, valid):
@@ -675,7 +591,7 @@ def _get_legend_args(ax, legend, observable, **kwargs):
     # Get the current number of lines on the axes
     n_current = len(_get_ax_current(ax))
     # Get the legend properties
-    ncols = _validate_kwarg_input("legend_ncol", kwargs.get("legend_ncol"))
+    ncols = kwargs.get("legend_ncol")
     # Use a default number of columns based on the total number of items
     if ncols is None:
         ncols = int(np.ceil(np.sqrt(len(observable) + n_current) / 3))
@@ -736,15 +652,6 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
                 continue
 
             msg = ""
-            # Validate values using appropriate validation method.
-            try:
-                values = [
-                    _validate_kwarg_input(k, v, prefix=kwarg_prefix, as_warning=False)
-                    for v in values
-                ]
-            except ValueError as e:
-                # Catch error and append to warning message
-                msg += str(e)
 
             # If only one value given, apply it to all lines.
             if len(values) == 1 and n_new != 1:
@@ -770,9 +677,6 @@ def _get_line_property_cycler(n_current, n_new, kwarg_prefix=None, **kwargs):
         # Validate cycler and ensure matplotlib format. Though the earlier
         # validation functions should have caught all issues, this extra
         # step catches potential edge cases that may have slipped through.
-        prop_cycler = _validate_kwarg_input("cycler", prop_cycler)
-    else:
-        prop_cycler = _validate_kwarg_input("cycler", prop_cycler)
 
     return prop_cycler
 
@@ -857,7 +761,6 @@ def _set_axes_gridlines(ax, **kwargs):
         for k in ["color", "linestyle", "linewidth"]:
             prefix = "grid_"
             v = kwargs.get(prefix + k)
-            v = _validate_kwarg_input(k, v, prefix=prefix)
             if v is not None:
                 grid_options[k] = v
 
@@ -869,30 +772,8 @@ def _set_axes_gridlines(ax, **kwargs):
 
         elif isinstance(grid, Iterable) and len(grid) == 2:
             which, axis = grid
-            # Validate which argument for gridlines
-            msg = ""
-            try:
-                _validate_kwarg_input("axis_locator", which, as_warning=False)
-            except ValueError as e:
-                # Format warning message
-                msg += str(e).split(":")[-1].strip()
-                msg += " for grid `which` argument"
-                which = None
 
-            # Validate axis argument for gridlines
-            try:
-                _validate_kwarg_input("grid_axis", axis, as_warning=False)
-            except ValueError as e:
-                # Format warning message
-                msg += " and " if msg else ""
-                msg += str(e).split(":")[-1].strip()
-                msg += " for grid `which` argument"
-                axis = None
-
-            if which is None or axis is None:
-                _raise_kwarg_warning("grid", msg=msg)
-            else:
-                ax.grid(True, which=which, axis=axis, **grid_options)
+            ax.grid(True, which=which, axis=axis, **grid_options)
 
         else:
             _raise_kwarg_warning("grid")
@@ -914,14 +795,6 @@ def _set_axes_margins(ax, x_default=None, y_default=None, tile=False, **kwargs):
         margin_arg = arg + "margin"
         # Validate margin value
         margin_value = kwargs.get(prefix + margin_arg, None)
-        if margin_value is not None:
-            margin_value = _validate_kwarg_input(
-                "margin",
-                margin_value,
-                prefix=prefix.rstrip("_"),
-                alt_arg_name=margin_arg,
-            )
-
         # Use default value if None
         if margin_value is None:
             # Use default from rcsetup
@@ -993,17 +866,14 @@ def _set_annotated_time_points(
             colors = [line.get_color()] * len(time_points)
         # Make and set the prop_cycler for the time points
         ax.set_prop_cycle(
-            _validate_kwarg_input(
-                "cycler",
-                cycler(
-                    **{
-                        "color": colors,
-                        "linestyle": [" "] * len(time_points),
-                        "marker": markers,
-                        "markersize": marker_sizes,
-                    }
-                ),
-            )
+            cycler(
+                **{
+                    "color": colors,
+                    "linestyle": [" "] * len(time_points),
+                    "marker": markers,
+                    "markersize": marker_sizes,
+                }
+            ),
         )
 
         for i, t in enumerate(time_points):
@@ -1066,10 +936,6 @@ def _check_second_legend_location(desired_loc, taken_loc):
         msg = " location already used, utilizing default value instead"
         _raise_kwarg_warning("legend_loc", msg=msg, kwarg_prefix="annotate_time_points")
         desired_loc = None
-
-    # Validate desired location
-    elif desired_loc not in OUTSIDE_LEGEND_LOCATION_AND_ANCHORS:
-        desired_loc = _validate_kwarg_input("legend_loc", desired_loc)
 
     return desired_loc, taken_loc
 

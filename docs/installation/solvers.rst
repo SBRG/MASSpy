@@ -17,13 +17,13 @@ The following optional solvers are currently supported by **Optlang**:
 IBM ILOG CPLEX Optimization Studio
 ----------------------------------
 The *IBM ILOG CPLEX Optimization Studio* (CPLEX) can be utilized through the
-`CPLEX Python API <https://www.ibm.com/support/knowledgecenter/en/SSSA5P_12.10.0/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/tutorials/Python/Python_synopsis.html>`__.
+`CPLEX Python API <https://www.ibm.com/docs/en/icos/20.1.0?topic=cplex-setting-up-python-api>`__.
 
 * To use CPLEX, a license must be obtained. Free academic licences are available.
 * To use CPLEX with Docker, an installer file must also be downloaded.
 
   `Homepage <https://www.ibm.com/products/ilog-cplex-optimization-studio/>`__ |
-  `Documentation <https://www.ibm.com/support/knowledgecenter/SSSA5P_12.10.0/ilog.odms.cplex.help/CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html>`__ |
+  `Documentation <https://www.ibm.com/docs/en/icos/20.1.0?topic=tutorials-python-tutorial>`__ |
   `Academic License <https://www.ibm.com/academic/faqs/agreement/>`__
 
 .. _gurobi-solver:
