@@ -111,7 +111,7 @@ linkcheck_ignore = [
 # -- NBSphinx -----------------------------------------------------------------
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = "always"
+nbsphinx_execute = "never"
 nbsphinx_execute_arguments = [
     "--Application.log_level=CRITICAL",
 ]
