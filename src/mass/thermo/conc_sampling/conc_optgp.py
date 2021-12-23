@@ -265,7 +265,7 @@ class ConcOptGPSampler(ConcHRSampler):
 
         """
         d = dict(self.__dict__)
-        del d["model"]
+        del d["concentration_solver"]
         return d
 
 

@@ -308,7 +308,7 @@ class MassSolution(DictWithID):
             "annotate_time_points_marker": ["o", "D"],
             "tile_xlabel_fontdict": {"size": "large"},
             "tile_ylabel_fontdict": {"size": "large"},
-            "annotate_time_points_legend_loc": "right outside",
+            "annotate_time_points_legend": "right outside",
         }
         # Plot with kwargs
         ax = plot_tiled_phase_portraits(self, ax=ax, **options)

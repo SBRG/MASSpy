@@ -878,6 +878,7 @@ class Simulation(Object):
                         include_time=False,
                         verbose=kwargs.get("verbose"),
                     )
+                    rr.steadyStateSolver.auto_moiety_analysis = False
                     # Use strategy
                     steady_state_function(model, **kwargs)
                     results = {

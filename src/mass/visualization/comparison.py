@@ -183,23 +183,17 @@ def _plot_xy_line(ax, limits, first_legend=None, **kwargs):
 
     """
     # Validate color
-    linecolor = v_util._validate_kwarg_input(
-        "color", kwargs.get("xy_linecolor"), prefix="xy", alt_arg_name="linecolor"
-    )
+    linecolor = kwargs.get("xy_linecolor")
     if linecolor is None:
         linecolor = "grey"
 
     # Validate linestyle
-    linestyle = v_util._validate_kwarg_input(
-        "linestyle", kwargs.get("xy_linestyle"), prefix="xy"
-    )
+    linestyle = kwargs.get("xy_linestyle")
     if linestyle is None:
         linestyle = "--"
 
     # Validate linewidth
-    linewidth = v_util._validate_kwarg_input(
-        "linewidth", kwargs.get("xy_linewidth"), prefix="xy"
-    )
+    linewidth = kwargs.get("xy_linewidth")
 
     plot_function = v_util._get_plotting_function(
         ax, plot_function_str=kwargs.get("plot_function"), valid={"plot", "loglog"}

@@ -42,7 +42,7 @@ to implement a variety of workflows. Many of these packages are seen throughout 
 As a helpful reference, links to the documentation homepages are provided for a select set of software:
 
 * `NumPy <https://numpy.org/>`__
-* `SciPy library <https://www.scipy.org/>`__
+* `SciPy library <https://scipy.org/>`__
 * `Matplotlib <https://matplotlib.org/>`__
 * `pandas <https://pandas.pydata.org/>`__
 * `SymPy <https://www.sympy.org/>`__

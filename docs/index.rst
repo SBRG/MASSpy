@@ -1,7 +1,7 @@
 MASSpy: Modeling Dynamic Biological Processes in Python
 =======================================================
 
-.. image:: images/masspy-logo.svg
+.. image:: media/images/masspy-logo.svg
    :width: 400
    :align: center
 
@@ -165,7 +165,7 @@ Indices and tables
     :alt: Current documentation status
 
 .. |LIC| image:: https://img.shields.io/github/license/sbrg/masspy?logo=license&style=plastic
-    :target: https://github.com/SBRG/MASSpy/blob/master/LICENSE
+    :target: https://github.com/SBRG/MASSpy/blob/main/LICENSE
     :alt: MIT License
 
 .. |Tests| image:: https://img.shields.io/github/workflow/status/sbrg/masspy/CI-CD?label=Tests&logo=GitHub%20Actions&style=plastic
@@ -180,7 +180,7 @@ Indices and tables
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
 
-.. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/master/graph/badge.svg
+.. |CodeCov| image:: https://codecov.io/gh/SBRG/masspy/branch/main/graph/badge.svg
     :target: https://app.codecov.io/gh/SBRG/MASSpy
     :alt: Codecov
 
