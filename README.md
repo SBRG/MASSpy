@@ -11,7 +11,7 @@
 [![pre-commit][9]](https://github.com/pre-commit/pre-commit)
 [![MASSpy Publication][10]](https://doi.org/10.1371/journal.pcbi.1008208)
 
-<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/main/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/main/docs/media/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
 
 ## What is MASSpy?
 
