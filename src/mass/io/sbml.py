@@ -2,7 +2,7 @@
 r"""
 SBML import and export using the :mod:`python-libsbml` package.
 
-* The SBML importer supports all versions of `SBML <http://sbml.org/Main_Page>`_
+* The SBML importer supports all versions of `SBML <https://sbml.org/>`_
   that are compatible with the :mod:`roadrunner` package.
 * The :mod:`sbml` module supports the latest version of
   `python-libsbml <https://synonym.caltech.edu/software/libsbml/5.18.0/docs/formatted/python-api/>`_

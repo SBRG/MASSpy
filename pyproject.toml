@@ -15,7 +15,6 @@ build-backend = "setuptools.build_meta"
 [tool.black]
 line-length = 88
 python-version = [
-    "py36",
     "py37",
     "py38",
     "py39"
@@ -91,7 +90,7 @@ envlist =
     clean,
     lint,
     pypi-description,
-    py3{6,7,8,9},
+    py3{7,8,9},
     docs,
     report
 isolated_build = true
@@ -100,7 +99,6 @@ skip_missing_interpreters = true
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
     3.8: py38
     3.9: py39
@@ -115,10 +113,10 @@ setenv =
     PYTHONUNBUFFERED=yes
     PY_COLORS={env:PY_COLORS:1}
 usedevelop = true
-install_command = python -m pip install --upgrade --upgrade-strategy eager {opts} {packages}
+install_command = python -m pip install --upgrade {opts} {packages}
 depends =
-    py3{6,7,8,9}: clean
-    report: py3{6,7,8,9}
+    py3{7,8,9}: clean
+    report: py3{7,8,9}
 
 
 [testenv:clean]
@@ -139,6 +137,7 @@ setenv =
 deps =
     pre-commit
 commands =
+
     pre-commit install
     pre-commit autoupdate
     pre-commit run --all-files --show-diff-on-failure
@@ -153,7 +152,7 @@ commands =
     safety check --full-report
 
 
-[testenv:py3{6,7,8,9}]
+[testenv:py3{7,8,9}]
 description = Run tests under {basepython}.
 extras = tests
 commands =
