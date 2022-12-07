@@ -60,7 +60,7 @@ def to_json(mass_model, sort=False, **kwargs):
 
     """
     obj = model_to_dict(mass_model, sort=sort)
-    obj[u"version"] = JSON_SPEC
+    obj["version"] = JSON_SPEC
     return json.dumps(obj, allow_nan=False, **kwargs)
 
 
@@ -115,7 +115,7 @@ def save_json_model(mass_model, filename, sort=False, pretty=False, **kwargs):
 
     """
     obj = model_to_dict(mass_model, sort=sort)
-    obj[u"version"] = JSON_SPEC
+    obj["version"] = JSON_SPEC
 
     if pretty:
         dump_opts = {

@@ -91,7 +91,6 @@ envlist =
     clean,
     lint,
     pypi-description,
-    safety,
     py3{6,7,8,9},
     docs,
     report
