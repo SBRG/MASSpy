@@ -698,7 +698,7 @@ def _format_table_for_print(table_items, checks, model_id):
 
     # Create tables
     tables = [
-        make_formatted_table([content], header, "simple", u"left")
+        make_formatted_table([content], header, "simple", "left")
         for content, header in zip(content_lists, columns)
     ]
     # Format based on longest string in the inner tables if content exists
@@ -718,7 +718,7 @@ def _format_table_for_print(table_items, checks, model_id):
 
     # Format all indivual pieces of the report
     tables = [
-        make_formatted_table([[table]], section, "rst", u"left")
+        make_formatted_table([[table]], section, "rst", "left")
         for table, section in zip(tables, sections)
     ]
     tables = [[table] for table in tables]
@@ -729,7 +729,7 @@ def _format_table_for_print(table_items, checks, model_id):
         "MODEL ID: {0}\nSIMULATABLE: {1}\nPARAMETERS NUMERICALY CONSISTENT:"
         " {2}".format(model_id, simulate_check, consistency_check)
     )
-    report = make_formatted_table(tables, [report_head], "fancy_grid", u"left")
+    report = make_formatted_table(tables, [report_head], "fancy_grid", "left")
     return report
 
 

@@ -35,7 +35,7 @@ The *Gurobi Optimizer* (Gurobi) is utilized through the `Gurobi Python Interface
 * To use Gurobi, a license must be obtained. Free academic licences are available.
 * To use Gurobi with Docker, a floating license is required.
 
-  `Homepage <https://www.gurobi.com/products/gurobi-optimizer/>`__ |
+  `Homepage <hhttps://www.gurobi.com/solutions/gurobi-optimizer/>`__ |
   `Documentation <https://www.gurobi.com/documentation/>`__ |
   `Academic License <https://www.gurobi.com/academia/academic-program-and-licenses/>`__ |
   `Floating License <https://www.gurobi.com/documentation/9.0/quickstart_linux/retrieving_a_floating_lice.html>`__

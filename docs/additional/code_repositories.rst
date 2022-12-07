@@ -46,6 +46,6 @@ As a helpful reference, links to the documentation homepages are provided for a 
 * `Matplotlib <https://matplotlib.org/>`__
 * `pandas <https://pandas.pydata.org/>`__
 * `SymPy <https://www.sympy.org/>`__
-* `libRoadRunner <http://libroadrunner.org/>`__
-* `iPython <http://ipython.org/>`__ (`Jupyter <https://jupyter.org/>`__)
+* `libRoadRunner <https://www.libroadrunner.org/>`__
+* `iPython <https://ipython.org/>`__ (`Jupyter <https://jupyter.org/>`__)
 * `Docker <https://docs.docker.com/>`__

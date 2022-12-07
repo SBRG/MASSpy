@@ -1,7 +1,6 @@
 include \
     *.yml \
     *.yaml \
-    .bumpversion.cfg \
     .dockerignore
 
 graft docker
