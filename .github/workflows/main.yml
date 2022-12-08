@@ -82,6 +82,12 @@ jobs:
         run: |
           python -m pip install ${{ env.PIP_INSTALL_OPTS }} pip setuptools tox tox-gh-actions coverage[toml]
       -
+        name: Fix libncurses on ubuntu for roadrunner
+        id: libncurses
+        if: startsWith(runner.os, 'ubuntu')
+        run: |
+          sudo apt-get install libncurses5-dev libncursesw5-dev
+      -
         name: Run tests via tox
         id: run-tox
         run: |
