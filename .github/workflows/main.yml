@@ -20,17 +20,17 @@ on:
         pip_opts:
           description: Install options (pip)
           required: false
-          default: '--upgrade --upgrade-strategy eager'
+          default: '--upgrade'
 env:
   ACTIONS_SETUP_PY3: ${{ github.event.inputs.py-act || '3.9' }}
-  PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade --upgrade-strategy eager' }}
+  PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade' }}
   PY_COLORS: 1
   DOCKER_IMAGE: sbrg/masspy
 
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Lint using pre-commit hooks
     steps:
       -
@@ -70,6 +70,12 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       -
+        name: Fix install on ubuntu
+        id: libncurses
+        if: runner.os == 'Linux'
+        run: |
+          apt-get install libc6
+      -
         name: Set Python ${{ matrix.py }} cache
         id: cache
         uses: actions/cache@v2
@@ -103,7 +109,7 @@ jobs:
 
   docs:
     needs: [lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Check documentation
     steps:
       -
@@ -141,7 +147,7 @@ jobs:
 
   publish-pypi:
     needs: [test, docs]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Publish package to Python Packaging Index (PyPi)
     if: endsWith(github.ref, github.event.repository.default_branch) || ( github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') )
     steps:
@@ -192,7 +198,7 @@ jobs:
 
   publish-docker:
     needs: [test, docs]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Build and push Docker images to registries
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
