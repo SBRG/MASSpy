@@ -30,7 +30,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Lint using pre-commit hooks
     steps:
       -
@@ -56,7 +56,7 @@ jobs:
       max-parallel: 4
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         py: [3.7, 3.8, 3.9]
     steps:
       -
@@ -69,12 +69,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.py }}
-      -
-        name: Fix install on ubuntu
-        id: libncurses
-        if: runner.os == 'Linux'
-        run: |
-          apt-get install libc6
       -
         name: Set Python ${{ matrix.py }} cache
         id: cache
@@ -109,7 +103,7 @@ jobs:
 
   docs:
     needs: [lint]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Check documentation
     steps:
       -
@@ -147,7 +141,7 @@ jobs:
 
   publish-pypi:
     needs: [test, docs]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Publish package to Python Packaging Index (PyPi)
     if: endsWith(github.ref, github.event.repository.default_branch) || ( github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') )
     steps:
@@ -198,7 +192,7 @@ jobs:
 
   publish-docker:
     needs: [test, docs]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Build and push Docker images to registries
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
