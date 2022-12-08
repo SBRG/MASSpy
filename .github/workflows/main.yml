@@ -87,6 +87,9 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install libncurses5-dev libncursesw5-dev
+          sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
+          sudo ln -s /usr/lib/libncursesw.so.6 /usr/lib/libncurses.so.5
+          sudo ln -s /usr/lib/libformw.so.6 /usr/lib/libform.so.5
       -
         name: Run tests via tox
         id: run-tox
