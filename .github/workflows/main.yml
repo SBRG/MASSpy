@@ -84,7 +84,7 @@ jobs:
       -
         name: Fix libncurses on ubuntu for roadrunner
         id: libncurses
-        if: startsWith(runner.os, 'ubuntu')
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get install libncurses5-dev libncursesw5-dev
       -
