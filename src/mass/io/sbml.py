@@ -2,10 +2,10 @@
 r"""
 SBML import and export using the :mod:`python-libsbml` package.
 
-* The SBML importer supports all versions of `SBML <http://sbml.org/Main_Page>`_
+* The SBML importer supports all versions of `SBML <https://sbml.org/>`_
   that are compatible with the :mod:`roadrunner` package.
 * The :mod:`sbml` module supports the latest version of
-  `python-libsbml <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/index.html>`_
+  `python-libsbml <https://synonym.caltech.edu/software/libsbml/5.18.0/docs/formatted/python-api/>`_
   that is compatible with the :mod:`roadrunner` package.
 * The SBML importer supports the 'fbc' and 'groups' package extension.
 * The SBML exporter writes SBML Level 3 models.
@@ -14,7 +14,7 @@ SBML import and export using the :mod:`python-libsbml` package.
 * All equations are written via `MathML <https://www.w3.org/Math/>`_.
 
 Parsing of models using the
-`fbc extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__fbc.html>`_
+`fbc extension <https://synonym.caltech.edu/software/libsbml/5.18.0/docs/formatted/python-api/group__fbc.html>`_
 was implemented as efficiently as possible, whereas (discouraged) fallback
 solutions are not optimized for efficiency. Futhermore, because the SBML
 kinetic law is used for the reaction kinetic laws, fbc information will NOT
@@ -39,7 +39,7 @@ attribute name precisely.
 
 The information specific to attributes of the :class:`~.EnzymeModule` and
 :class:`~.EnzymeModuleDict` information is stored using the
-`groups extension <http://sbml.org/Software/libSBML/5.18.0/docs/python-api/group__groups.html>`_
+`groups extension <https://synonym.caltech.edu/software/libsbml/5.18.0/docs/formatted/python-api/group__groups.html>`_
 by creating an SBML 'group' representing the enzyme module containing
 additional SBML group objects for enzyme module ligands, forms, and reactions
 for the categories of the enzyme module categorized dictionary attributes.

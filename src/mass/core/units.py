@@ -3,7 +3,7 @@ r"""Unit and UnitDefinition implementation based on SBML specifications.
 
 The :mod:`~.units` module contains the :class:`Unit` and
 :class:`UnitDefinition` classes based on the implementation of units in
-`SBML <http://sbml.org/Main_Page>`_.
+`SBML <https://sbml.org/>`_.
 
 Note that :mod:`mass` does not support automatic unit tracking to ensure
 unit consistency. Therefore, it is incumbent upon the user to maintain unit

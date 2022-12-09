@@ -121,13 +121,13 @@ nbsphinx_timeout = -1
 
 # Refer to the Python documentation for other libraries.
 intersphinx_mapping = {
-    "http://docs.python.org/": None,
+    "https://docs.python.org/3/": None,
     "https://cobrapy.readthedocs.io/en/latest/": None,
     "https://libroadrunner.readthedocs.io/en/latest/": None,
     "https://matplotlib.org/stable/": None,
-    "http://docs.scipy.org/doc/numpy/": None,
+    "https://numpy.org/doc/stable/": None,
     "https://pandas.pydata.org/pandas-docs/stable/": None,
-    "http://docs.scipy.org/doc/scipy/reference": None,
+    "https://docs.scipy.org/doc/scipy/": None,
     "https://docs.sympy.org/latest": None,
 }
 intersphinx_cache_limit = 10  # days to keep the cached inventories
