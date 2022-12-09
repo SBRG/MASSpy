@@ -641,15 +641,6 @@ def _sep_kwargs_for_tiled_phase_portraits(**kwargs):
     for key, value in iteritems(kwargs):
         # Get tile kwarg
         if "tile" in key:
-            # Validate some tile kwargs while others are validated later on.
-            if "ticks_on" in key:
-                value = v_util._validate_kwarg_input("ticks_on", value, prefix="tile")
-
-            # Validate tile colors
-            if "color" in key:
-                value = v_util._validate_kwarg_input(
-                    "color", value, prefix=key.replace("_color", "")
-                )
             # Add to the tile kwargs
             tile_kwargs[key] = value
         # Get tile kwarge that is not exclusive to tiled phase portraits
@@ -700,12 +691,8 @@ def _create_tiled_phase_portraits_tile(ax, observable, *args):
     plot_tile_bool = get_plot_tile_bool(i, j, plot_tile_placement)
 
     # Validate fontsize and set default data tile fontsize as large if needed.
-    if data_matrix is not None and tile_kwargs.get("data_tile_fontsize"):
-        tile_kwargs["data_tile_fontsize"] = v_util._validate_kwarg_input(
-            "fontsize", tile_kwargs.get("data_tile_fontsize"), prefix="data_tile"
-        )
-        if not tile_kwargs.get("data_tile_fontsize"):
-            tile_kwargs["data_tile_fontsize"] = "large"
+    if not tile_kwargs.get("data_tile_fontsize"):
+        tile_kwargs["data_tile_fontsize"] = "large"
 
     # Set diagonal tile color
     if i == j:

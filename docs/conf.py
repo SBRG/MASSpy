@@ -94,7 +94,7 @@ html_theme = "sphinx_rtd_theme"
 
 # Image file path for logo placed at the top of the sidebar;
 # its width should therefore not exceed 200 pixels
-html_logo = "images/masspy-logo.svg"
+html_logo = "media/images/masspy-logo.svg"
 # A list of paths that contain extra files not directly related to the
 # documentation, such as robots.txt or .htaccess. Relative paths are taken as
 # relative to the configuration directory. They are copied to the output
@@ -115,19 +115,19 @@ nbsphinx_execute = "never"
 nbsphinx_execute_arguments = [
     "--Application.log_level=CRITICAL",
 ]
-nbsphinx_timeout = 180
+nbsphinx_timeout = -1
 
 # -- Intersphinx --------------------------------------------------------------
 
 # Refer to the Python documentation for other libraries.
 intersphinx_mapping = {
-    "http://docs.python.org/": None,
+    "https://docs.python.org/3/": None,
     "https://cobrapy.readthedocs.io/en/latest/": None,
     "https://libroadrunner.readthedocs.io/en/latest/": None,
-    "https://matplotlib.org/": None,
-    "http://docs.scipy.org/doc/numpy/": None,
+    "https://matplotlib.org/stable/": None,
+    "https://numpy.org/doc/stable/": None,
     "https://pandas.pydata.org/pandas-docs/stable/": None,
-    "http://docs.scipy.org/doc/scipy/reference": None,
+    "https://docs.scipy.org/doc/scipy/": None,
     "https://docs.sympy.org/latest": None,
 }
 intersphinx_cache_limit = 10  # days to keep the cached inventories

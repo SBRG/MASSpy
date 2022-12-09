@@ -5,4 +5,4 @@ except ImportError:
 
 
 def test_mass_import():
-    return mass is not None
+    assert mass is not None

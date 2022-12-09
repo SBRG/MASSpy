@@ -11,7 +11,7 @@
 [![pre-commit][9]](https://github.com/pre-commit/pre-commit)
 [![MASSpy Publication][10]](https://doi.org/10.1371/journal.pcbi.1008208)
 
-<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/main/docs/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/SBRG/MASSpy/main/docs/media/images/masspy-logo.svg" alt="MASSpy-Symbol" width="250" height="250"/></p>
 
 ## What is MASSpy?
 
@@ -30,7 +30,7 @@ workflows and techniques. Additional information about [**COBRApy**][11] can be 
 
 Check out the following information from the [Quick Start](https://masspy.readthedocs.io/en/latest/installation/quickstart.html) guide to get started using MASSpy!
 
-### With Python 3.6+
+### With Python 3.7+
 
 The recommended method is to install **MASSpy** is to use ``pip`` to
 install the software from the [Python Package Index](https://pypi.org/project/masspy/)

@@ -20,10 +20,10 @@ on:
         pip_opts:
           description: Install options (pip)
           required: false
-          default: '--upgrade --upgrade-strategy eager'
+          default: '--upgrade'
 env:
   ACTIONS_SETUP_PY3: ${{ github.event.inputs.py-act || '3.9' }}
-  PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade --upgrade-strategy eager' }}
+  PIP_INSTALL_OPTS: ${{ github.event.inputs.pip_opts || '--upgrade' }}
   PY_COLORS: 1
   DOCKER_IMAGE: sbrg/masspy
 
@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        py: [3.6, 3.7, 3.8, 3.9]
+        py: [3.7, 3.8, 3.9]
     steps:
       -
         name: Checkout repository
