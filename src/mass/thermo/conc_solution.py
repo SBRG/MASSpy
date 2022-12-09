@@ -5,10 +5,10 @@
 Based on solution implementations in :mod:`cobra.core.solution`
 
 """
+import pandas as pd
 from cobra.util.solver import check_solver_status
 from numpy import array, exp, nan
 from optlang.interface import OPTIMAL
-from pandas import DataFrame, Series, option_context
 
 from mass.core.mass_configuration import MassConfiguration
 from mass.util.util import (
@@ -36,19 +36,19 @@ class ConcSolution:
         The (optimal) value for the objective function.
     status : str
         The solver status related to the solution.
-    concentrations : pandas.Series
+    concentrations : pandas.pd.Series
         Contains the metabolite concentrations which are the primal values
         of metabolite variables.
-    concentration_reduced_costs : pandas.Series
+    concentration_reduced_costs : pandas.pd.Series
         Contains metabolite reduced costs, which are the dual values of
         metabolites variables.
-    Keqs : pandas.Series
+    Keqs : pandas.pd.Series
         Contains the reaction equilibrium constant values, which are primal
         values of Keq variables.
-    Keq_reduced_costs : pandas.Series
+    Keq_reduced_costs : pandas.pd.Series
         Contains reaction equilibrium constant reduced costs, which are the
         dual values of Keq variables.
-    shadow_prices : pandas.Series
+    shadow_prices : pandas.pd.Series
         Contains reaction shadow prices (dual values of constraints).
 
     """
@@ -79,8 +79,8 @@ class ConcSolution:
         self.shadow_prices = shadow_prices
 
     def concentrations_to_frame(self):
-        """Get a :class:`pandas.DataFrame` of concs. and reduced costs."""
-        return DataFrame(
+        """Get a :class:`pandas.pd.DataFrame` of concs. and reduced costs."""
+        return pd.DataFrame(
             {
                 "concentrations": self.concentrations,
                 "reduced_costs": self.concentration_reduced_costs,
@@ -88,16 +88,18 @@ class ConcSolution:
         )
 
     def Keqs_to_frame(self):
-        """Get a :class:`pandas.DataFrame` of Keqs and reduced costs."""
-        return DataFrame({"Keqs": self.Keqs, "reduced_costs": self.Keq_reduced_costs})
+        """Get a :class:`pandas.pd.DataFrame` of Keqs and reduced costs."""
+        return pd.DataFrame(
+            {"Keqs": self.Keqs, "reduced_costs": self.Keq_reduced_costs}
+        )
 
     def to_frame(self):
-        """Get a :class:`pandas.DataFrame` of variables and reduced costs."""
-        return DataFrame(
+        """Get a :class:`pandas.pd.DataFrame` of variables and reduced costs."""
+        return pd.DataFrame(
             {
-                "variables": self.concentrations.append(self.Keqs),
-                "reduced_costs": self.concentration_reduced_costs.append(
-                    self.Keq_reduced_costs
+                "variables": pd.concat((self.concentrations, self.Keqs)),
+                "reduced_costs": pd.concat(
+                    (self.concentration_reduced_costs, self.Keq_reduced_costs)
                 ),
             }
         )
@@ -111,7 +113,7 @@ class ConcSolution:
 
         """
         if self.status == OPTIMAL:
-            with option_context("display.max_rows", 10):
+            with pd.option_context("display.max_rows", 10):
                 html = (
                     "<strong><em>Optimal</em> solution with objective "
                     "value {:.3f}</strong><br>{}".format(
@@ -262,11 +264,11 @@ def get_concentration_solution(
     return ConcSolution(
         objective_value,
         concentration_solver.solver.status,
-        Series(concs, metabolites, name="concentrations"),
-        Series(Keqs, Keq_ids, name="Keqs"),
-        Series(reduced_concs, metabolites, name="concentration_reduced_costs"),
-        Series(reduced_Keqs, Keq_ids, name="Keq_reduced_costs"),
-        Series(shadow, reactions, name="shadow_prices"),
+        pd.Series(concs, metabolites, name="concentrations"),
+        pd.Series(Keqs, Keq_ids, name="Keqs"),
+        pd.Series(reduced_concs, metabolites, name="concentration_reduced_costs"),
+        pd.Series(reduced_Keqs, Keq_ids, name="Keq_reduced_costs"),
+        pd.Series(shadow, reactions, name="shadow_prices"),
     )
 
 
